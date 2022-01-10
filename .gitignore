@@ -1,1 +1,7 @@
 .keep
+
+vendor
+
+.idea/
+
+bin/
