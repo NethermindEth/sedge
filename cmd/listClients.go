@@ -5,7 +5,6 @@ Copyright © 2022 Nethermind hello.nethermind.io
 package cmd
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/NethermindEth/1Click/configs"
@@ -20,8 +19,8 @@ var listClientsCmd = &cobra.Command{
 	Long:  `List supported clients for execution and consensus engines`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info("Listing supported clients")
-		fmt.Printf("Eth1 Clients: \n%s\n\n", strings.Join(configs.Eth1ClientsSupported, ", "))
-		fmt.Printf("Consensus Clients: \n%s\n", strings.Join(configs.ConsensusClientsSupported, ", "))
+		log.Info("Eth1 Clients: \n%s\n\n", strings.Join(configs.Eth1ClientsSupported, ", "))
+		log.Info("Consensus Clients: \n%s\n", strings.Join(configs.ConsensusClientsSupported, ", "))
 	},
 }
 
