@@ -2,10 +2,10 @@
 
 compile:: ## compile:
 	@mkdir -p bin
-	@go build -o bin/1click cmd/1Click/main.go
+	@go build -o build/1click cmd/1Click/main.go
 
 run: ## run
-	@./bin/1click
+	@./build/1click
 
 all: compile run ## build and run
 

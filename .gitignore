@@ -4,4 +4,4 @@ vendor
 
 .idea/
 
-bin/
+build/
