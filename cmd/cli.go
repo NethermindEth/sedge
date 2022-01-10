@@ -57,8 +57,8 @@ func init() {
 	rootCmd.AddCommand(cliCmd)
 
 	// Local flags
-	cliCmd.Flags().StringVar(&eth1Client, "eth1", "", "Execution engine client, e.g. Geth, Nethermind, Besu, Erigon")
-	cliCmd.MarkFlagRequired("eth1")
+	cliCmd.Flags().StringVar(&eth1Client, "execution", "", "Execution engine client, e.g. Geth, Nethermind, Besu, Erigon")
+	cliCmd.MarkFlagRequired("execution")
 
 	cliCmd.Flags().StringVar(&consensusClient, "consensus", "", "Consensus engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
 	cliCmd.MarkFlagRequired("consensus")
