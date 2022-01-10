@@ -1,4 +1,4 @@
-package onpremise
+package utils
 
 // DistroInfo : Struct Contains name and architecture of the linux distribution of the host machine
 type DistroInfo struct {

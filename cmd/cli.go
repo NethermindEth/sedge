@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/NethermindEth/1Click/configs"
-	pkg "github.com/NethermindEth/1Click/internal/app/1Click/on-premise"
+	"github.com/NethermindEth/1Click/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -36,12 +36,12 @@ Finally, it will run the generated docker-compose script`,
 		// Check if dependencies are installed
 		dependencies := configs.GetDependencies()
 		log.Infof(configs.CheckingDependencies, strings.Join(dependencies, ", "))
-		pending := pkg.CheckDependencies(dependencies)
+		pending := utils.CheckDependencies(dependencies)
 
 		if len(pending) > 0 {
 			log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
 			// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
-			err := pkg.InstallDependencies(pending)
+			err := utils.InstallDependencies(pending)
 			if err != nil {
 				log.Fatalf(configs.InstallingDependenciesError, err)
 			}

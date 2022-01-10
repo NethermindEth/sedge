@@ -1,4 +1,4 @@
-package onpremise
+package utils
 
 import (
 	"os/exec"
