@@ -40,7 +40,7 @@ Finally, it will run the generated docker-compose script`,
 
 		if len(pending) > 0 {
 			log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
-			// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
+			//TODO: Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
 			err := utils.InstallDependencies(pending)
 			if err != nil {
 				log.Fatalf(configs.InstallingDependenciesError, err)
