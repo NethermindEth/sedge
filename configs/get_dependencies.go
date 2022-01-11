@@ -1,5 +1,7 @@
 package configs
 
+import "github.com/spf13/viper"
+
 /*
 GetDependencies :
 This function is responsible for giving the dependencies needed for 1Click setup
@@ -12,6 +14,5 @@ a. []string
 List of dependencies needed for 1Click setup
 */
 func GetDependencies() []string {
-	//TODO: Get dependencies from config file
-	return Dependencies
+	return viper.GetStringSlice("dependencies")
 }

@@ -1,0 +1,9 @@
+dependencies:
+  - docker
+  - docker-compose
+#  - angkor
+# executionClients:
+#   - geth
+# consensusClients:
+#   - Lighthouse
+#   - Lodestar

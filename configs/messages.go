@@ -9,14 +9,3 @@ const (
 	GeneratingDockerComposeScript = "Generating docker-compose script for current selection of clients"
 	InstallingDependenciesError   = "Something went wrong while installing dependencies. Error: %s"
 )
-
-//TODO: Move all this to a config file. No supported clients for now
-
-var Eth1ClientsSupported = []string{}
-
-var ConsensusClientsSupported = []string{}
-
-var Dependencies = []string{
-	"docker",
-	"docker-compose",
-}
