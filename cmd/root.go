@@ -16,14 +16,10 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "1Click",
+	Use:   "1click",
 	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long: `A tool to allow deploying validators with ease. This tool is
+WIP and is not yet ready for use.`,
 	// TODO: Start the TUI engine in this callback. Default behavior
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
@@ -43,7 +39,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Persistent flags
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.1Click.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.1click.yaml)")
 
 	// Local flags
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
@@ -62,7 +58,7 @@ func initConfig() {
 		// Search config in home directory with name ".1Click" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".1Click")
+		viper.SetConfigName(".1click")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
