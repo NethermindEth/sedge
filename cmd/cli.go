@@ -11,6 +11,7 @@ import (
 
 	"github.com/NethermindEth/1Click/configs"
 	"github.com/NethermindEth/1Click/internal/utils"
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
 
@@ -40,11 +41,8 @@ Finally, it will run the generated docker-compose script`,
 
 		if len(pending) > 0 {
 			log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
-			//TODO: Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
-			err := utils.InstallDependencies(pending)
-			if err != nil {
-				log.Fatalf(configs.InstallingDependenciesError, err)
-			}
+			// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
+			installOrShowInstructions(pending)
 		}
 
 		log.Info(configs.DependenciesOK)
@@ -61,5 +59,33 @@ func init() {
 	cliCmd.MarkFlagRequired("execution")
 
 	cliCmd.Flags().StringVar(&consensusClient, "consensus", "", "Consensus engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
-	cliCmd.MarkFlagRequired("consensus")
+}
+
+func installOrShowInstructions(pending []string) {
+	optShow, optInstall, optExit := "Show instructions for installing dependencies", "Install dependencies", "Exit. You will manage this dependencies on your own"
+	prompt := promptui.Select{
+		Label: "Select how to proceed with the pending dependencies",
+		Items: []string{optShow, optInstall, optExit},
+	}
+
+	_, result, err := prompt.Run()
+	if err != nil {
+		log.Fatalf("prompt failed %v", err)
+	}
+
+	switch result {
+	case optShow:
+		err = utils.HandleInstructions(pending, utils.ShowInstructions)
+		if err != nil {
+			log.Fatalf(configs.ShowingInstructionsError, err)
+		}
+	case optInstall:
+		err = utils.HandleInstructions(pending, utils.InstallDependency)
+		if err != nil {
+			log.Fatalf(configs.InstallingDependenciesError, err)
+		}
+	default:
+		log.Info(configs.Exiting)
+		os.Exit(0)
+	}
 }
