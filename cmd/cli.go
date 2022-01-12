@@ -5,6 +5,7 @@ Copyright © 2022 Nethermind hello.nethermind.io
 package cmd
 
 import (
+	"os"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -16,8 +17,9 @@ import (
 )
 
 var (
-	eth1Client      string
+	executionClient string
 	consensusClient string
+	randomize       bool
 )
 
 // cliCmd represents the cli command
@@ -34,6 +36,32 @@ Second, it will generate docker-compose scripts to run the full setup according 
 
 Finally, it will run the generated docker-compose script`,
 	Run: func(cmd *cobra.Command, args []string) {
+		executionClients, consensusClients := configs.GetClients("executionClients"), configs.GetClients("consensusClients")
+		log.Debugf("Execution clients: %v", executionClients)
+		log.Debugf("Consensus clients: %v", consensusClients)
+		if executionClients == nil || consensusClients == nil {
+			log.Fatal(configs.NoClientsFound)
+		}
+
+		if randomize {
+			// Select a random execution client and a random consensus client
+			executionClient, consensusClient = utils.RandomizeClients(executionClients, consensusClients)
+			log.Info("Randomly selected execution client: ", executionClient)
+			log.Info("Randomly selected consensus client: ", consensusClient)
+		} else if executionClient == "" || consensusClient == "" {
+			log.Error(configs.ProvideClients)
+			os.Exit(1)
+		} else {
+			// Validate clients
+			if !utils.Contains(executionClients, executionClient) {
+				log.Errorf(configs.IncorrectClient, executionClient)
+				os.Exit(1)
+			} else if !utils.Contains(consensusClients, consensusClient) {
+				log.Errorf(configs.IncorrectClient, consensusClient)
+				os.Exit(1)
+			}
+		}
+
 		// Check if dependencies are installed
 		dependencies := configs.GetDependencies()
 		log.Infof(configs.CheckingDependencies, strings.Join(dependencies, ", "))
@@ -55,10 +83,11 @@ func init() {
 	rootCmd.AddCommand(cliCmd)
 
 	// Local flags
-	cliCmd.Flags().StringVar(&eth1Client, "execution", "", "Execution engine client, e.g. Geth, Nethermind, Besu, Erigon")
-	cliCmd.MarkFlagRequired("execution")
+	cliCmd.Flags().StringVar(&executionClient, "execution", "", "Execution engine client, e.g. Geth, Nethermind, Besu, Erigon")
 
 	cliCmd.Flags().StringVar(&consensusClient, "consensus", "", "Consensus engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
+
+	cliCmd.Flags().BoolVarP(&randomize, "randomize", "r", false, "Randomize combination of clients")
 }
 
 func installOrShowInstructions(pending []string) {

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"math/rand"
 	"strings"
 )
 
@@ -53,3 +54,24 @@ func Contains(list []string, str string) bool {
 	return false
 }
 
+/*
+RandomizeClients :
+Select a random execution client and a random consensus client
+
+params :-
+a. executionClients []string
+List of execution clients
+b. consensusClients []string
+List of consensus clients
+
+returns :-
+a. string
+Random execution client
+b. string
+Random consensus client
+*/
+func RandomizeClients(executionClients []string, consensusClients []string) (string, string) {
+	executionClient := executionClients[rand.Intn(len(executionClients))]
+	consensusClient := consensusClients[rand.Intn(len(consensusClients))]
+	return executionClient, consensusClient
+}
