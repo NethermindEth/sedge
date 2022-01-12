@@ -7,7 +7,10 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/NethermindEth/1Click/configs"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -70,4 +73,33 @@ func initConfig() {
 		fmt.Fprintln(os.Stderr, "Config file not found on the path provided nor in the home directory")
 		os.Exit(1)
 	}
+
+	initLogging()
+}
+
+/*
+initLogging :
+This function is responsible for :-
+initializing the logging configurations
+params :-
+none
+returns :-
+none
+*/
+func initLogging() {
+	var config configs.LogConfig
+
+	err := viper.UnmarshalKey("logs", &config)
+	if err != nil {
+		log.Errorf("Unable to decode into struct, %v", err)
+		return
+	}
+	log.Infof("Logging configuration: %+v", config)
+
+	level, err := log.ParseLevel(strings.ToLower(config.Level))
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	log.SetLevel(level)
 }

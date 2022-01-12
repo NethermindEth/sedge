@@ -6,4 +6,5 @@ dependencies:
 #   - geth
 # consensusClients:
 #   - Lighthouse
-#   - Lodestar
+logs:
+  logLevel: debug
