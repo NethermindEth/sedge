@@ -2,6 +2,20 @@ package utils
 
 import "fmt"
 
+/*
+ZipString :
+Zip string slices
+
+params :-
+a. lists ...[]string
+String slices to be zipped
+
+returns :-
+a. [][]string
+Zipped string slices
+b. error
+Error if any
+*/
 func ZipString(lists ...[]string) ([][]string, error) {
 	size := len(lists[0])
 	for _, list := range lists {

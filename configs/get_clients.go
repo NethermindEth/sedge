@@ -1,6 +1,10 @@
 package configs
 
-import "github.com/spf13/viper"
+import (
+	"strings"
+
+	"github.com/spf13/viper"
+)
 
 /*
 GetClients :
@@ -15,5 +19,9 @@ a. []string
 List of clients of type <clientType>
 */
 func GetClients(clientType string) []string {
-	return viper.GetStringSlice(clientType)
+	clients := viper.GetStringSlice(clientType)
+	if len(clients) == 0 {
+		return nil
+	}
+	return strings.Split(strings.ToLower(strings.Join(clients, ",")), ",")
 }
