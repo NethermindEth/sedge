@@ -55,23 +55,18 @@ func Contains(list []string, str string) bool {
 }
 
 /*
-RandomizeClients :
-Select a random execution client and a random consensus client
+RandomChoice :
+Select a random element from a string list
 
 params :-
-a. executionClients []string
-List of execution clients
-b. consensusClients []string
-List of consensus clients
+a. list []string
+Target list
 
 returns :-
 a. string
-Random execution client
-b. string
-Random consensus client
+Random element from list
 */
-func RandomizeClients(executionClients []string, consensusClients []string) (string, string) {
-	executionClient := executionClients[rand.Intn(len(executionClients))]
-	consensusClient := consensusClients[rand.Intn(len(consensusClients))]
-	return executionClient, consensusClient
+func RandomChoice(list []string) string {
+	item := list[rand.Intn(len(list))]
+	return item
 }

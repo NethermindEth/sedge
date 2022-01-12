@@ -45,7 +45,7 @@ Finally, it will run the generated docker-compose script`,
 
 		if randomize {
 			// Select a random execution client and a random consensus client
-			executionClient, consensusClient = utils.RandomizeClients(executionClients, consensusClients)
+			executionClient, consensusClient = utils.RandomChoice(executionClients), utils.RandomChoice(consensusClients)
 			log.Info("Randomly selected execution client: ", executionClient)
 			log.Info("Randomly selected consensus client: ", consensusClient)
 		} else if executionClient == "" || consensusClient == "" {
