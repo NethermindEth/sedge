@@ -6,6 +6,17 @@ import (
 	"github.com/alexeyco/simpletable"
 )
 
+/*
+WriteListClientsTable :
+Prints the supported clients table
+
+params :-
+a. data [][]string
+Table data
+
+returns :-
+None
+*/
 func WriteListClientsTable(data [][]string) {
 	table := simpletable.New()
 
@@ -32,6 +43,17 @@ func WriteListClientsTable(data [][]string) {
 	fmt.Println()
 }
 
+/*
+WriteRandomizedClientsTable :
+Prints the randomized clients table
+
+params :-
+a. data [][]string
+Table data
+
+returns :-
+None
+*/
 func WriteRandomizedClientsTable(data [][]string) {
 	table := simpletable.New()
 

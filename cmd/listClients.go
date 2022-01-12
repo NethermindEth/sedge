@@ -36,6 +36,19 @@ func init() {
 	rootCmd.AddCommand(listClientsCmd)
 }
 
+/*
+buildData :
+Builds the data for the supported clients table
+
+params :-
+None
+
+returns :-
+a. [][]string
+Table data
+b. error
+Error if any
+*/
 func buildData() ([][]string, error) {
 	executionClients, consensusClients := configs.GetClients("executionClients"), configs.GetClients("consensusClients")
 	max := int(math.Max(float64(len(executionClients)), float64(len(consensusClients))))
