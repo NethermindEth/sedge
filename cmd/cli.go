@@ -11,6 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/NethermindEth/1Click/configs"
+	"github.com/NethermindEth/1Click/internal/ui"
 	"github.com/NethermindEth/1Click/internal/utils"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -46,8 +47,8 @@ Finally, it will run the generated docker-compose script`,
 		if randomize {
 			// Select a random execution client and a random consensus client
 			executionClient, consensusClient = utils.RandomChoice(executionClients), utils.RandomChoice(consensusClients)
-			log.Info("Randomly selected execution client: ", executionClient)
-			log.Info("Randomly selected consensus client: ", consensusClient)
+			log.Infof("Listing randomized clients\n\n")
+			ui.WriteRandomizedClientsTable([][]string{{"Execution client", executionClient}, {"Consensus client", consensusClient}})
 		} else if executionClient == "" || consensusClient == "" {
 			log.Error(configs.ProvideClients)
 			os.Exit(1)
