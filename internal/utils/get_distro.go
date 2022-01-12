@@ -10,11 +10,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var reID = regexp.MustCompile(`^ID=(.*)$`)
+var (
+	reID        = regexp.MustCompile(`^ID=(.*)$`)
+	reVersionID = regexp.MustCompile(`^VERSION_ID=(.*)$`)
+)
 
 /*
 GetOSInfo :
-This function is responsible for gathering information like architecture
+Gather information like architecture
 and name of the linux distribution of the host machine.
 
 params :-
@@ -49,6 +52,8 @@ func GetOSInfo() (distro DistroInfo, err error) {
 	for s.Scan() {
 		if m := reID.FindStringSubmatch(s.Text()); m != nil {
 			distro.Name = strings.Trim(m[1], `"`)
+		} else if m := reVersionID.FindStringSubmatch(s.Text()); m != nil {
+			distro.Version = strings.Trim(m[1], `"`)
 		}
 	}
 
