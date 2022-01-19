@@ -1,10 +1,12 @@
 dependencies:
   - docker
   - docker-compose
-#  - angkor
-# executionClients:
-#   - geth
-# consensusClients:
-#   - Lighthouse
+executionClients:
+  - nethermind
+consensusClients:
+  - Lighthouse
+  - teku
+validatorClients:
+  - Lighthouse
 logs:
   logLevel: debug
