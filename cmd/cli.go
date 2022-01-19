@@ -21,6 +21,7 @@ var (
 	executionClient string
 	consensusClient string
 	validatorClient string
+	generationPath  string
 	randomize       bool
 )
 
@@ -78,10 +79,13 @@ Finally, it will run the generated docker-compose script`,
 			// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
 			installOrShowInstructions(pending)
 		}
-
 		log.Info(configs.DependenciesOK)
+
 		log.Info(configs.GeneratingDockerComposeScript)
-		//TODO: Implement logic for generating docker-compose scripts
+		utils.GenerateDockerComposeScripts(executionClient, consensusClient, validatorClient, generationPath)
+
+		log.Info(configs.GeneratingEnvFile)
+		utils.GenerateEnvFile(executionClient, consensusClient, validatorClient, generationPath)
 	},
 }
 
@@ -94,6 +98,8 @@ func init() {
 	cliCmd.Flags().StringVar(&consensusClient, "consensus", "", "Consensus engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
 
 	cliCmd.Flags().StringVar(&validatorClient, "validator", "", "Validator engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
+
+	cliCmd.Flags().StringVar(&generationPath, "path", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
 
 	cliCmd.Flags().BoolVarP(&randomize, "randomize", "r", false, "Randomize combination of clients")
 }
