@@ -7,6 +7,9 @@ compile: ## compile:
 run: ## run
 	@./build/1click
 
+run-cli: compile ## run randomized cli
+	@./build/1click cli -r --config ./config.yaml
+
 listClients: compile ## Run cmd listClients with ./config.yaml
 	@./build/1click listClients --config ./config.yaml
 
