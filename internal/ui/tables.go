@@ -25,6 +25,7 @@ func WriteListClientsTable(data [][]string) {
 			{Align: simpletable.AlignCenter, Text: "#"},
 			{Align: simpletable.AlignCenter, Text: "Execution Client"},
 			{Align: simpletable.AlignCenter, Text: "Consensus Client"},
+			{Align: simpletable.AlignCenter, Text: "Validator Client"},
 		},
 	}
 
@@ -33,6 +34,7 @@ func WriteListClientsTable(data [][]string) {
 			{Align: simpletable.AlignCenter, Text: fmt.Sprintf("%d", i+1)},
 			{Align: simpletable.AlignCenter, Text: interface{}(row[0]).(string)},
 			{Align: simpletable.AlignCenter, Text: interface{}(row[1]).(string)},
+			{Align: simpletable.AlignCenter, Text: interface{}(row[2]).(string)},
 		}
 
 		table.Body.Cells = append(table.Body.Cells, r)

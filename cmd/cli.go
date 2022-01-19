@@ -20,6 +20,7 @@ import (
 var (
 	executionClient string
 	consensusClient string
+	validatorClient string
 	randomize       bool
 )
 
@@ -37,19 +38,20 @@ Second, it will generate docker-compose scripts to run the full setup according 
 
 Finally, it will run the generated docker-compose script`,
 	Run: func(cmd *cobra.Command, args []string) {
-		executionClients, consensusClients := configs.GetClients("executionClients"), configs.GetClients("consensusClients")
+		executionClients, consensusClients, validatorClients := configs.GetClients("executionClients"), configs.GetClients("consensusClients"), configs.GetClients("validatorClients")
 		log.Debugf("Execution clients: %v", executionClients)
 		log.Debugf("Consensus clients: %v", consensusClients)
-		if executionClients == nil || consensusClients == nil {
+		log.Debugf("Validator clients: %v", validatorClients)
+		if executionClients == nil || consensusClients == nil || validatorClients == nil {
 			log.Fatal(configs.NoClientsFound)
 		}
 
 		if randomize {
 			// Select a random execution client and a random consensus client
-			executionClient, consensusClient = utils.RandomChoice(executionClients), utils.RandomChoice(consensusClients)
+			executionClient, consensusClient, validatorClient = utils.RandomChoice(executionClients), utils.RandomChoice(consensusClients), utils.RandomChoice(validatorClients)
 			log.Infof("Listing randomized clients\n\n")
-			ui.WriteRandomizedClientsTable([][]string{{"Execution client", executionClient}, {"Consensus client", consensusClient}})
-		} else if executionClient == "" || consensusClient == "" {
+			ui.WriteRandomizedClientsTable([][]string{{"Execution client", executionClient}, {"Consensus client", consensusClient}, {"Validator client", validatorClient}})
+		} else if executionClient == "" || consensusClient == "" || validatorClient == "" {
 			log.Error(configs.ProvideClients)
 			os.Exit(1)
 		} else {
@@ -59,6 +61,9 @@ Finally, it will run the generated docker-compose script`,
 				os.Exit(1)
 			} else if !utils.Contains(consensusClients, consensusClient) {
 				log.Errorf(configs.IncorrectClient, consensusClient)
+				os.Exit(1)
+			} else if !utils.Contains(validatorClients, validatorClient) {
+				log.Errorf(configs.IncorrectClient, validatorClient)
 				os.Exit(1)
 			}
 		}
@@ -87,6 +92,8 @@ func init() {
 	cliCmd.Flags().StringVar(&executionClient, "execution", "", "Execution engine client, e.g. Geth, Nethermind, Besu, Erigon")
 
 	cliCmd.Flags().StringVar(&consensusClient, "consensus", "", "Consensus engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
+
+	cliCmd.Flags().StringVar(&validatorClient, "validator", "", "Validator engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
 
 	cliCmd.Flags().BoolVarP(&randomize, "randomize", "r", false, "Randomize combination of clients")
 }

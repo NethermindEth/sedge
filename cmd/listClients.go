@@ -50,20 +50,21 @@ b. error
 Error if any
 */
 func buildData() ([][]string, error) {
-	executionClients, consensusClients := configs.GetClients("executionClients"), configs.GetClients("consensusClients")
+	executionClients, consensusClients, validatorClients := configs.GetClients("executionClients"), configs.GetClients("consensusClients"), configs.GetClients("validatorClients")
 	max := int(math.Max(float64(len(executionClients)), float64(len(consensusClients))))
+	max = int(math.Max(float64(max), float64(len(validatorClients))))
 
 	if max > 0 {
-		for _, list := range []*[]string{&executionClients, &consensusClients} {
+		for _, list := range []*[]string{&executionClients, &consensusClients, &validatorClients} {
 			for len(*list) < max {
 				*list = append(*list, "-")
 			}
 		}
 	} else {
-		executionClients, consensusClients = []string{"-"}, []string{"-"}
+		executionClients, consensusClients, validatorClients = []string{"-"}, []string{"-"}, []string{"-"}
 	}
 
-	data, err := utils.ZipString(executionClients, consensusClients)
+	data, err := utils.ZipString(executionClients, consensusClients, validatorClients)
 	if err != nil {
 		return nil, err
 	}
