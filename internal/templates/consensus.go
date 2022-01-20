@@ -2,15 +2,14 @@ package templates
 
 const (
 	LighthouseConsensus = `
-version: "2.4"
-
-services:
-
+{{ define "consensus" }}
   consensus:
     stop_grace_period: 1m
     container_name: lighthouse-consensus-client
     restart: unless-stopped
-    image: ${IMAGE_VERSION}
+    image: ${CC_IMAGE_VERSION}
+    depends_on: 
+      - execution
     volumes:
       - ./lhconsensus-data:/var/lib/lighthouse
     ports:
@@ -30,24 +29,24 @@ services:
       - --target-peers=${PEER_COUNT}
       - --eth1-endpoints=${EC_NODE}
       - --eth1-blocks-per-log-query=150
-      - --debug-level=${LOG_LEVEL}
+      - --debug-level=${CC_LOG_LEVEL}
       - --validator-monitor-auto
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
-        max-file: "10"
+        max-file: "10"      
+{{ end }}
 `
 	LodestarConsensus = `
-version: "2.4"
-
-services:
-
+{{ define "consensus" }}
   consensus:
     stop_grace_period: 1m
     container_name: lodestar-consensus-client
     restart: unless-stopped
-    image: ${IMAGE_VERSION}
+    image: ${CC_IMAGE_VERSION}
+    depends_on: 
+      - execution
     volumes:
       - ./lsconsensus-data:/var/lib/lodestar/consensus
     ports:
@@ -61,7 +60,7 @@ services:
       - --rootDir=/var/lib/lodestar/consensus
       - --network=${NETWORK}
       - --logFile=/var/lib/lodestart/consensus/logs/beacon.log 
-      - --logLevelFile=${LOG_LEVEL}
+      - --logLevelFile=${CC_LOG_LEVEL}
       - --api.rest.enabled 
       - --api.rest.host=0.0.0.0
       - --api.rest.port=4000
@@ -75,17 +74,17 @@ services:
       options:
       max-size: "10m"
       max-file: "10"
+{{ end }}
 `
 	PrysmConsensus = `
-version: "2.4"
-
-services:
-
+{{ define "consensus" }}
   consensus:
     stop_grace_period: 1m
     container_name: prysm-consesus-client
     restart: unless-stopped
-    image: ${IMAGE_VERSION}
+    image: ${CC_IMAGE_VERSION}
+    depends_on: 
+      - execution
     volumes:
       - ./prysmconsensus-data:/var/lib/prysm
     ports:
@@ -95,7 +94,7 @@ services:
       - 4000:4000/tcp
     command:
       - --datadir=/var/lib/prysm/
-      - --verbosity=${LOG_LEVEL}
+      - --verbosity=${CC_LOG_LEVEL}
       - --${NETWORK}
       - --p2p-tcp-port=13000
       - --p2p-udp-port=12000
@@ -113,17 +112,17 @@ services:
       options:
   	    max-size: "10m"
   	    max-file: "10"
+{{ end }}    
 `
 	TekuConsensus = `
-version: "2.4"
-
-services:
-
+{{ define "consensus" }}
   consensus:
     stop_grace_period: 1m
     container_name: teku-consensus-client
     restart: unless-stopped
-    image: ${IMAGE_VERSION}
+    image: ${CC_IMAGE_VERSION}
+    depends_on: 
+      - execution
     user: root
     volumes:
       - ./tekuconsensus-data:/var/lib/teku
@@ -136,7 +135,7 @@ services:
     command:
       - --data-path=/var/lib/teku
       - --log-destination=CONSOLE
-      - --logging=${LOG_LEVEL}
+      - --logging=${CC_LOG_LEVEL}
       - --network=${NETWORK}
       - --p2p-port=9000
       - --p2p-peer-upper-bound=${PEER_COUNT}
@@ -150,5 +149,6 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{{ end }} 
  `
 )

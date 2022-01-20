@@ -2,15 +2,12 @@ package templates
 
 const (
 	Nethermind = `
-version: '2.4'
-
-services:
-
-  nethermind:
+{{ define "execution" }}
+  execution:
     stop_grace_period: 1m
     container_name: nethermind-execution-client
     restart: unless-stopped
-    image: ${IMAGE_VERSION}
+    image: ${EXECUTION_IMAGE_VERSION}
     volumes:
       - ./nethermind-execution-data/:/nethermind/data
     ports:
@@ -40,5 +37,6 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{{ end }}
 	`
 )

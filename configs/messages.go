@@ -30,4 +30,5 @@ const (
 	GeneratingScriptsError          = "Generating docker-compose files for execution client %s, consensus client %s and validator client %s failed"
 	ClientNotSupported              = "Client %s is not supported. Please use 'listClient' command to see the list of supported clients"
 	GetRawTemplatesError            = "Failed to get raw templates for %s"
+	PrintingFile                    = "File %s :"
 )

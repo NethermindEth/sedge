@@ -2,14 +2,13 @@ package templates
 
 const (
 	LighthouseValidator = `
-version: "2.4"
-
-services:
-
+{{ define "validator" }}
   validator:
     restart: unless-stopped
     container_name: lighthouse-validator-client
-    image: ${IMAGE_VERSION}
+    image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      - consensus
     volumes:
       - ./keystore:/var/lib/lighthouse/keystore
     command:
@@ -18,7 +17,7 @@ services:
       - --beacon-nodes=${CC_NODE}
       - --graffiti=${GRAFFITI}
       - --network=${NETWORK}
-      - --debug-level=${LOG_LEVEL}
+      - --debug-level=${VL_LOG_LEVEL}
       - --validators-dir=/var/lib/lighthouse/keystore
       - --secrets-dir=/var/lib/lighthouse/keystore/secrets
     logging:
@@ -26,16 +25,16 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{{ end }}
 `
 	LodestarValidator = `
-version: "2.4"
-
-services:
-
+{{ define "validator" }}
   validator:
     restart: unless-stopped
     container_name: lodestar-validator-client
-    image: ${IMAGE_VERSION}
+    image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      - consensus
     volumes:
       - ./lsvalidator-data:/var/lib/lodestar/validator
       - ./keystore:/var/lib/lodestar/keystore
@@ -46,7 +45,7 @@ services:
       - --network=${NETWORK}
       - --rootDir=/var/lib/lodestar/validator
       - --logFile=/var/lib/lodestart/validator/logs/validator.log
-      - --logLevelFile=${LOG_LEVEL}
+      - --logLevelFile=${VL_LOG_LEVEL}
       - --importKeystoresPath=/var/lib/lodestar/keystore
       - --importKeystoresPassword=/var/lib/lodestar/keystore/password.txt
       - --server=${CC_NODE}
@@ -55,16 +54,16 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{{ end }}
 	`
 	PrysmValidator = `
-version: "2.4"
-
-services:
-
+{{ define "validator" }}
   validator:
     restart: unless-stopped
     container_name: prysm-validator-client
-    image: ${IMAGE_VERSION}
+    image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      - consensus
     volumes:
       - ./prysmvalidator-data:/var/lib/prysm
       - ./wallet:/var/lib/prysm/wallet
@@ -73,7 +72,7 @@ services:
       - --wallet-dir=/var/lib/prysm/wallet
       - --beacon-rpc-provider=${CC_NODE}
       - --graffiti=${GRAFFITI}
-      - --verbosity=${LOG_LEVEL}
+      - --verbosity=${VL_LOG_LEVEL}
       - --${NETWORK}
       - --enable-doppelganger
       - --accept-terms-of-use
@@ -83,16 +82,16 @@ services:
       options:
   	    max-size: "10m"
   	    max-file: "10"
+{{ end }}
 	`
 	TekuValidator = `
-version: "2.4"
-
-services:
-
+{{ define "validator" }}
   validator:
     restart: unless-stopped
     container_name: teku-validator-client
-    image: ${IMAGE_VERSION}
+    image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      - consensus
     user: root
     volumes:
       - ./tekuvalidator-data:/var/lib/teku
@@ -112,5 +111,6 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{{ end }}
 	`
 )

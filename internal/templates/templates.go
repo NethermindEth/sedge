@@ -1,5 +1,18 @@
 package templates
 
+const (
+	DockerComposeBase = `
+{{ define "docker-compose" }}
+version: "2.4"
+
+services:
+{{template "execution" .}}
+{{template "consensus" .}}
+{{template "validator" .}}
+{{ end }}
+	`
+)
+
 /*
 GetRawTemplates :
 Create a map of supported clients docker-compose.yml raw templates and
@@ -17,6 +30,10 @@ func GetRawTemplates(tmpType string) map[string]string {
 	var tmps map[string]string
 
 	switch tmpType {
+	case "base":
+		tmps = map[string]string{
+			"docker-compose_base": DockerComposeBase,
+		}
 	case "execution":
 		tmps = map[string]string{
 			"nethermind": Nethermind,
