@@ -53,19 +53,15 @@ Finally, it will run the generated docker-compose script`,
 			log.Infof("Listing randomized clients\n\n")
 			ui.WriteRandomizedClientsTable([][]string{{"Execution client", executionClient}, {"Consensus client", consensusClient}, {"Validator client", validatorClient}})
 		} else if executionClient == "" || consensusClient == "" || validatorClient == "" {
-			log.Error(configs.ProvideClients)
-			os.Exit(1)
+			log.Fatalf(configs.ProvideClients)
 		} else {
 			// Validate clients
 			if !utils.Contains(executionClients, executionClient) {
-				log.Errorf(configs.IncorrectClient, executionClient)
-				os.Exit(1)
+				log.Fatalf(configs.IncorrectClient, executionClient)
 			} else if !utils.Contains(consensusClients, consensusClient) {
-				log.Errorf(configs.IncorrectClient, consensusClient)
-				os.Exit(1)
+				log.Fatalf(configs.IncorrectClient, consensusClient)
 			} else if !utils.Contains(validatorClients, validatorClient) {
-				log.Errorf(configs.IncorrectClient, validatorClient)
-				os.Exit(1)
+				log.Fatalf(configs.IncorrectClient, validatorClient)
 			}
 		}
 
@@ -82,7 +78,10 @@ Finally, it will run the generated docker-compose script`,
 		log.Info(configs.DependenciesOK)
 
 		// Generate docker-compose scripts
-		utils.GenerateScripts(executionClient, consensusClient, validatorClient, generationPath)
+		err := utils.GenerateScripts(executionClient, consensusClient, validatorClient, generationPath)
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 

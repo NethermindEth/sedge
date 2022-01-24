@@ -10,20 +10,28 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func GenerateScripts(executionClient, consensusClient, validatorClient, path string) {
+func GenerateScripts(executionClient, consensusClient, validatorClient, path string) (err error) {
 	// Create scripts directory if not exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		err = os.MkdirAll(path, 0777)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
 
 	log.Info(configs.GeneratingDockerComposeScript)
-	generateDockerComposeScripts(executionClient, consensusClient, validatorClient, path)
+	err = generateDockerComposeScripts(executionClient, consensusClient, validatorClient, path)
+	if err != nil {
+		return err
+	}
 
 	log.Info(configs.GeneratingEnvFile)
-	generateEnvFile(executionClient, consensusClient, validatorClient, path)
+	err = generateEnvFile(executionClient, consensusClient, validatorClient, path)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 /*
@@ -42,41 +50,51 @@ d. path string
 Path of generated scripts
 
 returns :-
-None
+a. error
+Error if any
 */
-func generateDockerComposeScripts(executionClient, consensusClient, validatorClient, path string) error {
-	baseTmp, err := templates.Services.ReadFile("services/docker-compose_base.tmpl")
+func generateDockerComposeScripts(executionClient, consensusClient, validatorClient, path string) (err error) {
+	rawBaseTmp, err := templates.Services.ReadFile("services/docker-compose_base.tmpl")
 	if err != nil {
-		log.Fatal(err)
-	}
-	executionTmp, err := templates.Services.ReadFile("services/execution/" + executionClient + ".tmpl")
-	if err != nil {
-		log.Fatal(err)
-	}
-	consensusTmp, err := templates.Services.ReadFile("services/consensus/" + consensusClient + ".tmpl")
-	if err != nil {
-		log.Fatal(err)
-	}
-	validatorTmp, err := templates.Services.ReadFile("services/validator/" + validatorClient + ".tmpl")
-	if err != nil {
-		log.Fatal(err)
+		return
 	}
 
-	tmp := template.Must(template.New("docker-compose").Parse(string(baseTmp)))
-	template.Must(tmp.Parse(string(executionTmp)))
-	template.Must(tmp.Parse(string(consensusTmp)))
-	template.Must(tmp.Parse(string(validatorTmp)))
+	baseTmp, err := template.New("docker-compose").Parse(string(rawBaseTmp))
+	if err != nil {
+		return
+	}
+
+	clients := map[string]string{
+		"execution/": executionClient,
+		"consensus/": consensusClient,
+		"validator/": validatorClient,
+	}
+	for tmpKind, clientName := range clients {
+		tmp, err := templates.Services.ReadFile("services/" + tmpKind + clientName + ".tmpl")
+		if err != nil {
+			return err
+		}
+		_, err = baseTmp.Parse(string(tmp))
+		if err != nil {
+			return err
+		}
+	}
 
 	// Print docker-compose file
 	log.Infof(configs.PrintingFile, "docker-compose.yml")
-	tmp.Execute(os.Stdout, nil)
+	err = baseTmp.Execute(os.Stdout, nil)
+	if err != nil {
+		return fmt.Errorf(configs.PrintingFileError, "docker-compose.yml", err)
+	}
 	fmt.Println()
 
-	err = writeTemplateToFile(tmp, path+"/docker-compose.yml", nil, false)
+	err = writeTemplateToFile(baseTmp, path+"/docker-compose.yml", nil, false)
 	if err != nil {
 		log.Fatalf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient)
 	}
 	log.Infof(configs.CreatedFile, path+"/docker-compose.yml")
+
+	return nil
 }
 
 /*
@@ -96,23 +114,21 @@ d. path string
 Path of generated scripts
 
 returns :-
-None
+a. error
+Error if any
 */
-func generateEnvFile(executionClient, consensusClient, validatorClient, path string) error {
+func generateEnvFile(executionClient, consensusClient, validatorClient, path string) (err error) {
 	executionEnvTmp, err := template.ParseFS(templates.Envs, "envs/execution/"+executionClient+".tmpl")
 	if err != nil {
-		log.Error(err)
-		os.Exit(1)
+		return
 	}
 	consensusEnvTmp, err := template.ParseFS(templates.Envs, "envs/consensus/"+consensusClient+".tmpl")
 	if err != nil {
-		log.Error(err)
-		os.Exit(1)
+		return
 	}
 	validatorEnvTmp, err := template.ParseFS(templates.Envs, "envs/validator/"+validatorClient+".tmpl")
 	if err != nil {
-		log.Error(err)
-		os.Exit(1)
+		return
 	}
 
 	consensusEnv := ConsensusEnv{
@@ -126,27 +142,39 @@ func generateEnvFile(executionClient, consensusClient, validatorClient, path str
 
 	err = writeTemplateToFile(executionEnvTmp, path+"/.env", nil, false)
 	if err != nil {
-		log.Fatalf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient)
+		return fmt.Errorf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient, err)
 	}
 
 	err = writeTemplateToFile(consensusEnvTmp, path+"/.env", consensusEnv, true)
 	if err != nil {
-		log.Fatalf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient)
+		return fmt.Errorf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient, err)
 	}
 
 	err = writeTemplateToFile(validatorEnvTmp, path+"/.env", validatorEnv, true)
 	if err != nil {
-		log.Fatalf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient)
+		return fmt.Errorf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient, err)
 	}
 
 	// Print .env file
 	log.Infof(configs.PrintingFile, ".env")
-	executionEnvTmp.Execute(os.Stdout, nil)
-	consensusEnvTmp.Execute(os.Stdout, consensusEnv)
-	validatorEnvTmp.Execute(os.Stdout, validatorEnv)
+	err = executionEnvTmp.Execute(os.Stdout, nil)
+	if err != nil {
+		return fmt.Errorf(configs.PrintingFileError, ".env", err)
+	}
 
+	err = consensusEnvTmp.Execute(os.Stdout, consensusEnv)
+	if err != nil {
+		return fmt.Errorf(configs.PrintingFileError, ".env", err)
+	}
+
+	err = validatorEnvTmp.Execute(os.Stdout, validatorEnv)
+	if err != nil {
+		return fmt.Errorf(configs.PrintingFileError, ".env", err)
+	}
 	fmt.Println()
 	log.Infof(configs.CreatedFile, path+"/.env")
+
+	return nil
 }
 
 /*
@@ -173,14 +201,12 @@ func writeTemplateToFile(template *template.Template, file string, data interfac
 	if append {
 		f, err = os.OpenFile(file, os.O_APPEND|os.O_WRONLY, 0666)
 		if err != nil {
-			log.Errorf(configs.CreatingFileError, file, err)
-			return
+			return fmt.Errorf(configs.CreatingFileError, file, err)
 		}
 	} else {
 		f, err = os.Create(file)
 		if err != nil {
-			log.Errorf(configs.CreatingFileError, file, err)
-			return
+			return fmt.Errorf(configs.CreatingFileError, file, err)
 		}
 	}
 
@@ -195,7 +221,6 @@ func writeTemplateToFile(template *template.Template, file string, data interfac
 
 	err = template.Execute(f, data)
 	if err != nil {
-		log.Error(err)
 		return
 	}
 
