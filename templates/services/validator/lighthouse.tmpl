@@ -1,0 +1,25 @@
+{{/* lighthouse.tmpl */}}
+{{ define "validator" }}
+  validator:
+    restart: unless-stopped
+    container_name: lighthouse-validator-client
+    image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      - consensus
+    volumes:
+      - ./keystore:/var/lib/lighthouse/keystore
+    command:
+      - lighthouse
+      - vc
+      - --beacon-nodes=${CC_NODE}
+      - --graffiti=${GRAFFITI}
+      - --network=${NETWORK}
+      - --debug-level=${VL_LOG_LEVEL}
+      - --validators-dir=/var/lib/lighthouse/keystore
+      - --secrets-dir=/var/lib/lighthouse/keystore/secrets
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}

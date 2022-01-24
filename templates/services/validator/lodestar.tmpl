@@ -1,0 +1,28 @@
+{{/* lodestar.tmpl */}}
+{{ define "validator" }}
+  validator:
+    restart: unless-stopped
+    container_name: lodestar-validator-client
+    image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      - consensus
+    volumes:
+      - ./lsvalidator-data:/var/lib/lodestar/validator
+      - ./keystore:/var/lib/lodestar/keystore
+    environment:
+      NODE_OPTIONS: --max_old_space_size=8192
+    command: 
+      - validator
+      - --network=${NETWORK}
+      - --rootDir=/var/lib/lodestar/validator
+      - --logFile=/var/lib/lodestart/validator/logs/validator.log
+      - --logLevelFile=${VL_LOG_LEVEL}
+      - --importKeystoresPath=/var/lib/lodestar/keystore
+      - --importKeystoresPassword=/var/lib/lodestar/keystore/password.txt
+      - --server=${CC_NODE}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}

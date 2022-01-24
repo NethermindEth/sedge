@@ -31,4 +31,5 @@ const (
 	ClientNotSupported              = "Client %s is not supported. Please use 'listClient' command to see the list of supported clients"
 	GetRawTemplatesError            = "Failed to get raw templates for %s"
 	PrintingFile                    = "File %s :"
+	LoadingTemplatesError           = "Error loading templates: %v"
 )

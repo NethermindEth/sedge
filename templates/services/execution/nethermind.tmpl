@@ -1,7 +1,4 @@
-package templates
-
-const (
-	Nethermind = `
+{{/* nethermind.tmpl */}}
 {{ define "execution" }}
   execution:
     stop_grace_period: 1m
@@ -38,5 +35,3 @@ const (
         max-size: "10m"
         max-file: "10"
 {{ end }}
-	`
-)

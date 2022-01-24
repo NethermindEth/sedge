@@ -81,11 +81,8 @@ Finally, it will run the generated docker-compose script`,
 		}
 		log.Info(configs.DependenciesOK)
 
-		log.Info(configs.GeneratingDockerComposeScript)
-		utils.GenerateDockerComposeScripts(executionClient, consensusClient, validatorClient, generationPath)
-
-		log.Info(configs.GeneratingEnvFile)
-		utils.GenerateEnvFile(executionClient, consensusClient, validatorClient, generationPath)
+		// Generate docker-compose scripts
+		utils.GenerateScripts(executionClient, consensusClient, validatorClient, generationPath)
 	},
 }
 

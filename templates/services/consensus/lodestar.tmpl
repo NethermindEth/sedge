@@ -1,0 +1,37 @@
+{{/* lodestar.tmpl */}}
+{{ define "consensus" }}
+  consensus:
+    stop_grace_period: 1m
+    container_name: lodestar-consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    depends_on: 
+      - execution
+    volumes:
+      - ./lsconsensus-data:/var/lib/lodestar/consensus
+    ports:
+      - 9000:9000/tcp
+      - 9000:9000/udp
+      - 4000:4000/tcp
+    environment:
+      NODE_OPTIONS: --max_old_space_size=6144
+    command: 
+      - beacon 
+      - --rootDir=/var/lib/lodestar/consensus
+      - --network=${NETWORK}
+      - --logFile=/var/lib/lodestart/consensus/logs/beacon.log 
+      - --logLevelFile=${CC_LOG_LEVEL}
+      - --api.rest.enabled 
+      - --api.rest.host=0.0.0.0
+      - --api.rest.port=4000
+      - --network.discv5.bindAddr="/ip4/0.0.0.0/udp/9000"
+      - --network.localMultiaddrs="/ip4/0.0.0.0/tcp/9000"
+      - --eth1.providerUrl=${EC_NODE}
+      - --weakSubjectivitySyncLatest=${LS_RAPID_SYNC}
+      - --network.targetPeers=${PEERS_COUNT}
+    logging:
+      driver: "json-file"
+      options:
+      max-size: "10m"
+      max-file: "10"
+{{ end }}

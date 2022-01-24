@@ -1,16 +1,33 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 	"text/template"
 
 	"github.com/NethermindEth/1Click/configs"
-	"github.com/NethermindEth/1Click/internal/templates"
+	"github.com/NethermindEth/1Click/templates"
 	log "github.com/sirupsen/logrus"
 )
 
+func GenerateScripts(executionClient, consensusClient, validatorClient, path string) {
+	// Create scripts directory if not exists
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		err = os.MkdirAll(path, 0777)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	log.Info(configs.GeneratingDockerComposeScript)
+	generateDockerComposeScripts(executionClient, consensusClient, validatorClient, path)
+
+	log.Info(configs.GeneratingEnvFile)
+	generateEnvFile(executionClient, consensusClient, validatorClient, path)
+}
+
 /*
-GenerateDockerComposeScripts :
+generateDockerComposeScripts :
 This function is responsible for generating docker-compose scripts for execution, consensus and
 validator clients.
 
@@ -27,22 +44,35 @@ Path of generated scripts
 returns :-
 None
 */
-func GenerateDockerComposeScripts(executionClient, consensusClient, validatorClient, path string) {
-	_, baseTmp := buildTemplate("docker-compose_base", "base")
-	_, executionTmp := buildTemplate(executionClient, "execution")
-	_, consensusTmp := buildTemplate(consensusClient, "consensus")
-	_, validatorTmp := buildTemplate(validatorClient, "validator")
+func generateDockerComposeScripts(executionClient, consensusClient, validatorClient, path string) error {
+	baseTmp, err := templates.Services.ReadFile("services/docker-compose_base.tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
+	executionTmp, err := templates.Services.ReadFile("services/execution/" + executionClient + ".tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
+	consensusTmp, err := templates.Services.ReadFile("services/consensus/" + consensusClient + ".tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
+	validatorTmp, err := templates.Services.ReadFile("services/validator/" + validatorClient + ".tmpl")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	tmp := template.Must(template.New("docker-compose").Parse(baseTmp))
-	template.Must(tmp.Parse(executionTmp))
-	template.Must(tmp.Parse(consensusTmp))
-	template.Must(tmp.Parse(validatorTmp))
+	tmp := template.Must(template.New("docker-compose").Parse(string(baseTmp)))
+	template.Must(tmp.Parse(string(executionTmp)))
+	template.Must(tmp.Parse(string(consensusTmp)))
+	template.Must(tmp.Parse(string(validatorTmp)))
 
 	// Print docker-compose file
 	log.Infof(configs.PrintingFile, "docker-compose.yml")
 	tmp.Execute(os.Stdout, nil)
+	fmt.Println()
 
-	err := writeTemplateToFile(tmp, path+"/docker-compose.yml", nil, false)
+	err = writeTemplateToFile(tmp, path+"/docker-compose.yml", nil, false)
 	if err != nil {
 		log.Fatalf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient)
 	}
@@ -50,7 +80,7 @@ func GenerateDockerComposeScripts(executionClient, consensusClient, validatorCli
 }
 
 /*
-GenerateEnvFile :
+generateEnvFile :
 This function is responsible for generating the environment variable for the
 generated docker-compose scripts for execution, consensus and
 validator clients.
@@ -68,21 +98,33 @@ Path of generated scripts
 returns :-
 None
 */
-func GenerateEnvFile(executionClient, consensusClient, validatorClient, path string) {
-	executionEnvTmp, _ := buildTemplate(executionClient, "env")
-	consensusEnvTmp, _ := buildTemplate(consensusClient+"_"+"consensus", "env")
-	validatorEnvTmp, _ := buildTemplate(validatorClient+"_"+"validator", "env")
+func generateEnvFile(executionClient, consensusClient, validatorClient, path string) error {
+	executionEnvTmp, err := template.ParseFS(templates.Envs, "envs/execution/"+executionClient+".tmpl")
+	if err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
+	consensusEnvTmp, err := template.ParseFS(templates.Envs, "envs/consensus/"+consensusClient+".tmpl")
+	if err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
+	validatorEnvTmp, err := template.ParseFS(templates.Envs, "envs/validator/"+validatorClient+".tmpl")
+	if err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
 
-	consensusEnv := templates.ConsensusEnv{
+	consensusEnv := ConsensusEnv{
 		ExecutionNodeURL: configs.OnPremiseExecutionURL,
 	}
 
-	validatorEnv := templates.ValidatorEnv{
+	validatorEnv := ValidatorEnv{
 		ConsensusNodeURL:    configs.OnPremiseConsensusURL,
 		ExecutionEngineName: executionClient,
 	}
 
-	err := writeTemplateToFile(executionEnvTmp, path+"/.env", nil, false)
+	err = writeTemplateToFile(executionEnvTmp, path+"/.env", nil, false)
 	if err != nil {
 		log.Fatalf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient)
 	}
@@ -103,35 +145,8 @@ func GenerateEnvFile(executionClient, consensusClient, validatorClient, path str
 	consensusEnvTmp.Execute(os.Stdout, consensusEnv)
 	validatorEnvTmp.Execute(os.Stdout, validatorEnv)
 
+	fmt.Println()
 	log.Infof(configs.CreatedFile, path+"/.env")
-}
-
-/*
-buildTemplate :
-Gets template given client and template type.
-
-params :-
-a. client string
-Name of client. E.g geth, lighthouse
-b. tmpType string
-Kind of the template to be generated. Supported values are "execution", "consensus", "validator" and "env".
-
-returns :-
-a. *template.Template
-*/
-func buildTemplate(client, tmpType string) (tmp *template.Template, rawTmp string) {
-	templates := templates.GetRawTemplates(tmpType)
-	if templates == nil {
-		log.Fatalf(configs.GetRawTemplatesError, tmpType)
-	}
-
-	rawTmp, ok := templates[client]
-	if !ok {
-		log.Fatalf(configs.ClientNotSupported, client)
-	}
-
-	tmp = template.Must(template.New(tmpType).Parse(rawTmp))
-	return
 }
 
 /*
