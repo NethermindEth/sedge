@@ -10,6 +10,25 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+/*
+GenerateScripts :
+This function is responsible for generating docker-compose files for execution, consensus and
+validator clients.
+
+params :-
+a. executionClient string
+Execution client whose script is to be generated
+b. consensusClient string
+Execution client whose script is to be generated
+c. validatorClient string
+Execution client whose script is to be generated
+d. path string
+Path of generated scripts
+
+returns :-
+a. error
+Error if any
+*/
 func GenerateScripts(executionClient, consensusClient, validatorClient, path string) (err error) {
 	// Create scripts directory if not exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
