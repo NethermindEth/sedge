@@ -109,7 +109,7 @@ func generateDockerComposeScripts(executionClient, consensusClient, validatorCli
 
 	err = writeTemplateToFile(baseTmp, path+"/docker-compose.yml", nil, false)
 	if err != nil {
-		log.Fatalf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient)
+		return fmt.Errorf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient, err)
 	}
 	log.Infof(configs.CreatedFile, path+"/docker-compose.yml")
 
