@@ -4,9 +4,8 @@ dependencies:
 executionClients:
   - nethermind
 consensusClients:
-  - Lighthouse
-  - teku
+  - lighthouse
 validatorClients:
-  - Lighthouse
+  - lighthouse
 logs:
   logLevel: debug

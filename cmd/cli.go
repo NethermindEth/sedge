@@ -5,12 +5,14 @@ Copyright © 2022 Nethermind hello.nethermind.io
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/NethermindEth/1Click/configs"
+	"github.com/NethermindEth/1Click/internal/pkg/clients"
 	"github.com/NethermindEth/1Click/internal/ui"
 	"github.com/NethermindEth/1Click/internal/utils"
 	"github.com/manifoldco/promptui"
@@ -18,11 +20,15 @@ import (
 )
 
 var (
-	executionClient string
-	consensusClient string
-	validatorClient string
-	generationPath  string
-	randomize       bool
+	executionName  string
+	consensusName  string
+	validatorName  string
+	generationPath string
+	randomize      bool
+)
+
+const (
+	execution, consensus, validator = "execution", "consensus", "validator"
 )
 
 // cliCmd represents the cli command
@@ -39,30 +45,18 @@ Second, it will generate docker-compose scripts to run the full setup according 
 
 Finally, it will run the generated docker-compose script`,
 	Run: func(cmd *cobra.Command, args []string) {
-		executionClients, consensusClients, validatorClients := configs.GetClients("executionClients"), configs.GetClients("consensusClients"), configs.GetClients("validatorClients")
-		log.Debugf("Execution clients: %v", executionClients)
-		log.Debugf("Consensus clients: %v", consensusClients)
-		log.Debugf("Validator clients: %v", validatorClients)
-		if executionClients == nil || consensusClients == nil || validatorClients == nil {
-			log.Fatal(configs.NoClientsFound)
+		// Get all clients: supported + configured
+		clientsMap, errors := clients.GetClients([]string{execution, consensus, validator})
+		if len(errors) > 0 {
+			for _, err := range errors {
+				log.Error(err)
+			}
+			os.Exit(1)
 		}
 
-		if randomize {
-			// Select a random execution client and a random consensus client
-			executionClient, consensusClient, validatorClient = utils.RandomChoice(executionClients), utils.RandomChoice(consensusClients), utils.RandomChoice(validatorClients)
-			log.Infof("Listing randomized clients\n\n")
-			ui.WriteRandomizedClientsTable([][]string{{"Execution client", executionClient}, {"Consensus client", consensusClient}, {"Validator client", validatorClient}})
-		} else if executionClient == "" || consensusClient == "" || validatorClient == "" {
-			log.Fatalf(configs.ProvideClients)
-		} else {
-			// Validate clients
-			if !utils.Contains(executionClients, executionClient) {
-				log.Fatalf(configs.IncorrectClient, executionClient)
-			} else if !utils.Contains(consensusClients, consensusClient) {
-				log.Fatalf(configs.IncorrectClient, consensusClient)
-			} else if !utils.Contains(validatorClients, validatorClient) {
-				log.Fatalf(configs.IncorrectClient, validatorClient)
-			}
+		executionClient, consensusClient, validatorClient, err := validateClients(clientsMap)
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		// Check if dependencies are installed
@@ -73,12 +67,15 @@ Finally, it will run the generated docker-compose script`,
 		if len(pending) > 0 {
 			log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
 			// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
-			installOrShowInstructions(pending)
+			err := installOrShowInstructions(pending)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 		log.Info(configs.DependenciesOK)
 
 		// Generate docker-compose scripts
-		err := utils.GenerateScripts(executionClient, consensusClient, validatorClient, generationPath)
+		err = utils.GenerateScripts(executionClient.Name, consensusClient.Name, validatorClient.Name, generationPath)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -89,18 +86,18 @@ func init() {
 	rootCmd.AddCommand(cliCmd)
 
 	// Local flags
-	cliCmd.Flags().StringVar(&executionClient, "execution", "", "Execution engine client, e.g. Geth, Nethermind, Besu, Erigon")
+	cliCmd.Flags().StringVar(&executionName, "execution", "", "Execution engine client, e.g. Geth, Nethermind, Besu, Erigon")
 
-	cliCmd.Flags().StringVar(&consensusClient, "consensus", "", "Consensus engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
+	cliCmd.Flags().StringVar(&consensusName, "consensus", "", "Consensus engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
 
-	cliCmd.Flags().StringVar(&validatorClient, "validator", "", "Validator engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
+	cliCmd.Flags().StringVar(&validatorName, "validator", "", "Validator engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
 
 	cliCmd.Flags().StringVar(&generationPath, "path", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
 
 	cliCmd.Flags().BoolVarP(&randomize, "randomize", "r", false, "Randomize combination of clients")
 }
 
-func installOrShowInstructions(pending []string) {
+func installOrShowInstructions(pending []string) (err error) {
 	optShow, optInstall, optExit := "Show instructions for installing dependencies", "Install dependencies", "Exit. You will manage this dependencies on your own"
 	prompt := promptui.Select{
 		Label: "Select how to proceed with the pending dependencies",
@@ -109,22 +106,86 @@ func installOrShowInstructions(pending []string) {
 
 	_, result, err := prompt.Run()
 	if err != nil {
-		log.Fatalf("prompt failed %v", err)
+		return fmt.Errorf("prompt failed %s", err)
 	}
 
 	switch result {
 	case optShow:
 		err = utils.HandleInstructions(pending, utils.ShowInstructions)
 		if err != nil {
-			log.Fatalf(configs.ShowingInstructionsError, err)
+			return fmt.Errorf(configs.ShowingInstructionsError, err)
 		}
 	case optInstall:
 		err = utils.HandleInstructions(pending, utils.InstallDependency)
 		if err != nil {
-			log.Fatalf(configs.InstallingDependenciesError, err)
+			return fmt.Errorf(configs.InstallingDependenciesError, err)
 		}
 	default:
 		log.Info(configs.Exiting)
 		os.Exit(0)
 	}
+
+	return nil
+}
+
+func randomizeClients(clientsMap map[string][]clients.Client) (clients.Client, clients.Client, clients.Client, error) {
+	var executionClient, consensusClient, validatorClient clients.Client
+
+	executionClient, err := clients.RandomChoice(clientsMap[execution])
+	if err != nil {
+		return executionClient, consensusClient, validatorClient, err
+	}
+	consensusClient, err = clients.RandomChoice(clientsMap[consensus])
+	if err != nil {
+		return executionClient, consensusClient, validatorClient, err
+	}
+	validatorClient, err = clients.RandomChoice(clientsMap[validator])
+	if err != nil {
+		return executionClient, consensusClient, validatorClient, err
+	}
+
+	return executionClient, consensusClient, validatorClient, nil
+}
+
+func validateClients(clientsMap map[string][]clients.Client) (clients.Client, clients.Client, clients.Client, error) {
+	var executionClient, consensusClient, validatorClient clients.Client
+	var err error
+
+	if randomize {
+		// Select a random execution client and a random consensus client
+		executionClient, consensusClient, validatorClient, err = randomizeClients(clientsMap)
+		if err != nil {
+			return executionClient, consensusClient, validatorClient, err
+		}
+
+		log.Infof("Listing randomized clients\n\n")
+		ui.WriteRandomizedClientsTable([][]string{{"Execution client", executionClient.Name}, {"Consensus client", consensusClient.Name}, {"Validator client", validatorClient.Name}})
+	} else {
+		if executionName == "" {
+			return executionClient, consensusClient, validatorClient, fmt.Errorf(configs.ClientNotSpecifiedError, execution)
+		}
+		if consensusName == "" {
+			return executionClient, consensusClient, validatorClient, fmt.Errorf(configs.ClientNotSpecifiedError, consensus)
+		}
+		if validatorName == "" {
+			return executionClient, consensusClient, validatorClient, fmt.Errorf(configs.ClientNotSpecifiedError, validator)
+		}
+
+		executionClient, consensusClient, validatorClient = clients.Select(clientsMap[execution], executionName), clients.Select(clientsMap[consensus], consensusName), clients.Select(clientsMap[validator], validatorName)
+	}
+
+	err = clients.ValidateClient(executionClient)
+	if err != nil {
+		return executionClient, consensusClient, validatorClient, err
+	}
+	err = clients.ValidateClient(consensusClient)
+	if err != nil {
+		return executionClient, consensusClient, validatorClient, err
+	}
+	err = clients.ValidateClient(validatorClient)
+	if err != nil {
+		return executionClient, consensusClient, validatorClient, err
+	}
+
+	return executionClient, consensusClient, validatorClient, nil
 }
