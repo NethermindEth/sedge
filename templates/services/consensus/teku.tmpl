@@ -10,10 +10,6 @@
     user: root
     volumes:
       - ./tekuconsensus-data:/var/lib/teku
-    ports:
-      - 9000:9000/tcp
-      - 9000:9000/udp
-      - 4000:4000/tcp
     environment:
       - JAVA_OPTS=-XX:SoftMaxHeapSize=2g -Xmx4g
     command:
@@ -28,6 +24,7 @@
       - --rest-api-port=4000
       - --eth1-endpoints=${EC_NODE}
       - --eth1-deposit-contract-max-request-size=150
+    network_mode: host
     logging:
       driver: "json-file"
       options:

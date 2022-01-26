@@ -20,6 +20,7 @@
       - --importKeystoresPath=/var/lib/lodestar/keystore
       - --importKeystoresPassword=/var/lib/lodestar/keystore/password.txt
       - --server=${CC_NODE}
+    network_mode: host
     logging:
       driver: "json-file"
       options:
