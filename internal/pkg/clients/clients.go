@@ -91,9 +91,9 @@ returns :-
 a. error
 Error if client is not supported or configured
 */
-func ValidateClient(client Client) error {
+func ValidateClient(client Client, currentType string) error {
 	if client.Type == "" {
-		return fmt.Errorf(configs.IncorrectClientError, client.Name)
+		return fmt.Errorf(configs.IncorrectClientError, currentType, client.Name)
 	}
 
 	if !client.Supported {

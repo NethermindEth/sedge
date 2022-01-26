@@ -161,28 +161,40 @@ func validateClients(clientsMap map[string][]clients.Client) (clients.Client, cl
 		log.Infof("Listing randomized clients\n\n")
 		ui.WriteRandomizedClientsTable([][]string{{"Execution client", executionClient.Name}, {"Consensus client", consensusClient.Name}, {"Validator client", validatorClient.Name}})
 	} else {
+		notProvidedClients := make([]string, 0)
 		if executionName == "" {
-			return executionClient, consensusClient, validatorClient, fmt.Errorf(configs.ClientNotSpecifiedError, execution)
+			notProvidedClients = append(notProvidedClients, execution+" client")
 		}
 		if consensusName == "" {
-			return executionClient, consensusClient, validatorClient, fmt.Errorf(configs.ClientNotSpecifiedError, consensus)
+			notProvidedClients = append(notProvidedClients, consensus+" client")
 		}
 		if validatorName == "" {
-			return executionClient, consensusClient, validatorClient, fmt.Errorf(configs.ClientNotSpecifiedError, validator)
+			notProvidedClients = append(notProvidedClients, validator+" client")
+		}
+
+		if len(notProvidedClients) > 0 {
+			var msg string
+			if len(notProvidedClients) == 1 {
+				msg = notProvidedClients[0]
+			} else {
+				msg = strings.Join(notProvidedClients[:len(notProvidedClients)-1], ", ")
+				msg = msg + " and " + notProvidedClients[len(notProvidedClients)-1]
+			}
+			return executionClient, consensusClient, validatorClient, fmt.Errorf(configs.ClientNotSpecifiedError, msg)
 		}
 
 		executionClient, consensusClient, validatorClient = clients.Select(clientsMap[execution], executionName), clients.Select(clientsMap[consensus], consensusName), clients.Select(clientsMap[validator], validatorName)
 	}
 
-	err = clients.ValidateClient(executionClient)
+	err = clients.ValidateClient(executionClient, execution)
 	if err != nil {
 		return executionClient, consensusClient, validatorClient, err
 	}
-	err = clients.ValidateClient(consensusClient)
+	err = clients.ValidateClient(consensusClient, consensus)
 	if err != nil {
 		return executionClient, consensusClient, validatorClient, err
 	}
-	err = clients.ValidateClient(validatorClient)
+	err = clients.ValidateClient(validatorClient, validator)
 	if err != nil {
 		return executionClient, consensusClient, validatorClient, err
 	}
