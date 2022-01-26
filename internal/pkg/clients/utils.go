@@ -1,6 +1,9 @@
 package clients
 
-import "math/rand"
+import (
+	"crypto/rand"
+	"math/big"
+)
 
 /*
 RandomChoice :
@@ -13,10 +16,15 @@ Target list
 returns :-
 a. Client
 Random element from list
+b. error
+Error if any
 */
-func RandomChoice(list []Client) Client {
-	item := list[rand.Intn(len(list))]
-	return item
+func RandomChoice(list []Client) (client Client, err error) {
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(list))))
+	if err != nil {
+		return
+	}
+	return list[n.Int64()], nil
 }
 
 /*
