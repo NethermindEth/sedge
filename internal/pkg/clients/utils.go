@@ -31,26 +31,3 @@ func RandomChoice(clients ClientMap) (client Client, err error) {
 	}
 	return list[n.Int64()], nil
 }
-
-/*
-Select :
-Select an element from a Client list following the predicate (n => n.Name == name)
-
-params :-
-a. list [].Client
-Target list
-b. clientName string
-Name of the client to be selected
-
-returns :-
-a. Client
-Selected element from list
-*/
-func Select(list []Client, clientName string) Client {
-	for _, client := range list {
-		if client.Name == clientName {
-			return client
-		}
-	}
-	return Client{Name: clientName, Type: ""}
-}
