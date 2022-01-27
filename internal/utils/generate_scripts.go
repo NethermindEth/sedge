@@ -32,7 +32,7 @@ Error if any
 func GenerateScripts(executionClient, consensusClient, validatorClient, path string) (err error) {
 	// Create scripts directory if not exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		err = os.MkdirAll(path, 0777)
+		err = os.MkdirAll(path, 0755)
 		if err != nil {
 			return err
 		}
