@@ -1,4 +1,4 @@
-name: Melange CI
+name: 1Click CI
 
 on:
   push:

@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"github.com/NethermindEth/1Click/configs"
+	"github.com/NethermindEth/1Click/internal/pkg/clients"
 	"github.com/NethermindEth/1Click/internal/ui"
 	"github.com/NethermindEth/1Click/internal/utils"
 
@@ -23,7 +24,16 @@ var listClientsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Infof("Listing supported clients\n\n")
 
-		data, err := buildData()
+		data, err := buildData(clients.GetSupportedClients)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ui.WriteListClientsTable(data)
+
+		log.Infof("Listing clients provided in configuration file\n\n")
+
+		data, err = buildData(configs.GetConfigClients)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -49,21 +59,34 @@ Table data
 b. error
 Error if any
 */
-func buildData() ([][]string, error) {
-	executionClients, consensusClients := configs.GetClients("executionClients"), configs.GetClients("consensusClients")
+func buildData(getClients func(string) ([]string, error)) ([][]string, error) {
+	executionClients, err := getClients("execution")
+	if err != nil {
+		return nil, err
+	}
+	consensusClients, err := getClients("consensus")
+	if err != nil {
+		return nil, err
+	}
+	validatorClients, err := getClients("validator")
+	if err != nil {
+		return nil, err
+	}
+
 	max := int(math.Max(float64(len(executionClients)), float64(len(consensusClients))))
+	max = int(math.Max(float64(max), float64(len(validatorClients))))
 
 	if max > 0 {
-		for _, list := range []*[]string{&executionClients, &consensusClients} {
+		for _, list := range []*[]string{&executionClients, &consensusClients, &validatorClients} {
 			for len(*list) < max {
 				*list = append(*list, "-")
 			}
 		}
 	} else {
-		executionClients, consensusClients = []string{"-"}, []string{"-"}
+		executionClients, consensusClients, validatorClients = []string{"-"}, []string{"-"}, []string{"-"}
 	}
 
-	data, err := utils.ZipString(executionClients, consensusClients)
+	data, err := utils.ZipString(executionClients, consensusClients, validatorClients)
 	if err != nil {
 		return nil, err
 	}

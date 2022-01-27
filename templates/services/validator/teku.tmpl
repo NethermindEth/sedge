@@ -1,0 +1,29 @@
+{{/* teku.tmpl */}}
+{{ define "validator" }}
+  validator:
+    restart: unless-stopped
+    container_name: teku-validator-client
+    image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      - consensus
+    user: root
+    volumes:
+      - ./tekuvalidator-data:/var/lib/teku
+      - ./keystore:/var/lib/teku/keystore
+    command:
+      - validator-client
+      - --beacon-node-api-endpoint=${CC_NODE}
+      - --data-path=/var/lib/teku
+      - --log-destination=CONSOLE
+      - --network=auto
+      - --validators-graffiti=${GRAFFITI}
+      - --validators-keystore-locking-enabled=true
+      - --validator-keys=/var/lib/teku/keystore:/var/lib/teku/keystore/secrets
+      - --validators-early-attestations-enabled=false
+    network_mode: host
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}

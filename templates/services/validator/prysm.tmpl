@@ -1,0 +1,28 @@
+{{/* prysm.tmpl */}}
+{{ define "validator" }}
+  validator:
+    restart: unless-stopped
+    container_name: prysm-validator-client
+    image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      - consensus
+    volumes:
+      - ./prysmvalidator-data:/var/lib/prysm
+      - ./wallet:/var/lib/prysm/wallet
+    command:
+      - --datadir=/var/lib/prysm
+      - --wallet-dir=/var/lib/prysm/wallet
+      - --beacon-rpc-provider=${CC_NODE}
+      - --graffiti=${GRAFFITI}
+      - --verbosity=${VL_LOG_LEVEL}
+      - --${NETWORK}
+      - --enable-doppelganger
+      - --accept-terms-of-use
+      - --wallet-password-file=/var/lib/prysm/wallet/password.txt
+    network_mode: host
+    logging:
+      driver: "json-file"
+      options:
+  	    max-size: "10m"
+  	    max-file: "10"
+{{ end }}

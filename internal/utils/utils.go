@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"math/rand"
 	"strings"
 )
 
@@ -52,21 +51,4 @@ func Contains(list []string, str string) bool {
 		}
 	}
 	return false
-}
-
-/*
-RandomChoice :
-Select a random element from a string list
-
-params :-
-a. list []string
-Target list
-
-returns :-
-a. string
-Random element from list
-*/
-func RandomChoice(list []string) string {
-	item := list[rand.Intn(len(list))]
-	return item
 }
