@@ -54,7 +54,7 @@ Finally, it will run the generated docker-compose script`,
 			os.Exit(1)
 		}
 
-		executionClient, consensusClient, validatorClient, err := validateClients(clientsMap)
+		combinedClients, err := validateClients(clientsMap)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -75,7 +75,7 @@ Finally, it will run the generated docker-compose script`,
 		log.Info(configs.DependenciesOK)
 
 		// Generate docker-compose scripts
-		err = utils.GenerateScripts(executionClient.Name, consensusClient.Name, validatorClient.Name, generationPath)
+		err = utils.GenerateScripts(combinedClients.Execution.Name, combinedClients.Consensus.Name, combinedClients.Validator.Name, generationPath)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -128,38 +128,47 @@ func installOrShowInstructions(pending []string) (err error) {
 	return nil
 }
 
-func randomizeClients(clientsMap map[string][]clients.Client) (clients.Client, clients.Client, clients.Client, error) {
+func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error) {
 	var executionClient, consensusClient, validatorClient clients.Client
+	var combinedClients clients.Clients
 
-	executionClient, err := clients.RandomChoice(clientsMap[execution])
+	executionClient, err := clients.RandomChoice(allClients[execution])
 	if err != nil {
-		return executionClient, consensusClient, validatorClient, err
+		return combinedClients, err
 	}
-	consensusClient, err = clients.RandomChoice(clientsMap[consensus])
+	consensusClient, err = clients.RandomChoice(allClients[consensus])
 	if err != nil {
-		return executionClient, consensusClient, validatorClient, err
+		return combinedClients, err
 	}
-	validatorClient, err = clients.RandomChoice(clientsMap[validator])
+	validatorClient, err = clients.RandomChoice(allClients[validator])
 	if err != nil {
-		return executionClient, consensusClient, validatorClient, err
+		return combinedClients, err
 	}
 
-	return executionClient, consensusClient, validatorClient, nil
+	combinedClients = clients.Clients{
+		Execution: executionClient,
+		Consensus: consensusClient,
+		Validator: validatorClient}
+	return combinedClients, nil
 }
 
-func validateClients(clientsMap map[string][]clients.Client) (clients.Client, clients.Client, clients.Client, error) {
-	var executionClient, consensusClient, validatorClient clients.Client
+func validateClients(allClients clients.OrderedClients) (clients.Clients, error) {
+	var combinedClients clients.Clients
 	var err error
 
 	if randomize {
-		// Select a random execution client and a random consensus client
-		executionClient, consensusClient, validatorClient, err = randomizeClients(clientsMap)
+		// Select a random execution client, consensus client and validator client
+		combinedClients, err = randomizeClients(allClients)
 		if err != nil {
-			return executionClient, consensusClient, validatorClient, err
+			return combinedClients, err
 		}
 
 		log.Infof("Listing randomized clients\n\n")
-		ui.WriteRandomizedClientsTable([][]string{{"Execution client", executionClient.Name}, {"Consensus client", consensusClient.Name}, {"Validator client", validatorClient.Name}})
+		ui.WriteRandomizedClientsTable([][]string{
+			{"Execution", combinedClients.Execution.Name},
+			{"Consensus", combinedClients.Consensus.Name},
+			{"Validator", combinedClients.Validator.Name},
+		})
 	} else {
 		notProvidedClients := make([]string, 0)
 		if executionName == "" {
@@ -180,24 +189,28 @@ func validateClients(clientsMap map[string][]clients.Client) (clients.Client, cl
 				msg = strings.Join(notProvidedClients[:len(notProvidedClients)-1], ", ")
 				msg = msg + " and " + notProvidedClients[len(notProvidedClients)-1]
 			}
-			return executionClient, consensusClient, validatorClient, fmt.Errorf(configs.ClientNotSpecifiedError, msg)
+			return combinedClients, fmt.Errorf(configs.ClientNotSpecifiedError, msg)
 		}
 
-		executionClient, consensusClient, validatorClient = clients.Select(clientsMap[execution], executionName), clients.Select(clientsMap[consensus], consensusName), clients.Select(clientsMap[validator], validatorName)
+		combinedClients = clients.Clients{
+			Execution: allClients[execution][executionName],
+			Consensus: allClients[consensus][consensusName],
+			Validator: allClients[validator][validatorName],
+		}
+
+		err = clients.ValidateClient(combinedClients.Execution, execution)
+		if err != nil {
+			return combinedClients, err
+		}
+		err = clients.ValidateClient(combinedClients.Consensus, consensus)
+		if err != nil {
+			return combinedClients, err
+		}
+		err = clients.ValidateClient(combinedClients.Validator, validator)
+		if err != nil {
+			return combinedClients, err
+		}
 	}
 
-	err = clients.ValidateClient(executionClient, execution)
-	if err != nil {
-		return executionClient, consensusClient, validatorClient, err
-	}
-	err = clients.ValidateClient(consensusClient, consensus)
-	if err != nil {
-		return executionClient, consensusClient, validatorClient, err
-	}
-	err = clients.ValidateClient(validatorClient, validator)
-	if err != nil {
-		return executionClient, consensusClient, validatorClient, err
-	}
-
-	return executionClient, consensusClient, validatorClient, nil
+	return combinedClients, nil
 }
