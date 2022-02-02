@@ -115,6 +115,8 @@ func installOrShowInstructions(pending []string) (err error) {
 		if err != nil {
 			return fmt.Errorf(configs.ShowingInstructionsError, err)
 		}
+		err = installOrShowInstructions(pending)
+		return
 	case optInstall:
 		err = utils.HandleInstructions(pending, utils.InstallDependency)
 		if err != nil {

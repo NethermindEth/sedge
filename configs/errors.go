@@ -19,4 +19,5 @@ const (
 	GetRawTemplatesError        = "failed to get raw templates for %s"
 	LoadingTemplatesError       = "error loading templates: %s"
 	PrintingFileError           = "something went wrong printing file %s. Error: %s"
+	DependenciesPending         = "pending dependencies: %s"
 )

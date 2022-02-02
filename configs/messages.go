@@ -3,12 +3,10 @@ package configs
 // All the strings that are needed for debugging, info and error logging.
 const (
 	CheckingDependencies            = "Checking dependencies: %s"
-	DependenciesPending             = "Pending dependencies: %s"
 	DependencyNotInstalled          = "Dependency %s is not installed on host machine"
 	DependenciesOK                  = "All dependencies are installed on host machine"
 	GeneratingDockerComposeScript   = "Generating docker-compose script for current selection of clients"
 	GeneratingEnvFile               = "Generating environment file for current selection of clients"
-	InstallScriptsPath              = "scripts/setup"
 	InstallNotSupported             = "Install support for %s is not available for %s. Please install it and try again"
 	Exiting                         = "Exiting..."
 	InstructionsFor                 = "Instructions for %s"
