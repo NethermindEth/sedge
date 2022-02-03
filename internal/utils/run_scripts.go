@@ -1,14 +1,16 @@
 package utils
 
 import (
-	"os"
-	"os/exec"
+	"fmt"
+	"text/template"
 )
 
 // Run docker-compose scripts
 func RunDockerCompose(path string) error {
-	cmd := exec.Command("docker-compose", "-f", path, "up", "-d")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	cmd := fmt.Sprintf("sudo docker-compose -f %s up -d", path)
+	tmp, err := template.New("script").Parse(cmd)
+	if err != nil {
+		return err
+	}
+	return executeScript(tmp)
 }
