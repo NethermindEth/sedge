@@ -22,4 +22,5 @@ const (
 	ConfigClients                   = "Provided clients of type %s in configuration file: %v"
 	DockerComposeCMD                = "sudo docker-compose -f %s up -d"
 	RunningDockerCompose            = "Running docker-compose script"
+	Component                       = "component"
 )

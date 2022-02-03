@@ -5,6 +5,7 @@ go 1.17
 require github.com/sirupsen/logrus v1.8.1
 
 require (
+	github.com/antonfisher/nested-logrus-formatter v1.3.1 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/mattn/go-runewidth v0.0.12 // indirect
 	github.com/rivo/uniseg v0.1.0 // indirect
