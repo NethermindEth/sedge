@@ -26,6 +26,7 @@ var (
 	generationPath string
 	randomize      bool
 	install        bool
+	run            bool
 )
 
 const (
@@ -86,9 +87,16 @@ Finally, it will run the generated docker-compose script`,
 			log.Fatal(err)
 		}
 
-		// Let the user decide to see the instructions for executing the scripts and exit or let the tool execute them
-		if err = runScriptOrExit(); err != nil {
-			log.Fatal(err)
+		if run {
+			// Run docker-compose script
+			if err = utils.RunDockerCompose(generationPath + "/docker-compose.yml"); err != nil {
+				log.Fatalf(configs.RunningDockerComposeError, err)
+			}
+		} else {
+			// Let the user decide to see the instructions for executing the scripts and exit or let the tool execute them
+			if err = runScriptOrExit(); err != nil {
+				log.Fatal(err)
+			}
 		}
 	},
 }
@@ -108,6 +116,8 @@ func init() {
 	cliCmd.Flags().BoolVarP(&randomize, "randomize", "r", false, "Randomize combination of clients")
 
 	cliCmd.Flags().BoolVarP(&install, "install", "i", false, "Install dependencies if not installed without asking")
+
+	cliCmd.Flags().BoolVarP(&run, "run", "r", false, "Run the generated docker-compose scripts without asking")
 }
 
 func installOrShowInstructions(pending []string) (err error) {
