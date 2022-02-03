@@ -20,4 +20,5 @@ const (
 	LoadingTemplatesError       = "error loading templates: %s"
 	PrintingFileError           = "something went wrong printing file %s. Error: %s"
 	DependenciesPending         = "pending dependencies: %s"
+	RunningDockerComposeError   = "failed to execute docker-compose script. Error: %s"
 )

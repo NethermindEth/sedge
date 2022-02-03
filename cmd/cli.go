@@ -86,9 +86,7 @@ Finally, it will run the generated docker-compose script`,
 			log.Fatal(err)
 		}
 
-		// Run docker-compose scripts
-		err = utils.RunDockerCompose(generationPath + "/docker-compose.yml")
-		if err != nil {
+		// Let the user decide to see the instructions for executing the scripts and exit or let the tool execute them
 		if err = runScriptOrExit(); err != nil {
 			log.Fatal(err)
 		}
@@ -230,4 +228,34 @@ func validateClients(allClients clients.OrderedClients) (clients.Clients, error)
 	}
 
 	return combinedClients, nil
+}
+
+func runScriptOrExit() (err error) {
+	optShow, optRun, optExit := "Show instructions for running the script", "Run the script", "Exit"
+	prompt := promptui.Select{
+		Label: "Select how to proceed with the generated docker-compose script",
+		Items: []string{optShow, optRun, optExit},
+	}
+
+	_, result, err := prompt.Run()
+	if err != nil {
+		return fmt.Errorf("prompt failed %s", err)
+	}
+
+	switch result {
+	case optShow:
+		log.Infof(configs.InstructionsFor, "docker-compose script")
+		fmt.Printf("\n%s\n\n", fmt.Sprintf(configs.DockerComposeCMD, generationPath))
+		return
+	case optRun:
+		// Run docker-compose script
+		if err = utils.RunDockerCompose(generationPath + "/docker-compose.yml"); err != nil {
+			return fmt.Errorf(configs.RunningDockerComposeError, err)
+		}
+	default:
+		log.Info(configs.Exiting)
+		os.Exit(0)
+	}
+
+	return nil
 }
