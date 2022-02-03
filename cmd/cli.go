@@ -25,6 +25,7 @@ var (
 	validatorName  string
 	generationPath string
 	randomize      bool
+	install        bool
 )
 
 const (
@@ -66,10 +67,17 @@ Finally, it will run the generated docker-compose script`,
 
 		if len(pending) > 0 {
 			log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
-			// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
+			if install {
+				// Install dependencies directly
+				if err := installDependencies(pending); err != nil {
+					log.Fatal(err)
+				}
+			} else {
+				// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
 			err := installOrShowInstructions(pending)
 			if err != nil {
-				log.Fatal(err)
+					log.Fatal(err)
+				}
 			}
 		}
 		log.Info(configs.DependenciesOK)
@@ -102,6 +110,7 @@ func init() {
 
 	cliCmd.Flags().BoolVarP(&randomize, "randomize", "r", false, "Randomize combination of clients")
 
+	cliCmd.Flags().BoolVarP(&install, "install", "i", false, "Install dependencies if not installed without asking")
 }
 
 func installOrShowInstructions(pending []string) (err error) {
@@ -125,15 +134,19 @@ func installOrShowInstructions(pending []string) (err error) {
 		err = installOrShowInstructions(pending)
 		return
 	case optInstall:
-		err = utils.HandleInstructions(pending, utils.InstallDependency)
-		if err != nil {
-			return fmt.Errorf(configs.InstallingDependenciesError, err)
-		}
+		return installDependencies(pending)
 	default:
 		log.Info(configs.Exiting)
 		os.Exit(0)
 	}
 
+	return nil
+}
+
+func installDependencies(pending []string) error {
+	if err := utils.HandleInstructions(pending, utils.InstallDependency); err != nil {
+		return fmt.Errorf(configs.InstallingDependenciesError, err)
+	}
 	return nil
 }
 
