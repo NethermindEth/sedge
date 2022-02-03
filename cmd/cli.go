@@ -117,7 +117,7 @@ func init() {
 
 	cliCmd.Flags().BoolVarP(&install, "install", "i", false, "Install dependencies if not installed without asking")
 
-	cliCmd.Flags().BoolVarP(&run, "run", "r", false, "Run the generated docker-compose scripts without asking")
+	cliCmd.Flags().BoolVar(&run, "run", false, "Run the generated docker-compose scripts without asking")
 }
 
 func installOrShowInstructions(pending []string) (err error) {
