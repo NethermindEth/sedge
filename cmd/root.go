@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/NethermindEth/1Click/configs"
+	nested "github.com/antonfisher/nested-logrus-formatter"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -89,16 +90,22 @@ none
 func initLogging() {
 	var config configs.LogConfig
 
+	log.SetFormatter(&nested.Formatter{
+		HideKeys:        true,
+		FieldsOrder:     []string{configs.Component},
+		TimestampFormat: "2006-01-02 15:04:05 --",
+	})
+
 	err := viper.UnmarshalKey("logs", &config)
 	if err != nil {
-		log.Errorf("Unable to decode into struct, %v", err)
+		log.WithField(configs.Component, "Logger Init").Errorf("Unable to decode into struct, %v", err)
 		return
 	}
-	log.Infof("Logging configuration: %+v", config)
+	log.WithField(configs.Component, "Logger Init").Infof("Logging configuration: %+v", config)
 
 	level, err := log.ParseLevel(strings.ToLower(config.Level))
 	if err != nil {
-		log.Error(err)
+		log.WithField(configs.Component, "Logger Init").Error(err)
 		return
 	}
 	log.SetLevel(level)

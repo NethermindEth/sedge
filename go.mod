@@ -2,7 +2,10 @@ module github.com/NethermindEth/1Click
 
 go 1.17
 
-require github.com/sirupsen/logrus v1.8.1
+require (
+	github.com/antonfisher/nested-logrus-formatter v1.3.1
+	github.com/sirupsen/logrus v1.8.1
+)
 
 require (
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
