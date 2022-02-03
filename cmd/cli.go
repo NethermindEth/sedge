@@ -25,6 +25,8 @@ var (
 	validatorName  string
 	generationPath string
 	randomize      bool
+	install        bool
+	run            bool
 )
 
 const (
@@ -66,18 +68,35 @@ Finally, it will run the generated docker-compose script`,
 
 		if len(pending) > 0 {
 			log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
-			// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
-			err := installOrShowInstructions(pending)
-			if err != nil {
-				log.Fatal(err)
+			if install {
+				// Install dependencies directly
+				if err := installDependencies(pending); err != nil {
+					log.Fatal(err)
+				}
+			} else {
+				// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
+				if err := installOrShowInstructions(pending); err != nil {
+					log.Fatal(err)
+				}
 			}
 		}
 		log.Info(configs.DependenciesOK)
 
 		// Generate docker-compose scripts
-		err = utils.GenerateScripts(combinedClients.Execution.Name, combinedClients.Consensus.Name, combinedClients.Validator.Name, generationPath)
-		if err != nil {
+		if err = utils.GenerateScripts(combinedClients.Execution.Name, combinedClients.Consensus.Name, combinedClients.Validator.Name, generationPath); err != nil {
 			log.Fatal(err)
+		}
+
+		if run {
+			// Run docker-compose script
+			if err = utils.RunDockerCompose(generationPath + "/docker-compose.yml"); err != nil {
+				log.Fatalf(configs.RunningDockerComposeError, err)
+			}
+		} else {
+			// Let the user decide to see the instructions for executing the scripts and exit or let the tool execute them
+			if err = runScriptOrExit(); err != nil {
+				log.Fatal(err)
+			}
 		}
 	},
 }
@@ -86,15 +105,19 @@ func init() {
 	rootCmd.AddCommand(cliCmd)
 
 	// Local flags
-	cliCmd.Flags().StringVar(&executionName, "execution", "", "Execution engine client, e.g. Geth, Nethermind, Besu, Erigon")
+	cliCmd.Flags().StringVarP(&executionName, "execution", "e", "", "Execution engine client, e.g. Geth, Nethermind, Besu, Erigon")
 
-	cliCmd.Flags().StringVar(&consensusName, "consensus", "", "Consensus engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
+	cliCmd.Flags().StringVarP(&consensusName, "consensus", "c", "", "Consensus engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
 
-	cliCmd.Flags().StringVar(&validatorName, "validator", "", "Validator engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
+	cliCmd.Flags().StringVarP(&validatorName, "validator", "v", "", "Validator engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
 
-	cliCmd.Flags().StringVar(&generationPath, "path", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
+	cliCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
 
 	cliCmd.Flags().BoolVarP(&randomize, "randomize", "r", false, "Randomize combination of clients")
+
+	cliCmd.Flags().BoolVarP(&install, "install", "i", false, "Install dependencies if not installed without asking")
+
+	cliCmd.Flags().BoolVar(&run, "run", false, "Run the generated docker-compose scripts without asking")
 }
 
 func installOrShowInstructions(pending []string) (err error) {
@@ -111,22 +134,25 @@ func installOrShowInstructions(pending []string) (err error) {
 
 	switch result {
 	case optShow:
-		err = utils.HandleInstructions(pending, utils.ShowInstructions)
-		if err != nil {
+		if err = utils.HandleInstructions(pending, utils.ShowInstructions); err != nil {
 			return fmt.Errorf(configs.ShowingInstructionsError, err)
 		}
 		err = installOrShowInstructions(pending)
 		return
 	case optInstall:
-		err = utils.HandleInstructions(pending, utils.InstallDependency)
-		if err != nil {
-			return fmt.Errorf(configs.InstallingDependenciesError, err)
-		}
+		return installDependencies(pending)
 	default:
 		log.Info(configs.Exiting)
 		os.Exit(0)
 	}
 
+	return nil
+}
+
+func installDependencies(pending []string) error {
+	if err := utils.HandleInstructions(pending, utils.InstallDependency); err != nil {
+		return fmt.Errorf(configs.InstallingDependenciesError, err)
+	}
 	return nil
 }
 
@@ -200,19 +226,46 @@ func validateClients(allClients clients.OrderedClients) (clients.Clients, error)
 			Validator: allClients[validator][validatorName],
 		}
 
-		err = clients.ValidateClient(combinedClients.Execution, execution)
-		if err != nil {
+		if err = clients.ValidateClient(combinedClients.Execution, execution); err != nil {
 			return combinedClients, err
 		}
-		err = clients.ValidateClient(combinedClients.Consensus, consensus)
-		if err != nil {
+		if err = clients.ValidateClient(combinedClients.Consensus, consensus); err != nil {
 			return combinedClients, err
 		}
-		err = clients.ValidateClient(combinedClients.Validator, validator)
-		if err != nil {
+		if err = clients.ValidateClient(combinedClients.Validator, validator); err != nil {
 			return combinedClients, err
 		}
 	}
 
 	return combinedClients, nil
+}
+
+func runScriptOrExit() (err error) {
+	optShow, optRun, optExit := "Show instructions for running the script", "Run the script", "Exit"
+	prompt := promptui.Select{
+		Label: "Select how to proceed with the generated docker-compose script",
+		Items: []string{optShow, optRun, optExit},
+	}
+
+	_, result, err := prompt.Run()
+	if err != nil {
+		return fmt.Errorf("prompt failed %s", err)
+	}
+
+	switch result {
+	case optShow:
+		log.Infof(configs.InstructionsFor, "docker-compose script")
+		fmt.Printf("\n%s\n\n", fmt.Sprintf(configs.DockerComposeCMD, generationPath))
+		return
+	case optRun:
+		// Run docker-compose script
+		if err = utils.RunDockerCompose(generationPath + "/docker-compose.yml"); err != nil {
+			return fmt.Errorf(configs.RunningDockerComposeError, err)
+		}
+	default:
+		log.Info(configs.Exiting)
+		os.Exit(0)
+	}
+
+	return nil
 }
