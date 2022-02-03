@@ -79,6 +79,12 @@ Finally, it will run the generated docker-compose script`,
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		// Run docker-compose scripts
+		err = utils.RunDockerCompose(generationPath + "/docker-compose.yml")
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
