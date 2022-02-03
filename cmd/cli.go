@@ -92,15 +92,16 @@ func init() {
 	rootCmd.AddCommand(cliCmd)
 
 	// Local flags
-	cliCmd.Flags().StringVar(&executionName, "execution", "", "Execution engine client, e.g. Geth, Nethermind, Besu, Erigon")
+	cliCmd.Flags().StringVarP(&executionName, "execution", "e", "", "Execution engine client, e.g. Geth, Nethermind, Besu, Erigon")
 
-	cliCmd.Flags().StringVar(&consensusName, "consensus", "", "Consensus engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
+	cliCmd.Flags().StringVarP(&consensusName, "consensus", "c", "", "Consensus engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
 
-	cliCmd.Flags().StringVar(&validatorName, "validator", "", "Validator engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
+	cliCmd.Flags().StringVarP(&validatorName, "validator", "v", "", "Validator engine client, e.g. Teku, Lodestar, Prysm, Lighthouse, Nimbus")
 
-	cliCmd.Flags().StringVar(&generationPath, "path", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
+	cliCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
 
 	cliCmd.Flags().BoolVarP(&randomize, "randomize", "r", false, "Randomize combination of clients")
+
 }
 
 func installOrShowInstructions(pending []string) (err error) {

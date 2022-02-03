@@ -10,7 +10,7 @@ import (
 
 /*
 RunDockerCompose :
-This function is responsible for running the generated doccker-compose script.
+This function is responsible for running the generated docker-compose script.
 
 params :-
 a. path string
