@@ -74,8 +74,7 @@ Finally, it will run the generated docker-compose script`,
 				}
 			} else {
 				// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
-			err := installOrShowInstructions(pending)
-			if err != nil {
+				if err := installOrShowInstructions(pending); err != nil {
 					log.Fatal(err)
 				}
 			}
@@ -83,14 +82,14 @@ Finally, it will run the generated docker-compose script`,
 		log.Info(configs.DependenciesOK)
 
 		// Generate docker-compose scripts
-		err = utils.GenerateScripts(combinedClients.Execution.Name, combinedClients.Consensus.Name, combinedClients.Validator.Name, generationPath)
-		if err != nil {
+		if err = utils.GenerateScripts(combinedClients.Execution.Name, combinedClients.Consensus.Name, combinedClients.Validator.Name, generationPath); err != nil {
 			log.Fatal(err)
 		}
 
 		// Run docker-compose scripts
 		err = utils.RunDockerCompose(generationPath + "/docker-compose.yml")
 		if err != nil {
+		if err = runScriptOrExit(); err != nil {
 			log.Fatal(err)
 		}
 	},
@@ -127,8 +126,7 @@ func installOrShowInstructions(pending []string) (err error) {
 
 	switch result {
 	case optShow:
-		err = utils.HandleInstructions(pending, utils.ShowInstructions)
-		if err != nil {
+		if err = utils.HandleInstructions(pending, utils.ShowInstructions); err != nil {
 			return fmt.Errorf(configs.ShowingInstructionsError, err)
 		}
 		err = installOrShowInstructions(pending)
@@ -220,16 +218,13 @@ func validateClients(allClients clients.OrderedClients) (clients.Clients, error)
 			Validator: allClients[validator][validatorName],
 		}
 
-		err = clients.ValidateClient(combinedClients.Execution, execution)
-		if err != nil {
+		if err = clients.ValidateClient(combinedClients.Execution, execution); err != nil {
 			return combinedClients, err
 		}
-		err = clients.ValidateClient(combinedClients.Consensus, consensus)
-		if err != nil {
+		if err = clients.ValidateClient(combinedClients.Consensus, consensus); err != nil {
 			return combinedClients, err
 		}
-		err = clients.ValidateClient(combinedClients.Validator, validator)
-		if err != nil {
+		if err = clients.ValidateClient(combinedClients.Validator, validator); err != nil {
 			return combinedClients, err
 		}
 	}
