@@ -2,7 +2,7 @@
 {{ define "validator" }}
   validator:
     restart: unless-stopped
-    container_name: lighthouse-validator-client
+    container_name: validator-client
     image: ${VL_IMAGE_VERSION}
     depends_on: 
       - consensus

@@ -2,7 +2,7 @@
 {{ define "consensus" }}
   consensus:
     stop_grace_period: 1m
-    container_name: lodestar-consensus-client
+    container_name: consensus-client
     restart: unless-stopped
     image: ${CC_IMAGE_VERSION}
     depends_on: 
