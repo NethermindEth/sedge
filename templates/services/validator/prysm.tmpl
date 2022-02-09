@@ -1,7 +1,6 @@
 {{/* prysm.tmpl */}}
 {{ define "validator" }}
   validator:
-    restart: unless-stopped
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
     depends_on: 
