@@ -61,10 +61,10 @@ Finally, it will run the generated docker-compose script`,
 			log.Fatal(err)
 		}
 
-		// Check if dependencies are installed
 		dependencies := configs.GetDependencies()
 		log.Infof(configs.CheckingDependencies, strings.Join(dependencies, ", "))
 
+		// Check if dependencies are installed. Keep checking dependencies until they are all installed
 		for pending := utils.CheckDependencies(dependencies); len(pending) > 0; {
 			log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
 			if install {
