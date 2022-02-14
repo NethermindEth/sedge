@@ -1,7 +1,7 @@
 .DEFAULT_GOAL 	:= help
 
 compile: ## compile:
-	@mkdir -p bin
+	@mkdir -p build
 	@go build -o build/1click cmd/1Click/main.go
 
 run: ## run
