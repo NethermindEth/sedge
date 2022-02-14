@@ -23,7 +23,7 @@ func CheckDependencies(dependencies []string) (pending []string) {
 	for _, dependency := range dependencies {
 		_, err := exec.LookPath(dependency)
 		if err != nil {
-			log.Errorf(configs.DependencyNotInstalled, dependency)
+			log.Errorf(configs.DependencyNotInstalledError, dependency)
 			pending = append(pending, dependency)
 		}
 	}

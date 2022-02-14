@@ -19,6 +19,6 @@ const (
 	GetRawTemplatesError        = "failed to get raw templates for %s"
 	LoadingTemplatesError       = "error loading templates: %s"
 	PrintingFileError           = "something went wrong printing file %s. Error: %s"
-	DependenciesPending         = "pending dependencies: %s"
 	RunningCMDError             = "failed to execute %s command. Error: %s"
+	DependencyNotInstalledError = "dependency %s is not installed on host machine"
 )
