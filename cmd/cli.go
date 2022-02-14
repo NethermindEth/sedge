@@ -79,7 +79,6 @@ Finally, it will run the generated docker-compose script`,
 				}
 			}
 		}
-
 		log.Info(configs.DependenciesOK)
 
 		// Generate docker-compose scripts
@@ -212,30 +211,45 @@ func validateClients(allClients clients.OrderedClients) (clients.Clients, error)
 
 		if len(notProvidedClients) > 0 {
 			var msg string
+
 			if len(notProvidedClients) == 1 {
 				msg = notProvidedClients[0]
 			} else {
 				msg = strings.Join(notProvidedClients[:len(notProvidedClients)-1], ", ")
 				msg = msg + " and " + notProvidedClients[len(notProvidedClients)-1]
 			}
+
 			return combinedClients, fmt.Errorf(configs.ClientNotSpecifiedError, msg)
 		}
 
-		combinedClients = clients.Clients{
-			Execution: allClients[execution][executionName],
-			Consensus: allClients[consensus][consensusName],
-			Validator: allClients[validator][validatorName],
+		exec, ok := allClients[execution][executionName]
+		if !ok {
+			exec.Name = executionName
+		}
+		cons, ok := allClients[consensus][consensusName]
+		if !ok {
+			cons.Name = consensusName
+		}
+		val, ok := allClients[validator][validatorName]
+		if !ok {
+			val.Name = validatorName
 		}
 
-		if err = clients.ValidateClient(combinedClients.Execution, execution); err != nil {
-			return combinedClients, err
+		combinedClients = clients.Clients{
+			Execution: exec,
+			Consensus: cons,
+			Validator: val,
 		}
-		if err = clients.ValidateClient(combinedClients.Consensus, consensus); err != nil {
-			return combinedClients, err
-		}
-		if err = clients.ValidateClient(combinedClients.Validator, validator); err != nil {
-			return combinedClients, err
-		}
+	}
+
+	if err = clients.ValidateClient(combinedClients.Execution, execution); err != nil {
+		return combinedClients, err
+	}
+	if err = clients.ValidateClient(combinedClients.Consensus, consensus); err != nil {
+		return combinedClients, err
+	}
+	if err = clients.ValidateClient(combinedClients.Validator, validator); err != nil {
+		return combinedClients, err
 	}
 
 	return combinedClients, nil

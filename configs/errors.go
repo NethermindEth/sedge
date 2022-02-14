@@ -8,7 +8,7 @@ const (
 	ReadingInstructionError     = "failed to read instructions from file %s"
 	OSNotSupportedError         = "installation not supported for %s"
 	ProvideClientsError         = "Please provide both execution client and consensus client"
-	IncorrectClientError        = "incorrect %s client name %s. Please provide correct client name. Use 'listClient' command to see the list of supported clients"
+	IncorrectClientError        = "incorrect %s client name \"%s\". Please provide correct client name. Use 'listClient' command to see the list of supported clients"
 	NoClientsFoundError         = "no %s clients found. Please check your configuration file"
 	ClientNotSpecifiedError     = "please enter %s"
 	CreatingFileError           = "failed to create file %s. Error: %s"
