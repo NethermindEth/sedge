@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 	"text/template"
 
@@ -30,14 +31,18 @@ b. error
 Error if any
 */
 func RunCmd(cmd string, args ...string) error {
-	log.Info(configs.RunningCommand)
-	fullCmd := fmt.Sprintf(cmd, args)
+	fullCmd := fmt.Sprintf(cmd, strings.Join(args, " "))
+	log.Infof(configs.RunningCommand, fullCmd)
 	tmp, err := template.New("script").Parse(fullCmd)
 	if err != nil {
 		return err
 	}
 
-	return executeScript(tmp)
+	if err = executeScript(tmp); err != nil {
+		return fmt.Errorf(configs.RunningCMDError, fullCmd, err)
+	}
+
+	return nil
 }
 
 /*

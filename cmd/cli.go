@@ -275,11 +275,11 @@ func runScriptOrExit() (err error) {
 	case optRun:
 		// Run docker-compose script
 		if err = utils.RunCmd(configs.DockerComposeCMD, generationPath+"/docker-compose.yml"); err != nil {
-			return fmt.Errorf(configs.RunningCMDError, configs.DockerComposeCMD, err)
+			return err
 		}
 		// Run docker ps -a to show containers
 		if err = utils.RunCmd(configs.DockerPsCMD); err != nil {
-			return fmt.Errorf(configs.RunningCMDError, configs.DockerPsCMD, err)
+			return err
 		}
 	default:
 		log.Info(configs.Exiting)
