@@ -46,8 +46,14 @@ and provide instructions for installing them if they are not installed.
 
 Second, it will generate docker-compose scripts to run the full setup according to your selection.
 
-Finally, it will run the generated docker-compose script`,
+Finally, it will run the generated docker-compose script
+
+Running the command without flags (except global flag'--config') is equivalent to '1click cli -r -i --run' `,
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			randomize, install, run = true, true, true
+		}
+
 		// Get all clients: supported + configured
 		clientsMap, errors := clients.GetClients([]string{execution, consensus, validator})
 		if len(errors) > 0 {
