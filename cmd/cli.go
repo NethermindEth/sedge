@@ -89,8 +89,12 @@ Finally, it will run the generated docker-compose script`,
 
 		if run {
 			// Run docker-compose script
-			if err = utils.RunDockerCompose(generationPath + "/docker-compose.yml"); err != nil {
-				log.Fatalf(configs.RunningDockerComposeError, err)
+			if err = utils.RunCmd(configs.DockerComposeCMD, generationPath+"/docker-compose.yml"); err != nil {
+				log.Fatalf(configs.RunningCMDError, configs.DockerComposeCMD, err)
+			}
+			// Run docker ps -a to show containers
+			if err = utils.RunCmd(configs.DockerPsCMD); err != nil {
+				log.Fatalf(configs.RunningCMDError, configs.DockerPsCMD, err)
 			}
 		} else {
 			// Let the user decide to see the instructions for executing the scripts and exit or let the tool execute them
@@ -259,8 +263,12 @@ func runScriptOrExit() (err error) {
 		return
 	case optRun:
 		// Run docker-compose script
-		if err = utils.RunDockerCompose(generationPath + "/docker-compose.yml"); err != nil {
-			return fmt.Errorf(configs.RunningDockerComposeError, err)
+		if err = utils.RunCmd(configs.DockerComposeCMD, generationPath+"/docker-compose.yml"); err != nil {
+			return fmt.Errorf(configs.RunningCMDError, configs.DockerComposeCMD, err)
+		}
+		// Run docker ps -a to show containers
+		if err = utils.RunCmd(configs.DockerPsCMD); err != nil {
+			return fmt.Errorf(configs.RunningCMDError, configs.DockerPsCMD, err)
 		}
 	default:
 		log.Info(configs.Exiting)
