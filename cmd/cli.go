@@ -13,6 +13,7 @@ import (
 
 	"github.com/NethermindEth/1Click/configs"
 	"github.com/NethermindEth/1Click/internal/pkg/clients"
+	"github.com/NethermindEth/1Click/internal/pkg/generate"
 	"github.com/NethermindEth/1Click/internal/ui"
 	"github.com/NethermindEth/1Click/internal/utils"
 	"github.com/manifoldco/promptui"
@@ -82,7 +83,7 @@ Finally, it will run the generated docker-compose script`,
 		log.Info(configs.DependenciesOK)
 
 		// Generate docker-compose scripts
-		if err = utils.GenerateScripts(combinedClients.Execution.Name, combinedClients.Consensus.Name, combinedClients.Validator.Name, generationPath); err != nil {
+		if err = generate.GenerateScripts(combinedClients.Execution.Name, combinedClients.Consensus.Name, combinedClients.Validator.Name, generationPath); err != nil {
 			log.Fatal(err)
 		}
 
