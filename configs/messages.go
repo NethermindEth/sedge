@@ -25,4 +25,5 @@ const (
 	RunningDockerCompose            = "Running docker-compose script"
 	Component                       = "component"
 	RunningCommand                  = "Running command: %s"
+	ConfigFileName                  = ".1click"
 )
