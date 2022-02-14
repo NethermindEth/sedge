@@ -1,6 +1,6 @@
 package configs
 
-// All the strings that are needed for debugging, info and error logging.
+// All the strings that are needed for debugging and info logging, and constant strings.
 const (
 	CheckingDependencies            = "Checking dependencies: %s"
 	DependencyNotInstalled          = "Dependency %s is not installed on host machine"
@@ -21,6 +21,8 @@ const (
 	SupportedClients                = "Supported clients of type %s: %v"
 	ConfigClients                   = "Provided clients of type %s in configuration file: %v"
 	DockerComposeCMD                = "sudo docker-compose -f %s up -d"
+	DockerPsCMD                     = "sudo docker ps -a"
 	RunningDockerCompose            = "Running docker-compose script"
 	Component                       = "component"
+	RunningCommand                  = "Running command: %s"
 )

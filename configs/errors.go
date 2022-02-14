@@ -1,6 +1,6 @@
 package configs
 
-// All the strings that are needed for debugging, info and error logging.
+// All the strings that are needed for error logging.
 const (
 	InstallingDependenciesError = "something went wrong while installing dependencies. %s"
 	ShowingInstructionsError    = "something went wrong while showing the instructions for installing %s"
@@ -20,5 +20,5 @@ const (
 	LoadingTemplatesError       = "error loading templates: %s"
 	PrintingFileError           = "something went wrong printing file %s. Error: %s"
 	DependenciesPending         = "pending dependencies: %s"
-	RunningDockerComposeError   = "failed to execute docker-compose script. Error: %s"
+	RunningCMDError             = "failed to execute %s command. Error: %s"
 )
