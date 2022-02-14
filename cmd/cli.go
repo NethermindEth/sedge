@@ -125,24 +125,21 @@ func init() {
 }
 
 func installOrShowInstructions(pending []string) (err error) {
-	optShow, optInstall, optExit := "Show instructions for installing dependencies", "Install dependencies", "Exit. You will manage this dependencies on your own"
+	optInstall, optExit := "Install dependencies", "Exit. You will manage this dependencies on your own"
 	prompt := promptui.Select{
 		Label: "Select how to proceed with the pending dependencies",
-		Items: []string{optShow, optInstall, optExit},
+		Items: []string{optInstall, optExit},
 	}
 
+	if err = utils.HandleInstructions(pending, utils.ShowInstructions); err != nil {
+		return fmt.Errorf(configs.ShowingInstructionsError, err)
+	}
 	_, result, err := prompt.Run()
 	if err != nil {
 		return fmt.Errorf("prompt failed %s", err)
 	}
 
 	switch result {
-	case optShow:
-		if err = utils.HandleInstructions(pending, utils.ShowInstructions); err != nil {
-			return fmt.Errorf(configs.ShowingInstructionsError, err)
-		}
-		err = installOrShowInstructions(pending)
-		return
 	case optInstall:
 		return installDependencies(pending)
 	default:
@@ -245,11 +242,14 @@ func validateClients(allClients clients.OrderedClients) (clients.Clients, error)
 }
 
 func runScriptOrExit() (err error) {
-	optShow, optRun, optExit := "Show instructions for running the script", "Run the script", "Exit"
+	optRun, optExit := "Run the script", "Exit"
 	prompt := promptui.Select{
 		Label: "Select how to proceed with the generated docker-compose script",
-		Items: []string{optShow, optRun, optExit},
+		Items: []string{optRun, optExit},
 	}
+
+	log.Infof(configs.InstructionsFor, "running docker-compose script")
+	fmt.Printf("\n%s\n\n", fmt.Sprintf(configs.DockerComposeCMD, generationPath))
 
 	_, result, err := prompt.Run()
 	if err != nil {
@@ -257,10 +257,6 @@ func runScriptOrExit() (err error) {
 	}
 
 	switch result {
-	case optShow:
-		log.Infof(configs.InstructionsFor, "docker-compose script")
-		fmt.Printf("\n%s\n\n", fmt.Sprintf(configs.DockerComposeCMD, generationPath))
-		return
 	case optRun:
 		// Run docker-compose script
 		if err = utils.RunCmd(configs.DockerComposeCMD, generationPath+"/docker-compose.yml"); err != nil {
