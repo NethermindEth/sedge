@@ -3,7 +3,7 @@ package configs
 // All the strings that are needed for debugging and info logging, and constant strings.
 const (
 	CheckingDependencies            = "Checking dependencies: %s"
-	DependenciesPending             = "Pending dependencies: %s"
+	DependenciesPending             = "pending dependencies: %s"
 	DependenciesOK                  = "All dependencies are installed on host machine"
 	GeneratingDockerComposeScript   = "Generating docker-compose script for current selection of clients"
 	GeneratingEnvFile               = "Generating environment file for current selection of clients"
@@ -26,4 +26,6 @@ const (
 	Component                       = "component"
 	RunningCommand                  = "Running command: %s"
 	ConfigFileName                  = ".1click"
+	UnableToProceed                 = "Unable to proceed. Please check the logs for more details"
+	DefaultDockerComposeScriptName  = "docker-compose.yml"
 )

@@ -16,8 +16,8 @@ a. dependencies []string
 List of dependencies to be checked
 
 returns :-
-a. error
-Error if any
+a. []string
+List of dependencies that are not installed
 */
 func CheckDependencies(dependencies []string) (pending []string) {
 	for _, dependency := range dependencies {
