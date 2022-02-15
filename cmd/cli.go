@@ -95,11 +95,11 @@ Running the command without flags (except global flag'--config') is equivalent t
 
 		if run {
 			// Run docker-compose script
-			if err = utils.RunCmd(configs.DockerComposeCMD, generationPath+"/docker-compose.yml"); err != nil {
+			if _, err = utils.RunCmd(configs.DockerComposeCMD, false, generationPath+"/docker-compose.yml"); err != nil {
 				log.Fatalf(configs.RunningCMDError, configs.DockerComposeCMD, err)
 			}
 			// Run docker ps -a to show containers
-			if err = utils.RunCmd(configs.DockerPsCMD); err != nil {
+			if _, err = utils.RunCmd(configs.DockerPsCMD, false); err != nil {
 				log.Fatalf(configs.RunningCMDError, configs.DockerPsCMD, err)
 			}
 		} else {
@@ -280,11 +280,11 @@ func runScriptOrExit() (err error) {
 	switch result {
 	case optRun:
 		// Run docker-compose script
-		if err = utils.RunCmd(configs.DockerComposeCMD, generationPath+"/docker-compose.yml"); err != nil {
+		if _, err = utils.RunCmd(configs.DockerComposeCMD, false, generationPath+"/docker-compose.yml"); err != nil {
 			return err
 		}
 		// Run docker ps -a to show containers
-		if err = utils.RunCmd(configs.DockerPsCMD); err != nil {
+		if _, err = utils.RunCmd(configs.DockerPsCMD, false); err != nil {
 			return err
 		}
 	default:

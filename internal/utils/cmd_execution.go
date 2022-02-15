@@ -16,11 +16,13 @@ import (
 
 /*
 RunCmd :
-Executes a command and prints its output to stdout.
+Executes a command and returns the output.
 
 params :-
 a. cmd string
 The command to be executed.
+b. bool output
+True if the output is to be returned.
 b. args []string
 The arguments to be passed to the command.
 
@@ -30,36 +32,47 @@ The output of the command.
 b. error
 Error if any
 */
-func RunCmd(cmd string, args ...string) error {
-	fullCmd := fmt.Sprintf(cmd, strings.Join(args, " "))
+func RunCmd(cmd string, output bool, args ...string) (out string, err error) {
+	fullCmd := cmd
+	if len(args) > 0 {
+		fullCmd = fmt.Sprintf(cmd, strings.Join(args, " "))
+	}
 	log.Infof(configs.RunningCommand, fullCmd)
 	tmp, err := template.New("script").Parse(fullCmd)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	if err = executeScript(tmp); err != nil {
-		return fmt.Errorf(configs.RunningCMDError, fullCmd, err)
+	script := Script{
+		Tmp:    tmp,
+		Output: output,
+		Data:   struct{}{},
 	}
 
-	return nil
+	if out, err = executeScript(script); err != nil {
+		return "", fmt.Errorf(configs.RunningCMDError, fullCmd, err)
+	}
+
+	return out, nil
 }
 
 /*
 executeScript :
-Execute the script in the given template and print its output to stdout.
+Execute the script in the given template.
 
 params :-
-a. tmp *template.Template
-Script template
+a. script Script
+Script object to be executed
 
 returns :-
-a. error
+a. string
+The output of the script.
+b. error
 Error if any
 */
-func executeScript(tmp *template.Template) (err error) {
-	var script bytes.Buffer
-	if err = tmp.Execute(&script, struct{}{}); err != nil {
+func executeScript(script Script) (out string, err error) {
+	var scriptBuffer, combinedOut bytes.Buffer
+	if err = script.Tmp.Execute(&scriptBuffer, script.Data); err != nil {
 		return
 	}
 
@@ -67,23 +80,28 @@ func executeScript(tmp *template.Template) (err error) {
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		return err
+		return
 	}
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return err
+		return
 	}
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		return err
+		return
 	}
 
 	wait := sync.WaitGroup{}
 
 	errChans := make([]<-chan error, 0)
-	errChans = append(errChans, goCopy(&wait, stdin, &script, true))
-	errChans = append(errChans, goCopy(&wait, os.Stdout, stdout, false))
-	errChans = append(errChans, goCopy(&wait, os.Stderr, stderr, false))
+	errChans = append(errChans, goCopy(&wait, stdin, &scriptBuffer, true))
+	if script.Output {
+		cmd.Stdout = &combinedOut
+		cmd.Stderr = &combinedOut
+	} else {
+		errChans = append(errChans, goCopy(&wait, os.Stdout, stdout, false))
+		errChans = append(errChans, goCopy(&wait, os.Stderr, stderr, false))
+	}
 
 	if err = cmd.Start(); err != nil {
 		return
@@ -102,7 +120,11 @@ func executeScript(tmp *template.Template) (err error) {
 		return
 	}
 
-	return nil
+	if script.Output {
+		out = combinedOut.String()
+	}
+
+	return out, nil
 }
 
 /*
