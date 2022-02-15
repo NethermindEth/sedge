@@ -21,7 +21,7 @@ Executes a command and returns the output.
 params :-
 a. cmd string
 The command to be executed.
-b. bool output
+b. bool getOutput
 True if the output is to be returned.
 b. args []string
 The arguments to be passed to the command.
@@ -32,7 +32,7 @@ The output of the command.
 b. error
 Error if any
 */
-func RunCmd(cmd string, output bool, args ...string) (out string, err error) {
+func RunCmd(cmd string, getOutput bool, args ...string) (out string, err error) {
 	fullCmd := cmd
 	if len(args) > 0 {
 		fullCmd = fmt.Sprintf(cmd, strings.Join(args, " "))
@@ -44,9 +44,9 @@ func RunCmd(cmd string, output bool, args ...string) (out string, err error) {
 	}
 
 	script := Script{
-		Tmp:    tmp,
-		Output: output,
-		Data:   struct{}{},
+		Tmp:       tmp,
+		GetOutput: getOutput,
+		Data:      struct{}{},
 	}
 
 	if out, err = executeScript(script); err != nil {
@@ -95,7 +95,7 @@ func executeScript(script Script) (out string, err error) {
 
 	errChans := make([]<-chan error, 0)
 	errChans = append(errChans, goCopy(&wait, stdin, &scriptBuffer, true))
-	if script.Output {
+	if script.GetOutput {
 		cmd.Stdout = &combinedOut
 		cmd.Stderr = &combinedOut
 	} else {
@@ -120,7 +120,7 @@ func executeScript(script Script) (out string, err error) {
 		return
 	}
 
-	if script.Output {
+	if script.GetOutput {
 		out = combinedOut.String()
 	}
 

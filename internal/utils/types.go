@@ -13,8 +13,8 @@ type DistroInfo struct {
 type Script struct {
 	// Tmp : script template
 	Tmp *template.Template
-	// Output : output of the script
-	Output bool
+	// getOutput : True to get output of the script
+	GetOutput bool
 	// Data: template data object
 	Data interface{}
 }

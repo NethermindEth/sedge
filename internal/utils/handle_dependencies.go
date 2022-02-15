@@ -112,9 +112,9 @@ func InstallDependency(dependency string) (err error) {
 	}
 
 	script := Script{
-		Tmp:    tmp,
-		Output: false,
-		Data:   struct{}{},
+		Tmp:       tmp,
+		GetOutput: false,
+		Data:      struct{}{},
 	}
 
 	if _, err = executeScript(script); err != nil {
