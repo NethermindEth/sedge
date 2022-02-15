@@ -6,35 +6,82 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
+	"github.com/NethermindEth/1Click/configs"
+	"github.com/NethermindEth/1Click/internal/utils"
 	"github.com/spf13/cobra"
+
+	log "github.com/sirupsen/logrus"
+)
+
+var (
+	services   []string
+	scriptPath string
+	tail       bool
 )
 
 // logsCmd represents the logs command
 var logsCmd = &cobra.Command{
 	Use:   "logs",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Get running container logs",
+	Long: `Get running container logs using docker-compose CLI.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+By default will run 'docker-compose -f <script> logs --follow <service>'`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("logs called")
+		// Check that docker and docker-compose are installed
+		pending := utils.CheckDependencies([]string{"docker", "docker-compose"})
+		for _, dependency := range pending {
+			log.Errorf(configs.DependencyNotInstalledError, dependency)
+		}
+		if len(pending) > 0 {
+			log.Fatal(configs.DependenciesMissingError)
+		}
+
+		// Check docker engine is on
+		if _, err := utils.RunCmd(configs.DockerPsCMD, true); err != nil {
+			log.Fatal(configs.DockerEngineOffError, err)
+		}
+
+		// Check if docker-compose script was generated
+		file := scriptPath + "/" + configs.DefaultDockerComposeScriptName
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			log.Errorf(configs.OpeningFileError, file, err)
+			log.Fatal(configs.DockerComposeScriptNotFoundError, scriptPath, configs.DefaultDockerComposeScriptsPath)
+		}
+
+		// Check if docker-compose script is running
+		rawServices, err := utils.RunCmd(configs.DockerComposePsServicesCMD, true, file)
+		if err != nil || rawServices == "" {
+			if rawServices == "" && err == nil {
+				err = fmt.Errorf(configs.DockerComposePsReturnedEmptyError)
+			}
+			log.Fatal(configs.ScriptIsNotRunningError, err)
+		}
+
+		// TODO: Get logs from docker-compose script services
+		services := strings.Split(rawServices, "\n")
+		params := append([]string{file}, services...)
+
+		logsCMD := configs.DockerComposeLogsFollowCMD
+		if tail {
+			logsCMD = configs.DockerComposeLogsTailCMD
+		}
+
+		if _, err := utils.RunCmd(logsCMD, false, params...); err != nil {
+			log.Fatal(configs.GettingLogsError)
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(logsCmd)
 
-	// Here you will define your flags and configuration settings.
+	// Local flags
+	logsCmd.Flags().StringArrayVarP(&services, "services", "s", []string{"execution", "consensus", "validator"}, "List of services to get the logs from")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// logsCmd.PersistentFlags().String("foo", "", "A help for foo")
+	logsCmd.Flags().StringVarP(&scriptPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose script path")
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// logsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	logsCmd.Flags().BoolVarP(&tail, "tail", "t", false, "Tail the last 20 logs")
 }
