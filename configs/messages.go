@@ -20,8 +20,6 @@ const (
 	PrintingFile                    = "File %s :"
 	SupportedClients                = "Supported clients of type %s: %v"
 	ConfigClients                   = "Provided clients of type %s in configuration file: %v"
-	DockerComposeCMD                = "sudo docker-compose -f %s up -d execution consensus"
-	DockerPsCMD                     = "sudo docker ps -a"
 	RunningDockerCompose            = "Running docker-compose script"
 	Component                       = "component"
 	RunningCommand                  = "Running command: %s"
