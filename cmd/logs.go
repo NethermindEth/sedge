@@ -17,16 +17,15 @@ import (
 )
 
 var (
-	services   []string
 	scriptPath string
 	tail       bool
 )
 
 // logsCmd represents the logs command
 var logsCmd = &cobra.Command{
-	Use:   "logs",
+	Use:   "logs [flags] [services]",
 	Short: "Get running container logs",
-	Long: `Get running container logs using docker-compose CLI.
+	Long: `Get running container logs using docker-compose CLI. If no services are provided, the logs of all running services will be displayed.
 
 By default will run 'docker-compose -f <script> logs --follow <service>'`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -60,8 +59,11 @@ By default will run 'docker-compose -f <script> logs --follow <service>'`,
 			log.Fatal(configs.ScriptIsNotRunningError, err)
 		}
 
-		// TODO: Get logs from docker-compose script services
+		// Get logs from docker-compose script services
 		services := strings.Split(rawServices, "\n")
+		if len(args) > 0 {
+			services = args
+		}
 		params := append([]string{file}, services...)
 
 		logsCMD := configs.DockerComposeLogsFollowCMD
@@ -79,8 +81,6 @@ func init() {
 	rootCmd.AddCommand(logsCmd)
 
 	// Local flags
-	logsCmd.Flags().StringArrayVarP(&services, "services", "s", []string{"execution", "consensus", "validator"}, "List of services to get the logs from")
-
 	logsCmd.Flags().StringVarP(&scriptPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose script path")
 
 	logsCmd.Flags().BoolVarP(&tail, "tail", "t", false, "Tail the last 20 logs")
