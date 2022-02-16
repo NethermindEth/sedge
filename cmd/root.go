@@ -60,10 +60,6 @@ func initConfig() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Generate config file
-		err = generate.GenerateConfig(home)
-		cobra.CheckErr(err)
-
 		// Search config in home directory with name ".1Click" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
@@ -78,7 +74,17 @@ func initConfig() {
 	} else {
 		fmt.Println(err)
 		fmt.Fprintln(os.Stderr, "Config file not found on the path provided nor in the home directory")
-		os.Exit(1)
+
+		// Generate config file
+		home, err := os.UserHomeDir()
+		cobra.CheckErr(err)
+		fmt.Printf("Generating config file in the %s directory\n", home)
+
+		err = generate.GenerateConfig(home)
+		cobra.CheckErr(err)
+
+		viper.ReadInConfig()
+		cobra.CheckErr(err)
 	}
 
 	initLogging()
