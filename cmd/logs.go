@@ -39,24 +39,27 @@ By default will run 'docker-compose -f <script> logs --follow <service>'`,
 		}
 
 		// Check docker engine is on
+		log.Debugf(configs.RunningCommand, configs.DockerPsCMD)
 		if _, err := utils.RunCmd(configs.DockerPsCMD, true); err != nil {
-			log.Fatal(configs.DockerEngineOffError, err)
+			log.Fatalf(configs.DockerEngineOffError, err)
 		}
 
 		// Check if docker-compose script was generated
 		file := scriptPath + "/" + configs.DefaultDockerComposeScriptName
 		if _, err := os.Stat(file); os.IsNotExist(err) {
 			log.Errorf(configs.OpeningFileError, file, err)
-			log.Fatal(configs.DockerComposeScriptNotFoundError, scriptPath, configs.DefaultDockerComposeScriptsPath)
+			log.Fatalf(configs.DockerComposeScriptNotFoundError, scriptPath, configs.DefaultDockerComposeScriptsPath)
 		}
 
 		// Check if docker-compose script is running
-		rawServices, err := utils.RunCmd(configs.DockerComposePsServicesCMD, true, file)
-		if err != nil || rawServices == "" {
-			if rawServices == "" && err == nil {
+		psCMD := fmt.Sprintf(configs.DockerComposePsServicesCMD, file)
+		log.Debugf(configs.RunningCommand, configs.DockerPsCMD)
+		rawServices, err := utils.RunCmd(psCMD, true)
+		if err != nil || rawServices == "\n" {
+			if rawServices == "\n" && err == nil {
 				err = fmt.Errorf(configs.DockerComposePsReturnedEmptyError)
 			}
-			log.Fatal(configs.ScriptIsNotRunningError, err)
+			log.Fatalf(configs.ScriptIsNotRunningError, err)
 		}
 
 		// Get logs from docker-compose script services
@@ -64,14 +67,14 @@ By default will run 'docker-compose -f <script> logs --follow <service>'`,
 		if len(args) > 0 {
 			services = args
 		}
-		params := append([]string{file}, services...)
 
-		logsCMD := configs.DockerComposeLogsFollowCMD
+		logsCMD := fmt.Sprintf(configs.DockerComposeLogsFollowCMD, file, strings.Join(services, " "))
 		if tail {
-			logsCMD = configs.DockerComposeLogsTailCMD
+			logsCMD = fmt.Sprintf(configs.DockerComposeLogsTailCMD, file, strings.Join(services, " "))
 		}
 
-		if _, err := utils.RunCmd(logsCMD, false, params...); err != nil {
+		log.Debugf(configs.RunningCommand, logsCMD)
+		if _, err := utils.RunCmd(logsCMD, false); err != nil {
 			log.Fatal(configs.GettingLogsError)
 		}
 	},

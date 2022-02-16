@@ -95,10 +95,13 @@ Running the command without flags (except global flag'--config') is equivalent t
 
 		if run {
 			// Run docker-compose script
-			if _, err = utils.RunCmd(configs.DockerComposeCMD, false, generationPath+"/docker-compose.yml"); err != nil {
-				log.Fatalf(configs.RunningCMDError, configs.DockerComposeCMD, err)
+			upCMD := fmt.Sprintf(configs.DockerComposeUpCMD, generationPath+"/docker-compose.yml")
+			log.Infof(configs.RunningCommand, upCMD)
+			if _, err = utils.RunCmd(upCMD, false); err != nil {
+				log.Fatalf(configs.RunningCMDError, upCMD, err)
 			}
 			// Run docker ps -a to show containers
+			log.Infof(configs.RunningCommand, configs.DockerPsCMD)
 			if _, err = utils.RunCmd(configs.DockerPsCMD, false); err != nil {
 				log.Fatalf(configs.RunningCMDError, configs.DockerPsCMD, err)
 			}
@@ -270,7 +273,7 @@ func runScriptOrExit() (err error) {
 	}
 
 	log.Infof(configs.InstructionsFor, "running docker-compose script")
-	fmt.Printf("\n%s\n\n", fmt.Sprintf(configs.DockerComposeCMD, generationPath))
+	fmt.Printf("\n%s\n\n", fmt.Sprintf(configs.DockerComposeUpCMD, generationPath))
 
 	_, result, err := prompt.Run()
 	if err != nil {
@@ -280,7 +283,9 @@ func runScriptOrExit() (err error) {
 	switch result {
 	case optRun:
 		// Run docker-compose script
-		if _, err = utils.RunCmd(configs.DockerComposeCMD, false, generationPath+"/docker-compose.yml"); err != nil {
+		upCMD := fmt.Sprintf(configs.DockerComposeUpCMD, generationPath+"/docker-compose.yml")
+		log.Infof(configs.RunningCommand, upCMD)
+		if _, err = utils.RunCmd(upCMD, false); err != nil {
 			return err
 		}
 		// Run docker ps -a to show containers

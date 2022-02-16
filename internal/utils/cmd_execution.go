@@ -6,12 +6,10 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"strings"
 	"sync"
 	"text/template"
 
 	"github.com/NethermindEth/1Click/configs"
-	log "github.com/sirupsen/logrus"
 )
 
 /*
@@ -23,8 +21,6 @@ a. cmd string
 The command to be executed.
 b. bool getOutput
 True if the output is to be returned.
-b. args []string
-The arguments to be passed to the command.
 
 returns :-
 a. string
@@ -32,13 +28,8 @@ The output of the command.
 b. error
 Error if any
 */
-func RunCmd(cmd string, getOutput bool, args ...string) (out string, err error) {
-	fullCmd := cmd
-	if len(args) > 0 {
-		fullCmd = fmt.Sprintf(cmd, strings.Join(args, " "))
-	}
-	log.Infof(configs.RunningCommand, fullCmd)
-	tmp, err := template.New("script").Parse(fullCmd)
+func RunCmd(cmd string, getOutput bool) (out string, err error) {
+	tmp, err := template.New("script").Parse(cmd)
 	if err != nil {
 		return "", err
 	}
@@ -50,7 +41,7 @@ func RunCmd(cmd string, getOutput bool, args ...string) (out string, err error) 
 	}
 
 	if out, err = executeScript(script); err != nil {
-		return "", fmt.Errorf(configs.RunningCMDError, fullCmd, err)
+		return "", fmt.Errorf(configs.RunningCMDError, cmd, err)
 	}
 
 	return out, nil
