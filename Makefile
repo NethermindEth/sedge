@@ -13,6 +13,9 @@ run-cli: compile ## run randomized cli
 listClients: compile ## Run cmd listClients with ./config.yaml
 	@./build/1click listClients --config ./config.yaml
 
+logs: compile ## run cmd logs with ./config.yaml
+	@./build/1click logs --config ./config.yaml
+
 all: compile run ## build and run
 
 gomod_tidy:
