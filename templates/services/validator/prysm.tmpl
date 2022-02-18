@@ -1,5 +1,16 @@
 {{/* prysm.tmpl */}}
 {{ define "validator" }}
+  validator-import:
+    image: ${VL_IMAGE_VERSION}
+    container_name: validator-import-client
+    volumes:
+      - ./keystore:/keystore
+      - ./wallet:/wallet
+    command: |
+      account import
+      --directory=/keystore/validator_keys
+      --wallet-dir=/wallet
+
   validator:
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
