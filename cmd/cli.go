@@ -94,16 +94,8 @@ Running the command without flags (except global flag'--config') is equivalent t
 		}
 
 		if run {
-			// Run docker-compose script
-			upCMD := fmt.Sprintf(configs.DockerComposeUpCMD, generationPath+"/docker-compose.yml")
-			log.Infof(configs.RunningCommand, upCMD)
-			if _, err = utils.RunCmd(upCMD, false); err != nil {
-				log.Fatalf(configs.RunningCMDError, upCMD, err)
-			}
-			// Run docker ps -a to show containers
-			log.Infof(configs.RunningCommand, configs.DockerPsCMD)
-			if _, err = utils.RunCmd(configs.DockerPsCMD, false); err != nil {
-				log.Fatalf(configs.RunningCMDError, configs.DockerPsCMD, err)
+			if err = runAndShowContainers(); err != nil {
+				log.Fatal(err)
 			}
 		} else {
 			// Let the user decide to see the instructions for executing the scripts and exit or let the tool execute them
@@ -282,19 +274,35 @@ func runScriptOrExit() (err error) {
 
 	switch result {
 	case optRun:
-		// Run docker-compose script
-		upCMD := fmt.Sprintf(configs.DockerComposeUpCMD, generationPath+"/docker-compose.yml")
-		log.Infof(configs.RunningCommand, upCMD)
-		if _, err = utils.RunCmd(upCMD, false); err != nil {
-			return err
-		}
-		// Run docker ps -a to show containers
-		if _, err = utils.RunCmd(configs.DockerPsCMD, false); err != nil {
+		if err = runAndShowContainers(); err != nil {
 			return err
 		}
 	default:
 		log.Info(configs.Exiting)
 		os.Exit(0)
+	}
+
+	return nil
+}
+
+func runAndShowContainers() error {
+	// Check if docker engine is on
+	log.Info(configs.CheckingDockerEngine)
+	log.Infof(configs.RunningCommand, configs.DockerPsCMD)
+	if _, err := utils.RunCmd(configs.DockerPsCMD, true); err != nil {
+		return fmt.Errorf(configs.DockerEngineOffError, err)
+	}
+
+	// Run docker-compose script
+	upCMD := fmt.Sprintf(configs.DockerComposeUpCMD, generationPath+"/docker-compose.yml")
+	log.Infof(configs.RunningCommand, upCMD)
+	if _, err := utils.RunCmd(upCMD, false); err != nil {
+		return err
+	}
+
+	// Run docker ps -a to show containers
+	if _, err := utils.RunCmd(configs.DockerPsCMD, false); err != nil {
+		return err
 	}
 
 	return nil
