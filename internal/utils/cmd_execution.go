@@ -69,6 +69,7 @@ func executeScript(script Script) (out string, err error) {
 
 	cmd := exec.Command("bash")
 
+	// Prepare pipes for stdin, stdout and stderr
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return
@@ -84,12 +85,17 @@ func executeScript(script Script) (out string, err error) {
 
 	wait := sync.WaitGroup{}
 
+	// Prepare channel to receive errors from goroutines
 	errChans := make([]<-chan error, 0)
+	// cmd executes any instrucctions coming from stdin
 	errChans = append(errChans, goCopy(&wait, stdin, &scriptBuffer, true))
+
 	if script.GetOutput {
+		// If the script is to get the output, then use an unified buffer to combine stdout and stderr
 		cmd.Stdout = &combinedOut
 		cmd.Stderr = &combinedOut
 	} else {
+		// If the script is not to get the output, then pipe the output to stdout and stderr
 		errChans = append(errChans, goCopy(&wait, os.Stdout, stdout, false))
 		errChans = append(errChans, goCopy(&wait, os.Stderr, stderr, false))
 	}
@@ -98,6 +104,7 @@ func executeScript(script Script) (out string, err error) {
 		return
 	}
 
+	// Check for errors from goroutines
 	for _, errChan := range errChans {
 		err = <-errChan
 		if err != nil {
