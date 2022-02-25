@@ -2,7 +2,7 @@
 {{ define "execution" }}
   execution:
     stop_grace_period: 1m
-    container_name: nethermind-execution-client
+    container_name: execution-client
     restart: unless-stopped
     image: ${EXECUTION_IMAGE_VERSION}
     volumes:

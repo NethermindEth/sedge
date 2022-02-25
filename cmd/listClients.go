@@ -22,7 +22,7 @@ var listClientsCmd = &cobra.Command{
 	Short: "List supported clients",
 	Long:  `List supported clients for execution and consensus engines`,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Infof("Listing supported clients\n\n")
+		log.Infof("Listing supported clients\n")
 
 		data, err := buildData(clients.GetSupportedClients)
 		if err != nil {
@@ -31,7 +31,7 @@ var listClientsCmd = &cobra.Command{
 
 		ui.WriteListClientsTable(data)
 
-		log.Infof("Listing clients provided in configuration file\n\n")
+		log.Infof("Listing clients provided in configuration file\n")
 
 		data, err = buildData(configs.GetConfigClients)
 		if err != nil {

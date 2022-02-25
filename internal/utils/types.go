@@ -1,5 +1,7 @@
 package utils
 
+import "text/template"
+
 // DistroInfo : Struct Contains name, architecture and version of the linux distribution of the host machine
 type DistroInfo struct {
 	Name         string
@@ -7,13 +9,12 @@ type DistroInfo struct {
 	Version      string
 }
 
-// ConsensusEnv : Struct Data object to be applied to consensus docker-compose script environment template
-type ConsensusEnv struct {
-	ExecutionNodeURL string
-}
-
-// ValidatorEnv : Struct Data object to be applied to validator docker-compose script environment template
-type ValidatorEnv struct {
-	ConsensusNodeURL    string
-	ExecutionEngineName string
+// Script : Struct Represents a script to be executed
+type Script struct {
+	// Tmp : script template
+	Tmp *template.Template
+	// getOutput : True to get output of the script
+	GetOutput bool
+	// Data: template data object
+	Data interface{}
 }

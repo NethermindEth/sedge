@@ -1,0 +1,16 @@
+{{/* config.tmpl */}}
+dependencies:
+  - docker
+  - docker-compose
+
+executionClients:
+{{ range $_, $name := index . "execution" }}  - {{ $name }}
+{{end}}
+consensusClients:
+{{ range $_, $name := index . "consensus" }}  - {{ $name }}
+{{end}} 
+validatorClients:
+{{ range $_, $name := index . "validator" }}  - {{ $name }}
+{{end}}
+logs:
+  logLevel: info

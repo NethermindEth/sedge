@@ -2,7 +2,7 @@
 {{ define "consensus" }}
   consensus:
     stop_grace_period: 1m
-    container_name: lighthouse-consensus-client
+    container_name: consensus-client
     restart: unless-stopped
     image: ${CC_IMAGE_VERSION}
     depends_on: 
@@ -29,5 +29,5 @@
       driver: "json-file"
       options:
         max-size: "10m"
-        max-file: "10"      
+        max-file: "10"    
 {{ end }}
