@@ -137,7 +137,7 @@ func installOrShowInstructions(pending []string) (err error) {
 	}
 	_, result, err := prompt.Run()
 	if err != nil {
-		return fmt.Errorf("prompt failed %s", err)
+		return fmt.Errorf(configs.PromptFailedError, err)
 	}
 
 	switch result {

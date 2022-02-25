@@ -27,4 +27,5 @@ const (
 	ScriptIsNotRunningError           = "services of docker-compose script provided are not running. Error: %s"
 	GettingLogsError                  = "failed to get logs for services %s. Error: %s"
 	DockerComposePsReturnedEmptyError = "'docker-compose ps --services' returned empty string"
+	PromptFailedError                 = "prompt failed %s"
 )
