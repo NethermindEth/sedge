@@ -4,6 +4,4 @@ vendor
 
 .idea/
 
-build/
-
 docker-compose-scripts/
