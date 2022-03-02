@@ -10,3 +10,6 @@ var Envs embed.FS
 
 //go:embed setup
 var Setup embed.FS
+
+//go:embed config
+var Config embed.FS

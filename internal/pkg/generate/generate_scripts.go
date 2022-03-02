@@ -1,4 +1,4 @@
-package utils
+package generate
 
 import (
 	"fmt"
@@ -100,18 +100,18 @@ func generateDockerComposeScripts(executionClient, consensusClient, validatorCli
 	}
 
 	// Print docker-compose file
-	log.Infof(configs.PrintingFile, "docker-compose.yml")
+	log.Infof(configs.PrintingFile, configs.DefaultDockerComposeScriptName)
 	err = baseTmp.Execute(os.Stdout, nil)
 	if err != nil {
-		return fmt.Errorf(configs.PrintingFileError, "docker-compose.yml", err)
+		return fmt.Errorf(configs.PrintingFileError, configs.DefaultDockerComposeScriptName, err)
 	}
 	fmt.Println()
 
-	err = writeTemplateToFile(baseTmp, path+"/docker-compose.yml", nil, false)
+	err = writeTemplateToFile(baseTmp, path+"/"+configs.DefaultDockerComposeScriptName, nil, false)
 	if err != nil {
 		return fmt.Errorf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient, err)
 	}
-	log.Infof(configs.CreatedFile, path+"/docker-compose.yml")
+	log.Infof(configs.CreatedFile, path+"/"+configs.DefaultDockerComposeScriptName)
 
 	return nil
 }

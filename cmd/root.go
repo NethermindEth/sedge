@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/NethermindEth/1Click/configs"
+	"github.com/NethermindEth/1Click/internal/pkg/generate"
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -62,7 +63,7 @@ func initConfig() {
 		// Search config in home directory with name ".1Click" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".1click")
+		viper.SetConfigName(configs.ConfigFileName)
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -71,8 +72,19 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	} else {
+		fmt.Println(err)
 		fmt.Fprintln(os.Stderr, "Config file not found on the path provided nor in the home directory")
-		os.Exit(1)
+
+		// Generate config file
+		home, err := os.UserHomeDir()
+		cobra.CheckErr(err)
+		fmt.Printf("Generating config file in the %s directory\n", home)
+
+		err = generate.GenerateConfig(home)
+		cobra.CheckErr(err)
+
+		viper.ReadInConfig()
+		cobra.CheckErr(err)
 	}
 
 	initLogging()

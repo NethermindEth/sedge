@@ -1,8 +1,18 @@
 {{/* prysm.tmpl */}}
 {{ define "validator" }}
+  validator-import:
+    image: ${VL_IMAGE_VERSION}
+    container_name: validator-import-client
+    volumes:
+      - ./keystore:/keystore
+      - ./wallet:/wallet
+    command: |
+      account import
+      --directory=/keystore/validator_keys
+      --wallet-dir=/wallet
+
   validator:
-    restart: unless-stopped
-    container_name: prysm-validator-client
+    container_name: validator-client
     image: ${VL_IMAGE_VERSION}
     depends_on: 
       - consensus
@@ -23,6 +33,6 @@
     logging:
       driver: "json-file"
       options:
-  	    max-size: "10m"
-  	    max-file: "10"
+        max-size: "10m"
+        max-file: "10"
 {{ end }}

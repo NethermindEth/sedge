@@ -1,7 +1,7 @@
 .DEFAULT_GOAL 	:= help
 
 compile: ## compile:
-	@mkdir -p bin
+	@mkdir -p build
 	@go build -o build/1click cmd/1Click/main.go
 
 run: ## run
@@ -12,6 +12,9 @@ run-cli: compile ## run randomized cli
 
 listClients: compile ## Run cmd listClients with ./config.yaml
 	@./build/1click listClients --config ./config.yaml
+
+logs: compile ## run cmd logs with ./config.yaml
+	@./build/1click logs --config ./config.yaml
 
 all: compile run ## build and run
 
