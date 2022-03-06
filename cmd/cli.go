@@ -301,6 +301,7 @@ func runAndShowContainers() error {
 	}
 
 	// Run docker ps -a to show containers
+	log.Infof(configs.RunningCommand, configs.DockerPsCMD)
 	if _, err := utils.RunCmd(configs.DockerPsCMD, false); err != nil {
 		return err
 	}
