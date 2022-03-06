@@ -16,9 +16,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listClientsCmd represents the listClients command
+// listClientsCmd represents the clients command
 var listClientsCmd = &cobra.Command{
-	Use:   "listClients",
+	Use:   "clients",
 	Short: "List supported clients",
 	Long:  `List supported clients for execution and consensus engines`,
 	Run: func(cmd *cobra.Command, args []string) {

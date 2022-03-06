@@ -16,7 +16,7 @@ const (
 	DefaultDockerComposeScriptsPath = "./docker-compose-scripts"
 	OnPremiseExecutionURL           = "http://localhost:8545"
 	OnPremiseConsensusURL           = "http://localhost:4000"
-	ClientNotSupported              = "client %s is not supported. Please use 'listClient' command to see the list of supported clients"
+	ClientNotSupported              = "client %s is not supported. Please use 'clients' command to see the list of supported clients"
 	PrintingFile                    = "File %s :"
 	SupportedClients                = "Supported clients of type %s: %v"
 	ConfigClients                   = "Provided clients of type %s in configuration file: %v"

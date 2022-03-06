@@ -10,8 +10,8 @@ run: ## run
 run-cli: compile ## run randomized cli
 	@./build/1Click cli -r --config ./config.yaml
 
-listClients: compile ## Run cmd listClients with ./config.yaml
-	@./build/1Click listClients --config ./config.yaml
+listClients: compile ## Run cmd clients with ./config.yaml
+	@./build/1Click clients --config ./config.yaml
 
 logs: compile ## run cmd logs with ./config.yaml
 	@./build/1click logs --config ./config.yaml
