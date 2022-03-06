@@ -28,6 +28,11 @@ a. error
 Error if any
 */
 func GenerateValidatorKey(new bool, network string) error {
+	// Build eth2.0-deposit-cli docker image
+	if err := buildDepositCliImage(); err != nil {
+		return err
+	}
+
 	data := DepositCLI{
 		Network: network,
 	}
@@ -70,6 +75,17 @@ func GenerateValidatorKey(new bool, network string) error {
 		err = tmp.Execute(scriptBuffer, data)
 		log.Error(err)
 		return fmt.Errorf(configs.RunningCMDError, scriptBuffer, err)
+	}
+
+	return nil
+}
+
+func buildDepositCliImage() error {
+	// Run docker build
+	buildCMD := fmt.Sprintf(configs.DepositCLIDockerBuildCMD, configs.DepositCLIDockerImageName)
+	log.Infof(configs.RunningCommand, buildCMD)
+	if _, err := RunCmd(buildCMD, false); err != nil {
+		return err
 	}
 
 	return nil
