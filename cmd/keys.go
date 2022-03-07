@@ -16,6 +16,8 @@ limitations under the License.
 package cmd
 
 import (
+	"strings"
+
 	"github.com/NethermindEth/1Click/configs"
 	"github.com/NethermindEth/1Click/internal/utils"
 	log "github.com/sirupsen/logrus"
@@ -36,6 +38,24 @@ var keysCmd = &cobra.Command{
 New mnemonic will be generated if -e/--existing flag is not provided.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Validate network when several networks are supported
+
+		// Check if dependencies are installed. Keep checking dependencies until they are all installed
+		for pending := utils.CheckDependencies([]string{"docker"}); len(pending) > 0; {
+			log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
+			if install {
+				// Install dependencies directly
+				if err := installDependencies(pending); err != nil {
+					log.Fatal(err)
+				}
+			} else {
+				// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
+				if err := installOrShowInstructions(pending); err != nil {
+					log.Fatal(err)
+				}
+			}
+		}
+		log.Info(configs.DependenciesOK)
+
 		log.Info(configs.GeneratingKeystore)
 		if err := utils.GenerateValidatorKey(existingMnemonic, network); err != nil {
 			log.Fatalf(configs.GeneratingKeystoreError, err)
