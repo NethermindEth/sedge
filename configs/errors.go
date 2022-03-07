@@ -28,4 +28,5 @@ const (
 	GettingLogsError                  = "failed to get logs for services %s. Error: %s"
 	DockerComposePsReturnedEmptyError = "'docker-compose ps --services' returned empty string"
 	PromptFailedError                 = "prompt failed %s"
+	GeneratingKeystoreError           = "failed to generate keystore folder. Error: %s"
 )

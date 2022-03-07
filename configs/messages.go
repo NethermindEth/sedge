@@ -28,4 +28,5 @@ const (
 	DefaultDockerComposeScriptName  = "docker-compose.yml"
 	CheckingDockerEngine            = "Checking if docker engine is on"
 	DepositCLIDockerImageName       = "deposit-cli:local"
+	GeneratingKeystore              = "Generating keystore folder"
 )

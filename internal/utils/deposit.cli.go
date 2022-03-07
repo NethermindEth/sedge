@@ -18,8 +18,8 @@ The key can be generated using a new or existing mnemonic.
 Key's path is set to $(pwd)/keystore.
 
 params :-
-a. new bool
-True if the key is to be generated using a new mnemonic. False if the key is to be generated using an existing mnemonic.
+a. existing bool
+True if the key is to be generated using an existing mnemonic. False if the key is to be generated using a new mnemonic.
 b. network string
 Target network.
 
@@ -27,7 +27,7 @@ returns :-
 a. error
 Error if any
 */
-func GenerateValidatorKey(new bool, network string) error {
+func GenerateValidatorKey(existing bool, network string) error {
 	// Build eth2.0-deposit-cli docker image
 	if err := buildDepositCliImage(); err != nil {
 		return err
@@ -40,10 +40,10 @@ func GenerateValidatorKey(new bool, network string) error {
 	// Get the template file
 	var rawTmp []byte
 	var err error
-	if new {
-		rawTmp, err = templates.DepositCLI.ReadFile("deposit-cli/new.tmpl")
-	} else {
+	if existing {
 		rawTmp, err = templates.DepositCLI.ReadFile("deposit-cli/existing.tmpl")
+	} else {
+		rawTmp, err = templates.DepositCLI.ReadFile("deposit-cli/new.tmpl")
 	}
 
 	if err != nil {
