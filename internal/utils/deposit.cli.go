@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"strings"
 	"text/template"
 
 	"github.com/NethermindEth/1Click/configs"
@@ -46,7 +47,6 @@ func GenerateValidatorKey(existing bool, network string) (err error) {
 
 	// Get the template file
 	var rawTmp []byte
-	var err error
 	if existing {
 		rawTmp, err = templates.DepositCLI.ReadFile("deposit-cli/existing.tmpl")
 	} else {
@@ -64,24 +64,23 @@ func GenerateValidatorKey(existing bool, network string) (err error) {
 	}
 
 	// Print cmd
-	log.Info(configs.RunningCommand)
+	log.Infof(configs.RunningCommand, "")
 	err = tmp.Execute(os.Stdout, data)
 	if err != nil {
-		return err
+		return
 	}
 	fmt.Println()
 
-	// Execute cmd
-	script := Script{
-		Tmp:       tmp,
-		GetOutput: false,
-		Data:      data,
+	// Get the command as a string
+	var cmd bytes.Buffer
+	err = tmp.Execute(&cmd, data)
+	if err != nil {
+		return
 	}
-	if _, err = executeScript(script); err != nil {
-		var scriptBuffer *bytes.Buffer
-		err = tmp.Execute(scriptBuffer, data)
-		log.Error(err)
-		return fmt.Errorf(configs.RunningCMDError, scriptBuffer, err)
+
+	// Run the command
+	if _, err = RunCmd(cmd.String(), false, true); err != nil {
+		return
 	}
 
 	return nil
