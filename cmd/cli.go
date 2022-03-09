@@ -289,20 +289,20 @@ func runAndShowContainers() error {
 	// Check if docker engine is on
 	log.Info(configs.CheckingDockerEngine)
 	log.Infof(configs.RunningCommand, configs.DockerPsCMD)
-	if _, err := utils.RunCmd(configs.DockerPsCMD, true); err != nil {
+	if _, err := utils.RunCmd(configs.DockerPsCMD, true, false); err != nil {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
 	}
 
 	// Run docker-compose script
 	upCMD := fmt.Sprintf(configs.DockerComposeUpCMD, generationPath+"/docker-compose.yml")
 	log.Infof(configs.RunningCommand, upCMD)
-	if _, err := utils.RunCmd(upCMD, false); err != nil {
+	if _, err := utils.RunCmd(upCMD, false, false); err != nil {
 		return err
 	}
 
 	// Run docker ps -a to show containers
 	log.Infof(configs.RunningCommand, configs.DockerPsCMD)
-	if _, err := utils.RunCmd(configs.DockerPsCMD, false); err != nil {
+	if _, err := utils.RunCmd(configs.DockerPsCMD, false, false); err != nil {
 		return err
 	}
 

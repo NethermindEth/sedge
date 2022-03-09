@@ -40,7 +40,7 @@ By default will run 'docker-compose -f <script> logs --follow <service>'`,
 
 		// Check docker engine is on
 		log.Debugf(configs.RunningCommand, configs.DockerPsCMD)
-		if _, err := utils.RunCmd(configs.DockerPsCMD, true); err != nil {
+		if _, err := utils.RunCmd(configs.DockerPsCMD, true, false); err != nil {
 			log.Fatalf(configs.DockerEngineOffError, err)
 		}
 
@@ -54,7 +54,7 @@ By default will run 'docker-compose -f <script> logs --follow <service>'`,
 		// Check if docker-compose script is running
 		psCMD := fmt.Sprintf(configs.DockerComposePsServicesCMD, file)
 		log.Debugf(configs.RunningCommand, configs.DockerPsCMD)
-		rawServices, err := utils.RunCmd(psCMD, true)
+		rawServices, err := utils.RunCmd(psCMD, true, false)
 		if err != nil || rawServices == "\n" {
 			if rawServices == "\n" && err == nil {
 				err = fmt.Errorf(configs.DockerComposePsReturnedEmptyError)
@@ -74,7 +74,7 @@ By default will run 'docker-compose -f <script> logs --follow <service>'`,
 		}
 
 		log.Debugf(configs.RunningCommand, logsCMD)
-		if _, err := utils.RunCmd(logsCMD, false); err != nil {
+		if _, err := utils.RunCmd(logsCMD, false, false); err != nil {
 			log.Fatal(configs.GettingLogsError)
 		}
 	},
