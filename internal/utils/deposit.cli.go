@@ -27,10 +27,17 @@ returns :-
 a. error
 Error if any
 */
-func GenerateValidatorKey(existing bool, network string) error {
-	// Build eth2.0-deposit-cli docker image
-	if err := buildDepositCliImage(); err != nil {
-		return err
+func GenerateValidatorKey(existing bool, network string) (err error) {
+	// Check if image already exists
+	inspectCmd := fmt.Sprintf(configs.DockerInspectCMD, configs.DepositCLIDockerImageName)
+	if out, err := RunCmd(inspectCmd, true, false); err != nil {
+		// Output is of type: []\n Error: <text>
+		log.Error(strings.Split(out, "Error:")[1])
+
+		//Build eth2.0-deposit-cli docker image
+		if err := buildDepositCliImage(); err != nil {
+			return err
+		}
 	}
 
 	data := DepositCLI{
@@ -47,13 +54,13 @@ func GenerateValidatorKey(existing bool, network string) error {
 	}
 
 	if err != nil {
-		return err
+		return
 	}
 
 	// Parse the template
 	tmp, err := template.New("deposit-cli").Parse(string(rawTmp))
 	if err != nil {
-		return err
+		return
 	}
 
 	// Print cmd
@@ -84,7 +91,7 @@ func buildDepositCliImage() error {
 	// Run docker build
 	buildCMD := fmt.Sprintf(configs.DepositCLIDockerBuildCMD, configs.DepositCLIDockerImageName)
 	log.Infof(configs.RunningCommand, buildCMD)
-	if _, err := RunCmd(buildCMD, false); err != nil {
+	if _, err := RunCmd(buildCMD, false, false); err != nil {
 		return err
 	}
 
