@@ -64,9 +64,8 @@ func RunCmd(cmd string, getOutput, tty bool) (out string, err error) {
 	if err = exc.Start(); err != nil {
 		return
 	}
-	if err = exc.Wait(); err != nil {
-		return
-	}
+	// Return this error at the end as we need to check if the output from stderr is to be returned
+	err = exc.Wait()
 
 	if getOutput {
 		out = combinedOut.String()
