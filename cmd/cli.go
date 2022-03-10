@@ -80,7 +80,7 @@ Running the command without flags (except global flag'--config') is equivalent t
 		log.Infof(configs.CheckingDependencies, strings.Join(dependencies, ", "))
 
 		// Check if dependencies are installed. Keep checking dependencies until they are all installed
-		for pending := utils.CheckDependencies(dependencies); len(pending) > 0; {
+		for pending := utils.CheckDependencies(dependencies); len(pending) > 0; pending = utils.CheckDependencies(dependencies) {
 			log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
 			if install {
 				// Install dependencies directly
