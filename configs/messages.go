@@ -23,7 +23,7 @@ const (
 	RunningDockerCompose            = "Running docker-compose script"
 	Component                       = "component"
 	RunningCommand                  = "Running command: %s"
-	ConfigFileName                  = ".1click"
+	ConfigFileName                  = ".1Click"
 	UnableToProceed                 = "Unable to proceed. Please check the logs for more details"
 	DefaultDockerComposeScriptName  = "docker-compose.yml"
 	CheckingDockerEngine            = "Checking if docker engine is on"
