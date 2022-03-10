@@ -40,8 +40,6 @@ func RunCmd(cmd string, getOutput, tty bool) (out string, err error) {
 	r := strings.ReplaceAll(cmd, "\n", "")
 	spl := strings.Split(r, " ")
 	c, args := spl[0], spl[1:]
-	log.Error(c)
-	log.Error(args)
 
 	exc := exec.Command(c, args...)
 
@@ -252,6 +250,7 @@ func runInPty(cmd *exec.Cmd, getOutput bool) (out string, err error) {
 		cErr := ptmx.Close()
 		if err == nil && cErr != nil {
 			log.Error(cErr)
+			err = cErr
 		}
 	}()
 
@@ -260,52 +259,65 @@ func runInPty(cmd *exec.Cmd, getOutput bool) (out string, err error) {
 	errCh := make(chan error)
 	signal.Notify(ch, syscall.SIGWINCH)
 	go func() {
-		for range ch {
+		for sig := range ch {
+			log.Debug(sig)
 			if err := pty.InheritSize(os.Stdin, ptmx); err != nil {
+				log.Error(err)
 				errCh <- fmt.Errorf(configs.ResizingPtyError, err)
 			}
-			close(errCh)
 		}
+		close(errCh)
 	}()
 	ch <- syscall.SIGWINCH                        // Initial resize.
 	defer func() { signal.Stop(ch); close(ch) }() // Cleanup signals when done.
 
-	// Check resizing errors
-	err = <-errCh
-	if err != nil {
-		return
+	for {
+		select {
+		case err = <-errCh:
+			// Check resizing errors
+			if err != nil {
+				return
+			}
+		default:
+			// Normal workflow
+			// Set stdin in raw mode.
+			oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+			if err != nil {
+				return "", err
+			}
+			defer func() {
+				rErr := term.Restore(int(os.Stdin.Fd()), oldState)
+				if err == nil && rErr != nil {
+					err = rErr
+				}
+			}()
+
+			// Copy stdin to the pty (where are not using stdin at the moment)
+			// NOTE: The goroutine will keep reading until the next keystroke before returning.
+			//errCh1 := make(chan error)
+			go func() {
+				_, err = io.Copy(ptmx, os.Stdin)
+				log.Error(err)
+			}()
+
+			// Handle output
+			var output bytes.Buffer
+			if getOutput {
+				// Copy the pty to out
+				_, err = io.Copy(&output, ptmx)
+				if err != nil {
+					return "", err
+				}
+				out = output.String()
+			} else {
+				// Copy the pty to stdout
+				_, err = io.Copy(os.Stdout, ptmx)
+				if err != nil {
+					return "", err
+				}
+			}
+
+			return out, nil
+		}
 	}
-
-	// Set stdin in raw mode.
-	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
-	if err != nil {
-		return
-	}
-	defer func() { _ = term.Restore(int(os.Stdin.Fd()), oldState) }()
-
-	// Copy stdin to the pty (where are not using stdin at the moment)
-	// NOTE: The goroutine will keep reading until the next keystroke before returning.
-	//errCh1 := make(chan error)
-	go func() {
-		_, err = io.Copy(ptmx, os.Stdin)
-		log.Error(err)
-	}()
-
-	// Handle output
-	var output bytes.Buffer
-	if getOutput {
-		// Copy the pty to out
-		_, err = io.Copy(&output, ptmx)
-		out = output.String()
-	} else {
-		// Copy the pty to stdout
-		_, err = io.Copy(os.Stdout, ptmx)
-	}
-
-	// Check copy errors
-	if err != nil {
-		return
-	}
-
-	return
 }
