@@ -53,7 +53,7 @@ By default will run 'docker-compose -f <script> logs --follow <service>'`,
 
 		// Check if docker-compose script is running
 		psCMD := fmt.Sprintf(configs.DockerComposePsServicesCMD, file)
-		log.Debugf(configs.RunningCommand, configs.DockerPsCMD)
+		log.Debugf(configs.RunningCommand, psCMD)
 		rawServices, err := utils.RunCmd(psCMD, true, false)
 		if err != nil || rawServices == "\n" {
 			if rawServices == "\n" && err == nil {
@@ -75,7 +75,7 @@ By default will run 'docker-compose -f <script> logs --follow <service>'`,
 
 		log.Debugf(configs.RunningCommand, logsCMD)
 		if _, err := utils.RunCmd(logsCMD, false, false); err != nil {
-			log.Fatal(configs.GettingLogsError)
+			log.Fatalf(configs.GettingLogsError, strings.Join(services, " "), err)
 		}
 	},
 }
