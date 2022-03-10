@@ -64,6 +64,8 @@ By default will run 'docker-compose -f <script> logs --follow <service>'`,
 
 		// Get logs from docker-compose script services
 		services := strings.Split(rawServices, "\n")
+		// Remove empty string resulting of spliting the last blank line of rawServices
+		services = services[:len(services)-1]
 		if len(args) > 0 {
 			services = args
 		}
