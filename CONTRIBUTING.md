@@ -1,18 +1,18 @@
-# Contributing to 1click
+# Contributing to 1Click
 
 The Nethermind team maintains guidelines for contributing to the Nethermind repos. Check out our [docs page](https://docs.nethermind.io/nethermind/) for more info about us.
 
 ### Code of Conduct
 
-Have you read the [code of conduct](https://github.com/NethermindEth/1click/blob/main/CODE_OF_CONDUCT.md)?
+Have you read the [code of conduct](https://github.com/NethermindEth/1Click/blob/main/CODE_OF_CONDUCT.md)?
 
 ## Bugs and Feature Request
 
-Before you make your changes, check to see if an [issue](https://github.com/NethermindEth/1click/issues) exists already for the change you want to make.
+Before you make your changes, check to see if an [issue](https://github.com/NethermindEth/1Click/issues) exists already for the change you want to make.
 
 ### Don't see your issue? Open one
 
-If you spot something new, open an issue using a [template](https://github.com/NethermindEth/1click/issues/new/choose). We'll use the issue to have a conversation about the problem you want to fix.
+If you spot something new, open an issue using a [template](https://github.com/NethermindEth/1Click/issues/new/choose). We'll use the issue to have a conversation about the problem you want to fix.
 
 ### Open a Pull Request
 

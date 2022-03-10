@@ -5,7 +5,7 @@ compile: ## compile:
 	@go build -o build/1Click cmd/1Click/main.go
 
 run: ## run
-	@./build/1click
+	@./build/1Click
 
 run-cli: compile ## run randomized cli
 	@./build/1Click cli -r --config ./config.yaml
@@ -14,7 +14,7 @@ listClients: compile ## Run cmd clients with ./config.yaml
 	@./build/1Click clients --config ./config.yaml
 
 logs: compile ## run cmd logs with ./config.yaml
-	@./build/1click logs --config ./config.yaml
+	@./build/1Click logs --config ./config.yaml
 
 all: compile run ## build and run
 
