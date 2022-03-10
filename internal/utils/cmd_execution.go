@@ -304,17 +304,11 @@ func runInPty(cmd *exec.Cmd, getOutput bool) (out string, err error) {
 			var output bytes.Buffer
 			if getOutput {
 				// Copy the pty to out
-				_, err = io.Copy(&output, ptmx)
-				if err != nil {
-					return "", err
-				}
+				_, _ = io.Copy(&output, ptmx)
 				out = output.String()
 			} else {
 				// Copy the pty to stdout
-				_, err = io.Copy(os.Stdout, ptmx)
-				if err != nil {
-					return "", err
-				}
+				_, _ = io.Copy(os.Stdout, ptmx)
 			}
 
 			return out, nil
