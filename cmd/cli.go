@@ -18,6 +18,7 @@ import (
 	"github.com/NethermindEth/1Click/internal/utils"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 var (
@@ -36,7 +37,7 @@ const (
 
 // cliCmd represents the cli command
 var cliCmd = &cobra.Command{
-	Use:   "cli",
+	Use:   "cli [flags]",
 	Short: "Quick start 1Click",
 	Long: `Run the setup tool on-premise in a quick way. Provide only the command line
 options and the tool will do all the work.
@@ -48,9 +49,16 @@ Second, it will generate docker-compose scripts to run the full setup according 
 
 Finally, it will run the generated docker-compose script
 
-Running the command without flags (except global flag'--config') is equivalent to '1click cli -r -i --run' `,
+Running the command without flags (except global flag'--config') is equivalent to '1Click cli -r -i --run' `,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
+		// Count flags being set
+		count := 0
+		cmd.Flags().Visit(func(f *pflag.Flag) {
+			count++
+		})
+
+		if count == 0 {
+			// No flag behavior
 			randomize, install, run = true, true, true
 		}
 
