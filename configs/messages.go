@@ -29,4 +29,5 @@ const (
 	CheckingDockerEngine            = "Checking if docker engine is on"
 	DepositCLIDockerImageName       = "deposit-cli:local"
 	GeneratingKeystore              = "Generating keystore folder"
+	KeysFoundAt                     = "Your keys can be found at: %s"
 )

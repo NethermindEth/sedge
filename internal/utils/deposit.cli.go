@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"strings"
 	"text/template"
 
@@ -64,14 +63,6 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 		return
 	}
 
-	// Print cmd
-	log.Infof(configs.RunningCommand, "")
-	err = tmp.Execute(os.Stdout, data)
-	if err != nil {
-		return
-	}
-	fmt.Println()
-
 	// Get the command as a string
 	var cmd bytes.Buffer
 	err = tmp.Execute(&cmd, data)
@@ -80,9 +71,11 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 	}
 
 	// Run the command
+	log.Infof(configs.RunningCommand, cmd.String())
 	if _, err = RunCmd(cmd.String(), false, true); err != nil {
 		return
 	}
+	log.Infof(configs.KeysFoundAt, path+"/keystore")
 
 	return nil
 }
