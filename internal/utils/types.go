@@ -23,4 +23,6 @@ type Script struct {
 type DepositCLI struct {
 	// Network : Network name, e.g. "mainnet", "prater"
 	Network string
+	// Path : Path to the keystore folder
+	Path string
 }

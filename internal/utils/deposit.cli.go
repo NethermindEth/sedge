@@ -28,7 +28,7 @@ returns :-
 a. error
 Error if any
 */
-func GenerateValidatorKey(existing bool, network string) (err error) {
+func GenerateValidatorKey(existing bool, network, path string) (err error) {
 	// Check if image already exists
 	inspectCmd := fmt.Sprintf(configs.DockerInspectCMD, configs.DepositCLIDockerImageName)
 	if out, err := RunCmd(inspectCmd, true, false); err != nil {
@@ -43,6 +43,7 @@ func GenerateValidatorKey(existing bool, network string) (err error) {
 
 	data := DepositCLI{
 		Network: network,
+		Path:    path,
 	}
 
 	// Get the template file
