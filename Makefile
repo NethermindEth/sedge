@@ -2,16 +2,16 @@
 
 compile: ## compile:
 	@mkdir -p build
-	@go build -o build/1click cmd/1Click/main.go
+	@go build -o build/1Click cmd/1Click/main.go
 
 run: ## run
 	@./build/1click
 
 run-cli: compile ## run randomized cli
-	@./build/1click cli -r --config ./config.yaml
+	@./build/1Click cli -r --config ./config.yaml
 
 listClients: compile ## Run cmd listClients with ./config.yaml
-	@./build/1click listClients --config ./config.yaml
+	@./build/1Click listClients --config ./config.yaml
 
 logs: compile ## run cmd logs with ./config.yaml
 	@./build/1click logs --config ./config.yaml
