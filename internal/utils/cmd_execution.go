@@ -6,15 +6,75 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"os/signal"
+	"strings"
 	"sync"
+	"syscall"
 	"text/template"
 
 	"github.com/NethermindEth/1Click/configs"
+	"github.com/creack/pty"
+	log "github.com/sirupsen/logrus"
+	"golang.org/x/term"
 )
 
 /*
 RunCmd :
 Executes a command and returns the output.
+
+params :-
+a. cmd string
+The command to be executed.
+b. bool getOutput
+True if the output is to be returned.
+c. bool tty
+True if the command is to be run in a pty, false otherwise.
+
+returns :-
+a. string
+The output of the command.
+b. error
+Error if any
+*/
+func RunCmd(cmd string, getOutput, tty bool) (out string, err error) {
+	r := strings.ReplaceAll(cmd, "\n", "")
+	spl := strings.Split(r, " ")
+	c, args := spl[0], spl[1:]
+
+	exc := exec.Command(c, args...)
+
+	if tty {
+		return runInPty(exc, getOutput)
+	}
+
+	var combinedOut bytes.Buffer
+	if getOutput {
+		// If the cmd is to get the output, then use an unified buffer to combine stdout and stderr
+		exc.Stdout = &combinedOut
+		exc.Stderr = &combinedOut
+	} else {
+		// Pipe output to stdout and stderr
+		exc.Stdout = os.Stdout
+		exc.Stderr = os.Stderr
+	}
+
+	// Start and wait for the command to finish
+	if err = exc.Start(); err != nil {
+		return
+	}
+	// Return this error at the end as we need to check if the output from stderr is to be returned
+	err = exc.Wait()
+
+	if getOutput {
+		out = combinedOut.String()
+	}
+
+	return
+}
+
+/*
+RunBashCmd :
+Executes a command using bash and returns the output.
 
 params :-
 a. cmd string
@@ -28,7 +88,7 @@ The output of the command.
 b. error
 Error if any
 */
-func RunCmd(cmd string, getOutput bool) (out string, err error) {
+func RunBashCmd(cmd string, getOutput bool) (out string, err error) {
 	tmp, err := template.New("script").Parse(cmd)
 	if err != nil {
 		return "", err
@@ -40,7 +100,7 @@ func RunCmd(cmd string, getOutput bool) (out string, err error) {
 		Data:      struct{}{},
 	}
 
-	if out, err = executeScript(script); err != nil {
+	if out, err = executeBashScript(script); err != nil {
 		return "", fmt.Errorf(configs.RunningCMDError, cmd, err)
 	}
 
@@ -48,8 +108,8 @@ func RunCmd(cmd string, getOutput bool) (out string, err error) {
 }
 
 /*
-executeScript :
-Execute the script in the given template.
+executeBashScript :
+Execute the bash script in the given template.
 
 params :-
 a. script Script
@@ -61,7 +121,7 @@ The output of the script.
 b. error
 Error if any
 */
-func executeScript(script Script) (out string, err error) {
+func executeBashScript(script Script) (out string, err error) {
 	var scriptBuffer, combinedOut bytes.Buffer
 	if err = script.Tmp.Execute(&scriptBuffer, script.Data); err != nil {
 		return
@@ -161,4 +221,97 @@ func goCopy(wait *sync.WaitGroup, dst io.WriteCloser, src io.Reader, isStdin boo
 		wait.Done()
 	}()
 	return errChan
+}
+
+/*
+runInPty :
+Executes a command in a pty and returns the output.
+
+params :-
+a. cmd *exec.Cmd
+The command to be executed.
+b. bool getOutput
+True if the output is to be returned.
+
+returns :-
+a. string
+The output of the command.
+b. error
+Error if any
+*/
+func runInPty(cmd *exec.Cmd, getOutput bool) (out string, err error) {
+	// Start the command with a pty.
+	ptmx, err := pty.Start(cmd)
+	if err != nil {
+		return "", err
+	}
+	// Make sure to close the pty at the end.
+	defer func() {
+		cErr := ptmx.Close()
+		if err == nil && cErr != nil {
+			log.Error(cErr)
+			err = cErr
+		}
+	}()
+
+	// Handle pty size.
+	ch := make(chan os.Signal, 1)
+	errCh := make(chan error)
+	signal.Notify(ch, syscall.SIGWINCH)
+	go func() {
+		for sig := range ch {
+			log.Debug(sig)
+			if err := pty.InheritSize(os.Stdin, ptmx); err != nil {
+				log.Error(err)
+				errCh <- fmt.Errorf(configs.ResizingPtyError, err)
+			}
+		}
+		close(errCh)
+	}()
+	ch <- syscall.SIGWINCH                        // Initial resize.
+	defer func() { signal.Stop(ch); close(ch) }() // Cleanup signals when done.
+
+	for {
+		select {
+		case err = <-errCh:
+			// Check resizing errors
+			if err != nil {
+				return
+			}
+		default:
+			// Normal workflow
+			// Set stdin in raw mode.
+			oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+			if err != nil {
+				return "", err
+			}
+			defer func() {
+				rErr := term.Restore(int(os.Stdin.Fd()), oldState)
+				if err == nil && rErr != nil {
+					err = rErr
+				}
+			}()
+
+			// Copy stdin to the pty (where are not using stdin at the moment)
+			// NOTE: The goroutine will keep reading until the next keystroke before returning.
+			//errCh1 := make(chan error)
+			go func() {
+				_, err = io.Copy(ptmx, os.Stdin)
+				log.Error(err)
+			}()
+
+			// Handle output
+			var output bytes.Buffer
+			if getOutput {
+				// Copy the pty to out
+				_, _ = io.Copy(&output, ptmx)
+				out = output.String()
+			} else {
+				// Copy the pty to stdout
+				_, _ = io.Copy(os.Stdout, ptmx)
+			}
+
+			return out, nil
+		}
+	}
 }

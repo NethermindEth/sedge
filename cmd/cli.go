@@ -18,6 +18,7 @@ import (
 	"github.com/NethermindEth/1Click/internal/utils"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 var (
@@ -36,7 +37,7 @@ const (
 
 // cliCmd represents the cli command
 var cliCmd = &cobra.Command{
-	Use:   "cli",
+	Use:   "cli [flags]",
 	Short: "Quick start 1Click",
 	Long: `Run the setup tool on-premise in a quick way. Provide only the command line
 options and the tool will do all the work.
@@ -48,9 +49,16 @@ Second, it will generate docker-compose scripts to run the full setup according 
 
 Finally, it will run the generated docker-compose script
 
-Running the command without flags (except global flag'--config') is equivalent to '1click cli -r -i --run' `,
+Running the command without flags (except global flag'--config') is equivalent to '1Click cli -r -i --run' `,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
+		// Count flags being set
+		count := 0
+		cmd.Flags().Visit(func(f *pflag.Flag) {
+			count++
+		})
+
+		if count == 0 {
+			// No flag behavior
 			randomize, install, run = true, true, true
 		}
 
@@ -72,7 +80,7 @@ Running the command without flags (except global flag'--config') is equivalent t
 		log.Infof(configs.CheckingDependencies, strings.Join(dependencies, ", "))
 
 		// Check if dependencies are installed. Keep checking dependencies until they are all installed
-		for pending := utils.CheckDependencies(dependencies); len(pending) > 0; {
+		for pending := utils.CheckDependencies(dependencies); len(pending) > 0; pending = utils.CheckDependencies(dependencies) {
 			log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
 			if install {
 				// Install dependencies directly
@@ -289,19 +297,20 @@ func runAndShowContainers() error {
 	// Check if docker engine is on
 	log.Info(configs.CheckingDockerEngine)
 	log.Infof(configs.RunningCommand, configs.DockerPsCMD)
-	if _, err := utils.RunCmd(configs.DockerPsCMD, true); err != nil {
+	if _, err := utils.RunCmd(configs.DockerPsCMD, true, false); err != nil {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
 	}
 
 	// Run docker-compose script
 	upCMD := fmt.Sprintf(configs.DockerComposeUpCMD, generationPath+"/docker-compose.yml")
 	log.Infof(configs.RunningCommand, upCMD)
-	if _, err := utils.RunCmd(upCMD, false); err != nil {
+	if _, err := utils.RunCmd(upCMD, false, false); err != nil {
 		return err
 	}
 
 	// Run docker ps -a to show containers
-	if _, err := utils.RunCmd(configs.DockerPsCMD, false); err != nil {
+	log.Infof(configs.RunningCommand, configs.DockerPsCMD)
+	if _, err := utils.RunCmd(configs.DockerPsCMD, false, false); err != nil {
 		return err
 	}
 

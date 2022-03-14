@@ -117,7 +117,7 @@ func InstallDependency(dependency string) (err error) {
 		Data:      struct{}{},
 	}
 
-	if _, err = executeScript(script); err != nil {
+	if _, err = executeBashScript(script); err != nil {
 		return
 	}
 

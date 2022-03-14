@@ -18,3 +18,11 @@ type Script struct {
 	// Data: template data object
 	Data interface{}
 }
+
+// DepositCLI : Struct Data for eth2.0-deposit-cli command template
+type DepositCLI struct {
+	// Network : Network name, e.g. "mainnet", "prater"
+	Network string
+	// Path : Path to the keystore folder
+	Path string
+}

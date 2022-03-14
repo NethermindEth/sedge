@@ -21,7 +21,7 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "1click",
+	Use:   "1Click",
 	Short: "A brief description of your application",
 	Long: `A tool to allow deploying validators with ease. This tool is
 WIP and is not yet ready for use.`,
@@ -44,7 +44,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Persistent flags
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.1click.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.1Click.yaml)")
 
 	// Local flags
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")

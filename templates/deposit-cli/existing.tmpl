@@ -1,0 +1,2 @@
+{{/* deposit-cli-existing.tmpl */}}
+docker run -it --rm -v {{.Path}}/keystore:/app/validator_keys deposit-cli:local existing-mnemonic --chain {{.Network}}

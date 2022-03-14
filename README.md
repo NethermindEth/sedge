@@ -44,6 +44,6 @@ sudo cp 1Click/build/1Click /usr/local/bin/
 Download directly the binary and put it in `/usr/local/bin`:
 
 ```
-sudo curl -LJ -o /usr/local/bin/1Click https://github.com/NethermindEth/1Click/raw/feature/install-instructions/build/1Click
+sudo curl -LJ -o /usr/local/bin/1Click https://github.com/NethermindEth/1Click/raw/feature/main/build/1Click
 sudo chmod +x /usr/local/bin/1Click
 ```
