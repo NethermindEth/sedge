@@ -9,6 +9,10 @@
       - execution
     volumes:
       - ./lhconsensus-data:/var/lib/lighthouse
+    ports:
+      - 9000:9000/tcp
+      - 9000:9000/udp
+      - 4000:4000/tcp
     command:
       - lighthouse
       - bn
@@ -24,7 +28,6 @@
       - --eth1-blocks-per-log-query=150
       - --debug-level=${CC_LOG_LEVEL}
       - --validator-monitor-auto
-    network_mode: host
     logging:
       driver: "json-file"
       options:

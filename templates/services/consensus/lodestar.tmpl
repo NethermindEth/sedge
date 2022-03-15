@@ -9,6 +9,10 @@
       - execution
     volumes:
       - ./lsconsensus-data:/var/lib/lodestar/consensus
+    ports:
+      - 9000:9000/tcp
+      - 9000:9000/udp
+      - 4000:4000/tcp  
     environment:
       NODE_OPTIONS: --max_old_space_size=6144
     command: 
@@ -25,7 +29,6 @@
       - --eth1.providerUrl=${EC_NODE}
       - --weakSubjectivitySyncLatest=${LS_RAPID_SYNC}
       - --network.targetPeers=${CC_PEER_COUNT}
-    network_mode: host
     logging:
       driver: "json-file"
       options:
