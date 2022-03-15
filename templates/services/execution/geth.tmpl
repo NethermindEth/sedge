@@ -14,18 +14,15 @@
     command: 
       - geth
       - --http
-      - --http.addr
-      - 0.0.0.0
+      - --http.addr=0.0.0.0
       - --http.vhosts=*
       - --http.corsdomain=*
       - --http.api
       - web3,eth,net
       - --datadir
       - /var/lib/goethereum
-      - --port
-      - 30303
-      - --http.port
-      - 8545
+      - --port=30303
+      - --http.port=8545
       - --${GETH_NETWORK}
       - --verbosity
       - ${GETH_LOG_LEVEL}
