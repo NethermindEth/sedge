@@ -7,6 +7,10 @@
     image: ${EXECUTION_IMAGE_VERSION}
     volumes:
       - ./nethermind-execution-data/:/nethermind/data
+    ports:
+      - 30303:30303/tcp
+      - 30303:30303/udp
+      - 8545:8545/tcp
     command: 
       - --config=${NETHERMIND_CONFIG}
       - --datadir=/nethermind/data
@@ -25,7 +29,6 @@
       - --EthStats.Name=${NETHERMIND_ETHSTATSCONFIG_NAME}
       - --EthStats.Secret=${NETHERMIND_ETHSTATSCONFIG_SECRET}
       - --EthStats.Contact=${NETHERMIND_ETHSTATSCONFIG_CONTACT}
-    network_mode: host
     logging:
       driver: "json-file"
       options:
