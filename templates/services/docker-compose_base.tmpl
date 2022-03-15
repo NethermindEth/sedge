@@ -1,0 +1,9 @@
+{{/* docker-compose_base.tmpl */}}
+{{ define "docker-compose" }}
+version: "2.4"
+
+services:
+{{template "execution" .}}
+{{template "consensus" .}}
+{{template "validator" .}}
+{{ end }}

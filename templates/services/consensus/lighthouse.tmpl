@@ -1,0 +1,33 @@
+{{/* lighthouse.tmpl */}}
+{{ define "consensus" }}
+  consensus:
+    stop_grace_period: 1m
+    container_name: consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    depends_on: 
+      - execution
+    volumes:
+      - ./lhconsensus-data:/var/lib/lighthouse
+    command:
+      - lighthouse
+      - bn
+      - --disable-upnp
+      - --datadir=/var/lib/lighthouse
+      - --port=9000
+      - --http
+      - --http-address=0.0.0.0
+      - --http-port=4000
+      - --network=${NETWORK}
+      - --target-peers=${CC_PEER_COUNT}
+      - --eth1-endpoints=${EC_NODE}
+      - --eth1-blocks-per-log-query=150
+      - --debug-level=${CC_LOG_LEVEL}
+      - --validator-monitor-auto
+    network_mode: host
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"    
+{{ end }}

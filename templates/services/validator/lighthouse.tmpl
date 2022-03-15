@@ -1,0 +1,37 @@
+{{/* lighthouse.tmpl */}}
+{{ define "validator" }}
+  validator-import:
+    container_name: validator-import-client
+    image: ${VL_IMAGE_VERSION}
+    volumes:
+      - ./keystore:/keystore
+      - ./lhvalidator-data/:/var/lib/lighthouse
+    command: |
+      lighthouse account validator import
+      --password-file=/keystore/keystore_password.txt
+      --reuse-password
+      --directory /keystore
+      --datadir /var/lib/lighthouse
+
+  validator:
+    container_name: validator-client
+    image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      - consensus
+    volumes:
+      - ./lhvalidator-data:/var/lib/lighthouse
+    command:
+      - lighthouse
+      - vc
+      - --beacon-nodes=${CC_NODE}
+      - --graffiti=${GRAFFITI}
+      - --network=${NETWORK}
+      - --debug-level=${VL_LOG_LEVEL}
+      - --validators-dir=/var/lib/lighthouse
+    network_mode: host
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}

@@ -3,13 +3,13 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"os/exec"
 	"runtime"
 	"strings"
+	"text/template"
 
 	"github.com/NethermindEth/1Click/configs"
+	"github.com/NethermindEth/1Click/templates"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -70,7 +70,7 @@ func ShowInstructions(dependency string) error {
 		return fmt.Errorf(configs.ScriptPathError, err)
 	}
 
-	content, err := ioutil.ReadFile(scriptPath)
+	content, err := templates.Setup.ReadFile(scriptPath)
 	if err != nil {
 		return fmt.Errorf(configs.ReadingInstructionError, scriptPath)
 	}
@@ -95,25 +95,38 @@ returns :-
 a. error
 Error if any
 */
-func InstallDependency(dependency string) error {
+func InstallDependency(dependency string) (err error) {
 	scriptPath, _, err := getScriptPath(dependency)
 	if err != nil {
-		return err
+		return
 	}
 
-	// Not sure which is the best way, the two below works
-	cmd := exec.Command("bash", "-c", scriptPath)
-	//cmd := exec.Command(fmt.Sprintf("%s/%s/linux/%s/%s.sh", pwd, configs.InstallScriptsPath, dependency, distro.Name))
+	rawScript, err := templates.Setup.ReadFile(scriptPath)
+	if err != nil {
+		return
+	}
 
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	tmp, err := template.New("script").Parse(string(rawScript))
+	if err != nil {
+		return
+	}
 
-	return cmd.Run()
+	script := Script{
+		Tmp:       tmp,
+		GetOutput: false,
+		Data:      struct{}{},
+	}
+
+	if _, err = executeScript(script); err != nil {
+		return
+	}
+
+	return nil
 }
 
 /*
 getScriptPath :
-Give the path to dependency install script.
+Give the path to dependency embedded install script.
 Currently support only for linux.
 
 params :-
@@ -133,17 +146,12 @@ func getScriptPath(dependency string) (path string, distro DistroInfo, err error
 		return "", DistroInfo{}, fmt.Errorf(configs.OSNotSupported, runtime.GOOS)
 	}
 
-	pwd, err := os.Getwd()
-	if err != nil {
-		return
-	}
-
 	distro, err = GetOSInfo()
 	if err != nil {
 		return
 	}
 
-	path = fmt.Sprintf("%s/%s/%s/%s/%s.sh", pwd, configs.InstallScriptsPath, runtime.GOOS, dependency, distro.Name)
+	path = fmt.Sprintf("setup/%s/%s/%s_%s.sh", runtime.GOOS, dependency, distro.Name, distro.Version)
 	return path, distro, nil
 }
 
@@ -169,7 +177,7 @@ func dependencySupported(dependency string) bool {
 		return false
 	}
 
-	if _, err := os.Stat(scriptPath); errors.Is(err, os.ErrNotExist) {
+	if _, err := templates.Setup.Open(scriptPath); errors.Is(err, os.ErrNotExist) {
 		// script does not exist
 		return false
 	}

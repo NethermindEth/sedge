@@ -1,0 +1,33 @@
+{{/* prysm.tmpl */}}
+{{ define "consensus" }}
+  consensus:
+    stop_grace_period: 1m
+    container_name: consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    depends_on: 
+      - execution
+    volumes:
+      - ./prysmconsensus-data:/var/lib/prysm
+    command:
+      - --datadir=/var/lib/prysm/
+      - --verbosity=${CC_LOG_LEVEL}
+      - --${NETWORK}
+      - --p2p-tcp-port=13000
+      - --p2p-udp-port=12000
+      - --p2p-max-peers=${CC_PEER_COUNT}
+      - --rpc-host=0.0.0.0
+      - --grpc-gateway-host=0.0.0.0
+      - --grpc-gateway-port=4000
+      - --http-web3provider=${EC_NODE}
+      - --fallback-web3provider=${EC_FALLBACK_NODE1}
+      - --fallback-web3provider=${EC_FALLBACK_NODE2}
+      - --eth1-header-req-limit=150
+      - --accept-terms-of-use
+    network_mode: host
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}

@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/NethermindEth/1Click/configs"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -32,8 +33,9 @@ Error if any
 func GetOSInfo() (distro DistroInfo, err error) {
 	// Get the architecture
 	distro.Architecture = runtime.GOARCH
+	file := "/etc/os-release"
 
-	f, err := os.Open("/etc/os-release")
+	f, err := os.Open(file)
 	if err != nil {
 		return
 	}
@@ -42,7 +44,7 @@ func GetOSInfo() (distro DistroInfo, err error) {
 	defer func() {
 		cerr := f.Close()
 		if err == nil && cerr != nil {
-			log.Errorf("Failed to close file /etc/os-release")
+			log.Errorf(configs.ClosingFileError, file)
 			err = cerr
 		}
 	}()

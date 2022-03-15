@@ -10,6 +10,8 @@ import (
 	"strings"
 
 	"github.com/NethermindEth/1Click/configs"
+	"github.com/NethermindEth/1Click/internal/pkg/generate"
+	nested "github.com/antonfisher/nested-logrus-formatter"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -61,7 +63,7 @@ func initConfig() {
 		// Search config in home directory with name ".1Click" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".1click")
+		viper.SetConfigName(configs.ConfigFileName)
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -70,8 +72,19 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	} else {
+		fmt.Println(err)
 		fmt.Fprintln(os.Stderr, "Config file not found on the path provided nor in the home directory")
-		os.Exit(1)
+
+		// Generate config file
+		home, err := os.UserHomeDir()
+		cobra.CheckErr(err)
+		fmt.Printf("Generating config file in the %s directory\n", home)
+
+		err = generate.GenerateConfig(home)
+		cobra.CheckErr(err)
+
+		viper.ReadInConfig()
+		cobra.CheckErr(err)
 	}
 
 	initLogging()
@@ -89,16 +102,22 @@ none
 func initLogging() {
 	var config configs.LogConfig
 
+	log.SetFormatter(&nested.Formatter{
+		HideKeys:        true,
+		FieldsOrder:     []string{configs.Component},
+		TimestampFormat: "2006-01-02 15:04:05 --",
+	})
+
 	err := viper.UnmarshalKey("logs", &config)
 	if err != nil {
-		log.Errorf("Unable to decode into struct, %v", err)
+		log.WithField(configs.Component, "Logger Init").Errorf("Unable to decode into struct, %v", err)
 		return
 	}
-	log.Infof("Logging configuration: %+v", config)
+	log.WithField(configs.Component, "Logger Init").Infof("Logging configuration: %+v", config)
 
 	level, err := log.ParseLevel(strings.ToLower(config.Level))
 	if err != nil {
-		log.Error(err)
+		log.WithField(configs.Component, "Logger Init").Error(err)
 		return
 	}
 	log.SetLevel(level)
