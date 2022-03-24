@@ -20,7 +20,7 @@ import (
 
 /*
 RunCmd :
-Executes a command and returns the output.
+Executes a command with sudo and returns the output.
 
 params :-
 a. cmd string
@@ -37,6 +37,31 @@ b. error
 Error if any
 */
 func RunCmd(cmd string, getOutput, tty bool) (out string, err error) {
+	//TODO: Manage Windows compatibility regarding sudo powers
+	// Executing with sudo for now, this needs to change for Windows or maybe if docker is in user group
+	scmd := fmt.Sprintf("sudo %s", cmd)
+	return runCmd(scmd, getOutput, tty)
+}
+
+/*
+runCmd :
+Executes a command and returns the output.
+
+params :-
+a. cmd string
+The command to be executed.
+b. bool getOutput
+True if the output is to be returned.
+c. bool tty
+True if the command is to be run in a pty, false otherwise.
+
+returns :-
+a. string
+The output of the command.
+b. error
+Error if any
+*/
+func runCmd(cmd string, getOutput, tty bool) (out string, err error) {
 	r := strings.ReplaceAll(cmd, "\n", "")
 	spl := strings.Split(r, " ")
 	c, args := spl[0], spl[1:]
