@@ -77,7 +77,7 @@ func buildData(getClients func(string) ([]string, error)) ([][]string, error) {
 	max = int(math.Max(float64(max), float64(len(validatorClients))))
 
 	if max > 0 {
-		for _, list := range []*[]string{&executionClients, &consensusClients, &validatorClients} {
+		for _, list := range [...]*[]string{&executionClients, &consensusClients, &validatorClients} {
 			for len(*list) < max {
 				*list = append(*list, "-")
 			}
