@@ -43,6 +43,9 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	// Disable completion default cmd
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
+
 	// Persistent flags
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.1Click.yaml)")
 }
