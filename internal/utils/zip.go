@@ -1,6 +1,10 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/NethermindEth/1Click/configs"
+)
 
 /*
 ZipString :
@@ -20,7 +24,7 @@ func ZipString(lists ...[]string) ([][]string, error) {
 	size := len(lists[0])
 	for _, list := range lists {
 		if len(list) != size {
-			return nil, fmt.Errorf("all lists must have the same size")
+			return nil, fmt.Errorf(configs.ZipError)
 		}
 	}
 

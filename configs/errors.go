@@ -31,4 +31,5 @@ const (
 	GeneratingKeystoreError           = "failed to generate keystore folder. Error: %s"
 	ResizingPtyError                  = "error resizing pty: %s"
 	InvalidVolumePathError            = "invalid path provided: %s. If you intended to pass a host directory, use absolute path"
+	ZipError                          = "all lists must have the same size"
 )
