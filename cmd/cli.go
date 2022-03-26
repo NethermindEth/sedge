@@ -29,6 +29,7 @@ var (
 	randomize      bool
 	install        bool
 	run            bool
+	y              bool
 )
 
 const (
@@ -49,7 +50,7 @@ Second, it will generate docker-compose scripts to run the full setup according 
 
 Finally, it will run the generated docker-compose script
 
-Running the command without flags (except global flag'--config') is equivalent to '1Click cli -r -i --run' `,
+Running the command without flags (except global flag'--config') is equivalent to '1Click cli -r' `,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Count flags being set
 		count := 0
@@ -59,6 +60,11 @@ Running the command without flags (except global flag'--config') is equivalent t
 
 		if count == 0 {
 			// No flag behavior
+			randomize = true
+		}
+
+		// Quick run
+		if y {
 			randomize, install, run = true, true, true
 		}
 
@@ -131,6 +137,8 @@ func init() {
 	cliCmd.Flags().BoolVarP(&install, "install", "i", false, "Install dependencies if not installed without asking")
 
 	cliCmd.Flags().BoolVar(&run, "run", false, "Run the generated docker-compose scripts without asking")
+
+	cliCmd.Flags().BoolVarP(&y, "yes", "y", false, "Shortcut for '1Click cli -r -i --run'. Run without prompts")
 }
 
 func installOrShowInstructions(pending []string) (err error) {
