@@ -34,7 +34,7 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 		// Output is of type: []\n Error: <text>
 		log.Error(strings.Split(out, "Error:")[1])
 
-		//Build eth2.0-deposit-cli docker image
+		//Build staking-deposit-cli docker image
 		if err := buildDepositCliImage(); err != nil {
 			return err
 		}

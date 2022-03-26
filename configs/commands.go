@@ -7,6 +7,6 @@ const (
 	DockerComposePsServicesCMD = "docker-compose -f %s ps --services --filter status=running"
 	DockerComposeLogsFollowCMD = "docker-compose -f %s logs --follow %s"
 	DockerComposeLogsTailCMD   = "docker-compose -f %s logs --tail=20 %s"
-	DepositCLIDockerBuildCMD   = "docker build github.com/ethereum/eth2.0-deposit-cli -t %s"
+	DepositCLIDockerBuildCMD   = "docker build github.com/ethereum/staking-deposit-cli -t %s"
 	DockerInspectCMD           = "docker inspect %s"
 )
