@@ -32,4 +32,5 @@ const (
 	ResizingPtyError                  = "error resizing pty: %s"
 	InvalidVolumePathError            = "invalid path provided: %s. If you intended to pass a host directory, use absolute path"
 	ZipError                          = "all lists must have the same size"
+	CommandError                      = "Command %s throws error: %s"
 )

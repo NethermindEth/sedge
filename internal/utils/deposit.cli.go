@@ -32,11 +32,15 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 	inspectCmd := fmt.Sprintf(configs.DockerInspectCMD, configs.DepositCLIDockerImageName)
 	if out, err := RunCmd(inspectCmd, true, false); err != nil {
 		// Output is of type: []\n Error: <text>
-		log.Error(strings.Split(out, "Error:")[1])
-
-		//Build staking-deposit-cli docker image
-		if err := buildDepositCliImage(); err != nil {
-			return err
+		// TODO: Check if the error is not "Error: No such image: <image_name>" in Windows
+		if strings.Contains(out, "No such object:") {
+			// Image does not exist. Build it
+			log.Infof(configs.ImageNotFound, configs.DepositCLIDockerImageName)
+			if err := buildDepositCliImage(); err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf(configs.CommandError, inspectCmd, out)
 		}
 	}
 

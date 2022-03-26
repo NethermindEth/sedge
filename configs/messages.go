@@ -30,4 +30,5 @@ const (
 	DepositCLIDockerImageName       = "deposit-cli:local"
 	GeneratingKeystore              = "Generating keystore folder"
 	KeysFoundAt                     = "If everything went well, your keys can be found at: %s"
+	ImageNotFound                   = "Image %s not found, building it"
 )
