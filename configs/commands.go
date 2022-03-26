@@ -9,4 +9,5 @@ const (
 	DockerComposeLogsTailCMD   = "docker-compose -f %s logs --tail=20 %s"
 	DepositCLIDockerBuildCMD   = "docker build github.com/ethereum/staking-deposit-cli -t %s"
 	DockerInspectCMD           = "docker inspect %s"
+	DockerComposeDownCMD       = "docker-compose -f %s down"
 )
