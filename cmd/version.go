@@ -16,7 +16,7 @@ var versionCmd = &cobra.Command{
 	Short: "print 1Click version",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("version called")
+		fmt.Println("1click 0.1")
 	},
 }
 
