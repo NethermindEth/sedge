@@ -152,6 +152,7 @@ func generateEnvFile(executionClient, consensusClient, validatorClient, path str
 
 	consensusEnv := ConsensusEnv{
 		ExecutionNodeURL: configs.OnPremiseExecutionURL,
+		DataDir:          configs.ConsensusDefaultDataDir,
 	}
 
 	validatorEnv := ValidatorEnv{

@@ -8,7 +8,7 @@
     depends_on: 
       - execution
     volumes:
-      - ./prysmconsensus-data:/var/lib/prysm
+      - ${CC_DATA_DIR}:/var/lib/prysm
     ports:
       - 13000:13000/tcp
       - 12000:12000/udp

@@ -8,7 +8,7 @@
     depends_on: 
       - execution
     volumes:
-      - ./lsconsensus-data:/var/lib/lodestar/consensus
+      - ${CC_DATA_DIR}:/var/lib/lodestar/consensus
     ports:
       - 9000:9000/tcp
       - 9000:9000/udp
