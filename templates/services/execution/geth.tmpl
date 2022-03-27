@@ -4,9 +4,9 @@
     stop_grace_period: 1m
     container_name: execution-client
     restart: unless-stopped
-    image: ${EXECUTION_IMAGE_VERSION}
+    image: ${EC_IMAGE_VERSION}
     volumes:
-      - ./geth-execution-data:/var/lib/goethereum
+      - ${EC_DATA_DIR}:/var/lib/goethereum
     ports:
       - 30303:30303/tcp
       - 30303:30303/udp

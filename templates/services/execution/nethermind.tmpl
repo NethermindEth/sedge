@@ -4,9 +4,9 @@
     stop_grace_period: 1m
     container_name: execution-client
     restart: unless-stopped
-    image: ${EXECUTION_IMAGE_VERSION}
+    image: ${EC_IMAGE_VERSION}
     volumes:
-      - ./nethermind-execution-data/:/nethermind/data
+      - ${EC_DATA_DIR}:/nethermind/data
     ports:
       - 30303:30303/tcp
       - 30303:30303/udp

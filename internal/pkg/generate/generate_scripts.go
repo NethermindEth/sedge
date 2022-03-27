@@ -150,6 +150,11 @@ func generateEnvFile(executionClient, consensusClient, validatorClient, path str
 		return
 	}
 
+	// TODO: Use OS wise delimiter for these data structs
+	executionEnv := ExecutionEnv{
+		DataDir: configs.ExecutionDefaultDataDir,
+	}
+
 	consensusEnv := ConsensusEnv{
 		ExecutionNodeURL: configs.OnPremiseExecutionURL,
 		DataDir:          configs.ConsensusDefaultDataDir,
@@ -162,7 +167,7 @@ func generateEnvFile(executionClient, consensusClient, validatorClient, path str
 		DataDir:             configs.ValidatorDefaultDataDir,
 	}
 
-	err = writeTemplateToFile(executionEnvTmp, path+"/.env", nil, false)
+	err = writeTemplateToFile(executionEnvTmp, path+"/.env", executionEnv, false)
 	if err != nil {
 		return fmt.Errorf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient, err)
 	}

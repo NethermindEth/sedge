@@ -1,5 +1,10 @@
 package generate
 
+// ExecutionEnv : Struct Data object to be applied to execution docker-compose script environment template
+type ExecutionEnv struct {
+	DataDir string
+}
+
 // ConsensusEnv : Struct Data object to be applied to consensus docker-compose script environment template
 type ConsensusEnv struct {
 	ExecutionNodeURL string
