@@ -184,7 +184,7 @@ func generateEnvFile(executionClient, consensusClient, validatorClient, path str
 
 	// Print .env file
 	log.Infof(configs.PrintingFile, ".env")
-	err = executionEnvTmp.Execute(os.Stdout, nil)
+	err = executionEnvTmp.Execute(os.Stdout, executionEnv)
 	if err != nil {
 		return fmt.Errorf(configs.PrintingFileError, ".env", err)
 	}
