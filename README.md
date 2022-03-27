@@ -10,7 +10,7 @@ A tool to allow deploying validators with ease.
 If you have at least `go1.17.5` installed then this command will install the 1click executable along with the library and its dependencies:
 
 ```
-go install github.com/2kodevs/domline/cmd/domline@latest
+go install github.com/NethermindEth/1click/cmd/1click@latest
 ```
 
 The executable will be in `$GOBIN` (`$GOPATH/bin`) 
@@ -18,6 +18,14 @@ The executable will be in `$GOBIN` (`$GOPATH/bin`)
 ### Manual
 
 Generate the executable manually (need Go installed):
+
+```
+git clone https://github.com/NethermindEth/1click.git
+cd 1click
+go build -o 1click cmd/1click/main.go
+```
+
+or if you have `make` installed:
 
 ```
 git clone https://github.com/NethermindEth/1click.git
