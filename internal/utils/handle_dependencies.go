@@ -8,20 +8,20 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/NethermindEth/1Click/configs"
-	"github.com/NethermindEth/1Click/templates"
+	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/templates"
 	log "github.com/sirupsen/logrus"
 )
 
 /*
 HandleInstructions :
-This function is responsible for handling the dependencies needed for 1Click setup
+This function is responsible for handling the dependencies needed for 1click setup
 If install support for a dependency exists, then `handler` will process it, for example,
 installing it or showing instructions for it.
 
 params :-
 a. []string dependencies
-List of dependencies needed for 1Click setup
+List of dependencies needed for 1click setup
 b. func(string) error handler
 Handler for each dependency
 

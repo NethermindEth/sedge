@@ -1,4 +1,4 @@
-module github.com/NethermindEth/1Click
+module github.com/NethermindEth/1click
 
 go 1.17
 

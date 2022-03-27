@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/NethermindEth/1Click/configs"
+	"github.com/NethermindEth/1click/configs"
 	log "github.com/sirupsen/logrus"
 )
 

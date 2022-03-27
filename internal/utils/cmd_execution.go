@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"text/template"
 
-	"github.com/NethermindEth/1Click/configs"
+	"github.com/NethermindEth/1click/configs"
 	"github.com/creack/pty"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/term"

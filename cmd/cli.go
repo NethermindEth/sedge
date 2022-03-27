@@ -11,11 +11,11 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/NethermindEth/1Click/configs"
-	"github.com/NethermindEth/1Click/internal/pkg/clients"
-	"github.com/NethermindEth/1Click/internal/pkg/generate"
-	"github.com/NethermindEth/1Click/internal/ui"
-	"github.com/NethermindEth/1Click/internal/utils"
+	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/internal/pkg/clients"
+	"github.com/NethermindEth/1click/internal/pkg/generate"
+	"github.com/NethermindEth/1click/internal/ui"
+	"github.com/NethermindEth/1click/internal/utils"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -40,7 +40,7 @@ const (
 // cliCmd represents the cli command
 var cliCmd = &cobra.Command{
 	Use:   "cli [flags]",
-	Short: "Quick start 1Click",
+	Short: "Quick start 1click",
 	Long: `Run the setup tool on-premise in a quick way. Provide only the command line
 options and the tool will do all the work.
 
@@ -51,7 +51,7 @@ Second, it will generate docker-compose scripts to run the full setup according 
 
 Finally, it will run the generated docker-compose script. Only execution and consensus clients will be executed by default.
 
-Running the command without flags (except global flag'--config') is equivalent to '1Click cli -r' `,
+Running the command without flags (except global flag'--config') is equivalent to '1click cli -r' `,
 	Args: cobra.NoArgs,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		// Count flags being set
@@ -153,9 +153,9 @@ func init() {
 
 	cliCmd.Flags().BoolVar(&run, "run", false, "Run the generated docker-compose scripts without asking")
 
-	cliCmd.Flags().BoolVarP(&y, "yes", "y", false, "Shortcut for '1Click cli -r -i --run'. Run without prompts")
+	cliCmd.Flags().BoolVarP(&y, "yes", "y", false, "Shortcut for '1click cli -r -i --run'. Run without prompts")
 
-	services = cliCmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all. The 'all' option must be used alone. Example: '1Click cli -r --run-clients=consensus,validator'")
+	services = cliCmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all. The 'all' option must be used alone. Example: '1click cli -r --run-clients=consensus,validator'")
 }
 
 func installOrShowInstructions(pending []string) (err error) {

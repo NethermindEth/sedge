@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/NethermindEth/1Click/configs"
-	"github.com/NethermindEth/1Click/internal/utils"
-	"github.com/NethermindEth/1Click/templates"
+	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/internal/utils"
+	"github.com/NethermindEth/1click/templates"
 	log "github.com/sirupsen/logrus"
 )
 

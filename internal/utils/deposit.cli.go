@@ -6,8 +6,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/NethermindEth/1Click/configs"
-	"github.com/NethermindEth/1Click/templates"
+	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/templates"
 	log "github.com/sirupsen/logrus"
 )
 

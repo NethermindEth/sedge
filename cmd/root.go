@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/NethermindEth/1Click/configs"
-	"github.com/NethermindEth/1Click/internal/pkg/generate"
+	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/internal/pkg/generate"
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -21,7 +21,7 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "1Click",
+	Use:   "1click",
 	Short: "A brief description of your application",
 	Long: `A tool to allow deploying validators with ease. This tool is
 WIP and is not yet ready for use.`,
@@ -47,7 +47,7 @@ func init() {
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 
 	// Persistent flags
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.1Click.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.1click.yaml)")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -60,7 +60,7 @@ func initConfig() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".1Click" (without extension).
+		// Search config in home directory with name ".1click" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
 		viper.SetConfigName(configs.ConfigFileName)

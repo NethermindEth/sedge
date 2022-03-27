@@ -20,8 +20,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/NethermindEth/1Click/configs"
-	"github.com/NethermindEth/1Click/internal/utils"
+	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
