@@ -33,4 +33,5 @@ const (
 	InvalidVolumePathError            = "invalid path provided: %s. If you intended to pass a host directory, use absolute path"
 	ZipError                          = "all lists must have the same size"
 	CommandError                      = "Command '%s' throws error: %s"
+	RunClientsFlagAmbiguousError      = "provided values %v for run-clients flag are ambiguous. If you want to use the option 'all', then do not insert aditional options"
 )

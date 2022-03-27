@@ -2,7 +2,7 @@ package configs
 
 // Commands
 const (
-	DockerComposeUpCMD         = "docker-compose -f %s up -d execution consensus"
+	DockerComposeUpCMD         = "docker-compose -f %s up -d %s"
 	DockerPsCMD                = "docker ps -a"
 	DockerComposePsServicesCMD = "docker-compose -f %s ps --services --filter status=running"
 	DockerComposePsFilterCMD   = "docker-compose -f %s ps --filter status=running"
