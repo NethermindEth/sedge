@@ -51,7 +51,8 @@ Second, it will generate docker-compose scripts to run the full setup according 
 Finally, it will run the generated docker-compose script
 
 Running the command without flags (except global flag'--config') is equivalent to '1Click cli -r' `,
-	Run: func(cmd *cobra.Command, args []string) {
+	Args: cobra.NoArgs,
+	PreRun: func(cmd *cobra.Command, args []string) {
 		// Count flags being set
 		count := 0
 		cmd.Flags().Visit(func(f *pflag.Flag) {
@@ -68,6 +69,8 @@ Running the command without flags (except global flag'--config') is equivalent t
 			randomize, install, run = true, true, true
 		}
 
+	},
+	Run: func(cmd *cobra.Command, args []string) {
 		// Get all clients: supported + configured
 		clientsMap, errors := clients.GetClients([]string{execution, consensus, validator})
 		if len(errors) > 0 {
@@ -77,6 +80,7 @@ Running the command without flags (except global flag'--config') is equivalent t
 			os.Exit(1)
 		}
 
+		// Handle selection and validation of clients
 		combinedClients, err := validateClients(clientsMap)
 		if err != nil {
 			log.Fatal(err)
