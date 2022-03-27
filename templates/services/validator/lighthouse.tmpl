@@ -3,6 +3,8 @@
   validator-import:
     container_name: validator-import-client
     image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      - consensus
     volumes:
       - ${KEYSTORE_DIR}:/keystore
       - ${VL_DATA_DIR}:/var/lib/lighthouse
@@ -17,7 +19,7 @@
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
     depends_on: 
-      - consensus
+      - validator-import
     volumes:
       - ${VL_DATA_DIR}:/var/lib/lighthouse
     command:
