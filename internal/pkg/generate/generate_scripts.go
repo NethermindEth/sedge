@@ -157,6 +157,8 @@ func generateEnvFile(executionClient, consensusClient, validatorClient, path str
 	validatorEnv := ValidatorEnv{
 		ConsensusNodeURL:    configs.OnPremiseConsensusURL,
 		ExecutionEngineName: executionClient,
+		KeystoreDir:         configs.KeystoreDefaultDataDir,
+		DataDir:             configs.ValidatorDefaultDataDir,
 	}
 
 	err = writeTemplateToFile(executionEnvTmp, path+"/.env", nil, false)

@@ -4,7 +4,7 @@
     image: ${VL_IMAGE_VERSION}
     container_name: validator-import-client
     volumes:
-      - ./keystore:/keystore
+      - ${KEYSTORE_DIR}:/keystore
     command: |
       account validator import
       --network ${NETWORK}
@@ -17,8 +17,8 @@
     depends_on: 
       - consensus
     volumes:
-      - ./lsvalidator-data:/var/lib/lodestar/validator
-      - ./keystore:/var/lib/lodestar/keystore
+      - ${VL_DATA_DIR}:/var/lib/lodestar/validator
+      - ${KEYSTORE_DIR}:/var/lib/lodestar/keystore
     environment:
       NODE_OPTIONS: --max_old_space_size=8192
     command: 

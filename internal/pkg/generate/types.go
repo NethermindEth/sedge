@@ -9,4 +9,6 @@ type ConsensusEnv struct {
 type ValidatorEnv struct {
 	ConsensusNodeURL    string
 	ExecutionEngineName string
+	DataDir             string
+	KeystoreDir         string
 }

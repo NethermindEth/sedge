@@ -4,8 +4,8 @@
     container_name: validator-import-client
     image: ${VL_IMAGE_VERSION}
     volumes:
-      - ./keystore:/keystore
-      - ./lhvalidator-data/:/var/lib/lighthouse
+      - ${KEYSTORE_DIR}:/keystore
+      - ${VL_DATA_DIR}:/var/lib/lighthouse
     command: |
       lighthouse account validator import
       --password-file=/keystore/keystore_password.txt
@@ -19,7 +19,7 @@
     depends_on: 
       - consensus
     volumes:
-      - ./lhvalidator-data:/var/lib/lighthouse
+      - ${VL_DATA_DIR}:/var/lib/lighthouse
     command:
       - lighthouse
       - vc
