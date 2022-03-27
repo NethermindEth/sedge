@@ -74,6 +74,8 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 		if err := utils.GenerateValidatorKey(existingMnemonic, network, path); err != nil {
 			log.Fatalf(configs.GeneratingKeystoreError, err)
 		}
+
+		log.Warn(configs.ReviewKeystorePath)
 	},
 }
 
