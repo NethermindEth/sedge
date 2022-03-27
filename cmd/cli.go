@@ -316,10 +316,11 @@ func runAndShowContainers() error {
 		return err
 	}
 
-	// Run docker ps -a to show containers
-	log.Infof(configs.RunningCommand, configs.DockerPsCMD)
-	if _, err := utils.RunCmd(configs.DockerPsCMD, false, false); err != nil {
-		return err
+	// Run docker-compose ps --filter status=running to show script running containers
+	psCMD := fmt.Sprintf(configs.DockerComposePsFilterCMD, generationPath+"/"+configs.DefaultDockerComposeScriptName)
+	log.Infof(configs.RunningCommand, psCMD)
+	if _, err := utils.RunCmd(psCMD, false, false); err != nil {
+		return fmt.Errorf(configs.CommandError, psCMD, err)
 	}
 
 	return nil
