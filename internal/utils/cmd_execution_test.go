@@ -1,22 +1,33 @@
-package utils_test
+package utils
 
 import (
 	"testing"
+	"text/template"
 
-	"github.com/NethermindEth/1Click/internal/utils"
+	"github.com/NethermindEth/1Click/configs"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRunCmd(t *testing.T) {
-	testingService, v := utils.RunCmd("", false)
+	testingService, v := RunCmd("", false)
 
 	assert.Nil(t, v)
 	assert.Equal(t, testingService, testingService)
 }
 
-// func TestExecuteScript(t *testing.T) {
+func TestExecuteScript(t *testing.T) {
+	cmd := configs.DockerPsCMD
+	tmp, err := template.New("script").Parse(cmd)
+	if err != nil {
+		t.FailNow()
+	}
 
-// 	testingString, err := executeScript(nil)
-// 	assert.Nil(t, err, nil)
-// 	assert.NotEqual(t, testingString, "")
-// }
+	script := Script{
+		Tmp:       tmp,
+		GetOutput: true,
+		Data:      struct{}{},
+	}
+	testingString, err := executeScript(script)
+	assert.Nil(t, err, nil)
+	assert.NotEmpty(t, testingString)
+}
