@@ -7,7 +7,6 @@ const (
 	DependenciesOK                  = "All dependencies are installed on host machine"
 	GeneratingDockerComposeScript   = "Generating docker-compose script for current selection of clients"
 	GeneratingEnvFile               = "Generating environment file for current selection of clients"
-	InstallNotSupported             = "Install support for %s is not available for %s. Please install it and try again"
 	Exiting                         = "Exiting..."
 	InstructionsFor                 = "Instructions for %s"
 	OSNotSupported                  = "installation not supported for %s"

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"regexp"
 	"runtime"
@@ -17,7 +18,7 @@ var (
 )
 
 /*
-GetOSInfo :
+getOSInfo :
 Gather information like architecture
 and name of the linux distribution of the host machine.
 
@@ -30,7 +31,7 @@ DistroInfo struct containing name and architecture of the host machine
 a. err error
 Error if any
 */
-func GetOSInfo() (distro DistroInfo, err error) {
+func getOSInfo() (distro DistroInfo, err error) {
 	// Get the architecture
 	distro.Architecture = runtime.GOARCH
 	file := "/etc/os-release"
@@ -60,4 +61,25 @@ func GetOSInfo() (distro DistroInfo, err error) {
 	}
 
 	return distro, nil
+}
+
+/*
+GetDistroName :
+Get the name and version of the linux distribution of the host machine.
+
+params :-
+None
+
+returns :-
+a. string
+"<Distribution_Name> <Distribution_Version>"
+a. error
+Error if any
+*/
+func GetDistroName() (_ string, err error) {
+	var distro DistroInfo
+	if distro, err = getOSInfo(); err != nil {
+		return "", fmt.Errorf(configs.DistroInfoError, err)
+	}
+	return fmt.Sprintf("%s %s", distro.Name, distro.Version), nil
 }

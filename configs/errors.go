@@ -7,7 +7,7 @@ const (
 	ScriptPathError                   = "failed to get path for instructions file. Error: %s"
 	ReadingInstructionError           = "failed to read instructions from file %s"
 	OSNotSupportedError               = "installation not supported for %s"
-	ProvideClientsError               = "Please provide both execution client and consensus client"
+	ProvideClientsError               = "please provide both execution client and consensus client"
 	IncorrectClientError              = "incorrect %s client name \"%s\". Please provide correct client name. Use 'clients' command to see the list of supported clients"
 	NoClientsFoundError               = "no %s clients found. Please check your configuration file"
 	ClientNotSpecifiedError           = "please enter %s"
@@ -32,6 +32,8 @@ const (
 	ResizingPtyError                  = "error resizing pty: %s"
 	InvalidVolumePathError            = "invalid path provided: %s. If you intended to pass a host directory, use absolute path"
 	ZipError                          = "all lists must have the same size"
-	CommandError                      = "Command '%s' throws error: %s"
+	CommandError                      = "command '%s' throws error: %s"
 	RunClientsFlagAmbiguousError      = "provided values %v for run-clients flag are ambiguous. If you want to use the option 'all', then do not insert aditional options"
+	InstallNotSupported               = "install support for %s is not available for %s. Please install it and try again"
+	DistroInfoError                   = "failed to get linux distribution info. Error: %s"
 )

@@ -29,18 +29,27 @@ returns :-
 a. error
 Error if any
 */
-func HandleInstructions(dependencies []string, handler func(string) error) error {
+func HandleInstructions(dependencies []string, handler func(string) error) (err error) {
 	pending := make([]string, 0)
 
 	for _, dependency := range dependencies {
 		if dependencySupported(dependency) {
-			err := handler(dependency)
+			err = handler(dependency)
 			if err != nil {
 				log.Error(err)
 				pending = append(pending, dependency)
 			}
 		} else {
-			log.Errorf(configs.InstallNotSupported, dependency, runtime.GOOS)
+			var OS string
+			if runtime.GOOS == "linux" {
+				if OS, err = GetDistroName(); err != nil {
+					return
+				}
+			} else {
+				//TODO: Get OS version for other OS like Windows and Darwin
+				OS = runtime.GOOS
+			}
+			log.Errorf(configs.InstallNotSupported, dependency, OS)
 			pending = append(pending, dependency)
 		}
 	}
@@ -142,13 +151,14 @@ c. error
 Error if any
 */
 func getScriptPath(dependency string) (path string, distro DistroInfo, err error) {
+	// DEV: Only for linux
 	if runtime.GOOS != "linux" {
 		return "", DistroInfo{}, fmt.Errorf(configs.OSNotSupported, runtime.GOOS)
 	}
 
-	distro, err = GetOSInfo()
+	distro, err = getOSInfo()
 	if err != nil {
-		return
+		return path, distro, fmt.Errorf(configs.DistroInfoError, err)
 	}
 
 	path = fmt.Sprintf("setup/%s/%s/%s_%s.sh", runtime.GOOS, dependency, distro.Name, distro.Version)
