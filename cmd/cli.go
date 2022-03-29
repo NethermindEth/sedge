@@ -56,7 +56,7 @@ Running the command without flags (except global flag'--config') is equivalent t
 	PreRun: func(cmd *cobra.Command, args []string) {
 		// Count flags being set
 		count := 0
-		cmd.Flags().Visit(func(f *pflag.Flag) {
+		cmd.LocalFlags().Visit(func(f *pflag.Flag) {
 			count++
 		})
 
