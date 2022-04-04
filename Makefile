@@ -1,4 +1,5 @@
 .DEFAULT_GOAL 	:= help
+.PHONY: compile run run-cli test coverage clients logs all gomod_tidy go_fmt help
 
 compile: ## compile:
 	@mkdir -p build
@@ -9,6 +10,12 @@ run: ## run
 
 run-cli: compile ## run randomized cli
 	@./build/1click cli -r --config ./config.yaml
+
+test: ## run tests
+	@go test ./... -coverprofile cover.out
+
+coverage: cover.out ## show tests coverage
+	@go tool cover -func cover.out
 
 clients: compile ## Run cmd clients with ./config.yaml
 	@./build/1click clients --config ./config.yaml
