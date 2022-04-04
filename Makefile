@@ -12,10 +12,11 @@ run-cli: compile ## run randomized cli
 	@./build/1click cli -r --config ./config.yaml
 
 test: ## run tests
-	@go test ./... -coverprofile cover.out
+	@mkdir -p coverage
+	@go test -coverprofile=coverage/coverage.out -covermode=count ./...
 
-coverage: cover.out ## show tests coverage
-	@go tool cover -func cover.out
+coverage: coverage/coverage.out ## show tests coverage
+	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 clients: compile ## Run cmd clients with ./config.yaml
 	@./build/1click clients --config ./config.yaml
