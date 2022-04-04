@@ -49,6 +49,10 @@ func generateTestCases(t *testing.T) (tests []generateTestCase) {
 	return
 }
 
+func validateGeneratedFiles(t *testing.T, testCase generateTestCase) {
+	//TODO: validate generated files
+}
+
 func TestGenerateScripts(t *testing.T) {
 	inputs := generateTestCases(t)
 
@@ -60,5 +64,7 @@ func TestGenerateScripts(t *testing.T) {
 		} else if !input.isErr && err != nil {
 			t.Errorf("%s failed: %v", descr, err)
 		}
+		validateGeneratedFiles(t, input)
 	}
+
 }
