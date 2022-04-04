@@ -23,18 +23,18 @@ func WriteListClientsTable(data [][]string) {
 	table.Header = &simpletable.Header{
 		Cells: []*simpletable.Cell{
 			{Align: simpletable.AlignCenter, Text: "#"},
-			{Align: simpletable.AlignCenter, Text: "Execution Client"},
-			{Align: simpletable.AlignCenter, Text: "Consensus Client"},
-			{Align: simpletable.AlignCenter, Text: "Validator Client"},
+			{Align: simpletable.AlignLeft, Text: "Execution Client"},
+			{Align: simpletable.AlignLeft, Text: "Consensus Client"},
+			{Align: simpletable.AlignLeft, Text: "Validator Client"},
 		},
 	}
 
 	for i, row := range data {
 		r := []*simpletable.Cell{
-			{Align: simpletable.AlignCenter, Text: fmt.Sprintf("%d", i+1)},
-			{Align: simpletable.AlignCenter, Text: interface{}(row[0]).(string)},
-			{Align: simpletable.AlignCenter, Text: interface{}(row[1]).(string)},
-			{Align: simpletable.AlignCenter, Text: interface{}(row[2]).(string)},
+			{Align: simpletable.AlignLeft, Text: fmt.Sprintf("%d", i+1)},
+			{Align: simpletable.AlignLeft, Text: interface{}(row[0]).(string)},
+			{Align: simpletable.AlignLeft, Text: interface{}(row[1]).(string)},
+			{Align: simpletable.AlignLeft, Text: interface{}(row[2]).(string)},
 		}
 
 		table.Body.Cells = append(table.Body.Cells, r)
@@ -68,8 +68,8 @@ func WriteRandomizedClientsTable(data [][]string) {
 
 	for _, row := range data {
 		r := []*simpletable.Cell{
-			{Align: simpletable.AlignCenter, Text: interface{}(row[0]).(string)},
-			{Align: simpletable.AlignCenter, Text: interface{}(row[1]).(string)},
+			{Align: simpletable.AlignLeft, Text: interface{}(row[0]).(string)},
+			{Align: simpletable.AlignLeft, Text: interface{}(row[1]).(string)},
 		}
 
 		table.Body.Cells = append(table.Body.Cells, r)

@@ -7,8 +7,8 @@
       - consensus
     user: root
     volumes:
-      - ./tekuvalidator-data:/var/lib/teku
-      - ./keystore:/var/lib/teku/keystore
+      - ${VL_DATA_DIR}:/var/lib/teku
+      - ${KEYSTORE_DIR}:/var/lib/teku/keystore
     command:
       - validator-client
       - --beacon-node-api-endpoint=${CC_NODE}
