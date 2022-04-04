@@ -21,6 +21,10 @@ b. error
 Error if any
 */
 func ZipString(lists ...[]string) ([][]string, error) {
+	if len(lists) == 0 {
+		return [][]string{}, nil
+	}
+
 	size := len(lists[0])
 	for _, list := range lists {
 		if len(list) != size {
