@@ -6,7 +6,7 @@ import (
 )
 
 func TestContains(t *testing.T) {
-	inputs := []struct {
+	inputs := [...]struct {
 		list []string
 		str  string
 		want bool

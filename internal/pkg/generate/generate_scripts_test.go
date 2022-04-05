@@ -66,5 +66,4 @@ func TestGenerateScripts(t *testing.T) {
 		}
 		validateGeneratedFiles(t, input)
 	}
-
 }

@@ -34,7 +34,7 @@ Loop:
 }
 
 func TestZipStrings(t *testing.T) {
-	inputs := []zipTestCase{
+	inputs := [...]zipTestCase{
 		{},
 		{[][]string{{"a", "a", "a"}, {"b", "b", "b"}}, false, [][]string{{"a", "b"}, {"a", "b"}, {"a", "b"}}},
 		{[][]string{{"a", "a"}, {"b", "b"}, {"c", "c"}}, false, [][]string{{"a", "b", "c"}, {"a", "b", "c"}}},
