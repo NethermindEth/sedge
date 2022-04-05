@@ -50,8 +50,8 @@ func TestGetConfigClients(t *testing.T) {
 	for _, input := range inputs {
 		prepareGetConfigClientsTestCase(input)
 		descr := fmt.Sprintf("GetConfigClients(%s)", input.queryClientType)
-		res, err := GetConfigClients(input.queryClientType)
-		if input.isErr && err == nil {
+
+		if res, err := GetConfigClients(input.queryClientType); input.isErr && err == nil {
 			t.Logf("using config: %s", input.configClientsTypes)
 			t.Errorf("%s expected to fail.", descr)
 		} else if !input.isErr {
@@ -62,6 +62,7 @@ func TestGetConfigClients(t *testing.T) {
 				verifyGetConfigClientsResult(t, res, input, descr)
 			}
 		}
+
 		cleanGetConfigClientsTestCase(input)
 	}
 }
