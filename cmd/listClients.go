@@ -5,12 +5,9 @@ Copyright © 2022 Nethermind hello.nethermind.io
 package cmd
 
 import (
-	"math"
-
 	"github.com/NethermindEth/1click/configs"
 	"github.com/NethermindEth/1click/internal/pkg/clients"
 	"github.com/NethermindEth/1click/internal/ui"
-	"github.com/NethermindEth/1click/internal/utils"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -54,12 +51,12 @@ params :-
 None
 
 returns :-
-a. [][]string
+a. ui.ListClientsTable
 Table data
 b. error
 Error if any
 */
-func buildData(getClients func(string) ([]string, error)) ([][]string, error) {
+func buildData(getClients func(string) ([]string, error)) (*ui.ListClientsTable, error) {
 	executionClients, err := getClients("execution")
 	if err != nil {
 		return nil, err
@@ -73,23 +70,8 @@ func buildData(getClients func(string) ([]string, error)) ([][]string, error) {
 		return nil, err
 	}
 
-	max := int(math.Max(float64(len(executionClients)), float64(len(consensusClients))))
-	max = int(math.Max(float64(max), float64(len(validatorClients))))
-
-	if max > 0 {
-		for _, list := range [...]*[]string{&executionClients, &consensusClients, &validatorClients} {
-			for len(*list) < max {
-				*list = append(*list, "-")
-			}
-		}
-	} else {
-		executionClients, consensusClients, validatorClients = []string{"-"}, []string{"-"}, []string{"-"}
-	}
-
-	data, err := utils.ZipString(executionClients, consensusClients, validatorClients)
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
+	return &ui.ListClientsTable{
+		ClientTypes: []string{"Execution", "Consensus", "Validator"},
+		Clients:     [][]string{executionClients, consensusClients, validatorClients},
+	}, nil
 }

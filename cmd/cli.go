@@ -227,10 +227,17 @@ func validateClients(allClients clients.OrderedClients) (clients.Clients, error)
 		}
 
 		log.Infof("Listing randomized clients\n\n")
-		ui.WriteRandomizedClientsTable([][]string{
-			{"Execution", combinedClients.Execution.Name},
-			{"Consensus", combinedClients.Consensus.Name},
-			{"Validator", combinedClients.Validator.Name},
+		ui.WriteRandomizedClientsTable(ui.RandomizedClientsTable{
+			Clients: []string{
+				combinedClients.Execution.Name,
+				combinedClients.Consensus.Name,
+				combinedClients.Validator.Name,
+			},
+			ClientTypes: []string{
+				combinedClients.Execution.Type,
+				combinedClients.Consensus.Type,
+				combinedClients.Validator.Type,
+			},
 		})
 	} else {
 		notProvidedClients := make([]string, 0)
