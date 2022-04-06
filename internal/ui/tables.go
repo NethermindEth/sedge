@@ -112,10 +112,15 @@ func WriteSimpleTable(data *SimpleTableData) {
 	}
 	m := len(data.Headers)
 
+	if len(data.Headers) == 0 && !data.Enumerate {
+		return
+	}
+
 	//Add headers to table
 	table.Header = &simpletable.Header{
 		Cells: data.Headers,
 	}
+
 	if data.Enumerate { // Add number header
 		table.Header.Cells = append([]*simpletable.Cell{
 			{Align: simpletable.AlignCenter, Text: "#"},
