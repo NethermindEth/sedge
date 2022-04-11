@@ -24,6 +24,10 @@ func cleanGetConfigClientsTestCase(_ getConfigClientsTestCase) {
 	viper.Reset()
 }
 
+func cleanAll() {
+	viper.Reset()
+}
+
 func verifyGetConfigClientsResult(t *testing.T, resultClients []string, input getConfigClientsTestCase, descr string) {
 	for _, client := range resultClients {
 		contained := false
@@ -46,6 +50,7 @@ func TestGetConfigClients(t *testing.T) {
 		{"all", map[string][]string{"executionClients": {"a"}, "consensusClients": {"b"}, "validatorClients": {"c"}}, []string{}, true},
 		{"consensusClients", map[string][]string{"executionClients": {"a"}, "consensusClients": {"b"}, "validatorClients": {"c"}}, []string{}, true},
 	}
+	t.Cleanup(cleanAll)
 
 	for _, input := range inputs {
 		prepareGetConfigClientsTestCase(input)

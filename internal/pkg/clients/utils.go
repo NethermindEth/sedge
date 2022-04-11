@@ -20,6 +20,8 @@ b. error
 Error if any
 */
 func RandomChoice(clients ClientMap) (client Client, err error) {
+	//TODO: fix error when empty clients
+
 	list := make([]Client, 0)
 	for _, client := range clients {
 		list = append(list, client)
