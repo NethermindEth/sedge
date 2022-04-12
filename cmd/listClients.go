@@ -26,7 +26,7 @@ var listClientsCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		ui.WriteListClientsTable(data)
+		ui.WriteListClientsTable(cmd.OutOrStdout(), data)
 
 		log.Infof("Listing clients provided in configuration file\n")
 
@@ -35,7 +35,7 @@ var listClientsCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		ui.WriteListClientsTable(data)
+		ui.WriteListClientsTable(cmd.OutOrStdout(), data)
 	},
 }
 

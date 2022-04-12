@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -92,7 +93,7 @@ Running the command without flags (except global flag'--config') is equivalent t
 		}
 
 		// Handle selection and validation of clients
-		combinedClients, err := validateClients(clientsMap)
+		combinedClients, err := validateClients(clientsMap, cmd.OutOrStdout())
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -215,7 +216,7 @@ func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error
 	return combinedClients, nil
 }
 
-func validateClients(allClients clients.OrderedClients) (clients.Clients, error) {
+func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Clients, error) {
 	var combinedClients clients.Clients
 	var err error
 
@@ -227,7 +228,7 @@ func validateClients(allClients clients.OrderedClients) (clients.Clients, error)
 		}
 
 		log.Infof("Listing randomized clients\n\n")
-		ui.WriteRandomizedClientsTable(ui.RandomizedClientsTable{
+		ui.WriteRandomizedClientsTable(w, ui.RandomizedClientsTable{
 			Clients: []string{
 				combinedClients.Execution.Name,
 				combinedClients.Consensus.Name,

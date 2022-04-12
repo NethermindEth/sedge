@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/alexeyco/simpletable"
 )
@@ -17,7 +18,7 @@ Table data
 returns :-
 None
 */
-func WriteListClientsTable(data *ListClientsTable) {
+func WriteListClientsTable(w io.Writer, data *ListClientsTable) {
 	var headers []*simpletable.Cell
 	for _, clientType := range data.ClientTypes {
 		headers = append(headers, &simpletable.Cell{
@@ -38,7 +39,7 @@ func WriteListClientsTable(data *ListClientsTable) {
 		columns = append(columns, column)
 	}
 
-	WriteSimpleTable(&SimpleTableData{
+	WriteSimpleTable(w, &SimpleTableData{
 		Headers:      headers,
 		Columns:      columns,
 		DefaultAlign: simpletable.AlignLeft,
@@ -57,7 +58,7 @@ Table data
 returns :-
 None
 */
-func WriteRandomizedClientsTable(data RandomizedClientsTable) {
+func WriteRandomizedClientsTable(w io.Writer, data RandomizedClientsTable) {
 
 	headers := []*simpletable.Cell{
 		{Align: simpletable.AlignCenter, Text: "Type of Client"},
@@ -81,7 +82,7 @@ func WriteRandomizedClientsTable(data RandomizedClientsTable) {
 	}
 	columns = append(columns, clientTypesColumn, clientColumn)
 
-	WriteSimpleTable(&SimpleTableData{
+	WriteSimpleTable(w, &SimpleTableData{
 		Headers:      headers,
 		Columns:      columns,
 		DefaultAlign: simpletable.AlignLeft,
@@ -100,7 +101,7 @@ Table data
 returns :-
 None
 */
-func WriteSimpleTable(data *SimpleTableData) {
+func WriteSimpleTable(w io.Writer, data *SimpleTableData) {
 	//Initialize table
 	table := simpletable.New()
 	//Get maxium dimensions
@@ -151,6 +152,6 @@ func WriteSimpleTable(data *SimpleTableData) {
 	}
 	//Print table
 	table.SetStyle(simpletable.StyleCompact)
-	table.Println()
-	fmt.Println()
+	fmt.Fprintln(w, table.String())
+	fmt.Fprintln(w)
 }

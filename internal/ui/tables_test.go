@@ -1,12 +1,15 @@
 package ui
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/alexeyco/simpletable"
 )
 
 func TestWriteListClientsTable(t *testing.T) {
+	fdOut := new(bytes.Buffer)
+
 	inputs := []ListClientsTable{
 		{},
 		{Clients: [][]string{{}, {}, {}}},
@@ -15,11 +18,13 @@ func TestWriteListClientsTable(t *testing.T) {
 	}
 
 	for _, input := range inputs {
-		WriteListClientsTable(&input)
+		WriteListClientsTable(fdOut, &input)
 	}
 }
 
 func TestWriteRandomizedClientsTable(t *testing.T) {
+	fdOut := new(bytes.Buffer)
+
 	input := []RandomizedClientsTable{
 		{},
 		{ClientTypes: []string{}},
@@ -30,11 +35,13 @@ func TestWriteRandomizedClientsTable(t *testing.T) {
 	}
 
 	for _, input := range input {
-		WriteRandomizedClientsTable(input)
+		WriteRandomizedClientsTable(fdOut, input)
 	}
 }
 
 func TestWriteSimpleTable(t *testing.T) {
+	fdOut := new(bytes.Buffer)
+
 	inputs := []SimpleTableData{
 		{
 			Headers: []*simpletable.Cell{},
@@ -89,6 +96,6 @@ func TestWriteSimpleTable(t *testing.T) {
 	}
 
 	for _, input := range inputs {
-		WriteSimpleTable(&input)
+		WriteSimpleTable(fdOut, &input)
 	}
 }

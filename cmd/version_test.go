@@ -4,15 +4,18 @@ import (
 	"bytes"
 	"regexp"
 	"testing"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func TestVersionCmdExecute(t *testing.T) {
 	fdOut := new(bytes.Buffer)
 
-	versionRegexp := regexp.MustCompile(`1click [0-9][0-9|\.]+`)
+	versionRegexp := regexp.MustCompile(`1click [0-9][0-9|\.]+[0-9]`)
 
 	rootCmd.SetArgs([]string{"version"})
 	rootCmd.SetOut(fdOut)
+	log.SetOutput(fdOut)
 
 	err := rootCmd.Execute()
 	if err != nil {
