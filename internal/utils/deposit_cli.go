@@ -7,6 +7,7 @@ import (
 	"text/template"
 
 	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/internal/pkg/commands"
 	"github.com/NethermindEth/1click/templates"
 	log "github.com/sirupsen/logrus"
 )
@@ -29,8 +30,11 @@ Error if any
 */
 func GenerateValidatorKey(existing bool, network, path string) (err error) {
 	// Check if image already exists
-	inspectCmd := fmt.Sprintf(configs.DockerInspectCMD, configs.DepositCLIDockerImageName)
-	if out, err := RunCmd(inspectCmd, true, false); err != nil {
+	inspectCmd := commands.Runner.BuildDockerInspectCMD(commands.DockerInspectOptions{
+		Name: configs.DepositCLIDockerImageName,
+	})
+	inspectCmd.GetOutput = true
+	if out, err := commands.Runner.RunCMD(inspectCmd); err != nil {
 		// Output is of type: []\n Error: <text>
 		// TODO: Check if the error is not "Error: No such image: <image_name>" in Windows
 		if strings.Contains(out, "No such object:") {
@@ -40,7 +44,7 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 				return err
 			}
 		} else {
-			return fmt.Errorf(configs.CommandError, inspectCmd, out)
+			return fmt.Errorf(configs.CommandError, inspectCmd.Cmd, out)
 		}
 	}
 
@@ -76,7 +80,12 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 
 	// Run the command
 	log.Infof(configs.RunningCommand, cmd.String())
-	if _, err = RunCmd(cmd.String(), false, true); err != nil {
+	_, err = commands.Runner.RunCMD(commands.Command{
+		Cmd:       cmd.String(),
+		GetOutput: false,
+		RunInPty:  true,
+	})
+	if err != nil {
 		return
 	}
 	log.Infof(configs.KeysFoundAt, path+"/keystore")
@@ -86,9 +95,13 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 
 func buildDepositCliImage() error {
 	// Run docker build
-	buildCMD := fmt.Sprintf(configs.DepositCLIDockerBuildCMD, configs.DepositCLIDockerImageName)
-	log.Infof(configs.RunningCommand, buildCMD)
-	if _, err := RunCmd(buildCMD, false, false); err != nil {
+	buildCMD := commands.Runner.BuildDockerBuildCMD(commands.DockerBuildOptions{
+		Path: configs.DepositCLIDockerImageUrl,
+		Tag:  configs.DepositCLIDockerImageName,
+	})
+	log.Infof(configs.RunningCommand, buildCMD.Cmd)
+	_, err := commands.Runner.RunCMD(buildCMD)
+	if err != nil {
 		return err
 	}
 

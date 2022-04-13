@@ -7,12 +7,14 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/NethermindEth/1click/configs"
 	"github.com/NethermindEth/1click/internal/pkg/clients"
+	"github.com/NethermindEth/1click/internal/pkg/commands"
 	"github.com/NethermindEth/1click/internal/pkg/generate"
 	"github.com/NethermindEth/1click/internal/ui"
 	"github.com/NethermindEth/1click/internal/utils"
@@ -298,8 +300,11 @@ func runScriptOrExit() (err error) {
 	}
 
 	log.Infof(configs.InstructionsFor, "running docker-compose script")
-	servs := strings.Join(*services, " ")
-	fmt.Printf("\n%s\n\n", fmt.Sprintf(configs.DockerComposeUpCMD, generationPath, servs))
+	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
+		Path:     generationPath,
+		Services: *services,
+	})
+	fmt.Printf("\n%s\n\n", upCMD.Cmd)
 
 	_, result, err := prompt.Run()
 	if err != nil {
@@ -323,24 +328,33 @@ func runAndShowContainers() error {
 	// TODO: (refac) Put this check to checks.go and call it from there
 	// Check if docker engine is on
 	log.Info(configs.CheckingDockerEngine)
-	log.Infof(configs.RunningCommand, configs.DockerPsCMD)
-	if _, err := utils.RunCmd(configs.DockerPsCMD, true, false); err != nil {
+	psCMD := commands.Runner.BuildDockerPSCMD(commands.DockerPSOptions{
+		All: true,
+	})
+	psCMD.GetOutput = true
+	log.Infof(configs.RunningCommand, psCMD.Cmd)
+	if _, err := commands.Runner.RunCMD(psCMD); err != nil {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
 	}
 
 	// Run docker-compose script
-	servs := strings.Join(*services, " ")
-	upCMD := fmt.Sprintf(configs.DockerComposeUpCMD, generationPath+"/docker-compose.yml", servs)
-	log.Infof(configs.RunningCommand, upCMD)
-	if _, err := utils.RunCmd(upCMD, false, false); err != nil {
-		return fmt.Errorf(configs.CommandError, upCMD, err)
+	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Services: *services,
+	})
+	log.Infof(configs.RunningCommand, upCMD.Cmd)
+	if _, err := commands.Runner.RunCMD(upCMD); err != nil {
+		return fmt.Errorf(configs.CommandError, upCMD.Cmd, err)
 	}
 
 	// Run docker-compose ps --filter status=running to show script running containers
-	psCMD := fmt.Sprintf(configs.DockerComposePsFilterCMD, generationPath+"/"+configs.DefaultDockerComposeScriptName)
-	log.Infof(configs.RunningCommand, psCMD)
-	if _, err := utils.RunCmd(psCMD, false, false); err != nil {
-		return fmt.Errorf(configs.CommandError, psCMD, err)
+	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Services: false,
+	})
+	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
+	if _, err := commands.Runner.RunCMD(dcpsCMD); err != nil {
+		return fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
 	}
 
 	return nil

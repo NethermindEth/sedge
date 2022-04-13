@@ -1,4 +1,4 @@
-package utils
+package commands
 
 import (
 	"bytes"
@@ -10,38 +10,12 @@ import (
 	"strings"
 	"sync"
 	"syscall"
-	"text/template"
 
 	"github.com/NethermindEth/1click/configs"
 	"github.com/creack/pty"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/term"
 )
-
-/*
-RunCmd :
-Executes a command with sudo and returns the output.
-
-params :-
-a. cmd string
-The command to be executed.
-b. bool getOutput
-True if the output is to be returned.
-c. bool tty
-True if the command is to be run in a pty, false otherwise.
-
-returns :-
-a. string
-The output of the command.
-b. error
-Error if any
-*/
-func RunCmd(cmd string, getOutput, tty bool) (out string, err error) {
-	//TODO: Manage Windows compatibility regarding sudo powers
-	// Executing with sudo for now, this needs to change for Windows or maybe if docker is in user group
-	scmd := fmt.Sprintf("sudo %s", cmd)
-	return runCmd(scmd, getOutput, tty)
-}
 
 /*
 runCmd :
@@ -52,7 +26,7 @@ a. cmd string
 The command to be executed.
 b. bool getOutput
 True if the output is to be returned.
-c. bool tty
+c. bool runInPty
 True if the command is to be run in a pty, false otherwise.
 
 returns :-
@@ -61,14 +35,14 @@ The output of the command.
 b. error
 Error if any
 */
-func runCmd(cmd string, getOutput, tty bool) (out string, err error) {
+func runCmd(cmd string, getOutput, runInPTY bool) (out string, err error) {
 	r := strings.ReplaceAll(cmd, "\n", "")
 	spl := strings.Split(r, " ")
 	c, args := spl[0], spl[1:]
 
 	exc := exec.Command(c, args...)
 
-	if tty {
+	if runInPTY {
 		return runInPty(exc, getOutput)
 	}
 
@@ -98,41 +72,6 @@ func runCmd(cmd string, getOutput, tty bool) (out string, err error) {
 }
 
 /*
-RunBashCmd :
-Executes a command using bash and returns the output.
-
-params :-
-a. cmd string
-The command to be executed.
-b. bool getOutput
-True if the output is to be returned.
-
-returns :-
-a. string
-The output of the command.
-b. error
-Error if any
-*/
-func RunBashCmd(cmd string, getOutput bool) (out string, err error) {
-	tmp, err := template.New("script").Parse(cmd)
-	if err != nil {
-		return "", err
-	}
-
-	script := Script{
-		Tmp:       tmp,
-		GetOutput: getOutput,
-		Data:      struct{}{},
-	}
-
-	if out, err = executeBashScript(script); err != nil {
-		return "", fmt.Errorf(configs.RunningCMDError, cmd, err)
-	}
-
-	return out, nil
-}
-
-/*
 executeBashScript :
 Execute the bash script in the given template.
 
@@ -146,7 +85,7 @@ The output of the script.
 b. error
 Error if any
 */
-func executeBashScript(script Script) (out string, err error) {
+func executeBashScript(script BashScript) (out string, err error) {
 	var scriptBuffer, combinedOut bytes.Buffer
 	if err = script.Tmp.Execute(&scriptBuffer, script.Data); err != nil {
 		return

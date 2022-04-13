@@ -5,9 +5,10 @@ Copyright © 2022 Nethermind hello.nethermind.io
 package cmd
 
 import (
-	"fmt"
+	"path/filepath"
 
 	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/internal/pkg/commands"
 	"github.com/NethermindEth/1click/internal/utils"
 	"github.com/spf13/cobra"
 
@@ -28,11 +29,13 @@ var downCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		downCMD := fmt.Sprintf(configs.DockerComposeDownCMD, generationPath+"/"+configs.DefaultDockerComposeScriptName)
+		downCMD := commands.Runner.BuildDockerComposeDownCMD(commands.DockerComposeDownOptions{
+			Path: filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		})
 
-		log.Debugf(configs.RunningCommand, downCMD)
-		if _, err := utils.RunCmd(downCMD, false, false); err != nil {
-			log.Fatalf(configs.CommandError, downCMD, err)
+		log.Debugf(configs.RunningCommand, downCMD.Cmd)
+		if _, err := commands.Runner.RunCMD(downCMD); err != nil {
+			log.Fatalf(configs.CommandError, downCMD.Cmd, err)
 		}
 	},
 }

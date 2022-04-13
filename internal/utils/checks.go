@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/internal/pkg/commands"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -55,8 +57,11 @@ func PreCheck(generationPath string) error {
 	}
 
 	// Check docker engine is on
-	log.Debugf(configs.RunningCommand, configs.DockerPsCMD)
-	if _, err := RunCmd(configs.DockerPsCMD, true, false); err != nil {
+	dockerPsCMD := commands.Runner.BuildDockerPSCMD(commands.DockerPSOptions{All: true})
+	log.Debugf(configs.RunningCommand, dockerPsCMD.Cmd)
+	dockerPsCMD.GetOutput = true
+	_, err := commands.Runner.RunCMD(dockerPsCMD)
+	if err != nil {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
 	}
 
@@ -86,9 +91,13 @@ Error if any
 */
 func CheckContainers(generationPath string) (string, error) {
 	// Check if docker-compose script is running
-	psCMD := fmt.Sprintf(configs.DockerComposePsServicesCMD, generationPath+"/"+configs.DefaultDockerComposeScriptName)
-	log.Debugf(configs.RunningCommand, psCMD)
-	rawServices, err := RunCmd(psCMD, true, false)
+	psCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Services: true,
+	})
+	log.Debugf(configs.RunningCommand, psCMD.Cmd)
+	psCMD.GetOutput = true
+	rawServices, err := commands.Runner.RunCMD(psCMD)
 	if err != nil || rawServices == "\n" {
 		if rawServices == "\n" && err == nil {
 			err = fmt.Errorf(configs.DockerComposePsReturnedEmptyError)
