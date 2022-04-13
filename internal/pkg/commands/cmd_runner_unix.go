@@ -53,7 +53,7 @@ func (cr *UnixCMDRunner) BuildDockerComposeLogsCMD(options DockerComposeLogsOpti
 		log.Debugf(`Command "docker-compose logs" built with "--tail=%d" flag.`, options.Tail)
 		command += fmt.Sprintf("--tail=%d %s", options.Tail, servs)
 	} else {
-		log.Warn(`Command "docker-compose logs" built without "--follow" or "--tail" flags. Add follow argument or make tail argument is greater than 0.`)
+		log.Warn(`Command "docker-compose logs" built without "--follow" or "--tail" flags. Add follow argument or make tail argument greater than 0.`)
 		command += servs
 	}
 	return Command{Cmd: command}
