@@ -9,6 +9,7 @@ import (
 	"text/template"
 
 	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/internal/pkg/commands"
 	"github.com/NethermindEth/1click/templates"
 	log "github.com/sirupsen/logrus"
 )
@@ -120,13 +121,13 @@ func InstallDependency(dependency string) (err error) {
 		return
 	}
 
-	script := Script{
+	script := commands.BashScript{
 		Tmp:       tmp,
 		GetOutput: false,
 		Data:      struct{}{},
 	}
 
-	if _, err = executeBashScript(script); err != nil {
+	if _, err = commands.Runner.RunBash(script); err != nil {
 		return
 	}
 

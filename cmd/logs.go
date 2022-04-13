@@ -5,10 +5,11 @@ Copyright © 2022 Nethermind hello.nethermind.io
 package cmd
 
 import (
-	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/internal/pkg/commands"
 	"github.com/NethermindEth/1click/internal/utils"
 	"github.com/spf13/cobra"
 
@@ -37,7 +38,7 @@ By default will run 'docker-compose -f <script> logs --follow <service>'`,
 			log.Fatal(err)
 		}
 
-		file := generationPath + "/" + configs.DefaultDockerComposeScriptName
+		file := filepath.Join(generationPath, configs.DefaultDockerComposeScriptName)
 		// Get logs from docker-compose script services
 		services := strings.Split(rawServices, "\n")
 		// Remove empty string resulting of spliting the last blank line of rawServices
@@ -46,13 +47,15 @@ By default will run 'docker-compose -f <script> logs --follow <service>'`,
 			services = args
 		}
 
-		logsCMD := fmt.Sprintf(configs.DockerComposeLogsFollowCMD, file, strings.Join(services, " "))
-		if tail {
-			logsCMD = fmt.Sprintf(configs.DockerComposeLogsTailCMD, file, strings.Join(services, " "))
-		}
+		logsCMD := commands.Runner.BuildDockerComposeLogsCMD(commands.DockerComposeLogsOptions{
+			Path:     file,
+			Services: services,
+			Follow:   !tail,
+			Tail:     20, //TODO: allow to change this via command parameters
+		})
 
-		log.Debugf(configs.RunningCommand, logsCMD)
-		if _, err := utils.RunCmd(logsCMD, false, false); err != nil {
+		log.Debugf(configs.RunningCommand, logsCMD.Cmd)
+		if _, err := commands.Runner.RunCMD(logsCMD); err != nil {
 			log.Fatalf(configs.GettingLogsError, strings.Join(services, " "), err)
 		}
 	},
