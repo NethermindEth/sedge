@@ -79,6 +79,12 @@ func TestRunBashScript(t *testing.T) {
 		},
 	}
 
+	InitRunner(func() CommandRunner {
+		return NewCMDRunner(CMDRunnerOptions{
+			RunAsAdmin: false,
+		})
+	})
+
 	for _, input := range inputs {
 		descr := fmt.Sprintf("RunBashCmd(%s,%t)", input.cmd, input.getOutput)
 
@@ -104,3 +110,179 @@ func TestRunBashScript(t *testing.T) {
 }
 
 //TODO: add test cases for building and executing docker commands
+
+func TestBuildCommands(t *testing.T) {
+	inputs := [...]struct {
+		descr   string
+		builder func() string
+		output  string
+	}{
+		{
+			descr: `BuildDockerBuildCMD(DockerBuildOptions{
+				Path: "./testdir/dockerfile",
+				Tag:  "test:latest",
+			}`,
+			builder: func() string {
+				return Runner.BuildDockerBuildCMD(DockerBuildOptions{
+					Path: "./testdir/dockerfile",
+					Tag:  "test:latest",
+				}).Cmd
+			},
+			output: "docker build ./testdir/dockerfile -t test:latest",
+		},
+		{
+			descr: `BuildDockerBuildCMD(DockerBuildOptions{
+				Path: "./testdir/dockerfile",
+				Tag:  "",
+			}`,
+			builder: func() string {
+				return Runner.BuildDockerBuildCMD(DockerBuildOptions{
+					Path: "./testdir/dockerfile",
+					Tag:  "",
+				}).Cmd
+			},
+			output: "docker build ./testdir/dockerfile",
+		},
+		{
+			descr: `BuildDockerComposeDownCMD(DockerComposeDownOptions{
+				Path: "./testdir/docker-compose.yml",
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerComposeDownCMD(DockerComposeDownOptions{
+					Path: "./testdir/docker-compose.yml",
+				}).Cmd
+			},
+			output: "docker-compose -f ./testdir/docker-compose.yml down",
+		},
+		{
+			descr: `BuildDockerComposeLogsCMD(DockerComposeLogsOptions{
+				Path:     "./testdir/docker-compose.yml",
+				Services: []string{"A", "B"},
+				Follow:   true,
+				Tail:     20,
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerComposeLogsCMD(DockerComposeLogsOptions{
+					Path:     "./testdir/docker-compose.yml",
+					Services: []string{"A", "B"},
+					Follow:   true,
+					Tail:     20,
+				}).Cmd
+			},
+			output: "docker-compose -f ./testdir/docker-compose.yml logs --follow A B",
+		},
+		{
+			descr: `BuildDockerComposeLogsCMD(DockerComposeLogsOptions{
+				Path:     "./testdir/docker-compose.yml",
+				Services: []string{"A", "B"},
+				Follow:   false,
+				Tail:     20,
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerComposeLogsCMD(DockerComposeLogsOptions{
+					Path:     "./testdir/docker-compose.yml",
+					Services: []string{"A", "B"},
+					Follow:   false,
+					Tail:     20,
+				}).Cmd
+			},
+			output: "docker-compose -f ./testdir/docker-compose.yml logs --tail=20 A B",
+		},
+		{
+			descr: `BuildDockerComposeLogsCMD(DockerComposeLogsOptions{
+				Path:     "./testdir/docker-compose.yml",
+				Services: []string{"A", "B"},
+				Follow:   false,
+				Tail:     -1,
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerComposeLogsCMD(DockerComposeLogsOptions{
+					Path:     "./testdir/docker-compose.yml",
+					Services: []string{"A", "B"},
+					Follow:   false,
+					Tail:     -1,
+				}).Cmd
+			},
+			output: "docker-compose -f ./testdir/docker-compose.yml logs A B",
+		},
+		{
+			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
+				Path:     "./testdir/docker-compose.yml",
+				Services: true,
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerComposePSCMD(DockerComposePsOptions{
+					Path:     "./testdir/docker-compose.yml",
+					Services: true,
+				}).Cmd
+			},
+			output: "docker-compose -f ./testdir/docker-compose.yml ps --services --filter status=running",
+		},
+		{
+			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
+				Path:     "./testdir/docker-compose.yml",
+				Services: false,
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerComposePSCMD(DockerComposePsOptions{
+					Path:     "./testdir/docker-compose.yml",
+					Services: false,
+				}).Cmd
+			},
+			output: "docker-compose -f ./testdir/docker-compose.yml ps --filter status=running",
+		},
+		{
+			descr: `BuildDockerComposeUpCMD(DockerComposeUpOptions{
+				Path:     "./testdir/docker-compose.yml",
+				Services: []string{"A", "B"},
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerComposeUpCMD(DockerComposeUpOptions{
+					Path:     "./testdir/docker-compose.yml",
+					Services: []string{"A", "B"},
+				}).Cmd
+			},
+			output: "docker-compose -f ./testdir/docker-compose.yml up -d A B",
+		},
+		{
+			descr: `BuildDockerInspectCMD(DockerInspectOptions{
+				Name: "test:latest",
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerInspectCMD(DockerInspectOptions{
+					Name: "test:latest",
+				}).Cmd
+			},
+			output: "docker inspect test:latest",
+		},
+		{
+			descr: `BuildDockerPSCMD(DockerPSOptions{
+				All: true,
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerPSCMD(DockerPSOptions{
+					All: true,
+				}).Cmd
+			},
+			output: "docker ps -a",
+		},
+		{
+			descr: `BuildDockerPSCMD(DockerPSOptions{
+				All: true,
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerPSCMD(DockerPSOptions{
+					All: false,
+				}).Cmd
+			},
+			output: "docker ps",
+		},
+	}
+
+	for _, input := range inputs {
+		got := input.builder()
+		if got != input.output {
+			t.Errorf("%s expected %q but got %q", input.descr, input.output, got)
+		}
+	}
+}
