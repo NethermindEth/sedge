@@ -36,7 +36,7 @@ var downCmd = &cobra.Command{
 		log.Debugf(configs.RunningCommand, downCMD.Cmd)
 		_, err := commands.Runner.RunCMD(downCMD)
 		if err != nil {
-			log.Fatalf(configs.CommandError, downCMD, err)
+			log.Fatalf(configs.CommandError, downCMD.Cmd, err)
 		}
 	},
 }
