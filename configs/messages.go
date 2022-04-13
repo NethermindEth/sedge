@@ -26,6 +26,7 @@ const (
 	UnableToProceed                 = "Unable to proceed. Please check the logs for more details"
 	DefaultDockerComposeScriptName  = "docker-compose.yml"
 	CheckingDockerEngine            = "Checking if docker engine is on"
+	DepositCLIDockerImageUrl        = "github.com/ethereum/staking-deposit-cli"
 	DepositCLIDockerImageName       = "deposit-cli:local"
 	GeneratingKeystore              = "Generating keystore folder"
 	KeysFoundAt                     = "If everything went well, your keys can be found at: %s"
