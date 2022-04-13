@@ -1,8 +1,9 @@
-package utils
+package commands
 
 import (
 	"fmt"
 	"testing"
+	"text/template"
 )
 
 func TestRunCmd(t *testing.T) {
@@ -10,7 +11,7 @@ func TestRunCmd(t *testing.T) {
 	inputs := []struct {
 		cmd       string
 		getOutput bool
-		tty       bool
+		runInPty  bool
 		output    string
 		isErr     bool
 	}{
@@ -23,7 +24,7 @@ func TestRunCmd(t *testing.T) {
 		{
 			cmd:       "echo hello world",
 			getOutput: true,
-			tty:       true,
+			runInPty:  true,
 			output:    "hello world\n",
 			isErr:     true,
 		},
@@ -31,17 +32,22 @@ func TestRunCmd(t *testing.T) {
 			cmd:   "wr0n6",
 			isErr: true,
 		},
-		{
-			cmd:   "wr0n6",
-			tty:   true,
-			isErr: true,
-		},
 	}
 
-	for _, input := range inputs {
-		descr := fmt.Sprintf("RunCmd(%s,%t,%t)", input.cmd, input.getOutput, input.tty)
+	InitRunner(func() CommandRunner {
+		return NewCMDRunner(CMDRunnerOptions{
+			RunAsAdmin: false,
+		})
+	})
 
-		got, err := runCmd(input.cmd, input.getOutput, input.tty)
+	for _, input := range inputs {
+		descr := fmt.Sprintf("RunCmd(%s,%t,%t)", input.cmd, input.getOutput, input.runInPty)
+
+		got, err := Runner.RunCMD(Command{
+			Cmd:       input.cmd,
+			GetOutput: input.getOutput,
+			RunInPty:  input.runInPty,
+		})
 		if input.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
 		} else if !input.isErr {
@@ -54,7 +60,7 @@ func TestRunCmd(t *testing.T) {
 	}
 }
 
-func TestRunBashCmd(t *testing.T) {
+func TestRunBashScript(t *testing.T) {
 	inputs := []struct {
 		cmd       string
 		getOutput bool
@@ -76,7 +82,15 @@ func TestRunBashCmd(t *testing.T) {
 	for _, input := range inputs {
 		descr := fmt.Sprintf("RunBashCmd(%s,%t)", input.cmd, input.getOutput)
 
-		got, err := RunBashCmd(input.cmd, input.getOutput)
+		tmp, err := template.New("script").Parse(string(input.cmd))
+		if err != nil {
+			t.Fatalf("Unexpected error at case %q: %v", input.cmd, err)
+		}
+
+		got, err := Runner.RunBash(BashScript{
+			Tmp:       tmp,
+			GetOutput: input.getOutput,
+		})
 		if input.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
 		} else if !input.isErr {
@@ -88,3 +102,5 @@ func TestRunBashCmd(t *testing.T) {
 		}
 	}
 }
+
+//TODO: add test cases for building and executing docker commands
