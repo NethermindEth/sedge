@@ -12,7 +12,7 @@ type UnixCMDRunner struct {
 	RunWithSudo bool
 }
 
-func newCMDRunner(options CMDRunnerOptions) CommandRunner {
+func NewCMDRunner(options CMDRunnerOptions) CommandRunner {
 	return &UnixCMDRunner{
 		RunWithSudo: options.RunAsAdmin,
 	}
@@ -42,6 +42,7 @@ func (cr *UnixCMDRunner) BuildDockerComposePSCMD(options DockerComposePsOptions)
 }
 
 func (cr *UnixCMDRunner) BuildDockerComposeLogsCMD(options DockerComposeLogsOptions) Command {
+	//TODO: add logs
 	command := fmt.Sprintf("docker-compose -f %s logs ", options.Path)
 	servs := strings.Join(options.Services, " ")
 	if options.Follow {

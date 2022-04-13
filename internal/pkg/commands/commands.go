@@ -1,5 +1,7 @@
 package commands
 
+import "runtime"
+
 type CommandRunner interface {
 	BuildDockerComposeUpCMD(options DockerComposeUpOptions) Command
 
@@ -23,7 +25,13 @@ type CommandRunner interface {
 var Runner CommandRunner
 
 func init() {
-	Runner = newCMDRunner(CMDRunnerOptions{
-		RunAsAdmin: true,
+	InitRunner(func() CommandRunner {
+		return NewCMDRunner(CMDRunnerOptions{
+			RunAsAdmin: runtime.GOOS != "windows",
+		})
 	})
+}
+
+func InitRunner(builder func() CommandRunner) {
+	Runner = builder()
 }
