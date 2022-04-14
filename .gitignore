@@ -4,6 +4,6 @@ vendor
 
 .idea/
 
-docker-compose-scripts/
+/docker-compose-scripts/
 
 coverage/*
