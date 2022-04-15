@@ -1,6 +1,36 @@
 package test
 
-import "github.com/NethermindEth/1click/internal/pkg/commands"
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/NethermindEth/1click/internal/pkg/commands"
+)
+
+func CreateFakeDep(t *testing.T, dependency string) (depPath string) {
+	depPath = t.TempDir()
+	file, err := os.Create(filepath.Join(depPath, dependency))
+	if err != nil {
+		t.Fatalf("Can't fake dependency %s", dependency)
+	}
+	file.Close()
+
+	PATH := os.Getenv("PATH")
+	err = os.Setenv("PATH", fmt.Sprintf("%s:%s", PATH, depPath))
+	if err != nil {
+		t.Fatalf("Can't fake dependency %s", dependency)
+	}
+	return
+}
+
+func DeleteFakeDep(depPath string) {
+	PATH := os.Getenv("PATH")
+	PATH = strings.ReplaceAll(PATH, ":"+depPath, "")
+	os.Setenv("PATH", PATH)
+}
 
 type SimpleCMDRunner struct {
 	SRunCMD  func(commands.Command) (string, error)
