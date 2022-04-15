@@ -5,6 +5,9 @@ import (
 	"regexp"
 	"runtime"
 	"testing"
+
+	"github.com/NethermindEth/1click/internal/pkg/commands"
+	"github.com/NethermindEth/1click/test"
 )
 
 func TestGetScriptPath(t *testing.T) {
@@ -164,5 +167,61 @@ func TestShowInstructions(t *testing.T) {
 }
 
 func TestInstallDependency(t *testing.T) {
-	//TODO: test dependency installing
+	tcs := []struct {
+		dependency string
+		runner     commands.CommandRunner
+		isErr      bool
+	}{
+		{
+			dependency: "docker",
+			runner: &test.SimpleCMDRunner{
+				SRunCMD: func(c commands.Command) (string, error) {
+					return "", nil
+				},
+				SRunBash: func(bs commands.BashScript) (string, error) {
+					return "", nil
+				},
+			},
+			isErr: false,
+		},
+		{
+			dependency: "docker-compose",
+			runner: &test.SimpleCMDRunner{
+				SRunCMD: func(c commands.Command) (string, error) {
+					return "", nil
+				},
+				SRunBash: func(bs commands.BashScript) (string, error) {
+					return "", fmt.Errorf("test unexpected error")
+				},
+			},
+			isErr: true,
+		},
+		{
+			dependency: "docker-comp0se",
+			runner: &test.SimpleCMDRunner{
+				SRunCMD: func(c commands.Command) (string, error) {
+					return "", nil
+				},
+				SRunBash: func(bs commands.BashScript) (string, error) {
+					return "", nil
+				},
+			},
+			isErr: true,
+		},
+	}
+
+	for _, tc := range tcs {
+		commands.InitRunner(func() commands.CommandRunner {
+			return tc.runner
+		})
+
+		descr := fmt.Sprintf("InstallDependency(%s)", tc.dependency)
+
+		err := InstallDependency(tc.dependency)
+		if tc.isErr && err == nil {
+			t.Errorf("%s expected to fail", descr)
+		} else if !tc.isErr && err != nil {
+			t.Errorf("%s failed: %v", descr, err)
+		}
+	}
 }
