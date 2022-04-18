@@ -2,10 +2,8 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/NethermindEth/1click/configs"
@@ -14,38 +12,34 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type cliCmdTestCase struct {
+type downCmdTestCase struct {
 	configPath     string
 	generationPath string
 	runner         commands.CommandRunner
 	fdOut          *bytes.Buffer
-	args           []string
 	isErr          bool
 }
 
-func resetCliCmd() {
+func resetDownCmd() {
 	cfgFile = ""
-	executionName = ""
-	consensusName = ""
-	validatorName = ""
 	generationPath = configs.DefaultDockerComposeScriptsPath
-	randomize = false
-	install = false
-	run = false
-	y = false
-	services = &[]string{}
 }
 
-func buildCliTestCase(t *testing.T, caseName string, args []string, isErr bool) *cliCmdTestCase {
-	tc := cliCmdTestCase{}
+func buildDownTestCase(t *testing.T, caseName string, isErr bool) *downCmdTestCase {
+	tc := downCmdTestCase{}
 	configPath := t.TempDir()
 
-	err := test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", caseName, "config"), configPath)
+	err := test.PrepareTestCaseDir(filepath.Join("testdata", "down_tests", caseName, "config"), configPath)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
+
 	dcPath := filepath.Join(configPath, "docker-compose-scripts")
-	err = os.Mkdir(dcPath, os.ModePerm)
+	if err = os.Mkdir(dcPath, os.ModePerm); err != nil {
+		t.Fatalf("Can't build test case: %v", err)
+	}
+
+	err = test.PrepareTestCaseDir(filepath.Join("testdata", "down_tests", caseName, "docker-compose-scripts"), dcPath)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
@@ -60,7 +54,6 @@ func buildCliTestCase(t *testing.T, caseName string, args []string, isErr bool) 
 		},
 	}
 
-	tc.args = args
 	tc.generationPath = dcPath
 	tc.configPath = filepath.Join(configPath, "config.yaml")
 	tc.fdOut = new(bytes.Buffer)
@@ -68,20 +61,17 @@ func buildCliTestCase(t *testing.T, caseName string, args []string, isErr bool) 
 	return &tc
 }
 
-func TestCliCmd(t *testing.T) {
+func TestDownCmd(t *testing.T) {
 	//TODO: allow to test error programs
-	tcs := []cliCmdTestCase{
-		*buildCliTestCase(t, "case_1", []string{"-r"}, false),
-		*buildCliTestCase(t, "case_1", []string{"-e", "nethermind", "-c", "lighthouse", "-v", "lighthouse"}, false),
-		// *buildCliTestCase(t, "case_1", []string{"-e", "nethermind", "-v", "lighthouse"}, true),
-		// *buildCliTestCase(t, "case_1", []string{"-e", "nethermind", "-c", "lighthouse"}, true),
+	tcs := []downCmdTestCase{
+		*buildDownTestCase(t, "case_1", false),
 	}
 
-	t.Cleanup(resetCliCmd)
+	t.Cleanup(resetDownCmd)
 
 	for _, tc := range tcs {
-		resetCliCmd()
-		rootCmd.SetArgs(append([]string{"cli", "--config", tc.configPath, "--path", tc.generationPath, "-i", "--run"}, tc.args...))
+		resetDownCmd()
+		rootCmd.SetArgs([]string{"down", "--config", tc.configPath, "--path", tc.generationPath})
 		rootCmd.SetOut(tc.fdOut)
 		log.SetOutput(tc.fdOut)
 
@@ -89,7 +79,7 @@ func TestCliCmd(t *testing.T) {
 			return tc.runner
 		})
 
-		descr := fmt.Sprintf("1click cli -i --run %s", strings.Join(tc.args, " "))
+		descr := "1click down"
 		err := rootCmd.Execute()
 		if tc.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
