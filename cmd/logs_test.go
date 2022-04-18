@@ -14,6 +14,7 @@ import (
 )
 
 type logsTestCase struct {
+	name       string
 	runner     commands.CommandRunner
 	configPath string
 	fdOut      *bytes.Buffer
@@ -23,14 +24,20 @@ type logsTestCase struct {
 	dcLogsRuns int
 }
 
+func resetLogCmd() {
+	cfgFile = ""
+	tail = false
+}
+
 func prepareLogsTestCaseConfigDir(name, dest string) (string, error) {
-	caseConfigPath := filepath.Join(".", "testdata", "logs_tests", fmt.Sprintf("case_%s", name), "config")
+	caseConfigPath := filepath.Join(".", "testdata", "logs_tests", name, "config")
 	err := test.PrepareTestCaseDir(caseConfigPath, dest)
 	return dest, err
 }
 
 func prepareLogsTestCaseDCScripts(t *testing.T, name string) error {
-	caseDCScriptsPath := filepath.Join("testdata", "logs_tests", fmt.Sprintf("case_%s", name), "docker-compose-scripts")
+	os.RemoveAll("docker-compose-scripts")
+	caseDCScriptsPath := filepath.Join("testdata", "logs_tests", name, "docker-compose-scripts")
 	if err := os.Mkdir("docker-compose-scripts", os.ModePerm); err != nil {
 		return err
 	}
@@ -41,17 +48,22 @@ func prepareLogsTestCaseDCScripts(t *testing.T, name string) error {
 	return err
 }
 
-func buildLogsTestCase(t *testing.T, testName string, services []string, isErr bool) logsTestCase {
-	tcConfigPath, err := prepareLogsTestCaseConfigDir(testName, t.TempDir())
+func prepareFiles(t *testing.T, tc logsTestCase) {
+	tcConfigPath, err := prepareLogsTestCaseConfigDir(tc.name, t.TempDir())
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
-	err = prepareLogsTestCaseDCScripts(t, testName)
+	err = prepareLogsTestCaseDCScripts(t, tc.name)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
 
+	tc.configPath = filepath.Join(tcConfigPath, "config.yaml")
+}
+
+func buildLogsTestCase(t *testing.T, testName string, services []string, isErr bool) logsTestCase {
 	tc := logsTestCase{}
+	tc.name = testName
 
 	fdOut := new(bytes.Buffer)
 
@@ -80,7 +92,6 @@ func buildLogsTestCase(t *testing.T, testName string, services []string, isErr b
 	}
 
 	tc.runner = &runner
-	tc.configPath = tcConfigPath
 	tc.fdOut = fdOut
 	tc.services = services
 	tc.isErr = isErr
@@ -90,7 +101,7 @@ func buildLogsTestCase(t *testing.T, testName string, services []string, isErr b
 func TestLogsCmd(t *testing.T) {
 	tc1 := buildLogsTestCase(
 		t,
-		"1",
+		"case_1",
 		[]string{"execution", "consensus", "validator"},
 		false,
 	)
@@ -99,7 +110,10 @@ func TestLogsCmd(t *testing.T) {
 		tc1,
 	}
 
+	t.Cleanup(resetLogCmd)
+
 	for _, tc := range tcs {
+		resetLogCmd()
 		args := []string{"logs", "--config", tc.configPath, "--tail"}
 		args = append(args, tc.services...)
 		rootCmd.SetArgs(args)
@@ -109,6 +123,8 @@ func TestLogsCmd(t *testing.T) {
 		commands.InitRunner(func() commands.CommandRunner {
 			return tc.runner
 		})
+
+		prepareFiles(t, tc)
 
 		descr := fmt.Sprintf("1click logs --tail %s", strings.Join(tc.services, " "))
 
