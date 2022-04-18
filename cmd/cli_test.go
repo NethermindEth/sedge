@@ -15,11 +15,12 @@ import (
 )
 
 type cliCmdTestCase struct {
-	configPath string
-	runner     commands.CommandRunner
-	fdOut      *bytes.Buffer
-	args       []string
-	isErr      bool
+	configPath     string
+	generationPath string
+	runner         commands.CommandRunner
+	fdOut          *bytes.Buffer
+	args           []string
+	isErr          bool
 }
 
 func resetCliCmd() {
@@ -33,7 +34,6 @@ func resetCliCmd() {
 	run = false
 	y = false
 	services = &[]string{}
-	os.RemoveAll("docker-compose-scripts")
 }
 
 func buildCliTestCase(t *testing.T, caseName string, args []string, isErr bool) *cliCmdTestCase {
@@ -41,6 +41,11 @@ func buildCliTestCase(t *testing.T, caseName string, args []string, isErr bool) 
 	configPath := t.TempDir()
 
 	err := test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", caseName, "config"), configPath)
+	if err != nil {
+		t.Fatalf("Can't build test case: %v", err)
+	}
+	dcPath := filepath.Join(configPath, "docker-compose-scripts")
+	err = os.Mkdir(dcPath, os.ModePerm)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
@@ -56,6 +61,7 @@ func buildCliTestCase(t *testing.T, caseName string, args []string, isErr bool) 
 	}
 
 	tc.args = args
+	tc.generationPath = dcPath
 	tc.configPath = filepath.Join(configPath, "config.yaml")
 	tc.fdOut = new(bytes.Buffer)
 	tc.isErr = isErr
@@ -75,7 +81,7 @@ func TestCliCmd(t *testing.T) {
 
 	for _, tc := range tcs {
 		resetCliCmd()
-		rootCmd.SetArgs(append([]string{"cli", "--config", tc.configPath, "-i", "--run"}, tc.args...))
+		rootCmd.SetArgs(append([]string{"cli", "--config", tc.configPath, "--path", tc.generationPath, "-i", "--run"}, tc.args...))
 		rootCmd.SetOut(tc.fdOut)
 		log.SetOutput(tc.fdOut)
 
