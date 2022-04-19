@@ -16,6 +16,8 @@ As people who actively work on The Merge, we know how hard it is to set up an Et
 
 We want `1click `to take care of all of this for you. With just a few clicks or steps, `1click` can create an entire staking architecture that supports client diversity and Ethereum's latest features, while being completely free and open source. We want `1click` to save you from mistakes in this complex setup; along with hours or days of research, reading and testing. We want you to be able to stake easily with or without blockchain knowledge by giving you the tools to help this amazing community (and earn some good money of course 😉).
 
+We want to share our knowledge in this topic and create something that allows everyone to easily and safely set up lots of validators. 
+
 We don't want to stop at Ethereum. We also want to help stakers of other PoS networks/chains, so if your favourite chain is not here, you are more than welcome to contribute!
 
 ## ⚡️ Quick start
@@ -127,18 +129,7 @@ Full Ethereum 2 support with MEV-Boost
 ## 💪 Want to contribute?
 Please check our Contributing Guidelines, Code of Conduct and our issues. In case you want to report or suggest something (any help welcomed) please file an issue first and the main team will reach you and discuss it.
 
-## 🤑 Wait, this is free, how do you get money from this?
-
-Nethermind is aligned with Ethereum principles and values for allowing accessible, transparent, borderless economy and governance, so, as some other organizations in the community, we push for open-source free projects with intrinsic non-monetary value that helps the community grow. 
-
-Also, are you familiar with MEV and validator rewards? Something good has to come when you set up a validator with lots of experience and months of testing. We want to share our knowledge in the topic and create something that allows everyone to easily and safely set up lots of validators. 
-
-You may know a trick or two already, so if this is the case then please help us to add it to `1click` and help the community grow. If the community and the network grows, your validator earnings grow too!
-
-### TL;DR
-Not only are we building this tool to help us setting up validators for Mainnet and The Merge testnets, but also to help the community, so: we don't want money, we want lots of validators!
-
-> Although you can reach us to buy us some coffee 😉
+You may know a trick or two already for the validator setup, so if this is the case then please help us to add it to `1click` and help the community grow.
 
 ## ⚠️ License
 
