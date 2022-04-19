@@ -23,8 +23,7 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "1click",
 	Short: "A brief description of your application",
-	Long: `A tool to allow deploying validators with ease. This tool is
-WIP and is not yet ready for use.`,
+	Long:  `A tool to allow deploying validators with ease.`,
 	// TODO: Start the TUI engine in this callback. Default behavior
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
