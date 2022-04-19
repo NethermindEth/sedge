@@ -3,7 +3,7 @@
 
 A one click setup tool for PoS network/chain validators. Currently, `1click` is designed mainly for solo stakers and testnets devs of Beacon Chain and The Merge (Ethereum). `1click` generates docker-compose scripts for the entire on-premise validator setup depending on the chosen client.
 
-## 💥 Mission
+## 💥 How this all started?
 
 As people who actively work on The Merge, we know how hard it is to set up an Ethereum validator:
 - The setup requires at least three nodes: an execution node (geth, nethermind, etc), a consensus node, and a validator node (lighthouse, prysm, etc)
@@ -69,7 +69,7 @@ sudo cp 1click/build/1click /usr/local/bin/
 Download directly the binary and put it in `/usr/local/bin`:
 
 ```
-sudo curl -LJ -o /usr/local/bin/1click https://github.com/NethermindEth/1click/raw/feature/main/build/1click
+sudo curl -LJ -o /usr/local/bin/1click https://github.com/NethermindEth/1click/raw/main/build/1click
 sudo chmod +x /usr/local/bin/1click
 ```
 
