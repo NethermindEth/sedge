@@ -11,11 +11,11 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/NethermindEth/1Click/configs"
-	"github.com/NethermindEth/1Click/internal/pkg/clients"
-	"github.com/NethermindEth/1Click/internal/pkg/generate"
-	"github.com/NethermindEth/1Click/internal/ui"
-	"github.com/NethermindEth/1Click/internal/utils"
+	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/internal/pkg/clients"
+	"github.com/NethermindEth/1click/internal/pkg/generate"
+	"github.com/NethermindEth/1click/internal/ui"
+	"github.com/NethermindEth/1click/internal/utils"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -29,6 +29,8 @@ var (
 	randomize      bool
 	install        bool
 	run            bool
+	y              bool
+	services       *[]string
 )
 
 const (
@@ -38,7 +40,7 @@ const (
 // cliCmd represents the cli command
 var cliCmd = &cobra.Command{
 	Use:   "cli [flags]",
-	Short: "Quick start 1Click",
+	Short: "Quick start 1click",
 	Long: `Run the setup tool on-premise in a quick way. Provide only the command line
 options and the tool will do all the work.
 
@@ -47,21 +49,42 @@ and provide instructions for installing them if they are not installed.
 
 Second, it will generate docker-compose scripts to run the full setup according to your selection.
 
-Finally, it will run the generated docker-compose script
+Finally, it will run the generated docker-compose script. Only execution and consensus clients will be executed by default.
 
-Running the command without flags (except global flag'--config') is equivalent to '1Click cli -r -i --run' `,
-	Run: func(cmd *cobra.Command, args []string) {
+Running the command without flags (except global flag'--config') is equivalent to '1click cli -r' `,
+	Args: cobra.NoArgs,
+	PreRun: func(cmd *cobra.Command, args []string) {
 		// Count flags being set
 		count := 0
+		// HACKME: LocalFlags() doesn't work, so we count manually and check for parent flag config
 		cmd.Flags().Visit(func(f *pflag.Flag) {
-			count++
+			if f.Name != "config" {
+				count++
+			}
 		})
 
 		if count == 0 {
 			// No flag behavior
+			randomize = true
+		}
+
+		// Quick run
+		if y {
 			randomize, install, run = true, true, true
 		}
 
+		// Validate run-clients flag
+		if utils.Contains(*services, "all") {
+			if len(*services) == 1 {
+				// all used correctly
+				services = &[]string{execution, consensus, validator}
+			} else {
+				// Ambiguous value
+				log.Fatalf(configs.RunClientsFlagAmbiguousError, *services)
+			}
+		}
+	},
+	Run: func(cmd *cobra.Command, args []string) {
 		// Get all clients: supported + configured
 		clientsMap, errors := clients.GetClients([]string{execution, consensus, validator})
 		if len(errors) > 0 {
@@ -71,6 +94,7 @@ Running the command without flags (except global flag'--config') is equivalent t
 			os.Exit(1)
 		}
 
+		// Handle selection and validation of clients
 		combinedClients, err := validateClients(clientsMap)
 		if err != nil {
 			log.Fatal(err)
@@ -131,6 +155,10 @@ func init() {
 	cliCmd.Flags().BoolVarP(&install, "install", "i", false, "Install dependencies if not installed without asking")
 
 	cliCmd.Flags().BoolVar(&run, "run", false, "Run the generated docker-compose scripts without asking")
+
+	cliCmd.Flags().BoolVarP(&y, "yes", "y", false, "Shortcut for '1click cli -r -i --run'. Run without prompts")
+
+	services = cliCmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all. The 'all' option must be used alone. Example: '1click cli -r --run-clients=consensus,validator'")
 }
 
 func installOrShowInstructions(pending []string) (err error) {
@@ -273,7 +301,8 @@ func runScriptOrExit() (err error) {
 	}
 
 	log.Infof(configs.InstructionsFor, "running docker-compose script")
-	fmt.Printf("\n%s\n\n", fmt.Sprintf(configs.DockerComposeUpCMD, generationPath))
+	servs := strings.Join(*services, " ")
+	fmt.Printf("\n%s\n\n", fmt.Sprintf(configs.DockerComposeUpCMD, generationPath, servs))
 
 	_, result, err := prompt.Run()
 	if err != nil {
@@ -294,6 +323,7 @@ func runScriptOrExit() (err error) {
 }
 
 func runAndShowContainers() error {
+	// TODO: (refac) Put this check to checks.go and call it from there
 	// Check if docker engine is on
 	log.Info(configs.CheckingDockerEngine)
 	log.Infof(configs.RunningCommand, configs.DockerPsCMD)
@@ -302,16 +332,18 @@ func runAndShowContainers() error {
 	}
 
 	// Run docker-compose script
-	upCMD := fmt.Sprintf(configs.DockerComposeUpCMD, generationPath+"/docker-compose.yml")
+	servs := strings.Join(*services, " ")
+	upCMD := fmt.Sprintf(configs.DockerComposeUpCMD, generationPath+"/docker-compose.yml", servs)
 	log.Infof(configs.RunningCommand, upCMD)
 	if _, err := utils.RunCmd(upCMD, false, false); err != nil {
-		return err
+		return fmt.Errorf(configs.CommandError, upCMD, err)
 	}
 
-	// Run docker ps -a to show containers
-	log.Infof(configs.RunningCommand, configs.DockerPsCMD)
-	if _, err := utils.RunCmd(configs.DockerPsCMD, false, false); err != nil {
-		return err
+	// Run docker-compose ps --filter status=running to show script running containers
+	psCMD := fmt.Sprintf(configs.DockerComposePsFilterCMD, generationPath+"/"+configs.DefaultDockerComposeScriptName)
+	log.Infof(configs.RunningCommand, psCMD)
+	if _, err := utils.RunCmd(psCMD, false, false); err != nil {
+		return fmt.Errorf(configs.CommandError, psCMD, err)
 	}
 
 	return nil

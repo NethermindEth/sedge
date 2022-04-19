@@ -5,8 +5,8 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/NethermindEth/1Click/configs"
-	"github.com/NethermindEth/1Click/templates"
+	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/templates"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -150,16 +150,24 @@ func generateEnvFile(executionClient, consensusClient, validatorClient, path str
 		return
 	}
 
+	// TODO: Use OS wise delimiter for these data structs
+	executionEnv := ExecutionEnv{
+		DataDir: configs.ExecutionDefaultDataDir,
+	}
+
 	consensusEnv := ConsensusEnv{
 		ExecutionNodeURL: configs.OnPremiseExecutionURL,
+		DataDir:          configs.ConsensusDefaultDataDir,
 	}
 
 	validatorEnv := ValidatorEnv{
 		ConsensusNodeURL:    configs.OnPremiseConsensusURL,
 		ExecutionEngineName: executionClient,
+		KeystoreDir:         configs.KeystoreDefaultDataDir,
+		DataDir:             configs.ValidatorDefaultDataDir,
 	}
 
-	err = writeTemplateToFile(executionEnvTmp, path+"/.env", nil, false)
+	err = writeTemplateToFile(executionEnvTmp, path+"/.env", executionEnv, false)
 	if err != nil {
 		return fmt.Errorf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient, err)
 	}
@@ -176,7 +184,7 @@ func generateEnvFile(executionClient, consensusClient, validatorClient, path str
 
 	// Print .env file
 	log.Infof(configs.PrintingFile, ".env")
-	err = executionEnvTmp.Execute(os.Stdout, nil)
+	err = executionEnvTmp.Execute(os.Stdout, executionEnv)
 	if err != nil {
 		return fmt.Errorf(configs.PrintingFileError, ".env", err)
 	}

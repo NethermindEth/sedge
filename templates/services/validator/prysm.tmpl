@@ -2,10 +2,12 @@
 {{ define "validator" }}
   validator-import:
     image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      - consensus
     container_name: validator-import-client
     volumes:
-      - ./keystore:/keystore
-      - ./wallet:/wallet
+      - ${KEYSTORE_DIR}:/keystore
+      - ${WALLET_DIR}:/wallet
     command: |
       account import
       --directory=/keystore/validator_keys
@@ -15,10 +17,10 @@
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
     depends_on: 
-      - consensus
+      - validator-import
     volumes:
-      - ./prysmvalidator-data:/var/lib/prysm
-      - ./wallet:/var/lib/prysm/wallet
+      - ${VL_DATA_DIR}:/var/lib/prysm
+      - ${WALLET_DIR}:/var/lib/prysm/wallet
     command:
       - --datadir=/var/lib/prysm
       - --wallet-dir=/var/lib/prysm/wallet

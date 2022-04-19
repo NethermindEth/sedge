@@ -9,7 +9,7 @@
       - execution
     user: root
     volumes:
-      - ./tekuconsensus-data:/var/lib/teku
+      - ${CC_DATA_DIR}:/var/lib/teku
     ports:
       - 9000:9000/tcp
       - 9000:9000/udp

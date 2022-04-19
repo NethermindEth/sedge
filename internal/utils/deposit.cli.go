@@ -6,8 +6,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/NethermindEth/1Click/configs"
-	"github.com/NethermindEth/1Click/templates"
+	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/templates"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -32,11 +32,15 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 	inspectCmd := fmt.Sprintf(configs.DockerInspectCMD, configs.DepositCLIDockerImageName)
 	if out, err := RunCmd(inspectCmd, true, false); err != nil {
 		// Output is of type: []\n Error: <text>
-		log.Error(strings.Split(out, "Error:")[1])
-
-		//Build eth2.0-deposit-cli docker image
-		if err := buildDepositCliImage(); err != nil {
-			return err
+		// TODO: Check if the error is not "Error: No such image: <image_name>" in Windows
+		if strings.Contains(out, "No such object:") {
+			// Image does not exist. Build it
+			log.Infof(configs.ImageNotFound, configs.DepositCLIDockerImageName)
+			if err := buildDepositCliImage(); err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf(configs.CommandError, inspectCmd, out)
 		}
 	}
 

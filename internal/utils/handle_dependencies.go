@@ -8,20 +8,20 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/NethermindEth/1Click/configs"
-	"github.com/NethermindEth/1Click/templates"
+	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/templates"
 	log "github.com/sirupsen/logrus"
 )
 
 /*
 HandleInstructions :
-This function is responsible for handling the dependencies needed for 1Click setup
+This function is responsible for handling the dependencies needed for 1click setup
 If install support for a dependency exists, then `handler` will process it, for example,
 installing it or showing instructions for it.
 
 params :-
 a. []string dependencies
-List of dependencies needed for 1Click setup
+List of dependencies needed for 1click setup
 b. func(string) error handler
 Handler for each dependency
 
@@ -29,18 +29,27 @@ returns :-
 a. error
 Error if any
 */
-func HandleInstructions(dependencies []string, handler func(string) error) error {
+func HandleInstructions(dependencies []string, handler func(string) error) (err error) {
 	pending := make([]string, 0)
 
 	for _, dependency := range dependencies {
 		if dependencySupported(dependency) {
-			err := handler(dependency)
+			err = handler(dependency)
 			if err != nil {
 				log.Error(err)
 				pending = append(pending, dependency)
 			}
 		} else {
-			log.Errorf(configs.InstallNotSupported, dependency, runtime.GOOS)
+			var OS string
+			if runtime.GOOS == "linux" {
+				if OS, err = GetDistroName(); err != nil {
+					return
+				}
+			} else {
+				//TODO: Get OS version for other OS like Windows and Darwin
+				OS = runtime.GOOS
+			}
+			log.Errorf(configs.InstallNotSupported, dependency, OS)
 			pending = append(pending, dependency)
 		}
 	}
@@ -142,13 +151,14 @@ c. error
 Error if any
 */
 func getScriptPath(dependency string) (path string, distro DistroInfo, err error) {
+	// DEV: Only for linux
 	if runtime.GOOS != "linux" {
 		return "", DistroInfo{}, fmt.Errorf(configs.OSNotSupported, runtime.GOOS)
 	}
 
-	distro, err = GetOSInfo()
+	distro, err = getOSInfo()
 	if err != nil {
-		return
+		return path, distro, fmt.Errorf(configs.DistroInfoError, err)
 	}
 
 	path = fmt.Sprintf("setup/%s/%s/%s_%s.sh", runtime.GOOS, dependency, distro.Name, distro.Version)
