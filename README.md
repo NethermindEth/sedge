@@ -62,7 +62,7 @@ sudo $GOPATH/bin/1click /usr/local/bin/
 sudo cp 1click/build/1click /usr/local/bin/
 ```
 
-#### Download the binary
+#### Download the binary (only for linux)
 
 > This is temporary until the first release
 
