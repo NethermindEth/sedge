@@ -15,6 +15,15 @@ test: ## run tests
 	@mkdir -p coverage
 	@go test -coverprofile=coverage/coverage.out -covermode=count ./...
 
+codecov-test:
+	@mkdir -p coverage
+	@courtney/courtney -v -o coverage/coverage.out ./...
+
+install-deps: ## Install some project dependencies
+	@git clone https://github.com/stdevMac/courtney
+	@(cd courtney && go get  ./... && go build courtney.go)
+	@go get ./...
+
 coverage: coverage/coverage.out ## show tests coverage
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
