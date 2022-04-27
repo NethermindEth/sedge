@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"runtime"
 	"testing"
 
@@ -15,40 +16,39 @@ func TestGetScriptPath(t *testing.T) {
 
 	distro, err := GetOSInfo()
 	assert.Nil(t, err)
+	path := fmt.Sprintf("setup/%s/%s/%s_%s.sh", runtime.GOOS, "docker", distro.Name, distro.Version)
+
 	assert.Equal(t, distro.Name, "pop")
+	fmt.Println(path)
+	assert.NotEmpty(t, path)
 }
 
 func TestDependencySupported(t *testing.T) {
 	if runtime.GOOS != "linux" {
 		t.FailNow()
 	}
-
+	distro, err := GetOSInfo()
 	scriptPathDocker, _, err := getScriptPath("docker")
 	assert.Nil(t, err, nil)
-	assert.NotEmpty(t, scriptPathDocker)
+	assert.Equal(t, scriptPathDocker, "setup/linux/docker/"+distro.Name+"_"+distro.Version+".sh")
 
 	scriptPathDockerCompose, _, err := getScriptPath("docker-compose")
 	assert.Nil(t, err)
-	assert.NotEmpty(t, scriptPathDockerCompose)
+	fmt.Println(scriptPathDockerCompose)
+	assert.EqualValues(t, scriptPathDockerCompose, "setup/linux/docker-compose/"+distro.Name+"_"+distro.Version+".sh")
 }
 
-// func TestInstallDependency(t *testing.T) {
-// 	scriptPath, _, err := getScriptPath("")
-// 	assert.Nil(t, err)
-// 	rawScript, err := templates.Setup.ReadFile(scriptPath)
-// 	assert.Nil(t, err)
-// 	_, err = template.New("script").Parse(string(rawScript))
-// 	assert.Nil(t, err)
+func TestInstallDependency(t *testing.T) {
+	testingService := InstallDependency("docker")
+	assert.Nil(t, testingService)
 
-// 	testingService := InstallDependency("")
-// 	assert.Nil(t, testingService)
-// }
+}
 
-// func TestShowInstructions(t *testing.T) {
-// 	testingService := ShowInstructions("docker-compose")
-// 	fmt.Println(testingService)
-// 	assert.Nil(t, testingService)
-// }
+func TestShowInstructions(t *testing.T) {
+	testingService := ShowInstructions("docker")
+	fmt.Println(testingService)
+	assert.Nil(t, testingService)
+}
 
 func TestHandleInstructions(t *testing.T) {
 	dependencies := configs.GetDependencies()
