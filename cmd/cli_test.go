@@ -15,6 +15,7 @@ import (
 )
 
 type cliCmdTestCase struct {
+	name           string
 	configPath     string
 	generationPath string
 	runner         commands.CommandRunner
@@ -36,11 +37,11 @@ func resetCliCmd() {
 	services = &[]string{}
 }
 
-func buildCliTestCase(t *testing.T, caseName string, args []string, isErr bool) *cliCmdTestCase {
+func buildCliTestCase(t *testing.T, name, caseTestDataDir string, args []string, isErr bool) *cliCmdTestCase {
 	tc := cliCmdTestCase{}
 	configPath := t.TempDir()
 
-	err := test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", caseName, "config"), configPath)
+	err := test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", caseTestDataDir, "config"), configPath)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
@@ -60,6 +61,7 @@ func buildCliTestCase(t *testing.T, caseName string, args []string, isErr bool) 
 		},
 	}
 
+	tc.name = name
 	tc.args = args
 	tc.generationPath = dcPath
 	tc.configPath = filepath.Join(configPath, "config.yaml")
@@ -71,30 +73,33 @@ func buildCliTestCase(t *testing.T, caseName string, args []string, isErr bool) 
 func TestCliCmd(t *testing.T) {
 	//TODO: allow to test error programs
 	tcs := []cliCmdTestCase{
-		*buildCliTestCase(t, "case_1", []string{"-r"}, false),
-		*buildCliTestCase(t, "case_1", []string{"-e", "nethermind", "-c", "lighthouse", "-v", "lighthouse"}, false),
-		// *buildCliTestCase(t, "case_1", []string{"-e", "nethermind", "-v", "lighthouse"}, true),
-		// *buildCliTestCase(t, "case_1", []string{"-e", "nethermind", "-c", "lighthouse"}, true),
+		*buildCliTestCase(t, "Random clients", "case_1", []string{"-r"}, false),
+		*buildCliTestCase(t, "Fixed clients", "case_1", []string{"-e", "nethermind", "-c", "lighthouse", "-v", "lighthouse"}, false),
+		// *buildCliTestCase(t, "Missing consensus client", "case_1", []string{"-e", "nethermind", "-v", "lighthouse"}, true),
+		// *buildCliTestCase(t, "Missing validator client", "case_1", []string{"-e", "nethermind", "-c", "lighthouse"}, true),
 	}
 
 	t.Cleanup(resetCliCmd)
 
 	for _, tc := range tcs {
-		resetCliCmd()
-		rootCmd.SetArgs(append([]string{"cli", "--config", tc.configPath, "--path", tc.generationPath, "-i", "--run"}, tc.args...))
-		rootCmd.SetOut(tc.fdOut)
-		log.SetOutput(tc.fdOut)
+		t.Run(tc.name, func(t *testing.T) {
+			resetCliCmd()
+			rootCmd.SetArgs(append([]string{"cli", "--config", tc.configPath, "--path", tc.generationPath, "-i", "--run"}, tc.args...))
+			rootCmd.SetOut(tc.fdOut)
+			log.SetOutput(tc.fdOut)
 
-		commands.InitRunner(func() commands.CommandRunner {
-			return tc.runner
+			commands.InitRunner(func() commands.CommandRunner {
+				return tc.runner
+			})
+
+			err := rootCmd.Execute()
+			descr := fmt.Sprintf("1click cli -i --run %s", strings.Join(tc.args, " "))
+
+			if tc.isErr && err == nil {
+				t.Errorf("%s expected to fail", descr)
+			} else if !tc.isErr && err != nil {
+				t.Errorf("%s failed: %v", descr, err)
+			}
 		})
-
-		descr := fmt.Sprintf("1click cli -i --run %s", strings.Join(tc.args, " "))
-		err := rootCmd.Execute()
-		if tc.isErr && err == nil {
-			t.Errorf("%s expected to fail", descr)
-		} else if !tc.isErr && err != nil {
-			t.Errorf("%s failed: %v", descr, err)
-		}
 	}
 }
