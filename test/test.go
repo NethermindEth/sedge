@@ -10,6 +10,8 @@ import (
 	"github.com/NethermindEth/1click/internal/pkg/commands"
 )
 
+// Creates an empty file in a temp dir with "dependency" as name and add
+// temp dir to PATH. Return the path for the new dependency.
 func CreateFakeDep(t *testing.T, dependency string) (depPath string) {
 	depPath = t.TempDir()
 	file, err := os.Create(filepath.Join(depPath, dependency))
@@ -26,12 +28,14 @@ func CreateFakeDep(t *testing.T, dependency string) (depPath string) {
 	return
 }
 
+// Remove the "depPath" from PATH.
 func DeleteFakeDep(depPath string) {
 	PATH := os.Getenv("PATH")
 	PATH = strings.ReplaceAll(PATH, ":"+depPath, "")
 	os.Setenv("PATH", PATH)
 }
 
+// Struct for creating a commands.CommandRunner mocks
 type SimpleCMDRunner struct {
 	SRunCMD  func(commands.Command) (string, error)
 	SRunBash func(commands.BashScript) (string, error)
