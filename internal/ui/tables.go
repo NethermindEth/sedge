@@ -128,27 +128,29 @@ func WriteSimpleTable(w io.Writer, data *SimpleTableData) {
 		}, table.Header.Cells...)
 	}
 
-	for x := 0; x < n; x++ {
-		//Initialize new row
-		row := []*simpletable.Cell{}
-		if data.Enumerate { //Add row number cell
-			row = append(row, &simpletable.Cell{
-				Align: simpletable.AlignCenter,
-				Text:  fmt.Sprint(x + 1),
-			})
-		}
-		for y := 0; y < m; y++ {
-			if y < len(data.Columns) && x < len(data.Columns[y]) { //Add existing cell to row
-				row = append(row, data.Columns[y][x])
-			} else { //Add empty cell to row
+	if len(data.Headers) > 0 { // Don't write rows if no headers are provided
+		for x := 0; x < n; x++ {
+			//Initialize new row
+			row := []*simpletable.Cell{}
+			if data.Enumerate { //Add row number cell
 				row = append(row, &simpletable.Cell{
-					Align: data.DefaultAlign,
-					Text:  "-",
+					Align: simpletable.AlignCenter,
+					Text:  fmt.Sprint(x + 1),
 				})
 			}
+			for y := 0; y < m; y++ {
+				if y < len(data.Columns) && x < len(data.Columns[y]) { //Add existing cell to row
+					row = append(row, data.Columns[y][x])
+				} else { //Add empty cell to row
+					row = append(row, &simpletable.Cell{
+						Align: data.DefaultAlign,
+						Text:  "-",
+					})
+				}
+			}
+			//Add new row to table
+			table.Body.Cells = append(table.Body.Cells, row)
 		}
-		//Add new row to table
-		table.Body.Cells = append(table.Body.Cells, row)
 	}
 	//Print table
 	table.SetStyle(simpletable.StyleCompact)
