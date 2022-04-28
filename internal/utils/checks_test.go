@@ -62,16 +62,18 @@ func TestCheckDependencies(t *testing.T) {
 
 func TestPreCheck(t *testing.T) {
 	tcs := [...]struct {
-		caseName  string
-		path      string
-		runner    commands.CommandRunner
-		isErr     bool
-		noDocker  bool
-		noCompose bool
+		name            string
+		caseTestDataDir string
+		path            string
+		runner          commands.CommandRunner
+		isErr           bool
+		noDocker        bool
+		noCompose       bool
 	}{
 		{
-			caseName: "case_1",
-			path:     t.TempDir(),
+			name:            "Ok",
+			caseTestDataDir: "case_1",
+			path:            t.TempDir(),
 			runner: &test.SimpleCMDRunner{
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", nil
@@ -83,8 +85,9 @@ func TestPreCheck(t *testing.T) {
 			isErr: false,
 		},
 		{
-			caseName: "case_2",
-			path:     t.TempDir(),
+			name:            "Missing docker compose yaml",
+			caseTestDataDir: "case_2",
+			path:            t.TempDir(),
 			runner: &test.SimpleCMDRunner{
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", nil
@@ -96,8 +99,9 @@ func TestPreCheck(t *testing.T) {
 			isErr: true,
 		},
 		{
-			caseName: "case_1",
-			path:     t.TempDir(),
+			name:            "Command failure",
+			caseTestDataDir: "case_1",
+			path:            t.TempDir(),
 			runner: &test.SimpleCMDRunner{
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", fmt.Errorf("test unknown error")
@@ -111,35 +115,38 @@ func TestPreCheck(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		descr := fmt.Sprintf("PreCheck(%s)", tc.path)
-		dPath, dcPath := "", ""
+		t.Run(tc.name, func(t *testing.T) {
 
-		if !tc.noDocker {
-			dPath = test.CreateFakeDep(t, "docker")
-		}
-		if !tc.noCompose {
-			dcPath = test.CreateFakeDep(t, "docker-compose")
-		}
+			descr := fmt.Sprintf("PreCheck(%s)", tc.path)
+			dPath, dcPath := "", ""
 
-		commands.InitRunner(func() commands.CommandRunner {
-			return tc.runner
+			if !tc.noDocker {
+				dPath = test.CreateFakeDep(t, "docker")
+			}
+			if !tc.noCompose {
+				dcPath = test.CreateFakeDep(t, "docker-compose")
+			}
+
+			commands.InitRunner(func() commands.CommandRunner {
+				return tc.runner
+			})
+
+			test.PrepareTestCaseDir(filepath.Join("testdata", "checks_tests", tc.caseTestDataDir, "docker-compose-scripts"), tc.path)
+
+			err := PreCheck(tc.path)
+			if tc.isErr && err == nil {
+				t.Errorf("%s expected to fail", descr)
+			} else if !tc.isErr && err != nil {
+				t.Errorf("%s failed: %v", descr, err)
+			}
+
+			if dPath != "" {
+				test.DeleteFakeDep(dPath)
+			}
+			if dcPath != "" {
+				test.DeleteFakeDep(dcPath)
+			}
 		})
-
-		test.PrepareTestCaseDir(filepath.Join("testdata", "checks_tests", tc.caseName, "docker-compose-scripts"), tc.path)
-
-		err := PreCheck(tc.path)
-		if tc.isErr && err == nil {
-			t.Errorf("%s expected to fail", descr)
-		} else if !tc.isErr && err != nil {
-			t.Errorf("%s failed: %v", descr, err)
-		}
-
-		if dPath != "" {
-			test.DeleteFakeDep(dPath)
-		}
-		if dcPath != "" {
-			test.DeleteFakeDep(dcPath)
-		}
 	}
 }
 
