@@ -57,88 +57,101 @@ Finally, it will run the generated docker-compose script. Only execution and con
 Running the command without flags (except global flag'--config') is equivalent to '1click cli -r' `,
 	Args: cobra.NoArgs,
 	PreRun: func(cmd *cobra.Command, args []string) {
-		// Count flags being set
-		count := 0
-		// HACKME: LocalFlags() doesn't work, so we count manually and check for parent flag config
-		cmd.Flags().Visit(func(f *pflag.Flag) {
-			if f.Name != "config" {
-				count++
-			}
-		})
-
-		if count == 0 {
-			// No flag behavior
-			randomize = true
-		}
-
-		// Quick run
-		if y {
-			randomize, install, run = true, true, true
-		}
-
-		// Validate run-clients flag
-		if utils.Contains(*services, "all") {
-			if len(*services) == 1 {
-				// all used correctly
-				services = &[]string{execution, consensus, validator}
-			} else {
-				// Ambiguous value
-				log.Fatalf(configs.RunClientsFlagAmbiguousError, *services)
-			}
+		if err := preRunCliCmd(cmd, args); err != nil {
+			log.Fatal(err)
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// Get all clients: supported + configured
-		clientsMap, errors := clients.GetClients([]string{execution, consensus, validator})
-		if len(errors) > 0 {
-			for _, err := range errors {
+		if errs := runCliCmd(cmd, args); len(errs) > 0 {
+			for _, err := range errs {
 				log.Error(err)
 			}
 			os.Exit(1)
 		}
+	},
+}
 
-		// Handle selection and validation of clients
-		combinedClients, err := validateClients(clientsMap, cmd.OutOrStdout())
-		if err != nil {
-			log.Fatal(err)
+func preRunCliCmd(cmd *cobra.Command, args []string) error {
+	// Count flags being set
+	count := 0
+	// HACKME: LocalFlags() doesn't work, so we count manually and check for parent flag config
+	cmd.Flags().Visit(func(f *pflag.Flag) {
+		if f.Name != "config" {
+			count++
 		}
+	})
 
-		dependencies := configs.GetDependencies()
-		log.Infof(configs.CheckingDependencies, strings.Join(dependencies, ", "))
+	if count == 0 {
+		// No flag behavior
+		randomize = true
+	}
 
-		// Check if dependencies are installed. Keep checking dependencies until they are all installed
-		for pending := utils.CheckDependencies(dependencies); len(pending) > 0; pending = utils.CheckDependencies(dependencies) {
-			log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
-			if install {
-				// Install dependencies directly
-				if err := installDependencies(pending); err != nil {
-					log.Fatal(err)
-				}
-			} else {
-				// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
-				if err := installOrShowInstructions(pending); err != nil {
-					log.Fatal(err)
-				}
-			}
+	// Quick run
+	if y {
+		randomize, install, run = true, true, true
+	}
+
+	// Validate run-clients flag
+	if utils.Contains(*services, "all") {
+		if len(*services) == 1 {
+			// all used correctly
+			services = &[]string{execution, consensus, validator}
+		} else {
+			// Ambiguous value
+			return fmt.Errorf(configs.RunClientsFlagAmbiguousError, *services)
 		}
-		log.Info(configs.DependenciesOK)
+	}
+	return nil
+}
+func runCliCmd(cmd *cobra.Command, args []string) []error {
+	// Get all clients: supported + configured
+	clientsMap, errors := clients.GetClients([]string{execution, consensus, validator})
+	if len(errors) > 0 {
+		return errors
+	}
 
-		// Generate docker-compose scripts
-		if err = generate.GenerateScripts(combinedClients.Execution.Name, combinedClients.Consensus.Name, combinedClients.Validator.Name, generationPath); err != nil {
-			log.Fatal(err)
-		}
+	// Handle selection and validation of clients
+	combinedClients, err := validateClients(clientsMap, cmd.OutOrStdout())
+	if err != nil {
+		return []error{err}
+	}
 
-		if run {
-			if err = runAndShowContainers(); err != nil {
-				log.Fatal(err)
+	dependencies := configs.GetDependencies()
+	log.Infof(configs.CheckingDependencies, strings.Join(dependencies, ", "))
+
+	// Check if dependencies are installed. Keep checking dependencies until they are all installed
+	for pending := utils.CheckDependencies(dependencies); len(pending) > 0; pending = utils.CheckDependencies(dependencies) {
+		log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
+		if install {
+			// Install dependencies directly
+			if err := installDependencies(pending); err != nil {
+				return []error{err}
 			}
 		} else {
-			// Let the user decide to see the instructions for executing the scripts and exit or let the tool execute them
-			if err = runScriptOrExit(); err != nil {
-				log.Fatal(err)
+			// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
+			if err := installOrShowInstructions(pending); err != nil {
+				return []error{err}
 			}
 		}
-	},
+	}
+	log.Info(configs.DependenciesOK)
+
+	// Generate docker-compose scripts
+	if err = generate.GenerateScripts(combinedClients.Execution.Name, combinedClients.Consensus.Name, combinedClients.Validator.Name, generationPath); err != nil {
+		return []error{err}
+	}
+
+	if run {
+		if err = runAndShowContainers(); err != nil {
+			return []error{err}
+		}
+	} else {
+		// Let the user decide to see the instructions for executing the scripts and exit or let the tool execute them
+		if err = runScriptOrExit(); err != nil {
+			return []error{err}
+		}
+	}
+	return nil
 }
 
 func init() {

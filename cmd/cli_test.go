@@ -20,8 +20,41 @@ type cliCmdTestCase struct {
 	generationPath string
 	runner         commands.CommandRunner
 	fdOut          *bytes.Buffer
-	args           []string
+	args           cliCmdArgs
+	isPreErr       bool
 	isErr          bool
+}
+
+type cliCmdArgs struct {
+	random     bool
+	run        bool
+	install    bool
+	execClient string
+	conClient  string
+	valClient  string
+}
+
+func (args *cliCmdArgs) toString() string {
+	s := []string{}
+	if args.random {
+		s = append(s, "-r")
+	}
+	if args.run {
+		s = append(s, "--run")
+	}
+	if args.install {
+		s = append(s, "-i")
+	}
+	if args.execClient != "" {
+		s = append(s, "-e", args.execClient)
+	}
+	if args.conClient != "" {
+		s = append(s, "-c", args.conClient)
+	}
+	if args.valClient != "" {
+		s = append(s, "-v", args.valClient)
+	}
+	return strings.Join(s, " ")
 }
 
 func resetCliCmd() {
@@ -37,7 +70,37 @@ func resetCliCmd() {
 	services = &[]string{}
 }
 
-func buildCliTestCase(t *testing.T, name, caseTestDataDir string, args []string, isErr bool) *cliCmdTestCase {
+func prepareCliCmd(tc cliCmdTestCase) error {
+	// Set output buffers
+	rootCmd.SetOut(tc.fdOut)
+	log.SetOutput(tc.fdOut)
+	// Set config file path
+	cfgFile = tc.configPath
+	initConfig()
+	// Set flags
+	generationPath = tc.generationPath
+	randomize = tc.args.random
+	run = tc.args.run
+	install = tc.args.install
+	if tc.args.execClient != "" {
+		executionName = tc.args.execClient
+	}
+	if tc.args.conClient != "" {
+		consensusName = tc.args.conClient
+	}
+	if tc.args.valClient != "" {
+		validatorName = tc.args.valClient
+	}
+	if err := preRunCliCmd(rootCmd, []string{}); err != nil {
+		return err
+	}
+	commands.InitRunner(func() commands.CommandRunner {
+		return tc.runner
+	})
+	return nil
+}
+
+func buildCliTestCase(t *testing.T, name, caseTestDataDir string, args cliCmdArgs, isPreErr, isErr bool) *cliCmdTestCase {
 	tc := cliCmdTestCase{}
 	configPath := t.TempDir()
 
@@ -66,17 +129,64 @@ func buildCliTestCase(t *testing.T, name, caseTestDataDir string, args []string,
 	tc.generationPath = dcPath
 	tc.configPath = filepath.Join(configPath, "config.yaml")
 	tc.fdOut = new(bytes.Buffer)
+	tc.isPreErr = isPreErr
 	tc.isErr = isErr
 	return &tc
 }
 
 func TestCliCmd(t *testing.T) {
-	//TODO: allow to test error programs
 	tcs := []cliCmdTestCase{
-		*buildCliTestCase(t, "Random clients", "case_1", []string{"-r"}, false),
-		*buildCliTestCase(t, "Fixed clients", "case_1", []string{"-e", "nethermind", "-c", "lighthouse", "-v", "lighthouse"}, false),
-		// *buildCliTestCase(t, "Missing consensus client", "case_1", []string{"-e", "nethermind", "-v", "lighthouse"}, true),
-		// *buildCliTestCase(t, "Missing validator client", "case_1", []string{"-e", "nethermind", "-c", "lighthouse"}, true),
+		*buildCliTestCase(
+			t,
+			"Random clients",
+			"case_1",
+			cliCmdArgs{
+				random:  true,
+				run:     true,
+				install: true,
+			},
+			false,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"Fixed clients",
+			"case_1",
+			cliCmdArgs{
+				run:        true,
+				install:    true,
+				execClient: "nethermind",
+				conClient:  "lighthouse",
+				valClient:  "lighthouse",
+			},
+			false,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"Missing consensus client",
+			"case_1",
+			cliCmdArgs{
+				run:        true,
+				install:    true,
+				execClient: "nethermind",
+				valClient:  "lighthouse",
+			},
+			false,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"Missing validator client", "case_1",
+			cliCmdArgs{
+				run:        true,
+				install:    true,
+				execClient: "nethermind",
+				conClient:  "lighthouse",
+			},
+			false,
+			false,
+		),
 	}
 
 	t.Cleanup(resetCliCmd)
@@ -84,21 +194,24 @@ func TestCliCmd(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			resetCliCmd()
-			rootCmd.SetArgs(append([]string{"cli", "--config", tc.configPath, "--path", tc.generationPath, "-i", "--run"}, tc.args...))
-			rootCmd.SetOut(tc.fdOut)
-			log.SetOutput(tc.fdOut)
+			descr := fmt.Sprintf("1click cli %s", tc.args.toString())
 
-			commands.InitRunner(func() commands.CommandRunner {
-				return tc.runner
-			})
-
-			err := rootCmd.Execute()
-			descr := fmt.Sprintf("1click cli -i --run %s", strings.Join(tc.args, " "))
-
-			if tc.isErr && err == nil {
+			err := prepareCliCmd(tc)
+			if tc.isPreErr && err == nil {
 				t.Errorf("%s expected to fail", descr)
-			} else if !tc.isErr && err != nil {
+			} else if !tc.isPreErr && err != nil {
 				t.Errorf("%s failed: %v", descr, err)
+			}
+
+			errs := runCliCmd(rootCmd, []string{})
+			if tc.isErr && (errs == nil || len(errs) < 1) {
+				t.Errorf("%s expected to fail", descr)
+			} else if !tc.isErr && errs != nil && len(errs) > 1 {
+				errsStr := []string{}
+				for _, err := range errs {
+					errsStr = append(errsStr, fmt.Sprintf("%v", err))
+				}
+				t.Errorf("%s failed with errors: %v", descr, strings.Join(errsStr, "\n"))
 			}
 		})
 	}
