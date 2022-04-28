@@ -41,8 +41,8 @@ func buildListClientTestCase(t *testing.T, name, caseTestDataDir string, isErr b
 func TestListClientsCmd(t *testing.T) {
 	tcs := [...]listClientsTestCase{
 		buildListClientTestCase(t, "Ok", "case_1", false),
-		// buildListClientTestCase(t, "Missing validator clients", "case_2", true),
-		// buildListClientTestCase(t, "Invalid format", "case_3", true),
+		buildListClientTestCase(t, "Missing validator clients", "case_2", true),
+		buildListClientTestCase(t, "Using json format", "case_3", false),
 	}
 
 	t.Cleanup(resetListClientsCmd)
@@ -52,9 +52,12 @@ func TestListClientsCmd(t *testing.T) {
 			resetListClientsCmd()
 			rootCmd.SetOut(tc.tableOut)
 			log.SetOutput(tc.logsOut)
-			rootCmd.SetArgs([]string{"clients", "--config", tc.configPath})
+			args := []string{}
+			// Configure config path
+			cfgFile = tc.configPath
+			initConfig()
 
-			err := rootCmd.Execute()
+			err := runListClientsCmd(rootCmd, args)
 			if tc.isErr && err == nil {
 				t.Error("1click clients expected to fail")
 			} else if !tc.isErr && err != nil {
