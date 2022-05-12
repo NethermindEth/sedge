@@ -40,12 +40,12 @@ func TestGetScriptPath(t *testing.T) {
 				t.Errorf("%s failed: %v", descr, err)
 			} else {
 				//TODO: improve results tests
-				match, err := regexp.MatchString(`.*`+input.dependency+`/.*/`+`\.sh`, path)
+				match, err := regexp.MatchString(`.*`+input.dependency+`/.*\.sh`, path) // Check if path have correct format for dependency
 				if err != nil || match {
 					t.Errorf("returned path %s is invalid", path)
 				}
 
-				//TODO: validate distro
+				//TODO: validate if distro is correct
 			}
 		}
 
