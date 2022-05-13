@@ -1,0 +1,16 @@
+dependencies:
+  - docker
+  - docker-compose
+
+executionClients:
+  - nethermind
+  - geth
+
+consensusClients:
+  - lighthouse
+  - lodestar
+  - prysm
+  - teku
+
+logs:
+  logLevel: debug

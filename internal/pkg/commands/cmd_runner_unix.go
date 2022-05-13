@@ -44,26 +44,26 @@ func (cr *UnixCMDRunner) BuildDockerComposePSCMD(options DockerComposePsOptions)
 }
 
 func (cr *UnixCMDRunner) BuildDockerComposeLogsCMD(options DockerComposeLogsOptions) Command {
-	command := fmt.Sprintf("docker-compose -f %s logs ", options.Path)
+	command := fmt.Sprintf("docker-compose -f %s logs", options.Path)
 	servs := strings.Join(options.Services, " ")
 	if options.Follow {
 		log.Debug(`Command "docker-compose logs" built with "--follow" flag.`)
-		command += fmt.Sprintf("--follow %s", servs)
+		command += fmt.Sprintf(" --follow %s", servs)
 	} else if options.Tail > 0 {
 		log.Debugf(`Command "docker-compose logs" built with "--tail=%d" flag.`, options.Tail)
-		command += fmt.Sprintf("--tail=%d %s", options.Tail, servs)
+		command += fmt.Sprintf(" --tail=%d %s", options.Tail, servs)
 	} else {
 		log.Warn(`Command "docker-compose logs" built without "--follow" or "--tail" flags. Add follow argument or make tail argument greater than 0.`)
-		command += servs
+		command += " " + servs
 	}
 	return Command{Cmd: command}
 }
 
 func (cr *UnixCMDRunner) BuildDockerBuildCMD(options DockerBuildOptions) Command {
-	command := fmt.Sprintf("docker build %s ", options.Path)
+	command := fmt.Sprintf("docker build %s", options.Path)
 	if len(options.Tag) > 0 {
 		log.Debug(`Command "docker build" built with "-t" flag.`)
-		command += "-t " + options.Tag
+		command += " -t " + options.Tag
 	} else {
 		log.Debug(`Command "docker build" built withot "-t" flag.`)
 	}
