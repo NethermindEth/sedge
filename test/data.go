@@ -70,8 +70,8 @@ func getAllFiles(entries []fs.FileInfo, srcPath, dstPath string) ([]copyOperatio
 	return ops, nil
 }
 
-// Copy all sub directory and files from "src Path" to "dataPath"
-// mantining the same structure.
+// Copy all sub directory and files from "srcPath" to "dstPath"
+// maintaining the same structure.
 func PrepareTestCaseDir(srcPath, dstPath string) error {
 	srcDirs, err := ioutil.ReadDir(srcPath)
 	if err != nil {
