@@ -103,6 +103,7 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 	}
 	return nil
 }
+
 func runCliCmd(cmd *cobra.Command, args []string) []error {
 	// Get all clients: supported + configured
 	clientsMap, errors := clients.GetClients([]string{execution, consensus, validator})

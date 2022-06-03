@@ -11,6 +11,10 @@ import (
 )
 
 func TestGetScriptPath(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skipf("Test running in a non-linux environment. GOOS: %s", runtime.GOOS)
+	}
+
 	inputs := []struct {
 		dependency string
 		isErr      bool
@@ -87,6 +91,10 @@ func TestDependencySupported(t *testing.T) {
 }
 
 func TestHandleInstructions(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skipf("Test running in a non-linux environment. GOOS: %s", runtime.GOOS)
+	}
+
 	inputs := []struct {
 		dependencies  []string
 		handlerResult error
@@ -139,6 +147,10 @@ func TestHandleInstructions(t *testing.T) {
 }
 
 func TestShowInstructions(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skipf("Test running in a non-linux environment. GOOS: %s", runtime.GOOS)
+	}
+
 	inputs := []struct {
 		dependency string
 		isErr      bool
@@ -169,6 +181,10 @@ func TestShowInstructions(t *testing.T) {
 }
 
 func TestInstallDependency(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skipf("Test running in a non-linux environment. GOOS: %s", runtime.GOOS)
+	}
+
 	tcs := []struct {
 		dependency string
 		runner     commands.CommandRunner
