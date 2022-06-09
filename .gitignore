@@ -9,3 +9,5 @@ vendor
 coverage/*
 
 .vscode/
+
+.DS_Store

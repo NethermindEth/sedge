@@ -36,4 +36,6 @@ const (
 	RunClientsFlagAmbiguousError      = "provided values %v for run-clients flag are ambiguous. If you want to use the option 'all', then do not insert aditional options"
 	InstallNotSupported               = "install support for %s is not available for %s. Please install it and try again"
 	DistroInfoError                   = "failed to get linux distribution info. Error: %s"
+	MonitoringToolInitError           = "monitoring tool initialization failed. Error: %s"
+	TrackSyncError                    = "endpoint %s returned an error. Error: %v"
 )

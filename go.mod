@@ -3,14 +3,24 @@ module github.com/NethermindEth/1click
 go 1.17
 
 require (
+	github.com/NethermindEth/posmoni v0.0.0-20220603012828-9d6e0e2ac277
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
 	github.com/sirupsen/logrus v1.8.1
 )
 
 require (
+	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/mattn/go-runewidth v0.0.12 // indirect
+	github.com/mattn/go-sqlite3 v1.14.12 // indirect
+	github.com/r3labs/sse/v2 v2.7.7 // indirect
 	github.com/rivo/uniseg v0.1.0 // indirect
+	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
+	gopkg.in/cenkalti/backoff.v1 v1.1.0 // indirect
+	gorm.io/driver/sqlite v1.3.1 // indirect
+	gorm.io/gorm v1.23.4 // indirect
 )
 
 require (
@@ -25,7 +35,7 @@ require (
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
-	github.com/spf13/cobra v1.3.0
+	github.com/spf13/cobra v1.4.0
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1

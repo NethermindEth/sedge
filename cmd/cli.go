@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -19,6 +20,9 @@ import (
 	"github.com/NethermindEth/1click/internal/pkg/generate"
 	"github.com/NethermindEth/1click/internal/ui"
 	"github.com/NethermindEth/1click/internal/utils"
+	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
+	posmonidb "github.com/NethermindEth/posmoni/pkg/eth2/db"
+	posmoninet "github.com/NethermindEth/posmoni/pkg/eth2/networking"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -152,6 +156,43 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 			return []error{err}
 		}
 	}
+
+	// Initialize Eth2 Monitoring tool
+	moniCfg := posmoni.ConfigOpts{
+		Checkers: []posmoni.CfgChecker{
+			{Key: posmoni.Execution, ErrMsg: posmoni.NoExecutionFoundError, Data: []string{configs.OnPremiseExecutionURL}},
+			{Key: posmoni.Consensus, ErrMsg: posmoni.NoConsensusFoundError, Data: []string{configs.OnPremiseConsensusURL}},
+		},
+	}
+	m, err := posmoni.NewEth2Monitor(
+		posmonidb.EmptyRepository{},
+		&posmoninet.BeaconClient{RetryDuration: time.Second},
+		&posmoninet.ExecutionClient{RetryDuration: time.Second},
+		posmoninet.SubscribeOpts{},
+		moniCfg,
+	)
+	if err != nil {
+		return []error{fmt.Errorf(configs.MonitoringToolInitError, err)}
+	}
+
+	// Track sync of execution and consensus clients
+	// TODO: Parameterize wait arg of trackSync
+	if err = trackSync(m, time.Minute); err != nil {
+		return []error{err}
+	}
+
+	// TODO: Prompt for waiting for keystore and validator registration to run the validator
+
+	// Run docker-compose script validator
+	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Services: []string{"validator"},
+	})
+	log.Infof(configs.RunningCommand, upCMD.Cmd)
+	if _, err := commands.Runner.RunCMD(upCMD); err != nil {
+		return []error{fmt.Errorf(configs.CommandError, upCMD.Cmd, err)}
+	}
+
 	return nil
 }
 
@@ -380,6 +421,32 @@ func runAndShowContainers() error {
 	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
 	if _, err := commands.Runner.RunCMD(dcpsCMD); err != nil {
 		return fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
+	}
+
+	return nil
+}
+
+// Interface for Posmoni Eth2 monitor
+type monitor interface {
+	TrackSync(done <-chan struct{}, beaconEndpoints, executionEndpoints []string, wait time.Duration) <-chan posmoni.EndpointSyncStatus
+}
+
+func trackSync(m monitor, wait time.Duration) error {
+	done := make(chan struct{})
+	statuses := m.TrackSync(done, []string{configs.OnPremiseExecutionURL}, []string{configs.OnPremiseConsensusURL}, time.Minute)
+
+	var esynced, csynced bool
+	for s := range statuses {
+		if s.Error != nil {
+			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
+		}
+		esynced = esynced || (s.Synced && s.Endpoint == configs.OnPremiseExecutionURL)
+		csynced = csynced || (s.Synced && s.Endpoint == configs.OnPremiseConsensusURL)
+		if esynced && csynced {
+			// Stop tracking
+			close(done)
+			log.Info(configs.NodesSynced)
+		}
 	}
 
 	return nil

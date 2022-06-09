@@ -36,4 +36,5 @@ const (
 	ValidatorDefaultDataDir         = "./validator-data"
 	KeystoreDefaultDataDir          = "./keystore"
 	ReviewKeystorePath              = "In case you used custom paths for the 'cli' or the 'keys' commands, please review if the keystore path in the generated .env file points to the generated keystore folder (the .env key should be KEYSTORE_DIR). If not, change the path in the .env file to the correct one."
+	NodesSynced                     = "Execution and Consensus clients are synced, proceding to start validator node"
 )
