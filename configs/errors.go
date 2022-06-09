@@ -38,4 +38,5 @@ const (
 	DistroInfoError                   = "failed to get linux distribution info. Error: %s"
 	MonitoringToolInitError           = "monitoring tool initialization failed. Error: %s"
 	TrackSyncError                    = "endpoint %s returned an error. Error: %v"
+	RunClientsError                   = "provided values %v for run-clients are incorrect. Posible correct values are %v"
 )

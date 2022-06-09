@@ -104,6 +104,8 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 			// Ambiguous value
 			return fmt.Errorf(configs.RunClientsFlagAmbiguousError, *services)
 		}
+	} else if !utils.ContainsOnly(*services, []string{execution, consensus, validator}) {
+		return fmt.Errorf(configs.RunClientsError, strings.Join(*services, ","), strings.Join([]string{execution, consensus, validator}, ","))
 	}
 	return nil
 }
@@ -359,7 +361,7 @@ func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Cl
 }
 
 func runScriptOrExit() (err error) {
-	optRun, optExit := "Run the script", "Exit"
+	optRun, optExit := fmt.Sprintf("Run the script with the selected services %s", strings.Join(*services, ",")), "Exit"
 	prompt := promptui.Select{
 		Label: "Select how to proceed with the generated docker-compose script",
 		Items: []string{optRun, optExit},
