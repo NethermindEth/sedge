@@ -3,6 +3,7 @@ package generate
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"text/template"
 
 	"github.com/NethermindEth/1click/configs"
@@ -16,36 +17,30 @@ This function is responsible for generating docker-compose files for execution, 
 validator clients.
 
 params :-
-a. executionClient string
-Execution client whose script is to be generated
-b. consensusClient string
-Execution client whose script is to be generated
-c. validatorClient string
-Execution client whose script is to be generated
-d. path string
-Path of generated scripts
+a. gd GenerationData
+Data object containing clients whose script are to be generated, path of generated scripts and special options for the clients configuration.
 
 returns :-
 a. error
 Error if any
 */
-func GenerateScripts(executionClient, consensusClient, validatorClient, path string) (err error) {
+func GenerateScripts(gd GenerationData) (err error) {
 	// Create scripts directory if not exists
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		err = os.MkdirAll(path, 0755)
+	if _, err := os.Stat(gd.GenerationPath); os.IsNotExist(err) {
+		err = os.MkdirAll(gd.GenerationPath, 0755)
 		if err != nil {
 			return err
 		}
 	}
 
 	log.Info(configs.GeneratingDockerComposeScript)
-	err = generateDockerComposeScripts(executionClient, consensusClient, validatorClient, path)
+	err = generateDockerComposeScripts(gd)
 	if err != nil {
 		return err
 	}
 
 	log.Info(configs.GeneratingEnvFile)
-	err = generateEnvFile(executionClient, consensusClient, validatorClient, path)
+	err = generateEnvFile(gd)
 	if err != nil {
 		return err
 	}
@@ -72,8 +67,8 @@ returns :-
 a. error
 Error if any
 */
-func generateDockerComposeScripts(executionClient, consensusClient, validatorClient, path string) (err error) {
-	rawBaseTmp, err := templates.Services.ReadFile("services/docker-compose_base.tmpl")
+func generateDockerComposeScripts(gd GenerationData) (err error) {
+	rawBaseTmp, err := templates.Services.ReadFile(filepath.Join("services", "docker-compose_base.tmpl"))
 	if err != nil {
 		return
 	}
@@ -84,12 +79,12 @@ func generateDockerComposeScripts(executionClient, consensusClient, validatorCli
 	}
 
 	clients := map[string]string{
-		"execution/": executionClient,
-		"consensus/": consensusClient,
-		"validator/": validatorClient,
+		"execution/": gd.ExecutionClient,
+		"consensus/": gd.ConsensusClient,
+		"validator/": gd.ValidatorClient,
 	}
 	for tmpKind, clientName := range clients {
-		tmp, err := templates.Services.ReadFile("services/" + tmpKind + clientName + ".tmpl")
+		tmp, err := templates.Services.ReadFile(filepath.Join("services", tmpKind, clientName+".tmpl"))
 		if err != nil {
 			return err
 		}
@@ -99,19 +94,24 @@ func generateDockerComposeScripts(executionClient, consensusClient, validatorCli
 		}
 	}
 
+	data := DockerComposeData{
+		CheckpointSyncUrl: gd.CheckpointSyncUrl,
+		FallbackELUrls:    gd.FallbackELUrls,
+	}
+
 	// Print docker-compose file
 	log.Infof(configs.PrintingFile, configs.DefaultDockerComposeScriptName)
-	err = baseTmp.Execute(os.Stdout, nil)
+	err = baseTmp.Execute(os.Stdout, data)
 	if err != nil {
 		return fmt.Errorf(configs.PrintingFileError, configs.DefaultDockerComposeScriptName, err)
 	}
 	fmt.Println()
 
-	err = writeTemplateToFile(baseTmp, path+"/"+configs.DefaultDockerComposeScriptName, nil, false)
+	err = writeTemplateToFile(baseTmp, filepath.Join(gd.GenerationPath, configs.DefaultDockerComposeScriptName), data, false)
 	if err != nil {
-		return fmt.Errorf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient, err)
+		return fmt.Errorf(configs.GeneratingScriptsError, gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient, err)
 	}
-	log.Infof(configs.CreatedFile, path+"/"+configs.DefaultDockerComposeScriptName)
+	log.Infof(configs.CreatedFile, filepath.Join(gd.GenerationPath, configs.DefaultDockerComposeScriptName))
 
 	return nil
 }
@@ -136,16 +136,16 @@ returns :-
 a. error
 Error if any
 */
-func generateEnvFile(executionClient, consensusClient, validatorClient, path string) (err error) {
-	executionEnvTmp, err := template.ParseFS(templates.Envs, "envs/execution/"+executionClient+".tmpl")
+func generateEnvFile(gd GenerationData) (err error) {
+	executionEnvTmp, err := template.ParseFS(templates.Envs, filepath.Join("envs", "execution", gd.ExecutionClient+".tmpl"))
 	if err != nil {
 		return
 	}
-	consensusEnvTmp, err := template.ParseFS(templates.Envs, "envs/consensus/"+consensusClient+".tmpl")
+	consensusEnvTmp, err := template.ParseFS(templates.Envs, filepath.Join("envs", "consensus", gd.ConsensusClient+".tmpl"))
 	if err != nil {
 		return
 	}
-	validatorEnvTmp, err := template.ParseFS(templates.Envs, "envs/validator/"+validatorClient+".tmpl")
+	validatorEnvTmp, err := template.ParseFS(templates.Envs, filepath.Join("envs", "validator", gd.ValidatorClient+".tmpl"))
 	if err != nil {
 		return
 	}
@@ -162,24 +162,24 @@ func generateEnvFile(executionClient, consensusClient, validatorClient, path str
 
 	validatorEnv := ValidatorEnv{
 		ConsensusNodeURL:    configs.OnPremiseConsensusURL,
-		ExecutionEngineName: executionClient,
+		ExecutionEngineName: gd.ExecutionClient,
 		KeystoreDir:         configs.KeystoreDefaultDataDir,
 		DataDir:             configs.ValidatorDefaultDataDir,
 	}
 
-	err = writeTemplateToFile(executionEnvTmp, path+"/.env", executionEnv, false)
+	err = writeTemplateToFile(executionEnvTmp, filepath.Join(gd.GenerationPath, ".env"), executionEnv, false)
 	if err != nil {
-		return fmt.Errorf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient, err)
+		return fmt.Errorf(configs.GeneratingScriptsError, gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient, err)
 	}
 
-	err = writeTemplateToFile(consensusEnvTmp, path+"/.env", consensusEnv, true)
+	err = writeTemplateToFile(consensusEnvTmp, filepath.Join(gd.GenerationPath, ".env"), consensusEnv, true)
 	if err != nil {
-		return fmt.Errorf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient, err)
+		return fmt.Errorf(configs.GeneratingScriptsError, gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient, err)
 	}
 
-	err = writeTemplateToFile(validatorEnvTmp, path+"/.env", validatorEnv, true)
+	err = writeTemplateToFile(validatorEnvTmp, filepath.Join(gd.GenerationPath, ".env"), validatorEnv, true)
 	if err != nil {
-		return fmt.Errorf(configs.GeneratingScriptsError, executionClient, consensusClient, validatorClient, err)
+		return fmt.Errorf(configs.GeneratingScriptsError, gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient, err)
 	}
 
 	// Print .env file
@@ -199,7 +199,7 @@ func generateEnvFile(executionClient, consensusClient, validatorClient, path str
 		return fmt.Errorf(configs.PrintingFileError, ".env", err)
 	}
 	fmt.Println()
-	log.Infof(configs.CreatedFile, path+"/.env")
+	log.Infof(configs.CreatedFile, filepath.Join(gd.GenerationPath, ".env"))
 
 	return nil
 }

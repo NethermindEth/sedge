@@ -18,3 +18,19 @@ type ValidatorEnv struct {
 	DataDir             string
 	KeystoreDir         string
 }
+
+// GenerationData : Struct Data object for script's generation
+type GenerationData struct {
+	ExecutionClient   string
+	ConsensusClient   string
+	ValidatorClient   string
+	GenerationPath    string
+	CheckpointSyncUrl string
+	FallbackELUrls    []string
+}
+
+// DockerComposeData : Struct Data object to be applied to docker-compose script
+type DockerComposeData struct {
+	CheckpointSyncUrl string
+	FallbackELUrls    []string
+}
