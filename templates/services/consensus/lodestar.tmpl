@@ -26,9 +26,10 @@
       - --api.rest.port=4000
       - --network.discv5.bindAddr="/ip4/0.0.0.0/udp/9000"
       - --network.localMultiaddrs="/ip4/0.0.0.0/tcp/9000"
-      - --eth1.providerUrl=${EC_NODE}
-      - --weakSubjectivitySyncLatest=${LS_RAPID_SYNC}
+      - --eth1.providerUrls=${EC_NODE}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
       - --network.targetPeers=${CC_PEER_COUNT}
+      {{with .CheckpointSyncUrl}}- --weakSubjectivitySyncLatest
+      - --weakSubjectivityServerUrl={{.}}{{end}}
     logging:
       driver: "json-file"
       options:

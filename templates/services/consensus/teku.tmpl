@@ -28,6 +28,7 @@
       - --rest-api-port=4000
       - --eth1-endpoints=${EC_NODE}
       - --eth1-deposit-contract-max-request-size=150
+      {{with .CheckpointSyncUrl}}- --initial-state={{.}}/eth/v2/debug/beacon/states/{{end}}
     logging:
       driver: "json-file"
       options:

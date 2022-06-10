@@ -24,11 +24,11 @@
       - --rpc-host=0.0.0.0
       - --grpc-gateway-host=0.0.0.0
       - --grpc-gateway-port=4000
-      - --http-web3provider=${EC_NODE}
-      - --fallback-web3provider=${EC_FALLBACK_NODE1}
-      - --fallback-web3provider=${EC_FALLBACK_NODE2}
+      - --http-web3provider=${EC_NODE}{{range $url := .FallbackELUrls}}
+      - --fallback-web3provider={{$url}}{{end}}
       - --eth1-header-req-limit=150
       - --accept-terms-of-use
+      {{with .CheckpointSyncUrl}}- --checkpoint-sync-url={{.}}{{end}}
     logging:
       driver: "json-file"
       options:
