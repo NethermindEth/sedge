@@ -23,6 +23,7 @@ type cliCmdTestCase struct {
 	configPath     string
 	generationPath string
 	runner         commands.CommandRunner
+	monitor        MonitoringTool
 	fdOut          *bytes.Buffer
 	args           cliCmdArgs
 	isPreErr       bool
@@ -101,6 +102,9 @@ func prepareCliCmd(tc cliCmdTestCase) error {
 	commands.InitRunner(func() commands.CommandRunner {
 		return tc.runner
 	})
+	initMonitor(func() MonitoringTool {
+		return tc.monitor
+	})
 	return nil
 }
 
@@ -128,6 +132,8 @@ func buildCliTestCase(t *testing.T, name, caseTestDataDir string, args cliCmdArg
 		},
 	}
 
+	tc.monitor = &monitorStub{data: monitorData}
+
 	tc.name = name
 	tc.args = args
 	tc.generationPath = dcPath
@@ -139,6 +145,7 @@ func buildCliTestCase(t *testing.T, name, caseTestDataDir string, args cliCmdArg
 }
 
 func TestCliCmd(t *testing.T) {
+	// TODO: Add more test cases
 	tcs := []cliCmdTestCase{
 		*buildCliTestCase(
 			t,
@@ -148,6 +155,10 @@ func TestCliCmd(t *testing.T) {
 				random:  true,
 				run:     true,
 				install: true,
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			false,
 			false,
@@ -163,6 +174,10 @@ func TestCliCmd(t *testing.T) {
 				conClient:  "lighthouse",
 				valClient:  "lighthouse",
 			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
 			false,
 			false,
 		),
@@ -176,6 +191,10 @@ func TestCliCmd(t *testing.T) {
 				execClient: "nethermind",
 				valClient:  "lighthouse",
 			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
 			false,
 			false,
 		),
@@ -187,6 +206,10 @@ func TestCliCmd(t *testing.T) {
 				install:    true,
 				execClient: "nethermind",
 				conClient:  "lighthouse",
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			false,
 			false,
@@ -221,6 +244,7 @@ func TestCliCmd(t *testing.T) {
 	}
 }
 
+// Stub for MonitoringTool interface
 type monitorStub struct {
 	data  []posmoni.EndpointSyncStatus
 	calls int

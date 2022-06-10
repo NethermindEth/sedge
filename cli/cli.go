@@ -214,4 +214,26 @@ func init() {
 
 	services = cliCmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all. The 'all' option must be used alone. Example: '1click cli -r --run-clients=consensus,validator'")
 
+	// Initialize monitoring tool
+	initMonitor(func() MonitoringTool {
+		// Initialize Eth2 Monitoring tool
+		moniCfg := posmoni.ConfigOpts{
+			Checkers: []posmoni.CfgChecker{
+				{Key: posmoni.Execution, ErrMsg: posmoni.NoExecutionFoundError, Data: []string{configs.OnPremiseExecutionURL}},
+				{Key: posmoni.Consensus, ErrMsg: posmoni.NoConsensusFoundError, Data: []string{configs.OnPremiseConsensusURL}},
+			},
+		}
+		m, err := posmoni.NewEth2Monitor(
+			posmonidb.EmptyRepository{},
+			&posmoninet.BeaconClient{RetryDuration: time.Second},
+			&posmoninet.ExecutionClient{RetryDuration: time.Second},
+			posmoninet.SubscribeOpts{},
+			moniCfg,
+		)
+		if err != nil {
+			log.Fatalf(configs.MonitoringToolInitError, err)
+		}
+
+		return m
+	})
 }

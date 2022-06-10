@@ -19,6 +19,16 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
+// Interface for Posmoni Eth2 monitor
+type MonitoringTool interface {
+	TrackSync(done <-chan struct{}, beaconEndpoints, executionEndpoints []string, wait time.Duration) <-chan posmoni.EndpointSyncStatus
+}
+
+var monitor MonitoringTool
+
+func initMonitor(builder func() MonitoringTool) {
+	monitor = builder()
+}
 
 func installOrShowInstructions(pending []string) (err error) {
 	// notest
@@ -245,6 +255,39 @@ func trackSync(m MonitoringTool, wait time.Duration) error {
 			close(done)
 			log.Info(configs.NodesSynced)
 		}
+	}
+
+	return nil
+}
+
+func RunValidatorOrExit() error {
+	// notest
+	optRun, optExit := "Run validator service", "Exit"
+	prompt := promptui.Select{
+		Label: "Select how to proceed with the validator client",
+		Items: []string{optRun, optExit},
+	}
+
+	log.Infof(configs.InstructionsFor, "running validator service of docker-compose script")
+	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
+		Path:     generationPath,
+		Services: []string{validator},
+	})
+	fmt.Printf("\n%s\n\n", upCMD.Cmd)
+
+	_, result, err := prompt.Run()
+	if err != nil {
+		return fmt.Errorf("prompt failed %s", err)
+	}
+
+	switch result {
+	case optRun:
+		if err = runAndShowContainers([]string{validator}); err != nil {
+			return err
+		}
+	default:
+		log.Info(configs.Exiting)
+		os.Exit(0)
 	}
 
 	return nil
