@@ -3,7 +3,7 @@
 
 compile: ## compile:
 	@mkdir -p build
-	@go build -o build/1click cmd/1click/main.go
+	@go build -o build/1click cmd/main.go
 
 run: ## run
 	@./build/1click

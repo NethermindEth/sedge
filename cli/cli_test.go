@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 import (
 	"bytes"
@@ -104,7 +104,7 @@ func prepareCliCmd(tc cliCmdTestCase) error {
 	return nil
 }
 
-func buildCliTestCase(t *testing.T, name, caseTestDataDir string, args cliCmdArgs, isPreErr, isErr bool) *cliCmdTestCase {
+func buildCliTestCase(t *testing.T, name, caseTestDataDir string, args cliCmdArgs, monitorData []posmoni.EndpointSyncStatus, isPreErr, isErr bool) *cliCmdTestCase {
 	tc := cliCmdTestCase{}
 	configPath := t.TempDir()
 
@@ -210,7 +210,7 @@ func TestCliCmd(t *testing.T) {
 			errs := runCliCmd(rootCmd, []string{})
 			if tc.isErr && (errs == nil || len(errs) < 1) {
 				t.Errorf("%s expected to fail", descr)
-			} else if !tc.isErr && errs != nil && len(errs) > 1 {
+			} else if !tc.isErr && errs != nil && len(errs) > 0 {
 				errsStr := []string{}
 				for _, err := range errs {
 					errsStr = append(errsStr, fmt.Sprintf("%v", err))

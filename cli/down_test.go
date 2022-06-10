@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 import (
 	"bytes"
@@ -6,39 +6,40 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/NethermindEth/1click/configs"
 	"github.com/NethermindEth/1click/internal/pkg/commands"
 	"github.com/NethermindEth/1click/test"
 	log "github.com/sirupsen/logrus"
 )
 
-type keysCmdTestCase struct {
-	configPath   string
-	runner       commands.CommandRunner
-	mnemonic     bool
-	network      string
-	keystorePath string
-	fdOut        *bytes.Buffer
-	isErr        bool
+type downCmdTestCase struct {
+	configPath     string
+	generationPath string
+	runner         commands.CommandRunner
+	fdOut          *bytes.Buffer
+	isErr          bool
 }
 
-func resetKeysCmd() {
+func resetDownCmd() {
 	cfgFile = ""
-	path = ""
-	network = ""
-	existingMnemonic = false
+	generationPath = configs.DefaultDockerComposeScriptsPath
 }
 
-func buildKeysTestCase(t *testing.T, caseName, caseNetwork string, mnemonic, isErr bool) *keysCmdTestCase {
-	tc := keysCmdTestCase{}
+func buildDownTestCase(t *testing.T, caseName string, isErr bool) *downCmdTestCase {
+	tc := downCmdTestCase{}
 	configPath := t.TempDir()
 
-	err := test.PrepareTestCaseDir(filepath.Join("testdata", "keys_tests", caseName, "config"), configPath)
+	err := test.PrepareTestCaseDir(filepath.Join("testdata", "down_tests", caseName, "config"), configPath)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
 
-	keystorePath := filepath.Join(configPath, "keystore")
-	err = os.MkdirAll(keystorePath, os.ModePerm)
+	dcPath := filepath.Join(configPath, "docker-compose-scripts")
+	if err = os.Mkdir(dcPath, os.ModePerm); err != nil {
+		t.Fatalf("Can't build test case: %v", err)
+	}
+
+	err = test.PrepareTestCaseDir(filepath.Join("testdata", "down_tests", caseName, "docker-compose-scripts"), dcPath)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
@@ -53,27 +54,24 @@ func buildKeysTestCase(t *testing.T, caseName, caseNetwork string, mnemonic, isE
 		},
 	}
 
+	tc.generationPath = dcPath
 	tc.configPath = filepath.Join(configPath, "config.yaml")
-	tc.network = network
-	tc.keystorePath = keystorePath
-	tc.mnemonic = mnemonic
 	tc.fdOut = new(bytes.Buffer)
 	tc.isErr = isErr
 	return &tc
 }
 
-func TestKeysCmd(t *testing.T) {
+func TestDownCmd(t *testing.T) {
 	//TODO: allow to test error programs
-	tcs := []keysCmdTestCase{
-		*buildKeysTestCase(t, "case_1", "mainnet", false, false),
-		*buildKeysTestCase(t, "case_1", "mainnet", true, false),
+	tcs := []downCmdTestCase{
+		*buildDownTestCase(t, "case_1", false),
 	}
 
-	t.Cleanup(resetKeysCmd)
+	t.Cleanup(resetDownCmd)
 
 	for _, tc := range tcs {
-		resetKeysCmd()
-		rootCmd.SetArgs([]string{"keys", "--config", tc.configPath, "--path", tc.keystorePath})
+		resetDownCmd()
+		rootCmd.SetArgs([]string{"down", "--config", tc.configPath, "--path", tc.generationPath})
 		rootCmd.SetOut(tc.fdOut)
 		log.SetOutput(tc.fdOut)
 
@@ -81,7 +79,7 @@ func TestKeysCmd(t *testing.T) {
 			return tc.runner
 		})
 
-		descr := "1click keys"
+		descr := "1click down"
 		err := rootCmd.Execute()
 		if tc.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
