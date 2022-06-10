@@ -5,6 +5,10 @@ compile: ## compile:
 	@mkdir -p build
 	@go build -o build/1click cmd/main.go
 
+compile-linux: ## compile:
+	@mkdir -p build
+	@env GOOS=linux go build -o build/1click cmd/main.go
+
 run: ## run
 	@./build/1click
 
