@@ -13,7 +13,6 @@ import (
 	"github.com/NethermindEth/1click/configs"
 	"github.com/NethermindEth/1click/internal/pkg/clients"
 	"github.com/NethermindEth/1click/internal/pkg/commands"
-	"github.com/NethermindEth/1click/internal/ui"
 	"github.com/NethermindEth/1click/internal/utils"
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
 	"github.com/manifoldco/promptui"
@@ -65,7 +64,7 @@ func installDependencies(pending []string) error {
 }
 
 func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error) {
-	var executionClient, consensusClient, validatorClient clients.Client
+	var executionClient, consensusClient clients.Client
 	var combinedClients clients.Clients
 
 	executionClient, err := clients.RandomChoice(allClients[execution])
@@ -76,15 +75,11 @@ func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error
 	if err != nil {
 		return combinedClients, err
 	}
-	validatorClient, err = clients.RandomChoice(allClients[validator])
-	if err != nil {
-		return combinedClients, err
-	}
 
 	combinedClients = clients.Clients{
 		Execution: executionClient,
 		Consensus: consensusClient,
-		Validator: validatorClient}
+		Validator: consensusClient}
 	return combinedClients, nil
 }
 
@@ -92,69 +87,46 @@ func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Cl
 	var combinedClients clients.Clients
 	var err error
 
-	if randomize {
-		// Select a random execution client, consensus client and validator client
-		combinedClients, err = randomizeClients(allClients)
-		if err != nil {
-			return combinedClients, err
-		}
+	// Select a random execution client, consensus client and validator client
+	randomizedClients, err := randomizeClients(allClients)
+	if err != nil {
+		return combinedClients, err
+	}
 
-		log.Infof("Listing randomized clients\n\n")
-		ui.WriteRandomizedClientsTable(w, ui.RandomizedClientsTable{
-			Clients: []string{
-				combinedClients.Execution.Name,
-				combinedClients.Consensus.Name,
-				combinedClients.Validator.Name,
-			},
-			ClientTypes: []string{
-				combinedClients.Execution.Type,
-				combinedClients.Consensus.Type,
-				combinedClients.Validator.Type,
-			},
-		})
-	} else {
-		notProvidedClients := make([]string, 0)
-		if executionName == "" {
-			notProvidedClients = append(notProvidedClients, execution+" client")
-		}
-		if consensusName == "" {
-			notProvidedClients = append(notProvidedClients, consensus+" client")
-		}
-		if validatorName == "" {
-			notProvidedClients = append(notProvidedClients, validator+" client")
-		}
+	// Randomize missing clients, and choose same pair of client for consensus and validator if at least one of them is missing
+	if executionName == "" {
+		log.Warnf(configs.ExecutionClientNotSpecifiedWarn, randomizedClients.Execution.Name)
+		executionName = randomizedClients.Execution.Name
+	}
+	if consensusName == "" && validatorName == "" {
+		log.Warnf(configs.CLNotSpecifiedWarn, randomizedClients.Consensus.Name)
+		consensusName = randomizedClients.Consensus.Name
+		validatorName = randomizedClients.Validator.Name
+	} else if consensusName == "" {
+		log.Warn(configs.ConsensusClientNotSpecifiedWarn)
+		consensusName = validatorName
+	} else if validatorName == "" {
+		log.Warn(configs.ValidatorClientNotSpecifiedWarn)
+		validatorName = consensusName
+	}
 
-		if len(notProvidedClients) > 0 {
-			var msg string
+	exec, ok := allClients[execution][executionName]
+	if !ok {
+		exec.Name = executionName
+	}
+	cons, ok := allClients[consensus][consensusName]
+	if !ok {
+		cons.Name = consensusName
+	}
+	val, ok := allClients[validator][validatorName]
+	if !ok {
+		val.Name = validatorName
+	}
 
-			if len(notProvidedClients) == 1 {
-				msg = notProvidedClients[0]
-			} else {
-				msg = strings.Join(notProvidedClients[:len(notProvidedClients)-1], ", ")
-				msg = msg + " and " + notProvidedClients[len(notProvidedClients)-1]
-			}
-
-			return combinedClients, fmt.Errorf(configs.ClientNotSpecifiedError, msg)
-		}
-
-		exec, ok := allClients[execution][executionName]
-		if !ok {
-			exec.Name = executionName
-		}
-		cons, ok := allClients[consensus][consensusName]
-		if !ok {
-			cons.Name = consensusName
-		}
-		val, ok := allClients[validator][validatorName]
-		if !ok {
-			val.Name = validatorName
-		}
-
-		combinedClients = clients.Clients{
-			Execution: exec,
-			Consensus: cons,
-			Validator: val,
-		}
+	combinedClients = clients.Clients{
+		Execution: exec,
+		Consensus: cons,
+		Validator: val,
 	}
 
 	if err = clients.ValidateClient(combinedClients.Execution, execution); err != nil {
