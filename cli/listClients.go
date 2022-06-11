@@ -74,7 +74,7 @@ Table data
 b. error
 Error if any
 */
-func buildData(getClients func(string) ([]string, error)) (*ui.ListClientsTable, error) {
+func buildData(getClients func(string, string) ([]string, error)) (*ui.ListClientsTable, error) {
 	executionClients, err := getClients("execution")
 	if err != nil {
 		return nil, err
