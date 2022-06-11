@@ -35,7 +35,7 @@ func GenerateConfig(path string) (err error) {
 	// Get supported clients
 	clientsMap := make(map[string][]string)
 	for _, clientType := range []string{"execution", "consensus", "validator"} {
-		supportedClients, err := clients.GetSupportedClients(clientType)
+		supportedClients, err := clients.GetSupportedClients(clientType, "mainnet")
 		if err != nil {
 			return err
 		}

@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+// TODO: Add testcases for other networks
+
 func validateSupportedClients(t *testing.T, clientType string, supportedClients []string) {
 	//TODO: validate supported clients
 }
@@ -14,19 +16,20 @@ func validateSupportedClients(t *testing.T, clientType string, supportedClients 
 func TestGetSupportedClients(t *testing.T) {
 	inputs := [...]struct {
 		clientType string
+		network    string
 		isErr      bool
 	}{
-		{"execution", false},
-		{"consensus", false},
-		{"validator", false},
-		{"random", true},
-		{"", true},
+		{"execution", "mainnet", false},
+		{"consensus", "mainnet", false},
+		{"validator", "mainnet", false},
+		{"random", "mainnet", true},
+		{"", "mainnet", true},
 	}
 
 	for _, input := range inputs {
 		descr := fmt.Sprintf("GetSupportedClients(%s)", input.clientType)
 
-		if res, err := GetSupportedClients(input.clientType); input.isErr && err == nil {
+		if res, err := GetSupportedClients(input.clientType, input.network); input.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
 		} else if !input.isErr {
 			if err != nil {
@@ -41,6 +44,7 @@ func TestGetSupportedClients(t *testing.T) {
 type getClientsTestCase struct {
 	configClientsTypes map[string][]string
 	query              []string
+	network            string
 	isErr              bool
 }
 
@@ -94,6 +98,7 @@ func TestGetClients(t *testing.T) {
 				"validator": {"lighthouse"},
 			},
 			[]string{"consensus"},
+			"mainnet",
 			false,
 		},
 		{
@@ -103,6 +108,7 @@ func TestGetClients(t *testing.T) {
 				"validator": {"lighthouse"},
 			},
 			[]string{"other"},
+			"mainnet",
 			true,
 		},
 		{
@@ -112,6 +118,7 @@ func TestGetClients(t *testing.T) {
 				"validator": {"lighthouse"},
 			},
 			[]string{"execution", "validator"},
+			"mainnet",
 			false,
 		},
 		{
@@ -121,6 +128,7 @@ func TestGetClients(t *testing.T) {
 				"validator": {"lighthouse"},
 			},
 			[]string{"consensus", "other"},
+			"mainnet",
 			true,
 		},
 	}
@@ -132,7 +140,7 @@ func TestGetClients(t *testing.T) {
 
 		prepareGetConfigClientsTestCase(input)
 
-		if res, err := GetClients(input.query); input.isErr && err == nil {
+		if res, err := GetClients(input.query, input.network); input.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
 		} else if !input.isErr {
 			if err != nil {

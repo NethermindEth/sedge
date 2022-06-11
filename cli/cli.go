@@ -40,6 +40,7 @@ var (
 	validatorName     string
 	generationPath    string
 	checkpointSyncUrl string
+	network           string
 	install           bool
 	run               bool
 	y                 bool
@@ -112,7 +113,7 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 
 func runCliCmd(cmd *cobra.Command, args []string) []error {
 	// Get all clients: supported + configured
-	clientsMap, errors := clients.GetClients([]string{execution, consensus, validator})
+	clientsMap, errors := clients.GetClients([]string{execution, consensus, validator}, network)
 	if len(errors) > 0 {
 		return errors
 	}
@@ -207,6 +208,8 @@ func init() {
 	cliCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
 
 	cliCmd.Flags().StringVar(&checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity")
+
+	cliCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, prater, kiln, etc.")
 
 	cliCmd.Flags().BoolVarP(&install, "install", "i", false, "Install dependencies if not installed without asking")
 

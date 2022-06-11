@@ -27,7 +27,6 @@ import (
 )
 
 var (
-	network          string
 	path             string
 	existingMnemonic bool
 )
