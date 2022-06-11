@@ -38,4 +38,6 @@ const (
 	MonitoringToolInitError           = "monitoring tool initialization failed. Error: %s"
 	TrackSyncError                    = "endpoint %s returned an error. Error: %v"
 	RunClientsError                   = "provided values %v for run-clients are incorrect. Posible correct values are %v"
+	EmptyClientMapError               = "is not possible to select a random element from an empty collection"
+	NoSupportedClientsError           = "collection of clients given for random choice doesn't have any supported client"
 )
