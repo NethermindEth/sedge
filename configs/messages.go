@@ -18,7 +18,7 @@ const (
 	ClientNotSupported              = "client %s is not supported. Please use 'clients' command to see the list of supported clients"
 	PrintingFile                    = "File %s :"
 	SupportedClients                = "Supported clients of type %s: %v"
-	ConfigClients                   = "Provided clients of type %s in configuration file: %v"
+	ConfigClientsMsg                = "Provided clients of type %s in configuration file: %v"
 	RunningDockerCompose            = "Running docker-compose script"
 	Component                       = "component"
 	RunningCommand                  = "Running command: %s"

@@ -56,7 +56,7 @@ func TestGetConfigClients(t *testing.T) {
 		prepareGetConfigClientsTestCase(input)
 		descr := fmt.Sprintf("GetConfigClients(%s)", input.queryClientType)
 
-		if res, err := GetConfigClients(input.queryClientType); input.isErr && err == nil {
+		if res, err := ConfigClients(input.queryClientType); input.isErr && err == nil {
 			t.Logf("using config: %s", input.configClientsTypes)
 			t.Errorf("%s expected to fail.", descr)
 		} else if !input.isErr {

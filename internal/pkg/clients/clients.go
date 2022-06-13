@@ -75,12 +75,12 @@ func (c ClientInfo) Clients(clientTypes []string) (clients OrderedClients, errs 
 		log.Debugf(configs.SupportedClients, clientType, strings.ToLower(strings.Join(supportedClients, ", ")))
 
 		// Get the clients from the configuration file
-		configClients, err := configs.GetConfigClients(clientType)
+		configClients, err := configs.ConfigClients(clientType)
 		if err != nil {
 			errs = append(errs, err)
 			continue
 		}
-		log.Debugf(configs.ConfigClients, clientType, strings.ToLower(strings.Join(configClients, ", ")))
+		log.Debugf(configs.ConfigClientsMsg, clientType, strings.ToLower(strings.Join(configClients, ", ")))
 
 		for _, client := range configClients {
 			// Check if the client is supported
