@@ -25,6 +25,7 @@ type GenerationData struct {
 	ConsensusClient   string
 	ValidatorClient   string
 	GenerationPath    string
+	Network           string
 	CheckpointSyncUrl string
 	FallbackELUrls    []string
 }

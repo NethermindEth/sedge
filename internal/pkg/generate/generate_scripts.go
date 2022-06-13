@@ -79,12 +79,12 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 	}
 
 	clients := map[string]string{
-		"execution/": gd.ExecutionClient,
-		"consensus/": gd.ConsensusClient,
-		"validator/": gd.ValidatorClient,
+		"execution": gd.ExecutionClient,
+		"consensus": gd.ConsensusClient,
+		"validator": gd.ValidatorClient,
 	}
 	for tmpKind, clientName := range clients {
-		tmp, err := templates.Services.ReadFile(filepath.Join("services", tmpKind, clientName+".tmpl"))
+		tmp, err := templates.Services.ReadFile(filepath.Join("services", gd.Network, tmpKind, clientName+".tmpl"))
 		if err != nil {
 			return err
 		}
@@ -137,15 +137,15 @@ a. error
 Error if any
 */
 func generateEnvFile(gd GenerationData) (err error) {
-	executionEnvTmp, err := template.ParseFS(templates.Envs, filepath.Join("envs", "execution", gd.ExecutionClient+".tmpl"))
+	executionEnvTmp, err := template.ParseFS(templates.Envs, filepath.Join("envs", gd.Network, "execution", gd.ExecutionClient+".tmpl"))
 	if err != nil {
 		return
 	}
-	consensusEnvTmp, err := template.ParseFS(templates.Envs, filepath.Join("envs", "consensus", gd.ConsensusClient+".tmpl"))
+	consensusEnvTmp, err := template.ParseFS(templates.Envs, filepath.Join("envs", gd.Network, "consensus", gd.ConsensusClient+".tmpl"))
 	if err != nil {
 		return
 	}
-	validatorEnvTmp, err := template.ParseFS(templates.Envs, filepath.Join("envs", "validator", gd.ValidatorClient+".tmpl"))
+	validatorEnvTmp, err := template.ParseFS(templates.Envs, filepath.Join("envs", gd.Network, "validator", gd.ValidatorClient+".tmpl"))
 	if err != nil {
 		return
 	}

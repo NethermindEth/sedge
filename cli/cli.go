@@ -151,6 +151,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		ConsensusClient:   combinedClients.Consensus.Name,
 		ValidatorClient:   combinedClients.Validator.Name,
 		GenerationPath:    generationPath,
+		Network:           network,
 		CheckpointSyncUrl: checkpointSyncUrl,
 		FallbackELUrls:    *fallbackEL,
 	}
