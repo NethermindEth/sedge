@@ -8,8 +8,8 @@ import (
 
 var networks = []string{"mainnet", "kiln"}
 
-func TestGetSupportedNetworks(t *testing.T) {
-	names, err := GetSupportedNetworks()
+func TestSupportedNetworks(t *testing.T) {
+	names, err := SupportedNetworks()
 
 	if err != nil {
 		t.Errorf("GetSupportedNetworks() failed, gave error: %v", err)

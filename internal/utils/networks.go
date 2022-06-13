@@ -5,7 +5,7 @@ import (
 )
 
 /*
-GetSupportedNetworks :
+SupportedNetworks :
 Get supported networks names. A network is supported if it has a folder with the network name in either templates/envs or templates/services forder.
 
 params :-
@@ -17,7 +17,7 @@ List of supported network names
 b. error
 Error if any
 */
-func GetSupportedNetworks() (networkNames []string, err error) {
+func SupportedNetworks() (networkNames []string, err error) {
 	files, err := templates.Services.ReadDir("services")
 	if err != nil {
 		return

@@ -11,6 +11,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// ClientInfo : Struct Interface for listing available clients
+type ClientInfo struct {
+	Network string
+}
+
 /*
 GetSupportedClients :
 Get supported client names of type <clientType> for network <network>. A client is supported if it has a docker-compose service template
@@ -27,8 +32,8 @@ List of supported clients names of type <clientType>
 b. error
 Error if any
 */
-func GetSupportedClients(clientType, network string) (clientsNames []string, err error) {
-	files, err := templates.Services.ReadDir(filepath.Join("services", network, clientType))
+func (c ClientInfo) SupportedClients(clientType string) (clientsNames []string, err error) {
+	files, err := templates.Services.ReadDir(filepath.Join("services", c.Network, clientType))
 	if err != nil {
 		return
 	}
@@ -41,7 +46,7 @@ func GetSupportedClients(clientType, network string) (clientsNames []string, err
 }
 
 /*
-GetClients :
+Clients :
 Get all the supported and configured clients
 
 params :-
@@ -56,13 +61,13 @@ Map of <clientType>: map of <clientName>: Client
 b. []error
 List of errors
 */
-func GetClients(clientTypes []string, network string) (clients OrderedClients, errs []error) {
+func (c ClientInfo) Clients(clientTypes []string) (clients OrderedClients, errs []error) {
 	clients = make(OrderedClients)
 
 	for _, clientType := range clientTypes {
 		clients[clientType] = make(ClientMap)
 		// Get the clients with a docker-compose service template
-		supportedClients, err := GetSupportedClients(clientType, network)
+		supportedClients, err := c.SupportedClients(clientType)
 		if err != nil {
 			errs = append(errs, err)
 			continue

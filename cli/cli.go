@@ -113,7 +113,8 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 
 func runCliCmd(cmd *cobra.Command, args []string) []error {
 	// Get all clients: supported + configured
-	clientsMap, errors := clients.GetClients([]string{execution, consensus, validator}, network)
+	c := clients.ClientInfo{Network: network}
+	clientsMap, errors := c.Clients([]string{execution, consensus, validator})
 	if len(errors) > 0 {
 		return errors
 	}

@@ -19,6 +19,7 @@ import (
 	"github.com/NethermindEth/1click/configs"
 	"github.com/NethermindEth/1click/internal/pkg/clients"
 	"github.com/NethermindEth/1click/internal/ui"
+	"github.com/NethermindEth/1click/internal/utils"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -37,23 +38,29 @@ var listClientsCmd = &cobra.Command{
 }
 
 func runListClientsCmd(cmd *cobra.Command, args []string) error {
-	log.Infof("Listing supported clients\n")
-
-	data, err := buildData(clients.GetSupportedClients)
+	// Get supported networks and print table of clients per network
+	networks, err := utils.SupportedNetworks()
 	if err != nil {
 		return err
 	}
 
-	ui.WriteListClientsTable(cmd.OutOrStdout(), data)
+	for _, n := range networks {
+		log.Infof("Listing supported clients for network %s\n", n)
+		c := clients.ClientInfo{Network: n}
+		data, err := buildData(c.SupportedClients)
+		if err != nil {
+			return err
+		}
+		ui.WriteListClientsTable(cmd.OutOrStdout(), data)
+	}
 
 	log.Infof("Listing clients provided in configuration file\n")
-
-	data, err = buildData(configs.GetConfigClients)
+	data, err := buildData(configs.ConfigClients)
 	if err != nil {
 		return err
 	}
-
 	ui.WriteListClientsTable(cmd.OutOrStdout(), data)
+
 	return nil
 }
 
@@ -74,7 +81,7 @@ Table data
 b. error
 Error if any
 */
-func buildData(getClients func(string, string) ([]string, error)) (*ui.ListClientsTable, error) {
+func buildData(getClients func(string) ([]string, error)) (*ui.ListClientsTable, error) {
 	executionClients, err := getClients("execution")
 	if err != nil {
 		return nil, err

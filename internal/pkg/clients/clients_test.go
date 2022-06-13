@@ -13,7 +13,7 @@ func validateSupportedClients(t *testing.T, clientType string, supportedClients 
 	//TODO: validate supported clients
 }
 
-func TestGetSupportedClients(t *testing.T) {
+func TestSupportedClients(t *testing.T) {
 	inputs := [...]struct {
 		clientType string
 		network    string
@@ -23,13 +23,14 @@ func TestGetSupportedClients(t *testing.T) {
 		{"consensus", "mainnet", false},
 		{"validator", "mainnet", false},
 		{"random", "mainnet", true},
-		{"", "mainnet", true},
+		{"", "mainnet", false}, // This must fail at validation
 	}
 
 	for _, input := range inputs {
-		descr := fmt.Sprintf("GetSupportedClients(%s)", input.clientType)
+		descr := fmt.Sprintf("SupportedClients(%s)", input.clientType)
 
-		if res, err := GetSupportedClients(input.clientType, input.network); input.isErr && err == nil {
+		c := ClientInfo{Network: input.network}
+		if res, err := c.SupportedClients(input.clientType); input.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
 		} else if !input.isErr {
 			if err != nil {
@@ -41,20 +42,20 @@ func TestGetSupportedClients(t *testing.T) {
 	}
 }
 
-type getClientsTestCase struct {
+type clientsTestCase struct {
 	configClientsTypes map[string][]string
 	query              []string
 	network            string
 	isErr              bool
 }
 
-func prepareGetConfigClientsTestCase(testCase getClientsTestCase) {
+func prepareGetConfigClientsTestCase(testCase clientsTestCase) {
 	for key, value := range testCase.configClientsTypes {
 		viper.Set(key+"Clients", value)
 	}
 }
 
-func cleanGetConfigClientsTestCase(_ getClientsTestCase) {
+func cleanGetConfigClientsTestCase(_ clientsTestCase) {
 	viper.Reset()
 }
 
@@ -62,7 +63,7 @@ func cleanAll() {
 	viper.Reset()
 }
 
-func validateClients(resultClients OrderedClients, tc getClientsTestCase) bool {
+func validateClients(resultClients OrderedClients, tc clientsTestCase) bool {
 	//Check if all query clients types are in the result types
 Loop1:
 	for _, queryType := range tc.query {
@@ -88,8 +89,8 @@ Loop1:
 	return true
 }
 
-func TestGetClients(t *testing.T) {
-	inputs := [...]getClientsTestCase{
+func TestClients(t *testing.T) {
+	inputs := [...]clientsTestCase{
 		{},
 		{
 			map[string][]string{
@@ -136,11 +137,12 @@ func TestGetClients(t *testing.T) {
 	t.Cleanup(cleanAll)
 
 	for _, input := range inputs {
-		descr := fmt.Sprintf("GetClients(%s)", input.query)
+		descr := fmt.Sprintf("Clients(%s)", input.query)
 
 		prepareGetConfigClientsTestCase(input)
 
-		if res, err := GetClients(input.query, input.network); input.isErr && err == nil {
+		c := ClientInfo{Network: input.network}
+		if res, err := c.Clients(input.query); input.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
 		} else if !input.isErr {
 			if err != nil {
