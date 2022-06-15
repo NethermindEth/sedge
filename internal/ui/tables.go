@@ -12,7 +12,9 @@ WriteListClientsTable :
 Prints the supported clients table
 
 params :-
-a. data ListClientsTable
+a. w io.Writer
+Where the table is to be printed
+b. data ListClientsTable
 Table data
 
 returns :-
@@ -52,7 +54,9 @@ WriteRandomizedClientsTable :
 Prints the randomized clients table
 
 params :-
-a. data [][]string
+a. w io.Writer
+Where the table is to be printed
+b. data [][]string
 Table data
 
 returns :-
@@ -95,7 +99,9 @@ WriteSimpleTable :
 Prints a simple table from given data
 
 params :-
-a. data SimpleTableData
+a. w io.Writer
+Where the table is to be printed
+b. data SimpleTableData
 Table data
 
 returns :-
@@ -156,4 +162,43 @@ func WriteSimpleTable(w io.Writer, data *SimpleTableData) {
 	table.SetStyle(simpletable.StyleCompact)
 	fmt.Fprintln(w, table.String())
 	fmt.Fprintln(w)
+}
+
+/*
+WriteListNetworksTable :
+Prints the supported networks table
+
+params :-
+a. w io.Writer
+Where the table is to be printed
+b. data []string
+Table data
+
+returns :-
+None
+*/
+func WriteListNetworksTable(w io.Writer, data []string) {
+	headers := []*simpletable.Cell{
+		{
+			Align: simpletable.AlignCenter,
+			Text:  "Supported Networks",
+		},
+	}
+
+	var columns [][]*simpletable.Cell
+	column := []*simpletable.Cell{}
+	for _, network := range data {
+		column = append(column, &simpletable.Cell{
+			Align: simpletable.AlignLeft,
+			Text:  network,
+		})
+	}
+	columns = append(columns, column)
+
+	WriteSimpleTable(w, &SimpleTableData{
+		Headers:      headers,
+		Columns:      columns,
+		DefaultAlign: simpletable.AlignLeft,
+		Enumerate:    true,
+	})
 }
