@@ -108,6 +108,16 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 	} else if !utils.ContainsOnly(*services, []string{execution, consensus, validator}) {
 		return fmt.Errorf(configs.RunClientsError, strings.Join(*services, ","), strings.Join([]string{execution, consensus, validator}, ","))
 	}
+
+	// Validate network
+	networks, err := utils.SupportedNetworks()
+	if err != nil {
+		return fmt.Errorf(configs.NetworkValidationFailedError, err)
+	}
+	if !utils.Contains(networks, network) {
+		return fmt.Errorf(configs.UnknownNetworkError, network)
+	}
+
 	return nil
 }
 

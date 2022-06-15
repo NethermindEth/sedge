@@ -37,6 +37,7 @@ type cliCmdArgs struct {
 	execClient string
 	conClient  string
 	valClient  string
+	network    string
 }
 
 func (args *cliCmdArgs) toString() string {
@@ -58,6 +59,9 @@ func (args *cliCmdArgs) toString() string {
 	}
 	if args.valClient != "" {
 		s = append(s, "-v", args.valClient)
+	}
+	if args.network != "" {
+		s = append(s, "-n", args.network)
 	}
 	return strings.Join(s, " ")
 }
@@ -93,6 +97,9 @@ func prepareCliCmd(tc cliCmdTestCase) error {
 	}
 	if tc.args.valClient != "" {
 		validatorName = tc.args.valClient
+	}
+	if tc.args.network != "" {
+		network = tc.args.network
 	}
 	if err := preRunCliCmd(rootCmd, []string{}); err != nil {
 		return err
@@ -211,6 +218,40 @@ func TestCliCmd(t *testing.T) {
 			},
 			false,
 			false,
+		),
+		*buildCliTestCase(
+			t,
+			"Good network input", "case_1",
+			cliCmdArgs{
+				run:        true,
+				install:    true,
+				execClient: "nethermind",
+				conClient:  "lighthouse",
+				network:    "mainnet",
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			false,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"Bad network input", "case_1",
+			cliCmdArgs{
+				run:        true,
+				install:    true,
+				execClient: "nethermind",
+				conClient:  "lighthouse",
+				network:    "1click",
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			true,
+			true,
 		),
 	}
 

@@ -39,5 +39,7 @@ const (
 	TrackSyncError                    = "endpoint %s returned an error. Error: %v"
 	RunClientsError                   = "provided values %v for run-clients are incorrect. Posible correct values are %v"
 	EmptyClientMapError               = "is not possible to select a random element from an empty collection"
-	NoSupportedClientsError           = "collection of clients given for random choice doesn't have any supported client"
+	NoSupportedClientsError           = "collection of clients given for random choice doesn't have any supported client. Check the target network (flag --network). Use 'clients' command to see the list of supported clients for every supported network"
+	NetworkValidationFailedError      = "'network' flag validation failed. Error: %v"
+	UnknownNetworkError               = "unknown network \"%s\". Please provide correct network name. Use 'networks' command to see the list of supported networks"
 )
