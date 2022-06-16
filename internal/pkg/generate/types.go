@@ -27,6 +27,7 @@ type GenerationData struct {
 	GenerationPath    string
 	Network           string
 	CheckpointSyncUrl string
+	FeeRecipient      string
 	FallbackELUrls    []string
 }
 
@@ -35,5 +36,6 @@ type DockerComposeData struct {
 	ElTTD             bool
 	CcTTD             bool
 	CheckpointSyncUrl string
+	FeeRecipient      string
 	FallbackELUrls    []string
 }

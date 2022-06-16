@@ -109,6 +109,7 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		ElTTD:             elTTD,
 		CcTTD:             ccTTD,
 		CheckpointSyncUrl: gd.CheckpointSyncUrl,
+		FeeRecipient:      gd.FeeRecipient,
 		FallbackELUrls:    gd.FallbackELUrls,
 	}
 
