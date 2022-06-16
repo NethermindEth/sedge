@@ -12,9 +12,9 @@
     volumes:
       - ${CC_DATA_DIR}:/var/lib/lodestar/consensus
     ports:
-      - 9000:9000/tcp
-      - 9000:9000/udp
-      - 5054:5054/tcp
+      - "9000:9000/tcp"
+      - "9000:9000/udp"
+      - "5054:5054/tcp"
     expose:
       - 4000 
     environment:
