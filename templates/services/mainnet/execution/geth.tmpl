@@ -5,13 +5,18 @@
     container_name: execution-client
     restart: unless-stopped
     image: ${EC_IMAGE_VERSION}
+    networks:
+      - 1click
     volumes:
       - ${EC_DATA_DIR}:/var/lib/goethereum
     ports:
       - 30303:30303/tcp
       - 30303:30303/udp
-      - 8545:8545/tcp
+      - 8008:8008/tcp
+    expose:
+      - 8545
     command: 
+      - --syncmode=${EL_SYNC_MODE}
       - --http
       - --http.addr=0.0.0.0
       - --http.vhosts=*
@@ -25,6 +30,8 @@
       - --${GETH_NETWORK}
       - --verbosity
       - ${GETH_LOG_LEVEL}
+      - ${EL_METRICS_ENABLED:-""}
+      - --metrics.port=8008
     logging:
       driver: "json-file"
       options:

@@ -3,9 +3,8 @@
   validator:
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
-    depends_on: 
-      - consensus
-    user: root
+    networks:
+      - 1click
     volumes:
       - ${VL_DATA_DIR}:/var/lib/teku
       - ${KEYSTORE_DIR}:/var/lib/teku/keystore

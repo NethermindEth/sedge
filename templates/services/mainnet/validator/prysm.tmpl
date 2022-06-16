@@ -2,8 +2,8 @@
 {{ define "validator" }}
   validator-import:
     image: ${VL_IMAGE_VERSION}
-    depends_on: 
-      - consensus
+    networks:
+      - 1click
     container_name: validator-import-client
     volumes:
       - ${KEYSTORE_DIR}:/keystore
@@ -17,7 +17,8 @@
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
     depends_on: 
-      - validator-import
+      validator-import:
+        condition: service_completed_successfully
     volumes:
       - ${VL_DATA_DIR}:/var/lib/prysm
       - ${WALLET_DIR}:/var/lib/prysm/wallet

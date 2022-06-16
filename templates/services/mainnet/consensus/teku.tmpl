@@ -5,6 +5,8 @@
     container_name: consensus-client
     restart: unless-stopped
     image: ${CC_IMAGE_VERSION}
+    networks:
+      - 1click
     depends_on: 
       - execution
     user: root
@@ -13,7 +15,9 @@
     ports:
       - 9000:9000/tcp
       - 9000:9000/udp
-      - 4000:4000/tcp
+      - 5054:5054/tcp
+    expose:
+      - 4000
     environment:
       - JAVA_OPTS=-XX:SoftMaxHeapSize=2g -Xmx4g
     command:
@@ -28,6 +32,10 @@
       - --rest-api-port=4000
       - --eth1-endpoints=${EC_NODE}
       - --eth1-deposit-contract-max-request-size=150
+      - --metrics-enabled=true
+      - --metrics-host-allowlist=*
+      - --metrics-interface=0.0.0.0
+      - --metrics-port=5054
       {{with .CheckpointSyncUrl}}- --initial-state={{.}}/eth/v2/debug/beacon/states/{{end}}
     logging:
       driver: "json-file"

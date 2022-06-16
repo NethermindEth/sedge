@@ -5,12 +5,16 @@
     container_name: execution-client
     restart: unless-stopped
     image: ${EC_IMAGE_VERSION}
+    networks:
+      - 1click
     volumes:
       - ${EC_DATA_DIR}:/nethermind/data
     ports:
       - 30303:30303/tcp
       - 30303:30303/udp
-      - 8545:8545/tcp
+      - 8008:8008/tcp
+    expose:
+      - 8545
     command: 
       - --config=${NETHERMIND_CONFIG}
       - --datadir=/nethermind/data
@@ -18,6 +22,8 @@
       - --Metrics.Enabled=${NETHERMIND_METRICSCONFIG_ENABLED}
       - --Metrics.NodeName=${NETHERMIND_METRICSCONFIG_NODENAME}
       - --Metrics.PushGatewayUrl=${NETHERMIND_METRICSCONFIG_PUSHGATEWAYURL}
+      - --Metrics.ExposePort=8008
+      - --Sync.SnapSync=${EL_SNAP_SYNC_ENABLED}
       - --Init.WebSocketsEnabled=true
       - --JsonRpc.Enabled=true
       - --JsonRpc.Host=0.0.0.0

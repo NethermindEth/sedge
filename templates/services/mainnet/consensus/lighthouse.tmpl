@@ -5,6 +5,8 @@
     container_name: consensus-client
     restart: unless-stopped
     image: ${CC_IMAGE_VERSION}
+    networks:
+      - 1click
     depends_on: 
       - execution
     volumes:
@@ -12,7 +14,9 @@
     ports:
       - 9000:9000/tcp
       - 9000:9000/udp
-      - 4000:4000/tcp
+      - 5054:5054/tcp
+    expose:
+      - 4000  
     command:
       - lighthouse
       - bn
@@ -28,6 +32,11 @@
       - --eth1-blocks-per-log-query=150
       - --debug-level=${CC_LOG_LEVEL}
       - --validator-monitor-auto
+      - --subscribe-all-subnets
+      - --import-all-attestations
+      - --metrics
+      - --metrics-port=5054
+      - --metrics-address=0.0.0.0
       {{with .CheckpointSyncUrl}}- --checkpoint-sync-url={{.}}{{end}}
     logging:
       driver: "json-file"

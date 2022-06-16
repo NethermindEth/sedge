@@ -1,4 +1,5 @@
 {{/* nethermind.tmpl */}}
+# --- Execution Layer - Execution Node - configuration ---
 EC_IMAGE_VERSION=nethermind/nethermind
 NETHERMIND_CONFIG=mainnet_pruned
 NETHERMIND_LOG_LEVEL=INFO
@@ -14,3 +15,4 @@ NETHERMIND_ETHSTATSCONFIG_NAME=Nethermind
 NETHERMIND_ETHSTATSCONFIG_SECRET=secret
 NETHERMIND_ETHSTATSCONFIG_CONTACT=hello@nethermind.io
 EC_DATA_DIR={{.DataDir}}
+EL_SNAP_SYNC_ENABLED=true
