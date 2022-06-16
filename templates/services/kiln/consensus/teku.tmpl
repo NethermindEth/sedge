@@ -1,35 +1,47 @@
 {{/* teku.tmpl */}}
 {{ define "consensus" }}
   consensus:
-    stop_grace_period: 1m
+    stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
     image: ${CC_IMAGE_VERSION}
     networks:
       - 1click
-    user: root
     volumes:
       - ${CC_DATA_DIR}:/var/lib/teku
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
     ports:
       - "9000:9000/tcp"
       - "9000:9000/udp"
       - "5054:5054/tcp"
     expose:
-      - 4000
+      - 5051
     environment:
       - JAVA_OPTS=-XX:SoftMaxHeapSize=2g -Xmx4g
     command:
-      - --data-path=/var/lib/teku
       - --log-destination=CONSOLE
       - --logging=${CC_LOG_LEVEL}
       - --network=${NETWORK}
+      - --p2p-discovery-bootnodes=${CL_BOOTNODES}
+      - --p2p-enabled=true
       - --p2p-port=9000
       - --p2p-peer-upper-bound=${CC_PEER_COUNT}
-      - --rest-api-host-allowlist=*
       - --rest-api-enabled=true
-      - --rest-api-port=4000
-      - --eth1-endpoints=${EC_NODE}
-      - --eth1-deposit-contract-max-request-size=150
+      - --rest-api-host-allowlist=*
+      - --rest-api-interface=0.0.0.0
+      - --rest-api-port=5051
+      - --rest-api-cors-origins=*
+      - --rest-api-docs-enabled=false
+      - --data-beacon-path=/var/lib/teku/beacon
+      - --data-path=/var/lib/teku
+      - --data-storage-archive-frequency=2048
+      - --data-storage-mode=PRUNE
+      - --data-storage-non-canonical-blocks-enabled=false
+      - --ee-endpoint=${EC_NODE}:8551
+      {{with .FeeRecipient}}- --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
+      - --Xee-version=${XEE_VERSION}
+      - --ee-jwt-secret-file=/tmp/jwt/jwtsecret
+      {{with .TTD}}- --Xnetwork-total-terminal-difficulty-override=${CL_TTD}{{end}}
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0

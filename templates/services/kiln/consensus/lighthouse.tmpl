@@ -1,7 +1,7 @@
 {{/* lighthouse.tmpl */}}
 {{ define "consensus" }}
   consensus:
-    stop_grace_period: 1m
+    stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
     image: ${CC_IMAGE_VERSION}
@@ -9,15 +9,18 @@
       - 1click
     volumes:
       - ${CC_DATA_DIR}:/var/lib/lighthouse
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
     ports:
       - "9000:9000/tcp"
       - "9000:9000/udp"
       - "5054:5054/tcp"
     expose:
-      - 4000  
+      - 4000     
     command:
       - lighthouse
       - bn
+      - --staking
+      - --merge
       - --disable-upnp
       - --datadir=/var/lib/lighthouse
       - --port=9000
@@ -26,12 +29,14 @@
       - --http-port=4000
       - --network=${NETWORK}
       - --target-peers=${CC_PEER_COUNT}
-      - --eth1-endpoints=${EC_NODE}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
-      - --eth1-blocks-per-log-query=150
+      - --execution-endpoints=${EC_NODE}:8551
+      - --eth1-endpoints=${EC_NODE}:8545{{range $url := .FallbackELUrls}},{{$url}}{{end}}
+      {{with .TTD}}- --terminal-total-difficulty-override=${CC_TTD}{{end}}     
       - --debug-level=${CC_LOG_LEVEL}
+      {{with .FeeRecipient}}- --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
       - --validator-monitor-auto
       - --subscribe-all-subnets
-      - --import-all-attestations
+      - --import-all-attestations 
       - --metrics
       - --metrics-port=5054
       - --metrics-address=0.0.0.0

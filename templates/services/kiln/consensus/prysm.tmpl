@@ -1,0 +1,59 @@
+{{/* prysm.tmpl */}}
+{{ define "consensus" }}
+  config:
+    container_name: config_prysm
+    restart: unless-stopped
+    image: busybox:latest
+    volumes:
+      - ./:/tmp/app
+    command: >
+      sh -c "wget -O /tmp/app/config.yml ${CONFIG_URL};
+      wget -O /tmp/app/genesis.ssz ${GENESIS_URL}"
+
+  consensus:
+    stop_grace_period: 30s
+    container_name: consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    depends_on: 
+      config:
+        condition: service_completed_successfully
+    networks:
+      - 1click
+    volumes:
+      - ${CC_DATA_DIR}:/var/lib/prysm
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+      - ./config.yml:/network_config/config.yml
+      - ./genesis.ssz:/network_config/genesis.ssz
+    ports:
+      - "9000:9000/tcp"
+      - "9000:9000/udp"
+      - "5054:5054/tcp"
+    expose:
+      - 5051
+    command:
+      - --chain-config-file=/network_config/config.yml
+      - --bootstrap-node=${CL_BOOTNODE_1}
+      - --bootstrap-node=${CL_BOOTNODE_2}
+      - --p2p-tcp-port=9000
+      - --p2p-udp-port=9000
+      - --jwt-secret=/tmp/jwtsecret
+      - --rpc-host=0.0.0.0
+      - --rpc-port=5051
+      - --datadir=/var/lib/prysm/
+      - --verbosity=${CC_LOG_LEVEL}
+      - --${NETWORK}
+      - --p2p-max-peers=${CC_PEER_COUNT}
+      - --http-web3provider=${EC_NODE}:8551{{range $url := .FallbackELUrls}}
+      - --fallback-web3provider={{$url}}{{end}}
+      - --accept-terms-of-use
+      {{with .FeeRecipient}}- --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
+      - --monitoring-host=0.0.0.0
+      - --monitoring-port=5054
+      {{with .CheckpointSyncUrl}}- --checkpoint-sync-url={{.}}{{end}}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}

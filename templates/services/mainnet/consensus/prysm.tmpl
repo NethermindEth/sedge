@@ -7,8 +7,6 @@
     image: ${CC_IMAGE_VERSION}
     networks:
       - 1click
-    depends_on: 
-      - execution
     volumes:
       - ${CC_DATA_DIR}:/var/lib/prysm
     ports:
