@@ -1,0 +1,52 @@
+{{/* geth.tmpl */}}
+{{ define "execution" }}
+  execution:
+    stop_grace_period: 30m
+    container_name: execution-client
+    restart: unless-stopped
+    image: ${EC_IMAGE_VERSION}
+    networks:
+      - 1click
+    volumes:
+      - ${EC_DATA_DIR}:/var/lib/goethereum
+      - ${JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+      - 30303:30303/tcp
+      - 30303:30303/udp
+      - 8008:8008/tcp
+    expose:
+      - 8545
+      - 8546
+      - 8551
+    command: 
+      - --override.terminaltotaldifficulty=${EL_TTD}
+      - --bootnodes=${EL_BOOTNODES}
+      - --syncmode=${EL_SYNC_MODE}
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.vhosts=*
+      - --http.corsdomain=*
+      - --http.api
+      - web3,eth,net
+      - --datadir=/var/lib/goethereum
+      - --port=30303
+      - --http.port=8545
+      - --${GETH_NETWORK}
+      - --verbosity
+      - ${GETH_LOG_LEVEL}
+      - --ws
+      - --ws.addr=0.0.0.0
+      - --ws.port=8546
+      - --ws.api=engine,eth,web3,net,debug
+      - --authrpc.jwtsecret=/tmp/jwt/jwtsecret
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.port=8551
+      - --authrpc.vhosts=*
+      - ${EL_METRICS_ENABLED:-""}
+      - --metrics.port=8008
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}
