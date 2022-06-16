@@ -35,7 +35,7 @@ func generateTestCases(t *testing.T) (tests []generateTestCase) {
 		t.Errorf("GetSupportedClients(\"validator\") failed: %v", err)
 	}
 
-	// TODO: Add CheckpointSyncUrl and FallbackELUrls to test data
+	// TODO: Add CheckpointSyncUrl, FallbackELUrls and FeeRecipient to test data
 
 	tests = append(tests, generateTestCase{isErr: true})
 
@@ -60,23 +60,26 @@ func validateGeneratedFiles(t *testing.T, testCase generateTestCase) {
 }
 
 func TestGenerateScripts(t *testing.T) {
+	t.Parallel()
 	inputs := generateTestCases(t)
 
-	for _, input := range inputs {
-		gd := GenerationData{
-			ExecutionClient: input.execution,
-			ConsensusClient: input.consensus,
-			ValidatorClient: input.validator,
-			GenerationPath:  input.path,
-			Network:         network,
-		}
-		descr := fmt.Sprintf("GenerateScripts(%+v)", gd)
+	for i, input := range inputs {
+		t.Run(fmt.Sprintf("Test case %d", i), func(t *testing.T) {
+			gd := GenerationData{
+				ExecutionClient: input.execution,
+				ConsensusClient: input.consensus,
+				ValidatorClient: input.validator,
+				GenerationPath:  input.path,
+				Network:         network,
+			}
+			descr := fmt.Sprintf("GenerateScripts(%+v)", gd)
 
-		if err := GenerateScripts(gd); input.isErr && err == nil {
-			t.Errorf("%s expected to fail", descr)
-		} else if !input.isErr && err != nil {
-			t.Errorf("%s failed: %v", descr, err)
-		}
-		validateGeneratedFiles(t, input)
+			if err := GenerateScripts(gd); input.isErr && err == nil {
+				t.Errorf("%s expected to fail", descr)
+			} else if !input.isErr && err != nil {
+				t.Errorf("%s failed: %v", descr, err)
+			}
+			validateGeneratedFiles(t, input)
+		})
 	}
 }

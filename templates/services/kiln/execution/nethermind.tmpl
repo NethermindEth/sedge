@@ -9,11 +9,11 @@
       - 1click
     volumes:
       - ${EC_DATA_DIR}:/nethermind/data
-      - ${JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+      - ${EL_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
     ports:
-      - 30303:30303/tcp
-      - 30303:30303/udp
-      - 8008:8008/tcp
+      - "30303:30303/tcp"
+      - "30303:30303/udp"
+      - "8008:8008/tcp"
     expose:
       - 8545
       - 8551
@@ -21,7 +21,7 @@
       - --config=${NETHERMIND_CONFIG}
       - --datadir=/nethermind/data
       - --log=${NETHERMIND_LOG_LEVEL}
-      - --Merge.TerminalTotalDifficulty=${EL_TTD}
+      {{with .TTD}}- --Merge.TerminalTotalDifficulty=${EL_TTD}{{end}}
       - --Merge.TerminalBlockNumber=0
       - --Metrics.Enabled=${NETHERMIND_METRICSCONFIG_ENABLED}
       - --Metrics.NodeName=${NETHERMIND_METRICSCONFIG_NODENAME}
