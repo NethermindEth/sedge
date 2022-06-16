@@ -105,6 +105,14 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 			// Ambiguous value
 			return fmt.Errorf(configs.RunClientsFlagAmbiguousError, *services)
 		}
+	} else if utils.Contains(*services, "none") {
+		if len(*services) == 1 {
+			// all used correctly
+			services = &[]string{}
+		} else {
+			// Ambiguous value
+			return fmt.Errorf(configs.RunClientsFlagAmbiguousError, *services)
+		}
 	} else if !utils.ContainsOnly(*services, []string{execution, consensus, validator}) {
 		return fmt.Errorf(configs.RunClientsError, strings.Join(*services, ","), strings.Join([]string{execution, consensus, validator}, ","))
 	}
@@ -169,6 +177,12 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		return []error{err}
 	}
 
+	// If --run-clients=none was set then exit and don't run anything
+	if len(*services) == 0 {
+		log.Info(configs.HappyStaking2)
+		return nil
+	}
+
 	if run {
 		if err = runAndShowContainers(*services); err != nil {
 			return []error{err}
@@ -229,7 +243,7 @@ func init() {
 
 	cliCmd.Flags().BoolVarP(&y, "yes", "y", false, "Shortcut for '1click cli -r -i --run'. Run without prompts")
 
-	services = cliCmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all. The 'all' option must be used alone. Example: '1click cli -r --run-clients=consensus,validator'")
+	services = cliCmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all, none. The 'all' and 'none' option must be used alone. Example: '1click cli -r --run-clients=consensus,validator'")
 
 	fallbackEL = cliCmd.Flags().StringSlice("fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: '1click cli -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
 

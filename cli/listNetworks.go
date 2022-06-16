@@ -15,6 +15,8 @@ limitations under the License.
 */
 package cli
 
+// notest
+
 import (
 	"github.com/NethermindEth/1click/internal/ui"
 	"github.com/NethermindEth/1click/internal/utils"
