@@ -42,7 +42,7 @@ const (
 	You can use one of your own, a friend's node or providers such as Infura. Edit the .env file accordinly please, check that variable CC_NODE <-> (consensus endpoint) have the correct value. The validator node requires a high available consensus node, and consensus in turn needs a high available execution node.`
 	ValidatorTips = `A validator node needs to connect to a synced consensus node, and the consensus node in turn needs to connect to a synced execution node. 
 	
-	While these required nodes (execution/consensus) are syncing, you can setup the keystore folder(s) using the staking-deposit-cli tool (https://github.com/ethereum/staking-deposit-cli) or the command '1click keys'. If you don't want to use '1click keys', make sure to set .env variables KEYSTORE_DIR and VL_DATA_DIR to correct values. You can also check https://launchpad.ethereum.org/ for tips and more instructions.
+	While these required nodes (execution/consensus) are syncing, you can setup the keystore folder(s) using the eth2.0-deposit-cli tool (https://github.com/ethereum/staking-deposit-cli) or the command '1click keys'. If you don't want to use '1click keys', make sure to set .env variables KEYSTORE_DIR and VL_DATA_DIR to correct values. You can also check https://launchpad.ethereum.org/ for tips and more instructions.
 	
 	1click will track the syncing progress of the required nodes and let you run the validator after those nodes are synced (as we recommend). This takes a while, so you have time to prepare the keystore folder.
 	
