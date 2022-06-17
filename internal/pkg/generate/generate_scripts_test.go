@@ -31,6 +31,8 @@ func generateTestCases(t *testing.T) (tests []generateTestCase) {
 		t.Errorf("GetSupportedClients(\"validator\") failed: %v", err)
 	}
 
+	// TODO: Add CheckpointSyncUrl and FallbackELUrls to test data
+
 	tests = append(tests, generateTestCase{isErr: true})
 
 	for _, execution := range executionClients {
@@ -59,7 +61,13 @@ func TestGenerateScripts(t *testing.T) {
 	for _, input := range inputs {
 		descr := fmt.Sprintf("GenerateScripts(%s,%s,%s,%s)", input.execution, input.consensus, input.validator, input.path)
 
-		if err := GenerateScripts(input.execution, input.consensus, input.validator, input.path); input.isErr && err == nil {
+		gd := GenerationData{
+			ExecutionClient: input.execution,
+			ConsensusClient: input.consensus,
+			ValidatorClient: input.validator,
+			GenerationPath:  input.path,
+		}
+		if err := GenerateScripts(gd); input.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
 		} else if !input.isErr && err != nil {
 			t.Errorf("%s failed: %v", descr, err)

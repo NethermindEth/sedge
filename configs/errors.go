@@ -10,7 +10,6 @@ const (
 	ProvideClientsError               = "please provide both execution client and consensus client"
 	IncorrectClientError              = "incorrect %s client name \"%s\". Please provide correct client name. Use 'clients' command to see the list of supported clients"
 	NoClientsFoundError               = "no %s clients found. Please check your configuration file"
-	ClientNotSpecifiedError           = "please enter %s"
 	CreatingFileError                 = "failed to create file %s. Error: %s"
 	OpeningFileError                  = "failed to open file %s. Error: %s"
 	ClosingFileError                  = "failed to close file %s"

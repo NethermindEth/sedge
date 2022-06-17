@@ -68,7 +68,6 @@ func resetCliCmd() {
 	consensusName = ""
 	validatorName = ""
 	generationPath = configs.DefaultDockerComposeScriptsPath
-	randomize = false
 	install = false
 	run = false
 	y = false
@@ -84,7 +83,6 @@ func prepareCliCmd(tc cliCmdTestCase) error {
 	initConfig()
 	// Set flags
 	generationPath = tc.generationPath
-	randomize = tc.args.random
 	run = tc.args.run
 	install = tc.args.install
 	if tc.args.execClient != "" {

@@ -35,15 +35,16 @@ import (
 )
 
 var (
-	executionName  string
-	consensusName  string
-	validatorName  string
-	generationPath string
-	randomize      bool
-	install        bool
-	run            bool
-	y              bool
-	services       *[]string
+	executionName     string
+	consensusName     string
+	validatorName     string
+	generationPath    string
+	checkpointSyncUrl string
+	install           bool
+	run               bool
+	y                 bool
+	services          *[]string
+	fallbackEL        *[]string
 )
 
 const (
@@ -62,9 +63,7 @@ and provide instructions for installing them if they are not installed.
 
 Second, it will generate docker-compose scripts to run the full setup according to your selection.
 
-Finally, it will run the generated docker-compose script. Only execution and consensus clients will be executed by default.
-
-Running the command without flags (except global flag'--config') is equivalent to '1click cli -r' `,
+Finally, it will run the generated docker-compose script. Only execution and consensus clients will be executed by default.`,
 	Args: cobra.NoArgs,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if err := preRunCliCmd(cmd, args); err != nil {
@@ -91,14 +90,9 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 		}
 	})
 
-	if count == 0 {
-		// No flag behavior
-		randomize = true
-	}
-
 	// Quick run
 	if y {
-		randomize, install, run = true, true, true
+		install, run = true, true
 	}
 
 	// Validate run-clients flag
@@ -150,7 +144,15 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	log.Info(configs.DependenciesOK)
 
 	// Generate docker-compose scripts
-	if err = generate.GenerateScripts(combinedClients.Execution.Name, combinedClients.Consensus.Name, combinedClients.Validator.Name, generationPath); err != nil {
+	gd := generate.GenerationData{
+		ExecutionClient:   combinedClients.Execution.Name,
+		ConsensusClient:   combinedClients.Consensus.Name,
+		ValidatorClient:   combinedClients.Validator.Name,
+		GenerationPath:    generationPath,
+		CheckpointSyncUrl: checkpointSyncUrl,
+		FallbackELUrls:    *fallbackEL,
+	}
+	if err = generate.GenerateScripts(gd); err != nil {
 		return []error{err}
 	}
 
@@ -204,15 +206,17 @@ func init() {
 
 	cliCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
 
-	cliCmd.Flags().BoolVarP(&randomize, "randomize", "r", false, "Randomize combination of clients")
+	cliCmd.Flags().StringVar(&checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity")
 
 	cliCmd.Flags().BoolVarP(&install, "install", "i", false, "Install dependencies if not installed without asking")
 
-	cliCmd.Flags().BoolVar(&run, "run", false, "Run the generated docker-compose scripts without asking")
+	cliCmd.Flags().BoolVarP(&run, "run", "r", false, "Run the generated docker-compose scripts without asking")
 
 	cliCmd.Flags().BoolVarP(&y, "yes", "y", false, "Shortcut for '1click cli -r -i --run'. Run without prompts")
 
 	services = cliCmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all. The 'all' option must be used alone. Example: '1click cli -r --run-clients=consensus,validator'")
+
+	fallbackEL = cliCmd.Flags().StringSlice("fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: '1click cli -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
 
 	// Initialize monitoring tool
 	initMonitor(func() MonitoringTool {

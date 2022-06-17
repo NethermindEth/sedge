@@ -49,5 +49,9 @@ const (
 	Don't make the deposit to register the validator until its ready to run!!!
 	
 	After you complete the above steps follow https://launchpad.ethereum.org/ instructions to register the validator addresses of the validators you want to setup and manage using the validator node.`
-	HappyStaking = "Validator is up. Remember to setup the keystore folder and to make the deposit. If something went wrong and your validator node is down, don't panic! Short downtimes are not very bad. Check the logs and try to fix the errors. Make sure errors are not related to connection issues with the consensus nodes nor related to the keystore folder path or validator data directory. You can start the validator again using the instructions displayed by the tool."
+	HappyStaking                    = "Validator is up. Remember to setup the keystore folder and to make the deposit. If something went wrong and your validator node is down, don't panic! Short downtimes are not very bad. Check the logs and try to fix the errors. Make sure errors are not related to connection issues with the consensus nodes nor related to the keystore folder path or validator data directory. You can start the validator again using the instructions displayed by the tool."
+	ExecutionClientNotSpecifiedWarn = "Execution client not provided. A random client will be selected. Random client: %s"
+	ConsensusClientNotSpecifiedWarn = "Consensus client not provided. Selecting same pair of clients for consensus and validator clients"
+	ValidatorClientNotSpecifiedWarn = "Validator client not provided. Selecting same pair of clients for consensus and validator clients"
+	CLNotSpecifiedWarn              = "Consensus and validator clients not provided. Selecting same pair of clients for consensus and validator clients using a random client. Random client: %s"
 )
