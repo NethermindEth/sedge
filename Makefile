@@ -3,7 +3,11 @@
 
 compile: ## compile:
 	@mkdir -p build
-	@go build -o build/1click cmd/1click/main.go
+	@go build -o build/1click cmd/main.go
+
+compile-linux: ## compile:
+	@mkdir -p build
+	@env GOOS=linux go build -o build/1click cmd/main.go
 
 run: ## run
 	@./build/1click
@@ -15,7 +19,7 @@ test: ## run tests
 	@mkdir -p coverage
 	@go test -coverprofile=coverage/coverage.out -covermode=count ./...
 
-codecov-test:
+codecov-test: ## unit tests with coverage using the courtney tool
 	@mkdir -p coverage
 	@courtney/courtney -v -o coverage/coverage.out ./...
 
@@ -35,10 +39,10 @@ logs: compile ## run cmd logs with ./config.yaml
 
 all: compile run ## build and run
 
-gomod_tidy:
+gomod_tidy: ## go mod tidy
 	 go mod tidy
 
-gofmt:
+gofmt: ## go fmt
 	go fmt -x ./...
 
 help: ## Show this help

@@ -7,3 +7,7 @@ vendor
 /docker-compose-scripts/
 
 coverage/*
+
+.vscode/
+
+.DS_Store

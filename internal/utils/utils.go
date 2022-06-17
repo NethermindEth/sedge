@@ -52,3 +52,26 @@ func Contains(list []string, str string) bool {
 	}
 	return false
 }
+
+/*
+ContainsOnly :
+Checks if a string slice contains only strings of a given string slice
+
+params :-
+a. list []string
+String slice to be checked
+b. target []string
+String slice to be checked
+
+returns :-
+a. bool
+True if every string in list is in target, false otherwise
+*/
+func ContainsOnly(list []string, target []string) bool {
+	for _, s := range list {
+		if !Contains(target, s) {
+			return false
+		}
+	}
+	return true
+}
