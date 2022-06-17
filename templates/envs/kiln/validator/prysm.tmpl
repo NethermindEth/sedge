@@ -1,0 +1,10 @@
+{{/* prysm.tmpl */}}
+# --- Consensus Layer - Validator Node - configuration ---
+CC_NODE={{.ConsensusNodeURL}}
+GRAFFITI={{.ExecutionEngineName}}
+VL_LOG_LEVEL=info
+INSTANCE_NAME=PrysmValidator
+VL_IMAGE_VERSION=gcr.io/prysmaticlabs/prysm/validator:stable
+KEYSTORE_DIR={{.KeystoreDir}}
+WALLET_DIR=./wallet
+VL_DATA_DIR={{.DataDir}}

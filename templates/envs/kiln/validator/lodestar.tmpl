@@ -1,0 +1,9 @@
+{{/* lodestar.tmpl */}}
+# --- Consensus Layer - Validator Node - configuration ---
+CC_NODE={{.ConsensusNodeURL}}
+GRAFFITI={{.ExecutionEngineName}}
+VL_LOG_LEVEL=info
+INSTANCE_NAME=LodestarValidator
+VL_IMAGE_VERSION=chainsafe/lodestar
+KEYSTORE_DIR={{.KeystoreDir}}
+VL_DATA_DIR={{.DataDir}}

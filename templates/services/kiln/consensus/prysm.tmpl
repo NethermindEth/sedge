@@ -2,7 +2,6 @@
 {{ define "consensus" }}
   config:
     container_name: config_prysm
-    restart: unless-stopped
     image: busybox:latest
     volumes:
       - ./:/tmp/app
@@ -30,7 +29,7 @@
       - "9000:9000/udp"
       - "5054:5054/tcp"
     expose:
-      - 5051
+      - 4000
     command:
       - --chain-config-file=/network_config/config.yml
       - --bootstrap-node=${CL_BOOTNODE_1}
@@ -39,10 +38,10 @@
       - --p2p-udp-port=9000
       - --jwt-secret=/tmp/jwtsecret
       - --rpc-host=0.0.0.0
-      - --rpc-port=5051
+      - --rpc-port=4000
       - --datadir=/var/lib/prysm/
       - --verbosity=${CC_LOG_LEVEL}
-      - --${NETWORK}
+      - --${CC_NETWORK}
       - --p2p-max-peers=${CC_PEER_COUNT}
       - --http-web3provider=${EC_NODE}:8551{{range $url := .FallbackELUrls}}
       - --fallback-web3provider={{$url}}{{end}}

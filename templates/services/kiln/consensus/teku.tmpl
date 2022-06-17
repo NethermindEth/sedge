@@ -15,13 +15,11 @@
       - "9000:9000/udp"
       - "5054:5054/tcp"
     expose:
-      - 5051
-    environment:
-      - JAVA_OPTS=-XX:SoftMaxHeapSize=2g -Xmx4g
+      - 4000
     command:
       - --log-destination=CONSOLE
       - --logging=${CC_LOG_LEVEL}
-      - --network=${NETWORK}
+      - --network=${CC_NETWORK}
       - --p2p-discovery-bootnodes=${CL_BOOTNODES}
       - --p2p-enabled=true
       - --p2p-port=9000
@@ -29,7 +27,7 @@
       - --rest-api-enabled=true
       - --rest-api-host-allowlist=*
       - --rest-api-interface=0.0.0.0
-      - --rest-api-port=5051
+      - --rest-api-port=4000
       - --rest-api-cors-origins=*
       - --rest-api-docs-enabled=false
       - --data-beacon-path=/var/lib/teku/beacon

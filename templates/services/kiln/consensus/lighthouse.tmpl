@@ -27,7 +27,7 @@
       - --http
       - --http-address=0.0.0.0
       - --http-port=4000
-      - --network=${NETWORK}
+      - --network=${CC_NETWORK}
       - --target-peers=${CC_PEER_COUNT}
       - --execution-endpoints=${EC_NODE}:8551
       - --eth1-endpoints=${EC_NODE}:8545{{range $url := .FallbackELUrls}},{{$url}}{{end}}

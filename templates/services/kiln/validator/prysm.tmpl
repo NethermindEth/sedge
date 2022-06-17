@@ -1,0 +1,44 @@
+{{/* prysm.tmpl */}}
+{{ define "validator" }}
+  validator-import:
+    image: ${VL_IMAGE_VERSION}
+    networks:
+      - 1click
+    container_name: validator-import-client
+    volumes:
+      - ${VL_DATA_DIR}:/data
+      - ${KEYSTORE_DIR}:/keystore
+      - ./config.yml:/network_config/config.yml
+      - ./genesis.ssz:/network_config/genesis.ssz
+    command: |
+      --accept-terms-of-use
+      --chain-config-file=/network_config/config.yml
+      --genesis-state=/network_config/genesis.ssz
+      accounts import
+      --keys-dir=/keystore/validator_keys
+      --wallet-dir=/data/validator/wallet
+      --wallet-password-file=/keystore/keystore_password.txt
+
+  validator:
+    container_name: validator-client
+    image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      validator-import:
+        condition: service_completed_successfully
+    volumes:
+      - ${VL_DATA_DIR}:/var/lib/prysm
+      - ./config.yml:/network_config/config.yml
+      - ./genesis.ssz:/network_config/genesis.ssz
+    command:
+      - --datadir=/var/lib/prysm
+      - --wallet-dir=/var/lib/prysm/wallet
+      - --beacon-rpc-provider=${CC_NODE}
+      - --graffiti=${GRAFFITI}
+      - --verbosity=${VL_LOG_LEVEL}
+      - --accept-terms-of-use
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}
