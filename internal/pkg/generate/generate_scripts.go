@@ -105,13 +105,26 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		return err
 	}
 
+	// Check for prysm config
+	ccPrysmCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient)
+	if err != nil {
+		return err
+	}
+	vlPrysmCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient)
+	if err != nil {
+		return err
+	}
+
 	data := DockerComposeData{
 		ElTTD:             elTTD,
 		CcTTD:             ccTTD,
+		CcPrysmCfg:        ccPrysmCfg,
+		VlPrysmCfg:        vlPrysmCfg,
 		CheckpointSyncUrl: gd.CheckpointSyncUrl,
 		FeeRecipient:      gd.FeeRecipient,
 		FallbackELUrls:    gd.FallbackELUrls,
 	}
+	log.Errorf("%+v", data)
 
 	// Print docker-compose file
 	log.Infof(configs.PrintingFile, configs.DefaultDockerComposeScriptName)
@@ -172,6 +185,7 @@ func generateEnvFile(gd GenerationData) (err error) {
 	consensusEnv := ConsensusEnv{
 		ExecutionNodeURL: configs.OnPremiseExecutionURL,
 		DataDir:          configs.ConsensusDefaultDataDir,
+		FeeRecipient:     gd.FeeRecipient,
 	}
 
 	validatorEnv := ValidatorEnv{
