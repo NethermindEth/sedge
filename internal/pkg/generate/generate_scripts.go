@@ -7,7 +7,7 @@ import (
 	"text/template"
 
 	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/utils"
+	"github.com/NethermindEth/1click/internal/pkg/env"
 	"github.com/NethermindEth/1click/templates"
 	log "github.com/sirupsen/logrus"
 )
@@ -96,11 +96,11 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 	}
 
 	// Check for TTD in envs
-	elTTD, err := utils.TTD(gd.Network, "execution", gd.ExecutionClient)
+	elTTD, err := env.CheckVariable(env.ReTTD, gd.Network, "execution", gd.ExecutionClient)
 	if err != nil {
 		return err
 	}
-	ccTTD, err := utils.TTD(gd.Network, "consensus", gd.ConsensusClient)
+	ccTTD, err := env.CheckVariable(env.ReTTD, gd.Network, "consensus", gd.ConsensusClient)
 	if err != nil {
 		return err
 	}
