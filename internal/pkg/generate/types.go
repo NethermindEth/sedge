@@ -9,6 +9,7 @@ type ExecutionEnv struct {
 type ConsensusEnv struct {
 	ExecutionNodeURL string
 	DataDir          string
+	FeeRecipient     string
 }
 
 // ValidatorEnv : Struct Data object to be applied to validator docker-compose script environment template
@@ -35,6 +36,8 @@ type GenerationData struct {
 type DockerComposeData struct {
 	ElTTD             bool
 	CcTTD             bool
+	CcPrysmCfg        bool
+	VlPrysmCfg        bool
 	CheckpointSyncUrl string
 	FeeRecipient      string
 	FallbackELUrls    []string
