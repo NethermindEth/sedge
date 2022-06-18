@@ -24,11 +24,11 @@
       - --network=${CC_NETWORK}
       - --eth1.enabled=true
       - --eth1.providerUrls=${EC_NODE}:8545
-      - --execution.urls=${EC_NODE}:8551
-      {{with .TTD}}- --terminal-total-difficulty-override=${CC_TTD}{{end}}
+      - --execution.urls=${EC_NODE}:8551{{with .CcTTD}}
+      - --terminal-total-difficulty-override=${CC_TTD}{{end}}
       - --logFile=/var/lib/lodestart/consensus/logs/beacon.log 
-      - --logLevelFile=${CC_LOG_LEVEL}
-      {{with .FeeRecipient}}- --chain.defaultFeeRecipient=${CL_FEE_RECIPIENT}{{end}}
+      - --logLevelFile=${CC_LOG_LEVEL}{{with .FeeRecipient}}
+      - --chain.defaultFeeRecipient=${CL_FEE_RECIPIENT}{{end}}
       - --port=9000
       - --api.rest.enabled 
       - --api.rest.host=0.0.0.0
@@ -40,8 +40,8 @@
       - --network.targetPeers=${CC_PEER_COUNT}
       - --metrics.enabled=true
       - --metrics.port=5054
-      - --jwt-secret=/tmp/jwt/jwtsecret
-      {{with .CheckpointSyncUrl}}- --weakSubjectivitySyncLatest
+      - --jwt-secret=/tmp/jwt/jwtsecret{{with .CheckpointSyncUrl}}
+      - --weakSubjectivitySyncLatest
       - --weakSubjectivityServerUrl={{.}}{{end}}
     logging:
       driver: "json-file"

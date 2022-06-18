@@ -20,8 +20,8 @@
     command: 
       - --config=${NETHERMIND_CONFIG}
       - --datadir=/nethermind/data
-      - --log=${NETHERMIND_LOG_LEVEL}
-      {{with .TTD}}- --Merge.TerminalTotalDifficulty=${EL_TTD}{{end}}
+      - --log=${NETHERMIND_LOG_LEVEL}{{with .ElTTD}}
+      - --Merge.TerminalTotalDifficulty=${EL_TTD}{{end}}
       - --Merge.TerminalBlockNumber=0
       - --Metrics.Enabled=${NETHERMIND_METRICSCONFIG_ENABLED}
       - --Metrics.NodeName=${NETHERMIND_METRICSCONFIG_NODENAME}

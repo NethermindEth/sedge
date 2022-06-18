@@ -35,16 +35,16 @@
       - --data-storage-archive-frequency=2048
       - --data-storage-mode=PRUNE
       - --data-storage-non-canonical-blocks-enabled=false
-      - --ee-endpoint=${EC_NODE}:8551
-      {{with .FeeRecipient}}- --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
+      - --ee-endpoint=${EC_NODE}:8551{{with .FeeRecipient}}
+      - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
       - --Xee-version=${XEE_VERSION}
-      - --ee-jwt-secret-file=/tmp/jwt/jwtsecret
-      {{with .TTD}}- --Xnetwork-total-terminal-difficulty-override=${CL_TTD}{{end}}
+      - --ee-jwt-secret-file=/tmp/jwt/jwtsecret{{with .CcTTD}}
+      - --Xnetwork-total-terminal-difficulty-override=${CL_TTD}{{end}}
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
-      - --metrics-port=5054
-      {{with .CheckpointSyncUrl}}- --initial-state={{.}}/eth/v2/debug/beacon/states/{{end}}
+      - --metrics-port=5054{{with .CheckpointSyncUrl}}
+      - --initial-state={{.}}/eth/v2/debug/beacon/states/{{end}}
     logging:
       driver: "json-file"
       options:
