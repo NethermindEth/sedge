@@ -124,7 +124,6 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		FeeRecipient:      gd.FeeRecipient,
 		FallbackELUrls:    gd.FallbackELUrls,
 	}
-	log.Errorf("%+v", data)
 
 	// Print docker-compose file
 	log.Infof(configs.PrintingFile, configs.DefaultDockerComposeScriptName)
@@ -179,13 +178,15 @@ func generateEnvFile(gd GenerationData) (err error) {
 
 	// TODO: Use OS wise delimiter for these data structs
 	executionEnv := ExecutionEnv{
-		DataDir: configs.ExecutionDefaultDataDir,
+		DataDir:       configs.ExecutionDefaultDataDir,
+		JWTSecretPath: gd.JWTSecretPath,
 	}
 
 	consensusEnv := ConsensusEnv{
 		ExecutionNodeURL: configs.OnPremiseExecutionURL,
 		DataDir:          configs.ConsensusDefaultDataDir,
 		FeeRecipient:     gd.FeeRecipient,
+		JWTSecretPath:    gd.JWTSecretPath,
 	}
 
 	validatorEnv := ValidatorEnv{

@@ -42,4 +42,6 @@ const (
 	NoSupportedClientsError           = "collection of clients given for random choice doesn't have any supported client. Check the target network (flag --network). Use 'clients' command to see the list of supported clients for every supported network"
 	NetworkValidationFailedError      = "'network' flag validation failed. Error: %v"
 	UnknownNetworkError               = "unknown network \"%s\". Please provide correct network name. Use 'networks' command to see the list of supported networks"
+	GenerateJWTSecretError            = "JWT secret generation failed. Error: %v"
+	GetPWDError                       = "something failed trying to get current working directory. Error: %v"
 )

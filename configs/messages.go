@@ -62,4 +62,6 @@ const (
 	ConsensusClientNotSpecifiedWarn = "Consensus client not provided. Selecting same pair of clients for consensus and validator clients"
 	ValidatorClientNotSpecifiedWarn = "Validator client not provided. Selecting same pair of clients for consensus and validator clients"
 	CLNotSpecifiedWarn              = "Consensus and validator clients not provided. Selecting same pair of clients for consensus and validator clients using a random client. Random client: %s"
+	GeneratingJWTSecret             = "Generating JWT secret for client authentication"
+	JWTSecretGenerated              = "JWT secret generated"
 )

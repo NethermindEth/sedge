@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -14,6 +15,7 @@ import (
 	"github.com/NethermindEth/1click/internal/pkg/clients"
 	"github.com/NethermindEth/1click/internal/pkg/commands"
 	"github.com/NethermindEth/1click/internal/utils"
+	"github.com/NethermindEth/1click/templates"
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
 	"github.com/manifoldco/promptui"
 )
@@ -262,5 +264,39 @@ func RunValidatorOrExit() error {
 		os.Exit(0)
 	}
 
+	return nil
+}
+
+func handleJWTSecret() error {
+	log.Info(configs.GeneratingJWTSecret)
+
+	rawScript, err := templates.Scripts.ReadFile(filepath.Join("scripts", "jwt_secret.sh"))
+	if err != nil {
+		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	tmp, err := template.New("script").Parse(string(rawScript))
+	if err != nil {
+		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	script := commands.BashScript{
+		Tmp:       tmp,
+		GetOutput: false,
+		Data:      struct{}{},
+	}
+
+	if _, err = commands.Runner.RunBash(script); err != nil {
+		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	// Get PWD
+	pwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf(configs.GetPWDError, err)
+	}
+	jwtPath = filepath.Join(pwd, "jwtsecret")
+
+	log.Info(configs.JWTSecretGenerated)
 	return nil
 }

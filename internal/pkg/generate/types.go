@@ -2,7 +2,8 @@ package generate
 
 // ExecutionEnv : Struct Data object to be applied to execution docker-compose script environment template
 type ExecutionEnv struct {
-	DataDir string
+	DataDir       string
+	JWTSecretPath string
 }
 
 // ConsensusEnv : Struct Data object to be applied to consensus docker-compose script environment template
@@ -10,6 +11,7 @@ type ConsensusEnv struct {
 	ExecutionNodeURL string
 	DataDir          string
 	FeeRecipient     string
+	JWTSecretPath    string
 }
 
 // ValidatorEnv : Struct Data object to be applied to validator docker-compose script environment template
@@ -29,6 +31,7 @@ type GenerationData struct {
 	Network           string
 	CheckpointSyncUrl string
 	FeeRecipient      string
+	JWTSecretPath     string
 	FallbackELUrls    []string
 }
 
@@ -40,5 +43,6 @@ type DockerComposeData struct {
 	VlPrysmCfg        bool
 	CheckpointSyncUrl string
 	FeeRecipient      string
+	JWTSecretPath     string
 	FallbackELUrls    []string
 }

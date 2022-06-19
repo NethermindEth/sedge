@@ -42,6 +42,7 @@ var (
 	checkpointSyncUrl string
 	network           string
 	feeRecipient      string
+	jwtPath           string
 	install           bool
 	run               bool
 	y                 bool
@@ -164,6 +165,13 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	}
 	log.Info(configs.DependenciesOK)
 
+	// Generate JWT secret if necessary
+	if jwtPath == "" && configs.JWTNetworks[network] {
+		if err = handleJWTSecret(); err != nil {
+			return []error{err}
+		}
+	}
+
 	// Generate docker-compose scripts
 	gd := generate.GenerationData{
 		ExecutionClient:   combinedClients.Execution.Name,
@@ -173,6 +181,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		Network:           network,
 		CheckpointSyncUrl: checkpointSyncUrl,
 		FeeRecipient:      feeRecipient,
+		JWTSecretPath:     jwtPath,
 		FallbackELUrls:    *fallbackEL,
 	}
 	if err = generate.GenerateScripts(gd); err != nil {
@@ -240,6 +249,8 @@ func init() {
 	cliCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, prater, kiln, etc.")
 
 	cliCmd.Flags().StringVar(&feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption.")
+
+	cliCmd.Flags().StringVar(&jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 
 	cliCmd.Flags().BoolVarP(&install, "install", "i", false, "Install dependencies if not installed without asking")
 
