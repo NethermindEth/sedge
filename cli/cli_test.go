@@ -32,6 +32,7 @@ type cliCmdTestCase struct {
 
 type cliCmdArgs struct {
 	random       bool
+	yes          bool
 	run          bool
 	install      bool
 	execClient   string
@@ -43,8 +44,8 @@ type cliCmdArgs struct {
 
 func (args *cliCmdArgs) toString() string {
 	s := []string{}
-	if args.random {
-		s = append(s, "-r")
+	if args.yes {
+		s = append(s, "--yes")
 	}
 	if args.run {
 		s = append(s, "--run")
@@ -93,6 +94,7 @@ func prepareCliCmd(tc cliCmdTestCase) error {
 	initConfig()
 	// Set flags
 	generationPath = tc.generationPath
+	y = tc.args.yes
 	run = tc.args.run
 	install = tc.args.install
 	if tc.args.execClient != "" {
@@ -166,9 +168,8 @@ func TestCliCmd(t *testing.T) {
 			"Random clients",
 			"case_1",
 			cliCmdArgs{
-				random:  true,
-				run:     true,
-				install: true,
+				random: true,
+				yes:    true,
 			},
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
@@ -182,8 +183,7 @@ func TestCliCmd(t *testing.T) {
 			"Fixed clients",
 			"case_1",
 			cliCmdArgs{
-				run:        true,
-				install:    true,
+				yes:        true,
 				execClient: "nethermind",
 				conClient:  "lighthouse",
 				valClient:  "lighthouse",
@@ -200,8 +200,7 @@ func TestCliCmd(t *testing.T) {
 			"Missing consensus client",
 			"case_1",
 			cliCmdArgs{
-				run:        true,
-				install:    true,
+				yes:        true,
 				execClient: "nethermind",
 				valClient:  "lighthouse",
 			},
@@ -216,8 +215,7 @@ func TestCliCmd(t *testing.T) {
 			t,
 			"Missing validator client", "case_1",
 			cliCmdArgs{
-				run:        true,
-				install:    true,
+				yes:        true,
 				execClient: "nethermind",
 				conClient:  "lighthouse",
 			},
@@ -232,8 +230,7 @@ func TestCliCmd(t *testing.T) {
 			t,
 			"Good network input", "case_1",
 			cliCmdArgs{
-				run:        true,
-				install:    true,
+				yes:        true,
 				execClient: "nethermind",
 				conClient:  "lighthouse",
 				network:    "mainnet",
@@ -249,8 +246,7 @@ func TestCliCmd(t *testing.T) {
 			t,
 			"Bad network input", "case_1",
 			cliCmdArgs{
-				run:        true,
-				install:    true,
+				yes:        true,
 				execClient: "nethermind",
 				conClient:  "lighthouse",
 				network:    "1click",
@@ -266,8 +262,7 @@ func TestCliCmd(t *testing.T) {
 			t,
 			"Bad fee recipient input", "case_1",
 			cliCmdArgs{
-				run:          true,
-				install:      true,
+				yes:          true,
 				execClient:   "nethermind",
 				conClient:    "lighthouse",
 				network:      "kiln",
@@ -284,8 +279,7 @@ func TestCliCmd(t *testing.T) {
 			t,
 			"Good fee recipient input", "case_1",
 			cliCmdArgs{
-				run:          true,
-				install:      true,
+				yes:          true,
 				execClient:   "nethermind",
 				conClient:    "lighthouse",
 				network:      "kiln",

@@ -179,7 +179,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	}
 
 	// Get fee recipient
-	if !run && feeRecipient == "" {
+	if !y && feeRecipient == "" {
 		if err = feeRecipientPrompt(); err != nil {
 			return []error{err}
 		}
