@@ -43,6 +43,5 @@ type DockerComposeData struct {
 	VlPrysmCfg        bool
 	CheckpointSyncUrl string
 	FeeRecipient      string
-	JWTSecretPath     string
 	FallbackELUrls    []string
 }

@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"regexp"
 	"strings"
 )
+
+var reAddr = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
 
 /*
 SkipLines :
@@ -74,4 +77,8 @@ func ContainsOnly(list []string, target []string) bool {
 		}
 	}
 	return true
+}
+
+func IsAddress(a string) bool {
+	return reAddr.MatchString(a)
 }

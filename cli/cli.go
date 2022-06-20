@@ -16,6 +16,7 @@ limitations under the License.
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -128,6 +129,11 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf(configs.UnknownNetworkError, network)
 	}
 
+	// Validate fee recipient
+	if feeRecipient != "" && !utils.IsAddress(feeRecipient) {
+		return errors.New(configs.InvalidFeeRecipientError)
+	}
+
 	return nil
 }
 
@@ -168,6 +174,13 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	// Generate JWT secret if necessary
 	if jwtPath == "" && configs.JWTNetworks[network] {
 		if err = handleJWTSecret(); err != nil {
+			return []error{err}
+		}
+	}
+
+	// Get fee recipient
+	if !run && feeRecipient == "" {
+		if err = feeRecipientPrompt(); err != nil {
 			return []error{err}
 		}
 	}

@@ -31,13 +31,14 @@ type cliCmdTestCase struct {
 }
 
 type cliCmdArgs struct {
-	random     bool
-	run        bool
-	install    bool
-	execClient string
-	conClient  string
-	valClient  string
-	network    string
+	random       bool
+	run          bool
+	install      bool
+	execClient   string
+	conClient    string
+	valClient    string
+	network      string
+	feeRecipient string
 }
 
 func (args *cliCmdArgs) toString() string {
@@ -63,6 +64,9 @@ func (args *cliCmdArgs) toString() string {
 	if args.network != "" {
 		s = append(s, "-n", args.network)
 	}
+	if args.feeRecipient != "" {
+		s = append(s, "--fee-recipient", args.feeRecipient)
+	}
 	return strings.Join(s, " ")
 }
 
@@ -71,6 +75,8 @@ func resetCliCmd() {
 	executionName = ""
 	consensusName = ""
 	validatorName = ""
+	network = "mainnet"
+	feeRecipient = ""
 	generationPath = configs.DefaultDockerComposeScriptsPath
 	install = false
 	run = false
@@ -100,6 +106,9 @@ func prepareCliCmd(tc cliCmdTestCase) error {
 	}
 	if tc.args.network != "" {
 		network = tc.args.network
+	}
+	if tc.args.feeRecipient != "" {
+		feeRecipient = tc.args.feeRecipient
 	}
 	if err := preRunCliCmd(rootCmd, []string{}); err != nil {
 		return err
@@ -252,6 +261,42 @@ func TestCliCmd(t *testing.T) {
 			},
 			true,
 			true,
+		),
+		*buildCliTestCase(
+			t,
+			"Bad fee recipient input", "case_1",
+			cliCmdArgs{
+				run:          true,
+				install:      true,
+				execClient:   "nethermind",
+				conClient:    "lighthouse",
+				network:      "kiln",
+				feeRecipient: "666",
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			true,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"Good fee recipient input", "case_1",
+			cliCmdArgs{
+				run:          true,
+				install:      true,
+				execClient:   "nethermind",
+				conClient:    "lighthouse",
+				network:      "kiln",
+				feeRecipient: "0x5c00ABEf07604C59Ac72E859E5F93D5ab8546F83",
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			false,
+			false,
 		),
 	}
 

@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -298,5 +299,29 @@ func handleJWTSecret() error {
 	jwtPath = filepath.Join(pwd, "jwtsecret")
 
 	log.Info(configs.JWTSecretGenerated)
+	return nil
+}
+
+func feeRecipientPrompt() error {
+	// notest
+	validate := func(input string) error {
+		if input != "" && !utils.IsAddress(input) {
+			return errors.New(configs.InvalidFeeRecipientError)
+		}
+		return nil
+	}
+
+	prompt := promptui.Prompt{
+		Label:    "Please enter the Fee Recipient address. You can leave it blank and press enter (not recommended)",
+		Validate: validate,
+	}
+
+	result, err := prompt.Run()
+
+	if err != nil {
+		return fmt.Errorf(configs.PromptFailedError, err)
+	}
+
+	feeRecipient = result
 	return nil
 }
