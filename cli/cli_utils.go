@@ -147,12 +147,6 @@ func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Cl
 
 func runScriptOrExit() (err error) {
 	// notest
-	optRun, optExit := fmt.Sprintf("Run the script with the selected services %s", strings.Join(*services, ",")), "Exit"
-	prompt := promptui.Select{
-		Label: "Select how to proceed with the generated docker-compose script",
-		Items: []string{optRun, optExit},
-	}
-
 	log.Infof(configs.InstructionsFor, "running docker-compose script")
 	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
 		Path:     generationPath,
@@ -160,19 +154,19 @@ func runScriptOrExit() (err error) {
 	})
 	fmt.Printf("\n%s\n\n", upCMD.Cmd)
 
-	_, result, err := prompt.Run()
-	if err != nil {
-		return fmt.Errorf("prompt failed %s", err)
+	prompt := promptui.Prompt{
+		Label:     fmt.Sprintf("Run the script with the selected services %s", strings.Join(*services, ", ")),
+		IsConfirm: true,
+		Default:   "Y",
 	}
-
-	switch result {
-	case optRun:
-		if err = runAndShowContainers(*services); err != nil {
-			return err
-		}
-	default:
+	_, err = prompt.Run()
+	if err != nil {
 		log.Info(configs.Exiting)
 		os.Exit(0)
+	}
+
+	if err = runAndShowContainers(*services); err != nil {
+		return err
 	}
 
 	return nil
@@ -237,12 +231,6 @@ func trackSync(m MonitoringTool, wait time.Duration) error {
 
 func RunValidatorOrExit() error {
 	// notest
-	optRun, optExit := "Run validator service", "Exit"
-	prompt := promptui.Select{
-		Label: "Select how to proceed with the validator client",
-		Items: []string{optRun, optExit},
-	}
-
 	log.Infof(configs.InstructionsFor, "running validator service of docker-compose script")
 	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
 		Path:     generationPath,
@@ -250,19 +238,19 @@ func RunValidatorOrExit() error {
 	})
 	fmt.Printf("\n%s\n\n", upCMD.Cmd)
 
-	_, result, err := prompt.Run()
-	if err != nil {
-		return fmt.Errorf("prompt failed %s", err)
+	prompt := promptui.Prompt{
+		Label:     "Run validator service",
+		IsConfirm: true,
+		Default:   "Y",
 	}
-
-	switch result {
-	case optRun:
-		if err = runAndShowContainers([]string{validator}); err != nil {
-			return err
-		}
-	default:
+	_, err := prompt.Run()
+	if err != nil {
 		log.Info(configs.Exiting)
 		os.Exit(0)
+	}
+
+	if err = runAndShowContainers([]string{validator}); err != nil {
+		return err
 	}
 
 	return nil
