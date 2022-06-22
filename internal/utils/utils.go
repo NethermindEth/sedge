@@ -79,6 +79,18 @@ func ContainsOnly(list []string, target []string) bool {
 	return true
 }
 
+/*
+IsAddress :
+Checks if a string is an Ethereum address
+
+params :-
+a. a string
+String to be checked
+
+returns :-
+a. bool
+True if <a> is a valid Ethereum address. False otherwise
+*/
 func IsAddress(a string) bool {
 	return reAddr.MatchString(a)
 }
