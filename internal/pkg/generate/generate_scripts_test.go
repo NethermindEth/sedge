@@ -24,15 +24,15 @@ func generateTestCases(t *testing.T) (tests []generateTestCase) {
 
 	executionClients, err := c.SupportedClients("execution")
 	if err != nil {
-		t.Errorf("GetSupportedClients(\"execution\") failed: %v", err)
+		t.Errorf("SupportedClients(\"execution\") failed: %v", err)
 	}
 	consensusClients, err := c.SupportedClients("consensus")
 	if err != nil {
-		t.Errorf("GetSupportedClients(\"consensus\") failed: %v", err)
+		t.Errorf("SupportedClients(\"consensus\") failed: %v", err)
 	}
 	validatorClients, err := c.SupportedClients("validator")
 	if err != nil {
-		t.Errorf("GetSupportedClients(\"validator\") failed: %v", err)
+		t.Errorf("SupportedClients(\"validator\") failed: %v", err)
 	}
 
 	// TODO: Add CheckpointSyncUrl, FallbackELUrls and FeeRecipient to test data

@@ -18,7 +18,7 @@ b. error
 Error if any
 */
 func SupportedNetworks() (networkNames []string, err error) {
-	files, err := templates.Services.ReadDir("services")
+	files, err := templates.Envs.ReadDir("envs")
 	if err != nil {
 		return
 	}

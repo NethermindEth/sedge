@@ -85,7 +85,7 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		"validator": gd.ValidatorClient,
 	}
 	for tmpKind, clientName := range clients {
-		tmp, err := templates.Services.ReadFile(filepath.Join("services", gd.Network, tmpKind, clientName+".tmpl"))
+		tmp, err := templates.Services.ReadFile(filepath.Join("services", configs.NetworksToServices[gd.Network], tmpKind, clientName+".tmpl"))
 		if err != nil {
 			return err
 		}

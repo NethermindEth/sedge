@@ -17,7 +17,7 @@ type ClientInfo struct {
 }
 
 /*
-GetSupportedClients :
+SupportedClients :
 Get supported client names of type <clientType> for network <network>. A client is supported if it has a docker-compose service template
 
 params :-
@@ -33,7 +33,7 @@ b. error
 Error if any
 */
 func (c ClientInfo) SupportedClients(clientType string) (clientsNames []string, err error) {
-	files, err := templates.Services.ReadDir(filepath.Join("services", c.Network, clientType))
+	files, err := templates.Envs.ReadDir(filepath.Join("envs", c.Network, clientType))
 	if err != nil {
 		return
 	}
