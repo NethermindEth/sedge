@@ -28,7 +28,7 @@ returns :-
 a. error
 Error if any
 */
-func GenerateValidatorKey(existing bool, network, path string) (err error) {
+func GenerateValidatorKey(existing bool, network, path, password string) (err error) {
 	// Check if image already exists
 	inspectCmd := commands.Runner.BuildDockerInspectCMD(commands.DockerInspectOptions{
 		Name: configs.DepositCLIDockerImageName,
@@ -36,21 +36,22 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 	inspectCmd.GetOutput = true
 	if out, err := commands.Runner.RunCMD(inspectCmd); err != nil {
 		// Output is of type: []\n Error: <text>
-		// TODO: Check if the error is not "Error: No such image: <image_name>" in Windows
+		// TODO: Check if the error is not "Error: No such image: <image_name>" exists in Windows
 		if strings.Contains(out, "No such object:") {
+			// TODO: Allow user to choose between building the image from the staking-deposit-cli repo or use netherminderth/staking-deposit-cli image
 			// Image does not exist. Build it
-			log.Infof(configs.ImageNotFound, configs.DepositCLIDockerImageName)
-			if err := buildDepositCliImage(); err != nil {
+			// log.Infof(configs.ImageNotFoundBuilding, configs.DepositCLIDockerImageName)
+			// if err := buildDepositCliImage(); err != nil {
+			// 	return err
+			// }
+			// Image does not exist. Pull it
+			log.Infof(configs.ImageNotFoundPulling, configs.DepositCLIDockerImageName)
+			if err := pullDepositCliImage(); err != nil {
 				return err
 			}
 		} else {
 			return fmt.Errorf(configs.CommandError, inspectCmd.Cmd, out)
 		}
-	}
-
-	data := DepositCLI{
-		Network: network,
-		Path:    path,
 	}
 
 	// Get the template file
@@ -71,15 +72,35 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 		return
 	}
 
-	// Get the command as a string
+	lenPass := make([]struct{}, len(password))
+	for i := 0; i < len(password); i++ {
+		lenPass[i] = struct{}{}
+	}
+
+	data := DepositCLI{
+		Network: network,
+		Path:    path,
+		LenPass: lenPass,
+		Image:   configs.DepositCLIDockerImageName,
+	}
+
+	// Get the command as a string with password hidden to print it
 	var cmd bytes.Buffer
+	err = tmp.Execute(&cmd, data)
+	if err != nil {
+		return
+	}
+	log.Infof(configs.RunningCommand, cmd.String())
+
+	// Get the command as a string with password to execute it
+	data.Password = password
+	cmd.Reset()
 	err = tmp.Execute(&cmd, data)
 	if err != nil {
 		return
 	}
 
 	// Run the command
-	log.Infof(configs.RunningCommand, cmd.String())
 	_, err = commands.Runner.RunCMD(commands.Command{
 		Cmd:       cmd.String(),
 		GetOutput: false,
@@ -88,7 +109,7 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 	if err != nil {
 		return
 	}
-	log.Infof(configs.KeysFoundAt, path+"/keystore")
+	log.Info("deposit-cli tool exited")
 
 	return nil
 }
@@ -101,6 +122,20 @@ func buildDepositCliImage() error {
 	})
 	log.Infof(configs.RunningCommand, buildCMD.Cmd)
 	_, err := commands.Runner.RunCMD(buildCMD)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func pullDepositCliImage() error {
+	// Run docker pull
+	pullCMD := commands.Runner.BuildDockerPullCMD(commands.DockerBuildOptions{
+		Tag: configs.DepositCLIDockerImageName,
+	})
+	log.Infof(configs.RunningCommand, pullCMD.Cmd)
+	_, err := commands.Runner.RunCMD(pullCMD)
 	if err != nil {
 		return err
 	}

@@ -45,4 +45,6 @@ const (
 	GenerateJWTSecretError            = "JWT secret generation failed. Error: %v"
 	GetPWDError                       = "something failed trying to get current working directory. Error: %v"
 	InvalidFeeRecipientError          = "provided Fee Recipient is not a valid Ethereum address"
+	KeystorePasswordError             = "keystore password must have more than 8 characters"
+	CreatingKeystorePasswordError     = "failed to create keystore password file. Error: %v"
 )

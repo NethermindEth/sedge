@@ -76,6 +76,13 @@ func (cr *SimpleCMDRunner) BuildDockerBuildCMD(options commands.DockerBuildOptio
 	return r.BuildDockerBuildCMD(options)
 }
 
+func (cr *SimpleCMDRunner) BuildDockerPullCMD(options commands.DockerBuildOptions) commands.Command {
+	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
+		RunAsAdmin: false,
+	})
+	return r.BuildDockerPullCMD(options)
+}
+
 func (cr *SimpleCMDRunner) BuildDockerInspectCMD(options commands.DockerInspectOptions) commands.Command {
 	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
 		RunAsAdmin: false,

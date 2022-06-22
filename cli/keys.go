@@ -16,12 +16,16 @@ limitations under the License.
 package cli
 
 import (
+	"errors"
+	"io"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
 	"github.com/NethermindEth/1click/configs"
 	"github.com/NethermindEth/1click/internal/utils"
+	"github.com/manifoldco/promptui"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -69,12 +73,30 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 		}
 		log.Info(configs.DependenciesOK)
 
+		// Get keystore password
+		password := passwordPrompt()
+
+		// Create keystore folder
 		log.Info(configs.GeneratingKeystore)
-		if err := utils.GenerateValidatorKey(existingMnemonic, network, path); err != nil {
+		if err := os.MkdirAll(filepath.Join(path, "keystore"), 0766); err != nil {
+			log.Fatal(err)
+		}
+
+		keystorePath := filepath.Join(path, "keystore", "validator_keys")
+		if err := utils.GenerateValidatorKey(existingMnemonic, network, keystorePath, password); err != nil {
 			log.Fatalf(configs.GeneratingKeystoreError, err)
 		}
 
-		log.Warn(configs.ReviewKeystorePath)
+		// Check if keystore generation went ok
+		if !emptyKeystore() {
+			log.Infof(configs.KeysFoundAt, keystorePath)
+			if err := createKeystorePassword(password); err != nil {
+				log.Fatalf(configs.CreatingKeystorePasswordError, err)
+			}
+
+			log.Warn(configs.ReviewKeystorePath)
+		}
+
 	},
 }
 
@@ -89,9 +111,67 @@ func init() {
 	log.Debug(pwd)
 
 	// Local flags
-	keysCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, prater, etc.")
+	keysCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, prater, ropsten, sepolia etc.")
 
 	keysCmd.Flags().StringVarP(&path, "path", "p", pwd, "Absolute path to keystore folder. e.g. /home/user/keystore")
 
 	keysCmd.Flags().BoolVarP(&existingMnemonic, "existing", "e", false, "Use existing mnemonic")
+}
+
+func passwordPrompt() string {
+	// notest
+	validate := func(input string) error {
+		if len(input) < 8 {
+			return errors.New(configs.KeystorePasswordError)
+		}
+		return nil
+	}
+
+	prompt := promptui.Prompt{
+		Label:    "Please enter the password you will use for the validator keystore",
+		Validate: validate,
+		Mask:     '*',
+	}
+
+	result, err := prompt.Run()
+
+	if err != nil {
+		log.Errorf(configs.PromptFailedError, err)
+		return ""
+	}
+
+	return result
+}
+
+func createKeystorePassword(password string) error {
+	log.Debug(configs.CreatingKeystorePassword)
+
+	// Create file keystore_password.txt
+	file, err := os.Create(filepath.Join(path, "keystore", "keystore_password.txt"))
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Write password to file
+	_, err = file.WriteString(password)
+	if err != nil {
+		return err
+	}
+
+	log.Info(configs.KeystorePasswordCreated)
+	return nil
+}
+
+// Check if keystore folder is not empty
+func emptyKeystore() bool {
+	f, err := os.Open(filepath.Join(path, "keystore"))
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	_, err = f.Readdirnames(1)
+	// Either not empty or error, suits both cases
+	return err == io.EOF
 }

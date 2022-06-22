@@ -73,6 +73,11 @@ func (cr *UnixCMDRunner) BuildDockerBuildCMD(options DockerBuildOptions) Command
 	return Command{Cmd: command}
 }
 
+func (cr *UnixCMDRunner) BuildDockerPullCMD(options DockerBuildOptions) Command {
+	command := fmt.Sprintf("docker pull %s", options.Tag)
+	return Command{Cmd: command}
+}
+
 func (cr *UnixCMDRunner) BuildDockerInspectCMD(options DockerInspectOptions) Command {
 	command := "docker inspect " + options.Name
 	return Command{Cmd: command}

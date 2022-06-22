@@ -13,4 +13,10 @@ type DepositCLI struct {
 	Network string
 	// Path : Path to the keystore folder
 	Path string
+	// Password : Keystore password
+	Password string
+	// LenPass : Slice used to hide password in template
+	LenPass []struct{}
+	// Image : staking-deposit-cli docker image
+	Image string
 }
