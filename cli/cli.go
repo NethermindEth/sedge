@@ -32,7 +32,6 @@ import (
 	posmonidb "github.com/NethermindEth/posmoni/pkg/eth2/db"
 	posmoninet "github.com/NethermindEth/posmoni/pkg/eth2/networking"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 var (
@@ -70,11 +69,13 @@ Second, it will generate docker-compose scripts to run the full setup according 
 Finally, it will run the generated docker-compose script. Only execution and consensus clients will be executed by default.`,
 	Args: cobra.NoArgs,
 	PreRun: func(cmd *cobra.Command, args []string) {
+		// notest
 		if err := preRunCliCmd(cmd, args); err != nil {
 			log.Fatal(err)
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		// notest
 		if errs := runCliCmd(cmd, args); len(errs) > 0 {
 			for _, err := range errs {
 				log.Error(err)
@@ -85,15 +86,6 @@ Finally, it will run the generated docker-compose script. Only execution and con
 }
 
 func preRunCliCmd(cmd *cobra.Command, args []string) error {
-	// Count flags being set
-	count := 0
-	// HACKME: LocalFlags() doesn't work, so we count manually and check for parent flag config
-	cmd.Flags().Visit(func(f *pflag.Flag) {
-		if f.Name != "config" {
-			count++
-		}
-	})
-
 	// Quick run
 	if y {
 		install, run = true, true

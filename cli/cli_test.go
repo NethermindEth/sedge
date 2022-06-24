@@ -31,7 +31,6 @@ type cliCmdTestCase struct {
 }
 
 type cliCmdArgs struct {
-	random       bool
 	yes          bool
 	run          bool
 	install      bool
@@ -40,6 +39,7 @@ type cliCmdArgs struct {
 	valClient    string
 	network      string
 	feeRecipient string
+	services     []string
 }
 
 func (args *cliCmdArgs) toString() string {
@@ -68,6 +68,11 @@ func (args *cliCmdArgs) toString() string {
 	if args.feeRecipient != "" {
 		s = append(s, "--fee-recipient", args.feeRecipient)
 	}
+	if len(*services) == 0 {
+		s = append(s, "--run-client none")
+	} else {
+		s = append(s, strings.Join(*services, ", "))
+	}
 	return strings.Join(s, " ")
 }
 
@@ -83,6 +88,9 @@ func resetCliCmd() {
 	run = false
 	y = false
 	services = &[]string{}
+	fallbackEL = &[]string{}
+	jwtPath = ""
+	checkpointSyncUrl = ""
 }
 
 func prepareCliCmd(tc cliCmdTestCase) error {
@@ -97,6 +105,7 @@ func prepareCliCmd(tc cliCmdTestCase) error {
 	y = tc.args.yes
 	run = tc.args.run
 	install = tc.args.install
+	services = &tc.args.services
 	if tc.args.execClient != "" {
 		executionName = tc.args.execClient
 	}
@@ -165,11 +174,10 @@ func TestCliCmd(t *testing.T) {
 	tcs := []cliCmdTestCase{
 		*buildCliTestCase(
 			t,
-			"Random clients",
-			"case_1",
+			"Random clients", "case_1",
 			cliCmdArgs{
-				random: true,
-				yes:    true,
+				yes:      true,
+				services: []string{execution, consensus},
 			},
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
@@ -180,13 +188,13 @@ func TestCliCmd(t *testing.T) {
 		),
 		*buildCliTestCase(
 			t,
-			"Fixed clients",
-			"case_1",
+			"Fixed clients", "case_1",
 			cliCmdArgs{
 				yes:        true,
 				execClient: "nethermind",
 				conClient:  "lighthouse",
 				valClient:  "lighthouse",
+				services:   []string{execution, consensus},
 			},
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
@@ -197,12 +205,12 @@ func TestCliCmd(t *testing.T) {
 		),
 		*buildCliTestCase(
 			t,
-			"Missing consensus client",
-			"case_1",
+			"Missing consensus client", "case_1",
 			cliCmdArgs{
 				yes:        true,
 				execClient: "nethermind",
 				valClient:  "lighthouse",
+				services:   []string{execution, consensus},
 			},
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
@@ -218,6 +226,7 @@ func TestCliCmd(t *testing.T) {
 				yes:        true,
 				execClient: "nethermind",
 				conClient:  "lighthouse",
+				services:   []string{execution, consensus},
 			},
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
@@ -234,6 +243,7 @@ func TestCliCmd(t *testing.T) {
 				execClient: "nethermind",
 				conClient:  "lighthouse",
 				network:    "mainnet",
+				services:   []string{execution, consensus},
 			},
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
@@ -250,6 +260,7 @@ func TestCliCmd(t *testing.T) {
 				execClient: "nethermind",
 				conClient:  "lighthouse",
 				network:    "1click",
+				services:   []string{execution, consensus},
 			},
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
@@ -267,6 +278,7 @@ func TestCliCmd(t *testing.T) {
 				conClient:    "lighthouse",
 				network:      "kiln",
 				feeRecipient: "666",
+				services:     []string{execution, consensus},
 			},
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
@@ -284,6 +296,7 @@ func TestCliCmd(t *testing.T) {
 				conClient:    "lighthouse",
 				network:      "kiln",
 				feeRecipient: "0x5c00ABEf07604C59Ac72E859E5F93D5ab8546F83",
+				services:     []string{execution, consensus},
 			},
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
@@ -291,6 +304,119 @@ func TestCliCmd(t *testing.T) {
 			},
 			false,
 			false,
+		),
+		*buildCliTestCase(
+			t,
+			"--run-client all", "case_1",
+			cliCmdArgs{
+				yes:      true,
+				services: []string{"all"},
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			false,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"--run-client none", "case_1",
+			cliCmdArgs{
+				yes: true,
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			false,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"--run-client none, execution, ambiguos error", "case_1",
+			cliCmdArgs{
+				yes:      true,
+				services: []string{execution, "none"},
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			true,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"--run-client validator", "case_1",
+			cliCmdArgs{
+				yes:      true,
+				services: []string{validator},
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			false,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"--run-client all, validator, ambiguos error", "case_1",
+			cliCmdArgs{
+				yes:      true,
+				services: []string{validator, "all"},
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			true,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"--run-client all, validator, ambiguos error", "case_1",
+			cliCmdArgs{
+				yes:      true,
+				services: []string{validator, "all"},
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			true,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"--network kiln", "case_1",
+			cliCmdArgs{
+				yes:      true,
+				network:  "kiln",
+				services: []string{execution, consensus},
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			false,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"Invalid network", "case_1",
+			cliCmdArgs{
+				yes:      true,
+				network:  "test",
+				services: []string{execution, consensus},
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			true,
+			true,
 		),
 	}
 
