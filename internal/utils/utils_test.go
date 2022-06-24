@@ -72,3 +72,26 @@ func TestContainsOnly(t *testing.T) {
 		}
 	}
 }
+
+func TestIsAddress(t *testing.T) {
+	tcs := []struct {
+		input string
+		want  bool
+	}{
+		{"", false},
+		{"2131", false},
+		{"dasd31gsd1231", false},
+		{"0x2312313aaef2312312", false},
+		{"0x5c00ABEf07604C59Ac72E859E5F93D5abZXCVF83", false},
+		{"5c00ABEf07604C59Ac72E859E5F93D5ab8546F83", false},
+		{"0x5c00ABEf07604C59Ac72E859E5F93D5ab8546F83", true},
+	}
+
+	for _, tc := range tcs {
+		t.Run(fmt.Sprintf("IsAddress(%s)", tc.input), func(t *testing.T) {
+			if got := IsAddress(tc.input); got != tc.want {
+				t.Errorf("got != want. Expected %v, got %v", tc.want, tc.input)
+			}
+		})
+	}
+}
