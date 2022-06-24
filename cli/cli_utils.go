@@ -313,3 +313,24 @@ func feeRecipientPrompt() error {
 	feeRecipient = result
 	return nil
 }
+
+func preRunTeku() error {
+	log.Info(configs.PreparingTekuDatadir)
+	for _, s := range *services {
+		if s == "all" || s == consensus {
+			// Prepare consensus datadir
+			path := filepath.Join(generationPath, configs.ConsensusDefaultDataDir)
+			if err := os.MkdirAll(path, 0777); err != nil {
+				return fmt.Errorf(configs.TekuDatadirError, consensus, err)
+			}
+		}
+		if s == "all" || s == validator {
+			// Prepare validator datadir
+			path := filepath.Join(generationPath, configs.ValidatorDefaultDataDir)
+			if err := os.MkdirAll(path, 0777); err != nil {
+				return fmt.Errorf(configs.TekuDatadirError, validator, err)
+			}
+		}
+	}
+	return nil
+}

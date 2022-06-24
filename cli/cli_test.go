@@ -418,6 +418,38 @@ func TestCliCmd(t *testing.T) {
 			true,
 			true,
 		),
+		*buildCliTestCase(
+			t,
+			"--network kiln, testing teku datadirs preparation", "case_1",
+			cliCmdArgs{
+				yes:       true,
+				network:   "kiln",
+				services:  []string{execution, consensus},
+				conClient: "teku",
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			false,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"--network kiln, testing teku datadirs preparation, all services", "case_1",
+			cliCmdArgs{
+				yes:       true,
+				network:   "kiln",
+				services:  []string{"all"},
+				conClient: "teku",
+			},
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			false,
+			false,
+		),
 	}
 
 	t.Cleanup(resetCliCmd)
