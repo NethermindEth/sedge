@@ -11,3 +11,5 @@ coverage/*
 .vscode/
 
 .DS_Store
+
+build/1click

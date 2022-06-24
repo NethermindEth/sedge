@@ -64,17 +64,6 @@ sudo $GOPATH/bin/1click /usr/local/bin/
 sudo cp 1click/build/1click /usr/local/bin/
 ```
 
-#### Download the binary (only for linux)
-
-> This is temporary until the first release
-
-Download directly the binary and put it in `/usr/local/bin`:
-
-```
-sudo curl -LJ -o /usr/local/bin/1click https://github.com/NethermindEth/1click/raw/main/build/1click
-sudo chmod +x /usr/local/bin/1click
-```
-
 ### Dependencies
 `1click` dependencies are `docker` and `docker-compose`, but if you don't have those installed, `1click` will show instructions to install them, or install them for you.
 
