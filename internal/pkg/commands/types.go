@@ -46,8 +46,14 @@ type DockerPSOptions struct {
 type DockerComposePsOptions struct {
 	// Path : path to docker-compose.yaml
 	Path string
-	// Services : use with --services
+	// Services : use with --services to display services
 	Services bool
+	// Quiet : use with --quietto display only IDs
+	Quiet bool
+	// ServiceName: Service argument
+	ServiceName string
+	// FilterRunning : use with --filter status=running
+	FilterRunning bool
 }
 
 // DockerComposeLogsOptions : Represents docker-compose log command options
@@ -74,6 +80,8 @@ type DockerBuildOptions struct {
 type DockerInspectOptions struct {
 	// Name : docker object name
 	Name string
+	// Format : Go template for --format flag
+	Format string
 }
 
 // DockerComposeDownOptions : Represents docker-compose down command options

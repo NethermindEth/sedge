@@ -216,20 +216,89 @@ func TestBuildCommands(t *testing.T) {
 					Services: true,
 				}).Cmd
 			},
+			output: "docker-compose -f ./testdir/docker-compose.yml ps --services",
+		},
+		{
+			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
+				Path:     "./testdir/docker-compose.yml",
+				Services: true,
+				FilterRunning: true,
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerComposePSCMD(DockerComposePsOptions{
+					Path:          "./testdir/docker-compose.yml",
+					Services:      true,
+					FilterRunning: true,
+				}).Cmd
+			},
 			output: "docker-compose -f ./testdir/docker-compose.yml ps --services --filter status=running",
 		},
 		{
 			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
 				Path:     "./testdir/docker-compose.yml",
-				Services: false,
+				Quiet: true,
+				FilterRunning: true,
 			})`,
 			builder: func() string {
 				return Runner.BuildDockerComposePSCMD(DockerComposePsOptions{
-					Path:     "./testdir/docker-compose.yml",
-					Services: false,
+					Path:          "./testdir/docker-compose.yml",
+					Quiet:         true,
+					FilterRunning: true,
 				}).Cmd
 			},
-			output: "docker-compose -f ./testdir/docker-compose.yml ps --filter status=running",
+			output: "docker-compose -f ./testdir/docker-compose.yml ps --quiet --filter status=running",
+		},
+		{
+			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
+				Path:     "./testdir/docker-compose.yml",
+				Quiet: true,
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerComposePSCMD(DockerComposePsOptions{
+					Path:  "./testdir/docker-compose.yml",
+					Quiet: true,
+				}).Cmd
+			},
+			output: "docker-compose -f ./testdir/docker-compose.yml ps --quiet",
+		},
+		{
+			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
+				Path:     "./testdir/docker-compose.yml",
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerComposePSCMD(DockerComposePsOptions{
+					Path: "./testdir/docker-compose.yml",
+				}).Cmd
+			},
+			output: "docker-compose -f ./testdir/docker-compose.yml ps",
+		},
+		{
+			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
+				Path:     "./testdir/docker-compose.yml",
+				ServiceName: "service",
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerComposePSCMD(DockerComposePsOptions{
+					Path:        "./testdir/docker-compose.yml",
+					ServiceName: "service",
+				}).Cmd
+			},
+			output: "docker-compose -f ./testdir/docker-compose.yml ps service",
+		},
+		{
+			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
+				Path:     "./testdir/docker-compose.yml",
+				Quiet:       true,
+				ServiceName: "service",
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerComposePSCMD(DockerComposePsOptions{
+					Path:        "./testdir/docker-compose.yml",
+					Quiet:       true,
+					ServiceName: "service",
+				}).Cmd
+			},
+			output: "docker-compose -f ./testdir/docker-compose.yml ps --quiet service",
 		},
 		{
 			descr: `BuildDockerComposeUpCMD(DockerComposeUpOptions{
@@ -254,6 +323,19 @@ func TestBuildCommands(t *testing.T) {
 				}).Cmd
 			},
 			output: "docker inspect test:latest",
+		},
+		{
+			descr: `BuildDockerInspectCMD(DockerInspectOptions{
+				Name: "test",
+				Format: "'{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'",
+			})`,
+			builder: func() string {
+				return Runner.BuildDockerInspectCMD(DockerInspectOptions{
+					Name:   "test",
+					Format: "'{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'",
+				}).Cmd
+			},
+			output: "docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' test",
 		},
 		{
 			descr: `BuildDockerPSCMD(DockerPSOptions{

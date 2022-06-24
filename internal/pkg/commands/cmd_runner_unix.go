@@ -37,12 +37,24 @@ func (cr *UnixCMDRunner) BuildDockerPSCMD(options DockerPSOptions) Command {
 }
 
 func (cr *UnixCMDRunner) BuildDockerComposePSCMD(options DockerComposePsOptions) Command {
-	servs := ""
+	flags := ""
+	name := ""
 	if options.Services {
 		log.Debug(`Command "docker-compose ps" built with "--service" flag.`)
-		servs = " --services"
+		flags += " --services"
+	} else if options.Quiet {
+		log.Debug(`Command "docker-compose ps" built with "--quiet" flag.`)
+		flags += " --quiet"
 	}
-	command := fmt.Sprintf("docker-compose -f %s ps%s --filter status=running", options.Path, servs)
+
+	if options.FilterRunning {
+		flags += " --filter status=running"
+	}
+
+	if options.ServiceName != "" {
+		name += " " + options.ServiceName
+	}
+	command := fmt.Sprintf("docker-compose -f %s ps%s%s", options.Path, flags, name)
 	return Command{Cmd: command}
 }
 
@@ -79,7 +91,11 @@ func (cr *UnixCMDRunner) BuildDockerPullCMD(options DockerBuildOptions) Command 
 }
 
 func (cr *UnixCMDRunner) BuildDockerInspectCMD(options DockerInspectOptions) Command {
-	command := "docker inspect " + options.Name
+	flags := ""
+	if options.Format != "" {
+		flags += " --format " + options.Format
+	}
+	command := fmt.Sprintf("docker inspect%s %s", flags, options.Name)
 	return Command{Cmd: command}
 }
 
