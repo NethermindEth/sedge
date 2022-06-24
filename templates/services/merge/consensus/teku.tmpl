@@ -39,7 +39,7 @@
       - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
       - --Xee-version=${XEE_VERSION}
       - --ee-jwt-secret-file=/tmp/jwt/jwtsecret{{with .CcTTD}}
-      - --Xnetwork-total-terminal-difficulty-override=${CL_TTD}{{end}}
+      - --Xnetwork-total-terminal-difficulty-override=${CC_TTD}{{end}}
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
