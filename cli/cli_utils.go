@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -149,7 +151,7 @@ func runScriptOrExit() (err error) {
 	// notest
 	log.Infof(configs.InstructionsFor, "running docker-compose script")
 	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
-		Path:     generationPath,
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 		Services: *services,
 	})
 	fmt.Printf("\n%s\n\n", upCMD.Cmd)
@@ -197,8 +199,8 @@ func runAndShowContainers(services []string) error {
 
 	// Run docker-compose ps --filter status=running to show script running containers
 	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
-		Services: false,
+		Path:          filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		FilterRunning: true,
 	})
 	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
 	if _, err := commands.Runner.RunCMD(dcpsCMD); err != nil {
@@ -208,9 +210,77 @@ func runAndShowContainers(services []string) error {
 	return nil
 }
 
+type container struct {
+	NetworkSettings networkSettings
+}
+type networkSettings struct {
+	Networks map[string]networks
+}
+type networks struct {
+	IPAddress string
+}
+
+func parseNetwork(js string) (string, error) {
+	var c []container
+	if err := json.NewDecoder(bytes.NewReader([]byte(js))).Decode(&c); err != nil {
+		return "", err
+	}
+	if len(c) == 0 {
+		return "", errors.New(configs.NoOutputDockerInspectError)
+	}
+	if ip := c[0].NetworkSettings.Networks["1click_network"].IPAddress; ip != "" {
+		return ip, nil
+	}
+	return "", errors.New(configs.IPNotFoundError)
+}
+
+func getContainerIP(service string) (ip string, err error) {
+	// Run docker-compose ps --quiet <service> to show service's ID
+	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+		Path:        filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Quiet:       true,
+		ServiceName: service,
+	})
+	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
+	dcpsCMD.GetOutput = true
+	id, err := commands.Runner.RunCMD(dcpsCMD)
+	if err != nil {
+		return ip, fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
+	}
+
+	// Run docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' <id> to get IP address
+	inspectCmd := commands.Runner.BuildDockerInspectCMD(commands.DockerInspectOptions{
+		Name: id,
+	})
+	log.Infof(configs.RunningCommand, inspectCmd.Cmd)
+	inspectCmd.GetOutput = true
+	data, err := commands.Runner.RunCMD(inspectCmd)
+	if err != nil {
+		return
+	}
+
+	ip, err = parseNetwork(data)
+	return
+}
+
 func trackSync(m MonitoringTool, wait time.Duration) error {
 	done := make(chan struct{})
-	statuses := m.TrackSync(done, []string{configs.OnPremiseExecutionURL}, []string{configs.OnPremiseConsensusURL}, time.Minute)
+
+	log.Info(configs.GettingContainersIP)
+	executionIP, errE := getContainerIP(execution)
+	if errE != nil {
+		log.Errorf(configs.GetContainerIPError, execution, errE)
+	}
+	consensusIP, errC := getContainerIP(consensus)
+	if errC != nil {
+		log.Errorf(configs.GetContainerIPError, consensus, errC)
+		if errE != nil {
+			// Both IP were not detected, both containers probably failed
+			return errors.New(configs.UnableToTrackSyncError)
+		}
+	}
+
+	statuses := m.TrackSync(done, []string{"http://" + consensusIP + ":4000"}, []string{"http://" + executionIP + ":8545"}, time.Minute)
 
 	var esynced, csynced bool
 	for s := range statuses {
@@ -233,7 +303,7 @@ func RunValidatorOrExit() error {
 	// notest
 	log.Infof(configs.InstructionsFor, "running validator service of docker-compose script")
 	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
-		Path:     generationPath,
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 		Services: []string{validator},
 	})
 	fmt.Printf("\n%s\n\n", upCMD.Cmd)
