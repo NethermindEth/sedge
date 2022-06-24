@@ -259,3 +259,52 @@ func TestWriteSimpleTable(t *testing.T) {
 		})
 	}
 }
+
+type listNetworksTableTestCase struct {
+	name      string
+	fdOut     *bytes.Buffer
+	data      []string
+	outputDir string
+}
+
+func buildListNetworksTestCase(
+	t *testing.T,
+	name string,
+	data []string,
+	outputDir string,
+) listNetworksTableTestCase {
+	tc := listNetworksTableTestCase{}
+	tc.name = name
+	tc.data = data
+	tc.outputDir = filepath.Join("testdata", "table_tests", "network_tables", outputDir, "output")
+	tc.fdOut = new(bytes.Buffer)
+	return tc
+}
+
+func TestListNetworksTable(t *testing.T) {
+	tcs := []listNetworksTableTestCase{
+		buildListNetworksTestCase(
+			t,
+			"Empty",
+			[]string{},
+			"case_1",
+		),
+		buildListNetworksTestCase(
+			t,
+			"OK, one element",
+			[]string{"A"},
+			"case_2",
+		),
+		buildListNetworksTestCase(
+			t,
+			"OK, several elements",
+			[]string{"A", "B", "C"},
+			"case_3",
+		),
+	}
+
+	for _, tc := range tcs {
+		WriteListNetworksTable(tc.fdOut, tc.data)
+		ensureResult(t, tc.fdOut, tc.outputDir)
+	}
+}
