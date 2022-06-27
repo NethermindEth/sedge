@@ -219,6 +219,9 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 
 	// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service  in the previous step
 	if !utils.Contains(*services, validator) {
+		// Wait for clients to start
+		log.Info(configs.WaitingForNodesToStart)
+		time.Sleep(time.Minute)
 		// Track sync of execution and consensus clients
 		// TODO: Parameterize wait arg of trackSync
 		if err = trackSync(monitor, time.Minute); err != nil {
@@ -283,8 +286,8 @@ func init() {
 		}
 		m, err := posmoni.NewEth2Monitor(
 			posmonidb.EmptyRepository{},
-			&posmoninet.BeaconClient{RetryDuration: time.Second},
-			&posmoninet.ExecutionClient{RetryDuration: time.Second},
+			&posmoninet.BeaconClient{RetryDuration: time.Second * 30},
+			&posmoninet.ExecutionClient{RetryDuration: time.Second * 30},
 			posmoninet.SubscribeOpts{},
 			moniCfg,
 		)

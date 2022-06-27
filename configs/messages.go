@@ -75,4 +75,5 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 	GeneratingMnemonic              = "Generating mnemonic for validator keystore"
 	PreparingTekuDatadir            = "Preparing teku datadirs (must have full read/write/execute permissions to work)"
 	GettingContainersIP             = "Proceding to get execution and consensus containers IP address for the monitoring tool"
+	WaitingForNodesToStart          = "Waiting a minute for nodes to start"
 )
