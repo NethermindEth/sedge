@@ -1,7 +1,7 @@
 {{/* nethermind.tmpl */}}
 {{ define "execution" }}
 # --- Execution Layer - Execution Node - configuration ---
-EC_IMAGE_VERSION=nethermindeth/nethermind
+EC_IMAGE_VERSION={{if .ElImage}} {{.ElImage}} {{else}} nethermindeth/nethermind {{end}}
 NETHERMIND_LOG_LEVEL=INFO
 EC_ENABLED_MODULES=[Web3,Eth,Subscribe,Net,]
 EC_METRICS_ENABLED=false

@@ -2,8 +2,11 @@ package generate
 
 // EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
 type EnvData struct {
+	ElImage             string
 	ElDataDir           string
+	CcImage             string
 	CcDataDir           string
+	VlImage             string
 	VlDataDir           string
 	ExecutionNodeURL    string
 	ConsensusNodeURL    string
@@ -16,8 +19,11 @@ type EnvData struct {
 // GenerationData : Struct Data object for script's generation
 type GenerationData struct {
 	ExecutionClient   string
+	ExecutionImage    string
 	ConsensusClient   string
+	ConsensusImage    string
 	ValidatorClient   string
+	ValidatorImage    string
 	GenerationPath    string
 	Network           string
 	CheckpointSyncUrl string
