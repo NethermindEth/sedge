@@ -16,7 +16,7 @@
     expose:
       - 8545
     command: 
-      - --syncmode=${EL_SYNC_MODE}
+      - --syncmode=${EC_SYNC_MODE}
       - --http
       - --http.addr=0.0.0.0
       - --http.vhosts=*
@@ -30,7 +30,7 @@
       - --${NETWORK}
       - --verbosity
       - ${GETH_LOG_LEVEL}
-      - ${EL_METRICS_ENABLED:-""}
+      - ${EC_METRICS_ENABLED:-""}
       - --metrics.port=8008
     logging:
       driver: "json-file"

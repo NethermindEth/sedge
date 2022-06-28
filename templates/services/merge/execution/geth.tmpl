@@ -9,7 +9,7 @@
       - 1click
     volumes:
       - ${EC_DATA_DIR}:/var/lib/goethereum
-      - ${EL_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+      - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
     ports:
       - "30303:30303/tcp"
       - "30303:30303/udp"
@@ -20,8 +20,8 @@
       - 8551
     command:{{with .ElTTD}} 
       - --override.terminaltotaldifficulty=${TTD}{{end}}
-      - --bootnodes=${EL_BOOTNODES}
-      - --syncmode=${EL_SYNC_MODE}
+      - --bootnodes=${EC_BOOTNODES}
+      - --syncmode=${EC_SYNC_MODE}
       - --http
       - --http.addr=0.0.0.0
       - --http.vhosts=*
@@ -42,7 +42,7 @@
       - --authrpc.addr=0.0.0.0
       - --authrpc.port=8551
       - --authrpc.vhosts=*
-      - ${EL_METRICS_ENABLED:-""}
+      - ${EC_METRICS_ENABLED:-""}
       - --metrics.port=8008
     logging:
       driver: "json-file"

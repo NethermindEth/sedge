@@ -16,25 +16,20 @@
     expose:
       - 8545
     command: 
-      - --config=${NETHERMIND_CONFIG}
+      - --config=${NETWORK}
       - --datadir=/nethermind/data
       - --log=${NETHERMIND_LOG_LEVEL}
-      - --Metrics.Enabled=${NETHERMIND_METRICSCONFIG_ENABLED}
-      - --Metrics.NodeName=${NETHERMIND_METRICSCONFIG_NODENAME}
-      - --Metrics.PushGatewayUrl=${NETHERMIND_METRICSCONFIG_PUSHGATEWAYURL}
+      - --Metrics.Enabled=${EC_METRICS_ENABLED}
+      - --Metrics.NodeName=${EC_NODENAME}
+      - --Metrics.PushGatewayUrl=${NETHERMIND_METRICS_PUSH_GATEWAY_URL}
       - --Metrics.ExposePort=8008
-      - --Sync.SnapSync=${EL_SNAP_SYNC_ENABLED}
+      - --Sync.SnapSync=${EC_SNAP_SYNC_ENABLED}
       - --Init.WebSocketsEnabled=true
       - --JsonRpc.Enabled=true
       - --JsonRpc.Host=0.0.0.0
-      - --JsonRpc.EnabledModules=${NETHERMIND_JSONRPCCONFIG_ENABLEDMODULES}
-      - --HealthChecks.Enabled=${NETHERMIND_HEALTHCHECKSCONFIG_ENABLED}
-      - --Pruning.CacheMb=${NETHERMIND_PRUNINGCONFIG_CACHEMB}
-      - --EthStats.Enabled=${NETHERMIND_ETHSTATSCONFIG_ENABLED}
-      - --EthStats.Server=${NETHERMIND_ETHSTATSCONFIG_SERVER}
-      - --EthStats.Name=${NETHERMIND_ETHSTATSCONFIG_NAME}
-      - --EthStats.Secret=${NETHERMIND_ETHSTATSCONFIG_SECRET}
-      - --EthStats.Contact=${NETHERMIND_ETHSTATSCONFIG_CONTACT}
+      - --JsonRpc.EnabledModules=${EC_ENABLED_MODULES}
+      - --HealthChecks.Enabled=${NETHERMIND_HEALTH_CHECKS_ENABLED}
+      - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}
     logging:
       driver: "json-file"
       options:

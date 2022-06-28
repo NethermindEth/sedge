@@ -9,7 +9,7 @@
       - 1click
     volumes:
       - ${EC_DATA_DIR}:/nethermind/data
-      - ${EL_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+      - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
     ports:
       - "30303:30303/tcp"
       - "30303:30303/udp"
@@ -18,28 +18,23 @@
       - 8545
       - 8551
     command: 
-      - --config=${NETHERMIND_CONFIG}
+      - --config=${NETWORK}
       - --datadir=/nethermind/data
       - --log=${NETHERMIND_LOG_LEVEL}{{with .ElTTD}}
       - --Merge.TerminalTotalDifficulty=${TTD}{{end}}
       - --Merge.TerminalBlockNumber=0
-      - --Metrics.Enabled=${NETHERMIND_METRICSCONFIG_ENABLED}
-      - --Metrics.NodeName=${NETHERMIND_METRICSCONFIG_NODENAME}
-      - --Metrics.PushGatewayUrl=${NETHERMIND_METRICSCONFIG_PUSHGATEWAYURL}
+      - --Metrics.Enabled=${EC_METRICS_ENABLED}
+      - --Metrics.NodeName=${EC_NODENAME}
+      - --Metrics.PushGatewayUrl=${NETHERMIND_METRICS_PUSH_GATEWAY_URL}
       - --Metrics.ExposePort=8008
-      - --Sync.SnapSync=${EL_SNAP_SYNC_ENABLED}
+      - --Sync.SnapSync=${EC_SNAP_SYNC_ENABLED}
       - --JsonRpc.Enabled=true
       - --JsonRpc.Host=0.0.0.0
-      - --JsonRpc.EnabledModules=${NETHERMIND_JSONRPCCONFIG_ENABLEDMODULES}
+      - --JsonRpc.EnabledModules=${EC_ENABLED_MODULES}
       - --JsonRpc.JwtSecretFile=/tmp/jwt/jwtsecret
       - --JsonRpc.AdditionalRpcUrls=["http://0.0.0.0:8551|http;ws|net;eth;subscribe;engine;web3;client"]
-      - --HealthChecks.Enabled=${NETHERMIND_HEALTHCHECKSCONFIG_ENABLED}
-      - --Pruning.CacheMb=${NETHERMIND_PRUNINGCONFIG_CACHEMB}
-      - --EthStats.Enabled=${NETHERMIND_ETHSTATSCONFIG_ENABLED}
-      - --EthStats.Server=${NETHERMIND_ETHSTATSCONFIG_SERVER}
-      - --EthStats.Name=${NETHERMIND_ETHSTATSCONFIG_NAME}
-      - --EthStats.Secret=${NETHERMIND_ETHSTATSCONFIG_SECRET}
-      - --EthStats.Contact=${NETHERMIND_ETHSTATSCONFIG_CONTACT}
+      - --HealthChecks.Enabled=${NETHERMIND_HEALTH_CHECKS_ENABLED}
+      - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}
     logging:
       driver: "json-file"
       options:
