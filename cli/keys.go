@@ -140,6 +140,26 @@ func passwordPrompt() string {
 		return ""
 	}
 
+	validate = func(input string) error {
+		if input != result {
+			return errors.New(configs.KeystorePasswordRetryError)
+		}
+		return nil
+	}
+
+	prompt = promptui.Prompt{
+		Label:    "Please re-enter the password. Press Ctrl+C to retry",
+		Validate: validate,
+		Mask:     '*',
+	}
+
+	_, err = prompt.Run()
+
+	if err != nil {
+		log.Errorf(configs.PromptFailedError, err)
+		return passwordPrompt()
+	}
+
 	return result
 }
 

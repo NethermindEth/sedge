@@ -46,6 +46,7 @@ const (
 	GetPWDError                       = "something failed trying to get current working directory. Error: %v"
 	InvalidFeeRecipientError          = "provided Fee Recipient is not a valid Ethereum address"
 	KeystorePasswordError             = "keystore password must have more than 8 characters"
+	KeystorePasswordRetryError        = "the two entered keystore passwords do not match"
 	CreatingKeystorePasswordError     = "failed to create keystore password file. Error: %v"
 	GetContainerIPError               = "failed to get docker internal IP address of docker-compose service %s. Error: %v"
 	TekuDatadirError                  = "failed to create teku %s datadir with 777 permissions. Error :%v"
