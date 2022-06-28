@@ -248,7 +248,7 @@ func getContainerIP(service string) (ip string, err error) {
 		return ip, fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
 	}
 
-	// Run docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' <id> to get IP address
+	// Run docker inspect <id> to get IP address
 	inspectCmd := commands.Runner.BuildDockerInspectCMD(commands.DockerInspectOptions{
 		Name: id,
 	})

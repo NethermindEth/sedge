@@ -18,6 +18,78 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var inspectOut = `
+[
+	{
+		"NetworkSettings": {
+			"Bridge": "",
+			"SandboxID": "56e2c759c33315c9de009bd70aac0fdeb9367549303433debb71edff8dd4db39",
+			"HairpinMode": false,
+			"LinkLocalIPv6Address": "",
+			"LinkLocalIPv6PrefixLen": 0,
+			"Ports": {
+				"30303/tcp": [
+					{
+						"HostIp": "0.0.0.0",
+						"HostPort": "30303"
+					}
+				],
+				"30303/udp": [
+					{
+						"HostIp": "0.0.0.0",
+						"HostPort": "30303"
+					}
+				],
+				"8008/tcp": [
+					{
+						"HostIp": "0.0.0.0",
+						"HostPort": "8008"
+					}
+				],
+				"8545/tcp": [
+					{
+						"HostIp": "0.0.0.0",
+						"HostPort": "8560"
+					}
+				]
+			},
+			"SandboxKey": "/var/run/docker/netns/56e2c759c333",
+			"SecondaryIPAddresses": null,
+			"SecondaryIPv6Addresses": null,
+			"EndpointID": "",
+			"Gateway": "",
+			"GlobalIPv6Address": "",
+			"GlobalIPv6PrefixLen": 0,
+			"IPAddress": "",
+			"IPPrefixLen": 0,
+			"IPv6Gateway": "",
+			"MacAddress": "",
+			"Networks": {
+				"1click_network": {
+					"IPAMConfig": null,
+					"Links": null,
+					"Aliases": [
+						"execution-client",
+						"execution",
+						"babf61f2c52a"
+					],
+					"NetworkID": "b4bb0c21aa1c9495d08309f8f7f4f2fb5a493fd925c880cb146045aafb2f4390",
+					"EndpointID": "7832cdd23f1f9f70e38576f8088da61010e057bffb0b98c83bd391065d703ed9",
+					"Gateway": "192.168.128.1",
+					"IPAddress": "192.168.128.3",
+					"IPPrefixLen": 20,
+					"IPv6Gateway": "",
+					"GlobalIPv6Address": "",
+					"GlobalIPv6PrefixLen": 0,
+					"MacAddress": "02:42:c0:a8:80:03",
+					"DriverOpts": null
+				}
+			}
+		}
+	}
+]
+`
+
 type cliCmdTestCase struct {
 	name           string
 	configPath     string
@@ -130,6 +202,7 @@ func prepareCliCmd(tc cliCmdTestCase) error {
 	initMonitor(func() MonitoringTool {
 		return tc.monitor
 	})
+	waitingTime = time.Millisecond
 	return nil
 }
 
@@ -150,6 +223,12 @@ func buildCliTestCase(t *testing.T, name, caseTestDataDir string, args cliCmdArg
 	// TODO: allow runner edition
 	tc.runner = &test.SimpleCMDRunner{
 		SRunCMD: func(c commands.Command) (string, error) {
+			// For getContainerIP logic
+			if strings.Contains(c.Cmd, "ps --quiet") {
+				return "666", nil
+			} else if strings.Contains(c.Cmd, "docker inspect 666") {
+				return inspectOut, nil
+			}
 			return "", nil
 		},
 		SRunBash: func(bs commands.BashScript) (string, error) {

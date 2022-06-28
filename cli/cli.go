@@ -48,6 +48,7 @@ var (
 	y                 bool
 	services          *[]string
 	fallbackEL        *[]string
+	waitingTime       time.Duration
 )
 
 const (
@@ -221,7 +222,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	if !utils.Contains(*services, validator) {
 		// Wait for clients to start
 		log.Info(configs.WaitingForNodesToStart)
-		time.Sleep(time.Minute)
+		time.Sleep(waitingTime)
 		// Track sync of execution and consensus clients
 		// TODO: Parameterize wait arg of trackSync
 		if err = trackSync(monitor, time.Minute); err != nil {
@@ -297,4 +298,6 @@ func init() {
 
 		return m
 	})
+
+	waitingTime = time.Minute
 }
