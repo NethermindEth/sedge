@@ -17,6 +17,7 @@ package cli
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -31,8 +32,9 @@ import (
 )
 
 var (
-	path             string
-	existingMnemonic bool
+	path                  string
+	eth1WithdrawalAddress string
+	existingMnemonic      bool
 )
 
 var (
@@ -73,6 +75,11 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 		}
 		log.Info(configs.DependenciesOK)
 
+		// Prompt for eth1WithdrawalAddress
+		if eth1WithdrawalAddress == "" {
+			eth1WithdrawalPrompt()
+		}
+
 		// Get keystore password
 		password := passwordPrompt()
 
@@ -83,7 +90,14 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 		}
 
 		keystorePath := filepath.Join(path, "keystore", "validator_keys")
-		if err := utils.GenerateValidatorKey(existingMnemonic, network, keystorePath, password); err != nil {
+		data := utils.ValidatorKeyData{
+			Existing:              existingMnemonic,
+			Network:               network,
+			Path:                  keystorePath,
+			Password:              password,
+			Eth1WithdrawalAddress: eth1WithdrawalAddress,
+		}
+		if err := utils.GenerateValidatorKey(data); err != nil {
 			log.Fatalf(configs.GeneratingKeystoreError, err)
 		}
 
@@ -114,6 +128,8 @@ func init() {
 	keysCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, prater, ropsten, sepolia etc.")
 
 	keysCmd.Flags().StringVarP(&path, "path", "p", pwd, "Absolute path to keystore folder. e.g. /home/user/keystore")
+
+	keysCmd.Flags().StringVar(&eth1WithdrawalAddress, "eth1WithdrawalAddress", "", "If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
 
 	keysCmd.Flags().BoolVarP(&existingMnemonic, "existing", "e", false, "Use existing mnemonic")
 }
@@ -194,4 +210,28 @@ func emptyKeystore() bool {
 	_, err = f.Readdirnames(1)
 	// Either not empty or error, suits both cases
 	return err == io.EOF
+}
+
+func eth1WithdrawalPrompt() error {
+	// notest
+	validate := func(input string) error {
+		if input != "" && !utils.IsAddress(input) {
+			return errors.New("invalid ETH1 address")
+		}
+		return nil
+	}
+
+	prompt := promptui.Prompt{
+		Label:    "Please enter a Eth1 address to be used to create the withdrawal credentials. You can leave it blank and press enter.",
+		Validate: validate,
+	}
+
+	result, err := prompt.Run()
+
+	if err != nil {
+		return fmt.Errorf(configs.PromptFailedError, err)
+	}
+
+	eth1WithdrawalAddress = result
+	return nil
 }

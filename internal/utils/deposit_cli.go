@@ -19,16 +19,14 @@ The key can be generated using a new or existing mnemonic.
 Key's path is set to $(pwd)/keystore.
 
 params :-
-a. existing bool
-True if the key is to be generated using an existing mnemonic. False if the key is to be generated using a new mnemonic.
-b. network string
-Target network.
+a. arg ValidatorKeyData
+Data for keystore generation
 
 returns :-
 a. error
 Error if any
 */
-func GenerateValidatorKey(existing bool, network, path, password string) (err error) {
+func GenerateValidatorKey(arg ValidatorKeyData) (err error) {
 	// Check if image already exists
 	inspectCmd := commands.Runner.BuildDockerInspectCMD(commands.DockerInspectOptions{
 		Name: configs.DepositCLIDockerImageName,
@@ -56,7 +54,7 @@ func GenerateValidatorKey(existing bool, network, path, password string) (err er
 
 	// Get the template file
 	var rawTmp []byte
-	if existing {
+	if arg.Existing {
 		rawTmp, err = templates.DepositCLI.ReadFile("deposit-cli/existing.tmpl")
 	} else {
 		rawTmp, err = templates.DepositCLI.ReadFile("deposit-cli/new.tmpl")
@@ -72,16 +70,17 @@ func GenerateValidatorKey(existing bool, network, path, password string) (err er
 		return
 	}
 
-	lenPass := make([]struct{}, len(password))
-	for i := 0; i < len(password); i++ {
+	lenPass := make([]struct{}, len(arg.Password))
+	for i := 0; i < len(arg.Password); i++ {
 		lenPass[i] = struct{}{}
 	}
 
 	data := DepositCLI{
-		Network: network,
-		Path:    path,
-		LenPass: lenPass,
-		Image:   configs.DepositCLIDockerImageName,
+		Network:               arg.Network,
+		Path:                  arg.Path,
+		LenPass:               lenPass,
+		Image:                 configs.DepositCLIDockerImageName,
+		Eth1WithdrawalAddress: arg.Eth1WithdrawalAddress,
 	}
 
 	// Get the command as a string with password hidden to print it
@@ -93,7 +92,7 @@ func GenerateValidatorKey(existing bool, network, path, password string) (err er
 	log.Infof(configs.RunningCommand, cmd.String())
 
 	// Get the command as a string with password to execute it
-	data.Password = password
+	data.Password = arg.Password
 	cmd.Reset()
 	err = tmp.Execute(&cmd, data)
 	if err != nil {

@@ -19,4 +19,20 @@ type DepositCLI struct {
 	LenPass []struct{}
 	// Image : staking-deposit-cli docker image
 	Image string
+	// Eth1WithdrawalAddress : Address to be used to create withdrawal credentials
+	Eth1WithdrawalAddress string
+}
+
+// ValidatorKeyData : Struct Data for Keystore generation
+type ValidatorKeyData struct {
+	// Existing: True if a existing mnemonic is being used. False to create and use a new one.
+	Existing bool
+	// Network : Target network
+	Network string
+	// Path : Path to the keystore folder
+	Path string
+	// Password : Keystore password
+	Password string
+	// Eth1WithdrawalAddress : Address to be used to create withdrawal credentials
+	Eth1WithdrawalAddress string
 }
