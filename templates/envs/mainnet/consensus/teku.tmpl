@@ -1,9 +1,10 @@
 {{/* teku.tmpl */}}
+{{ define "consensus" }}
 # --- Consensus Layer - Beacon Node - configuration ---
 CC_PEER_COUNT=50
 CC_LOG_LEVEL=info
-NETWORK=mainnet
 EC_NODE={{.ExecutionNodeURL}}
 CC_INSTANCE_NAME=Teku
 CC_IMAGE_VERSION=consensys/teku:latest
-CC_DATA_DIR={{.DataDir}}
+CC_DATA_DIR={{.CcDataDir}}
+{{ end }}

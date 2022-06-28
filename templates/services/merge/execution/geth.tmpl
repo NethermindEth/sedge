@@ -19,7 +19,7 @@
       - 8546
       - 8551
     command:{{with .ElTTD}} 
-      - --override.terminaltotaldifficulty=${EL_TTD}{{end}}
+      - --override.terminaltotaldifficulty=${TTD}{{end}}
       - --bootnodes=${EL_BOOTNODES}
       - --syncmode=${EL_SYNC_MODE}
       - --http
@@ -31,7 +31,7 @@
       - --datadir=/var/lib/goethereum
       - --port=30303
       - --http.port=8545
-      - --${GETH_NETWORK}
+      - --${NETWORK}
       - --verbosity
       - ${GETH_LOG_LEVEL}
       - --ws

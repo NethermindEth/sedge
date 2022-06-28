@@ -1,4 +1,5 @@
 {{/* nethermind.tmpl */}}
+{{ define "execution" }}
 # --- Execution Layer - Execution Node - configuration ---
 EC_IMAGE_VERSION=nethermindeth/nethermind
 NETHERMIND_CONFIG=kiln
@@ -14,7 +15,8 @@ NETHERMIND_ETHSTATSCONFIG_SERVER=http://localhost:3000/api
 NETHERMIND_ETHSTATSCONFIG_NAME=Nethermind
 NETHERMIND_ETHSTATSCONFIG_SECRET=secret
 NETHERMIND_ETHSTATSCONFIG_CONTACT=hello@nethermind.io
-EC_DATA_DIR={{.DataDir}}
+EC_DATA_DIR={{.ElDataDir}}
 EL_SNAP_SYNC_ENABLED=true
 EL_TTD=20000000000000
 EL_JWT_SECRET_PATH={{.JWTSecretPath}}
+{{ end }}

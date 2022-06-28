@@ -10,7 +10,7 @@
       - ${VL_DATA_DIR}:/var/lib/lighthouse
     command: |
       lighthouse account validator import
-      --network=${VL_NETWORK}
+      --network=${NETWORK}
       --password-file=/keystore/keystore_password.txt
       --reuse-password
       --directory /keystore
@@ -31,10 +31,9 @@
     command:
       - lighthouse
       - vc
-      - --network=${VL_NETWORK}
+      - --network=${NETWORK}
       - --beacon-nodes=${CC_NODE}
       - --graffiti=${GRAFFITI}
-      - --network=${NETWORK}
       - --debug-level=${VL_LOG_LEVEL}
       - --validators-dir=/data/validators
       - --metrics

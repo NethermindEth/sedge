@@ -1,4 +1,5 @@
 {{/* prysm.tmpl */}}
+{{ define "validator" }}
 # --- Consensus Layer - Validator Node - configuration ---
 CC_NODE={{.ConsensusNodeURL}}
 GRAFFITI={{.ExecutionEngineName}}
@@ -7,5 +8,6 @@ VL_INSTANCE_NAME=PrysmValidator
 VL_IMAGE_VERSION=gcr.io/prysmaticlabs/prysm/validator:stable
 KEYSTORE_DIR={{.KeystoreDir}}
 WALLET_DIR=./wallet
-VL_DATA_DIR={{.DataDir}}
+VL_DATA_DIR={{.VlDataDir}}
 CONFIG_URL=https://config.kiln.themerge.dev/cl/genesis/config.yaml
+{{ end }}

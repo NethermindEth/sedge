@@ -1,8 +1,9 @@
 {{/* geth.tmpl */}}
+{{ define "execution" }}
 # --- Execution Layer - Execution Node - configuration ---
 EC_IMAGE_VERSION=ethereum/client-go
-GETH_NETWORK=mainnet
 GETH_LOG_LEVEL=3
-EC_DATA_DIR={{.DataDir}}
+EC_DATA_DIR={{.ElDataDir}}
 EL_METRICS_ENABLED="--metrics"
 EL_SYNC_MODE=snap
+{{ end }}

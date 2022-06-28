@@ -19,7 +19,7 @@
     command:
       - --log-destination=CONSOLE
       - --logging=${CC_LOG_LEVEL}
-      - --network=${CC_NETWORK}
+      - --network=${NETWORK}
       - --p2p-discovery-bootnodes=${CL_BOOTNODES}
       - --p2p-enabled=true
       - --p2p-port=9000
@@ -39,7 +39,7 @@
       - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
       - --Xee-version=${XEE_VERSION}
       - --ee-jwt-secret-file=/tmp/jwt/jwtsecret{{with .CcTTD}}
-      - --Xnetwork-total-terminal-difficulty-override=${CC_TTD}{{end}}
+      - --Xnetwork-total-terminal-difficulty-override=${TTD}{{end}}
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0

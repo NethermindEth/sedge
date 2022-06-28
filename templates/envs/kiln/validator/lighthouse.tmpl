@@ -1,4 +1,5 @@
 {{/* lighthouse.tmpl */}}
+{{ define "validator" }}
 # --- Consensus Layer - Validator Node - configuration ---
 CC_NODE={{.ConsensusNodeURL}}
 GRAFFITI={{.ExecutionEngineName}}
@@ -6,5 +7,5 @@ VL_LOG_LEVEL=info
 VL_INSTANCE_NAME=LighthouseValidator
 VL_IMAGE_VERSION=sigp/lighthouse:latest
 KEYSTORE_DIR={{.KeystoreDir}}
-VL_DATA_DIR={{.DataDir}}
-VL_NETWORK=kiln
+VL_DATA_DIR={{.VlDataDir}}
+{{ end }}

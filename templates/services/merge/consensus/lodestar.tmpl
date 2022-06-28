@@ -21,11 +21,11 @@
     command: 
       - beacon 
       - --rootDir=/var/lib/lodestar/consensus
-      - --network=${CC_NETWORK}
+      - --network=${NETWORK}
       - --eth1.enabled=true
       - --eth1.providerUrls=${EC_NODE}:8545
       - --execution.urls=${EC_NODE}:8551{{with .CcTTD}}
-      - --terminal-total-difficulty-override=${CC_TTD}{{end}}
+      - --terminal-total-difficulty-override=${TTD}{{end}}
       - --logFile=/var/lib/lodestart/consensus/logs/beacon.log 
       - --logLevelFile=${CC_LOG_LEVEL}{{with .FeeRecipient}}
       - --chain.defaultFeeRecipient=${CL_FEE_RECIPIENT}{{end}}

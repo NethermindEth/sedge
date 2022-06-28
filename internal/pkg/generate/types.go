@@ -1,24 +1,15 @@
 package generate
 
-// ExecutionEnv : Struct Data object to be applied to execution docker-compose script environment template
-type ExecutionEnv struct {
-	DataDir       string
-	JWTSecretPath string
-}
-
-// ConsensusEnv : Struct Data object to be applied to consensus docker-compose script environment template
-type ConsensusEnv struct {
-	ExecutionNodeURL string
-	DataDir          string
-	FeeRecipient     string
-	JWTSecretPath    string
-}
-
-// ValidatorEnv : Struct Data object to be applied to validator docker-compose script environment template
-type ValidatorEnv struct {
+// EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
+type EnvData struct {
+	ElDataDir           string
+	CcDataDir           string
+	VlDataDir           string
+	ExecutionNodeURL    string
 	ConsensusNodeURL    string
+	FeeRecipient        string
+	JWTSecretPath       string
 	ExecutionEngineName string
-	DataDir             string
 	KeystoreDir         string
 }
 
