@@ -38,7 +38,7 @@
       - --ee-endpoint=${EC_NODE}:8551{{with .FeeRecipient}}
       - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
       - --Xee-version=${XEE_VERSION}
-      - --ee-jwt-secret-file=/tmp/jwt/jwtsecret{{with .CcTTD}}
+      - --ee-jwt-secret-file=/tmp/jwt/jwtsecret{{with .TTD}}
       - --Xnetwork-total-terminal-difficulty-override=${TTD}{{end}}
       - --metrics-enabled=true
       - --metrics-host-allowlist=*

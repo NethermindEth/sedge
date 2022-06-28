@@ -95,12 +95,8 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		}
 	}
 
-	// Check for TTD in envs
-	elTTD, err := env.CheckVariable(env.ReTTD, gd.Network, "execution", gd.ExecutionClient)
-	if err != nil {
-		return err
-	}
-	ccTTD, err := env.CheckVariable(env.ReTTD, gd.Network, "consensus", gd.ConsensusClient)
+	// Check for TTD in env base template
+	TTD, err := env.CheckVariableBase(env.ReTTD, gd.Network)
 	if err != nil {
 		return err
 	}
@@ -116,8 +112,7 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 	}
 
 	data := DockerComposeData{
-		ElTTD:             elTTD,
-		CcTTD:             ccTTD,
+		TTD:               TTD,
 		CcPrysmCfg:        ccPrysmCfg,
 		VlPrysmCfg:        vlPrysmCfg,
 		CheckpointSyncUrl: gd.CheckpointSyncUrl,

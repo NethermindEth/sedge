@@ -28,8 +28,7 @@ type GenerationData struct {
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
-	ElTTD             bool
-	CcTTD             bool
+	TTD               bool
 	CcPrysmCfg        bool
 	VlPrysmCfg        bool
 	CheckpointSyncUrl string

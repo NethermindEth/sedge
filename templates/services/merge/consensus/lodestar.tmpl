@@ -24,7 +24,7 @@
       - --network=${NETWORK}
       - --eth1.enabled=true
       - --eth1.providerUrls=${EC_NODE}:8545
-      - --execution.urls=${EC_NODE}:8551{{with .CcTTD}}
+      - --execution.urls=${EC_NODE}:8551{{with .TTD}}
       - --terminal-total-difficulty-override=${TTD}{{end}}
       - --logFile=/var/lib/lodestart/consensus/logs/beacon.log 
       - --logLevelFile=${CC_LOG_LEVEL}{{with .FeeRecipient}}

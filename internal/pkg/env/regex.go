@@ -3,6 +3,6 @@ package env
 import "regexp"
 
 var (
-	ReTTD    = regexp.MustCompile(`(.*)_TTD=(.*)`)
+	ReTTD    = regexp.MustCompile(`TTD=(.*)`)
 	ReCONFIG = regexp.MustCompile(`CONFIG_URL=(.*)`)
 )
