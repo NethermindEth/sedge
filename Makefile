@@ -12,8 +12,8 @@ compile-linux: ## compile:
 run: ## run
 	@./build/1click
 
-run-cli: compile ## run randomized cli
-	@./build/1click cli -r --config ./config.yaml
+run-cli: compile ## run cli
+	@./build/1click cli --config ./config.yaml
 
 test: ## run tests
 	@mkdir -p coverage
