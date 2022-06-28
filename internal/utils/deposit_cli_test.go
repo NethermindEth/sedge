@@ -140,7 +140,14 @@ func TestGenerateValidatorKey(t *testing.T) {
 			})
 			descr := fmt.Sprintf("GenerateValidatorKey(%t, %s, %s, %s)", tc.existing, tc.network, tc.path, "password")
 
-			err := GenerateValidatorKey(tc.existing, tc.network, tc.path, "password")
+			data := ValidatorKeyData{
+				Existing:              tc.existing,
+				Network:               tc.network,
+				Path:                  tc.path,
+				Password:              "password",
+				Eth1WithdrawalAddress: "0x5c00ABEf07604C59Ac72E859E5F93D5ab8546F83",
+			}
+			err := GenerateValidatorKey(data)
 			if tc.isErr && err == nil {
 				t.Errorf("%s expected to fail.", descr)
 			} else if !tc.isErr && err != nil {
