@@ -36,8 +36,11 @@ import (
 
 var (
 	executionName     string
+	executionImage    string
 	consensusName     string
+	consensusImage    string
 	validatorName     string
+	validatorImage    string
 	generationPath    string
 	checkpointSyncUrl string
 	network           string
@@ -127,10 +130,32 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 		return errors.New(configs.InvalidFeeRecipientError)
 	}
 
+	// Prepare custom images
+	if executionName != "" {
+		executionParts := strings.Split(executionName, ":")
+		executionName = executionParts[0]
+		executionImage = strings.Join(executionParts[1:], ":")
+	}
+	if consensusName != "" {
+		consensusParts := strings.Split(consensusName, ":")
+		consensusName = consensusParts[0]
+		consensusImage = strings.Join(consensusParts[1:], ":")
+	}
+	if validatorName != "" {
+		validatorParts := strings.Split(validatorName, ":")
+		validatorName = validatorParts[0]
+		validatorImage = strings.Join(validatorParts[1:], ":")
+	}
+
 	return nil
 }
 
 func runCliCmd(cmd *cobra.Command, args []string) []error {
+	// Show warnings if custom images are used
+	if executionImage != "" || consensusImage != "" || validatorImage != "" {
+		log.Warn(configs.CustomImagesWarning)
+	}
+
 	// Get all clients: supported + configured
 	c := clients.ClientInfo{Network: network}
 	clientsMap, errors := c.Clients([]string{execution, consensus, validator})
@@ -181,8 +206,11 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	// Generate docker-compose scripts
 	gd := generate.GenerationData{
 		ExecutionClient:   combinedClients.Execution.Name,
+		ExecutionImage:    executionImage,
 		ConsensusClient:   combinedClients.Consensus.Name,
+		ConsensusImage:    consensusImage,
 		ValidatorClient:   combinedClients.Validator.Name,
+		ValidatorImage:    validatorImage,
 		GenerationPath:    generationPath,
 		Network:           network,
 		CheckpointSyncUrl: checkpointSyncUrl,
@@ -250,11 +278,11 @@ func init() {
 	rootCmd.AddCommand(cliCmd)
 
 	// Local flags
-	cliCmd.Flags().StringVarP(&executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon")
+	cliCmd.Flags().StringVarP(&executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name.")
 
-	cliCmd.Flags().StringVarP(&consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus")
+	cliCmd.Flags().StringVarP(&consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name.")
 
-	cliCmd.Flags().StringVarP(&validatorName, "validator", "v", "", "Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus")
+	cliCmd.Flags().StringVarP(&validatorName, "validator", "v", "", "Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name.")
 
 	cliCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
 

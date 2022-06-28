@@ -186,8 +186,11 @@ func generateEnvFile(gd GenerationData) (err error) {
 
 	// TODO: Use OS wise delimiter for these data structs
 	data := EnvData{
+		ElImage:             gd.ExecutionImage,
 		ElDataDir:           configs.ExecutionDefaultDataDir,
+		CcImage:             gd.ConsensusImage,
 		CcDataDir:           configs.ConsensusDefaultDataDir,
+		VlImage:             gd.ValidatorImage,
 		VlDataDir:           configs.ValidatorDefaultDataDir,
 		ExecutionNodeURL:    configs.OnPremiseExecutionURL,
 		ConsensusNodeURL:    configs.OnPremiseConsensusURL,
