@@ -5,7 +5,7 @@ CC_NODE={{.ConsensusNodeURL}}
 GRAFFITI={{.ExecutionEngineName}}
 VL_LOG_LEVEL=info
 VL_INSTANCE_NAME=LighthouseValidator
-VL_IMAGE_VERSION={{if .VlImage}} {{.VlImage}} {{else}} sigp/lighthouse:latest {{end}}
+VL_IMAGE_VERSION={{if .VlImage}}{{.VlImage}}{{else}}sigp/lighthouse:latest{{end}}
 KEYSTORE_DIR={{.KeystoreDir}}
 VL_DATA_DIR={{.VlDataDir}}
 {{ end }}

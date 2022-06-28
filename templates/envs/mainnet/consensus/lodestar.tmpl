@@ -5,6 +5,6 @@ CC_PEER_COUNT=50
 CC_LOG_LEVEL=info
 EC_NODE={{.ExecutionNodeURL}}
 CC_INSTANCE_NAME=Lodestar
-CC_IMAGE_VERSION={{if .CcImage}} {{.CcImage}} {{else}} chainsafe/lodestar {{end}}
+CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}chainsafe/lodestar{{end}}
 CC_DATA_DIR={{.CcDataDir}}
 {{ end }}
