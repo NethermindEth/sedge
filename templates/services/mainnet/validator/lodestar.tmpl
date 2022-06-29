@@ -22,7 +22,7 @@
     networks:
       - 1click
     ports:
-      - "5056:5056"
+      - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
       - ${VL_DATA_DIR}:/var/lib/lodestar/validator
       - ${KEYSTORE_DIR}:/var/lib/lodestar/keystore

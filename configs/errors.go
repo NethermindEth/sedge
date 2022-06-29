@@ -53,4 +53,6 @@ const (
 	UnableToTrackSyncError            = "it seems both execution and consensus containers are down. It was not possible to get internal IP address for the monitoring tool to be able to track sync progress. Check the logs using '1click logs' to find the problem"
 	NoOutputDockerInspectError        = "no output from docker inspect"
 	IPNotFoundError                   = "could not find IP address"
+	PortOccupationError               = "port occupation check failed. Error: %v"
+	DefaultPortEmptyError             = "default %s can not be empty"
 )

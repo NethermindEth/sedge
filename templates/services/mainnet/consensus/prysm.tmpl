@@ -10,9 +10,9 @@
     volumes:
       - ${CC_DATA_DIR}:/var/lib/prysm
     ports:
-      - "13000:13000/tcp"
-      - "12000:12000/udp"
-      - "5054:5054/tcp"
+      - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
+      - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
+      - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"
     expose:
       - 4000
     command:

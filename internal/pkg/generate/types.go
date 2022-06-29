@@ -42,6 +42,11 @@ type DockerComposeData struct {
 	VlPrysmCfg        bool
 	CheckpointSyncUrl string
 	FeeRecipient      string
+	ElDiscoveryPort   string
+	ElMetricsPort     string
+	ClDiscoveryPort   string
+	ClMetricsPort     string
+	VlMetricsPort     string
 	FallbackELUrls    []string
 	ElExtraFlags      []string
 	ClExtraFlags      []string

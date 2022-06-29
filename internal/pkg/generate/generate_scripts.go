@@ -8,6 +8,7 @@ import (
 
 	"github.com/NethermindEth/1click/configs"
 	"github.com/NethermindEth/1click/internal/pkg/env"
+	"github.com/NethermindEth/1click/internal/utils"
 	"github.com/NethermindEth/1click/templates"
 	log "github.com/sirupsen/logrus"
 )
@@ -111,12 +112,30 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		return err
 	}
 
+	// Check for port occupation
+	defaultsPorts := map[string]string{
+		"ELDiscovery": configs.DefaultDiscoveryPortEL,
+		"ELMetrics":   configs.DefaultMetricsPortEL,
+		"CLDiscovery": configs.DefaultDiscoveryPortCL,
+		"CLMetrics":   configs.DefaultMetricsPortCL,
+		"VLMetrics":   configs.DefaultMetricsPortVL,
+	}
+	ports, err := utils.AssingPorts("localhost", defaultsPorts)
+	if err != nil {
+		return fmt.Errorf(configs.PortOccupationError, err)
+	}
+
 	data := DockerComposeData{
 		TTD:               TTD,
 		CcPrysmCfg:        ccPrysmCfg,
 		VlPrysmCfg:        vlPrysmCfg,
 		CheckpointSyncUrl: gd.CheckpointSyncUrl,
 		FeeRecipient:      gd.FeeRecipient,
+		ElDiscoveryPort:   ports["ELDiscovery"],
+		ElMetricsPort:     ports["ELMetrics"],
+		ClDiscoveryPort:   ports["CLDiscovery"],
+		ClMetricsPort:     ports["CLMetrics"],
+		VlMetricsPort:     ports["VLMetrics"],
 		FallbackELUrls:    gd.FallbackELUrls,
 		ElExtraFlags:      gd.ElExtraFlags,
 		ClExtraFlags:      gd.ClExtraFlags,

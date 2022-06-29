@@ -2,7 +2,14 @@ package utils
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"strconv"
+	"strings"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSkipLines(t *testing.T) {
@@ -91,6 +98,115 @@ func TestIsAddress(t *testing.T) {
 		t.Run(fmt.Sprintf("IsAddress(%s)", tc.input), func(t *testing.T) {
 			if got := IsAddress(tc.input); got != tc.want {
 				t.Errorf("got != want. Expected %v, got %v", tc.want, tc.input)
+			}
+		})
+	}
+}
+
+func TestPortAvailable(t *testing.T) {
+	server := httptest.NewServer(
+		http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			rw.WriteHeader(http.StatusOK)
+		}))
+	defer server.Close()
+	split := strings.Split(server.URL, ":")
+	host, port := split[1][2:], split[2]
+
+	tcs := []struct {
+		name string
+		host string
+		port string
+		want bool
+	}{
+		{
+			"Test case 1, good host and unavailable port",
+			host, port,
+			false,
+		},
+		{
+			"Test case 2, bad host and port",
+			"b@dh0$t", port,
+			true,
+		},
+		{
+			"Test case 3, good host and bad port",
+			host, "666666666",
+			true,
+		},
+		{
+			"Test case 4, good host and available port",
+			"localhost", "9999",
+			true,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := portAvailable(tc.host, tc.port, time.Millisecond*200); tc.want != got {
+				t.Errorf("portAvailable(%s, %s, %s) failed; expected: %v, got: %v", tc.host, tc.port, "200ms", tc.want, got)
+			}
+		})
+	}
+}
+
+func TestAssingPorts(t *testing.T) {
+	server := httptest.NewServer(
+		http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			rw.WriteHeader(http.StatusOK)
+		}))
+	defer server.Close()
+	split := strings.Split(server.URL, ":")
+	host, port := split[1][2:], split[2]
+	portN, _ := strconv.Atoi(port)
+
+	tcs := []struct {
+		name     string
+		host     string
+		defaults map[string]string
+		want     map[string]string
+		isErr    bool
+	}{
+		{
+			"Test case 1, good host and defaults",
+			host,
+			map[string]string{"EL": "8545", "CL": port},
+			map[string]string{"EL": "8545", "CL": strconv.Itoa(portN + 1)},
+			false,
+		},
+		{
+			"Test case 2, good host and bad defaults",
+			host,
+			map[string]string{"EL": "8545", "CL": ""},
+			map[string]string{},
+			true,
+		},
+		{
+			"Test case 3, good host and bad defaults",
+			host,
+			map[string]string{"CL": "", "EL": "8545"},
+			map[string]string{},
+			true,
+		},
+		{
+			"Test case 4, bad host and good defaults",
+			"b@dh0$t",
+			map[string]string{"CL": "9000", "EL": "8545"},
+			map[string]string{"CL": "9000", "EL": "8545"},
+			false,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := AssingPorts(tc.host, tc.defaults)
+
+			descr := fmt.Sprintf("AssingPorts(%s, %+v)", tc.host, tc.defaults)
+			if err = CheckErr(descr, tc.isErr, err); err != nil {
+				t.Error(err)
+			}
+
+			if err != nil {
+				assert.Equal(t, tc.want, got, descr)
 			}
 		})
 	}

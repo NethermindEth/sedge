@@ -11,9 +11,9 @@
       - ${EC_DATA_DIR}:/nethermind/data
       - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
     ports:
-      - "30303:30303/tcp"
-      - "30303:30303/udp"
-      - "8008:8008/tcp"
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
+      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"
     expose:
       - 8545
       - 8551

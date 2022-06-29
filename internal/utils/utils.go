@@ -1,8 +1,15 @@
 package utils
 
 import (
+	"fmt"
+	"net"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
+
+	"github.com/NethermindEth/1click/configs"
+	log "github.com/sirupsen/logrus"
 )
 
 var reAddr = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
@@ -93,4 +100,66 @@ True if <a> is a valid Ethereum address. False otherwise
 */
 func IsAddress(a string) bool {
 	return reAddr.MatchString(a)
+}
+
+/*
+AssingPorts :
+Checks if port is occupied in a given host
+
+params :-
+a. host string
+Host which port is to be checked
+b. port string
+Port to be checked
+
+returns :-
+a. bool
+True if <port> is available. False otherwise
+*/
+func AssingPorts(host string, defaults map[string]string) (ports map[string]string, err error) {
+	ports = make(map[string]string)
+	for k, v := range defaults {
+		if v == "" {
+			return ports, fmt.Errorf(configs.DefaultPortEmptyError, k)
+		}
+
+		for !portAvailable(host, v, time.Second*5) {
+			i, err := strconv.Atoi(v)
+			if err != nil {
+				return ports, err
+			}
+			v = strconv.Itoa(i + 1)
+		}
+		ports[k] = v
+	}
+
+	return
+}
+
+/*
+portAvailable :
+Checks if port is occupied in a given host
+
+params :-
+a. host string
+Host which port is to be checked
+b. port string
+Port to be checked
+
+returns :-
+a. bool
+True if <port> is available. False otherwise
+*/
+func portAvailable(host, port string, timeout time.Duration) bool {
+	log.Debugf("Checking port ocuppation of %s\n", net.JoinHostPort(host, port))
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, port), timeout)
+	if err != nil {
+		log.Debugf("Port seems available, got connecting error: %v", err)
+		return true
+	}
+	if conn != nil {
+		defer conn.Close()
+		log.Debugf("Port open at %s", net.JoinHostPort(host, port))
+	}
+	return conn == nil
 }

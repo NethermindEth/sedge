@@ -22,7 +22,7 @@
     networks:
       - 1click
     ports:
-      - "5056:5056"
+      - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
       - ${VL_DATA_DIR}:/var/lib/prysm
       - ${WALLET_DIR}:/var/lib/prysm/wallet
