@@ -14,13 +14,13 @@
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
       - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
-      - "8545:8545"
-      - "8546:8546"
-      - "8551:8551"{{end}}
+      - "{{.ElApiPort}}:{{.ElApiPort}}"
+      - "{{.ElWsPort}}:{{.ElWsPort}}"
+      - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
     expose:
-      - 8545
-      - 8546
-      - 8551
+      - {{.ElApiPort}}
+      - {{.ElWsPort}}
+      - {{.ElAuthPort}}
     command:{{with .TTD}} 
       - --override.terminaltotaldifficulty=${TTD}{{end}}
       - --bootnodes=${EC_BOOTNODES}
@@ -32,21 +32,21 @@
       - --http.api
       - web3,eth,net
       - --datadir=/var/lib/goethereum
-      - --port=30303
-      - --http.port=8545
+      - --port={{.ElDiscoveryPort}}
+      - --http.port={{.ElApiPort}}
       - --${NETWORK}
       - --verbosity
       - ${GETH_LOG_LEVEL}
       - --ws
       - --ws.addr=0.0.0.0
-      - --ws.port=8546
+      - --ws.port={{.ElWsPort}}
       - --ws.api=engine,eth,web3,net,debug
       - --authrpc.jwtsecret=/tmp/jwt/jwtsecret
       - --authrpc.addr=0.0.0.0
-      - --authrpc.port=8551
+      - --authrpc.port={{.ElAuthPort}}
       - --authrpc.vhosts=*
       - ${EC_METRICS_ENABLED:-""}
-      - --metrics.port=8008{{range $flag := .ElExtraFlags}}
+      - --metrics.port={{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
       - --{{$flag}}{{end}}
     logging:
       driver: "json-file"

@@ -45,8 +45,12 @@ type DockerComposeData struct {
 	FeeRecipient      string
 	ElDiscoveryPort   string
 	ElMetricsPort     string
+	ElApiPort         string
+	ElAuthPort        string
+	ElWsPort          string
 	ClDiscoveryPort   string
 	ClMetricsPort     string
+	ClApiPort         string
 	VlMetricsPort     string
 	FallbackELUrls    []string
 	ElExtraFlags      []string

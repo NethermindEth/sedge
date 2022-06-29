@@ -29,7 +29,7 @@
     command:
       - --datadir=/var/lib/prysm
       - --wallet-dir=/var/lib/prysm/wallet
-      - --beacon-rpc-provider=${CC_NODE}
+      - --beacon-rpc-provider=${CC_NODE}:{{.ClApiPort}}
       - --graffiti=${GRAFFITI}
       - --verbosity=${VL_LOG_LEVEL}
       - --${NETWORK}
@@ -37,7 +37,7 @@
       - --accept-terms-of-use
       - --wallet-password-file=/var/lib/prysm/wallet/password.txt
       - --monitoring-host=0.0.0.0
-      - --monitoring-port=5056{{range $flag := .VlExtraFlags}}
+      - --monitoring-port={{.VlMetricsPort}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}
     logging:
       driver: "json-file"

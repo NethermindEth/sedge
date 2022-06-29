@@ -30,13 +30,13 @@
     command:
       - lighthouse
       - vc
-      - --beacon-nodes=${CC_NODE}
+      - --beacon-nodes=${CC_NODE}:{{.ClApiPort}}
       - --graffiti=${GRAFFITI}
       - --network=${NETWORK}
       - --debug-level=${VL_LOG_LEVEL}
       - --validators-dir=/var/lib/lighthouse
       - --metrics
-      - --metrics-port=5056
+      - --metrics-port={{.VlMetricsPort}}
       - --metrics-address=0.0.0.0{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}
     logging:

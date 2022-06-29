@@ -32,12 +32,12 @@
       - lighthouse
       - vc
       - --network=${NETWORK}
-      - --beacon-nodes=${CC_NODE}
+      - --beacon-nodes=${CC_NODE}:{{.ClApiPort}}
       - --graffiti=${GRAFFITI}
       - --debug-level=${VL_LOG_LEVEL}
       - --validators-dir=/data/validators
       - --metrics
-      - --metrics-port=5056
+      - --metrics-port={{.VlMetricsPort}}
       - --metrics-address=0.0.0.0{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}
     logging:

@@ -14,9 +14,9 @@
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
       - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"{{if .MapAllPorts}}
-      - "4000:4000"{{end}}
+      - "{{.ClApiPort}}:{{.ClApiPort}}"{{end}}
     expose:
-      - 4000
+      - {{.ClApiPort}}
     environment:
       - JAVA_OPTS=-XX:SoftMaxHeapSize=2g -Xmx4g
     command:
@@ -24,17 +24,17 @@
       - --log-destination=CONSOLE
       - --logging=${CC_LOG_LEVEL}
       - --network=${NETWORK}
-      - --p2p-port=9000
+      - --p2p-port={{.ClDiscoveryPort}}
       - --p2p-peer-upper-bound=${CC_PEER_COUNT}
       - --rest-api-host-allowlist=*
       - --rest-api-enabled=true
-      - --rest-api-port=4000
-      - --eth1-endpoints=${EC_NODE}
+      - --rest-api-port={{.ClApiPort}}
+      - --eth1-endpoints=${EC_NODE}:{{.ElApiPort}}
       - --eth1-deposit-contract-max-request-size=150
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
-      - --metrics-port=5054{{with .CheckpointSyncUrl}}
+      - --metrics-port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}
       - --initial-state={{.}}/eth/v2/debug/beacon/states/{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}
     logging:

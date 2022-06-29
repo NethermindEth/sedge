@@ -14,21 +14,21 @@
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
       - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"{{if .MapAllPorts}}
-      - "4000:4000"{{end}}
+      - "{{.ClApiPort}}:{{.ClApiPort}}"{{end}}
     expose:
-      - 4000
+      - {{.ClApiPort}}
     command:
       - --log-destination=CONSOLE
       - --logging=${CC_LOG_LEVEL}
       - --network=${NETWORK}
       - --p2p-discovery-bootnodes=${CL_BOOTNODES}
       - --p2p-enabled=true
-      - --p2p-port=9000
+      - --p2p-port={{.ClDiscoveryPort}}
       - --p2p-peer-upper-bound=${CC_PEER_COUNT}
       - --rest-api-enabled=true
       - --rest-api-host-allowlist=*
       - --rest-api-interface=0.0.0.0
-      - --rest-api-port=4000
+      - --rest-api-port={{.ClApiPort}}
       - --rest-api-cors-origins=*
       - --rest-api-docs-enabled=false
       - --data-beacon-path=/var/lib/teku/beacon
@@ -36,7 +36,7 @@
       - --data-storage-archive-frequency=2048
       - --data-storage-mode=PRUNE
       - --data-storage-non-canonical-blocks-enabled=false
-      - --ee-endpoint=${EC_NODE}:8551{{with .FeeRecipient}}
+      - --ee-endpoint=${EC_NODE}:{{.ElAuthPort}}{{with .FeeRecipient}}
       - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
       - --Xee-version=${XEE_VERSION}
       - --ee-jwt-secret-file=/tmp/jwt/jwtsecret{{with .TTD}}
@@ -44,7 +44,7 @@
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
-      - --metrics-port=5054{{with .CheckpointSyncUrl}}
+      - --metrics-port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}
       - --initial-state={{.}}/eth/v2/debug/beacon/states/{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}
     logging:

@@ -13,7 +13,7 @@
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
       - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
-      - "8545:8545"{{end}}
+      - "{{.ElApiPort}}:{{.ElApiPort}}"{{end}}
     expose:
       - 8545
     command: 
@@ -26,13 +26,13 @@
       - web3,eth,net
       - --datadir
       - /var/lib/goethereum
-      - --port=30303
-      - --http.port=8545
+      - --port={{.ElDiscoveryPort}}
+      - --http.port={{.ElApiPort}}
       - --${NETWORK}
       - --verbosity
       - ${GETH_LOG_LEVEL}
       - ${EC_METRICS_ENABLED:-""}
-      - --metrics.port=8008{{range $flag := .ElExtraFlags}}
+      - --metrics.port={{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
       - --{{$flag}}{{end}}
     logging:
       driver: "json-file"

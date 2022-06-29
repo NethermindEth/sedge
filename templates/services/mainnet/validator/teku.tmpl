@@ -12,7 +12,7 @@
       - ${KEYSTORE_DIR}:/var/lib/teku/keystore
     command:
       - validator-client
-      - --beacon-node-api-endpoint=${CC_NODE}
+      - --beacon-node-api-endpoint=${CC_NODE}:{{.ClApiPort}}
       - --data-path=/var/lib/teku
       - --log-destination=CONSOLE
       - --network=auto
@@ -23,7 +23,7 @@
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
-      - --metrics-port=5056{{with .FeeRecipient}}
+      - --metrics-port={{.VlMetricsPort}}{{with .FeeRecipient}}
       - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}
     logging:

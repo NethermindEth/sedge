@@ -13,9 +13,9 @@
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
       - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"{{if .MapAllPorts}}
-      - "4000:4000"{{end}}
+      - "{{.ClApiPort}}:{{.ClApiPort}}"{{end}}
     expose:
-      - 4000 
+      - {{.ClApiPort}} 
     environment:
       NODE_OPTIONS: --max_old_space_size=6144
     command: 
@@ -26,13 +26,13 @@
       - --logLevelFile=${CC_LOG_LEVEL}
       - --api.rest.enabled 
       - --api.rest.host=0.0.0.0
-      - --api.rest.port=4000
-      - --network.discv5.bindAddr="/ip4/0.0.0.0/udp/9000"
-      - --network.localMultiaddrs="/ip4/0.0.0.0/tcp/9000"
-      - --eth1.providerUrls=${EC_NODE}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
+      - --api.rest.port={{.ClApiPort}}
+      - --network.discv5.bindAddr="/ip4/0.0.0.0/udp/{{.ClDiscoveryPort}}"
+      - --network.localMultiaddrs="/ip4/0.0.0.0/tcp/{{.ClDiscoveryPort}}"
+      - --eth1.providerUrls=${EC_NODE}:{{.ElApiPort}}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
       - --network.targetPeers=${CC_PEER_COUNT}
       - --metrics.enabled=true
-      - --metrics.port=5054{{with .CheckpointSyncUrl}}
+      - --metrics.port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}
       - --weakSubjectivitySyncLatest
       - --weakSubjectivityServerUrl={{.}}{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}

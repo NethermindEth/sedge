@@ -14,11 +14,11 @@
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
       - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
-      - "8545:8545"
-      - "8551:8551"{{end}}
+      - "{{.ElApiPort}}:{{.ElApiPort}}"
+      - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
     expose:
-      - 8545
-      - 8551
+      - {{.ElApiPort}}
+      - {{.ElAuthPort}}
     command: 
       - --config=${NETWORK}
       - --datadir=/nethermind/data
@@ -28,13 +28,15 @@
       - --Metrics.Enabled=${EC_METRICS_ENABLED}
       - --Metrics.NodeName=${EC_NODENAME}
       - --Metrics.PushGatewayUrl=${NETHERMIND_METRICS_PUSH_GATEWAY_URL}
-      - --Metrics.ExposePort=8008
+      - --Metrics.ExposePort={{.ElMetricsPort}}
       - --Sync.SnapSync=${EC_SNAP_SYNC_ENABLED}
       - --JsonRpc.Enabled=true
       - --JsonRpc.Host=0.0.0.0
+      - --JsonRpc.Port={{.ElApiPort}}
       - --JsonRpc.EnabledModules=${EC_ENABLED_MODULES}
       - --JsonRpc.JwtSecretFile=/tmp/jwt/jwtsecret
-      - --JsonRpc.AdditionalRpcUrls=["http://0.0.0.0:8551|http;ws|net;eth;subscribe;engine;web3;client"]
+      - --JsonRpc.AdditionalRpcUrls=["http://0.0.0.0:{{.ElAuthPort}}|http;ws|net;eth;subscribe;engine;web3;client"]
+      - --Network.DiscoveryPort={{.ElDiscoveryPort}}
       - --HealthChecks.Enabled=${NETHERMIND_HEALTH_CHECKS_ENABLED}
       - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}{{range $flag := .ElExtraFlags}}
       - --{{$flag}}{{end}}

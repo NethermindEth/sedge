@@ -13,9 +13,9 @@
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
       - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
-      - "8545:8545"{{end}}
+      - "{{.ElApiPort}}:{{.ElApiPort}}"{{end}}
     expose:
-      - 8545
+      - {{.ElApiPort}}
     command: 
       - --config=${NETWORK}
       - --datadir=/nethermind/data
@@ -23,12 +23,14 @@
       - --Metrics.Enabled=${EC_METRICS_ENABLED}
       - --Metrics.NodeName=${EC_NODENAME}
       - --Metrics.PushGatewayUrl=${NETHERMIND_METRICS_PUSH_GATEWAY_URL}
-      - --Metrics.ExposePort=8008
+      - --Metrics.ExposePort={{.ElMetricsPort}}
       - --Sync.SnapSync=${EC_SNAP_SYNC_ENABLED}
       - --Init.WebSocketsEnabled=true
       - --JsonRpc.Enabled=true
       - --JsonRpc.Host=0.0.0.0
+      - --JsonRpc.Port={{.ElApiPort}}
       - --JsonRpc.EnabledModules=${EC_ENABLED_MODULES}
+      - --Network.DiscoveryPort={{.ElDiscoveryPort}}
       - --HealthChecks.Enabled=${NETHERMIND_HEALTH_CHECKS_ENABLED}
       - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}{{range $flag := .ElExtraFlags}}
       - --{{$flag}}{{end}}

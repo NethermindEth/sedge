@@ -116,8 +116,12 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 	defaultsPorts := map[string]string{
 		"ELDiscovery": configs.DefaultDiscoveryPortEL,
 		"ELMetrics":   configs.DefaultMetricsPortEL,
+		"ELApi":       configs.DefaultApiPortEL,
+		"ELAuth":      configs.DefaultAuthPortEL,
+		"ELWS":        configs.DefaultWSPortEL,
 		"CLDiscovery": configs.DefaultDiscoveryPortCL,
 		"CLMetrics":   configs.DefaultMetricsPortCL,
+		"CLApi":       configs.DefaultApiPortCL,
 		"VLMetrics":   configs.DefaultMetricsPortVL,
 	}
 	ports, err := utils.AssingPorts("localhost", defaultsPorts)
@@ -133,8 +137,12 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		FeeRecipient:      gd.FeeRecipient,
 		ElDiscoveryPort:   ports["ELDiscovery"],
 		ElMetricsPort:     ports["ELMetrics"],
+		ElApiPort:         ports["ELApi"],
+		ElAuthPort:        ports["ELAuth"],
+		ElWsPort:          ports["ELWS"],
 		ClDiscoveryPort:   ports["CLDiscovery"],
 		ClMetricsPort:     ports["CLMetrics"],
+		ClApiPort:         ports["CLApi"],
 		VlMetricsPort:     ports["VLMetrics"],
 		FallbackELUrls:    gd.FallbackELUrls,
 		ElExtraFlags:      gd.ElExtraFlags,

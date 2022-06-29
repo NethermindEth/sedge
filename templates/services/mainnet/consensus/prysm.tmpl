@@ -13,25 +13,25 @@
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
       - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"{{if .MapAllPorts}}
-      - "4000:4000"{{end}}
+      - "{{.ClApiPort}}:{{.ClApiPort}}"{{end}}
     expose:
-      - 4000
+      - {{.ClApiPort}}
     command:
       - --datadir=/var/lib/prysm/
       - --verbosity=${CC_LOG_LEVEL}
       - --${NETWORK}
-      - --p2p-tcp-port=13000
-      - --p2p-udp-port=12000
+      - --p2p-tcp-port={{.ClDiscoveryPort}}
+      - --p2p-udp-port={{.ClDiscoveryPort}}
       - --p2p-max-peers=${CC_PEER_COUNT}
       - --rpc-host=0.0.0.0
       - --grpc-gateway-host=0.0.0.0
-      - --grpc-gateway-port=4000
-      - --http-web3provider=${EC_NODE}{{range $url := .FallbackELUrls}}
+      - --grpc-gateway-port={{.ClApiPort}}
+      - --http-web3provider=${EC_NODE}:{{.ElApiPort}}{{range $url := .FallbackELUrls}}
       - --fallback-web3provider={{$url}}{{end}}
       - --eth1-header-req-limit=150
       - --accept-terms-of-use
       - --monitoring-host=0.0.0.0
-      - --monitoring-port=5054{{with .CheckpointSyncUrl}}
+      - --monitoring-port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}
       - --checkpoint-sync-url={{.}}{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}
     logging:

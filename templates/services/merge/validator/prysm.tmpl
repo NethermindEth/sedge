@@ -48,12 +48,12 @@
       - --wallet-dir=/var/lib/prysm/wallet
       - --wallet-password-file=/keystore/keystore_password.txt{{with .VlPrysmCfg}}
       - --chain-config-file=/network_config/config.yml{{end}}
-      - --beacon-rpc-provider=${CC_NODE}
+      - --beacon-rpc-provider=${CC_NODE}:{{.ClApiPort}}
       - --graffiti=${GRAFFITI}
       - --verbosity=${VL_LOG_LEVEL}
       - --accept-terms-of-use
       - --monitoring-host=0.0.0.0
-      - --monitoring-port=5056{{range $flag := .VlExtraFlags}}
+      - --monitoring-port={{.VlMetricsPort}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}
     logging:
       driver: "json-file"

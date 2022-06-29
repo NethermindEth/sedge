@@ -14,9 +14,9 @@
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
       - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"{{if .MapAllPorts}}
-      - "4000:4000"{{end}}
+      - "{{.ClApiPort}}:{{.ClApiPort}}"{{end}}
     expose:
-      - 4000     
+      - {{.ClApiPort}}     
     command:
       - lighthouse
       - bn
@@ -24,14 +24,14 @@
       - --merge
       - --disable-upnp
       - --datadir=/var/lib/lighthouse
-      - --port=9000
+      - --port={{.ClDiscoveryPort}}
       - --http
       - --http-address=0.0.0.0
-      - --http-port=4000
+      - --http-port={{.ClApiPort}}
       - --network=${NETWORK}
       - --target-peers=${CC_PEER_COUNT}
-      - --execution-endpoints=${EC_NODE}:8551
-      - --eth1-endpoints=${EC_NODE}:8545{{range $url := .FallbackELUrls}},{{$url}}{{end}}{{with .TTD}}
+      - --execution-endpoints=${EC_NODE}:{{.ElAuthPort}}
+      - --eth1-endpoints=${EC_NODE}:{{.ElApiPort}}{{range $url := .FallbackELUrls}},{{$url}}{{end}}{{with .TTD}}
       - --terminal-total-difficulty-override=${TTD}{{end}}     
       - --debug-level=${CC_LOG_LEVEL}{{with .FeeRecipient}}
       - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
@@ -39,7 +39,7 @@
       - --subscribe-all-subnets
       - --import-all-attestations 
       - --metrics
-      - --metrics-port=5054
+      - --metrics-port={{.ClMetricsPort}}
       - --metrics-address=0.0.0.0{{with .CheckpointSyncUrl}}
       - --checkpoint-sync-url={{.}}{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}

@@ -34,10 +34,10 @@
       - --logLevelFile=${VL_LOG_LEVEL}
       - --importKeystoresPath=/var/lib/lodestar/keystore
       - --importKeystoresPassword=/var/lib/lodestar/keystore/keystore_password.txt
-      - --server=${CC_NODE}
+      - --server=${CC_NODE}:{{.ClApiPort}}
       - --metrics.enabled=true
       - --metrics.address=0.0.0.0
-      - --metrics.port=5056{{with .FeeRecipient}}
+      - --metrics.port={{.VlMetricsPort}}{{with .FeeRecipient}}
       - --defaultFeeRecipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}
     logging:
