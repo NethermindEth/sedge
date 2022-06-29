@@ -55,6 +55,7 @@ var (
 	clExtraFlags      *[]string
 	vlExtraFlags      *[]string
 	waitingTime       time.Duration
+	exposePorts       bool
 )
 
 const (
@@ -154,9 +155,14 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 }
 
 func runCliCmd(cmd *cobra.Command, args []string) []error {
-	// Show warnings if custom images are used
+	// Warnings
+	// Warn if custom images are used
 	if executionImage != "" || consensusImage != "" || validatorImage != "" {
 		log.Warn(configs.CustomImagesWarning)
+	}
+	// War if exposed ports are used
+	if exposePorts {
+		log.Warn(configs.ExposePortsWarning)
 	}
 
 	// Get all clients: supported + configured
@@ -223,6 +229,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		ElExtraFlags:      *elExtraFlags,
 		ClExtraFlags:      *clExtraFlags,
 		VlExtraFlags:      *vlExtraFlags,
+		ExposePorts:       exposePorts,
 	}
 	if err = generate.GenerateScripts(gd); err != nil {
 		return []error{err}
@@ -307,6 +314,8 @@ func init() {
 	cliCmd.Flags().BoolVarP(&run, "run", "r", false, "Run the generated docker-compose scripts without asking")
 
 	cliCmd.Flags().BoolVarP(&y, "yes", "y", false, "Shortcut for '1click cli -r -i --run'. Run without prompts")
+
+	cliCmd.Flags().BoolVarP(&exposePorts, "expose-ports", "x", false, "Expose clients ports. Useful to allow remote access to the clients.")
 
 	services = cliCmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all, none. The 'all' and 'none' option must be used alone. Example: '1click cli -r --run-clients=consensus,validator'")
 
