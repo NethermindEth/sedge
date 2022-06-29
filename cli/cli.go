@@ -55,7 +55,7 @@ var (
 	clExtraFlags      *[]string
 	vlExtraFlags      *[]string
 	waitingTime       time.Duration
-	exposePorts       bool
+	mapAllPorts       bool
 )
 
 const (
@@ -161,8 +161,8 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		log.Warn(configs.CustomImagesWarning)
 	}
 	// War if exposed ports are used
-	if exposePorts {
-		log.Warn(configs.ExposePortsWarning)
+	if mapAllPorts {
+		log.Warn(configs.MapAllPortsWarning)
 	}
 
 	// Get all clients: supported + configured
@@ -229,7 +229,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		ElExtraFlags:      *elExtraFlags,
 		ClExtraFlags:      *clExtraFlags,
 		VlExtraFlags:      *vlExtraFlags,
-		ExposePorts:       exposePorts,
+		MapAllPorts:       mapAllPorts,
 	}
 	if err = generate.GenerateScripts(gd); err != nil {
 		return []error{err}
@@ -315,7 +315,7 @@ func init() {
 
 	cliCmd.Flags().BoolVarP(&y, "yes", "y", false, "Shortcut for '1click cli -r -i --run'. Run without prompts")
 
-	cliCmd.Flags().BoolVarP(&exposePorts, "expose-ports", "x", false, "Expose clients ports. Useful to allow remote access to the clients.")
+	cliCmd.Flags().BoolVar(&mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients.")
 
 	services = cliCmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all, none. The 'all' and 'none' option must be used alone. Example: '1click cli -r --run-clients=consensus,validator'")
 

@@ -27,7 +27,7 @@
     ports:
       - "9000:9000/tcp"
       - "9000:9000/udp"
-      - "5054:5054/tcp"{{if .ExposePorts}}
+      - "5054:5054/tcp"{{if .MapAllPorts}}
       - "4000:4000"{{end}}
     expose:
       - 4000
