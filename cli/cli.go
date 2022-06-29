@@ -160,7 +160,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	if executionImage != "" || consensusImage != "" || validatorImage != "" {
 		log.Warn(configs.CustomImagesWarning)
 	}
-	// War if exposed ports are used
+	// Warn if exposed ports are used
 	if mapAllPorts {
 		log.Warn(configs.MapAllPortsWarning)
 	}
