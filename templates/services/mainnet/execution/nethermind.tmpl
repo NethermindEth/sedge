@@ -12,7 +12,8 @@
     ports:
       - "30303:30303/tcp"
       - "30303:30303/udp"
-      - "8008:8008/tcp"
+      - "8008:8008/tcp"{{if .MapAllPorts}}
+      - "8545:8545"{{end}}
     expose:
       - 8545
     command: 

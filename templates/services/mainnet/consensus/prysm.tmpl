@@ -12,7 +12,8 @@
     ports:
       - "13000:13000/tcp"
       - "12000:12000/udp"
-      - "5054:5054/tcp"
+      - "5054:5054/tcp"{{if .MapAllPorts}}
+      - "4000:4000"{{end}}
     expose:
       - 4000
     command:

@@ -77,4 +77,5 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 	GettingContainersIP             = "Proceding to get execution and consensus containers IP address for the monitoring tool"
 	WaitingForNodesToStart          = "Waiting a minute for nodes to start"
 	CustomImagesWarning             = "You are using custom images for the execution, consensus or validator clients!!! Make sure this is intended. Also check these images are correct and available from this device otherwise the setup will fail or have an unexpected behavior."
+	MapAllPortsWarning              = "You are mapping all ports for the clients!!! Make sure this is intended. This could make the clients vulnerable to attacks. Be sure to setup a firewall."
 )
