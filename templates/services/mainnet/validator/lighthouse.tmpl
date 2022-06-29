@@ -21,6 +21,10 @@
     depends_on: 
       validator-import:
         condition: service_completed_successfully
+    networks:
+      - 1click
+    ports:
+      - "5056:5056"
     volumes:
       - ${VL_DATA_DIR}:/var/lib/lighthouse
     command:
@@ -30,7 +34,10 @@
       - --graffiti=${GRAFFITI}
       - --network=${NETWORK}
       - --debug-level=${VL_LOG_LEVEL}
-      - --validators-dir=/var/lib/lighthouse{{range $flag := .VlExtraFlags}}
+      - --validators-dir=/var/lib/lighthouse
+      - --metrics
+      - --metrics-port=5056
+      - --metrics-address=0.0.0.0{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}
     logging:
       driver: "json-file"

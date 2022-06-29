@@ -5,6 +5,8 @@
     image: ${VL_IMAGE_VERSION}
     networks:
       - 1click
+    ports:
+      - "5056:5056"
     volumes:
       - ${VL_DATA_DIR}:/var/lib/teku
       - ${KEYSTORE_DIR}:/var/lib/teku/keystore
@@ -17,7 +19,12 @@
       - --validators-graffiti=${GRAFFITI}
       - --validators-keystore-locking-enabled=true
       - --validator-keys=/var/lib/teku/keystore:/var/lib/teku/keystore/secrets
-      - --validators-early-attestations-enabled=false{{range $flag := .VlExtraFlags}}
+      - --validators-early-attestations-enabled=false
+      - --metrics-enabled=true
+      - --metrics-host-allowlist=*
+      - --metrics-interface=0.0.0.0
+      - --metrics-port=5056{{with .FeeRecipient}}
+      - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}
     logging:
       driver: "json-file"

@@ -19,6 +19,10 @@
     depends_on: 
       validator-import:
         condition: service_completed_successfully
+    networks:
+      - 1click
+    ports:
+      - "5056:5056"
     volumes:
       - ${VL_DATA_DIR}:/var/lib/prysm
       - ${WALLET_DIR}:/var/lib/prysm/wallet
@@ -31,7 +35,9 @@
       - --${NETWORK}
       - --enable-doppelganger
       - --accept-terms-of-use
-      - --wallet-password-file=/var/lib/prysm/wallet/password.txt{{range $flag := .VlExtraFlags}}
+      - --wallet-password-file=/var/lib/prysm/wallet/password.txt
+      - --monitoring-host=0.0.0.0
+      - --monitoring-port=5056{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
