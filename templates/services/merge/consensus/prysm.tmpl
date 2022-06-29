@@ -27,7 +27,8 @@
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
-      - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"
+      - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"{{if .MapAllPorts}}
+      - "4000:4000"{{end}}
     expose:
       - 4000
     command:{{with .CcPrysmCfg}}

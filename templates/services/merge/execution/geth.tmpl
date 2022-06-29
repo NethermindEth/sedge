@@ -13,7 +13,10 @@
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
-      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"
+      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
+      - "8545:8545"
+      - "8546:8546"
+      - "8551:8551"{{end}}
     expose:
       - 8545
       - 8546

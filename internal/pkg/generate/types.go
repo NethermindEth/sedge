@@ -33,6 +33,7 @@ type GenerationData struct {
 	ElExtraFlags      []string
 	ClExtraFlags      []string
 	VlExtraFlags      []string
+	MapAllPorts       bool
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -51,4 +52,5 @@ type DockerComposeData struct {
 	ElExtraFlags      []string
 	ClExtraFlags      []string
 	VlExtraFlags      []string
+	MapAllPorts       bool
 }
