@@ -12,7 +12,7 @@
       - ${KEYSTORE_DIR}:/var/lib/teku/keystore
     command:
       - validator-client
-      - --beacon-node-api-endpoint=${CC_NODE}:{{.ClApiPort}}
+      - --beacon-node-api-endpoint=${CC_API_URL}
       - --data-path=/var/lib/teku
       - --log-destination=CONSOLE
       - --network=auto

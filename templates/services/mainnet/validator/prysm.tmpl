@@ -29,7 +29,7 @@
     command:
       - --datadir=/var/lib/prysm
       - --wallet-dir=/var/lib/prysm/wallet
-      - --beacon-rpc-provider=${CC_NODE}:{{.ClApiPort}}
+      - --beacon-rpc-provider=${CC_API_URL}
       - --graffiti=${GRAFFITI}
       - --verbosity=${VL_LOG_LEVEL}
       - --${NETWORK}

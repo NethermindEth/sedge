@@ -36,7 +36,7 @@
       - --data-storage-archive-frequency=2048
       - --data-storage-mode=PRUNE
       - --data-storage-non-canonical-blocks-enabled=false
-      - --ee-endpoint=${EC_NODE}:{{.ElAuthPort}}{{with .FeeRecipient}}
+      - --ee-endpoint=${EC_AUTH_URL}{{with .FeeRecipient}}
       - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
       - --Xee-version=${XEE_VERSION}
       - --ee-jwt-secret-file=/tmp/jwt/jwtsecret{{with .TTD}}

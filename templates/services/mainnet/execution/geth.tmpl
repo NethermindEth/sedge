@@ -15,7 +15,7 @@
       - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
       - "{{.ElApiPort}}:{{.ElApiPort}}"{{end}}
     expose:
-      - 8545
+      - {{.ElApiPort}}
     command: 
       - --syncmode=${EC_SYNC_MODE}
       - --http

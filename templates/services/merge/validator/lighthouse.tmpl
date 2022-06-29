@@ -32,7 +32,7 @@
       - lighthouse
       - vc
       - --network=${NETWORK}
-      - --beacon-nodes=${CC_NODE}:{{.ClApiPort}}
+      - --beacon-nodes=${CC_API_URL}
       - --graffiti=${GRAFFITI}
       - --debug-level=${VL_LOG_LEVEL}
       - --validators-dir=/data/validators

@@ -26,7 +26,7 @@
       - --rpc-host=0.0.0.0
       - --grpc-gateway-host=0.0.0.0
       - --grpc-gateway-port={{.ClApiPort}}
-      - --http-web3provider=${EC_NODE}:{{.ElApiPort}}{{range $url := .FallbackELUrls}}
+      - --http-web3provider=${EC_API_URL}{{range $url := .FallbackELUrls}}
       - --fallback-web3provider={{$url}}{{end}}
       - --eth1-header-req-limit=150
       - --accept-terms-of-use

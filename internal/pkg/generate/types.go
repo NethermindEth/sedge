@@ -8,8 +8,9 @@ type EnvData struct {
 	CcDataDir           string
 	VlImage             string
 	VlDataDir           string
-	ExecutionNodeURL    string
-	ConsensusNodeURL    string
+	ExecutionApiURL     string
+	ExecutionAuthURL    string
+	ConsensusApiURL     string
 	FeeRecipient        string
 	JWTSecretPath       string
 	ExecutionEngineName string
@@ -20,8 +21,10 @@ type EnvData struct {
 type GenerationData struct {
 	ExecutionClient   string
 	ExecutionImage    string
+	ExecutionEndpoint string
 	ConsensusClient   string
 	ConsensusImage    string
+	ConsensusEndpoint string
 	ValidatorClient   string
 	ValidatorImage    string
 	GenerationPath    string
@@ -34,6 +37,7 @@ type GenerationData struct {
 	ClExtraFlags      []string
 	VlExtraFlags      []string
 	MapAllPorts       bool
+	Ports             map[string]string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script

@@ -27,7 +27,7 @@
       - --http-port={{.ClApiPort}}
       - --network=${NETWORK}
       - --target-peers=${CC_PEER_COUNT}
-      - --eth1-endpoints=${EC_NODE}:{{.ElApiPort}}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
+      - --eth1-endpoints=${EC_API_URL}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
       - --eth1-blocks-per-log-query=150
       - --debug-level=${CC_LOG_LEVEL}
       - --validator-monitor-auto

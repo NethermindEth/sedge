@@ -3,7 +3,8 @@
 # --- Consensus Layer - Beacon Node - configuration ---
 CC_PEER_COUNT=50
 CC_LOG_LEVEL=info
-EC_NODE={{.ExecutionNodeURL}}
+EC_API_URL={{.ExecutionApiURL}}
+EC_AUTH_URL={{.ExecutionAuthURL}}
 CC_INSTANCE_NAME=Teku
 CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}consensys/teku:latest{{end}}
 CC_DATA_DIR={{.CcDataDir}}

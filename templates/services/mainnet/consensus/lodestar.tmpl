@@ -29,7 +29,7 @@
       - --api.rest.port={{.ClApiPort}}
       - --network.discv5.bindAddr="/ip4/0.0.0.0/udp/{{.ClDiscoveryPort}}"
       - --network.localMultiaddrs="/ip4/0.0.0.0/tcp/{{.ClDiscoveryPort}}"
-      - --eth1.providerUrls=${EC_NODE}:{{.ElApiPort}}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
+      - --eth1.providerUrls=${EC_API_URL}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
       - --network.targetPeers=${CC_PEER_COUNT}
       - --metrics.enabled=true
       - --metrics.port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}

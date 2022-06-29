@@ -48,7 +48,7 @@
       - --wallet-dir=/var/lib/prysm/wallet
       - --wallet-password-file=/keystore/keystore_password.txt{{with .VlPrysmCfg}}
       - --chain-config-file=/network_config/config.yml{{end}}
-      - --beacon-rpc-provider=${CC_NODE}:{{.ClApiPort}}
+      - --beacon-rpc-provider=${CC_API_URL}
       - --graffiti=${GRAFFITI}
       - --verbosity=${VL_LOG_LEVEL}
       - --accept-terms-of-use
