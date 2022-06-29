@@ -121,6 +121,7 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		ElExtraFlags:      gd.ElExtraFlags,
 		ClExtraFlags:      gd.ClExtraFlags,
 		VlExtraFlags:      gd.VlExtraFlags,
+		MapAllPorts:       gd.MapAllPorts,
 	}
 
 	// Print docker-compose file
