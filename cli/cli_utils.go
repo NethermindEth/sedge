@@ -197,7 +197,7 @@ func runAndShowContainers(services []string) error {
 		return fmt.Errorf(configs.CommandError, upCMD.Cmd, err)
 	}
 
-	// Run docker-compose ps --filter status=running to show script running containers
+	// Run docker compose ps --filter status=running to show script running containers
 	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
 		Path:          filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 		FilterRunning: true,
@@ -235,7 +235,7 @@ func parseNetwork(js string) (string, error) {
 }
 
 func getContainerIP(service string) (ip string, err error) {
-	// Run docker-compose ps --quiet <service> to show service's ID
+	// Run docker compose ps --quiet <service> to show service's ID
 	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
 		Path:        filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 		Quiet:       true,

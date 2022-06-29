@@ -65,7 +65,7 @@ sudo cp 1click/build/1click /usr/local/bin/
 ```
 
 ### Dependencies
-`1click` dependencies are `docker` and `docker-compose`, but if you don't have those installed, `1click` will show instructions to install them, or install them for you.
+`1click` dependencies are `docker` with `docker compose` plugin, but if you don't have those installed, `1click` will show instructions to install them, or install them for you.
 
 ### Quick run
 With `1click cli` you can go through the entire workflow setup:

@@ -65,7 +65,7 @@ var cliCmd = &cobra.Command{
 	Long: `Run the setup tool on-premise in a quick way. Provide only the command line
 options and the tool will do all the work.
 
-First it will check if dependencies like docker and docker-compose are installed on your machine
+First it will check if dependencies such as docker are installed on your machine
 and provide instructions for installing them if they are not installed.
 
 Second, it will generate docker-compose scripts to run the full setup according to your selection.

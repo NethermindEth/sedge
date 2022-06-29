@@ -165,7 +165,7 @@ func buildCheckContainersTestCase(t *testing.T, caseName string, isErr bool) *ch
 	tc.path = dcPath
 	tc.runner = &test.SimpleCMDRunner{
 		SRunCMD: func(c commands.Command) (string, error) {
-			if strings.Contains(c.Cmd, "docker-compose") && strings.Contains(c.Cmd, "ps") {
+			if strings.Contains(c.Cmd, "docker compose") && strings.Contains(c.Cmd, "ps") {
 				tc.psRunned += 1
 				_, err := os.Lstat(filepath.Join(dcPath, configs.DefaultDockerComposeScriptName))
 				return "", err
@@ -208,7 +208,7 @@ func TestCheckContainers(t *testing.T) {
 			if err != nil {
 				t.Errorf("%s failed: %v", descr, err)
 			} else if tc.psRunned < 1 {
-				t.Errorf("%s didn't run docker-compose ps", descr)
+				t.Errorf("%s didn't run docker compose ps", descr)
 			}
 		}
 	}

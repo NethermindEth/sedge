@@ -22,7 +22,7 @@ func NewCMDRunner(options CMDRunnerOptions) CommandRunner {
 
 func (cr *UnixCMDRunner) BuildDockerComposeUpCMD(options DockerComposeUpOptions) Command {
 	servs := strings.Join(options.Services, " ")
-	command := fmt.Sprintf("docker-compose -f %s up -d %s", options.Path, servs)
+	command := fmt.Sprintf("docker compose -f %s up -d %s", options.Path, servs)
 	return Command{Cmd: command}
 }
 
@@ -40,10 +40,10 @@ func (cr *UnixCMDRunner) BuildDockerComposePSCMD(options DockerComposePsOptions)
 	flags := ""
 	name := ""
 	if options.Services {
-		log.Debug(`Command "docker-compose ps" built with "--service" flag.`)
+		log.Debug(`Command "docker compose ps" built with "--service" flag.`)
 		flags += " --services"
 	} else if options.Quiet {
-		log.Debug(`Command "docker-compose ps" built with "--quiet" flag.`)
+		log.Debug(`Command "docker compose ps" built with "--quiet" flag.`)
 		flags += " --quiet"
 	}
 
@@ -54,21 +54,21 @@ func (cr *UnixCMDRunner) BuildDockerComposePSCMD(options DockerComposePsOptions)
 	if options.ServiceName != "" {
 		name += " " + options.ServiceName
 	}
-	command := fmt.Sprintf("docker-compose -f %s ps%s%s", options.Path, flags, name)
+	command := fmt.Sprintf("docker compose -f %s ps%s%s", options.Path, flags, name)
 	return Command{Cmd: command}
 }
 
 func (cr *UnixCMDRunner) BuildDockerComposeLogsCMD(options DockerComposeLogsOptions) Command {
-	command := fmt.Sprintf("docker-compose -f %s logs", options.Path)
+	command := fmt.Sprintf("docker compose -f %s logs", options.Path)
 	servs := strings.Join(options.Services, " ")
 	if options.Follow {
-		log.Debug(`Command "docker-compose logs" built with "--follow" flag.`)
+		log.Debug(`Command "docker compose logs" built with "--follow" flag.`)
 		command += fmt.Sprintf(" --follow %s", servs)
 	} else if options.Tail > 0 {
-		log.Debugf(`Command "docker-compose logs" built with "--tail=%d" flag.`, options.Tail)
+		log.Debugf(`Command "docker compose logs" built with "--tail=%d" flag.`, options.Tail)
 		command += fmt.Sprintf(" --tail=%d %s", options.Tail, servs)
 	} else {
-		log.Warn(`Command "docker-compose logs" built without "--follow" or "--tail" flags. Add follow argument or make tail argument greater than 0.`)
+		log.Warn(`Command "docker compose logs" built without "--follow" or "--tail" flags. Add follow argument or make tail argument greater than 0.`)
 		command += " " + servs
 	}
 	return Command{Cmd: command}
@@ -100,7 +100,7 @@ func (cr *UnixCMDRunner) BuildDockerInspectCMD(options DockerInspectOptions) Com
 }
 
 func (cr *UnixCMDRunner) BuildDockerComposeDownCMD(options DockerComposeDownOptions) Command {
-	command := fmt.Sprintf("docker-compose -f %s down", options.Path)
+	command := fmt.Sprintf("docker compose -f %s down", options.Path)
 	return Command{Cmd: command}
 }
 

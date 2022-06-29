@@ -37,7 +37,7 @@ var logsCmd = &cobra.Command{
 	Short: "Get running container logs",
 	Long: `Get running container logs using docker-compose CLI. If no services are provided, the logs of all running services will be displayed.
 
-By default will run 'docker-compose -f <script> logs --follow <service>'`,
+By default will run 'docker compose -f <script> logs --follow <service>'`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		if err = utils.PreCheck(generationPath); err != nil {
@@ -50,7 +50,7 @@ By default will run 'docker-compose -f <script> logs --follow <service>'`,
 		}
 
 		file := filepath.Join(generationPath, configs.DefaultDockerComposeScriptName)
-		// Get logs from docker-compose script services
+		// Get logs from docker compose script services
 		services := strings.Split(rawServices, "\n")
 		// Remove empty string resulting of spliting the last blank line of rawServices
 		services = services[:len(services)-1]

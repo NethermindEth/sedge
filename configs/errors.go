@@ -25,7 +25,7 @@ const (
 	DockerComposeScriptNotFoundError  = "docker-compose script not found at %s. Please run '1click cli' command to generate it or check the script path. By default, it should be located at %s"
 	ScriptIsNotRunningError           = "services of docker-compose script provided are not running. Error: %v"
 	GettingLogsError                  = "failed to get logs for services %s. Error: %v"
-	DockerComposePsReturnedEmptyError = "'docker-compose ps --services' returned empty string"
+	DockerComposePsReturnedEmptyError = "'docker compose ps --services' returned empty string"
 	PromptFailedError                 = "prompt failed %v"
 	GeneratingKeystoreError           = "failed to generate keystore folder. Error: %v"
 	ResizingPtyError                  = "error resizing pty: %v"

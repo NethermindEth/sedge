@@ -1,6 +1,5 @@
 dependencies:
   - docker
-  - docker-compose
 
 executionClients:
   - nethermind

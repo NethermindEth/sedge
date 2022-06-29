@@ -152,7 +152,7 @@ func TestBuildCommands(t *testing.T) {
 					Path: "./testdir/docker-compose.yml",
 				}).Cmd
 			},
-			output: "docker-compose -f ./testdir/docker-compose.yml down",
+			output: "docker compose -f ./testdir/docker-compose.yml down",
 		},
 		{
 			descr: `BuildDockerComposeLogsCMD(DockerComposeLogsOptions{
@@ -169,7 +169,7 @@ func TestBuildCommands(t *testing.T) {
 					Tail:     20,
 				}).Cmd
 			},
-			output: "docker-compose -f ./testdir/docker-compose.yml logs --follow A B",
+			output: "docker compose -f ./testdir/docker-compose.yml logs --follow A B",
 		},
 		{
 			descr: `BuildDockerComposeLogsCMD(DockerComposeLogsOptions{
@@ -186,7 +186,7 @@ func TestBuildCommands(t *testing.T) {
 					Tail:     20,
 				}).Cmd
 			},
-			output: "docker-compose -f ./testdir/docker-compose.yml logs --tail=20 A B",
+			output: "docker compose -f ./testdir/docker-compose.yml logs --tail=20 A B",
 		},
 		{
 			descr: `BuildDockerComposeLogsCMD(DockerComposeLogsOptions{
@@ -203,7 +203,7 @@ func TestBuildCommands(t *testing.T) {
 					Tail:     -1,
 				}).Cmd
 			},
-			output: "docker-compose -f ./testdir/docker-compose.yml logs A B",
+			output: "docker compose -f ./testdir/docker-compose.yml logs A B",
 		},
 		{
 			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
@@ -216,7 +216,7 @@ func TestBuildCommands(t *testing.T) {
 					Services: true,
 				}).Cmd
 			},
-			output: "docker-compose -f ./testdir/docker-compose.yml ps --services",
+			output: "docker compose -f ./testdir/docker-compose.yml ps --services",
 		},
 		{
 			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
@@ -231,7 +231,7 @@ func TestBuildCommands(t *testing.T) {
 					FilterRunning: true,
 				}).Cmd
 			},
-			output: "docker-compose -f ./testdir/docker-compose.yml ps --services --filter status=running",
+			output: "docker compose -f ./testdir/docker-compose.yml ps --services --filter status=running",
 		},
 		{
 			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
@@ -246,7 +246,7 @@ func TestBuildCommands(t *testing.T) {
 					FilterRunning: true,
 				}).Cmd
 			},
-			output: "docker-compose -f ./testdir/docker-compose.yml ps --quiet --filter status=running",
+			output: "docker compose -f ./testdir/docker-compose.yml ps --quiet --filter status=running",
 		},
 		{
 			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
@@ -259,7 +259,7 @@ func TestBuildCommands(t *testing.T) {
 					Quiet: true,
 				}).Cmd
 			},
-			output: "docker-compose -f ./testdir/docker-compose.yml ps --quiet",
+			output: "docker compose -f ./testdir/docker-compose.yml ps --quiet",
 		},
 		{
 			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
@@ -270,7 +270,7 @@ func TestBuildCommands(t *testing.T) {
 					Path: "./testdir/docker-compose.yml",
 				}).Cmd
 			},
-			output: "docker-compose -f ./testdir/docker-compose.yml ps",
+			output: "docker compose -f ./testdir/docker-compose.yml ps",
 		},
 		{
 			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
@@ -283,7 +283,7 @@ func TestBuildCommands(t *testing.T) {
 					ServiceName: "service",
 				}).Cmd
 			},
-			output: "docker-compose -f ./testdir/docker-compose.yml ps service",
+			output: "docker compose -f ./testdir/docker-compose.yml ps service",
 		},
 		{
 			descr: `BuildDockerComposePSCMD(DockerComposePsOptions{
@@ -298,7 +298,7 @@ func TestBuildCommands(t *testing.T) {
 					ServiceName: "service",
 				}).Cmd
 			},
-			output: "docker-compose -f ./testdir/docker-compose.yml ps --quiet service",
+			output: "docker compose -f ./testdir/docker-compose.yml ps --quiet service",
 		},
 		{
 			descr: `BuildDockerComposeUpCMD(DockerComposeUpOptions{
@@ -311,7 +311,7 @@ func TestBuildCommands(t *testing.T) {
 					Services: []string{"A", "B"},
 				}).Cmd
 			},
-			output: "docker-compose -f ./testdir/docker-compose.yml up -d A B",
+			output: "docker compose -f ./testdir/docker-compose.yml up -d A B",
 		},
 		{
 			descr: `BuildDockerInspectCMD(DockerInspectOptions{
