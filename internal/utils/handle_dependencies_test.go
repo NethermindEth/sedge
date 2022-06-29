@@ -96,26 +96,31 @@ func TestHandleInstructions(t *testing.T) {
 	}
 
 	inputs := []struct {
+		caseName      string
 		dependencies  []string
 		handlerResult error
 		isErr         bool
 	}{
 		{
+			"No dependencies to handle",
 			[]string{},
 			nil,
 			false,
 		},
 		{
+			"Handle docker and docker-composes",
 			[]string{"docker", "docker-compose"},
 			nil,
-			false,
+			true,
 		},
 		{
+			"Handle docker and docker-compose with handler failure",
 			[]string{"docker", "docker-compose"},
 			fmt.Errorf("unexpected error"),
 			true,
 		},
 		{
+			"Handle docker and invalid dependency",
 			[]string{"docker", "wR0n9"},
 			nil,
 			true,
@@ -123,26 +128,28 @@ func TestHandleInstructions(t *testing.T) {
 	}
 
 	for _, input := range inputs {
-		descr := fmt.Sprintf("HandlerInstruction(%s,...)", input.dependencies)
-		err := HandleInstructions(input.dependencies, func(dependency string) error {
-			contained := false
-			for _, expected := range input.dependencies {
-				if dependency == expected {
-					contained = true
+		t.Run(input.caseName, func(t *testing.T) {
+			descr := fmt.Sprintf("HandlerInstruction(%s,...)", input.dependencies)
+			err := HandleInstructions(input.dependencies, func(dependency string) error {
+				contained := false
+				for _, expected := range input.dependencies {
+					if dependency == expected {
+						contained = true
+					}
 				}
-			}
-			if !contained {
-				t.Errorf("%s handler called on unnexpected dependency %s", descr, dependency)
-			}
+				if !contained {
+					t.Errorf("%s handler called on unnexpected dependency %s", descr, dependency)
+				}
 
-			t.Logf("%s handler returning error %v", descr, input.handlerResult)
-			return input.handlerResult
+				t.Logf("%s handler returning error %v", descr, input.handlerResult)
+				return input.handlerResult
+			})
+			if input.isErr && err == nil {
+				t.Errorf("%s expected to fail", descr)
+			} else if !input.isErr && err != nil {
+				t.Errorf("%s failed: %v", descr, err)
+			}
 		})
-		if input.isErr && err == nil {
-			t.Errorf("%s expected to fail", descr)
-		} else if !input.isErr && err != nil {
-			t.Errorf("%s failed: %v", descr, err)
-		}
 	}
 }
 
