@@ -42,7 +42,8 @@
       - --metrics.port=5054
       - --jwt-secret=/tmp/jwt/jwtsecret{{with .CheckpointSyncUrl}}
       - --weakSubjectivitySyncLatest
-      - --weakSubjectivityServerUrl={{.}}{{end}}
+      - --weakSubjectivityServerUrl={{.}}{{end}}{{range $flag := .ClExtraFlags}}
+      - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
       options:

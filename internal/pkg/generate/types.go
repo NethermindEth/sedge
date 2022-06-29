@@ -30,6 +30,9 @@ type GenerationData struct {
 	FeeRecipient      string
 	JWTSecretPath     string
 	FallbackELUrls    []string
+	ElExtraFlags      []string
+	ClExtraFlags      []string
+	VlExtraFlags      []string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -40,4 +43,7 @@ type DockerComposeData struct {
 	CheckpointSyncUrl string
 	FeeRecipient      string
 	FallbackELUrls    []string
+	ElExtraFlags      []string
+	ClExtraFlags      []string
+	VlExtraFlags      []string
 }

@@ -27,11 +27,12 @@
       - --log-destination=CONSOLE
       - --validators-graffiti=${GRAFFITI}
       - --validator-keys=/var/lib/teku/keys:/var/lib/teku/passwords
-      {{with .FeeRecipient}}- --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
-      - --metrics-port=5056
+      - --metrics-port=5056{{with .FeeRecipient}}
+      - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
+      - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
       options:

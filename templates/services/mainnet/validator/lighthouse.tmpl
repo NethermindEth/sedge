@@ -30,7 +30,8 @@
       - --graffiti=${GRAFFITI}
       - --network=${NETWORK}
       - --debug-level=${VL_LOG_LEVEL}
-      - --validators-dir=/var/lib/lighthouse
+      - --validators-dir=/var/lib/lighthouse{{range $flag := .VlExtraFlags}}
+      - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
       options:

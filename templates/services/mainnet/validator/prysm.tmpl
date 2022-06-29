@@ -31,7 +31,8 @@
       - --${NETWORK}
       - --enable-doppelganger
       - --accept-terms-of-use
-      - --wallet-password-file=/var/lib/prysm/wallet/password.txt
+      - --wallet-password-file=/var/lib/prysm/wallet/password.txt{{range $flag := .VlExtraFlags}}
+      - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
       options:

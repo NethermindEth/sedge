@@ -118,6 +118,9 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		CheckpointSyncUrl: gd.CheckpointSyncUrl,
 		FeeRecipient:      gd.FeeRecipient,
 		FallbackELUrls:    gd.FallbackELUrls,
+		ElExtraFlags:      gd.ElExtraFlags,
+		ClExtraFlags:      gd.ClExtraFlags,
+		VlExtraFlags:      gd.VlExtraFlags,
 	}
 
 	// Print docker-compose file

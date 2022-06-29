@@ -43,7 +43,8 @@
       - --authrpc.port=8551
       - --authrpc.vhosts=*
       - ${EC_METRICS_ENABLED:-""}
-      - --metrics.port=8008
+      - --metrics.port=8008{{range $flag := .ElExtraFlags}}
+      - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
       options:

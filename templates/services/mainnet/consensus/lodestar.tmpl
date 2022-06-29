@@ -31,9 +31,10 @@
       - --eth1.providerUrls=${EC_NODE}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
       - --network.targetPeers=${CC_PEER_COUNT}
       - --metrics.enabled=true
-      - --metrics.port=5054
-      {{with .CheckpointSyncUrl}}- --weakSubjectivitySyncLatest
-      - --weakSubjectivityServerUrl={{.}}{{end}}
+      - --metrics.port=5054{{with .CheckpointSyncUrl}}
+      - --weakSubjectivitySyncLatest
+      - --weakSubjectivityServerUrl={{.}}{{end}}{{range $flag := .ClExtraFlags}}
+      - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
       options:

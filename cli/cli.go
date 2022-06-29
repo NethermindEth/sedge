@@ -51,6 +51,9 @@ var (
 	y                 bool
 	services          *[]string
 	fallbackEL        *[]string
+	elExtraFlags      *[]string
+	clExtraFlags      *[]string
+	vlExtraFlags      *[]string
 	waitingTime       time.Duration
 )
 
@@ -217,6 +220,9 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		FeeRecipient:      feeRecipient,
 		JWTSecretPath:     jwtPath,
 		FallbackELUrls:    *fallbackEL,
+		ElExtraFlags:      *elExtraFlags,
+		ClExtraFlags:      *clExtraFlags,
+		VlExtraFlags:      *vlExtraFlags,
 	}
 	if err = generate.GenerateScripts(gd); err != nil {
 		return []error{err}
@@ -277,6 +283,8 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 func init() {
 	rootCmd.AddCommand(cliCmd)
 
+	cliCmd.Flags().SortFlags = false
+
 	// Local flags
 	cliCmd.Flags().StringVarP(&executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name.")
 
@@ -303,6 +311,12 @@ func init() {
 	services = cliCmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all, none. The 'all' and 'none' option must be used alone. Example: '1click cli -r --run-clients=consensus,validator'")
 
 	fallbackEL = cliCmd.Flags().StringSlice("fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: '1click cli -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
+
+	elExtraFlags = cliCmd.Flags().StringArray("el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: '1click cli --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+
+	clExtraFlags = cliCmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: '1click cli --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+
+	vlExtraFlags = cliCmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: '1click cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 
 	// Initialize monitoring tool
 	initMonitor(func() MonitoringTool {

@@ -38,7 +38,8 @@
       - --validators-dir=/data/validators
       - --metrics
       - --metrics-port=5056
-      - --metrics-address=0.0.0.0
+      - --metrics-address=0.0.0.0{{range $flag := .VlExtraFlags}}
+      - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
       options:

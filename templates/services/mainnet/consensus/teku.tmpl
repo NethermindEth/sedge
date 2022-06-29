@@ -33,8 +33,9 @@
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
-      - --metrics-port=5054
-      {{with .CheckpointSyncUrl}}- --initial-state={{.}}/eth/v2/debug/beacon/states/{{end}}
+      - --metrics-port=5054{{with .CheckpointSyncUrl}}
+      - --initial-state={{.}}/eth/v2/debug/beacon/states/{{end}}{{range $flag := .ClExtraFlags}}
+      - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
       options:

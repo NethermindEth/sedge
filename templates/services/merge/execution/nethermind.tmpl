@@ -34,7 +34,8 @@
       - --JsonRpc.JwtSecretFile=/tmp/jwt/jwtsecret
       - --JsonRpc.AdditionalRpcUrls=["http://0.0.0.0:8551|http;ws|net;eth;subscribe;engine;web3;client"]
       - --HealthChecks.Enabled=${NETHERMIND_HEALTH_CHECKS_ENABLED}
-      - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}
+      - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}{{range $flag := .ElExtraFlags}}
+      - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
       options:

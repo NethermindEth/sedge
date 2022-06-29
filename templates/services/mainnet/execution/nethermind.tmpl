@@ -29,7 +29,8 @@
       - --JsonRpc.Host=0.0.0.0
       - --JsonRpc.EnabledModules=${EC_ENABLED_MODULES}
       - --HealthChecks.Enabled=${NETHERMIND_HEALTH_CHECKS_ENABLED}
-      - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}
+      - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}{{range $flag := .ElExtraFlags}}
+      - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
       options:

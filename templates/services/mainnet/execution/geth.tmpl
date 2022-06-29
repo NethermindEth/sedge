@@ -31,7 +31,8 @@
       - --verbosity
       - ${GETH_LOG_LEVEL}
       - ${EC_METRICS_ENABLED:-""}
-      - --metrics.port=8008
+      - --metrics.port=8008{{range $flag := .ElExtraFlags}}
+      - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
       options:

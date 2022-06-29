@@ -32,7 +32,8 @@
       - --logLevelFile=${VL_LOG_LEVEL}
       - --importKeystoresPath=/var/lib/lodestar/keystore
       - --importKeystoresPassword=/var/lib/lodestar/keystore/keystore_password.txt
-      - --server=${CC_NODE}
+      - --server=${CC_NODE}{{range $flag := .VlExtraFlags}}
+      - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
       options:

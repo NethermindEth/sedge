@@ -30,8 +30,9 @@
       - --eth1-header-req-limit=150
       - --accept-terms-of-use
       - --monitoring-host=0.0.0.0
-      - --monitoring-port=5054
-      {{with .CheckpointSyncUrl}}- --checkpoint-sync-url={{.}}{{end}}
+      - --monitoring-port=5054{{with .CheckpointSyncUrl}}
+      - --checkpoint-sync-url={{.}}{{end}}{{range $flag := .ClExtraFlags}}
+      - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
       options:
