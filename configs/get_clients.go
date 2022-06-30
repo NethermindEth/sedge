@@ -8,7 +8,7 @@ import (
 )
 
 /*
-GetConfigClients :
+ConfigClients :
 Get the client names of type <clientType> from configuration file
 
 params :-
@@ -19,7 +19,7 @@ returns :-
 a. []string
 List of clients names of type <clientType>
 */
-func GetConfigClients(clientType string) ([]string, error) {
+func ConfigClients(clientType string) ([]string, error) {
 	clients := viper.GetStringSlice(clientType + "Clients")
 	if len(clients) == 0 {
 		return nil, fmt.Errorf(NoClientsFoundError, clientType)

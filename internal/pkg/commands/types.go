@@ -28,7 +28,7 @@ type CMDRunnerOptions struct {
 	RunAsAdmin bool
 }
 
-// DockerComposeUpOptions : Represent docker-compose up command options
+// DockerComposeUpOptions : Represent docker compose up command options
 type DockerComposeUpOptions struct {
 	// Path : path to docker-compose.yaml
 	Path string
@@ -42,15 +42,21 @@ type DockerPSOptions struct {
 	All bool
 }
 
-// DockerComposePsOptions : Represents docker-compose ps command options
+// DockerComposePsOptions : Represents docker compose ps command options
 type DockerComposePsOptions struct {
 	// Path : path to docker-compose.yaml
 	Path string
-	// Services : use with --services
+	// Services : use with --services to display services
 	Services bool
+	// Quiet : use with --quietto display only IDs
+	Quiet bool
+	// ServiceName: Service argument
+	ServiceName string
+	// FilterRunning : use with --filter status=running
+	FilterRunning bool
 }
 
-// DockerComposeLogsOptions : Represents docker-compose log command options
+// DockerComposeLogsOptions : Represents docker compose log command options
 type DockerComposeLogsOptions struct {
 	// Path : path to docker-compose.yaml
 	Path string
@@ -74,9 +80,11 @@ type DockerBuildOptions struct {
 type DockerInspectOptions struct {
 	// Name : docker object name
 	Name string
+	// Format : Go template for --format flag
+	Format string
 }
 
-// DockerComposeDownOptions : Represents docker-compose down command options
+// DockerComposeDownOptions : Represents docker compose down command options
 type DockerComposeDownOptions struct {
 	// Path : path to docker-compose.yaml
 	Path string

@@ -1,0 +1,61 @@
+{{/* prysm.tmpl */}}
+{{ define "consensus" }}
+  {{with .CcPrysmCfg}}config_beacon:
+    container_name: config_prysm_bc
+    image: busybox:latest
+    volumes:
+      - ./:/tmp/app
+    command: >
+      sh -c "wget -O /tmp/app/config.yml ${CONFIG_URL};
+      wget -O /tmp/app/genesis.ssz ${GENESIS_URL}"{{end}}
+
+  consensus:
+    stop_grace_period: 30s
+    container_name: consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    depends_on: 
+      config_beacon:
+        condition: service_completed_successfully
+    networks:
+      - 1click
+    volumes:
+      - ${CC_DATA_DIR}:/var/lib/prysm
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{with .CcPrysmCfg}}
+      - ./config.yml:/network_config/config.yml
+      - ./genesis.ssz:/network_config/genesis.ssz{{end}}
+    ports:
+      - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
+      - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
+      - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"{{if .MapAllPorts}}
+      - "{{.ClApiPort}}:{{.ClApiPort}}"{{end}}
+    expose:
+      - {{.ClApiPort}}
+    command:{{with .CcPrysmCfg}}
+      - --chain-config-file=/network_config/config.yml
+      - --genesis-state=/network_config/genesis.ssz{{end}}
+      - --bootstrap-node=${CL_BOOTNODE_1}
+      - --bootstrap-node=${CL_BOOTNODE_2}
+      - --p2p-tcp-port={{.ClDiscoveryPort}}
+      - --p2p-udp-port={{.ClDiscoveryPort}}
+      - --jwt-secret=/tmp/jwtsecret
+      - --rpc-host=0.0.0.0
+      - --rpc-port={{.ClApiPort}}
+      - --datadir=/var/lib/prysm/
+      - --verbosity=${CC_LOG_LEVEL}
+      - --${NETWORK}
+      - --p2p-max-peers=${CC_PEER_COUNT}
+      - --http-web3provider=${EC_AUTH_URL}{{range $url := .FallbackELUrls}}
+      - --fallback-web3provider={{$url}}{{end}}
+      - --accept-terms-of-use{{with .FeeRecipient}}
+      - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
+      - --monitoring-host=0.0.0.0
+      - --monitoring-port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}
+      - --checkpoint-sync-url={{.}}{{end}}{{range $flag := .ClExtraFlags}}
+      - --{{$flag}}{{end}}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}

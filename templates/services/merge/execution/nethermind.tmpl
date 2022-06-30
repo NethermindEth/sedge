@@ -1,0 +1,48 @@
+{{/* nethermind.tmpl */}}
+{{ define "execution" }}
+  execution:
+    stop_grace_period: 30s
+    container_name: execution-client
+    restart: unless-stopped
+    image: ${EC_IMAGE_VERSION}
+    networks:
+      - 1click
+    volumes:
+      - ${EC_DATA_DIR}:/nethermind/data
+      - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
+      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
+      - "{{.ElApiPort}}:{{.ElApiPort}}"
+      - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
+    expose:
+      - {{.ElApiPort}}
+      - {{.ElAuthPort}}
+    command: 
+      - --config=${NETWORK}
+      - --datadir=/nethermind/data
+      - --log=${NETHERMIND_LOG_LEVEL}{{with .TTD}}
+      - --Merge.TerminalTotalDifficulty=${TTD}{{end}}
+      - --Merge.TerminalBlockNumber=0
+      - --Metrics.Enabled=${EC_METRICS_ENABLED}
+      - --Metrics.NodeName=${EC_NODENAME}
+      - --Metrics.PushGatewayUrl=${NETHERMIND_METRICS_PUSH_GATEWAY_URL}
+      - --Metrics.ExposePort={{.ElMetricsPort}}
+      - --Sync.SnapSync=${EC_SNAP_SYNC_ENABLED}
+      - --JsonRpc.Enabled=true
+      - --JsonRpc.Host=0.0.0.0
+      - --JsonRpc.Port={{.ElApiPort}}
+      - --JsonRpc.EnabledModules=${EC_ENABLED_MODULES}
+      - --JsonRpc.JwtSecretFile=/tmp/jwt/jwtsecret
+      - --JsonRpc.AdditionalRpcUrls=["http://0.0.0.0:{{.ElAuthPort}}|http;ws|net;eth;subscribe;engine;web3;client"]
+      - --Network.DiscoveryPort={{.ElDiscoveryPort}}
+      - --HealthChecks.Enabled=${NETHERMIND_HEALTH_CHECKS_ENABLED}
+      - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}{{range $flag := .ElExtraFlags}}
+      - --{{$flag}}{{end}}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}

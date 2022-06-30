@@ -1,2 +1,2 @@
 {{/* deposit-cli-new.tmpl */}}
-docker run -it --rm -v {{.Path}}/keystore:/app/validator_keys deposit-cli:local new-mnemonic --chain {{.Network}}
+docker run -it --rm -v {{.Path}}:/app/validator_keys {{.Image}} new-mnemonic --chain {{.Network}} --keystore_password {{if .Password}}{{.Password}}{{else if .LenPass}}{{range .LenPass}}*{{end}}{{end}} {{if .Eth1WithdrawalAddress}}--eth1_withdrawal_address {{.Eth1WithdrawalAddress}}{{end}}

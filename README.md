@@ -26,7 +26,7 @@ We don't want to stop at Ethereum. We also want to help stakers of other PoS net
 
 #### Using Go
 
-If you have at least `go1.18.0` installed then this command will install the `1click` executable along with the library and its dependencies:
+If you have at least `go1.18.2` installed then this command will install the `1click` executable along with the library and its dependencies:
 
 ```
 go install github.com/NethermindEth/1click/cmd/1click@latest
@@ -64,25 +64,15 @@ sudo $GOPATH/bin/1click /usr/local/bin/
 sudo cp 1click/build/1click /usr/local/bin/
 ```
 
-#### Download the binary (only for linux)
-
-> This is temporary until the first release
-
-Download directly the binary and put it in `/usr/local/bin`:
-
-```
-sudo curl -LJ -o /usr/local/bin/1click https://github.com/NethermindEth/1click/raw/main/build/1click
-sudo chmod +x /usr/local/bin/1click
-```
-
 ### Dependencies
-`1click` dependencies are `docker` and `docker-compose`, but if you don't have those installed, `1click` will show instructions to install them, or install them for you.
+`1click` dependencies are `docker` with `docker compose` plugin, but if you don't have those installed, `1click` will show instructions to install them, or install them for you.
 
 ### Quick run
 With `1click cli` you can go through the entire workflow setup:
 1. Check dependencies
-2. Generate a `docker-compose` script with randomized clients selection and `.env`
-3. Execute the `docker-compose` script (only execution and consensus nodes will be executed by default)
+2. Generate jwtsecret (not for mainnet and prater)
+3. Generate a `docker-compose` script with randomized clients selection and `.env`
+4. Execute the `docker-compose` script (only execution and consensus nodes will be executed by default)
   
 ## 🔥 What can you do right now with this tool?
 
@@ -90,11 +80,20 @@ With `1click cli` you can go through the entire workflow setup:
 - Generate the keystore folder using the [staking-deposit-cli](https://github.com/ethereum/staking-deposit-cli) tool with `1click keys`
 - Don't remember `docker-compose` commands or flags? No problem, you can check the logs of the running services of the generated `docker-compose` script with `1click logs` and shutdown the services with `1click down`
 
-> The setup is currently designed to start all the three nodes required to start a validator (execution, consensus and validator node). This will change soon and `1click` will let you connect to a public or remote node, or to automatically start the validator node when the execution and consensus nodes in the setup are synced. Although you can do all of this after generating the docker-compose script 😉
+> The setup is currently designed to start all the three nodes required to start a validator (execution, consensus and validator node). This will change soon and `1click` will let you connect to a public or remote node. The execution and consensus nodes will be executed first, and the validator node will be executed automatically after those nodes are sync, giving you time to prepare the keystore and make the deposit for your staked ETH.
 
 ## Supported networks and clients
 
 ### Mainnet
+
+| Execution  | Consensus  | Validator  |
+| ---------- | ---------- | ---------- |
+| Geth       | Lighthouse | Lighthouse |
+| Nethermind | Lodestar   | Lodestar   |
+|            | Prysm      | Prysm      |
+|            | Teku       | Teku       |
+
+### Kiln
 
 | Execution  | Consensus  | Validator  |
 | ---------- | ---------- | ---------- |
@@ -109,14 +108,16 @@ The following roadmap covers the main features and ideas we want to implement bu
 ### Version 0.1 (coming soon in May-June 2022)
 - [x] Generate `docker-compose` scripts and `.env` files for selected clients with a cli tool
 - [x] Generate keystore folder with the cli
-- [ ] Test coverage (unit and integration tests)
-- [ ] Monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
+- [x] Test coverage (unit tests)
+- [x] Integrate Kiln network
 - [ ] Integrate MEV-Boost as recommended setting  
-- [ ] Use public execution and consensus nodes
 
 ### Version 0.X
+- [ ] Use public execution and consensus nodes
+- [ ] Monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
 - [ ] TUI for guided and more interactive setup (better UX)
-- [ ] Integrate Kiln network
+- [ ] Integrate Ropsten network
+- [ ] Integrate Sepolia network
 - [ ] Integrate Prater network
 - [ ] Off-premise setup support
 - [ ] Improve documentation

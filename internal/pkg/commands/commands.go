@@ -13,6 +13,8 @@ type CommandRunner interface {
 
 	BuildDockerBuildCMD(options DockerBuildOptions) Command
 
+	BuildDockerPullCMD(options DockerBuildOptions) Command
+
 	BuildDockerInspectCMD(options DockerInspectOptions) Command
 
 	BuildDockerComposeDownCMD(options DockerComposeDownOptions) Command

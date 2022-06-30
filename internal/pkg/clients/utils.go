@@ -2,12 +2,15 @@ package clients
 
 import (
 	"crypto/rand"
+	"errors"
 	"math/big"
+
+	"github.com/NethermindEth/1click/configs"
 )
 
 /*
 RandomChoice :
-Select a random element from a ClientMap
+Select a random supported client from a ClientMap
 
 params :-
 a. clients ClientMap
@@ -20,11 +23,19 @@ b. error
 Error if any
 */
 func RandomChoice(clients ClientMap) (client Client, err error) {
-	//TODO: fix error when empty clients
+	if len(clients) == 0 {
+		return client, errors.New(configs.EmptyClientMapError)
+	}
 
 	list := make([]Client, 0)
 	for _, client := range clients {
-		list = append(list, client)
+		if client.Supported {
+			list = append(list, client)
+		}
+	}
+
+	if len(list) == 0 {
+		return client, errors.New(configs.NoSupportedClientsError)
 	}
 
 	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(list))))

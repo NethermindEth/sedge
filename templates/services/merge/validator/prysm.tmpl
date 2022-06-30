@@ -1,0 +1,63 @@
+{{/* prysm.tmpl */}}
+{{ define "validator" }}
+  {{with .VlPrysmCfg}}config_validator:
+    container_name: config_prysm_val
+    image: busybox:latest
+    volumes:
+      - ./:/tmp/app
+    command: >
+      sh -c "wget -O /tmp/app/config.yml ${CONFIG_URL}"{{end}}
+
+  validator-import:
+    image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      config_validator:
+        condition: service_completed_successfully
+    networks:
+      - 1click
+    container_name: validator-import-client
+    volumes:
+      - ${VL_DATA_DIR}:/data
+      - ${KEYSTORE_DIR}:/keystore{{with .VlPrysmCfg}}
+      - ./config.yml:/network_config/config.yml{{end}}
+    command: |
+      accounts import
+      --accept-terms-of-use{{with .VlPrysmCfg}}
+      --chain-config-file=/network_config/config.yml{{end}}
+      --keys-dir=/keystore/validator_keys
+      --wallet-dir=/data/validator/wallet
+      --wallet-password-file=/keystore/keystore_password.txt
+      --account-password-file=/keystore/keystore_password.txt
+
+  validator:
+    container_name: validator-client
+    image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      validator-import:
+        condition: service_completed_successfully
+    networks:
+      - 1click
+    ports:
+      - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
+    volumes:
+      - ${VL_DATA_DIR}:/var/lib/prysm
+      - ${KEYSTORE_DIR}/keystore_password.txt:/keystore/keystore_password.txt{{with .VlPrysmCfg}}
+      - ./config.yml:/network_config/config.yml{{end}}
+    command:
+      - --datadir=/var/lib/prysm
+      - --wallet-dir=/var/lib/prysm/wallet
+      - --wallet-password-file=/keystore/keystore_password.txt{{with .VlPrysmCfg}}
+      - --chain-config-file=/network_config/config.yml{{end}}
+      - --beacon-rpc-provider=${CC_API_URL}
+      - --graffiti=${GRAFFITI}
+      - --verbosity=${VL_LOG_LEVEL}
+      - --accept-terms-of-use
+      - --monitoring-host=0.0.0.0
+      - --monitoring-port={{.VlMetricsPort}}{{range $flag := .VlExtraFlags}}
+      - --{{$flag}}{{end}}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}

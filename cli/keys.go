@@ -16,20 +16,25 @@ limitations under the License.
 package cli
 
 import (
+	"errors"
+	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
 	"github.com/NethermindEth/1click/configs"
 	"github.com/NethermindEth/1click/internal/utils"
+	"github.com/manifoldco/promptui"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var (
-	network          string
-	path             string
-	existingMnemonic bool
+	path                  string
+	eth1WithdrawalAddress string
+	existingMnemonic      bool
 )
 
 var (
@@ -70,12 +75,42 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 		}
 		log.Info(configs.DependenciesOK)
 
+		// Prompt for eth1WithdrawalAddress
+		if eth1WithdrawalAddress == "" {
+			eth1WithdrawalPrompt()
+		}
+
+		// Get keystore password
+		password := passwordPrompt()
+
+		// Create keystore folder
 		log.Info(configs.GeneratingKeystore)
-		if err := utils.GenerateValidatorKey(existingMnemonic, network, path); err != nil {
+		if err := os.MkdirAll(filepath.Join(path, "keystore"), 0766); err != nil {
+			log.Fatal(err)
+		}
+
+		keystorePath := filepath.Join(path, "keystore", "validator_keys")
+		data := utils.ValidatorKeyData{
+			Existing:              existingMnemonic,
+			Network:               network,
+			Path:                  keystorePath,
+			Password:              password,
+			Eth1WithdrawalAddress: eth1WithdrawalAddress,
+		}
+		if err := utils.GenerateValidatorKey(data); err != nil {
 			log.Fatalf(configs.GeneratingKeystoreError, err)
 		}
 
-		log.Warn(configs.ReviewKeystorePath)
+		// Check if keystore generation went ok
+		if !emptyKeystore() {
+			log.Infof(configs.KeysFoundAt, keystorePath)
+			if err := createKeystorePassword(password); err != nil {
+				log.Fatalf(configs.CreatingKeystorePasswordError, err)
+			}
+
+			log.Warn(configs.ReviewKeystorePath)
+		}
+
 	},
 }
 
@@ -90,9 +125,113 @@ func init() {
 	log.Debug(pwd)
 
 	// Local flags
-	keysCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, prater, etc.")
+	keysCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, prater, ropsten, sepolia etc.")
 
 	keysCmd.Flags().StringVarP(&path, "path", "p", pwd, "Absolute path to keystore folder. e.g. /home/user/keystore")
 
+	keysCmd.Flags().StringVar(&eth1WithdrawalAddress, "eth1-withdrawal-address", "", "If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
+
 	keysCmd.Flags().BoolVarP(&existingMnemonic, "existing", "e", false, "Use existing mnemonic")
+}
+
+func passwordPrompt() string {
+	// notest
+	validate := func(input string) error {
+		if len(input) < 8 {
+			return errors.New(configs.KeystorePasswordError)
+		}
+		return nil
+	}
+
+	prompt := promptui.Prompt{
+		Label:    "Please enter the password you will use for the validator keystore",
+		Validate: validate,
+		Mask:     '*',
+	}
+
+	result, err := prompt.Run()
+
+	if err != nil {
+		log.Errorf(configs.PromptFailedError, err)
+		return ""
+	}
+
+	validate = func(input string) error {
+		if input != result {
+			return errors.New(configs.KeystorePasswordRetryError)
+		}
+		return nil
+	}
+
+	prompt = promptui.Prompt{
+		Label:    "Please re-enter the password. Press Ctrl+C to retry",
+		Validate: validate,
+		Mask:     '*',
+	}
+
+	_, err = prompt.Run()
+
+	if err != nil {
+		log.Errorf(configs.PromptFailedError, err)
+		return passwordPrompt()
+	}
+
+	return result
+}
+
+func createKeystorePassword(password string) error {
+	log.Debug(configs.CreatingKeystorePassword)
+
+	// Create file keystore_password.txt
+	file, err := os.Create(filepath.Join(path, "keystore", "keystore_password.txt"))
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Write password to file
+	_, err = file.WriteString(password)
+	if err != nil {
+		return err
+	}
+
+	log.Info(configs.KeystorePasswordCreated)
+	return nil
+}
+
+// Check if keystore folder is not empty
+func emptyKeystore() bool {
+	f, err := os.Open(filepath.Join(path, "keystore"))
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	_, err = f.Readdirnames(1)
+	// Either not empty or error, suits both cases
+	return err == io.EOF
+}
+
+func eth1WithdrawalPrompt() error {
+	// notest
+	validate := func(input string) error {
+		if input != "" && !utils.IsAddress(input) {
+			return errors.New("invalid ETH1 address")
+		}
+		return nil
+	}
+
+	prompt := promptui.Prompt{
+		Label:    "Please enter a Eth1 address to be used to create the withdrawal credentials. You can leave it blank and press enter.",
+		Validate: validate,
+	}
+
+	result, err := prompt.Run()
+
+	if err != nil {
+		return fmt.Errorf(configs.PromptFailedError, err)
+	}
+
+	eth1WithdrawalAddress = result
+	return nil
 }

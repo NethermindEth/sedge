@@ -261,7 +261,6 @@ func runInPty(cmd *exec.Cmd, getOutput bool) (out string, err error) {
 
 			// Copy stdin to the pty (where are not using stdin at the moment)
 			// NOTE: The goroutine will keep reading until the next keystroke before returning.
-			//errCh1 := make(chan error)
 			go func() {
 				_, err = io.Copy(ptmx, os.Stdin)
 				log.Error(err)

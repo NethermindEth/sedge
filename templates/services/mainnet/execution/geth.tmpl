@@ -1,0 +1,42 @@
+{{/* geth.tmpl */}}
+{{ define "execution" }}
+  execution:
+    stop_grace_period: 1m
+    container_name: execution-client
+    restart: unless-stopped
+    image: ${EC_IMAGE_VERSION}
+    networks:
+      - 1click
+    volumes:
+      - ${EC_DATA_DIR}:/var/lib/goethereum
+    ports:
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
+      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
+      - "{{.ElApiPort}}:{{.ElApiPort}}"{{end}}
+    expose:
+      - {{.ElApiPort}}
+    command: 
+      - --syncmode=${EC_SYNC_MODE}
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.vhosts=*
+      - --http.corsdomain=*
+      - --http.api
+      - web3,eth,net
+      - --datadir
+      - /var/lib/goethereum
+      - --port={{.ElDiscoveryPort}}
+      - --http.port={{.ElApiPort}}
+      - --${NETWORK}
+      - --verbosity
+      - ${GETH_LOG_LEVEL}
+      - ${EC_METRICS_ENABLED:-""}
+      - --metrics.port={{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
+      - --{{$flag}}{{end}}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}

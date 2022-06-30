@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"path/filepath"
 	"text/template"
 
 	"github.com/NethermindEth/1click/configs"
@@ -22,7 +23,7 @@ a. error
 Error if any
 */
 func GenerateConfig(path string) (err error) {
-	rawTmp, err := templates.Config.ReadFile("config/config.tmpl")
+	rawTmp, err := templates.Config.ReadFile(filepath.Join("config", "config.tmpl"))
 	if err != nil {
 		return
 	}
@@ -35,7 +36,8 @@ func GenerateConfig(path string) (err error) {
 	// Get supported clients
 	clientsMap := make(map[string][]string)
 	for _, clientType := range []string{"execution", "consensus", "validator"} {
-		supportedClients, err := clients.GetSupportedClients(clientType)
+		c := clients.ClientInfo{Network: "mainnet"}
+		supportedClients, err := c.SupportedClients(clientType)
 		if err != nil {
 			return err
 		}

@@ -8,7 +8,10 @@ import (
 	"github.com/NethermindEth/1click/internal/utils"
 )
 
-const wrongDep string = "wrong_dep"
+const (
+	wrongDep = "wrong_dep"
+	network  = "mainnet"
+)
 
 type generateTestCase struct {
 	execution, consensus, validator, path string
@@ -17,21 +20,22 @@ type generateTestCase struct {
 
 func generateTestCases(t *testing.T) (tests []generateTestCase) {
 	tests = []generateTestCase{}
+	c := clients.ClientInfo{Network: network}
 
-	executionClients, err := clients.GetSupportedClients("execution")
+	executionClients, err := c.SupportedClients("execution")
 	if err != nil {
-		t.Errorf("GetSupportedClients(\"execution\") failed: %v", err)
+		t.Errorf("SupportedClients(\"execution\") failed: %v", err)
 	}
-	consensusClients, err := clients.GetSupportedClients("consensus")
+	consensusClients, err := c.SupportedClients("consensus")
 	if err != nil {
-		t.Errorf("GetSupportedClients(\"consensus\") failed: %v", err)
+		t.Errorf("SupportedClients(\"consensus\") failed: %v", err)
 	}
-	validatorClients, err := clients.GetSupportedClients("validator")
+	validatorClients, err := c.SupportedClients("validator")
 	if err != nil {
-		t.Errorf("GetSupportedClients(\"validator\") failed: %v", err)
+		t.Errorf("SupportedClients(\"validator\") failed: %v", err)
 	}
 
-	// TODO: Add CheckpointSyncUrl and FallbackELUrls to test data
+	// TODO: Add CheckpointSyncUrl, FallbackELUrls and FeeRecipient to test data
 
 	tests = append(tests, generateTestCase{isErr: true})
 
@@ -56,22 +60,26 @@ func validateGeneratedFiles(t *testing.T, testCase generateTestCase) {
 }
 
 func TestGenerateScripts(t *testing.T) {
+	t.Parallel()
 	inputs := generateTestCases(t)
 
-	for _, input := range inputs {
-		descr := fmt.Sprintf("GenerateScripts(%s,%s,%s,%s)", input.execution, input.consensus, input.validator, input.path)
+	for i, input := range inputs {
+		t.Run(fmt.Sprintf("Test case %d", i), func(t *testing.T) {
+			gd := GenerationData{
+				ExecutionClient: input.execution,
+				ConsensusClient: input.consensus,
+				ValidatorClient: input.validator,
+				GenerationPath:  input.path,
+				Network:         network,
+			}
+			descr := fmt.Sprintf("GenerateScripts(%+v)", gd)
 
-		gd := GenerationData{
-			ExecutionClient: input.execution,
-			ConsensusClient: input.consensus,
-			ValidatorClient: input.validator,
-			GenerationPath:  input.path,
-		}
-		if err := GenerateScripts(gd); input.isErr && err == nil {
-			t.Errorf("%s expected to fail", descr)
-		} else if !input.isErr && err != nil {
-			t.Errorf("%s failed: %v", descr, err)
-		}
-		validateGeneratedFiles(t, input)
+			if err := GenerateScripts(gd); input.isErr && err == nil {
+				t.Errorf("%s expected to fail", descr)
+			} else if !input.isErr && err != nil {
+				t.Errorf("%s failed: %v", descr, err)
+			}
+			validateGeneratedFiles(t, input)
+		})
 	}
 }

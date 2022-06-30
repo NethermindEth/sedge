@@ -76,7 +76,7 @@ func buildLogsTestCase(t *testing.T, testName string, services []string, isErr b
 	//TODO: allow modification of the simple runner
 	runner := test.SimpleCMDRunner{
 		SRunCMD: func(c commands.Command) (string, error) {
-			if strings.Contains(c.Cmd, "docker-compose") {
+			if strings.Contains(c.Cmd, "docker compose") {
 				if strings.Contains(c.Cmd, "logs") {
 					tc.dcLogsRuns += 1
 					return "some logs", nil

@@ -92,8 +92,9 @@ Error if any
 func CheckContainers(generationPath string) (string, error) {
 	// Check if docker-compose script is running
 	psCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
-		Services: true,
+		Path:          filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Services:      true,
+		FilterRunning: true,
 	})
 	log.Debugf(configs.RunningCommand, psCMD.Cmd)
 	psCMD.GetOutput = true

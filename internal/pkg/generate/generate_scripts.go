@@ -7,6 +7,8 @@ import (
 	"text/template"
 
 	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/1click/internal/pkg/env"
+	"github.com/NethermindEth/1click/internal/utils"
 	"github.com/NethermindEth/1click/templates"
 	log "github.com/sirupsen/logrus"
 )
@@ -32,6 +34,27 @@ func GenerateScripts(gd GenerationData) (err error) {
 			return err
 		}
 	}
+
+	// Check for port occupation
+	defaultsPorts := map[string]string{
+		"ELDiscovery": configs.DefaultDiscoveryPortEL,
+		"ELMetrics":   configs.DefaultMetricsPortEL,
+		"ELApi":       configs.DefaultApiPortEL,
+		"ELAuth":      configs.DefaultAuthPortEL,
+		"ELWS":        configs.DefaultWSPortEL,
+		"CLDiscovery": configs.DefaultDiscoveryPortCL,
+		"CLMetrics":   configs.DefaultMetricsPortCL,
+		"CLApi":       configs.DefaultApiPortCL,
+		"VLMetrics":   configs.DefaultMetricsPortVL,
+	}
+	ports, err := utils.AssingPorts("localhost", defaultsPorts)
+	if err != nil {
+		return fmt.Errorf(configs.PortOccupationError, err)
+	}
+	gd.Ports = ports
+	// External endpoints will be configured here. Also Ports should be updated with external ports
+	gd.ExecutionEndpoint = configs.OnPremiseExecutionURL
+	gd.ConsensusEndpoint = configs.OnPremiseConsensusURL
 
 	log.Info(configs.GeneratingDockerComposeScript)
 	err = generateDockerComposeScripts(gd)
@@ -79,12 +102,12 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 	}
 
 	clients := map[string]string{
-		"execution/": gd.ExecutionClient,
-		"consensus/": gd.ConsensusClient,
-		"validator/": gd.ValidatorClient,
+		"execution": gd.ExecutionClient,
+		"consensus": gd.ConsensusClient,
+		"validator": gd.ValidatorClient,
 	}
 	for tmpKind, clientName := range clients {
-		tmp, err := templates.Services.ReadFile(filepath.Join("services", tmpKind, clientName+".tmpl"))
+		tmp, err := templates.Services.ReadFile(filepath.Join("services", configs.NetworksToServices[gd.Network], tmpKind, clientName+".tmpl"))
 		if err != nil {
 			return err
 		}
@@ -94,9 +117,42 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		}
 	}
 
+	// Check for TTD in env base template
+	TTD, err := env.CheckVariableBase(env.ReTTD, gd.Network)
+	if err != nil {
+		return err
+	}
+
+	// Check for prysm config
+	ccPrysmCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient)
+	if err != nil {
+		return err
+	}
+	vlPrysmCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient)
+	if err != nil {
+		return err
+	}
+
 	data := DockerComposeData{
+		TTD:               TTD,
+		CcPrysmCfg:        ccPrysmCfg,
+		VlPrysmCfg:        vlPrysmCfg,
 		CheckpointSyncUrl: gd.CheckpointSyncUrl,
+		FeeRecipient:      gd.FeeRecipient,
+		ElDiscoveryPort:   gd.Ports["ELDiscovery"],
+		ElMetricsPort:     gd.Ports["ELMetrics"],
+		ElApiPort:         gd.Ports["ELApi"],
+		ElAuthPort:        gd.Ports["ELAuth"],
+		ElWsPort:          gd.Ports["ELWS"],
+		ClDiscoveryPort:   gd.Ports["CLDiscovery"],
+		ClMetricsPort:     gd.Ports["CLMetrics"],
+		ClApiPort:         gd.Ports["CLApi"],
+		VlMetricsPort:     gd.Ports["VLMetrics"],
 		FallbackELUrls:    gd.FallbackELUrls,
+		ElExtraFlags:      gd.ElExtraFlags,
+		ClExtraFlags:      gd.ClExtraFlags,
+		VlExtraFlags:      gd.VlExtraFlags,
+		MapAllPorts:       gd.MapAllPorts,
 	}
 
 	// Print docker-compose file
@@ -137,68 +193,61 @@ a. error
 Error if any
 */
 func generateEnvFile(gd GenerationData) (err error) {
-	executionEnvTmp, err := template.ParseFS(templates.Envs, filepath.Join("envs", "execution", gd.ExecutionClient+".tmpl"))
+	rawBaseTmp, err := templates.Envs.ReadFile(filepath.Join("envs", gd.Network, "env_base.tmpl"))
 	if err != nil {
 		return
 	}
-	consensusEnvTmp, err := template.ParseFS(templates.Envs, filepath.Join("envs", "consensus", gd.ConsensusClient+".tmpl"))
+
+	baseTmp, err := template.New("env").Parse(string(rawBaseTmp))
 	if err != nil {
 		return
 	}
-	validatorEnvTmp, err := template.ParseFS(templates.Envs, filepath.Join("envs", "validator", gd.ValidatorClient+".tmpl"))
-	if err != nil {
-		return
+
+	clients := map[string]string{
+		"execution": gd.ExecutionClient,
+		"consensus": gd.ConsensusClient,
+		"validator": gd.ValidatorClient,
+	}
+	for tmpKind, clientName := range clients {
+		tmp, err := templates.Envs.ReadFile(filepath.Join("envs", gd.Network, tmpKind, clientName+".tmpl"))
+		if err != nil {
+			return err
+		}
+		_, err = baseTmp.Parse(string(tmp))
+		if err != nil {
+			return err
+		}
 	}
 
 	// TODO: Use OS wise delimiter for these data structs
-	executionEnv := ExecutionEnv{
-		DataDir: configs.ExecutionDefaultDataDir,
-	}
-
-	consensusEnv := ConsensusEnv{
-		ExecutionNodeURL: configs.OnPremiseExecutionURL,
-		DataDir:          configs.ConsensusDefaultDataDir,
-	}
-
-	validatorEnv := ValidatorEnv{
-		ConsensusNodeURL:    configs.OnPremiseConsensusURL,
+	data := EnvData{
+		ElImage:             gd.ExecutionImage,
+		ElDataDir:           configs.ExecutionDefaultDataDir,
+		CcImage:             gd.ConsensusImage,
+		CcDataDir:           configs.ConsensusDefaultDataDir,
+		VlImage:             gd.ValidatorImage,
+		VlDataDir:           configs.ValidatorDefaultDataDir,
+		ExecutionApiURL:     gd.ExecutionEndpoint + ":" + gd.Ports["ELApi"],
+		ExecutionAuthURL:    gd.ExecutionEndpoint + ":" + gd.Ports["ELAuth"],
+		ConsensusApiURL:     gd.ConsensusEndpoint + ":" + gd.Ports["CLApi"],
+		FeeRecipient:        gd.FeeRecipient,
+		JWTSecretPath:       gd.JWTSecretPath,
 		ExecutionEngineName: gd.ExecutionClient,
 		KeystoreDir:         configs.KeystoreDefaultDataDir,
-		DataDir:             configs.ValidatorDefaultDataDir,
-	}
-
-	err = writeTemplateToFile(executionEnvTmp, filepath.Join(gd.GenerationPath, ".env"), executionEnv, false)
-	if err != nil {
-		return fmt.Errorf(configs.GeneratingScriptsError, gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient, err)
-	}
-
-	err = writeTemplateToFile(consensusEnvTmp, filepath.Join(gd.GenerationPath, ".env"), consensusEnv, true)
-	if err != nil {
-		return fmt.Errorf(configs.GeneratingScriptsError, gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient, err)
-	}
-
-	err = writeTemplateToFile(validatorEnvTmp, filepath.Join(gd.GenerationPath, ".env"), validatorEnv, true)
-	if err != nil {
-		return fmt.Errorf(configs.GeneratingScriptsError, gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient, err)
 	}
 
 	// Print .env file
 	log.Infof(configs.PrintingFile, ".env")
-	err = executionEnvTmp.Execute(os.Stdout, executionEnv)
-	if err != nil {
-		return fmt.Errorf(configs.PrintingFileError, ".env", err)
-	}
-
-	err = consensusEnvTmp.Execute(os.Stdout, consensusEnv)
-	if err != nil {
-		return fmt.Errorf(configs.PrintingFileError, ".env", err)
-	}
-
-	err = validatorEnvTmp.Execute(os.Stdout, validatorEnv)
+	err = baseTmp.Execute(os.Stdout, data)
 	if err != nil {
 		return fmt.Errorf(configs.PrintingFileError, ".env", err)
 	}
 	fmt.Println()
+
+	err = writeTemplateToFile(baseTmp, filepath.Join(gd.GenerationPath, ".env"), data, false)
+	if err != nil {
+		return fmt.Errorf(configs.GeneratingScriptsError, gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient, err)
+	}
 	log.Infof(configs.CreatedFile, filepath.Join(gd.GenerationPath, ".env"))
 
 	return nil

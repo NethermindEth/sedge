@@ -1,11 +1,15 @@
 package cli
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -14,6 +18,7 @@ import (
 	"github.com/NethermindEth/1click/internal/pkg/clients"
 	"github.com/NethermindEth/1click/internal/pkg/commands"
 	"github.com/NethermindEth/1click/internal/utils"
+	"github.com/NethermindEth/1click/templates"
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
 	"github.com/manifoldco/promptui"
 )
@@ -144,32 +149,26 @@ func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Cl
 
 func runScriptOrExit() (err error) {
 	// notest
-	optRun, optExit := fmt.Sprintf("Run the script with the selected services %s", strings.Join(*services, ",")), "Exit"
-	prompt := promptui.Select{
-		Label: "Select how to proceed with the generated docker-compose script",
-		Items: []string{optRun, optExit},
-	}
-
 	log.Infof(configs.InstructionsFor, "running docker-compose script")
 	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
-		Path:     generationPath,
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 		Services: *services,
 	})
 	fmt.Printf("\n%s\n\n", upCMD.Cmd)
 
-	_, result, err := prompt.Run()
-	if err != nil {
-		return fmt.Errorf("prompt failed %s", err)
+	prompt := promptui.Prompt{
+		Label:     fmt.Sprintf("Run the script with the selected services %s", strings.Join(*services, ", ")),
+		IsConfirm: true,
+		Default:   "Y",
 	}
-
-	switch result {
-	case optRun:
-		if err = runAndShowContainers(*services); err != nil {
-			return err
-		}
-	default:
+	_, err = prompt.Run()
+	if err != nil {
 		log.Info(configs.Exiting)
 		os.Exit(0)
+	}
+
+	if err = runAndShowContainers(*services); err != nil {
+		return err
 	}
 
 	return nil
@@ -198,10 +197,10 @@ func runAndShowContainers(services []string) error {
 		return fmt.Errorf(configs.CommandError, upCMD.Cmd, err)
 	}
 
-	// Run docker-compose ps --filter status=running to show script running containers
+	// Run docker compose ps --filter status=running to show script running containers
 	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
-		Services: false,
+		Path:          filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		FilterRunning: true,
 	})
 	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
 	if _, err := commands.Runner.RunCMD(dcpsCMD); err != nil {
@@ -211,9 +210,77 @@ func runAndShowContainers(services []string) error {
 	return nil
 }
 
+type container struct {
+	NetworkSettings networkSettings
+}
+type networkSettings struct {
+	Networks map[string]networks
+}
+type networks struct {
+	IPAddress string
+}
+
+func parseNetwork(js string) (string, error) {
+	var c []container
+	if err := json.NewDecoder(bytes.NewReader([]byte(js))).Decode(&c); err != nil {
+		return "", err
+	}
+	if len(c) == 0 {
+		return "", errors.New(configs.NoOutputDockerInspectError)
+	}
+	if ip := c[0].NetworkSettings.Networks["1click_network"].IPAddress; ip != "" {
+		return ip, nil
+	}
+	return "", errors.New(configs.IPNotFoundError)
+}
+
+func getContainerIP(service string) (ip string, err error) {
+	// Run docker compose ps --quiet <service> to show service's ID
+	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+		Path:        filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Quiet:       true,
+		ServiceName: service,
+	})
+	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
+	dcpsCMD.GetOutput = true
+	id, err := commands.Runner.RunCMD(dcpsCMD)
+	if err != nil {
+		return ip, fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
+	}
+
+	// Run docker inspect <id> to get IP address
+	inspectCmd := commands.Runner.BuildDockerInspectCMD(commands.DockerInspectOptions{
+		Name: id,
+	})
+	log.Infof(configs.RunningCommand, inspectCmd.Cmd)
+	inspectCmd.GetOutput = true
+	data, err := commands.Runner.RunCMD(inspectCmd)
+	if err != nil {
+		return
+	}
+
+	ip, err = parseNetwork(data)
+	return
+}
+
 func trackSync(m MonitoringTool, wait time.Duration) error {
 	done := make(chan struct{})
-	statuses := m.TrackSync(done, []string{configs.OnPremiseExecutionURL}, []string{configs.OnPremiseConsensusURL}, time.Minute)
+
+	log.Info(configs.GettingContainersIP)
+	executionIP, errE := getContainerIP(execution)
+	if errE != nil {
+		log.Errorf(configs.GetContainerIPError, execution, errE)
+	}
+	consensusIP, errC := getContainerIP(consensus)
+	if errC != nil {
+		log.Errorf(configs.GetContainerIPError, consensus, errC)
+		if errE != nil {
+			// Both IP were not detected, both containers probably failed
+			return errors.New(configs.UnableToTrackSyncError)
+		}
+	}
+
+	statuses := m.TrackSync(done, []string{"http://" + consensusIP + ":4000"}, []string{"http://" + executionIP + ":8545"}, time.Minute)
 
 	var esynced, csynced bool
 	for s := range statuses {
@@ -234,33 +301,106 @@ func trackSync(m MonitoringTool, wait time.Duration) error {
 
 func RunValidatorOrExit() error {
 	// notest
-	optRun, optExit := "Run validator service", "Exit"
-	prompt := promptui.Select{
-		Label: "Select how to proceed with the validator client",
-		Items: []string{optRun, optExit},
-	}
-
 	log.Infof(configs.InstructionsFor, "running validator service of docker-compose script")
 	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
-		Path:     generationPath,
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 		Services: []string{validator},
 	})
 	fmt.Printf("\n%s\n\n", upCMD.Cmd)
 
-	_, result, err := prompt.Run()
-	if err != nil {
-		return fmt.Errorf("prompt failed %s", err)
+	prompt := promptui.Prompt{
+		Label:     "Run validator service",
+		IsConfirm: true,
+		Default:   "Y",
 	}
-
-	switch result {
-	case optRun:
-		if err = runAndShowContainers([]string{validator}); err != nil {
-			return err
-		}
-	default:
+	_, err := prompt.Run()
+	if err != nil {
 		log.Info(configs.Exiting)
 		os.Exit(0)
 	}
 
+	if err = runAndShowContainers([]string{validator}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func handleJWTSecret() error {
+	log.Info(configs.GeneratingJWTSecret)
+
+	rawScript, err := templates.Scripts.ReadFile(filepath.Join("scripts", "jwt_secret.sh"))
+	if err != nil {
+		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	tmp, err := template.New("script").Parse(string(rawScript))
+	if err != nil {
+		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	script := commands.BashScript{
+		Tmp:       tmp,
+		GetOutput: false,
+		Data:      struct{}{},
+	}
+
+	if _, err = commands.Runner.RunBash(script); err != nil {
+		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	// Get PWD
+	pwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf(configs.GetPWDError, err)
+	}
+	jwtPath = filepath.Join(pwd, "jwtsecret")
+
+	log.Info(configs.JWTSecretGenerated)
+	return nil
+}
+
+func feeRecipientPrompt() error {
+	// notest
+	validate := func(input string) error {
+		if input != "" && !utils.IsAddress(input) {
+			return errors.New(configs.InvalidFeeRecipientError)
+		}
+		return nil
+	}
+
+	prompt := promptui.Prompt{
+		Label:    "Please enter the Fee Recipient address. You can leave it blank and press enter (not recommended)",
+		Validate: validate,
+	}
+
+	result, err := prompt.Run()
+
+	if err != nil {
+		return fmt.Errorf(configs.PromptFailedError, err)
+	}
+
+	feeRecipient = result
+	return nil
+}
+
+func preRunTeku() error {
+	log.Info(configs.PreparingTekuDatadir)
+	for _, s := range *services {
+		if s == "all" || s == consensus {
+			// Prepare consensus datadir
+			path := filepath.Join(generationPath, configs.ConsensusDefaultDataDir)
+			if err := os.MkdirAll(path, 0777); err != nil {
+				return fmt.Errorf(configs.TekuDatadirError, consensus, err)
+			}
+		}
+		if s == "all" || s == validator {
+			// Prepare validator datadir
+			path := filepath.Join(generationPath, configs.ValidatorDefaultDataDir)
+			if err := os.MkdirAll(path, 0777); err != nil {
+				return fmt.Errorf(configs.TekuDatadirError, validator, err)
+			}
+		}
+	}
 	return nil
 }

@@ -1,0 +1,34 @@
+{{/* teku.tmpl */}}
+{{ define "validator" }}
+  validator:
+    container_name: validator-client
+    image: ${VL_IMAGE_VERSION}
+    networks:
+      - 1click
+    ports:
+      - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
+    volumes:
+      - ${VL_DATA_DIR}:/var/lib/teku
+      - ${KEYSTORE_DIR}:/var/lib/teku/keystore
+    command:
+      - validator-client
+      - --beacon-node-api-endpoint=${CC_API_URL}
+      - --data-path=/var/lib/teku
+      - --log-destination=CONSOLE
+      - --network=auto
+      - --validators-graffiti=${GRAFFITI}
+      - --validators-keystore-locking-enabled=true
+      - --validator-keys=/var/lib/teku/keystore:/var/lib/teku/keystore/secrets
+      - --validators-early-attestations-enabled=false
+      - --metrics-enabled=true
+      - --metrics-host-allowlist=*
+      - --metrics-interface=0.0.0.0
+      - --metrics-port={{.VlMetricsPort}}{{with .FeeRecipient}}
+      - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
+      - --{{$flag}}{{end}}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}

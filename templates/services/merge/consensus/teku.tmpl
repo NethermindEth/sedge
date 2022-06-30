@@ -1,0 +1,55 @@
+{{/* teku.tmpl */}}
+{{ define "consensus" }}
+  consensus:
+    stop_grace_period: 30s
+    container_name: consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    networks:
+      - 1click
+    volumes:
+      - ${CC_DATA_DIR}:/var/lib/teku
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+      - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
+      - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
+      - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"{{if .MapAllPorts}}
+      - "{{.ClApiPort}}:{{.ClApiPort}}"{{end}}
+    expose:
+      - {{.ClApiPort}}
+    command:
+      - --log-destination=CONSOLE
+      - --logging=${CC_LOG_LEVEL}
+      - --network=${NETWORK}
+      - --p2p-discovery-bootnodes=${CL_BOOTNODES}
+      - --p2p-enabled=true
+      - --p2p-port={{.ClDiscoveryPort}}
+      - --p2p-peer-upper-bound=${CC_PEER_COUNT}
+      - --rest-api-enabled=true
+      - --rest-api-host-allowlist=*
+      - --rest-api-interface=0.0.0.0
+      - --rest-api-port={{.ClApiPort}}
+      - --rest-api-cors-origins=*
+      - --rest-api-docs-enabled=false
+      - --data-beacon-path=/var/lib/teku/beacon
+      - --data-path=/var/lib/teku
+      - --data-storage-archive-frequency=2048
+      - --data-storage-mode=PRUNE
+      - --data-storage-non-canonical-blocks-enabled=false
+      - --ee-endpoint=${EC_AUTH_URL}{{with .FeeRecipient}}
+      - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
+      - --Xee-version=${XEE_VERSION}
+      - --ee-jwt-secret-file=/tmp/jwt/jwtsecret{{with .TTD}}
+      - --Xnetwork-total-terminal-difficulty-override=${TTD}{{end}}
+      - --metrics-enabled=true
+      - --metrics-host-allowlist=*
+      - --metrics-interface=0.0.0.0
+      - --metrics-port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}
+      - --initial-state={{.}}/eth/v2/debug/beacon/states/{{end}}{{range $flag := .ClExtraFlags}}
+      - --{{$flag}}{{end}}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}

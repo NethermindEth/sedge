@@ -19,16 +19,14 @@ The key can be generated using a new or existing mnemonic.
 Key's path is set to $(pwd)/keystore.
 
 params :-
-a. existing bool
-True if the key is to be generated using an existing mnemonic. False if the key is to be generated using a new mnemonic.
-b. network string
-Target network.
+a. arg ValidatorKeyData
+Data for keystore generation
 
 returns :-
 a. error
 Error if any
 */
-func GenerateValidatorKey(existing bool, network, path string) (err error) {
+func GenerateValidatorKey(arg ValidatorKeyData) (err error) {
 	// Check if image already exists
 	inspectCmd := commands.Runner.BuildDockerInspectCMD(commands.DockerInspectOptions{
 		Name: configs.DepositCLIDockerImageName,
@@ -36,11 +34,17 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 	inspectCmd.GetOutput = true
 	if out, err := commands.Runner.RunCMD(inspectCmd); err != nil {
 		// Output is of type: []\n Error: <text>
-		// TODO: Check if the error is not "Error: No such image: <image_name>" in Windows
+		// TODO: Check if the error is not "Error: No such image: <image_name>" exists in Windows
 		if strings.Contains(out, "No such object:") {
+			// TODO: Allow user to choose between building the image from the staking-deposit-cli repo or use netherminderth/staking-deposit-cli image
 			// Image does not exist. Build it
-			log.Infof(configs.ImageNotFound, configs.DepositCLIDockerImageName)
-			if err := buildDepositCliImage(); err != nil {
+			// log.Infof(configs.ImageNotFoundBuilding, configs.DepositCLIDockerImageName)
+			// if err := buildDepositCliImage(); err != nil {
+			// 	return err
+			// }
+			// Image does not exist. Pull it
+			log.Infof(configs.ImageNotFoundPulling, configs.DepositCLIDockerImageName)
+			if err := pullDepositCliImage(); err != nil {
 				return err
 			}
 		} else {
@@ -48,14 +52,9 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 		}
 	}
 
-	data := DepositCLI{
-		Network: network,
-		Path:    path,
-	}
-
 	// Get the template file
 	var rawTmp []byte
-	if existing {
+	if arg.Existing {
 		rawTmp, err = templates.DepositCLI.ReadFile("deposit-cli/existing.tmpl")
 	} else {
 		rawTmp, err = templates.DepositCLI.ReadFile("deposit-cli/new.tmpl")
@@ -71,15 +70,36 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 		return
 	}
 
-	// Get the command as a string
+	lenPass := make([]struct{}, len(arg.Password))
+	for i := 0; i < len(arg.Password); i++ {
+		lenPass[i] = struct{}{}
+	}
+
+	data := DepositCLI{
+		Network:               arg.Network,
+		Path:                  arg.Path,
+		LenPass:               lenPass,
+		Image:                 configs.DepositCLIDockerImageName,
+		Eth1WithdrawalAddress: arg.Eth1WithdrawalAddress,
+	}
+
+	// Get the command as a string with password hidden to print it
 	var cmd bytes.Buffer
+	err = tmp.Execute(&cmd, data)
+	if err != nil {
+		return
+	}
+	log.Infof(configs.RunningCommand, cmd.String())
+
+	// Get the command as a string with password to execute it
+	data.Password = arg.Password
+	cmd.Reset()
 	err = tmp.Execute(&cmd, data)
 	if err != nil {
 		return
 	}
 
 	// Run the command
-	log.Infof(configs.RunningCommand, cmd.String())
 	_, err = commands.Runner.RunCMD(commands.Command{
 		Cmd:       cmd.String(),
 		GetOutput: false,
@@ -88,7 +108,7 @@ func GenerateValidatorKey(existing bool, network, path string) (err error) {
 	if err != nil {
 		return
 	}
-	log.Infof(configs.KeysFoundAt, path+"/keystore")
+	log.Info("deposit-cli tool exited")
 
 	return nil
 }
@@ -101,6 +121,20 @@ func buildDepositCliImage() error {
 	})
 	log.Infof(configs.RunningCommand, buildCMD.Cmd)
 	_, err := commands.Runner.RunCMD(buildCMD)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func pullDepositCliImage() error {
+	// Run docker pull
+	pullCMD := commands.Runner.BuildDockerPullCMD(commands.DockerBuildOptions{
+		Tag: configs.DepositCLIDockerImageName,
+	})
+	log.Infof(configs.RunningCommand, pullCMD.Cmd)
+	_, err := commands.Runner.RunCMD(pullCMD)
 	if err != nil {
 		return err
 	}
