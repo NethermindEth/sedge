@@ -23,15 +23,19 @@ a. gd GenerationData
 Data object containing clients whose script are to be generated, path of generated scripts and special options for the clients configuration.
 
 returns :-
+a. string
+Execution client json-rpc API port
+b. string
+Consensus client HTTP API port
 a. error
 Error if any
 */
-func GenerateScripts(gd GenerationData) (err error) {
+func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 	// Create scripts directory if not exists
 	if _, err := os.Stat(gd.GenerationPath); os.IsNotExist(err) {
 		err = os.MkdirAll(gd.GenerationPath, 0755)
 		if err != nil {
-			return err
+			return "", "", err
 		}
 	}
 
@@ -49,7 +53,7 @@ func GenerateScripts(gd GenerationData) (err error) {
 	}
 	ports, err := utils.AssingPorts("localhost", defaultsPorts)
 	if err != nil {
-		return fmt.Errorf(configs.PortOccupationError, err)
+		return "", "", fmt.Errorf(configs.PortOccupationError, err)
 	}
 	gd.Ports = ports
 	// External endpoints will be configured here. Also Ports should be updated with external ports
@@ -59,16 +63,16 @@ func GenerateScripts(gd GenerationData) (err error) {
 	log.Info(configs.GeneratingDockerComposeScript)
 	err = generateDockerComposeScripts(gd)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
 	log.Info(configs.GeneratingEnvFile)
 	err = generateEnvFile(gd)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
-	return nil
+	return ports["ELApi"], ports["CLApi"], nil
 }
 
 /*
