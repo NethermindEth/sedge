@@ -263,7 +263,7 @@ func getContainerIP(service string) (ip string, err error) {
 	return
 }
 
-func trackSync(m MonitoringTool, wait time.Duration) error {
+func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration) error {
 	done := make(chan struct{})
 
 	log.Info(configs.GettingContainersIP)
@@ -280,8 +280,7 @@ func trackSync(m MonitoringTool, wait time.Duration) error {
 		}
 	}
 
-	// FIXME: The ports used are fixed and should be editable. This would brake if the ports are not the default ones.
-	statuses := m.TrackSync(done, []string{"http://" + consensusIP + ":4000"}, []string{"http://" + executionIP + ":8545"}, time.Minute)
+	statuses := m.TrackSync(done, []string{"http://" + consensusIP + ":" + clPort}, []string{"http://" + executionIP + ":" + elPort}, wait)
 
 	var esynced, csynced bool
 	for s := range statuses {
