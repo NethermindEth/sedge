@@ -37,15 +37,16 @@ func GenerateScripts(gd GenerationData) (err error) {
 
 	// Check for port occupation
 	defaultsPorts := map[string]string{
-		"ELDiscovery": configs.DefaultDiscoveryPortEL,
-		"ELMetrics":   configs.DefaultMetricsPortEL,
-		"ELApi":       configs.DefaultApiPortEL,
-		"ELAuth":      configs.DefaultAuthPortEL,
-		"ELWS":        configs.DefaultWSPortEL,
-		"CLDiscovery": configs.DefaultDiscoveryPortCL,
-		"CLMetrics":   configs.DefaultMetricsPortCL,
-		"CLApi":       configs.DefaultApiPortCL,
-		"VLMetrics":   configs.DefaultMetricsPortVL,
+		"ELDiscovery":     configs.DefaultDiscoveryPortEL,
+		"ELMetrics":       configs.DefaultMetricsPortEL,
+		"ELApi":           configs.DefaultApiPortEL,
+		"ELAuth":          configs.DefaultAuthPortEL,
+		"ELWS":            configs.DefaultWSPortEL,
+		"CLDiscovery":     configs.DefaultDiscoveryPortCL,
+		"CLMetrics":       configs.DefaultMetricsPortCL,
+		"CLApi":           configs.DefaultApiPortCL,
+		"CLAdditionalApi": configs.DefaultAdditionalApiPortCL,
+		"VLMetrics":       configs.DefaultMetricsPortVL,
 	}
 	ports, err := utils.AssingPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -134,25 +135,26 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 	}
 
 	data := DockerComposeData{
-		TTD:               TTD,
-		CcPrysmCfg:        ccPrysmCfg,
-		VlPrysmCfg:        vlPrysmCfg,
-		CheckpointSyncUrl: gd.CheckpointSyncUrl,
-		FeeRecipient:      gd.FeeRecipient,
-		ElDiscoveryPort:   gd.Ports["ELDiscovery"],
-		ElMetricsPort:     gd.Ports["ELMetrics"],
-		ElApiPort:         gd.Ports["ELApi"],
-		ElAuthPort:        gd.Ports["ELAuth"],
-		ElWsPort:          gd.Ports["ELWS"],
-		ClDiscoveryPort:   gd.Ports["CLDiscovery"],
-		ClMetricsPort:     gd.Ports["CLMetrics"],
-		ClApiPort:         gd.Ports["CLApi"],
-		VlMetricsPort:     gd.Ports["VLMetrics"],
-		FallbackELUrls:    gd.FallbackELUrls,
-		ElExtraFlags:      gd.ElExtraFlags,
-		ClExtraFlags:      gd.ClExtraFlags,
-		VlExtraFlags:      gd.VlExtraFlags,
-		MapAllPorts:       gd.MapAllPorts,
+		TTD:                 TTD,
+		CcPrysmCfg:          ccPrysmCfg,
+		VlPrysmCfg:          vlPrysmCfg,
+		CheckpointSyncUrl:   gd.CheckpointSyncUrl,
+		FeeRecipient:        gd.FeeRecipient,
+		ElDiscoveryPort:     gd.Ports["ELDiscovery"],
+		ElMetricsPort:       gd.Ports["ELMetrics"],
+		ElApiPort:           gd.Ports["ELApi"],
+		ElAuthPort:          gd.Ports["ELAuth"],
+		ElWsPort:            gd.Ports["ELWS"],
+		ClDiscoveryPort:     gd.Ports["CLDiscovery"],
+		ClMetricsPort:       gd.Ports["CLMetrics"],
+		ClApiPort:           gd.Ports["CLApi"],
+		ClAdditionalApiPort: gd.Ports["CLAdditionalApi"],
+		VlMetricsPort:       gd.Ports["VLMetrics"],
+		FallbackELUrls:      gd.FallbackELUrls,
+		ElExtraFlags:        gd.ElExtraFlags,
+		ClExtraFlags:        gd.ClExtraFlags,
+		VlExtraFlags:        gd.VlExtraFlags,
+		MapAllPorts:         gd.MapAllPorts,
 	}
 
 	// Print docker-compose file
@@ -221,19 +223,20 @@ func generateEnvFile(gd GenerationData) (err error) {
 
 	// TODO: Use OS wise delimiter for these data structs
 	data := EnvData{
-		ElImage:             gd.ExecutionImage,
-		ElDataDir:           configs.ExecutionDefaultDataDir,
-		CcImage:             gd.ConsensusImage,
-		CcDataDir:           configs.ConsensusDefaultDataDir,
-		VlImage:             gd.ValidatorImage,
-		VlDataDir:           configs.ValidatorDefaultDataDir,
-		ExecutionApiURL:     gd.ExecutionEndpoint + ":" + gd.Ports["ELApi"],
-		ExecutionAuthURL:    gd.ExecutionEndpoint + ":" + gd.Ports["ELAuth"],
-		ConsensusApiURL:     gd.ConsensusEndpoint + ":" + gd.Ports["CLApi"],
-		FeeRecipient:        gd.FeeRecipient,
-		JWTSecretPath:       gd.JWTSecretPath,
-		ExecutionEngineName: gd.ExecutionClient,
-		KeystoreDir:         configs.KeystoreDefaultDataDir,
+		ElImage:                   gd.ExecutionImage,
+		ElDataDir:                 configs.ExecutionDefaultDataDir,
+		CcImage:                   gd.ConsensusImage,
+		CcDataDir:                 configs.ConsensusDefaultDataDir,
+		VlImage:                   gd.ValidatorImage,
+		VlDataDir:                 configs.ValidatorDefaultDataDir,
+		ExecutionApiURL:           gd.ExecutionEndpoint + ":" + gd.Ports["ELApi"],
+		ExecutionAuthURL:          gd.ExecutionEndpoint + ":" + gd.Ports["ELAuth"],
+		ConsensusApiURL:           gd.ConsensusEndpoint + ":" + gd.Ports["CLApi"],
+		ConsensusAdditionalApiURL: gd.ConsensusEndpoint + ":" + gd.Ports["CLAdditionalApi"], // This is generated but not used by any client
+		FeeRecipient:              gd.FeeRecipient,
+		JWTSecretPath:             gd.JWTSecretPath,
+		ExecutionEngineName:       gd.ExecutionClient,
+		KeystoreDir:               configs.KeystoreDefaultDataDir,
 	}
 
 	// Print .env file

@@ -29,7 +29,7 @@ import (
 	"github.com/NethermindEth/1click/internal/pkg/generate"
 	"github.com/NethermindEth/1click/internal/utils"
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
-	posmonidb "github.com/NethermindEth/posmoni/pkg/eth2/db"
+	"github.com/NethermindEth/posmoni/pkg/eth2/db"
 	posmoninet "github.com/NethermindEth/posmoni/pkg/eth2/networking"
 	"github.com/spf13/cobra"
 )
@@ -337,7 +337,7 @@ func init() {
 			},
 		}
 		m, err := posmoni.NewEth2Monitor(
-			posmonidb.EmptyRepository{},
+			db.EmptyRepository{},
 			&posmoninet.BeaconClient{RetryDuration: time.Second * 30},
 			&posmoninet.ExecutionClient{RetryDuration: time.Second * 30},
 			posmoninet.SubscribeOpts{},
