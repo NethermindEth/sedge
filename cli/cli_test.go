@@ -689,7 +689,7 @@ func TestTrackSync(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			ms := monitorStub{data: tc.data}
 
-			err := trackSync(&ms, time.Millisecond*100)
+			err := trackSync(&ms, "", "", time.Millisecond*100)
 			utils.CheckErr("trackSync(...) failed", tc.isError, err)
 		})
 	}

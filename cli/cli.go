@@ -29,7 +29,7 @@ import (
 	"github.com/NethermindEth/1click/internal/pkg/generate"
 	"github.com/NethermindEth/1click/internal/utils"
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
-	"github.com/NethermindEth/posmoni/pkg/eth2/db"
+	posmonidb "github.com/NethermindEth/posmoni/pkg/eth2/db"
 	posmoninet "github.com/NethermindEth/posmoni/pkg/eth2/networking"
 	"github.com/spf13/cobra"
 )
