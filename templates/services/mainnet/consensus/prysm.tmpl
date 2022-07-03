@@ -26,9 +26,9 @@
       - --p2p-udp-port={{.ClDiscoveryPort}}
       - --p2p-max-peers=${CC_PEER_COUNT}
       - --rpc-host=0.0.0.0
-      - --rpc-port={{.ClApiPort}}
+      - --rpc-port={{.ClAdditionalApiPort}}
       - --grpc-gateway-host=0.0.0.0
-      - --grpc-gateway-port={{.ClAdditionalApiPort}}
+      - --grpc-gateway-port={{.ClApiPort}}
       - --http-web3provider=${EC_API_URL}{{range $url := .FallbackELUrls}}
       - --fallback-web3provider={{$url}}{{end}}
       - --eth1-header-req-limit=150

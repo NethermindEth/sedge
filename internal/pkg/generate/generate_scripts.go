@@ -232,7 +232,7 @@ func generateEnvFile(gd GenerationData) (err error) {
 		ExecutionApiURL:           gd.ExecutionEndpoint + ":" + gd.Ports["ELApi"],
 		ExecutionAuthURL:          gd.ExecutionEndpoint + ":" + gd.Ports["ELAuth"],
 		ConsensusApiURL:           gd.ConsensusEndpoint + ":" + gd.Ports["CLApi"],
-		ConsensusAdditionalApiURL: gd.ConsensusEndpoint + ":" + gd.Ports["CLAdditionalApi"], // This is generated but not used by any client
+		ConsensusAdditionalApiURL: gd.ConsensusEndpoint + ":" + gd.Ports["CLAdditionalApi"],
 		FeeRecipient:              gd.FeeRecipient,
 		JWTSecretPath:             gd.JWTSecretPath,
 		ExecutionEngineName:       gd.ExecutionClient,
