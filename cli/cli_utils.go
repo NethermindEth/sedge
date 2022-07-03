@@ -280,6 +280,7 @@ func trackSync(m MonitoringTool, wait time.Duration) error {
 		}
 	}
 
+	// FIXME: The ports used are fixed and should be editable. This would brake if the ports are not the default ones.
 	statuses := m.TrackSync(done, []string{"http://" + consensusIP + ":4000"}, []string{"http://" + executionIP + ":8545"}, time.Minute)
 
 	var esynced, csynced bool
