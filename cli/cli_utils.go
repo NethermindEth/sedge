@@ -326,7 +326,7 @@ func RunValidatorOrExit() error {
 	return nil
 }
 
-func handleJWTSecret(generationPath string) error {
+func handleJWTSecret() error {
 	log.Info(configs.GeneratingJWTSecret)
 
 	rawScript, err := templates.Scripts.ReadFile(filepath.Join("scripts", "jwt_secret.sh"))
@@ -342,14 +342,19 @@ func handleJWTSecret(generationPath string) error {
 	script := commands.BashScript{
 		Tmp:       tmp,
 		GetOutput: false,
-		Data:      struct{}{},
+		Data: map[string]string{
+			"Path": generationPath,
+		},
 	}
 
 	if _, err = commands.Runner.RunBash(script); err != nil {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	jwtPath = filepath.Join(path, "jwtsecret")
+	jwtPath, err = filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+	if err != nil {
+		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
 
 	log.Info(configs.JWTSecretGenerated)
 	return nil

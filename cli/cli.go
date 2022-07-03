@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -200,7 +201,11 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 
 	// Generate JWT secret if necessary
 	if jwtPath == "" && configs.JWTNetworks[network] {
-		if err = handleJWTSecret(generationPath); err != nil {
+		if err = handleJWTSecret(); err != nil {
+			return []error{err}
+		}
+	} else if filepath.IsAbs(jwtPath) { //Ensure jwtPath is absolute
+		if jwtPath, err = filepath.Abs(jwtPath); err != nil {
 			return []error{err}
 		}
 	}
