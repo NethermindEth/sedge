@@ -117,17 +117,10 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 func init() {
 	rootCmd.AddCommand(keysCmd)
 
-	// Get PWD
-	pwd, err := os.Getwd()
-	if err != nil {
-		log.WithField(configs.Component, "Root Init").Fatal(err)
-	}
-	log.Debug(pwd)
-
 	// Local flags
 	keysCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, prater, ropsten, sepolia etc.")
 
-	keysCmd.Flags().StringVarP(&path, "path", "p", pwd, "Absolute path to keystore folder. e.g. /home/user/keystore")
+	keysCmd.Flags().StringVarP(&path, "path", "p", configs.DefaultDockerComposeScriptsPath, "Absolute path to keystore folder. e.g. /home/user/keystore")
 
 	keysCmd.Flags().StringVar(&eth1WithdrawalAddress, "eth1-withdrawal-address", "", "If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
 
