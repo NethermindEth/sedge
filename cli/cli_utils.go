@@ -265,6 +265,7 @@ func getContainerIP(service string) (ip string, err error) {
 
 func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration) error {
 	done := make(chan struct{})
+	defer close(done)
 
 	log.Info(configs.GettingContainersIP)
 	executionIP, errE := getContainerIP(execution)
@@ -294,7 +295,7 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration) erro
 		csynced = csynced || (s.Synced && s.Endpoint == consensusUrl)
 		if esynced && csynced {
 			// Stop tracking
-			close(done)
+			done <- struct{}{}
 			log.Info(configs.NodesSynced)
 		}
 	}
