@@ -17,7 +17,7 @@
       - 1click
     container_name: validator-import-client
     volumes:
-      - ${VL_DATA_DIR}:/data
+      - ${VL_DATA_DIR}:/var/lib/prysm
       - ${KEYSTORE_DIR}:/keystore{{with .VlPrysmCfg}}
       - ./config.yml:/network_config/config.yml{{end}}
     command: |{{with .VlPrysmCfg}}
@@ -25,7 +25,7 @@
       accounts import
       --accept-terms-of-use
       --keys-dir=/keystore/validator_keys
-      --wallet-dir=/data/validator/wallet
+      --wallet-dir=/var/lib/prysm/wallet
       --wallet-password-file=/keystore/keystore_password.txt
       --account-password-file=/keystore/keystore_password.txt
 

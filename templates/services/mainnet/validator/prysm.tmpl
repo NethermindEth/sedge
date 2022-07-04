@@ -7,11 +7,11 @@
     container_name: validator-import-client
     volumes:
       - ${KEYSTORE_DIR}:/keystore
-      - ${WALLET_DIR}:/wallet
+      - ${WALLET_DIR}:/var/lib/prysm/wallet
     command: |
       account import
       --directory=/keystore/validator_keys
-      --wallet-dir=/wallet
+      --wallet-dir=/var/lib/prysm/wallet
 
   validator:
     container_name: validator-client
