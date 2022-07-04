@@ -290,8 +290,8 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration) erro
 		if s.Error != nil {
 			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
 		}
-		esynced = esynced || (s.Synced && s.Endpoint == consensusUrl)
-		csynced = csynced || (s.Synced && s.Endpoint == executionUrl)
+		esynced = esynced || (s.Synced && s.Endpoint == executionUrl)
+		csynced = csynced || (s.Synced && s.Endpoint == consensusUrl)
 		if esynced && csynced {
 			// Stop tracking
 			close(done)
