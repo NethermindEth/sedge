@@ -20,10 +20,10 @@
       - ${VL_DATA_DIR}:/data
       - ${KEYSTORE_DIR}:/keystore{{with .VlPrysmCfg}}
       - ./config.yml:/network_config/config.yml{{end}}
-    command: |
-      accounts import
-      --accept-terms-of-use{{with .VlPrysmCfg}}
+    command: |{{with .VlPrysmCfg}}
       --chain-config-file=/network_config/config.yml{{end}}
+      accounts import
+      --accept-terms-of-use
       --keys-dir=/keystore/validator_keys
       --wallet-dir=/data/validator/wallet
       --wallet-password-file=/keystore/keystore_password.txt
