@@ -280,15 +280,18 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration) erro
 		}
 	}
 
-	statuses := m.TrackSync(done, []string{"http://" + consensusIP + ":" + clPort}, []string{"http://" + executionIP + ":" + elPort}, wait)
+	consensusUrl := fmt.Sprintf("http://%s:%s", consensusIP, clPort)
+	executionUrl := fmt.Sprintf("http://%s:%s", executionIP, elPort)
+
+	statuses := m.TrackSync(done, []string{consensusUrl}, []string{executionUrl}, wait)
 
 	var esynced, csynced bool
 	for s := range statuses {
 		if s.Error != nil {
 			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
 		}
-		esynced = esynced || (s.Synced && s.Endpoint == configs.OnPremiseExecutionURL)
-		csynced = csynced || (s.Synced && s.Endpoint == configs.OnPremiseConsensusURL)
+		esynced = esynced || (s.Synced && s.Endpoint == consensusUrl)
+		csynced = csynced || (s.Synced && s.Endpoint == executionUrl)
 		if esynced && csynced {
 			// Stop tracking
 			close(done)
