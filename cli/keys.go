@@ -49,14 +49,19 @@ var keysCmd = &cobra.Command{
 	Long: `Generate keystore folder using the eth2.0-deposit-cli tool.
 	
 New mnemonic will be generated if -e/--existing flag is not provided.`,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		var err error
+		// Ensure that path is absolute
+		log.Debugf("Path to keystore file: %s", path)
+		if !filepath.IsAbs(path) {
+			path, err = filepath.Abs(path)
+			if err != nil {
+				log.Fatalf(configs.InvalidVolumePathError, err)
+			}
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Validate network when several networks are supported
-
-		// Validate path. It must be an absolute and correct path
-		log.Debugf("Path to keystore file: %s", path)
-		if !rePath.MatchString(path) {
-			log.Fatalf(configs.InvalidVolumePathError, path)
-		}
 
 		// Check if dependencies are installed. Keep checking dependencies until they are all installed
 		for pending := utils.CheckDependencies([]string{"docker"}); len(pending) > 0; {
