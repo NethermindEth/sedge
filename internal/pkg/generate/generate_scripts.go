@@ -41,16 +41,16 @@ func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 
 	// Check for port occupation
 	defaultsPorts := map[string]string{
-		"ELDiscovery": configs.DefaultDiscoveryPortEL,
-		"ELMetrics":   configs.DefaultMetricsPortEL,
-		"ELApi":       configs.DefaultApiPortEL,
-		"ELAuth":      configs.DefaultAuthPortEL,
-		"ELWS":        configs.DefaultWSPortEL,
-		"CLDiscovery": configs.DefaultDiscoveryPortCL,
-		"CLMetrics":   configs.DefaultMetricsPortCL,
-		"CLApi":       configs.DefaultApiPortCL,
+		"ELDiscovery":     configs.DefaultDiscoveryPortEL,
+		"ELMetrics":       configs.DefaultMetricsPortEL,
+		"ELApi":           configs.DefaultApiPortEL,
+		"ELAuth":          configs.DefaultAuthPortEL,
+		"ELWS":            configs.DefaultWSPortEL,
+		"CLDiscovery":     configs.DefaultDiscoveryPortCL,
+		"CLMetrics":       configs.DefaultMetricsPortCL,
+		"CLApi":           configs.DefaultApiPortCL,
 		"CLAdditionalApi": configs.DefaultAdditionalApiPortCL,
-		"VLMetrics":   configs.DefaultMetricsPortVL,
+		"VLMetrics":       configs.DefaultMetricsPortVL,
 	}
 	ports, err := utils.AssingPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -241,6 +241,11 @@ func generateEnvFile(gd GenerationData) (err error) {
 		JWTSecretPath:             gd.JWTSecretPath,
 		ExecutionEngineName:       gd.ExecutionClient,
 		KeystoreDir:               configs.KeystoreDefaultDataDir,
+	}
+
+	// Fix prysm rpc url
+	if gd.ValidatorClient == "prysm" {
+		data.ConsensusAdditionalApiURL = fmt.Sprintf("%s:%s", "consensus", gd.Ports["CLAdditionalApi"])
 	}
 
 	// Print .env file
