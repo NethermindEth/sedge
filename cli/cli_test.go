@@ -18,6 +18,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	inspectExecutionUrl = "http://192.168.128.3:8545"
+	inspectConsensusUrl = "http://192.168.128.3:4000"
+)
 var inspectOut = `
 [
 	{
@@ -206,7 +210,14 @@ func prepareCliCmd(tc cliCmdTestCase) error {
 	return nil
 }
 
-func buildCliTestCase(t *testing.T, name, caseTestDataDir string, args cliCmdArgs, monitorData []posmoni.EndpointSyncStatus, isPreErr, isErr bool) *cliCmdTestCase {
+func buildCliTestCase(
+	t *testing.T,
+	name,
+	caseTestDataDir string,
+	args cliCmdArgs,
+	isPreErr,
+	isErr bool,
+) *cliCmdTestCase {
 	tc := cliCmdTestCase{}
 	configPath := t.TempDir()
 
@@ -236,7 +247,12 @@ func buildCliTestCase(t *testing.T, name, caseTestDataDir string, args cliCmdArg
 		},
 	}
 
-	tc.monitor = &monitorStub{data: monitorData}
+	tc.monitor = &monitorStub{
+		data: []posmoni.EndpointSyncStatus{
+			{Endpoint: inspectExecutionUrl, Synced: true},
+			{Endpoint: inspectConsensusUrl, Synced: true},
+		},
+	}
 
 	tc.name = name
 	tc.args = args
@@ -258,10 +274,6 @@ func TestCliCmd(t *testing.T) {
 				yes:      true,
 				services: []string{execution, consensus},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -275,10 +287,6 @@ func TestCliCmd(t *testing.T) {
 				valClient:  "lighthouse",
 				services:   []string{execution, consensus},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -291,10 +299,6 @@ func TestCliCmd(t *testing.T) {
 				valClient:  "lighthouse",
 				services:   []string{execution, consensus},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -306,10 +310,6 @@ func TestCliCmd(t *testing.T) {
 				execClient: "nethermind",
 				conClient:  "lighthouse",
 				services:   []string{execution, consensus},
-			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			false,
 			false,
@@ -324,10 +324,6 @@ func TestCliCmd(t *testing.T) {
 				network:    "mainnet",
 				services:   []string{execution, consensus},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -340,10 +336,6 @@ func TestCliCmd(t *testing.T) {
 				conClient:  "lighthouse",
 				network:    "1click",
 				services:   []string{execution, consensus},
-			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			true,
 			true,
@@ -359,10 +351,6 @@ func TestCliCmd(t *testing.T) {
 				feeRecipient: "666",
 				services:     []string{execution, consensus},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			true,
 			false,
 		),
@@ -377,10 +365,6 @@ func TestCliCmd(t *testing.T) {
 				feeRecipient: "0x5c00ABEf07604C59Ac72E859E5F93D5ab8546F83",
 				services:     []string{execution, consensus},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -391,10 +375,6 @@ func TestCliCmd(t *testing.T) {
 				yes:      true,
 				services: []string{"all"},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -403,10 +383,6 @@ func TestCliCmd(t *testing.T) {
 			"--run-client none", "case_1",
 			cliCmdArgs{
 				yes: true,
-			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			false,
 			false,
@@ -418,10 +394,6 @@ func TestCliCmd(t *testing.T) {
 				yes:      true,
 				services: []string{execution, "none"},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			true,
 			false,
 		),
@@ -432,10 +404,6 @@ func TestCliCmd(t *testing.T) {
 				yes:      true,
 				services: []string{validator},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -445,10 +413,6 @@ func TestCliCmd(t *testing.T) {
 			cliCmdArgs{
 				yes:      true,
 				services: []string{validator, "all"},
-			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			true,
 			false,
@@ -459,10 +423,6 @@ func TestCliCmd(t *testing.T) {
 			cliCmdArgs{
 				yes:      true,
 				services: []string{validator, "all"},
-			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			true,
 			false,
@@ -475,10 +435,6 @@ func TestCliCmd(t *testing.T) {
 				network:  "kiln",
 				services: []string{execution, consensus},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -489,10 +445,6 @@ func TestCliCmd(t *testing.T) {
 				yes:      true,
 				network:  "test",
 				services: []string{execution, consensus},
-			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			true,
 			true,
@@ -506,10 +458,6 @@ func TestCliCmd(t *testing.T) {
 				services:  []string{execution, consensus},
 				conClient: "teku",
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -521,10 +469,6 @@ func TestCliCmd(t *testing.T) {
 				network:   "kiln",
 				services:  []string{"all"},
 				conClient: "teku",
-			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			false,
 			false,
