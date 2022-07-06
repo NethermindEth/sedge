@@ -297,7 +297,7 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration) erro
 			// Stop tracking
 			done <- struct{}{}
 			log.Info(configs.NodesSynced)
-			break // FIXME: statuses channel seems not being closed despite done channel signaled
+			break // statuses channel might still have data before closing done channel
 		}
 	}
 
