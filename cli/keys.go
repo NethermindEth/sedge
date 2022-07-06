@@ -220,7 +220,7 @@ func eth1WithdrawalPrompt() error {
 	}
 
 	prompt := promptui.Prompt{
-		Label:    "Please enter a Eth1 address to be used to create the withdrawal credentials. You can leave it blank and press enter.",
+		Label:    "Please enter a Eth1 address to be used to create the withdrawal credentials. You can leave it blank and press enter",
 		Validate: validate,
 	}
 
