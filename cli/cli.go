@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -203,6 +204,10 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		if err = handleJWTSecret(); err != nil {
 			return []error{err}
 		}
+	} else if filepath.IsAbs(jwtPath) { //Ensure jwtPath is absolute
+		if jwtPath, err = filepath.Abs(jwtPath); err != nil {
+			return []error{err}
+		}
 	}
 
 	// Get fee recipient
@@ -231,7 +236,8 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		VlExtraFlags:      *vlExtraFlags,
 		MapAllPorts:       mapAllPorts,
 	}
-	if err = generate.GenerateScripts(gd); err != nil {
+	elPort, clPort, err := generate.GenerateScripts(gd)
+	if err != nil {
 		return []error{err}
 	}
 
@@ -262,11 +268,11 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service  in the previous step
 	if !utils.Contains(*services, validator) {
 		// Wait for clients to start
-		log.Info(configs.WaitingForNodesToStart)
-		time.Sleep(waitingTime)
+		//log.Info(configs.WaitingForNodesToStart)
+		//time.Sleep(waitingTime)
 		// Track sync of execution and consensus clients
 		// TODO: Parameterize wait arg of trackSync
-		if err = trackSync(monitor, time.Minute); err != nil {
+		if err = trackSync(monitor, elPort, clPort, time.Minute*5); err != nil {
 			return []error{err}
 		}
 

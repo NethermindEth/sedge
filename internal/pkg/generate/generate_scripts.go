@@ -23,33 +23,38 @@ a. gd GenerationData
 Data object containing clients whose script are to be generated, path of generated scripts and special options for the clients configuration.
 
 returns :-
+a. string
+Execution client json-rpc API port
+b. string
+Consensus client HTTP API port
 a. error
 Error if any
 */
-func GenerateScripts(gd GenerationData) (err error) {
+func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 	// Create scripts directory if not exists
 	if _, err := os.Stat(gd.GenerationPath); os.IsNotExist(err) {
 		err = os.MkdirAll(gd.GenerationPath, 0755)
 		if err != nil {
-			return err
+			return "", "", err
 		}
 	}
 
 	// Check for port occupation
 	defaultsPorts := map[string]string{
-		"ELDiscovery": configs.DefaultDiscoveryPortEL,
-		"ELMetrics":   configs.DefaultMetricsPortEL,
-		"ELApi":       configs.DefaultApiPortEL,
-		"ELAuth":      configs.DefaultAuthPortEL,
-		"ELWS":        configs.DefaultWSPortEL,
-		"CLDiscovery": configs.DefaultDiscoveryPortCL,
-		"CLMetrics":   configs.DefaultMetricsPortCL,
-		"CLApi":       configs.DefaultApiPortCL,
-		"VLMetrics":   configs.DefaultMetricsPortVL,
+		"ELDiscovery":     configs.DefaultDiscoveryPortEL,
+		"ELMetrics":       configs.DefaultMetricsPortEL,
+		"ELApi":           configs.DefaultApiPortEL,
+		"ELAuth":          configs.DefaultAuthPortEL,
+		"ELWS":            configs.DefaultWSPortEL,
+		"CLDiscovery":     configs.DefaultDiscoveryPortCL,
+		"CLMetrics":       configs.DefaultMetricsPortCL,
+		"CLApi":           configs.DefaultApiPortCL,
+		"CLAdditionalApi": configs.DefaultAdditionalApiPortCL,
+		"VLMetrics":       configs.DefaultMetricsPortVL,
 	}
 	ports, err := utils.AssingPorts("localhost", defaultsPorts)
 	if err != nil {
-		return fmt.Errorf(configs.PortOccupationError, err)
+		return "", "", fmt.Errorf(configs.PortOccupationError, err)
 	}
 	gd.Ports = ports
 	// External endpoints will be configured here. Also Ports should be updated with external ports
@@ -59,16 +64,16 @@ func GenerateScripts(gd GenerationData) (err error) {
 	log.Info(configs.GeneratingDockerComposeScript)
 	err = generateDockerComposeScripts(gd)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
 	log.Info(configs.GeneratingEnvFile)
 	err = generateEnvFile(gd)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
-	return nil
+	return ports["ELApi"], ports["CLApi"], nil
 }
 
 /*
@@ -134,25 +139,26 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 	}
 
 	data := DockerComposeData{
-		TTD:               TTD,
-		CcPrysmCfg:        ccPrysmCfg,
-		VlPrysmCfg:        vlPrysmCfg,
-		CheckpointSyncUrl: gd.CheckpointSyncUrl,
-		FeeRecipient:      gd.FeeRecipient,
-		ElDiscoveryPort:   gd.Ports["ELDiscovery"],
-		ElMetricsPort:     gd.Ports["ELMetrics"],
-		ElApiPort:         gd.Ports["ELApi"],
-		ElAuthPort:        gd.Ports["ELAuth"],
-		ElWsPort:          gd.Ports["ELWS"],
-		ClDiscoveryPort:   gd.Ports["CLDiscovery"],
-		ClMetricsPort:     gd.Ports["CLMetrics"],
-		ClApiPort:         gd.Ports["CLApi"],
-		VlMetricsPort:     gd.Ports["VLMetrics"],
-		FallbackELUrls:    gd.FallbackELUrls,
-		ElExtraFlags:      gd.ElExtraFlags,
-		ClExtraFlags:      gd.ClExtraFlags,
-		VlExtraFlags:      gd.VlExtraFlags,
-		MapAllPorts:       gd.MapAllPorts,
+		TTD:                 TTD,
+		CcPrysmCfg:          ccPrysmCfg,
+		VlPrysmCfg:          vlPrysmCfg,
+		CheckpointSyncUrl:   gd.CheckpointSyncUrl,
+		FeeRecipient:        gd.FeeRecipient,
+		ElDiscoveryPort:     gd.Ports["ELDiscovery"],
+		ElMetricsPort:       gd.Ports["ELMetrics"],
+		ElApiPort:           gd.Ports["ELApi"],
+		ElAuthPort:          gd.Ports["ELAuth"],
+		ElWsPort:            gd.Ports["ELWS"],
+		ClDiscoveryPort:     gd.Ports["CLDiscovery"],
+		ClMetricsPort:       gd.Ports["CLMetrics"],
+		ClApiPort:           gd.Ports["CLApi"],
+		ClAdditionalApiPort: gd.Ports["CLAdditionalApi"],
+		VlMetricsPort:       gd.Ports["VLMetrics"],
+		FallbackELUrls:      gd.FallbackELUrls,
+		ElExtraFlags:        gd.ElExtraFlags,
+		ClExtraFlags:        gd.ClExtraFlags,
+		VlExtraFlags:        gd.VlExtraFlags,
+		MapAllPorts:         gd.MapAllPorts,
 	}
 
 	// Print docker-compose file
@@ -221,19 +227,25 @@ func generateEnvFile(gd GenerationData) (err error) {
 
 	// TODO: Use OS wise delimiter for these data structs
 	data := EnvData{
-		ElImage:             gd.ExecutionImage,
-		ElDataDir:           configs.ExecutionDefaultDataDir,
-		CcImage:             gd.ConsensusImage,
-		CcDataDir:           configs.ConsensusDefaultDataDir,
-		VlImage:             gd.ValidatorImage,
-		VlDataDir:           configs.ValidatorDefaultDataDir,
-		ExecutionApiURL:     gd.ExecutionEndpoint + ":" + gd.Ports["ELApi"],
-		ExecutionAuthURL:    gd.ExecutionEndpoint + ":" + gd.Ports["ELAuth"],
-		ConsensusApiURL:     gd.ConsensusEndpoint + ":" + gd.Ports["CLApi"],
-		FeeRecipient:        gd.FeeRecipient,
-		JWTSecretPath:       gd.JWTSecretPath,
-		ExecutionEngineName: gd.ExecutionClient,
-		KeystoreDir:         configs.KeystoreDefaultDataDir,
+		ElImage:                   gd.ExecutionImage,
+		ElDataDir:                 configs.ExecutionDefaultDataDir,
+		CcImage:                   gd.ConsensusImage,
+		CcDataDir:                 configs.ConsensusDefaultDataDir,
+		VlImage:                   gd.ValidatorImage,
+		VlDataDir:                 configs.ValidatorDefaultDataDir,
+		ExecutionApiURL:           gd.ExecutionEndpoint + ":" + gd.Ports["ELApi"],
+		ExecutionAuthURL:          gd.ExecutionEndpoint + ":" + gd.Ports["ELAuth"],
+		ConsensusApiURL:           gd.ConsensusEndpoint + ":" + gd.Ports["CLApi"],
+		ConsensusAdditionalApiURL: gd.ConsensusEndpoint + ":" + gd.Ports["CLAdditionalApi"],
+		FeeRecipient:              gd.FeeRecipient,
+		JWTSecretPath:             gd.JWTSecretPath,
+		ExecutionEngineName:       gd.ExecutionClient,
+		KeystoreDir:               configs.KeystoreDefaultDataDir,
+	}
+
+	// Fix prysm rpc url
+	if gd.ValidatorClient == "prysm" {
+		data.ConsensusAdditionalApiURL = fmt.Sprintf("%s:%s", "consensus", gd.Ports["CLAdditionalApi"])
 	}
 
 	// Print .env file

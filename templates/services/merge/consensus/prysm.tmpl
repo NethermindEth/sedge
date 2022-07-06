@@ -28,9 +28,11 @@
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
       - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"{{if .MapAllPorts}}
-      - "{{.ClApiPort}}:{{.ClApiPort}}"{{end}}
+      - "{{.ClApiPort}}:{{.ClApiPort}}"
+      - "{{.ClAdditionalApiPort}}:{{.ClAdditionalApiPort}}"{{end}}
     expose:
       - {{.ClApiPort}}
+      - {{.ClAdditionalApiPort}}
     command:{{with .CcPrysmCfg}}
       - --chain-config-file=/network_config/config.yml
       - --genesis-state=/network_config/genesis.ssz{{end}}
@@ -38,12 +40,13 @@
       - --bootstrap-node=${CL_BOOTNODE_2}
       - --p2p-tcp-port={{.ClDiscoveryPort}}
       - --p2p-udp-port={{.ClDiscoveryPort}}
-      - --jwt-secret=/tmp/jwtsecret
+      - --jwt-secret=/tmp/jwt/jwtsecret
       - --rpc-host=0.0.0.0
-      - --rpc-port={{.ClApiPort}}
+      - --rpc-port={{.ClAdditionalApiPort}}
+      - --grpc-gateway-host=0.0.0.0
+      - --grpc-gateway-port={{.ClApiPort}}
       - --datadir=/var/lib/prysm/
       - --verbosity=${CC_LOG_LEVEL}
-      - --${NETWORK}
       - --p2p-max-peers=${CC_PEER_COUNT}
       - --http-web3provider=${EC_AUTH_URL}{{range $url := .FallbackELUrls}}
       - --fallback-web3provider={{$url}}{{end}}

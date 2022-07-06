@@ -49,14 +49,19 @@ var keysCmd = &cobra.Command{
 	Long: `Generate keystore folder using the eth2.0-deposit-cli tool.
 	
 New mnemonic will be generated if -e/--existing flag is not provided.`,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		var err error
+		// Ensure that path is absolute
+		log.Debugf("Path to keystore file: %s", path)
+		if !filepath.IsAbs(path) {
+			path, err = filepath.Abs(path)
+			if err != nil {
+				log.Fatalf(configs.InvalidVolumePathError, err)
+			}
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Validate network when several networks are supported
-
-		// Validate path. It must be an absolute and correct path
-		log.Debugf("Path to keystore file: %s", path)
-		if !rePath.MatchString(path) {
-			log.Fatalf(configs.InvalidVolumePathError, path)
-		}
 
 		// Check if dependencies are installed. Keep checking dependencies until they are all installed
 		for pending := utils.CheckDependencies([]string{"docker"}); len(pending) > 0; {
@@ -117,17 +122,10 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 func init() {
 	rootCmd.AddCommand(keysCmd)
 
-	// Get PWD
-	pwd, err := os.Getwd()
-	if err != nil {
-		log.WithField(configs.Component, "Root Init").Fatal(err)
-	}
-	log.Debug(pwd)
-
 	// Local flags
 	keysCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, prater, ropsten, sepolia etc.")
 
-	keysCmd.Flags().StringVarP(&path, "path", "p", pwd, "Absolute path to keystore folder. e.g. /home/user/keystore")
+	keysCmd.Flags().StringVarP(&path, "path", "p", configs.DefaultDockerComposeScriptsPath, "Absolute path to keystore folder. e.g. /home/user/keystore")
 
 	keysCmd.Flags().StringVar(&eth1WithdrawalAddress, "eth1-withdrawal-address", "", "If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
 
@@ -222,7 +220,7 @@ func eth1WithdrawalPrompt() error {
 	}
 
 	prompt := promptui.Prompt{
-		Label:    "Please enter a Eth1 address to be used to create the withdrawal credentials. You can leave it blank and press enter.",
+		Label:    "Please enter a Eth1 address to be used to create the withdrawal credentials. You can leave it blank and press enter",
 		Validate: validate,
 	}
 

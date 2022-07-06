@@ -85,6 +85,7 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 	DefaultDiscoveryPortCL          = "9000"
 	DefaultMetricsPortCL            = "5054"
 	DefaultApiPortCL                = "4000"
+	DefaultAdditionalApiPortCL      = "4001"
 	DefaultMetricsPortVL            = "5056"
 	MapAllPortsWarning              = "You are mapping all ports for the clients!!! Make sure this is intended. This could make the clients vulnerable to attacks. Be sure to setup a firewall."
 )
