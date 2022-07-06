@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	inspectExecutionUrl = "http://192.168.128.3:8545"
-	inspectConsensusUrl = "http://192.168.128.3:4000"
+	inspectExecutionUrl = "http://192.168.128.3"
+	inspectConsensusUrl = "http://192.168.128.3"
 )
 var inspectOut = `
 [
@@ -247,10 +247,20 @@ func buildCliTestCase(
 		},
 	}
 
+	// Check for port occupation
+	defaultsPorts := map[string]string{
+		"ELApi": configs.DefaultApiPortEL,
+		"CLApi": configs.DefaultApiPortCL,
+	}
+	ports, err := utils.AssingPorts("localhost", defaultsPorts)
+	if err != nil {
+		t.Fatalf(configs.PortOccupationError, err)
+	}
+
 	tc.monitor = &monitorStub{
 		data: []posmoni.EndpointSyncStatus{
-			{Endpoint: inspectExecutionUrl, Synced: true},
-			{Endpoint: inspectConsensusUrl, Synced: true},
+			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
+			{Endpoint: inspectConsensusUrl + ":" + ports["CLApi"], Synced: true},
 		},
 	}
 
