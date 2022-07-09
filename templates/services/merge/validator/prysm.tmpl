@@ -14,7 +14,7 @@
       config_validator:
         condition: service_completed_successfully
     networks:
-      - 1click
+      - sedge
     container_name: validator-import-client
     volumes:
       - ${VL_DATA_DIR}:/var/lib/prysm
@@ -36,7 +36,7 @@
       validator-import:
         condition: service_completed_successfully
     networks:
-      - 1click
+      - sedge
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:

@@ -25,13 +25,13 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/pkg/clients"
-	"github.com/NethermindEth/1click/internal/pkg/generate"
-	"github.com/NethermindEth/1click/internal/utils"
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
 	posmonidb "github.com/NethermindEth/posmoni/pkg/eth2/db"
 	posmoninet "github.com/NethermindEth/posmoni/pkg/eth2/networking"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -66,7 +66,7 @@ const (
 // cliCmd represents the cli command
 var cliCmd = &cobra.Command{
 	Use:   "cli [flags]",
-	Short: "Quick start 1click",
+	Short: "Quick start sedge",
 	Long: `Run the setup tool on-premise in a quick way. Provide only the command line
 options and the tool will do all the work.
 
@@ -322,19 +322,19 @@ func init() {
 
 	cliCmd.Flags().BoolVarP(&run, "run", "r", false, "Run the generated docker-compose scripts without asking")
 
-	cliCmd.Flags().BoolVarP(&y, "yes", "y", false, "Shortcut for '1click cli -r -i --run'. Run without prompts")
+	cliCmd.Flags().BoolVarP(&y, "yes", "y", false, "Shortcut for 'sedge cli -r -i --run'. Run without prompts")
 
 	cliCmd.Flags().BoolVar(&mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
 
-	services = cliCmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all, none. The 'all' and 'none' option must be used alone. Example: '1click cli -r --run-clients=consensus,validator'")
+	services = cliCmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all, none. The 'all' and 'none' option must be used alone. Example: 'sedge cli -r --run-clients=consensus,validator'")
 
-	fallbackEL = cliCmd.Flags().StringSlice("fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: '1click cli -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
+	fallbackEL = cliCmd.Flags().StringSlice("fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge cli -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
 
-	elExtraFlags = cliCmd.Flags().StringArray("el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: '1click cli --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	elExtraFlags = cliCmd.Flags().StringArray("el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge cli --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 
-	clExtraFlags = cliCmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: '1click cli --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	clExtraFlags = cliCmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge cli --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 
-	vlExtraFlags = cliCmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: '1click cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	vlExtraFlags = cliCmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 
 	// Initialize monitoring tool
 	initMonitor(func() MonitoringTool {

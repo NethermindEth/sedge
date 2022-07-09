@@ -5,7 +5,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/sedge/configs"
 )
 
 /*

@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/NethermindEth/1click/internal/utils"
+	"github.com/NethermindEth/sedge/internal/utils"
 )
 
 func TestCheckVariable(t *testing.T) {

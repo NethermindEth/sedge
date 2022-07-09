@@ -6,9 +6,9 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/pkg/commands"
-	"github.com/NethermindEth/1click/templates"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/templates"
 	log "github.com/sirupsen/logrus"
 )
 

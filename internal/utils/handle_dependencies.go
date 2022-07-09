@@ -8,21 +8,21 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/pkg/commands"
-	"github.com/NethermindEth/1click/templates"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/templates"
 	log "github.com/sirupsen/logrus"
 )
 
 /*
 HandleInstructions :
-This function is responsible for handling the dependencies needed for 1click setup
+This function is responsible for handling the dependencies needed for sedge setup
 If install support for a dependency exists, then `handler` will process it, for example,
 installing it or showing instructions for it.
 
 params :-
 a. []string dependencies
-List of dependencies needed for 1click setup
+List of dependencies needed for sedge setup
 b. func(string) error handler
 Handler for each dependency
 

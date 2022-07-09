@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/pkg/env"
-	"github.com/NethermindEth/1click/internal/utils"
-	"github.com/NethermindEth/1click/templates"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/env"
+	"github.com/NethermindEth/sedge/internal/utils"
+	"github.com/NethermindEth/sedge/templates"
 	log "github.com/sirupsen/logrus"
 )
 

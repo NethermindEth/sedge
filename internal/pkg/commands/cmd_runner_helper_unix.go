@@ -14,7 +14,7 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/sedge/configs"
 	"github.com/creack/pty"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/term"

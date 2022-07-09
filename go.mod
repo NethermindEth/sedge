@@ -1,6 +1,6 @@
-module github.com/NethermindEth/1click
+module github.com/NethermindEth/sedge
 
-go 1.17
+go 1.18
 
 require (
 	github.com/NethermindEth/posmoni v0.0.0-20220603012828-9d6e0e2ac277

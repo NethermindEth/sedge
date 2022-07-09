@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/pkg/commands"
-	"github.com/NethermindEth/1click/test"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/test"
 )
 
 func validatePending(got, want []string) bool {

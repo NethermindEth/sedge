@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/NethermindEth/1click/templates"
+	"github.com/NethermindEth/sedge/templates"
 )
 
 /*

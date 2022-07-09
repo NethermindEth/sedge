@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/NethermindEth/1click/internal/pkg/clients"
-	"github.com/NethermindEth/1click/internal/utils"
+	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/utils"
 )
 
 const (

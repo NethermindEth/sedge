@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/NethermindEth/1click/templates"
+	"github.com/NethermindEth/sedge/templates"
 )
 
 /*

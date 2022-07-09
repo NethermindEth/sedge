@@ -9,7 +9,7 @@
       mevboost:
         condition: service_started{{end}}
     networks:
-      - 1click
+      - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/lighthouse
       - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret

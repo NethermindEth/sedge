@@ -14,12 +14,12 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/pkg/clients"
-	"github.com/NethermindEth/1click/internal/pkg/commands"
-	"github.com/NethermindEth/1click/internal/utils"
-	"github.com/NethermindEth/1click/templates"
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/utils"
+	"github.com/NethermindEth/sedge/templates"
 	"github.com/manifoldco/promptui"
 )
 
@@ -228,7 +228,7 @@ func parseNetwork(js string) (string, error) {
 	if len(c) == 0 {
 		return "", errors.New(configs.NoOutputDockerInspectError)
 	}
-	if ip := c[0].NetworkSettings.Networks["1click_network"].IPAddress; ip != "" {
+	if ip := c[0].NetworkSettings.Networks["sedge_network"].IPAddress; ip != "" {
 		return ip, nil
 	}
 	return "", errors.New(configs.IPNotFoundError)

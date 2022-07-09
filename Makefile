@@ -3,17 +3,17 @@
 
 compile: ## compile:
 	@mkdir -p build
-	@go build -o build/1click cmd/main.go
+	@go build -o build/sedge cmd/main.go
 
 compile-linux: ## compile:
 	@mkdir -p build
-	@env GOOS=linux go build -o build/1click cmd/main.go
+	@env GOOS=linux go build -o build/sedge cmd/main.go
 
 run: ## run
-	@./build/1click
+	@./build/sedge
 
 run-cli: compile ## run cli
-	@./build/1click cli --config ./config.yaml
+	@./build/sedge cli --config ./config.yaml
 
 test: ## run tests
 	@mkdir -p coverage
@@ -32,10 +32,10 @@ coverage: coverage/coverage.out ## show tests coverage
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 clients: compile ## Run cmd clients with ./config.yaml
-	@./build/1click clients --config ./config.yaml
+	@./build/sedge clients --config ./config.yaml
 
 logs: compile ## run cmd logs with ./config.yaml
-	@./build/1click logs --config ./config.yaml
+	@./build/sedge logs --config ./config.yaml
 
 all: compile run ## build and run
 

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NethermindEth/1click/test"
+	"github.com/NethermindEth/sedge/test"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -59,9 +59,9 @@ func TestListClientsCmd(t *testing.T) {
 
 			err := runListClientsCmd(rootCmd, args)
 			if tc.isErr && err == nil {
-				t.Error("1click clients expected to fail")
+				t.Error("sedge clients expected to fail")
 			} else if !tc.isErr && err != nil {
-				t.Errorf("1click clients failed: %v", err)
+				t.Errorf("sedge clients failed: %v", err)
 			}
 		})
 	}

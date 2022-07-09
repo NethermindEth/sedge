@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/NethermindEth/1click/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 )
 
 // Creates an empty file in a temp dir with "dependency" as name and add

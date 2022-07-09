@@ -16,10 +16,10 @@ limitations under the License.
 package cli
 
 import (
-	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/pkg/clients"
-	"github.com/NethermindEth/1click/internal/ui"
-	"github.com/NethermindEth/1click/internal/utils"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/ui"
+	"github.com/NethermindEth/sedge/internal/utils"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

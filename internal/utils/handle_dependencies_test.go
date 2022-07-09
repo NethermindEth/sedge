@@ -6,8 +6,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/NethermindEth/1click/internal/pkg/commands"
-	"github.com/NethermindEth/1click/test"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/test"
 )
 
 func TestGetScriptPath(t *testing.T) {

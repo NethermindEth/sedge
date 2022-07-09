@@ -3,7 +3,7 @@ package utils
 import (
 	"fmt"
 
-	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/sedge/configs"
 )
 
 /*

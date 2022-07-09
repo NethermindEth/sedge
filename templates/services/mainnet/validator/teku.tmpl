@@ -4,7 +4,7 @@
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
     networks:
-      - 1click
+      - sedge
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:

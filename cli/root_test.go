@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NethermindEth/1click/test"
+	"github.com/NethermindEth/sedge/test"
 )
 
 func resetRootCmd() {

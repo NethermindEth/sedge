@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/NethermindEth/1click/configs"
+	"github.com/NethermindEth/sedge/configs"
 	log "github.com/sirupsen/logrus"
 )
 

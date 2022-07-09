@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/pkg/commands"
-	"github.com/NethermindEth/1click/test"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/test"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -132,7 +132,7 @@ func TestLogsCmd(t *testing.T) {
 			return tc.runner
 		})
 
-		descr := fmt.Sprintf("1click logs --tail %s", strings.Join(tc.services, " "))
+		descr := fmt.Sprintf("sedge logs --tail %s", strings.Join(tc.services, " "))
 
 		err := rootCmd.Execute()
 		if tc.isErr && err == nil {

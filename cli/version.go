@@ -24,10 +24,10 @@ import (
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print 1click version",
+	Short: "Print sedge version",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Fprintln(cmd.OutOrStdout(), "1click 0.1")
+		fmt.Fprintln(cmd.OutOrStdout(), "sedge 0.1")
 	},
 }
 
