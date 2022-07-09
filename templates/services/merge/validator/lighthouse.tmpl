@@ -47,13 +47,3 @@
         max-size: "10m"
         max-file: "10"
 {{ end }}
-
- - --network=ropsten
-      - --beacon-nodes=http://beacon:5052
-      - --graffiti=${VL_GRAFFITI}
-      - --validators-dir=/data/validators
-      - --metrics
-      - --metrics-port=5056
-      - --metrics-address=0.0.0.0
-      - --suggested-fee-recipient=${CL_FEE_RECIPIENT}
-      - --private-tx-proposals
