@@ -4,7 +4,6 @@ version: "3.9"
 
 services:
 {{template "execution" .}}
-{{template "consensus" .}}
 {{if .Mev}}
   mevboost:
     image: flashbots/mev-boost:latest
@@ -19,6 +18,7 @@ services:
       - -${NETWORK}
       - -relays
       - ${RELAY_URL}{{end}}
+{{template "consensus" .}}
 {{template "validator" .}}
 
 networks:

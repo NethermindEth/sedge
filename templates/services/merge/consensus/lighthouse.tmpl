@@ -4,7 +4,10 @@
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}
+    image: ${CC_IMAGE_VERSION}{{if .Mev}}
+    depends_on:
+      mevboost:
+        condition: service_started{{end}}
     networks:
       - 1click
     volumes:

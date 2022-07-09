@@ -21,9 +21,7 @@
     image: ${VL_IMAGE_VERSION}
     depends_on: 
       validator-import:
-        condition: service_completed_successfully{{if .Mev}}
-      mevboost:
-        condition: service_started{{end}}
+        condition: service_completed_successfully
     networks:
       - 1click
     ports:
