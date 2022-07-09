@@ -206,7 +206,6 @@ func prepareCliCmd(tc cliCmdTestCase) error {
 	initMonitor(func() MonitoringTool {
 		return tc.monitor
 	})
-	waitingTime = time.Millisecond
 	return nil
 }
 

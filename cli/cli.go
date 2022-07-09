@@ -358,6 +358,4 @@ func init() {
 
 		return m
 	})
-
-	waitingTime = time.Minute
 }
