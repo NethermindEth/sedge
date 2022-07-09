@@ -250,7 +250,9 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 
 	// If teku is chosen, then prepare datadir with 777 permissions
 	if combinedClients.Consensus.Name == "teku" {
-		preRunTeku()
+		if err = preRunTeku(); err != nil {
+			return []error{err}
+		}
 	}
 
 	if run {
