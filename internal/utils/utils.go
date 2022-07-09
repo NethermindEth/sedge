@@ -118,12 +118,14 @@ True if <port> is available. False otherwise
 */
 func AssingPorts(host string, defaults map[string]string) (ports map[string]string, err error) {
 	ports = make(map[string]string)
+	mask := make(map[string]bool)
+
 	for k, v := range defaults {
 		if v == "" {
 			return ports, fmt.Errorf(configs.DefaultPortEmptyError, k)
 		}
 
-		for !portAvailable(host, v, time.Second*5) {
+		for !portAvailable(host, v, time.Second*5) || mask[v] {
 			i, err := strconv.Atoi(v)
 			if err != nil {
 				return ports, err
@@ -131,6 +133,7 @@ func AssingPorts(host string, defaults map[string]string) (ports map[string]stri
 			v = strconv.Itoa(i + 1)
 		}
 		ports[k] = v
+		mask[v] = true
 	}
 
 	return

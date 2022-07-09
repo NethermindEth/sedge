@@ -194,6 +194,13 @@ func TestAssingPorts(t *testing.T) {
 			map[string]string{"CL": "9000", "EL": "8545"},
 			false,
 		},
+		{
+			"Test case 5, good host and succesive increments",
+			host,
+			map[string]string{"CL": port, "EL": strconv.Itoa(portN + 1)},
+			map[string]string{"CL": strconv.Itoa(portN + 1), "EL": strconv.Itoa(portN + 2)},
+			false,
+		},
 	}
 
 	for _, tc := range tcs {
@@ -201,11 +208,11 @@ func TestAssingPorts(t *testing.T) {
 			got, err := AssingPorts(tc.host, tc.defaults)
 
 			descr := fmt.Sprintf("AssingPorts(%s, %+v)", tc.host, tc.defaults)
-			if err = CheckErr(descr, tc.isErr, err); err != nil {
-				t.Error(err)
+			if cerr := CheckErr(descr, tc.isErr, err); cerr != nil {
+				t.Error(cerr)
 			}
 
-			if err != nil {
+			if err == nil {
 				assert.Equal(t, tc.want, got, descr)
 			}
 		})
