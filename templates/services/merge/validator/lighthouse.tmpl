@@ -21,7 +21,9 @@
     image: ${VL_IMAGE_VERSION}
     depends_on: 
       validator-import:
-        condition: service_completed_successfully
+        condition: service_completed_successfully{{if .Mev}}
+      mevboost:
+        condition: service_started{{end}}
     networks:
       - 1click
     ports:
@@ -39,10 +41,21 @@
       - --metrics
       - --metrics-port={{.VlMetricsPort}}
       - --metrics-address=0.0.0.0{{range $flag := .VlExtraFlags}}
-      - --{{$flag}}{{end}}
+      - --{{$flag}}{{end}}{{if .Mev}}
+      - --private-tx-proposals{{end}}
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "10"
 {{ end }}
+
+ - --network=ropsten
+      - --beacon-nodes=http://beacon:5052
+      - --graffiti=${VL_GRAFFITI}
+      - --validators-dir=/data/validators
+      - --metrics
+      - --metrics-port=5056
+      - --metrics-address=0.0.0.0
+      - --suggested-fee-recipient=${CL_FEE_RECIPIENT}
+      - --private-tx-proposals

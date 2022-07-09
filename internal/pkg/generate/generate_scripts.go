@@ -51,6 +51,7 @@ func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 		"CLApi":           configs.DefaultApiPortCL,
 		"CLAdditionalApi": configs.DefaultAdditionalApiPortCL,
 		"VLMetrics":       configs.DefaultMetricsPortVL,
+		"MevPort":         configs.DefaultMevPort,
 	}
 	ports, err := utils.AssingPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -138,10 +139,25 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		return err
 	}
 
+	// Check for XEE_VERSION in teku
+	xeeVersion, err := env.CheckVariable(env.ReXEEV, gd.Network, "consensus", gd.ConsensusClient)
+	if err != nil {
+		return err
+	}
+
+	// Check for Mev
+	mev, err := env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient)
+	if err != nil {
+		return err
+	}
+
 	data := DockerComposeData{
 		TTD:                 TTD,
 		CcPrysmCfg:          ccPrysmCfg,
 		VlPrysmCfg:          vlPrysmCfg,
+		XeeVersion:          xeeVersion,
+		Mev:                 mev && gd.Mev,
+		MevPort:             gd.Ports["MevPort"],
 		CheckpointSyncUrl:   gd.CheckpointSyncUrl,
 		FeeRecipient:        gd.FeeRecipient,
 		ElDiscoveryPort:     gd.Ports["ELDiscovery"],

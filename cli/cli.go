@@ -55,8 +55,8 @@ var (
 	elExtraFlags      *[]string
 	clExtraFlags      *[]string
 	vlExtraFlags      *[]string
-	waitingTime       time.Duration
 	mapAllPorts       bool
+	noMev             bool
 )
 
 const (
@@ -235,6 +235,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		ClExtraFlags:      *clExtraFlags,
 		VlExtraFlags:      *vlExtraFlags,
 		MapAllPorts:       mapAllPorts,
+		Mev:               !noMev,
 	}
 	elPort, clPort, err := generate.GenerateScripts(gd)
 	if err != nil {
@@ -299,11 +300,11 @@ func init() {
 	cliCmd.Flags().SortFlags = false
 
 	// Local flags
-	cliCmd.Flags().StringVarP(&executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name.")
+	cliCmd.Flags().StringVarP(&executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 
-	cliCmd.Flags().StringVarP(&consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name.")
+	cliCmd.Flags().StringVarP(&consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 
-	cliCmd.Flags().StringVarP(&validatorName, "validator", "v", "", "Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name.")
+	cliCmd.Flags().StringVarP(&validatorName, "validator", "v", "", "Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 
 	cliCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
 
@@ -311,7 +312,9 @@ func init() {
 
 	cliCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, prater, kiln, etc.")
 
-	cliCmd.Flags().StringVar(&feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption.")
+	cliCmd.Flags().StringVar(&feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
+
+	cliCmd.Flags().BoolVar(&noMev, "no-mev-boost", false, "Not use mev-boost if supported")
 
 	cliCmd.Flags().StringVar(&jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 
@@ -321,7 +324,7 @@ func init() {
 
 	cliCmd.Flags().BoolVarP(&y, "yes", "y", false, "Shortcut for '1click cli -r -i --run'. Run without prompts")
 
-	cliCmd.Flags().BoolVar(&mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients.")
+	cliCmd.Flags().BoolVar(&mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
 
 	services = cliCmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all, none. The 'all' and 'none' option must be used alone. Example: '1click cli -r --run-clients=consensus,validator'")
 
@@ -344,8 +347,8 @@ func init() {
 		}
 		m, err := posmoni.NewEth2Monitor(
 			posmonidb.EmptyRepository{},
-			&posmoninet.BeaconClient{RetryDuration: time.Second * 30},
-			&posmoninet.ExecutionClient{RetryDuration: time.Second * 30},
+			&posmoninet.BeaconClient{RetryDuration: time.Minute * 10},
+			&posmoninet.ExecutionClient{RetryDuration: time.Minute * 10},
 			posmoninet.SubscribeOpts{},
 			moniCfg,
 		)

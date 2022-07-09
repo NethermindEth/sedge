@@ -42,7 +42,8 @@
       - --metrics-port={{.ClMetricsPort}}
       - --metrics-address=0.0.0.0{{with .CheckpointSyncUrl}}
       - --checkpoint-sync-url={{.}}{{end}}{{range $flag := .ClExtraFlags}}
-      - --{{$flag}}{{end}}
+      - --{{$flag}}{{end}}{{if .Mev}}
+      - --builder=http://mevboost:{{.MevPort}}{{end}}
     logging:
       driver: "json-file"
       options:
