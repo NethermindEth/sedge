@@ -4,7 +4,10 @@
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}
+    image: ${CC_IMAGE_VERSION}{{if .Mev}}
+    depends_on:
+      mevboost:
+        condition: service_started{{end}}
     networks:
       - 1click
     volumes:
@@ -38,7 +41,6 @@
       - --data-storage-non-canonical-blocks-enabled=false
       - --ee-endpoint=${EC_AUTH_URL}{{with .FeeRecipient}}
       - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
-      - --Xee-version=${XEE_VERSION}
       - --ee-jwt-secret-file=/tmp/jwt/jwtsecret{{with .TTD}}
       - --Xnetwork-total-terminal-difficulty-override=${TTD}{{end}}
       - --metrics-enabled=true
@@ -46,7 +48,10 @@
       - --metrics-interface=0.0.0.0
       - --metrics-port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}
       - --initial-state={{.}}/eth/v2/debug/beacon/states/{{end}}{{range $flag := .ClExtraFlags}}
-      - --{{$flag}}{{end}}
+      - --{{$flag}}{{end}}{{if .Mev}}
+      - --Xvalidators-proposer-blinded-blocks-enabled=true
+      - --Xeb-endpoint=http://mevboost:{{.MevPort}}{{end}}{{if .XeeVersion}}
+      - --Xee-version=${XEE_VERSION}{{end}}
     logging:
       driver: "json-file"
       options:

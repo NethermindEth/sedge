@@ -38,6 +38,7 @@ type GenerationData struct {
 	ClExtraFlags      []string
 	VlExtraFlags      []string
 	MapAllPorts       bool
+	Mev               bool
 	Ports             map[string]string
 }
 
@@ -46,6 +47,9 @@ type DockerComposeData struct {
 	TTD                 bool
 	CcPrysmCfg          bool
 	VlPrysmCfg          bool
+	XeeVersion          bool
+	Mev                 bool
+	MevPort             string
 	CheckpointSyncUrl   string
 	FeeRecipient        string
 	ElDiscoveryPort     string

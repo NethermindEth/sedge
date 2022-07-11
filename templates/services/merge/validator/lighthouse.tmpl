@@ -39,7 +39,8 @@
       - --metrics
       - --metrics-port={{.VlMetricsPort}}
       - --metrics-address=0.0.0.0{{range $flag := .VlExtraFlags}}
-      - --{{$flag}}{{end}}
+      - --{{$flag}}{{end}}{{if .Mev}}
+      - --private-tx-proposals{{end}}
     logging:
       driver: "json-file"
       options:

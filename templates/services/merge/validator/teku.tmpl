@@ -32,7 +32,9 @@
       - --metrics-interface=0.0.0.0
       - --metrics-port={{.VlMetricsPort}}{{with .FeeRecipient}}
       - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
-      - --{{$flag}}{{end}}
+      - --{{$flag}}{{end}}{{if .Mev}}
+      - --Xvalidators-registration-default-enabled=true
+      - --Xvalidators-registration-default-gas-limit=29000000{{end}}
     logging:
       driver: "json-file"
       options:

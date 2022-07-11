@@ -4,6 +4,20 @@ version: "3.9"
 
 services:
 {{template "execution" .}}
+{{if .Mev}}
+  mevboost:
+    image: flashbots/mev-boost:latest
+    networks:
+      - 1click
+    container_name: mev-boost
+    restart: on-failure
+    entrypoint:
+      - /app/mev-boost
+      - -addr
+      - 0.0.0.0:{{.MevPort}}
+      - -${NETWORK}
+      - -relays
+      - ${RELAY_URL}{{end}}
 {{template "consensus" .}}
 {{template "validator" .}}
 

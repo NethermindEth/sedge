@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-var networks = []string{"mainnet", "kiln"}
+var networks = []string{"mainnet", "kiln", "ropsten"}
 
 func TestSupportedNetworks(t *testing.T) {
 	names, err := SupportedNetworks()
