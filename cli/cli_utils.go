@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"text/template"
 	"time"
 
@@ -391,6 +392,8 @@ func feeRecipientPrompt() error {
 
 func preRunTeku() error {
 	log.Info(configs.PreparingTekuDatadir)
+	// Change umask to avoid OS from changing the permissions
+	syscall.Umask(0)
 	for _, s := range *services {
 		if s == "all" || s == consensus {
 			// Prepare consensus datadir
