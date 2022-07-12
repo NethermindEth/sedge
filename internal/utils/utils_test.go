@@ -23,8 +23,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestSkipLines(t *testing.T) {
@@ -228,7 +226,11 @@ func TestAssingPorts(t *testing.T) {
 			}
 
 			if err == nil {
-				assert.Equal(t, tc.want, got, descr)
+				for k := range tc.want {
+					if tc.want[k] != got[k] {
+						t.Errorf("A mismatch in the result has been found. Expected (key: %s, value: %s); got (key: %s, value %s). Call: %s. Expected object: %+v, Got: %+v", k, tc.want[k], k, got[k], descr, tc.want, got)
+					}
+				}
 			}
 		})
 	}
