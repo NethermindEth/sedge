@@ -1,7 +1,7 @@
-# 1click
-[![Go Report Card](https://goreportcard.com/badge/github.com/NethermindEth/1click)](https://goreportcard.com/report/github.com/NethermindEth/1click)
+# Sedge
+[![Go Report Card](https://goreportcard.com/badge/github.com/NethermindEth/sedge)](https://goreportcard.com/report/github.com/NethermindEth/sedge)
 
-A one click setup tool for PoS network/chain validators. Currently, `1click` is designed primarily for solo stakers and testnet devs of the Beacon Chain and the Merge (Ethereum). `1click` generates docker-compose scripts for the entire on-premise validator setup based on the chosen client.
+A one click setup tool for PoS network/chain validators. Currently, `sedge` is designed primarily for solo stakers and testnet devs of the Beacon Chain and the Merge (Ethereum). `sedge` generates docker-compose scripts for the entire on-premise validator setup based on the chosen client.
 
 ## 💥 How this all started?
 
@@ -12,9 +12,9 @@ As people who actively work on The Merge, we know how hard it is to set up an Et
 - In the case of working with the Ethereum Mainnet, you are working with real money that can potentially be lost in the event of having downtime or being slashed. To avoid losing real value, you must be aware of and follow best practices on the validator setup, and correctly monitor your nodes.
 - Have you heard of MEV? Flashbots is working on an MEV-Boost component which will take your validator to another level of awesomeness. You most likely want to always be running the latest version, but you also most likely don’t have the time to understand the MEV-Boost architecture in and out, or how to successfully implement it into your environment.
   
-> Enter 1click
+> Enter sedge
 
-We want `1click` to take care of all of the above for you. With just a few clicks or steps, `1click` can create an entire ethereum staking architecture that supports client diversity and Ethereum's latest features, while being completely free and open source. We want `1click` to save you from making costly mistakes in this complex setup; along with hours or days of research, reading and testing. We want you to be able to stake easily with or without blockchain knowledge by giving you the tools to help this amazing community (and earn some good money of course 😉).
+We want `sedge` to take care of all of the above for you. With just a few clicks or steps, `sedge` can create an entire ethereum staking architecture that supports client diversity and Ethereum's latest features, while being completely free and open source. We want `sedge` to save you from making costly mistakes in this complex setup; along with hours or days of research, reading and testing. We want you to be able to stake easily with or without blockchain knowledge by giving you the tools to help this amazing community (and earn some good money of course 😉).
 
 We want to share our knowledge in this topic and create something that allows everyone to easily and safely set up lots of diverse validators. 
 
@@ -26,10 +26,10 @@ We don't want to stop at Ethereum. We also want to help stakers of other PoS net
 
 #### Using Go
 
-If you have at least `go1.18.2` installed then this command will install the `1click` executable along with the library and its dependencies in your system:
+If you have at least `go1.18.2` installed then this command will install the `sedge` executable along with the library and its dependencies in your system:
 
 ```
-go install github.com/NethermindEth/1click/cmd/1click@latest
+go install github.com/NethermindEth/sedge/cmd/sedge@latest
 ```
 
 The executable will be in your `$GOBIN` (`$GOPATH/bin`) 
@@ -39,48 +39,48 @@ The executable will be in your `$GOBIN` (`$GOPATH/bin`)
 Generate the executable manually (need Go installed):
 
 ```
-git clone https://github.com/NethermindEth/1click.git
-cd 1click
-go build -o 1click cmd/1click/main.go
+git clone https://github.com/NethermindEth/sedge.git
+cd sedge
+go build -o sedge cmd/sedge/main.go
 ```
 
 or if you have `make` installed:
 
 ```
-git clone https://github.com/NethermindEth/1click.git
-cd 1click
+git clone https://github.com/NethermindEth/sedge.git
+cd sedge
 make compile
 ```
 
-The executable will be in the `1click/build` folder
+The executable will be in the `sedge/build` folder
 
 ---
 In case you want the binary in your main PATH (or you don't have `$GOBIN` in your PATH), please copy the executable to `/usr/local/bin`:
 
 ```
 # Using go
-sudo $GOPATH/bin/1click /usr/local/bin/
+sudo $GOPATH/bin/sedge /usr/local/bin/
 # Manually
-sudo cp 1click/build/1click /usr/local/bin/
+sudo cp sedge/build/sedge /usr/local/bin/
 ```
 
 ### Dependencies
-`1click` dependencies are `docker` with `docker compose` plugin, but if you don't have those installed, `1click` will show instructions to install them, or install them for you.
+`sedge` dependencies are `docker` with `docker compose` plugin, but if you don't have those installed, `sedge` will show instructions to install them, or install them for you.
 
 ### Quick run
-With `1click cli` you can go through the entire workflow setup:
+With `sedge cli` you can go through the entire workflow setup:
 1. Check dependencies
 2. Generate jwtsecret (not for mainnet and prater)
 3. Generate a `docker-compose` script with randomized clients selection and `.env`
 4. Execute the `docker-compose` script (only execution and consensus nodes will be executed by default)
   
-## 🔥 What can you do with 1click today?
+## 🔥 What can you do with sedge today?
 
 - Select an execution, consensus and validator node (manually or automatically) and generate a `docker-compose` script with production-tested configurations to run the setup you want.
-- Generate the keystore folder using the [staking-deposit-cli](https://github.com/ethereum/staking-deposit-cli) tool with `1click keys`
-- Don't remember `docker-compose` commands or flags for your setup? Check docker logs of the running services with `1click logs`, and shut them down with `1click down`
+- Generate the keystore folder using the [staking-deposit-cli](https://github.com/ethereum/staking-deposit-cli) tool with `sedge keys`
+- Don't remember `docker-compose` commands or flags for your setup? Check docker logs of the running services with `sedge logs`, and shut them down with `sedge down`
 
-> The setup is currently designed to start all three nodes required to run a validator (execution, consensus and validator node). Soon `1click` will let you directly connect to a public or remote node. The execution and consensus nodes will be executed first, and the validator node will be executed automatically after those nodes are synced, giving you time to prepare the keystore file and make the deposit for your staked ether.
+> The setup is currently designed to start all three nodes required to run a validator (execution, consensus and validator node). Soon `sedge` will let you directly connect to a public or remote node. The execution and consensus nodes will be executed first, and the validator node will be executed automatically after those nodes are synced, giving you time to prepare the keystore file and make the deposit for your staked ether.
 
 ## Supported networks and clients
 
@@ -131,8 +131,8 @@ Full Ethereum 2 support with MEV-Boost
 ## 💪 Want to contribute?
 Please check our Contributing Guidelines, Code of Conduct and our issues. In case you want to report or suggest something (any help is welcome) please file an issue first so the main team is aware and it can be discussed.
 
-If you know of any good tricks for validator setup that other people could make good use of as well, please consider adding it to `1click`. Your efforts will be greatly appreciated by the community.
+If you know of any good tricks for validator setup that other people could make good use of as well, please consider adding it to `sedge`. Your efforts will be greatly appreciated by the community.
 
 ## ⚠️ License
 
-`1click` is a Nethermind free and open-source software licensed under the [Apache 2.0 License](https://github.com/NethermindEth/1click/blob/main/LICENSE).
+`sedge` is a Nethermind free and open-source software licensed under the [Apache 2.0 License](https://github.com/NethermindEth/sedge/blob/main/LICENSE).

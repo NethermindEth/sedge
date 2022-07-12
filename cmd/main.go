@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/NethermindEth/1click/cli"
+import "github.com/NethermindEth/sedge/cli"
 
 func main() {
 	cli.Execute()

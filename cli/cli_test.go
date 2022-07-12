@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package cli
 
 import (
@@ -10,11 +25,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/pkg/commands"
-	"github.com/NethermindEth/1click/internal/utils"
-	"github.com/NethermindEth/1click/test"
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/utils"
+	"github.com/NethermindEth/sedge/test"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -69,7 +84,7 @@ var inspectOut = `
 			"IPv6Gateway": "",
 			"MacAddress": "",
 			"Networks": {
-				"1click_network": {
+				"sedge_network": {
 					"IPAMConfig": null,
 					"Links": null,
 					"Aliases": [
@@ -343,7 +358,7 @@ func TestCliCmd(t *testing.T) {
 				yes:        true,
 				execClient: "nethermind",
 				conClient:  "lighthouse",
-				network:    "1click",
+				network:    "sedge",
 				services:   []string{execution, consensus},
 			},
 			true,
@@ -489,7 +504,7 @@ func TestCliCmd(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			resetCliCmd()
-			descr := fmt.Sprintf("1click cli %s", tc.args.toString())
+			descr := fmt.Sprintf("sedge cli %s", tc.args.toString())
 
 			err := prepareCliCmd(tc)
 			if tc.isPreErr && err == nil {

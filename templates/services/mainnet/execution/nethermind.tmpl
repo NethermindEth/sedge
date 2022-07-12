@@ -6,7 +6,7 @@
     restart: unless-stopped
     image: ${EC_IMAGE_VERSION}
     networks:
-      - 1click
+      - sedge
     volumes:
       - ${EC_DATA_DIR}:/nethermind/data
     ports:

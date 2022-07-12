@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package cli
 
 import (
@@ -15,12 +30,12 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/pkg/clients"
-	"github.com/NethermindEth/1click/internal/pkg/commands"
-	"github.com/NethermindEth/1click/internal/utils"
-	"github.com/NethermindEth/1click/templates"
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/utils"
+	"github.com/NethermindEth/sedge/templates"
 	"github.com/manifoldco/promptui"
 )
 
@@ -229,7 +244,7 @@ func parseNetwork(js string) (string, error) {
 	if len(c) == 0 {
 		return "", errors.New(configs.NoOutputDockerInspectError)
 	}
-	if ip := c[0].NetworkSettings.Networks["1click_network"].IPAddress; ip != "" {
+	if ip := c[0].NetworkSettings.Networks["sedge_network"].IPAddress; ip != "" {
 		return ip, nil
 	}
 	return "", errors.New(configs.IPNotFoundError)

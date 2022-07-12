@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package cli
 
 import (
@@ -5,7 +20,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NethermindEth/1click/test"
+	"github.com/NethermindEth/sedge/test"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -59,9 +74,9 @@ func TestListClientsCmd(t *testing.T) {
 
 			err := runListClientsCmd(rootCmd, args)
 			if tc.isErr && err == nil {
-				t.Error("1click clients expected to fail")
+				t.Error("sedge clients expected to fail")
 			} else if !tc.isErr && err != nil {
-				t.Errorf("1click clients failed: %v", err)
+				t.Errorf("sedge clients failed: %v", err)
 			}
 		})
 	}

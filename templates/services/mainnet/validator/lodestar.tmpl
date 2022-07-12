@@ -3,7 +3,7 @@
   validator-import:
     image: ${VL_IMAGE_VERSION}
     networks:
-      - 1click
+      - sedge
     container_name: validator-import-client
     volumes:
       - ${KEYSTORE_DIR}:/keystore
@@ -20,7 +20,7 @@
       validator-import:
         condition: service_completed_successfully
     networks:
-      - 1click
+      - sedge
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
