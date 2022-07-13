@@ -1,0 +1,101 @@
+
+version: "2.4"
+
+services:
+
+  execution:
+    stop_grace_period: 1m
+    container_name: execution-client
+    restart: unless-stopped
+    image: ${EC_IMAGE_VERSION}
+    volumes:
+      - ${EC_DATA_DIR}:/nethermind/data
+    ports:
+      - 30303:30303/tcp
+      - 30303:30303/udp
+      - 8545:8545/tcp
+    command: 
+      - --config=${NETHERMIND_CONFIG}
+      - --datadir=/nethermind/data
+      - --log=${NETHERMIND_LOG_LEVEL}
+      - --Metrics.Enabled=${NETHERMIND_METRICSCONFIG_ENABLED}
+      - --Metrics.NodeName=${NETHERMIND_METRICSCONFIG_NODENAME}
+      - --Metrics.PushGatewayUrl=${NETHERMIND_METRICSCONFIG_PUSHGATEWAYURL}
+      - --Init.WebSocketsEnabled=true
+      - --JsonRpc.Enabled=true
+      - --JsonRpc.Host=0.0.0.0
+      - --JsonRpc.EnabledModules=${NETHERMIND_JSONRPCCONFIG_ENABLEDMODULES}
+      - --HealthChecks.Enabled=${NETHERMIND_HEALTHCHECKSCONFIG_ENABLED}
+      - --Pruning.CacheMb=${NETHERMIND_PRUNINGCONFIG_CACHEMB}
+      - --EthStats.Enabled=${NETHERMIND_ETHSTATSCONFIG_ENABLED}
+      - --EthStats.Server=${NETHERMIND_ETHSTATSCONFIG_SERVER}
+      - --EthStats.Name=${NETHERMIND_ETHSTATSCONFIG_NAME}
+      - --EthStats.Secret=${NETHERMIND_ETHSTATSCONFIG_SECRET}
+      - --EthStats.Contact=${NETHERMIND_ETHSTATSCONFIG_CONTACT}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+
+  consensus:
+    stop_grace_period: 1m
+    container_name: consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    depends_on: 
+      - execution
+    user: root
+    volumes:
+      - ${CC_DATA_DIR}:/var/lib/teku
+    ports:
+      - 9000:9000/tcp
+      - 9000:9000/udp
+      - 4000:4000/tcp
+    environment:
+      - JAVA_OPTS=-XX:SoftMaxHeapSize=2g -Xmx4g
+    command:
+      - --data-path=/var/lib/teku
+      - --log-destination=CONSOLE
+      - --logging=${CC_LOG_LEVEL}
+      - --network=${NETWORK}
+      - --p2p-port=9000
+      - --p2p-peer-upper-bound=${CC_PEER_COUNT}
+      - --rest-api-host-allowlist=*
+      - --rest-api-enabled=true
+      - --rest-api-port=4000
+      - --eth1-endpoints=${EC_NODE}
+      - --eth1-deposit-contract-max-request-size=150
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+
+  validator:
+    container_name: validator-client
+    image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      - consensus
+    user: root
+    volumes:
+      - ${VL_DATA_DIR}:/var/lib/teku
+      - ${KEYSTORE_DIR}:/var/lib/teku/keystore
+    command:
+      - validator-client
+      - --beacon-node-api-endpoint=${CC_NODE}
+      - --data-path=/var/lib/teku
+      - --log-destination=CONSOLE
+      - --network=auto
+      - --validators-graffiti=${GRAFFITI}
+      - --validators-keystore-locking-enabled=true
+      - --validator-keys=/var/lib/teku/keystore:/var/lib/teku/keystore/secrets
+      - --validators-early-attestations-enabled=false
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+

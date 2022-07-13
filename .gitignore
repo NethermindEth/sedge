@@ -4,4 +4,12 @@ vendor
 
 .idea/
 
-docker-compose-scripts/
+/docker-compose-scripts/
+
+coverage/*
+
+.vscode/
+
+.DS_Store
+
+build/sedge

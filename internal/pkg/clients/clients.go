@@ -1,22 +1,45 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package clients
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
-	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/utils"
-	"github.com/NethermindEth/1click/templates"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/utils"
+	"github.com/NethermindEth/sedge/templates"
 	log "github.com/sirupsen/logrus"
 )
 
+// ClientInfo : Struct Interface for listing available clients
+type ClientInfo struct {
+	Network string
+}
+
 /*
-GetConfigClients :
-Get supported client names of type <clientType>. A client is supported if it has a docker-compose service template
+SupportedClients :
+Get supported client names of type <clientType> for network <network>. A client is supported if it has a docker-compose service template
 
 params :-
-a. clientType :- string
+a. clientType string
 Type of client to be returned
+b .network string
+Target network
 
 returns :-
 a. []string
@@ -24,8 +47,8 @@ List of supported clients names of type <clientType>
 b. error
 Error if any
 */
-func GetSupportedClients(clientType string) (clientsNames []string, err error) {
-	files, err := templates.Services.ReadDir("services/" + clientType)
+func (c ClientInfo) SupportedClients(clientType string) (clientsNames []string, err error) {
+	files, err := templates.Envs.ReadDir(filepath.Join("envs", c.Network, clientType))
 	if err != nil {
 		return
 	}
@@ -38,12 +61,14 @@ func GetSupportedClients(clientType string) (clientsNames []string, err error) {
 }
 
 /*
-GetClients :
+Clients :
 Get all the supported and configured clients
 
 params :-
 a. clientTypes []string
 Types of client supported. E.g execution, consensus, validator
+b. network
+Target network
 
 returns :-
 a. OrderedClients
@@ -51,13 +76,13 @@ Map of <clientType>: map of <clientName>: Client
 b. []error
 List of errors
 */
-func GetClients(clientTypes []string) (clients OrderedClients, errs []error) {
+func (c ClientInfo) Clients(clientTypes []string) (clients OrderedClients, errs []error) {
 	clients = make(OrderedClients)
 
 	for _, clientType := range clientTypes {
 		clients[clientType] = make(ClientMap)
 		// Get the clients with a docker-compose service template
-		supportedClients, err := GetSupportedClients(clientType)
+		supportedClients, err := c.SupportedClients(clientType)
 		if err != nil {
 			errs = append(errs, err)
 			continue
@@ -65,12 +90,12 @@ func GetClients(clientTypes []string) (clients OrderedClients, errs []error) {
 		log.Debugf(configs.SupportedClients, clientType, strings.ToLower(strings.Join(supportedClients, ", ")))
 
 		// Get the clients from the configuration file
-		configClients, err := configs.GetConfigClients(clientType)
+		configClients, err := configs.ConfigClients(clientType)
 		if err != nil {
 			errs = append(errs, err)
 			continue
 		}
-		log.Debugf(configs.ConfigClients, clientType, strings.ToLower(strings.Join(configClients, ", ")))
+		log.Debugf(configs.ConfigClientsMsg, clientType, strings.ToLower(strings.Join(configClients, ", ")))
 
 		for _, client := range configClients {
 			// Check if the client is supported

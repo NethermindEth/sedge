@@ -1,7 +1,6 @@
 {{/* config.tmpl */}}
 dependencies:
   - docker
-  - docker-compose
 
 executionClients:
 {{ range $_, $name := index . "execution" }}  - {{ $name }}

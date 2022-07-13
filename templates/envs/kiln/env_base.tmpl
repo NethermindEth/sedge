@@ -1,0 +1,9 @@
+{{/* docker-compose_base.tmpl */}}
+{{ define "env" }}
+# --- Global configuration ---
+NETWORK=kiln
+TTD=20000000000000
+{{template "execution" .}}
+{{template "consensus" .}}
+{{template "validator" .}}
+{{ end }}

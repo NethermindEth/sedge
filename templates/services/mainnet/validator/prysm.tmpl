@@ -1,0 +1,47 @@
+{{/* prysm.tmpl */}}
+{{ define "validator" }}
+  validator-import:
+    image: ${VL_IMAGE_VERSION}
+    networks:
+      - sedge
+    container_name: validator-import-client
+    volumes:
+      - ${KEYSTORE_DIR}:/keystore
+      - ${WALLET_DIR}:/var/lib/prysm/wallet
+    command: |
+      account import
+      --directory=/keystore/validator_keys
+      --wallet-dir=/var/lib/prysm/wallet
+
+  validator:
+    container_name: validator-client
+    image: ${VL_IMAGE_VERSION}
+    depends_on: 
+      validator-import:
+        condition: service_completed_successfully
+    networks:
+      - sedge
+    ports:
+      - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
+    volumes:
+      - ${VL_DATA_DIR}:/var/lib/prysm
+      - ${WALLET_DIR}:/var/lib/prysm/wallet
+    command:
+      - --datadir=/var/lib/prysm
+      - --wallet-dir=/var/lib/prysm/wallet
+      - --beacon-rpc-provider=${CC_API_URL}
+      - --graffiti=${GRAFFITI}
+      - --verbosity=${VL_LOG_LEVEL}
+      - --${NETWORK}
+      - --enable-doppelganger
+      - --accept-terms-of-use
+      - --wallet-password-file=/var/lib/prysm/wallet/password.txt
+      - --monitoring-host=0.0.0.0
+      - --monitoring-port={{.VlMetricsPort}}{{range $flag := .VlExtraFlags}}
+      - --{{$flag}}{{end}}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}

@@ -1,0 +1,7 @@
+{
+  "dependencies": ["docker"],
+  "executionClients": ["nethermind", "geth"],
+  "consensusClients": ["lighthouse", "lodestar", "prysm", "teku"],
+  "validatorClients": ["lighthouse", "lodestar", "prysm", "teku"],
+  "logs": { "logLevel": "debug" },
+}

@@ -1,0 +1,43 @@
+{{/* teku.tmpl */}}
+{{ define "validator" }}
+  validator-import:
+    container_name: validator-import-client
+    build:
+      context: github.com/NethermindEth/teku-init-validator
+    volumes:
+      - ${VL_DATA_DIR}:/data
+      - ${KEYSTORE_DIR}:/keystore
+
+  validator:
+    container_name: validator-client
+    image: ${VL_IMAGE_VERSION}
+    depends_on:
+      validator-import:
+        condition: service_completed_successfully
+    networks:
+      - sedge
+    ports:
+      - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
+    volumes:
+      - ${VL_DATA_DIR}:/var/lib/teku
+    command:
+      - validator-client
+      - --beacon-node-api-endpoint=${CC_API_URL}
+      - --data-path=/var/lib/teku
+      - --log-destination=CONSOLE
+      - --validators-graffiti=${GRAFFITI}
+      - --validator-keys=/var/lib/teku/keys:/var/lib/teku/passwords
+      - --metrics-enabled=true
+      - --metrics-host-allowlist=*
+      - --metrics-interface=0.0.0.0
+      - --metrics-port={{.VlMetricsPort}}{{with .FeeRecipient}}
+      - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
+      - --{{$flag}}{{end}}{{if .Mev}}
+      - --Xvalidators-registration-default-enabled=true
+      - --Xvalidators-registration-default-gas-limit=29000000{{end}}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+{{ end }}

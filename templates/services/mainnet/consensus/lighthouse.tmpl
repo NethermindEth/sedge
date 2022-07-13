@@ -1,0 +1,46 @@
+{{/* lighthouse.tmpl */}}
+{{ define "consensus" }}
+  consensus:
+    stop_grace_period: 1m
+    container_name: consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${CC_DATA_DIR}:/var/lib/lighthouse
+    ports:
+      - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
+      - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
+      - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"{{if .MapAllPorts}}
+      - "{{.ClApiPort}}:{{.ClApiPort}}"{{end}}
+    expose:
+      - {{.ClApiPort}}  
+    command:
+      - lighthouse
+      - bn
+      - --disable-upnp
+      - --datadir=/var/lib/lighthouse
+      - --port={{.ClDiscoveryPort}}
+      - --http
+      - --http-address=0.0.0.0
+      - --http-port={{.ClApiPort}}
+      - --network=${NETWORK}
+      - --target-peers=${CC_PEER_COUNT}
+      - --eth1-endpoints=${EC_API_URL}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
+      - --eth1-blocks-per-log-query=150
+      - --debug-level=${CC_LOG_LEVEL}
+      - --validator-monitor-auto
+      - --subscribe-all-subnets
+      - --import-all-attestations
+      - --metrics
+      - --metrics-port={{.ClMetricsPort}}
+      - --metrics-address=0.0.0.0{{with .CheckpointSyncUrl}}
+      - --checkpoint-sync-url={{.}}{{end}}{{range $flag := .ClExtraFlags}}
+      - --{{$flag}}{{end}}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"    
+{{ end }}
