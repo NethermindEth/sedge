@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package utils
 
 import (
@@ -8,8 +23,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestSkipLines(t *testing.T) {
@@ -194,6 +207,13 @@ func TestAssingPorts(t *testing.T) {
 			map[string]string{"CL": "9000", "EL": "8545"},
 			false,
 		},
+		{
+			"Test case 5, good host and succesive increments",
+			host,
+			map[string]string{"CL": port, "EL": strconv.Itoa(portN + 1)},
+			map[string]string{"CL": strconv.Itoa(portN + 1), "EL": strconv.Itoa(portN + 2)},
+			false,
+		},
 	}
 
 	for _, tc := range tcs {
@@ -201,12 +221,16 @@ func TestAssingPorts(t *testing.T) {
 			got, err := AssingPorts(tc.host, tc.defaults)
 
 			descr := fmt.Sprintf("AssingPorts(%s, %+v)", tc.host, tc.defaults)
-			if err = CheckErr(descr, tc.isErr, err); err != nil {
-				t.Error(err)
+			if cerr := CheckErr(descr, tc.isErr, err); cerr != nil {
+				t.Error(cerr)
 			}
 
-			if err != nil {
-				assert.Equal(t, tc.want, got, descr)
+			if err == nil {
+				for k := range tc.want {
+					if tc.want[k] != got[k] {
+						t.Errorf("A mismatch in the result has been found. Expected (key: %s, value: %s); got (key: %s, value %s). Call: %s. Expected object: %+v, Got: %+v", k, tc.want[k], k, got[k], descr, tc.want, got)
+					}
+				}
 			}
 		})
 	}

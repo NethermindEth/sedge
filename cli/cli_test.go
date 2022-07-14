@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package cli
 
 import (
@@ -10,14 +25,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/pkg/commands"
-	"github.com/NethermindEth/1click/internal/utils"
-	"github.com/NethermindEth/1click/test"
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/utils"
+	"github.com/NethermindEth/sedge/test"
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	inspectExecutionUrl = "http://192.168.128.3"
+	inspectConsensusUrl = "http://192.168.128.3"
+)
 var inspectOut = `
 [
 	{
@@ -65,7 +84,7 @@ var inspectOut = `
 			"IPv6Gateway": "",
 			"MacAddress": "",
 			"Networks": {
-				"1click_network": {
+				"sedge_network": {
 					"IPAMConfig": null,
 					"Links": null,
 					"Aliases": [
@@ -202,11 +221,17 @@ func prepareCliCmd(tc cliCmdTestCase) error {
 	initMonitor(func() MonitoringTool {
 		return tc.monitor
 	})
-	waitingTime = time.Millisecond
 	return nil
 }
 
-func buildCliTestCase(t *testing.T, name, caseTestDataDir string, args cliCmdArgs, monitorData []posmoni.EndpointSyncStatus, isPreErr, isErr bool) *cliCmdTestCase {
+func buildCliTestCase(
+	t *testing.T,
+	name,
+	caseTestDataDir string,
+	args cliCmdArgs,
+	isPreErr,
+	isErr bool,
+) *cliCmdTestCase {
 	tc := cliCmdTestCase{}
 	configPath := t.TempDir()
 
@@ -236,7 +261,22 @@ func buildCliTestCase(t *testing.T, name, caseTestDataDir string, args cliCmdArg
 		},
 	}
 
-	tc.monitor = &monitorStub{data: monitorData}
+	// Check for port occupation
+	defaultsPorts := map[string]string{
+		"ELApi": configs.DefaultApiPortEL,
+		"CLApi": configs.DefaultApiPortCL,
+	}
+	ports, err := utils.AssingPorts("localhost", defaultsPorts)
+	if err != nil {
+		t.Fatalf(configs.PortOccupationError, err)
+	}
+
+	tc.monitor = &monitorStub{
+		data: []posmoni.EndpointSyncStatus{
+			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
+			{Endpoint: inspectConsensusUrl + ":" + ports["CLApi"], Synced: true},
+		},
+	}
 
 	tc.name = name
 	tc.args = args
@@ -258,10 +298,6 @@ func TestCliCmd(t *testing.T) {
 				yes:      true,
 				services: []string{execution, consensus},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -275,10 +311,6 @@ func TestCliCmd(t *testing.T) {
 				valClient:  "lighthouse",
 				services:   []string{execution, consensus},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -291,10 +323,6 @@ func TestCliCmd(t *testing.T) {
 				valClient:  "lighthouse",
 				services:   []string{execution, consensus},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -306,10 +334,6 @@ func TestCliCmd(t *testing.T) {
 				execClient: "nethermind",
 				conClient:  "lighthouse",
 				services:   []string{execution, consensus},
-			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			false,
 			false,
@@ -324,10 +348,6 @@ func TestCliCmd(t *testing.T) {
 				network:    "mainnet",
 				services:   []string{execution, consensus},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -338,12 +358,8 @@ func TestCliCmd(t *testing.T) {
 				yes:        true,
 				execClient: "nethermind",
 				conClient:  "lighthouse",
-				network:    "1click",
+				network:    "sedge",
 				services:   []string{execution, consensus},
-			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			true,
 			true,
@@ -359,10 +375,6 @@ func TestCliCmd(t *testing.T) {
 				feeRecipient: "666",
 				services:     []string{execution, consensus},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			true,
 			false,
 		),
@@ -377,10 +389,6 @@ func TestCliCmd(t *testing.T) {
 				feeRecipient: "0x5c00ABEf07604C59Ac72E859E5F93D5ab8546F83",
 				services:     []string{execution, consensus},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -391,10 +399,6 @@ func TestCliCmd(t *testing.T) {
 				yes:      true,
 				services: []string{"all"},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -403,10 +407,6 @@ func TestCliCmd(t *testing.T) {
 			"--run-client none", "case_1",
 			cliCmdArgs{
 				yes: true,
-			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			false,
 			false,
@@ -418,10 +418,6 @@ func TestCliCmd(t *testing.T) {
 				yes:      true,
 				services: []string{execution, "none"},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			true,
 			false,
 		),
@@ -432,10 +428,6 @@ func TestCliCmd(t *testing.T) {
 				yes:      true,
 				services: []string{validator},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -445,10 +437,6 @@ func TestCliCmd(t *testing.T) {
 			cliCmdArgs{
 				yes:      true,
 				services: []string{validator, "all"},
-			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			true,
 			false,
@@ -459,10 +447,6 @@ func TestCliCmd(t *testing.T) {
 			cliCmdArgs{
 				yes:      true,
 				services: []string{validator, "all"},
-			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			true,
 			false,
@@ -475,10 +459,6 @@ func TestCliCmd(t *testing.T) {
 				network:  "kiln",
 				services: []string{execution, consensus},
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -489,10 +469,6 @@ func TestCliCmd(t *testing.T) {
 				yes:      true,
 				network:  "test",
 				services: []string{execution, consensus},
-			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			true,
 			true,
@@ -506,10 +482,6 @@ func TestCliCmd(t *testing.T) {
 				services:  []string{execution, consensus},
 				conClient: "teku",
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -522,10 +494,6 @@ func TestCliCmd(t *testing.T) {
 				services:  []string{"all"},
 				conClient: "teku",
 			},
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
 			false,
 			false,
 		),
@@ -536,7 +504,7 @@ func TestCliCmd(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			resetCliCmd()
-			descr := fmt.Sprintf("1click cli %s", tc.args.toString())
+			descr := fmt.Sprintf("sedge cli %s", tc.args.toString())
 
 			err := prepareCliCmd(tc)
 			if tc.isPreErr && err == nil {
@@ -689,7 +657,7 @@ func TestTrackSync(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			ms := monitorStub{data: tc.data}
 
-			err := trackSync(&ms, time.Millisecond*100)
+			err := trackSync(&ms, "", "", time.Millisecond*100)
 			utils.CheckErr("trackSync(...) failed", tc.isError, err)
 		})
 	}

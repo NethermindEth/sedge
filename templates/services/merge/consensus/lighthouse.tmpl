@@ -4,9 +4,12 @@
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}
+    image: ${CC_IMAGE_VERSION}{{if .Mev}}
+    depends_on:
+      mevboost:
+        condition: service_started{{end}}
     networks:
-      - 1click
+      - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/lighthouse
       - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
@@ -42,7 +45,8 @@
       - --metrics-port={{.ClMetricsPort}}
       - --metrics-address=0.0.0.0{{with .CheckpointSyncUrl}}
       - --checkpoint-sync-url={{.}}{{end}}{{range $flag := .ClExtraFlags}}
-      - --{{$flag}}{{end}}
+      - --{{$flag}}{{end}}{{if .Mev}}
+      - --builder=http://mevboost:{{.MevPort}}{{end}}
     logging:
       driver: "json-file"
       options:

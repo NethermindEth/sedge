@@ -18,8 +18,8 @@ package cli
 // notest
 
 import (
-	"github.com/NethermindEth/1click/internal/ui"
-	"github.com/NethermindEth/1click/internal/utils"
+	"github.com/NethermindEth/sedge/internal/ui"
+	"github.com/NethermindEth/sedge/internal/utils"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

@@ -6,7 +6,7 @@
     restart: unless-stopped
     image: ${CC_IMAGE_VERSION}
     networks:
-      - 1click
+      - sedge
     user: root
     volumes:
       - ${CC_DATA_DIR}:/var/lib/teku

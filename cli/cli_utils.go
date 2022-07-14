@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package cli
 
 import (
@@ -9,17 +24,18 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"text/template"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/pkg/clients"
-	"github.com/NethermindEth/1click/internal/pkg/commands"
-	"github.com/NethermindEth/1click/internal/utils"
-	"github.com/NethermindEth/1click/templates"
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/utils"
+	"github.com/NethermindEth/sedge/templates"
 	"github.com/manifoldco/promptui"
 )
 
@@ -228,7 +244,7 @@ func parseNetwork(js string) (string, error) {
 	if len(c) == 0 {
 		return "", errors.New(configs.NoOutputDockerInspectError)
 	}
-	if ip := c[0].NetworkSettings.Networks["1click_network"].IPAddress; ip != "" {
+	if ip := c[0].NetworkSettings.Networks["sedge_network"].IPAddress; ip != "" {
 		return ip, nil
 	}
 	return "", errors.New(configs.IPNotFoundError)
@@ -263,8 +279,9 @@ func getContainerIP(service string) (ip string, err error) {
 	return
 }
 
-func trackSync(m MonitoringTool, wait time.Duration) error {
+func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration) error {
 	done := make(chan struct{})
+	defer close(done)
 
 	log.Info(configs.GettingContainersIP)
 	executionIP, errE := getContainerIP(execution)
@@ -280,19 +297,23 @@ func trackSync(m MonitoringTool, wait time.Duration) error {
 		}
 	}
 
-	statuses := m.TrackSync(done, []string{"http://" + consensusIP + ":4000"}, []string{"http://" + executionIP + ":8545"}, time.Minute)
+	consensusUrl := fmt.Sprintf("http://%s:%s", consensusIP, clPort)
+	executionUrl := fmt.Sprintf("http://%s:%s", executionIP, elPort)
+
+	statuses := m.TrackSync(done, []string{consensusUrl}, []string{executionUrl}, wait)
 
 	var esynced, csynced bool
 	for s := range statuses {
 		if s.Error != nil {
 			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
 		}
-		esynced = esynced || (s.Synced && s.Endpoint == configs.OnPremiseExecutionURL)
-		csynced = csynced || (s.Synced && s.Endpoint == configs.OnPremiseConsensusURL)
+		esynced = esynced || (s.Synced && s.Endpoint == executionUrl)
+		csynced = csynced || (s.Synced && s.Endpoint == consensusUrl)
 		if esynced && csynced {
 			// Stop tracking
-			close(done)
+			done <- struct{}{}
 			log.Info(configs.NodesSynced)
+			break // statuses channel might still have data before closing done channel
 		}
 	}
 
@@ -342,19 +363,19 @@ func handleJWTSecret() error {
 	script := commands.BashScript{
 		Tmp:       tmp,
 		GetOutput: false,
-		Data:      struct{}{},
+		Data: map[string]string{
+			"Path": generationPath,
+		},
 	}
 
 	if _, err = commands.Runner.RunBash(script); err != nil {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	// Get PWD
-	pwd, err := os.Getwd()
+	jwtPath, err = filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
 	if err != nil {
-		return fmt.Errorf(configs.GetPWDError, err)
+		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
-	jwtPath = filepath.Join(pwd, "jwtsecret")
 
 	log.Info(configs.JWTSecretGenerated)
 	return nil
@@ -386,6 +407,8 @@ func feeRecipientPrompt() error {
 
 func preRunTeku() error {
 	log.Info(configs.PreparingTekuDatadir)
+	// Change umask to avoid OS from changing the permissions
+	syscall.Umask(0)
 	for _, s := range *services {
 		if s == "all" || s == consensus {
 			// Prepare consensus datadir

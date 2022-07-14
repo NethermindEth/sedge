@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package generate
 
 import (
@@ -6,10 +21,10 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/NethermindEth/1click/configs"
-	"github.com/NethermindEth/1click/internal/pkg/env"
-	"github.com/NethermindEth/1click/internal/utils"
-	"github.com/NethermindEth/1click/templates"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/env"
+	"github.com/NethermindEth/sedge/internal/utils"
+	"github.com/NethermindEth/sedge/templates"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -23,33 +38,39 @@ a. gd GenerationData
 Data object containing clients whose script are to be generated, path of generated scripts and special options for the clients configuration.
 
 returns :-
+a. string
+Execution client json-rpc API port
+b. string
+Consensus client HTTP API port
 a. error
 Error if any
 */
-func GenerateScripts(gd GenerationData) (err error) {
+func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 	// Create scripts directory if not exists
 	if _, err := os.Stat(gd.GenerationPath); os.IsNotExist(err) {
 		err = os.MkdirAll(gd.GenerationPath, 0755)
 		if err != nil {
-			return err
+			return "", "", err
 		}
 	}
 
 	// Check for port occupation
 	defaultsPorts := map[string]string{
-		"ELDiscovery": configs.DefaultDiscoveryPortEL,
-		"ELMetrics":   configs.DefaultMetricsPortEL,
-		"ELApi":       configs.DefaultApiPortEL,
-		"ELAuth":      configs.DefaultAuthPortEL,
-		"ELWS":        configs.DefaultWSPortEL,
-		"CLDiscovery": configs.DefaultDiscoveryPortCL,
-		"CLMetrics":   configs.DefaultMetricsPortCL,
-		"CLApi":       configs.DefaultApiPortCL,
-		"VLMetrics":   configs.DefaultMetricsPortVL,
+		"ELDiscovery":     configs.DefaultDiscoveryPortEL,
+		"ELMetrics":       configs.DefaultMetricsPortEL,
+		"ELApi":           configs.DefaultApiPortEL,
+		"ELAuth":          configs.DefaultAuthPortEL,
+		"ELWS":            configs.DefaultWSPortEL,
+		"CLDiscovery":     configs.DefaultDiscoveryPortCL,
+		"CLMetrics":       configs.DefaultMetricsPortCL,
+		"CLApi":           configs.DefaultApiPortCL,
+		"CLAdditionalApi": configs.DefaultAdditionalApiPortCL,
+		"VLMetrics":       configs.DefaultMetricsPortVL,
+		"MevPort":         configs.DefaultMevPort,
 	}
 	ports, err := utils.AssingPorts("localhost", defaultsPorts)
 	if err != nil {
-		return fmt.Errorf(configs.PortOccupationError, err)
+		return "", "", fmt.Errorf(configs.PortOccupationError, err)
 	}
 	gd.Ports = ports
 	// External endpoints will be configured here. Also Ports should be updated with external ports
@@ -59,16 +80,16 @@ func GenerateScripts(gd GenerationData) (err error) {
 	log.Info(configs.GeneratingDockerComposeScript)
 	err = generateDockerComposeScripts(gd)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
 	log.Info(configs.GeneratingEnvFile)
 	err = generateEnvFile(gd)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
-	return nil
+	return ports["ELApi"], ports["CLApi"], nil
 }
 
 /*
@@ -133,26 +154,42 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		return err
 	}
 
+	// Check for XEE_VERSION in teku
+	xeeVersion, err := env.CheckVariable(env.ReXEEV, gd.Network, "consensus", gd.ConsensusClient)
+	if err != nil {
+		return err
+	}
+
+	// Check for Mev
+	mev, err := env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient)
+	if err != nil {
+		return err
+	}
+
 	data := DockerComposeData{
-		TTD:               TTD,
-		CcPrysmCfg:        ccPrysmCfg,
-		VlPrysmCfg:        vlPrysmCfg,
-		CheckpointSyncUrl: gd.CheckpointSyncUrl,
-		FeeRecipient:      gd.FeeRecipient,
-		ElDiscoveryPort:   gd.Ports["ELDiscovery"],
-		ElMetricsPort:     gd.Ports["ELMetrics"],
-		ElApiPort:         gd.Ports["ELApi"],
-		ElAuthPort:        gd.Ports["ELAuth"],
-		ElWsPort:          gd.Ports["ELWS"],
-		ClDiscoveryPort:   gd.Ports["CLDiscovery"],
-		ClMetricsPort:     gd.Ports["CLMetrics"],
-		ClApiPort:         gd.Ports["CLApi"],
-		VlMetricsPort:     gd.Ports["VLMetrics"],
-		FallbackELUrls:    gd.FallbackELUrls,
-		ElExtraFlags:      gd.ElExtraFlags,
-		ClExtraFlags:      gd.ClExtraFlags,
-		VlExtraFlags:      gd.VlExtraFlags,
-		MapAllPorts:       gd.MapAllPorts,
+		TTD:                 TTD,
+		CcPrysmCfg:          ccPrysmCfg,
+		VlPrysmCfg:          vlPrysmCfg,
+		XeeVersion:          xeeVersion,
+		Mev:                 mev && gd.Mev,
+		MevPort:             gd.Ports["MevPort"],
+		CheckpointSyncUrl:   gd.CheckpointSyncUrl,
+		FeeRecipient:        gd.FeeRecipient,
+		ElDiscoveryPort:     gd.Ports["ELDiscovery"],
+		ElMetricsPort:       gd.Ports["ELMetrics"],
+		ElApiPort:           gd.Ports["ELApi"],
+		ElAuthPort:          gd.Ports["ELAuth"],
+		ElWsPort:            gd.Ports["ELWS"],
+		ClDiscoveryPort:     gd.Ports["CLDiscovery"],
+		ClMetricsPort:       gd.Ports["CLMetrics"],
+		ClApiPort:           gd.Ports["CLApi"],
+		ClAdditionalApiPort: gd.Ports["CLAdditionalApi"],
+		VlMetricsPort:       gd.Ports["VLMetrics"],
+		FallbackELUrls:      gd.FallbackELUrls,
+		ElExtraFlags:        gd.ElExtraFlags,
+		ClExtraFlags:        gd.ClExtraFlags,
+		VlExtraFlags:        gd.VlExtraFlags,
+		MapAllPorts:         gd.MapAllPorts,
 	}
 
 	// Print docker-compose file
@@ -221,19 +258,25 @@ func generateEnvFile(gd GenerationData) (err error) {
 
 	// TODO: Use OS wise delimiter for these data structs
 	data := EnvData{
-		ElImage:             gd.ExecutionImage,
-		ElDataDir:           configs.ExecutionDefaultDataDir,
-		CcImage:             gd.ConsensusImage,
-		CcDataDir:           configs.ConsensusDefaultDataDir,
-		VlImage:             gd.ValidatorImage,
-		VlDataDir:           configs.ValidatorDefaultDataDir,
-		ExecutionApiURL:     gd.ExecutionEndpoint + ":" + gd.Ports["ELApi"],
-		ExecutionAuthURL:    gd.ExecutionEndpoint + ":" + gd.Ports["ELAuth"],
-		ConsensusApiURL:     gd.ConsensusEndpoint + ":" + gd.Ports["CLApi"],
-		FeeRecipient:        gd.FeeRecipient,
-		JWTSecretPath:       gd.JWTSecretPath,
-		ExecutionEngineName: gd.ExecutionClient,
-		KeystoreDir:         configs.KeystoreDefaultDataDir,
+		ElImage:                   gd.ExecutionImage,
+		ElDataDir:                 configs.ExecutionDefaultDataDir,
+		CcImage:                   gd.ConsensusImage,
+		CcDataDir:                 configs.ConsensusDefaultDataDir,
+		VlImage:                   gd.ValidatorImage,
+		VlDataDir:                 configs.ValidatorDefaultDataDir,
+		ExecutionApiURL:           gd.ExecutionEndpoint + ":" + gd.Ports["ELApi"],
+		ExecutionAuthURL:          gd.ExecutionEndpoint + ":" + gd.Ports["ELAuth"],
+		ConsensusApiURL:           gd.ConsensusEndpoint + ":" + gd.Ports["CLApi"],
+		ConsensusAdditionalApiURL: gd.ConsensusEndpoint + ":" + gd.Ports["CLAdditionalApi"],
+		FeeRecipient:              gd.FeeRecipient,
+		JWTSecretPath:             gd.JWTSecretPath,
+		ExecutionEngineName:       gd.ExecutionClient,
+		KeystoreDir:               configs.KeystoreDefaultDataDir,
+	}
+
+	// Fix prysm rpc url
+	if gd.ValidatorClient == "prysm" {
+		data.ConsensusAdditionalApiURL = fmt.Sprintf("%s:%s", "consensus", gd.Ports["CLAdditionalApi"])
 	}
 
 	// Print .env file

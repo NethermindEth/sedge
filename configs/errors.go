@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package configs
 
 // All the strings that are needed for error logging.
@@ -20,9 +35,9 @@ const (
 	PrintingFileError                 = "something went wrong printing file %s. Error: %v"
 	RunningCMDError                   = "failed to execute '%s' command. Error: %v"
 	DependencyNotInstalledError       = "dependency %s is not installed on host machine"
-	DependenciesMissingError          = "required dependencies are missing. Please install them and try again. Dependencies can be installed using '1click cli' command"
+	DependenciesMissingError          = "required dependencies are missing. Please install them and try again. Dependencies can be installed using 'sedge cli' command"
 	DockerEngineOffError              = "it seems docker engine is not running. Please start it and try again. Error: %v"
-	DockerComposeScriptNotFoundError  = "docker-compose script not found at %s. Please run '1click cli' command to generate it or check the script path. By default, it should be located at %s"
+	DockerComposeScriptNotFoundError  = "docker-compose script not found at %s. Please run 'sedge cli' command to generate it or check the script path. By default, it should be located at %s"
 	ScriptIsNotRunningError           = "services of docker-compose script provided are not running. Error: %v"
 	GettingLogsError                  = "failed to get logs for services %s. Error: %v"
 	DockerComposePsReturnedEmptyError = "'docker compose ps --services' returned empty string"
@@ -50,7 +65,7 @@ const (
 	CreatingKeystorePasswordError     = "failed to create keystore password file. Error: %v"
 	GetContainerIPError               = "failed to get docker internal IP address of docker-compose service %s. Error: %v"
 	TekuDatadirError                  = "failed to create teku %s datadir with 777 permissions. Error :%v"
-	UnableToTrackSyncError            = "it seems both execution and consensus containers are down. It was not possible to get internal IP address for the monitoring tool to be able to track sync progress. Check the logs using '1click logs' to find the problem"
+	UnableToTrackSyncError            = "it seems both execution and consensus containers are down. It was not possible to get internal IP address for the monitoring tool to be able to track sync progress. Check the logs using 'sedge logs' to find the problem"
 	NoOutputDockerInspectError        = "no output from docker inspect"
 	IPNotFoundError                   = "could not find IP address"
 	PortOccupationError               = "port occupation check failed. Error: %v"
