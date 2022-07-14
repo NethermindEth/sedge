@@ -10,7 +10,7 @@ do
 	platform_split=(${platform//\// })
 	GOOS=${platform_split[0]}
 	GOARCH=${platform_split[1]}
-	output_name=$package_name'-'$GOOS'-'$GOARCH
+	output_name=$package_name'-v'$VERSION'-'$GOOS'-'$GOARCH
 
 	env GOOS=$GOOS GOARCH=$GOARCH go build -o build/$output_name $package
 	if [ $? -ne 0 ]; then
