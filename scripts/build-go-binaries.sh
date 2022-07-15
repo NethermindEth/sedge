@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-package=cmd/main.go
+package=cmd/sedge/main.go
 package_name=sedge
 	
 platforms=("linux/amd64" "linux/arm64" "darwin/amd64" "darwin/arm64")

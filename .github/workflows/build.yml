@@ -28,48 +28,35 @@ jobs:
     - uses: actions/upload-artifact@master
       name: Uploading sedge darwin amd64 package
       with:
-        name: sedge-darwin-amd64-package
+        name: sedge-v${{env.VERSION}}-darwin-amd64
         path: build/sedge-v${{env.VERSION}}-darwin-amd64
 
     - uses: actions/upload-artifact@master
       name: Uploading sedge darwin arm64 package
       with:
-        name: sedge-darwin-arm64-package
+        name: sedge-v${{env.VERSION}}-darwin-arm64
         path: build/sedge-v${{env.VERSION}}-darwin-arm64
 
     - uses: actions/upload-artifact@master
       name: Uploading sedge linux amd64 package
       with:
-        name: sedge-linux-amd64-package
+        name: sedge-v${{env.VERSION}}-linux-amd64
         path: build/sedge-v${{env.VERSION}}-linux-amd64
         
     - uses: actions/upload-artifact@master
       name: Uploading sedge linux arm64 package
       with:
-        name: sedge-linux-arm64-package
+        name: sedge-v${{env.VERSION}}-linux-arm64
         path: build/sedge-v${{env.VERSION}}-linux-arm64
-
-  test-sedge:
-    runs-on: ubuntu-latest
-    needs: build-sedge
-    if: ${{ github.event.inputs.tag = 'xyz' }} #random if to not run test
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - uses: actions/setup-go@v3
-      with:
-        go-version: '1.18.3'
-    -  name: Run Go test
-       run: |
-         sudo curl -L "https://github.com/docker/compose/releases/download/v2.6.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-         sudo chmod +x /usr/local/bin/docker-compose
-         mkdir -p coverage
-         go test -coverprofile=coverage/coverage.out -covermode=count ./...
 
   upload-github:
     runs-on: ubuntu-latest
+    env: 
+      VERSION: ${{ github.event.inputs.tag }}
     needs: build-sedge
     steps:
+    - name: Checkout
+      uses: actions/checkout@v3
     - name: Download packages
       uses: actions/download-artifact@v3
       with: 
@@ -79,10 +66,10 @@ jobs:
       with:
         tag_name: ${{ github.event.inputs.tag }}
         name: ${{ github.event.inputs.tag }}
-        #body_path: path to changelog file
+        body_path: CHANGELOG.md
         draft: true
         files: |
-          /tmp/binaries/sedge-linux-amd64
-          /tmp/binaries/sedge-linux-arm64
-          /tmp/binaries/sedge-darwin-amd64
-          /tmp/binaries/sedge-darwin-arm64
+          /tmp/binaries/sedge-v${{env.VERSION}}-linux-amd64
+          /tmp/binaries/sedge-v${{env.VERSION}}-linux-arm64
+          /tmp/binaries/sedge-v${{env.VERSION}}-darwin-amd64
+          /tmp/binaries/sedge-v${{env.VERSION}}-darwin-arm64
