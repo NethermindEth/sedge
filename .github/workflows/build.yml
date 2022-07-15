@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'The TAG of the version you want to release.'
-        required: false
+        description: 'The version number (e.g: 0.1.2) of the release you want to push'
+        required: true
         default: 'master'
 
 permissions: 
