@@ -49,3 +49,14 @@ Branch names must follow `kebab-case` pattern. Follow the pattern `feature/<name
 ## Commit Naming
 
 Commits must follow the `<type>(<scope>): <subject>` pattern, as stated in the [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/)
+
+## Changelog
+
+Sedge's changelog format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). Every PR must update the __Unreleased__ section of the project CHANGELOG.md with the new changes. The changes must follow the following structure:
+
+- `Added` for new features.
+- `Changed` for changes in existing functionality.
+- `Deprecated` for soon-to-be removed features.
+- `Removed` for now removed features.
+- `Fixed` for any bug fixes.
+- `Security` in case of vulnerabilities.

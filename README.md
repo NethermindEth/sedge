@@ -58,8 +58,8 @@ The executable will be in the `sedge/build` folder
 In case you want the binary in your main PATH (or you don't have `$GOBIN` in your PATH), please copy the executable to `/usr/local/bin`:
 
 ```
-# Using go
-sudo $GOPATH/bin/sedge /usr/local/bin/
+# Using go install
+sudo cp $GOPATH/bin/sedge /usr/local/bin/
 # Manually
 sudo cp sedge/build/sedge /usr/local/bin/
 ```
@@ -73,7 +73,11 @@ With `sedge cli` you can go through the entire workflow setup:
 2. Generate jwtsecret (not for mainnet and prater)
 3. Generate a `docker-compose` script with randomized clients selection and `.env`
 4. Execute the `docker-compose` script (only execution and consensus nodes will be executed by default)
+5. Validator client will be executed automatically after execution and consensus nodes are synced.
   
+Between steps 4 and 5 you can generate the validator(s) keystore folder using `sedge keys`. 
+
+Check all the options and flags with `sedge cli --help`. More instructions or guides about sedge's features will come soon!
 ## 🔥 What can you do with sedge today?
 
 - Select an execution, consensus and validator node (manually or automatically) and generate a `docker-compose` script with production-tested configurations to run the setup you want.
@@ -110,7 +114,7 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Generate keystore folder with the cli
 - [x] Test coverage (unit tests)
 - [x] Integrate Kiln network
-- [ ] Integrate MEV-Boost as an option
+- [x] Integrate MEV-Boost as an option
 
 ### Version 0.X
 - [ ] Enable use of public execution and consensus nodes
