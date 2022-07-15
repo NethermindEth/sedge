@@ -3,7 +3,7 @@
 
 compile: ## compile:
 	@mkdir -p build
-	@go build -o build/sedge cmd/main.go
+	@go build -o build/sedge cmd/sedge/main.go
 
 compile-linux: ## compile:
 	@mkdir -p build
