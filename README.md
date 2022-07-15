@@ -58,8 +58,8 @@ The executable will be in the `sedge/build` folder
 In case you want the binary in your main PATH (or you don't have `$GOBIN` in your PATH), please copy the executable to `/usr/local/bin`:
 
 ```
-# Using go
-sudo $GOPATH/bin/sedge /usr/local/bin/
+# Using go install
+sudo cp $GOPATH/bin/sedge /usr/local/bin/
 # Manually
 sudo cp sedge/build/sedge /usr/local/bin/
 ```
@@ -110,7 +110,7 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Generate keystore folder with the cli
 - [x] Test coverage (unit tests)
 - [x] Integrate Kiln network
-- [ ] Integrate MEV-Boost as an option
+- [x] Integrate MEV-Boost as an option
 
 ### Version 0.X
 - [ ] Enable use of public execution and consensus nodes
