@@ -268,6 +268,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 
 	log.Info(configs.ValidatorTips)
 
+	// TODO: Add ability to not run a validator at all
 	// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service  in the previous step
 	if !utils.Contains(*services, validator) {
 		// Wait for clients to start
