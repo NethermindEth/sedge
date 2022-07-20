@@ -62,8 +62,8 @@ a. error
 Error if any
 */
 func PreCheck(generationPath string) error {
-	// Check that docker and docker-compose are installed
-	pending := CheckDependencies([]string{"docker", "docker-compose"})
+	// Check docker is installed
+	pending := CheckDependencies([]string{"docker"})
 	for _, dependency := range pending {
 		log.Errorf(configs.DependencyNotInstalledError, dependency)
 	}
@@ -78,6 +78,15 @@ func PreCheck(generationPath string) error {
 	_, err := commands.Runner.RunCMD(dockerPsCMD)
 	if err != nil {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
+	}
+
+	// Check that compose plugin is installed with docker running 'docker compose ps'
+	dockerComposePsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{})
+	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
+	dockerComposePsCMD.GetOutput = true
+	_, err = commands.Runner.RunCMD(dockerComposePsCMD)
+	if err != nil {
+		return fmt.Errorf(configs.DockerComposeOffError, err)
 	}
 
 	// Check if docker-compose script was generated
