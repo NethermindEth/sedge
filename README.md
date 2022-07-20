@@ -107,25 +107,33 @@ Check all the options and flags with `sedge cli --help`. More instructions or gu
 |            | Teku       | Teku       |
 
 ## ✅ Roadmap
-The following roadmap covers the main features and ideas we want to implement but doesn't cover everything we are planning for this tool. Stay in touch if you are interested, a lot of improvements are coming in the next two months.
+The following roadmap covers the main features and ideas we want to implement but doesn't cover everything we are planning for this tool. Stay in touch if you are interested, a lot of improvements are coming in the next two months. Please note that this Roadmap is continually changing until version 1.0.
 
-### Version 0.1 (coming June-July 2022)
+### Version 0.1 (Actual)
 - [x] Generate `docker-compose` scripts and `.env` files for selected clients with a cli tool
 - [x] Generate keystore folder with the cli
 - [x] Test coverage (unit tests)
 - [x] Integrate Kiln network
 - [x] Integrate MEV-Boost as an option
+- [x] Integrate Ropsten network
 
-### Version 0.X
+### Version 0.2
+- [ ] Set up and run only one node (execution/consensus/validator)
+- [ ] Integrate Sepolia network
+- [ ] Documentation with examples
+
+### Version 0.3
 - [ ] Enable use of public execution and consensus nodes
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
+
+### Version 0.4
+- [ ] Integrate Gnosis network
+
+### Version 0.X
 - [ ] TUI for guided and more interactive setup (better UX)
-- [ ] Integrate Ropsten network
-- [ ] Integrate Sepolia network
 - [ ] Integrate Prater network
 - [ ] Off-premise setup support
 - [ ] Cross platform support and documentation
-- [ ] Documentation with examples
 - [ ] More tests!!!
 - [ ] Integrate other PoS networks
 
