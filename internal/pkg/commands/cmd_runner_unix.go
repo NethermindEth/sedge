@@ -53,23 +53,28 @@ func (cr *UnixCMDRunner) BuildDockerPSCMD(options DockerPSOptions) Command {
 
 func (cr *UnixCMDRunner) BuildDockerComposePSCMD(options DockerComposePsOptions) Command {
 	flags := ""
+	psFlags := ""
 	name := ""
+	if options.Path != "" {
+		flags += fmt.Sprintf(" -f %s ", options.Path)
+	}
+
 	if options.Services {
 		log.Debug(`Command "docker compose ps" built with "--service" flag.`)
-		flags += " --services"
+		psFlags += " --services"
 	} else if options.Quiet {
 		log.Debug(`Command "docker compose ps" built with "--quiet" flag.`)
-		flags += " --quiet"
+		psFlags += " --quiet"
 	}
 
 	if options.FilterRunning {
-		flags += " --filter status=running"
+		psFlags += " --filter status=running"
 	}
 
 	if options.ServiceName != "" {
 		name += " " + options.ServiceName
 	}
-	command := fmt.Sprintf("docker compose -f %s ps%s%s", options.Path, flags, name)
+	command := fmt.Sprintf("docker compose%sps%s%s", flags, psFlags, name)
 	return Command{Cmd: command}
 }
 
