@@ -350,6 +350,14 @@ func RunValidatorOrExit() error {
 func handleJWTSecret() error {
 	log.Info(configs.GeneratingJWTSecret)
 
+	// Create scripts directory if not exists
+	if _, err := os.Stat(generationPath); os.IsNotExist(err) {
+		err = os.MkdirAll(generationPath, 0755)
+		if err != nil {
+			return err
+		}
+	}
+
 	rawScript, err := templates.Scripts.ReadFile(filepath.Join("scripts", "jwt_secret.sh"))
 	if err != nil {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)

@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.0.1] - 2022-07-15
+### Fixed
+- Error when trying to generate jwtsecret on unexisting folder
+
+## [0.1.0] - 2022-07-15
 ### Added
 - Create cli tool able to set up a Ethereum based validator in an on-premise way.
 - Generate `docker-compose` scripts and `.env` files for selected clients with the `cli` command.
