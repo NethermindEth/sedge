@@ -204,7 +204,9 @@ func runAndShowContainers(services []string) error {
 	}
 
 	// Check that compose plugin is installed with docker running 'docker compose ps'
-	dockerComposePsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{})
+	dockerComposePsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+		Path: filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+	})
 	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
 	dockerComposePsCMD.GetOutput = true
 	_, err := commands.Runner.RunCMD(dockerComposePsCMD)
