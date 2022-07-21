@@ -314,17 +314,26 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration) erro
 	statuses := m.TrackSync(done, []string{consensusUrl}, []string{executionUrl}, wait)
 
 	var esynced, csynced bool
+	// Threshold to stop tracking, to avoid false responses
+	times := 0
 	for s := range statuses {
 		if s.Error != nil {
 			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
 		}
-		esynced = esynced || (s.Synced && s.Endpoint == executionUrl)
-		csynced = csynced || (s.Synced && s.Endpoint == consensusUrl)
+		esynced = s.Synced && s.Endpoint == executionUrl
+		csynced = s.Synced && s.Endpoint == consensusUrl
 		if esynced && csynced {
-			// Stop tracking
-			done <- struct{}{}
-			log.Info(configs.NodesSynced)
-			break // statuses channel might still have data before closing done channel
+			times++
+			// Stop tracking after consecutive synced reports
+			if times == 2 {
+				// Stop tracking
+				done <- struct{}{}
+				log.Info(configs.NodesSynced)
+				break // statuses channel might still have data before closing done channel
+			}
+		} else {
+			// Restart threshold
+			times = 0
 		}
 	}
 
