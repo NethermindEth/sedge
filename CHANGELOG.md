@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Table with mev-boost support information on the Readme
+- Table with OS support for dependency installation
 - More instructions and descriptions about the tool on the Readme
 
 ### Changed 

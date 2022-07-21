@@ -187,6 +187,18 @@ If you are familiar with `docker`, `docker compose`, and the validator setup, th
 | Teku       | yes       | Ropsten    |
 
 > Settings for Lighthouse with mev-boost are quite ready, we are waiting for an official and stable Lighthouse docker image with mev-boost support
+## Supported Linux flavours for dependency installation
+
+| OS             | Versions                |
+| -------------- | ----------------------- |
+| Ubuntu         | 22.04,21.10,21.04,20.04 |
+| Debian         | 11,10,9,8               |
+| Fedora         | 35,34                   |
+| CentOS         | 8                       |
+| Arch           | -                       |
+| Amazon Linux 2 | -                       |
+| Alpine         | 3.15,3.14,3.14.3        |
+
 ## ✅ Roadmap
 The following roadmap covers the main features and ideas we want to implement but doesn't cover everything we are planning for this tool. Stay in touch if you are interested, a lot of improvements are coming in the next two months. Please note that this Roadmap is continually changing until version 1.0.
 
