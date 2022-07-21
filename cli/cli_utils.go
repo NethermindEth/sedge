@@ -320,12 +320,17 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration) erro
 		if s.Error != nil {
 			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
 		}
-		esynced = s.Synced && s.Endpoint == executionUrl
-		csynced = s.Synced && s.Endpoint == consensusUrl
+
+		if s.Endpoint == executionUrl {
+			esynced = s.Synced
+		} else if s.Endpoint == consensusUrl {
+			csynced = s.Synced
+		}
+
 		if esynced && csynced {
 			times++
 			// Stop tracking after consecutive synced reports
-			if times == 2 {
+			if times == 3 {
 				// Stop tracking
 				done <- struct{}{}
 				log.Info(configs.NodesSynced)
