@@ -37,6 +37,7 @@ const (
 	DependencyNotInstalledError       = "dependency %s is not installed on host machine"
 	DependenciesMissingError          = "required dependencies are missing. Please install them and try again. Dependencies can be installed using 'sedge cli' command"
 	DockerEngineOffError              = "it seems docker engine is not running. Please start it and try again. Error: %v"
+	DockerComposeOffError             = "it seems docker compose plugin is not installed. Please install it and try again. Error: %v"
 	DockerComposeScriptNotFoundError  = "docker-compose script not found at %s. Please run 'sedge cli' command to generate it or check the script path. By default, it should be located at %s"
 	ScriptIsNotRunningError           = "services of docker-compose script provided are not running. Error: %v"
 	GettingLogsError                  = "failed to get logs for services %s. Error: %v"

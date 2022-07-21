@@ -54,6 +54,7 @@ func (cr *UnixCMDRunner) BuildDockerPSCMD(options DockerPSOptions) Command {
 func (cr *UnixCMDRunner) BuildDockerComposePSCMD(options DockerComposePsOptions) Command {
 	flags := ""
 	name := ""
+
 	if options.Services {
 		log.Debug(`Command "docker compose ps" built with "--service" flag.`)
 		flags += " --services"

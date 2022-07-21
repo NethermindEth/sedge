@@ -203,6 +203,17 @@ func runAndShowContainers(services []string) error {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
 	}
 
+	// Check that compose plugin is installed with docker running 'docker compose ps'
+	dockerComposePsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+		Path: filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+	})
+	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
+	dockerComposePsCMD.GetOutput = true
+	_, err := commands.Runner.RunCMD(dockerComposePsCMD)
+	if err != nil {
+		return fmt.Errorf(configs.DockerComposeOffError, err)
+	}
+
 	// Run docker-compose script
 	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
 		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
@@ -303,17 +314,31 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration) erro
 	statuses := m.TrackSync(done, []string{consensusUrl}, []string{executionUrl}, wait)
 
 	var esynced, csynced bool
+	// Threshold to stop tracking, to avoid false responses
+	times := 0
 	for s := range statuses {
 		if s.Error != nil {
 			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
 		}
-		esynced = esynced || (s.Synced && s.Endpoint == executionUrl)
-		csynced = csynced || (s.Synced && s.Endpoint == consensusUrl)
+
+		if s.Endpoint == executionUrl {
+			esynced = s.Synced
+		} else if s.Endpoint == consensusUrl {
+			csynced = s.Synced
+		}
+
 		if esynced && csynced {
-			// Stop tracking
-			done <- struct{}{}
-			log.Info(configs.NodesSynced)
-			break // statuses channel might still have data before closing done channel
+			times++
+			// Stop tracking after consecutive synced reports
+			if times == 3 {
+				// Stop tracking
+				done <- struct{}{}
+				log.Info(configs.NodesSynced)
+				break // statuses channel might still have data before closing done channel
+			}
+		} else {
+			// Restart threshold
+			times = 0
 		}
 	}
 

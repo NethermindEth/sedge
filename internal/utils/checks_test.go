@@ -83,7 +83,6 @@ func TestPreCheck(t *testing.T) {
 		runner          commands.CommandRunner
 		isErr           bool
 		noDocker        bool
-		noCompose       bool
 	}{
 		{
 			name:            "Ok",
@@ -137,9 +136,6 @@ func TestPreCheck(t *testing.T) {
 
 			if !tc.noDocker {
 				dPath = test.CreateFakeDep(t, "docker")
-			}
-			if !tc.noCompose {
-				dcPath = test.CreateFakeDep(t, "docker-compose")
 			}
 
 			commands.InitRunner(func() commands.CommandRunner {

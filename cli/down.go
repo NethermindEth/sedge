@@ -30,7 +30,7 @@ import (
 var downCmd = &cobra.Command{
 	Use:   "down [flags]",
 	Short: "Shutdown sedge running containers",
-	Long:  `Shutdown sedge running containers using docker-compose CLI. Shortcut for 'docker compose -f <script> down'`,
+	Long:  `Shutdown sedge running containers using docker compose CLI. Shortcut for 'docker compose -f <script> down'`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := utils.PreCheck(generationPath); err != nil {
 			log.Fatal(err)

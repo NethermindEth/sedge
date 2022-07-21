@@ -64,6 +64,11 @@ sudo cp $GOPATH/bin/sedge /usr/local/bin/
 sudo cp sedge/build/sedge /usr/local/bin/
 ```
 
+#### Download binary from release page
+1. Download correct binary for the machine you want to use for Sedge, i.e choose the correct target OS/Arch.
+2. Set binary as executable with `chmod +x <binary>`. Replace `<binary>` with the name of the downloaded binary.
+3. (Optional) Put the binary on path with `cp <binary> /usr/local/bin/sedge`
+
 ### Dependencies
 `sedge` dependencies are `docker` with `docker compose` plugin, but if you don't have those installed, `sedge` will show instructions to install them, or install them for you.
 
@@ -77,7 +82,59 @@ With `sedge cli` you can go through the entire workflow setup:
   
 Between steps 4 and 5 you can generate the validator(s) keystore folder using `sedge keys`. 
 
+The entire process is interactive, although you can use the `-y` flag to run Sedge without prompts.
+
 Check all the options and flags with `sedge cli --help`. More instructions or guides about sedge's features will come soon!
+
+### Run a validator with mev-boost on Ropsten
+
+The following command takes care of the setup of a Teku consensus and validator nodes on Ropsten with a random execution client:
+
+```
+sedge cli --network ropsten -c teku
+```
+
+The `--network` flag allow you to choose the target network for the setup. Check out supported networks below. Default network is mainnet.
+
+The `-c/-v` flag is to select the desired consensus/validator client for the setup. If you only use one of those flags, then the same client pair will be used for consensus and validator nodes.
+
+There is also a `-e` flag to select the execution client. The default behavior is to choose a randomized client, that's why if we skip the `-e` flag this time, a randomized execution client will be used.
+
+mev-boost is a default setting as long as Sedge supports mev-boost for the selected client and network. If you don't want to use mev-boost in this case, then add the `--no-mev-boost` flag to the command.
+
+### Configuration file
+When you run Sedge for the first time, it generates a `.sedge.yml` on your HOME directory. This file should look like this:
+
+```yaml
+dependencies:
+  - docker
+
+executionClients:
+  - geth
+  - nethermind
+
+consensusClients:
+  - lighthouse
+  - lodestar
+  - prysm
+  - teku
+ 
+validatorClients:
+  - lighthouse
+  - lodestar
+  - prysm
+  - teku
+
+logs:
+  logLevel: info
+```
+
+If you want to know what Sedge does in every step, then just read the logs. Sedge is logging every step. Some of the applied steps or commands are shown on the debug logs only. To see these logs you need to replace `info` for `debug` on the `logLevel` field.
+
+You can modify the clients there to customize Sedge's random selection of clients. If you remove a client there, it won't be randomly selected. Be careful not to add an unsupported client, if this client is choosed you will face an error. Sedge knows very well which clients it supports.
+
+You don't need to modify the `dependencies` field at all. If you alter it, Sedge may not work as expected.
+
 ## 🔥 What can you do with sedge today?
 
 - Select an execution, consensus and validator node (manually or automatically) and generate a `docker-compose` script with production-tested configurations to run the setup you want.
@@ -85,6 +142,10 @@ Check all the options and flags with `sedge cli --help`. More instructions or gu
 - Don't remember `docker-compose` commands or flags for your setup? Check docker logs of the running services with `sedge logs`, and shut them down with `sedge down`
 
 > The setup is currently designed to start all three nodes required to run a validator (execution, consensus and validator node). Soon `sedge` will let you directly connect to a public or remote node. The execution and consensus nodes will be executed first, and the validator node will be executed automatically after those nodes are synced, giving you time to prepare the keystore file and make the deposit for your staked ether.
+
+If you are familiar with `docker`, `docker compose`, and the validator setup, then you can use Sedge to generate a base docker-compose script with the recommended settings, stop Sedge instead of letting it execute the script, and then edit the script as much as you want. Is a lot more easier than doing everything from scratch!
+
+> Although Sedge supports several clients, is still on beta. Some settings may not work because -at least on the testnets- the clients are constantly evolving. Please let us know any issues you encounter!
 
 ## Supported networks and clients
 
@@ -106,6 +167,38 @@ Check all the options and flags with `sedge cli --help`. More instructions or gu
 |            | Prysm      | Prysm      |
 |            | Teku       | Teku       |
 
+### Ropsten
+
+| Execution  | Consensus  | Validator  |
+| ---------- | ---------- | ---------- |
+| Geth       | Lighthouse | Lighthouse |
+| Nethermind | Lodestar   | Lodestar   |
+|            | Prysm      | Prysm      |
+|            | Teku       | Teku       |
+
+
+### CL clients with Mev-Boost
+
+| Client     | Mev-Boost | Networks   |
+| ---------- | --------- | ---------- |
+| Lighthouse | no*       | Ropsten    |
+| Lodestar   | no        | -          |
+| Prysm      | no        | -          |
+| Teku       | yes       | Ropsten    |
+
+> Settings for Lighthouse with mev-boost are quite ready, we are waiting for an official and stable Lighthouse docker image with mev-boost support
+## Supported Linux flavours for dependency installation
+
+| OS             | Versions                |
+| -------------- | ----------------------- |
+| Ubuntu         | 22.04,21.10,21.04,20.04 |
+| Debian         | 11,10,9,8               |
+| Fedora         | 35,34                   |
+| CentOS         | 8                       |
+| Arch           | -                       |
+| Amazon Linux 2 | -                       |
+| Alpine         | 3.15,3.14,3.14.3        |
+
 ## ✅ Roadmap
 The following roadmap covers the main features and ideas we want to implement but doesn't cover everything we are planning for this tool. Stay in touch if you are interested, a lot of improvements are coming in the next two months. Please note that this Roadmap is continually changing until version 1.0.
 
@@ -124,6 +217,7 @@ The following roadmap covers the main features and ideas we want to implement bu
 
 ### Version 0.3
 - [ ] Enable use of public execution and consensus nodes
+- [ ] Integrate Goerli network
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
 
 ### Version 0.4
