@@ -24,11 +24,13 @@ func init() {
 		"mainnet": false,
 		"kiln":    true,
 		"ropsten": true,
+		"prater":  true,
 	}
 
 	NetworksToServices = map[string]string{
 		"mainnet": "mainnet",
 		"kiln":    "merge",
 		"ropsten": "merge",
+		"prater":  "merge",
 	}
 }

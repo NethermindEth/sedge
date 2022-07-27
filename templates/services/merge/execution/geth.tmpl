@@ -34,7 +34,7 @@
       - --datadir=/var/lib/goethereum
       - --port={{.ElDiscoveryPort}}
       - --http.port={{.ElApiPort}}
-      - --${NETWORK}
+      - --{{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
       - --verbosity
       - ${GETH_LOG_LEVEL}
       - --ws
