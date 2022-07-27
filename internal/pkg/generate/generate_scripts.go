@@ -211,6 +211,7 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 }
 
 func checkSplitedNetworks(network string) bool {
+	// TODO: use network names as constants
 	return network == "prater" // Check if network is goerli/prater
 }
 
