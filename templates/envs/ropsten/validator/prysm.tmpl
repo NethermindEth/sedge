@@ -9,5 +9,5 @@ VL_IMAGE_VERSION={{if .VlImage}}{{.VlImage}}{{else}}gcr.io/prysmaticlabs/prysm/v
 KEYSTORE_DIR={{.KeystoreDir}}
 WALLET_DIR=./wallet
 VL_DATA_DIR={{.VlDataDir}}
-CONFIG_URL=https://config.kiln.themerge.dev/cl/genesis/config.yaml
+CONFIG_URL=https://raw.githubusercontent.com/eth-clients/merge-testnets/main/ropsten-beacon-chain/config.yaml
 {{ end }}
