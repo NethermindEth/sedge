@@ -9,10 +9,10 @@
       sh -c "wget -O /tmp/app/config.yml ${CONFIG_URL}"{{end}}
 
   validator-import:
-    image: ${VL_IMAGE_VERSION}
-    depends_on: 
+    image: ${VL_IMAGE_VERSION}{{with .VlPrysmCfg}}
+    depends_on:
       config_validator:
-        condition: service_completed_successfully
+        condition: service_completed_successfully{{end}}
     networks:
       - sedge
     container_name: validator-import-client

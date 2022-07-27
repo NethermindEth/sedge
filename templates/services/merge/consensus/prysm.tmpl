@@ -13,10 +13,10 @@
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}
-    depends_on: 
+    image: ${CC_IMAGE_VERSION}{{with .CcPrysmCfg}}
+    depends_on:
       config_beacon:
-        condition: service_completed_successfully
+        condition: service_completed_successfully{{end}}
     networks:
       - sedge
     volumes:
