@@ -152,6 +152,15 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 		validatorImage = strings.Join(validatorParts[1:], ":")
 	}
 
+	// Checkpoint Url
+	if checkpointSyncUrl == "" {
+		var ok bool
+		checkpointSyncUrl, ok = configs.NetworksToCheckpointUrl[network]
+		if !ok {
+			checkpointSyncUrl = ""
+		}
+	}
+
 	return nil
 }
 
@@ -164,6 +173,11 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	// Warn if exposed ports are used
 	if mapAllPorts {
 		log.Warn(configs.MapAllPortsWarning)
+	}
+
+	// Warn if checkpoint url used
+	if checkpointSyncUrl != "" {
+		log.Warnf(configs.CheckpointUrlUsedWarning, checkpointSyncUrl)
 	}
 
 	// Get all clients: supported + configured

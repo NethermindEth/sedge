@@ -55,7 +55,8 @@
       - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
       - --monitoring-host=0.0.0.0
       - --monitoring-port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}
-      - --checkpoint-sync-url={{.}}{{end}}{{range $flag := .ClExtraFlags}}
+      - --checkpoint-sync-url={{.}}
+      - --genesis-beacon-api-url={{.}}{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}
     logging:
       driver: "json-file"
