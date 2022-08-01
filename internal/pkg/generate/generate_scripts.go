@@ -190,6 +190,7 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
 		MapAllPorts:         gd.MapAllPorts,
+		SplittedNetwork:     checkSplitedNetworks(gd.Network),
 	}
 
 	// Print docker-compose file
@@ -207,6 +208,11 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 	log.Infof(configs.CreatedFile, filepath.Join(gd.GenerationPath, configs.DefaultDockerComposeScriptName))
 
 	return nil
+}
+
+func checkSplitedNetworks(network string) bool {
+	// TODO: use network names as constants
+	return network == "prater" // Check if network is goerli/prater
 }
 
 /*

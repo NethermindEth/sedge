@@ -152,6 +152,11 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 		validatorImage = strings.Join(validatorParts[1:], ":")
 	}
 
+	// Checkpoint Url
+	if checkpointSyncUrl == "" {
+		checkpointSyncUrl, _ = configs.NetworksToCheckpointUrl[network]
+	}
+
 	return nil
 }
 
@@ -164,6 +169,11 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	// Warn if exposed ports are used
 	if mapAllPorts {
 		log.Warn(configs.MapAllPortsWarning)
+	}
+
+	// Warn if checkpoint url used
+	if checkpointSyncUrl != "" {
+		log.Warnf(configs.CheckpointUrlUsedWarning, checkpointSyncUrl)
 	}
 
 	// Get all clients: supported + configured
@@ -268,6 +278,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 
 	log.Info(configs.ValidatorTips)
 
+	// TODO: Add ability to not run a validator at all
 	// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service  in the previous step
 	if !utils.Contains(*services, validator) {
 		// Wait for clients to start

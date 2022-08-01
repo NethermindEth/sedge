@@ -104,4 +104,5 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 	DefaultMetricsPortVL            = "5056"
 	DefaultMevPort                  = "18550"
 	MapAllPortsWarning              = "You are mapping all ports for the clients!!! Make sure this is intended. This could make the clients vulnerable to attacks. Be sure to setup a firewall."
+	CheckpointUrlUsedWarning        = "A Checkpoint Sync Url will be used for the consensus node. Using %s ."
 )

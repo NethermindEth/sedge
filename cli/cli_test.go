@@ -275,6 +275,8 @@ func buildCliTestCase(
 		data: []posmoni.EndpointSyncStatus{
 			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
 			{Endpoint: inspectConsensusUrl + ":" + ports["CLApi"], Synced: true},
+			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
+			{Endpoint: inspectConsensusUrl + ":" + ports["CLApi"], Synced: true},
 		},
 	}
 
