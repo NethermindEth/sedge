@@ -154,11 +154,7 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 
 	// Checkpoint Url
 	if checkpointSyncUrl == "" {
-		var ok bool
-		checkpointSyncUrl, ok = configs.NetworksToCheckpointUrl[network]
-		if !ok {
-			checkpointSyncUrl = ""
-		}
+		checkpointSyncUrl, _ = configs.NetworksToCheckpointUrl[network]
 	}
 
 	return nil
