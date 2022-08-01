@@ -1,0 +1,72 @@
+name: 'Release Sedge'
+
+on: 
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The version number (e.g: 0.1.2) of the release you want to push'
+        required: true
+        default: 'master'
+
+permissions: 
+  contents: write
+  packages: write
+
+jobs:
+  build-sedge:
+    name: Build sedge
+    runs-on: ubuntu-latest
+    env: 
+      VERSION: ${{ github.event.inputs.tag }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - uses: actions/setup-go@v3
+      with:
+        go-version: '1.18.3'
+    - run: chmod +x ./scripts/build-go-binaries.sh && ./scripts/build-go-binaries.sh
+    - uses: actions/upload-artifact@master
+      name: Uploading sedge darwin amd64 package
+      with:
+        name: sedge-v${{env.VERSION}}-darwin-amd64
+        path: build/sedge-v${{env.VERSION}}-darwin-amd64
+
+    - uses: actions/upload-artifact@master
+      name: Uploading sedge darwin arm64 package
+      with:
+        name: sedge-v${{env.VERSION}}-darwin-arm64
+        path: build/sedge-v${{env.VERSION}}-darwin-arm64
+
+    - uses: actions/upload-artifact@master
+      name: Uploading sedge linux amd64 package
+      with:
+        name: sedge-v${{env.VERSION}}-linux-amd64
+        path: build/sedge-v${{env.VERSION}}-linux-amd64
+        
+    - uses: actions/upload-artifact@master
+      name: Uploading sedge linux arm64 package
+      with:
+        name: sedge-v${{env.VERSION}}-linux-arm64
+        path: build/sedge-v${{env.VERSION}}-linux-arm64
+
+  publish-github:
+    name: "Release and upload binaries to github"
+    runs-on: ubuntu-latest
+    env: 
+      VERSION: ${{ github.event.inputs.tag }}
+    needs: build-sedge
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Download packages
+      uses: actions/download-artifact@v3
+      with: 
+        path: /tmp/binaries
+    - name: Upload release to Github Releases
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "/tmp/binaries/sedge-v*/*"
+        bodyFile: "CHANGELOG.md"
+        draft: true
+        tag: ${{ github.event.inputs.tag }}
+        name: ${{ github.event.inputs.tag }}
