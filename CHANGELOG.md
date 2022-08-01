@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Support for Goerli/Prater network
 - Docusaurus documentation engine with initial version of docs
 - CI workflows to test and deploy documentation to Github Pages
 

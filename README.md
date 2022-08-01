@@ -83,6 +83,10 @@ If you are familiar with `docker`, `docker compose`, and the validator setup, th
 
 > Although Sedge supports several clients, is still on beta. Some settings may not work because -at least on the testnets- the clients are constantly evolving. Please let us know any issues you encounter!
 
+If you are familiar with `docker`, `docker compose`, and the validator setup, then you can use Sedge to generate a base docker-compose script with the recommended settings, stop Sedge instead of letting it execute the script, and then edit the script as much as you want. Is a lot more easier than doing everything from scratch!
+
+> Although Sedge supports several clients, is still on beta. Some settings may not work because -at least on the testnets- the clients are constantly evolving. Please let us know any issues you encounter!
+
 ## Supported networks and clients
 
 ### Mainnet
