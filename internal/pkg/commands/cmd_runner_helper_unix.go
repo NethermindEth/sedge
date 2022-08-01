@@ -129,7 +129,7 @@ func executeBashScript(script BashScript) (out string, err error) {
 
 	// Prepare channel to receive errors from goroutines
 	errChans := make([]<-chan error, 0)
-	// cmd executes any instrucctions coming from stdin
+	// cmd executes any instructions coming from stdin
 	errChans = append(errChans, goCopy(&wait, stdin, &scriptBuffer, true))
 
 	if script.GetOutput {
