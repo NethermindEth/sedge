@@ -1,0 +1,97 @@
+---
+sidebar_position: 3
+id: install-guide
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Installation guide
+
+Sedge is currently only available for Linux and macOS, and both amd64 and arm64 architectures. You can use any of the following methods to install Sedge:
+
+## Download binary from release page
+1. Download correct binary for the machine you want to use for Sedge from the [releases page](https://github.com/NethermindEth/sedge/releases), i.e choose the correct target OS / Arch. For example: if your machine is a Intel / M1 mac then download the `darwin-amd64` / `darwin-arm64` binary. You can also download the binary from the CLI (command line interface) or Terminal with `curl` and `wget`:
+<Tabs groupId="download-cmds">
+  <TabItem value="curl" label="curl">
+
+  ```
+  curl -OL https://github.com/NethermindEth/sedge/releases/download/<VERSION>/sedge-v<VERSION>-<OS>-<ARCH>
+  ```
+
+  </TabItem>
+  <TabItem value="wget" label="wget">
+
+    wget https://github.com/NethermindEth/sedge/releases/download/<VERSION>/sedge-v<VERSION>-<OS>-<ARCH>
+
+  </TabItem>
+</Tabs>
+
+  > Replace `<VERSION>` with the desired version number, e.g 0.1.2; `<OS>` with your OS, e.g linux; and `<ARCH>` with your architecture, e.g amd64.
+
+1. Open a console or terminal instance on the directory in which you downloaded the binary. 
+1. Set binary as executable executing `chmod +x <binary>` in the terminal. Replace `<binary>` with the name of the downloaded binary.
+1. Run Sedge `./sedge --help` to check if the executable is ok. The `.` represents the current directory (where your terminal session is pointing to)
+1. (Optional) Put the binary in your [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) with `cp <binary> /usr/local/bin/sedge` so you can execute Sedge from any directory using the terminal. Try `sedge --help` now.
+
+## Using Go
+
+First install the Go programmning language following the [official instructions](https://go.dev/doc/install). You need at least the `1.18.2` version.
+
+:::tip
+
+If you want to install Sedge in a M1 mac then you need the `darwin-arm64` package. You can find it clicking on [other downloads](https://go.dev/dl/) from the Go install page.
+
+:::
+
+This command will install the `sedge` executable along with the library and its dependencies in your system:
+
+```
+go install github.com/NethermindEth/sedge/cmd/sedge@latest
+```
+
+The executable will be in your `$GOBIN` (`$GOPATH/bin`).
+
+:::tip
+
+To check if the `GOBIN` is not in your PATH you can execute `echo $GOBIN` from the terminal. If it doesn't print anything then is not in your PATH. To add `GOBIN` to your PATH add the following lines to your $HOME/.profile:
+
+```bash
+export GOBIN=$GOPATH/bin
+export PATH=$GOBIN:$PATH
+```
+
+Changes made to a profile file may not apply until the next time you log into your computer. To apply the changes immediately, just run the shell commands directly or execute them from the profile using a command such as source $HOME/.profile.
+:::
+
+## Build from source
+    
+In this method you generate the binary manually (need Go installed) downloading and compiling the source code:
+
+```
+git clone https://github.com/NethermindEth/sedge.git
+cd sedge
+mkdir -p build
+go build -o build/sedge cmd/sedge/main.go
+```
+
+or if you have `make` installed:
+
+```
+git clone https://github.com/NethermindEth/sedge.git
+cd sedge
+make compile
+```
+
+The executable will be in the `build` folder.
+
+---
+In case you want the binary in your PATH (or if you used the [Using Go](#using-go) method and you don't have `$GOBIN` in your PATH), please copy the binary to `/usr/local/bin`:
+
+```
+# Using Go
+sudo cp $GOPATH/bin/sedge /usr/local/bin/
+
+# Build from source
+sudo cp sedge/build/sedge /usr/local/bin/
+```
