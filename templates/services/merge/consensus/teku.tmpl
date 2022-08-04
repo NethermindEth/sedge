@@ -49,8 +49,7 @@
       - --metrics-port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}
       - --initial-state={{.}}/eth/v2/debug/beacon/states/finalized{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
-      - --Xvalidators-proposer-blinded-blocks-enabled=true
-      - --Xeb-endpoint=http://mevboost:{{.MevPort}}{{end}}{{if .XeeVersion}}
+      - --builder-endpoint=http://mevboost:{{.MevPort}}{{end}}{{if .XeeVersion}}
       - --Xee-version=${XEE_VERSION}{{end}}
     logging:
       driver: "json-file"

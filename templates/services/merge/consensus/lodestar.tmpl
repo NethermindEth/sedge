@@ -43,7 +43,9 @@
       - --jwt-secret=/tmp/jwt/jwtsecret{{with .CheckpointSyncUrl}}
       - --weakSubjectivitySyncLatest
       - --weakSubjectivityServerUrl={{.}}{{end}}{{range $flag := .ClExtraFlags}}
-      - --{{$flag}}{{end}}
+      - --{{$flag}}{{end}}{{if .Mev}}
+      - --builder.enabled
+      - --builder.urls http://mevboost:{{.MevPort}}{{end}}
     logging:
       driver: "json-file"
       options:
