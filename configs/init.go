@@ -27,6 +27,7 @@ func init() {
 		"kiln":    true,
 		"ropsten": true,
 		"prater":  true,
+		"sepolia": true,
 	}
 
 	NetworksToServices = map[string]string{
@@ -34,6 +35,7 @@ func init() {
 		"kiln":    "merge",
 		"ropsten": "merge",
 		"prater":  "merge",
+		"sepolia": "merge",
 	}
 
 	NetworksToCheckpointUrl = map[string]string{
@@ -41,5 +43,6 @@ func init() {
 		"kiln":    "",
 		"ropsten": "https://ropsten.checkpoint-sync.ethdevops.io",
 		"prater":  "https://goerli.checkpoint-sync.ethdevops.io",
+		"sepolia": "https://sepolia.checkpoint-sync.ethdevops.io",
 	}
 }

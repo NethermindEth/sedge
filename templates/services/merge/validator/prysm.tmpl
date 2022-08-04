@@ -56,7 +56,10 @@
       - --accept-terms-of-use
       - --monitoring-host=0.0.0.0
       - --monitoring-port={{.VlMetricsPort}}{{range $flag := .VlExtraFlags}}
-      - --{{$flag}}{{end}}
+      - --{{$flag}}{{end}}{{with .FeeRecipient}}
+      - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{if .Mev}}
+      - --enable-builder
+      - --enable-validator-registration{{end}}
     logging:
       driver: "json-file"
       options:

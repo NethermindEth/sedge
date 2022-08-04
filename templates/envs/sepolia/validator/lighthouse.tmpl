@@ -1,12 +1,11 @@
-{{/* teku.tmpl */}}
+{{/* lighthouse.tmpl */}}
 {{ define "validator" }}
 # --- Consensus Layer - Validator Node - configuration ---
 CC_API_URL={{.ConsensusApiURL}}
 GRAFFITI={{.ExecutionEngineName}}
 VL_LOG_LEVEL=info
-VL_INSTANCE_NAME=TekuValidator
-VL_IMAGE_VERSION={{if .VlImage}}{{.VlImage}}{{else}}consensys/teku:latest{{end}}
+VL_INSTANCE_NAME=LighthouseValidator
+VL_IMAGE_VERSION={{if .VlImage}}{{.VlImage}}{{else}}sigp/lighthouse:latest{{end}}
 KEYSTORE_DIR={{.KeystoreDir}}
 VL_DATA_DIR={{.VlDataDir}}
-MEV=true
 {{ end }}
