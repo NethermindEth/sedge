@@ -151,13 +151,13 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Integrate Ropsten network
 
 ### Version 0.2
-- [ ] Set up and run only one node (execution/consensus/validator)
-- [ ] Integrate Goerli/Prater network
-- [ ] Documentation with examples
+- [x] Integrate Goerli/Prater network
+- [x] Integrate Sepolia network
+- [x] Documentation with examples
 
 ### Version 0.3
+- [ ] Set up and run only one node (execution/consensus/validator)
 - [ ] Enable use of public execution and consensus nodes
-- [ ] Integrate Sepolia network
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
 
 ### Version 0.4
