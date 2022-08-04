@@ -35,12 +35,13 @@
       - --beacon-nodes=${CC_API_URL}
       - --graffiti=${GRAFFITI}
       - --debug-level=${VL_LOG_LEVEL}
-      - --validators-dir=/data/validators
+      - --validators-dir=/data/validators{{with .FeeRecipient}}
+      - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
       - --metrics
       - --metrics-port={{.VlMetricsPort}}
       - --metrics-address=0.0.0.0{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
-      - --private-tx-proposals{{end}}
+      - --builder-proposals{{end}}
     logging:
       driver: "json-file"
       options:
