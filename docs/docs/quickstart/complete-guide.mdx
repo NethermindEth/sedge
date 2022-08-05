@@ -3,6 +3,9 @@ sidebar_position: 4
 id: complete-guide
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Complete quickstart guide
 
 Sedge is a one-click setup tool which you can use to setup and run a validator on Ethereum easily and without any prior knowledge. In this guide you will go through every step in the validator setup using Sedge, along with detailed explanations for beginners. 
@@ -13,8 +16,8 @@ This is a beginner-friendly guide. Familiarity with the command line is expected
 
 We will walk through the following steps:
 
-1. Download and install Sedge in a new brand Linux machine
-2. Run Sedge's main workflow with default configuration values and use it to install dependencies
+1. Download and install Sedge in a new brand machine
+2. Run Sedge's main workflow with default configuration values and use it to install dependencies (only for Linux)
 3. Generate a `docker-compose` script with a randomized set of execution, consensus and validator clients
 4. Run the `docker-compose` script
 5. Generate validator keystore
@@ -28,11 +31,25 @@ The hardware specifications of the machine we are going to use are:
  
 ### 1. Download and install Sedge in a new brand Linux machine
 
-First open a console in the Home directory. Then use `wget` to download a binary from the releases page (we will be using the `0.1.2` version):
+First open a console in the Home directory. Then use `curl` or `wget` to download a binary from the releases page (we will be using the `0.1.2` version). Check the [installation guide](install-guide) for more information or if you want to use another installation method:
 
-```
-$ wget https://github.com/NethermindEth/sedge/releases/download/0.1.2/sedge-v0.1.2-linux-amd64 -O sedge
-```
+<Tabs groupId="download-cmds">
+  <TabItem value="curl" label="curl">
+
+  ```
+  $ curl -L https://github.com/NethermindEth/sedge/releases/download/0.1.2/sedge-v0.1.2-linux-amd64 --output sedge
+  ```
+
+  </TabItem>
+  <TabItem value="wget" label="wget">
+
+  ```
+  $ wget https://github.com/NethermindEth/sedge/releases/download/0.1.2/sedge-v0.1.2-linux-amd64 -O sedge
+  ```
+
+  </TabItem>
+</Tabs>
+
 
 :::note
 
@@ -46,13 +63,19 @@ The `$` symbol represents the Terminal prompt
 
 :::
 
+:::info
+
+This guide assume your Terminal session is pointing all the time to the folder in which you downloaded Sedge. You can check the directory pointed by your Terminal session if you execute `pwd`. 
+
+:::
+
 You can run `ls` to print the files and directories on the current directory and check the binary was downloaded correctly.
 
 <!-- The following screenshot summarizes the above steps. Not important content was hidden so you can focus on the essential parts.
 
 ![download-and-ls](/img/download-sedge.png) -->
 
-Set binary as executable executing `chmod +x sedge`.
+Set binary as executable executing `chmod +x sedge`. You shouldn't see any output or logs if the command was successful
 
 **(Optional)** Run Sedge `./sedge --help` to check if the executable is ok. The `.` represents the current directory (where your terminal session is pointing to).
 
@@ -64,17 +87,26 @@ Set binary as executable executing `chmod +x sedge`.
 
 - Initialization
   
-    ```
+    ```logs
     $ ./sedge cli
 
     Initializing configuration
     Config File ".sedge" Not Found in "[/home/sedge]"
     Config file not found on the path provided nor in the home directory
+    # highlight-next-line
     Generating config file in the /home/sedge directory
     2022-XX-XX 00:00:00 -- [INFO] [Logger Init] Logging configuration: {Level:info}
+    # highlight-start
     2022-XX-XX 00:00:00 -- [WARN] Execution client not provided. A random client will be selected. Random client: nethermind
     2022-XX-XX 00:00:00 -- [WARN] Consensus and validator clients not provided. Selecting same pair of clients for consensus and validator clients using a random client. Random client: lighthouse
+    # highlight-end
     ```
+
+  :::info
+
+  The `logs` shown by Sedge in every step will be displayed and explained. You should compare your `logs` with the ones in this guide to check everything went as expected. Note that some logs are **highlighted**.
+
+  :::
 
     As you see a configuration file was generated. This configuration file is generated with default values and we don't need to worry about it for this guide. 
 
@@ -85,41 +117,60 @@ Set binary as executable executing `chmod +x sedge`.
   ```
   2022-XX-XX 00:00:00 -- [INFO] Checking dependencies: docker
   ```
-  - If a dependency is missing, Sedge will print instructions to install it and a prompt will be shown to let you decide between letting Sedge install it for you or exit and you install it on your own. (Only for Linux)
-    ```
-    2022-XX-XX 00:00:00 -- [ERRO] dependency docker is not installed on host machine
-    2022-XX-XX 00:00:00 -- [INFO] pending dependencies: docker
-    2022-XX-XX 00:00:00 -- [INFO] Instructions for docker
 
-    sudo apt-get update
+  <Tabs groupId="dependency-check">
+    <TabItem value="linux" label="Linux">
 
-    sudo apt apt-get install -y \
-        apt-transport-https \
-        ca-certificates \
-        curl \
-        software-properties-common
+  If a dependency is missing, Sedge will print instructions to install it and a prompt will be shown to let you decide between letting Sedge install it for you or exit and you install it on your own. (Only for Linux)
 
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  ```logs
+  # highlight-start
+  2022-XX-XX 00:00:00 -- [ERRO] dependency docker is not installed on host machine
+  2022-XX-XX 00:00:00 -- [INFO] pending dependencies: docker
+  2022-XX-XX 00:00:00 -- [INFO] Instructions for docker
+  # highlight-end
 
-    echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  sudo apt-get update
 
-    sudo apt-get update
-    sudo apt-get install -y docker-ce
+  sudo apt apt-get install -y \
+      apt-transport-https \
+      ca-certificates \
+      curl \
+      software-properties-common
 
-    DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
-    sudo mkdir -p $DOCKER_CONFIG/cli-plugins
-    sudo curl -SL "https://github.com/docker/compose/releases/download/v2.6.1/docker-compose-$(uname -s)-$(uname -m)" -o $DOCKER_CONFIG/cli-plugins/docker-compose
-    sudo chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
-    Use the arrow keys to navigate: ↓ ↑ → ←
-    ? Select how to proceed with the pending dependencies:
-    ▸ Install dependencies
-        Exit. You will manage this dependencies on your own
-    ```
-    We will go with the `Install dependencies` option, but feel free to go with the `Exit` option, install dependencies on your own and then run Sedge again.
+  echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
+  sudo apt-get update
+  sudo apt-get install -y docker-ce
+
+  DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+  sudo mkdir -p $DOCKER_CONFIG/cli-plugins
+  sudo curl -SL "https://github.com/docker/compose/releases/download/v2.6.1/docker-compose-$(uname -s)-$(uname -m)" -o $DOCKER_CONFIG/cli-plugins/docker-compose
+  sudo chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+
+  # highlight-start
+  Use the arrow keys to navigate: ↓ ↑ → ←
+  ? Select how to proceed with the pending dependencies:
+  ▸ Install dependencies
+      Exit. You will manage this dependencies on your own
+  # highlight-end
+  ```
+      
+  We will go with the `Install dependencies` option, but feel free to go with the `Exit` option, install dependencies on your own and then run Sedge again.
+
+    </TabItem>
+    <TabItem value="macos" label="macOS">
+
+    If you have missing dependencies then you need to install it first. Search for instructions in the [dependencies guide](dependencies).
+
+    </TabItem>
+  </Tabs>
+
+    If dependencies were successfully installed, then you should see this log:
     ```
     2022-XX-XX 00:00:00 -- [INFO] All dependencies are installed on host machine
     ```
@@ -136,7 +187,8 @@ A new prompt will be shown for the fee recipient address. Although you can skip 
 
 The following step will be done automatically.
 
-```
+```logs
+# highlight-next-line
 2022-XX-XX 00:00:00 -- [INFO] Generating docker-compose script for current selection of clients
 2022-XX-XX 00:00:00 -- [INFO] File docker-compose.yml:
 
@@ -271,8 +323,10 @@ networks:
   sedge:
     name: sedge_network
 
+# highlight-start
 2022-07-31 21:06:40 -- [INFO] Created file docker-compose-scripts/docker-compose.yml
 2022-07-31 21:06:40 -- [INFO] Generating environment file for current selection of clients
+# highlight-end
 2022-07-31 21:06:40 -- [INFO] File .env:
 
 # --- Global configuration ---
@@ -307,6 +361,7 @@ VL_IMAGE_VERSION=sigp/lighthouse:latest
 KEYSTORE_DIR=./keystore
 VL_DATA_DIR=./validator-data
 
+# highlight-next-line
 2022-XX-XX 00:00:00 -- [INFO] Created file docker-compose-scripts/.env
 ```
 
@@ -314,11 +369,12 @@ VL_DATA_DIR=./validator-data
 
 Instructions on how to run the docker-compose script will be displayed and next to it a confirm prompt.
 
-```
+```logs
 2022-XX-XX 00:00:00 -- [INFO] Instructions for running docker-compose script
 
 docker compose -f docker-compose-scripts/docker-compose.yml up -d execution consensus
 
+# highlight-next-line
 ? Run the script with the selected services execution, consensus? [Y/n]
 ```
 
@@ -328,11 +384,11 @@ Notice that it says "Run the script with the selected services **execution, cons
 
 Sedge will track the syncing progress of the execution and consensus nodes, and after they are completely synced, Sedge will automatically spin up the validator node. This give you time for you to prepare the validator keystore (we will do that shortly) and to be familiar with the validator registration.
 
-Now type `Y` or enter to start the following flow:
+Now type `Y` or enter to start the following flow (You just need to read carefully all the logs from now on):
 
 :::info
 
-Docker commands need to be executed with `sudo` by default, which requires root permissions and hence a password prompt may arise. Sedge only executes the commands that are shown in the logs, and you can also check out the codebase to check that there's nothing nasty running under the hood. The codebase is public and fully visible on the Github repo.
+Docker commands need to be executed with `sudo` by default, which requires root permissions and hence a **password prompt may arise**. Sedge only executes the commands that are shown in the logs, and you can also check out the codebase to check that there's nothing nasty running under the hood. The codebase is public and fully visible on the Github repo.
 
 :::
 
@@ -414,7 +470,7 @@ Docker commands need to be executed with `sudo` by default, which requires root 
 
     Now Sedge will use an external monitoring tool to track the syncing progress. Your logs should be similar to this:
 
-    ```
+    ```logs
     2022-XX-XX 00:00:00 -- [INFO] [ETH2 Monitor] [TrackSync] Tracking sync progress of consensus nodes...
     2022-XX-XX 00:00:00 -- [ERRO] [GetRequest] request failed. Error: Get "http://172.19.0.2:4000/eth/v1/node/syncing": dial tcp 172.19.0.2:4000: connect: connection refused
     2022-XX-XX 00:00:00 -- [INFO] [GetRequest] Retrying request
@@ -435,15 +491,17 @@ Docker commands need to be executed with `sudo` by default, which requires root 
     2022-XX-XX 00:00:00 -- [ERRO] [PostRequest] request failed. Error: Post "http://172.19.0.3:8545": dial tcp 172.19.0.3:8545: connect: connection refused
     2022-XX-XX 00:00:00 -- [INFO] [PostRequest] Retrying request
     2022-XX-XX 00:00:00 -- [INFO] [ETH2 Monitor] [TrackSync] Endpoint http://172.19.0.3:8545 is synced
+    # highlight-start
     2022-XX-XX 00:05:00 -- [INFO] [ETH2 Monitor] [TrackSync] Tracking sync progress of consensus nodes...
     2022-XX-XX 00:05:00 -- [INFO] [ETH2 Monitor] [TrackSync] Endpoint http://172.19.0.2:4000 is syncing
     2022-XX-XX 00:05:00 -- [INFO] [ETH2 Monitor] [TrackSync] Tracking sync progress of execution nodes...
     2022-XX-XX 00:05:00 -- [INFO] [ETH2 Monitor] [TrackSync] Endpoint http://172.19.0.3:8545 is syncing
+    # highlight-end
     ```  
 
-    Is normal that some requests fail at the beginning because the nodes are not ready yet. After they are ready you shouldn't see more failed requests unless there is a network problem in your machine or you shutdown the nodes.
+    **Is normal that some requests fail** at the beginning because the nodes are not ready yet. It should take a few minutes for the nodes to be ready. After they are ready you shouldn't see more failed requests unless there is a network problem in your machine or you shutdown the nodes.
 
-    Is also normal to see some logs saying a node is synced at the beginning. This are false reports from the node itself. Sedge knows how to handle this and tell if a node is truly synced. 
+    **Is also normal to see some logs saying a node is synced** at the beginning. This are false reports from the node itself. Sedge knows how to handle this and tell if a node is truly synced. 
 
     For a long time (until the nodes are synced) and every 5 minutes you will see logs like this:
 
@@ -474,11 +532,12 @@ The `keys` command will first check if Docker is installed (because use docker t
 
 The next step involves a prompt for a Eth1 address to be used to create the [withdrawal credentials](/docs/concepts/keystore). If you don't provide one then the tool will generate withdrawal credentials with the mnemonic-derived withdrawal public key.
 
-```
+```logs
 Initializing configuration
 Using config file: /Users/teno/.sedge.yaml
 2022-07-31 22:18:50 -- [INFO] [Logger Init] Logging configuration: {Level:info}
 2022-07-31 22:18:50 -- [INFO] All dependencies are installed on host machine
+# highlight-next-line
 ✔ Please enter a Eth1 address to be used to create the withdrawal credentials. You can leave it blank and press enter:
 ```
 
@@ -492,7 +551,7 @@ Please enter the password you will use for the validator keystore: ********
 
 :::info
 
-A password prompt may arise again because Sedge use docker commands to run the staking-deposit-cli docker image, and these commands need to be executed with `sudo` by default. The required password is your **machine password**, not the keystore password.
+A **password prompt** may arise again because Sedge use docker commands to run the staking-deposit-cli docker image, and these commands need to be executed with `sudo` by default. The required password is your **machine password**, not the keystore password.
 
 :::
 
@@ -511,7 +570,7 @@ Repeat your keystore password for confirmation:
 Be careful to type correctly the keystore password provided previously to Sedge. If you don't insert the same password, then staking-deposit-cli will ask you to create a new password. If this happens you have two options:
 
 1. Exit the program and try again.
-2. Finish the execution flow, generating the keystore succefully in the process. Then you need to update the `keystore_password.txt` file inside the `keystore` folder with the password you provided to the staking-deposit-cli tool. 
+2. Finish the execution flow, generating the keystore successfully in the process. Then you need to update the `keystore_password.txt` file inside the `keystore` folder with the password you provided to the staking-deposit-cli tool. 
 
 :::
 
@@ -568,8 +627,9 @@ Press any key.
 
 The above logs mark the end of the staking-deposit-cli execution and Sedge retakes control of the flow:
 
-```
+```logs
 2022-XX-XX 00:00:00 -- [INFO] deposit-cli tool exited
+# highlight-next-line
 2022-XX-XX 00:00:00 -- [INFO] If everything went well, your keys can be found at: /home/sedge/docker-compose-scripts/keystore/validator_keys
 2022-XX-XX 00:00:00 -- [INFO] keystore_password.txt on keystore folder created with provided password
 2022-XX-XX 00:00:00 -- [WARN] In case you used custom paths for the 'cli' or the 'keys' commands, please review if the keystore path in the generated .env file points to the generated keystore folder (the .env key should be KEYSTORE_DIR). If not, change the path in the .env file to the correct one.

@@ -1,7 +1,68 @@
 # Sedge
+
 [![Go Report Card](https://goreportcard.com/badge/github.com/NethermindEth/sedge)](https://goreportcard.com/report/github.com/NethermindEth/sedge)
+[![Discord](https://user-images.githubusercontent.com/7288322/34471967-1df7808a-efbb-11e7-9088-ed0b04151291.png)](https://discord.com/invite/PaCMRFdvWT)
+[![codecov](https://codecov.io/gh/NethermindEth/sedge/branch/main/graph/badge.svg?token=8FERO4PO1V)](https://codecov.io/gh/NethermindEth/sedge)
+
 
 A one click setup tool for PoS network/chain validators. Currently, Sedge is designed primarily for solo stakers and testnet devs of the Beacon Chain and the Merge (Ethereum). Sedge generates docker-compose scripts for the entire on-premise validator setup based on the chosen client.
+
+- [Sedge](#sedge)
+  - [⚙️ Installation](#️-installation)
+    - [Dependencies](#dependencies)
+    - [Installation methods](#installation-methods)
+  - [📜 Documentation](#-documentation)
+  - [⚡️ Quick start](#️-quick-start)
+  - [💥 How this all started?](#-how-this-all-started)
+  - [🔥 What can you do with sedge today?](#-what-can-you-do-with-sedge-today)
+  - [Supported networks and clients](#supported-networks-and-clients)
+    - [Mainnet](#mainnet)
+    - [Kiln](#kiln)
+    - [Ropsten](#ropsten)
+    - [Sepolia](#sepolia)
+    - [Prater](#prater)
+    - [CL clients with Mev-Boost](#cl-clients-with-mev-boost)
+  - [Supported Linux flavours for dependency installation](#supported-linux-flavours-for-dependency-installation)
+  - [✅ Roadmap](#-roadmap)
+    - [Version 0.1 (Actual)](#version-01-actual)
+    - [Version 0.2](#version-02)
+    - [Version 0.3](#version-03)
+    - [Version 0.4](#version-04)
+    - [Version 0.X](#version-0x)
+    - [Version 1.0](#version-10)
+  - [💪 Want to contribute?](#-want-to-contribute)
+  - [⚠️ License](#️-license)
+
+## ⚙️ Installation
+### Dependencies
+Sedge dependencies are `docker` with `docker compose` plugin, but if you don't have those installed, Sedge will show instructions to install them, or install them for you. Check the [docs](https://docs.sedge.nethermind.io/docs/quickstart/dependencies) for more details.
+
+### Installation methods
+
+Check our [installation guide](https://docs.sedge.nethermind.io/docs/quickstart/install-guide) for detailed instructions on the supported methods:
+
+- Download binary from release page
+- Using the Go programmning language
+- Build from source
+
+## 📜 Documentation
+
+For further details, you can check the [documentation](https://docs.sedge.nethermind.io).
+
+## ⚡️ Quick start
+
+With `sedge cli` you can go through the entire workflow setup:
+1. Check dependencies
+2. Generate jwtsecret (not for mainnet)
+3. Generate a `docker-compose` script with randomized clients selection and `.env`
+4. Execute the `docker-compose` script (only execution and consensus nodes will be executed by default)
+5. Validator client will be executed automatically after execution and consensus nodes are synced.
+  
+Between steps 4 and 5 you can generate the validator(s) keystore folder using `sedge keys`. 
+
+The entire process is interactive, although you can use the `-y` flag to run Sedge without prompts.
+
+Check all the options and flags with `sedge cli --help`. More instructions or guides about sedge's features will come soon!
 
 ## 💥 How this all started?
 
@@ -20,57 +81,6 @@ We want to share our knowledge in this topic and create something that allows ev
 
 We don't want to stop at Ethereum. We also want to help stakers of other PoS networks/chains, so if your favourite chain is not here, you are more than welcome to contribute!
 
-## ⚡️ Quick start
-### Dependencies
-Sedge dependencies are `docker` with `docker compose` plugin, but if you don't have those installed, Sedge will show instructions to install them, or install them for you.
-
-### Quick run
-With `sedge cli` you can go through the entire workflow setup:
-1. Check dependencies
-2. Generate jwtsecret (not for mainnet and prater)
-3. Generate a `docker-compose` script with randomized clients selection and `.env`
-4. Execute the `docker-compose` script (only execution and consensus nodes will be executed by default)
-5. Validator client will be executed automatically after execution and consensus nodes are synced.
-  
-Between steps 4 and 5 you can generate the validator(s) keystore folder using `sedge keys`. 
-
-The entire process is interactive, although you can use the `-y` flag to run Sedge without prompts.
-
-Check all the options and flags with `sedge cli --help`. More instructions or guides about sedge's features will come soon!
-
-### Configuration file
-When you run Sedge for the first time, it generates a `.sedge.yml` on your HOME directory. This file should look like this:
-
-```yaml
-dependencies:
-  - docker
-
-executionClients:
-  - geth
-  - nethermind
-
-consensusClients:
-  - lighthouse
-  - lodestar
-  - prysm
-  - teku
- 
-validatorClients:
-  - lighthouse
-  - lodestar
-  - prysm
-  - teku
-
-logs:
-  logLevel: info
-```
-
-If you want to know what Sedge does in every step, then just read the logs. Sedge is logging every step. Some of the applied steps or commands are shown on the debug logs only. To see these logs you need to replace `info` for `debug` on the `logLevel` field.
-
-You can modify the clients there to customize Sedge's random selection of clients. If you remove a client there, it won't be randomly selected. Be careful not to add an unsupported client, if this client is choosed you will face an error. Sedge knows very well which clients it supports.
-
-You don't need to modify the `dependencies` field at all. If you alter it, Sedge may not work as expected.
-
 ## 🔥 What can you do with sedge today?
 
 - Select an execution, consensus and validator node (manually or automatically) and generate a `docker-compose` script with production-tested configurations to run the setup you want.
@@ -78,10 +88,6 @@ You don't need to modify the `dependencies` field at all. If you alter it, Sedge
 - Don't remember `docker-compose` commands or flags for your setup? Check docker logs of the running services with `sedge logs`, and shut them down with `sedge down`
 
 > The setup is currently designed to start all three nodes required to run a validator (execution, consensus and validator node). Soon Sedge will let you directly connect to a public or remote node. The execution and consensus nodes will be executed first, and the validator node will be executed automatically after those nodes are synced, giving you time to prepare the keystore file and make the deposit for your staked ether.
-
-If you are familiar with `docker`, `docker compose`, and the validator setup, then you can use Sedge to generate a base docker-compose script with the recommended settings, stop Sedge instead of letting it execute the script, and then edit the script as much as you want. Is a lot more easier than doing everything from scratch!
-
-> Although Sedge supports several clients, is still on beta. Some settings may not work because -at least on the testnets- the clients are constantly evolving. Please let us know any issues you encounter!
 
 If you are familiar with `docker`, `docker compose`, and the validator setup, then you can use Sedge to generate a base docker-compose script with the recommended settings, stop Sedge instead of letting it execute the script, and then edit the script as much as you want. Is a lot more easier than doing everything from scratch!
 
@@ -116,22 +122,40 @@ If you are familiar with `docker`, `docker compose`, and the validator setup, th
 |            | Prysm      | Prysm      |
 |            | Teku       | Teku       |
 
+### Sepolia
+
+| Execution  | Consensus  | Validator  |
+| ---------- | ---------- | ---------- |
+| Geth       | Lighthouse | Lighthouse |
+| Nethermind | Lodestar   | Lodestar   |
+|            | Prysm      | Prysm      |
+|            | Teku       | Teku       |
+
+### Prater
+
+| Execution  | Consensus  | Validator  |
+| ---------- | ---------- | ---------- |
+| Geth       | Lighthouse | Lighthouse |
+| Nethermind | Lodestar   | Lodestar   |
+|            | Prysm      | Prysm      |
+|            | Teku       | Teku       |
+
 
 ### CL clients with Mev-Boost
 
-| Client     | Mev-Boost | Networks   |
-| ---------- | --------- | ---------- |
-| Lighthouse | no*       | Ropsten    |
-| Lodestar   | no        | -          |
-| Prysm      | no        | -          |
-| Teku       | yes       | Ropsten    |
+| Client     | Mev-Boost | Networks        |
+| ---------- | --------- | --------------- |
+| Lighthouse | yes       | Ropsten, Prater |
+| Lodestar   | yes       | Prater          |
+| Prysm      | no*       | Prater          |
+| Teku       | yes       | Ropsten, Prater |
 
-> Settings for Lighthouse with mev-boost are quite ready, we are waiting for an official and stable Lighthouse docker image with mev-boost support
+> Settings for Prysm with mev-boost are quite ready, we are waiting for an official and stable Prysm docker image with mev-boost support
 ## Supported Linux flavours for dependency installation
 
 | OS             | Versions                |
 | -------------- | ----------------------- |
-| Ubuntu         | 22.04,21.10,21.04,20.04 |
+| Ubuntu         | 22.04, 20.04 |
 | Debian         | 11,10,9,8               |
 | Fedora         | 35,34                   |
 | CentOS         | 8                       |
