@@ -16,6 +16,7 @@ services:
       - -addr
       - 0.0.0.0:{{.MevPort}}
       - -${NETWORK}
+      - -relay-check
       - -relays
       - ${RELAY_URL}{{end}}
 {{template "consensus" .}}

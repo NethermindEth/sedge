@@ -20,11 +20,10 @@
       - {{.ElApiPort}}
       - {{.ElAuthPort}}
     command: 
-      - --config=${NETWORK}
+      - --config={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
       - --datadir=/nethermind/data
       - --log=${NETHERMIND_LOG_LEVEL}{{with .TTD}}
       - --Merge.TerminalTotalDifficulty=${TTD}{{end}}
-      - --Merge.TerminalBlockNumber=0
       - --Metrics.Enabled=${EC_METRICS_ENABLED}
       - --Metrics.NodeName=${EC_NODENAME}
       - --Metrics.PushGatewayUrl=${NETHERMIND_METRICS_PUSH_GATEWAY_URL}

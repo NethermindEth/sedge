@@ -1,0 +1,10 @@
+{
+  "label": "Overview",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "Overview of Sedge design and features",
+    "slug": "overview"
+  }
+}
+

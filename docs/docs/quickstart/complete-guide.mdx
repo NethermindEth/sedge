@@ -1,0 +1,653 @@
+---
+sidebar_position: 4
+id: complete-guide
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Complete quickstart guide
+
+Sedge is a one-click setup tool which you can use to setup and run a validator on Ethereum easily and without any prior knowledge. In this guide you will go through every step in the validator setup using Sedge, along with detailed explanations for beginners. 
+
+This is a beginner-friendly guide. Familiarity with the command line is expected, but otherwise this guide makes no assumptions about your technical skills or prior knowledge.
+
+## Overview
+
+We will walk through the following steps:
+
+1. Download and install Sedge in a new brand machine
+2. Run Sedge's main workflow with default configuration values and use it to install dependencies (only for Linux)
+3. Generate a `docker-compose` script with a randomized set of execution, consensus and validator clients
+4. Run the `docker-compose` script
+5. Generate validator keystore
+
+The hardware specifications of the machine we are going to use are:
+
+- 4 CPU cores
+- 8 GB RAM
+- 200 SSD
+- Ubuntu 22.04/amd64
+ 
+### 1. Download and install Sedge in a new brand Linux machine
+
+First open a console in the Home directory. Then use `curl` or `wget` to download a binary from the releases page (we will be using the `0.1.2` version). Check the [installation guide](install-guide) for more information or if you want to use another installation method:
+
+<Tabs groupId="download-cmds">
+  <TabItem value="curl" label="curl">
+
+  ```
+  $ curl -L https://github.com/NethermindEth/sedge/releases/download/0.1.2/sedge-v0.1.2-linux-amd64 --output sedge
+  ```
+
+  </TabItem>
+  <TabItem value="wget" label="wget">
+
+  ```
+  $ wget https://github.com/NethermindEth/sedge/releases/download/0.1.2/sedge-v0.1.2-linux-amd64 -O sedge
+  ```
+
+  </TabItem>
+</Tabs>
+
+
+:::note
+
+The `-O` flag is to rename binary as __sedge__
+
+:::
+
+:::note
+
+The `$` symbol represents the Terminal prompt
+
+:::
+
+:::info
+
+This guide assume your Terminal session is pointing all the time to the folder in which you downloaded Sedge. You can check the directory pointed by your Terminal session if you execute `pwd`. 
+
+:::
+
+You can run `ls` to print the files and directories on the current directory and check the binary was downloaded correctly.
+
+<!-- The following screenshot summarizes the above steps. Not important content was hidden so you can focus on the essential parts.
+
+![download-and-ls](/img/download-sedge.png) -->
+
+Set binary as executable executing `chmod +x sedge`. You shouldn't see any output or logs if the command was successful
+
+**(Optional)** Run Sedge `./sedge --help` to check if the executable is ok. The `.` represents the current directory (where your terminal session is pointing to).
+
+<!-- ![chmod-help](/img/chmod-and-help.png) -->
+
+### 2. Run Sedge's main workflow with default configuration values
+
+`cli` is Sedge's main command. This command takes care of the entire validator setup and is highly customizable. We will run it without flags and walk through the process:
+
+- Initialization
+  
+    ```logs
+    $ ./sedge cli
+
+    Initializing configuration
+    Config File ".sedge" Not Found in "[/home/sedge]"
+    Config file not found on the path provided nor in the home directory
+    # highlight-next-line
+    Generating config file in the /home/sedge directory
+    2022-XX-XX 00:00:00 -- [INFO] [Logger Init] Logging configuration: {Level:info}
+    # highlight-start
+    2022-XX-XX 00:00:00 -- [WARN] Execution client not provided. A random client will be selected. Random client: nethermind
+    2022-XX-XX 00:00:00 -- [WARN] Consensus and validator clients not provided. Selecting same pair of clients for consensus and validator clients using a random client. Random client: lighthouse
+    # highlight-end
+    ```
+
+  :::info
+
+  The `logs` shown by Sedge in every step will be displayed and explained. You should compare your `logs` with the ones in this guide to check everything went as expected. Note that some logs are **highlighted**.
+
+  :::
+
+    As you see a configuration file was generated. This configuration file is generated with default values and we don't need to worry about it for this guide. 
+
+    As we didn't specified the clients to be used in the setup, they were randomly choosen. Nethermind was choosen as the execution client and Lighthouse for the consensus layer.
+
+- Check if dependencies are installed
+  
+  ```
+  2022-XX-XX 00:00:00 -- [INFO] Checking dependencies: docker
+  ```
+
+  <Tabs groupId="dependency-check">
+    <TabItem value="linux" label="Linux">
+
+  If a dependency is missing, Sedge will print instructions to install it and a prompt will be shown to let you decide between letting Sedge install it for you or exit and you install it on your own. (Only for Linux)
+
+  ```logs
+  # highlight-start
+  2022-XX-XX 00:00:00 -- [ERRO] dependency docker is not installed on host machine
+  2022-XX-XX 00:00:00 -- [INFO] pending dependencies: docker
+  2022-XX-XX 00:00:00 -- [INFO] Instructions for docker
+  # highlight-end
+
+  sudo apt-get update
+
+  sudo apt apt-get install -y \
+      apt-transport-https \
+      ca-certificates \
+      curl \
+      software-properties-common
+
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+  echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+  sudo apt-get update
+  sudo apt-get install -y docker-ce
+
+  DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+  sudo mkdir -p $DOCKER_CONFIG/cli-plugins
+  sudo curl -SL "https://github.com/docker/compose/releases/download/v2.6.1/docker-compose-$(uname -s)-$(uname -m)" -o $DOCKER_CONFIG/cli-plugins/docker-compose
+  sudo chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+
+  # highlight-start
+  Use the arrow keys to navigate: ↓ ↑ → ←
+  ? Select how to proceed with the pending dependencies:
+  ▸ Install dependencies
+      Exit. You will manage this dependencies on your own
+  # highlight-end
+  ```
+      
+  We will go with the `Install dependencies` option, but feel free to go with the `Exit` option, install dependencies on your own and then run Sedge again.
+
+    </TabItem>
+    <TabItem value="macos" label="macOS">
+
+    If you have missing dependencies then you need to install it first. Search for instructions in the [dependencies guide](dependencies).
+
+    </TabItem>
+  </Tabs>
+
+    If dependencies were successfully installed, then you should see this log:
+    ```
+    2022-XX-XX 00:00:00 -- [INFO] All dependencies are installed on host machine
+    ```
+
+- Enter [fee recipient](/docs/concepts/fee-recipient) address
+
+A new prompt will be shown for the fee recipient address. Although you can skip it pressing enter, we don't recommend to do so.
+
+```
+✔ Please enter the Fee Recipient address. You can leave it blank and press enter (not recommended):
+```
+
+### 3. Generate a `docker-compose` script with a randomized set of execution, consensus and validator clients
+
+The following step will be done automatically.
+
+```logs
+# highlight-next-line
+2022-XX-XX 00:00:00 -- [INFO] Generating docker-compose script for current selection of clients
+2022-XX-XX 00:00:00 -- [INFO] File docker-compose.yml:
+
+version: "3.9"
+
+services:
+
+  execution:
+    stop_grace_period: 1m
+    container_name: execution-client
+    restart: unless-stopped
+    image: ${EC_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${EC_DATA_DIR}:/nethermind/data
+    ports:
+      - "30303:30303/tcp"
+      - "30303:30303/udp"
+      - "8008:8008/tcp"
+    expose:
+      - 8545
+    command:
+      - --config=${NETWORK}
+      - --datadir=/nethermind/data
+      - --log=${NETHERMIND_LOG_LEVEL}
+      - --Metrics.Enabled=${EC_METRICS_ENABLED}
+      - --Metrics.NodeName=${EC_NODENAME}
+      - --Metrics.PushGatewayUrl=${NETHERMIND_METRICS_PUSH_GATEWAY_URL}
+      - --Metrics.ExposePort=8008
+      - --Sync.SnapSync=${EC_SNAP_SYNC_ENABLED}
+      - --Init.WebSocketsEnabled=true
+      - --JsonRpc.Enabled=true
+      - --JsonRpc.Host=0.0.0.0
+      - --JsonRpc.Port=8545
+      - --JsonRpc.EnabledModules=${EC_ENABLED_MODULES}
+      - --Network.DiscoveryPort=30303
+      - --HealthChecks.Enabled=${NETHERMIND_HEALTH_CHECKS_ENABLED}
+      - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  consensus:
+    stop_grace_period: 1m
+    container_name: consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${CC_DATA_DIR}:/var/lib/lighthouse
+    ports:
+      - "9000:9000/tcp"
+      - "9000:9000/udp"
+      - "5054:5054/tcp"
+    expose:
+      - 4000
+    command:
+      - lighthouse
+      - bn
+      - --disable-upnp
+      - --datadir=/var/lib/lighthouse
+      - --port=9000
+      - --http
+      - --http-address=0.0.0.0
+      - --http-port=4000
+      - --network=${NETWORK}
+      - --target-peers=${CC_PEER_COUNT}
+      - --eth1-endpoints=${EC_API_URL}
+      - --eth1-blocks-per-log-query=150
+      - --debug-level=${CC_LOG_LEVEL}
+      - --validator-monitor-auto
+      - --subscribe-all-subnets
+      - --import-all-attestations
+      - --metrics
+      - --metrics-port=5054
+      - --metrics-address=0.0.0.0
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  validator-import:
+    container_name: validator-import-client
+    image: ${VL_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${KEYSTORE_DIR}:/keystore
+      - ${VL_DATA_DIR}:/var/lib/lighthouse
+    command: |
+      lighthouse account validator import
+      --password-file=/keystore/keystore_password.txt
+      --reuse-password
+      --directory /keystore
+      --datadir /var/lib/lighthouse
+
+  validator:
+    container_name: validator-client
+    image: ${VL_IMAGE_VERSION}
+    depends_on:
+      validator-import:
+        condition: service_completed_successfully
+    networks:
+      - sedge
+    ports:
+      - "5056:5056"
+    volumes:
+      - ${VL_DATA_DIR}:/var/lib/lighthouse
+    command:
+      - lighthouse
+      - vc
+      - --beacon-nodes=${CC_API_URL}
+      - --graffiti=${GRAFFITI}
+      - --network=${NETWORK}
+      - --debug-level=${VL_LOG_LEVEL}
+      - --validators-dir=/var/lib/lighthouse
+      - --metrics
+      - --metrics-port=5056
+      - --metrics-address=0.0.0.0
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+networks:
+  sedge:
+    name: sedge_network
+
+# highlight-start
+2022-07-31 21:06:40 -- [INFO] Created file docker-compose-scripts/docker-compose.yml
+2022-07-31 21:06:40 -- [INFO] Generating environment file for current selection of clients
+# highlight-end
+2022-07-31 21:06:40 -- [INFO] File .env:
+
+# --- Global configuration ---
+NETWORK=mainnet
+
+# --- Execution Layer - Execution Node - configuration ---
+EC_IMAGE_VERSION=nethermind/nethermind
+NETHERMIND_LOG_LEVEL=INFO
+EC_ENABLED_MODULES=[Web3,Eth,Subscribe,Net]
+EC_METRICS_ENABLED=false
+EC_NODENAME=Nethermind
+NETHERMIND_METRICS_PUSH_GATEWAY_URL=http://localhost:9090/metrics
+NETHERMIND_HEALTH_CHECKS_ENABLED=false
+NETHERMIND_PRUNING_CACHEMB=2048
+EC_DATA_DIR=./execution-data
+EC_SNAP_SYNC_ENABLED=true
+
+# --- Consensus Layer - Beacon Node - configuration ---
+CC_PEER_COUNT=50
+CC_LOG_LEVEL=info
+EC_API_URL=http://execution:8545
+CC_INSTANCE_NAME=Lighthouse
+CC_IMAGE_VERSION=sigp/lighthouse:latest
+CC_DATA_DIR=./consensus-data
+
+# --- Consensus Layer - Validator Node - configuration ---
+CC_API_URL=http://consensus:4000
+GRAFFITI=nethermind
+VL_LOG_LEVEL=info
+VL_INSTANCE_NAME=LighthouseValidator
+VL_IMAGE_VERSION=sigp/lighthouse:latest
+KEYSTORE_DIR=./keystore
+VL_DATA_DIR=./validator-data
+
+# highlight-next-line
+2022-XX-XX 00:00:00 -- [INFO] Created file docker-compose-scripts/.env
+```
+
+### 4. Run the `docker-compose` script
+
+Instructions on how to run the docker-compose script will be displayed and next to it a confirm prompt.
+
+```logs
+2022-XX-XX 00:00:00 -- [INFO] Instructions for running docker-compose script
+
+docker compose -f docker-compose-scripts/docker-compose.yml up -d execution consensus
+
+# highlight-next-line
+? Run the script with the selected services execution, consensus? [Y/n]
+```
+
+Notice that it says "Run the script with the selected services **execution, consensus**?". This is because by default only this nodes will be up and running at the beginning, as they need to sync with the network first and these can take days.
+
+> On some testnets the sync process takes hours; dependending on the network age and your internet bandwidth
+
+Sedge will track the syncing progress of the execution and consensus nodes, and after they are completely synced, Sedge will automatically spin up the validator node. This give you time for you to prepare the validator keystore (we will do that shortly) and to be familiar with the validator registration.
+
+Now type `Y` or enter to start the following flow (You just need to read carefully all the logs from now on):
+
+:::info
+
+Docker commands need to be executed with `sudo` by default, which requires root permissions and hence a **password prompt may arise**. Sedge only executes the commands that are shown in the logs, and you can also check out the codebase to check that there's nothing nasty running under the hood. The codebase is public and fully visible on the Github repo.
+
+:::
+
+- Check if docker engine is on
+    ```
+    2022-XX-XX 00:00:00 -- [INFO] Checking if docker engine is on
+    2022-XX-XX 00:00:00 -- [INFO] Running command: docker ps -a
+    ```
+    Sedge runs `docker ps -a` to check if docker engine is on. You might have docker installed previously, but this not means docker is up and running. Docker engine is usually off when you use Docker Desktop and doesn't have the app on. If this is your case, just start Docker Desktop.
+
+    In this case docker engine is on.
+
+- Run the docker-compose script
+    
+    In this step the docker-compose script will be executed, which needs to pull the client's docker images from Docker Hub. This can take a while dependending on your internet connection.
+
+    ```
+    2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml up -d execution consensus
+    [+] Running 13/13
+    ⠿ consensus Pulled
+        ⠿ 45ea9169a5e4 Pull complete
+        ⠿ 9587c7a34752 Pull complete
+    ⠿ execution Pulled
+        ⠿ 405f018f9d1d Pull complete
+        ⠿ 026cbc59cccf Pull complete
+        ⠿ bd9aeeeca91c Pull complete
+        ⠿ 14c2bd6cb1ae Pull complete
+        ⠿ 49b80f5c597c Pull complete
+        ⠿ 5d26e9f3c617 Pull complete
+        ⠿ 44860d1d6af8 Pull complete
+        ⠿ a9132ab111ad Pull complete
+        ⠿ d8334d965894 Pull complete
+    [+] Running 3/3
+    ⠿ Network sedge_network       Created
+    ⠿ Container consensus-client  Started
+    ⠿ Container execution-client  Started
+    ```
+
+    The above logs are an example of healthy logs when going on through this step.
+
+- Display running nodes
+
+    ```
+    2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml ps --filter status=running
+    NAME                COMMAND                  SERVICE             STATUS              PORTS
+    consensus-client    "lighthouse bn --dis…"   consensus           running             0.0.0.0:5054->5054/tcp, :::5054->5054/tcp, 4000/tcp, 0.0.0.0:9000->9000/tcp, :::9000->9000/tcp, 0.0.0.0:9000->9000/udp, :::9000->9000/udp
+    execution-client    "./Nethermind.Runner…"   execution           running             0.0.0.0:8008->8008/tcp, :::8008->8008/tcp, 0.0.0.0:30303->30303/tcp, :::30303->30303/tcp, 8545/tcp, 0.0.0.0:30303->30303/udp, :::30303->30303/udp
+    ```
+
+    Double check there are both `consensus-client` and `execution-client` entries. If one of them is missing then something [wrong happened](/docs/troubleshooting). 
+
+- Futher instructions
+    
+    ```
+    2022-XX-XX 00:00:00 -- [INFO]
+    A validator node needs to connect to a synced consensus node, and the consensus node in turn needs to connect to a synced execution node.
+
+    While these required nodes (execution/consensus) are syncing, you can setup the keystore folder(s) using the staking-deposit-cli tool (https://github.com/ethereum/staking-deposit-cli) or the command 'sedge keys'. If you don't want to use 'sedge keys', make sure to set .env variables KEYSTORE_DIR and VL_DATA_DIR to correct values. You can also check https://launchpad.ethereum.org/ for tips and more instructions.
+
+    sedge will track the syncing progress of the required nodes and let you run the validator after those nodes are synced (as we recommend). This takes a while, so you have time to prepare the keystore folder.
+
+    Don't make the deposit to register the validator until its ready to run!!!
+
+    After you complete the above steps follow https://launchpad.ethereum.org/ instructions to register the validator addresses of the validators you want to setup and manage using the validator node.
+    ```
+
+- Track sync of execution and consensus node
+
+    First Sedge needs to get the IP address of the execution and consensus containers within the docker network. You don't need to worry about that if this is very technical for you.
+
+    ```
+    2022-XX-XX 00:00:00 -- [INFO] Proceding to get execution and consensus containers IP address for the monitoring tool
+    2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml ps --quiet execution
+    2022-XX-XX 00:00:00 -- [INFO] Running command: docker inspect 13d0364c2ea3016c689def9b9e3e0f1d060ccca033274f3d30b8e2998a13a392
+
+    2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml ps --quiet consensus
+    2022-XX-XX 00:00:00 -- [INFO] Running command: docker inspect 5f22960d056013b25a884e21462e019ee4ed50eccb3a065ba14cfa4eed17820e
+    ```
+
+    Now Sedge will use an external monitoring tool to track the syncing progress. Your logs should be similar to this:
+
+    ```logs
+    2022-XX-XX 00:00:00 -- [INFO] [ETH2 Monitor] [TrackSync] Tracking sync progress of consensus nodes...
+    2022-XX-XX 00:00:00 -- [ERRO] [GetRequest] request failed. Error: Get "http://172.19.0.2:4000/eth/v1/node/syncing": dial tcp 172.19.0.2:4000: connect: connection refused
+    2022-XX-XX 00:00:00 -- [INFO] [GetRequest] Retrying request
+    2022-XX-XX 00:00:00 -- [ERRO] [GetRequest] request failed. Error: Get "http://172.19.0.2:4000/eth/v1/node/syncing": dial tcp 172.19.0.2:4000: connect: connection refused
+    2022-XX-XX 00:00:00 -- [INFO] [GetRequest] Retrying request
+    2022-XX-XX 00:00:00 -- [ERRO] [GetRequest] request failed. Error: Get "http://172.19.0.2:4000/eth/v1/node/syncing": dial tcp 172.19.0.2:4000: connect: connection refused
+    2022-XX-XX 00:00:00 -- [INFO] [GetRequest] Retrying request
+    2022-XX-XX 00:00:00 -- [ERRO] [GetRequest] request failed. Error: Get "http://172.19.0.2:4000/eth/v1/node/syncing": dial tcp 172.19.0.2:4000: connect: connection refused
+    2022-XX-XX 00:00:00 -- [INFO] [GetRequest] Retrying request
+    2022-XX-XX 00:00:00 -- [ERRO] [GetRequest] request failed. Error: Get "http://172.19.0.2:4000/eth/v1/node/syncing": dial tcp 172.19.0.2:4000: connect: connection refused
+    2022-XX-XX 00:00:00 -- [INFO] [GetRequest] Retrying request
+    2022-XX-XX 00:00:00 -- [INFO] [ETH2 Monitor] [TrackSync] Endpoint http://172.19.0.2:4000 is syncing
+    2022-XX-XX 00:00:00 -- [INFO] [ETH2 Monitor] [TrackSync] Tracking sync progress of execution nodes...
+    2022-XX-XX 00:00:00 -- [ERRO] [PostRequest] request failed. Error: Post "http://172.19.0.3:8545": dial tcp 172.19.0.3:8545: connect: connection refused
+    2022-XX-XX 00:00:00 -- [INFO] [PostRequest] Retrying request
+    2022-XX-XX 00:00:00 -- [ERRO] [PostRequest] request failed. Error: Post "http://172.19.0.3:8545": dial tcp 172.19.0.3:8545: connect: connection refused
+    2022-XX-XX 00:00:00 -- [INFO] [PostRequest] Retrying request
+    2022-XX-XX 00:00:00 -- [ERRO] [PostRequest] request failed. Error: Post "http://172.19.0.3:8545": dial tcp 172.19.0.3:8545: connect: connection refused
+    2022-XX-XX 00:00:00 -- [INFO] [PostRequest] Retrying request
+    2022-XX-XX 00:00:00 -- [INFO] [ETH2 Monitor] [TrackSync] Endpoint http://172.19.0.3:8545 is synced
+    # highlight-start
+    2022-XX-XX 00:05:00 -- [INFO] [ETH2 Monitor] [TrackSync] Tracking sync progress of consensus nodes...
+    2022-XX-XX 00:05:00 -- [INFO] [ETH2 Monitor] [TrackSync] Endpoint http://172.19.0.2:4000 is syncing
+    2022-XX-XX 00:05:00 -- [INFO] [ETH2 Monitor] [TrackSync] Tracking sync progress of execution nodes...
+    2022-XX-XX 00:05:00 -- [INFO] [ETH2 Monitor] [TrackSync] Endpoint http://172.19.0.3:8545 is syncing
+    # highlight-end
+    ```  
+
+    **Is normal that some requests fail** at the beginning because the nodes are not ready yet. It should take a few minutes for the nodes to be ready. After they are ready you shouldn't see more failed requests unless there is a network problem in your machine or you shutdown the nodes.
+
+    **Is also normal to see some logs saying a node is synced** at the beginning. This are false reports from the node itself. Sedge knows how to handle this and tell if a node is truly synced. 
+
+    For a long time (until the nodes are synced) and every 5 minutes you will see logs like this:
+
+    ```
+        2022-XX-XX 00:00:00 -- [INFO] [ETH2 Monitor] [TrackSync] Tracking sync progress of consensus nodes...
+        2022-XX-XX 00:00:00 -- [INFO] [ETH2 Monitor] [TrackSync] Endpoint http://172.19.0.2:4000 is syncing
+        2022-XX-XX 00:00:00 -- [INFO] [ETH2 Monitor] [TrackSync] Tracking sync progress of execution nodes...
+        2022-XX-XX 00:00:00 -- [INFO] [ETH2 Monitor] [TrackSync] Endpoint http://172.19.0.3:8545 is syncing
+    ```
+
+:::info
+
+Date and time of the logs were modified to show more generic logs. Until this step, and depending of your internet connection, the entire process should take just a few minutes.
+
+:::
+
+### 5. Generate validator keystore
+
+Sedge uses the [staking-deposit-cli](https://github.com/ethereum/staking-deposit-cli) tool docker image to generate the [validator keystore](/docs/concepts/keystore). 
+
+To get started, first open another Terminal on the same working directory we used before (where the binary is located). Then run the following command to quickly generate the keystore:
+
+```
+./sedge keys
+```
+
+The `keys` command will first check if Docker is installed (because use docker to run the staking-deposit-cli docker image). As we already installed Docker in the previous steps, Sedge will continue the process.
+
+The next step involves a prompt for a Eth1 address to be used to create the [withdrawal credentials](/docs/concepts/keystore). If you don't provide one then the tool will generate withdrawal credentials with the mnemonic-derived withdrawal public key.
+
+```logs
+Initializing configuration
+Using config file: /Users/teno/.sedge.yaml
+2022-07-31 22:18:50 -- [INFO] [Logger Init] Logging configuration: {Level:info}
+2022-07-31 22:18:50 -- [INFO] All dependencies are installed on host machine
+# highlight-next-line
+✔ Please enter a Eth1 address to be used to create the withdrawal credentials. You can leave it blank and press enter:
+```
+
+The keystore must be secured with a password with a minimum lenght of 8. Sedge will ask you to provide this password so it can be used by the staking-deposit-cli to secure the generated keystore and then create a `keystore_password.txt` for the validator node. The password input will be hidden so you don't need to worried about your password getting registered in the Terminal logs or history.
+
+```
+✔ Please enter the password you will use for the validator keystore: ********█
+Please enter the password you will use for the validator keystore: ********
+✔ Please re-enter the password. Press Ctrl+C to retry: ********
+```
+
+:::info
+
+A **password prompt** may arise again because Sedge use docker commands to run the staking-deposit-cli docker image, and these commands need to be executed with `sudo` by default. The required password is your **machine password**, not the keystore password.
+
+:::
+
+From here the rest of the flow belongs to the staking-deposit-cli tool:
+
+```
+2022-07-31 23:08:53 -- [INFO] Generating keystore folder
+2022-07-31 23:08:53 -- [INFO] Running command:
+docker run -it --rm -v /home/sedge/docker-compose-scripts/keystore/validator_keys:/app/validator_keys nethermindeth/staking-deposit-cli new-mnemonic --chain mainnet --keystore_password ********
+Please choose your language ['1. العربية', '2. ελληνικά', '3. English', '4. Français', '5. Bahasa melayu', '6. Italiano', '7. 日本語', '8. 한국어', '9. Português do Brasil', '10. român', '11. 简体中文']:  [English]:
+Repeat your keystore password for confirmation:
+```
+
+:::caution
+
+Be careful to type correctly the keystore password provided previously to Sedge. If you don't insert the same password, then staking-deposit-cli will ask you to create a new password. If this happens you have two options:
+
+1. Exit the program and try again.
+2. Finish the execution flow, generating the keystore successfully in the process. Then you need to update the `keystore_password.txt` file inside the `keystore` folder with the password you provided to the staking-deposit-cli tool. 
+
+:::
+
+The staking-deposit-cli tool let you create a keystore using an existing mnemonic or creating a new one. By default, Sedge's `keys` command goes with creating a new mnemonic.
+
+```
+Please choose your mnemonic language ['1. 简体中文', '2. 繁體中文', '3. čeština', '4. English', '5. Italiano', '6. 한국어', '7. Português', '8. Español']:  [english]:
+Please choose how many new validators you wish to run:
+```
+
+:::tip
+
+One validator node can handle hundreds of validators (validator keys). We recommend to run at most 500 validators within a single validator node. We will go with 1 validator this time.
+
+:::
+
+After you choose how many new validators you wish to run, a new generated mnemonic will be displayed. You must copy it using safe methods such as pen and paper. Then you will be asked to insert the mnemonic for validation. This is the final step, after which the keystore will be generated:
+
+```
+                  #####     #####
+                ##     #####     ##
+    ###         ##   #######     #########################
+    ##  ##      #####               ##                   ##
+    ##     #####                 ##                       ##
+    ##     ##                     ##                      ###
+   ########                        ##                     ####
+   ##        ##   ###         #####                       #####
+   #                          ##                         # #####
+   #                            #                        #  #####
+   ##                             ##                    ##
+   ##                              ##                   ##
+   ##             ###              ##                   ##
+   ###############                 ##                   ##
+   ###               ##                                 ##
+      #############################                    ##
+                     ##                             ###
+                     #######     #################     ###
+                     ##   ## ##        ##   ##    ###
+                     ##############          #############
+
+Creating your keys.
+Creating your keys:		      [####################################]  1/1
+Creating your keystores:	  [####################################]  1/1
+Creating your depositdata:	  [####################################]  1/1
+Verifying your keystores:	  [####################################]  1/1
+Verifying your deposits:	  [####################################]  1/1
+
+Success!
+Your keys can be found at: /app/validator_keys
+
+
+Press any key.
+```
+
+The above logs mark the end of the staking-deposit-cli execution and Sedge retakes control of the flow:
+
+```logs
+2022-XX-XX 00:00:00 -- [INFO] deposit-cli tool exited
+# highlight-next-line
+2022-XX-XX 00:00:00 -- [INFO] If everything went well, your keys can be found at: /home/sedge/docker-compose-scripts/keystore/validator_keys
+2022-XX-XX 00:00:00 -- [INFO] keystore_password.txt on keystore folder created with provided password
+2022-XX-XX 00:00:00 -- [WARN] In case you used custom paths for the 'cli' or the 'keys' commands, please review if the keystore path in the generated .env file points to the generated keystore folder (the .env key should be KEYSTORE_DIR). If not, change the path in the .env file to the correct one.
+```
+
+As we stick to default configuration values all the time, we can ignore the final log. 
+
+Your keystore folder should look similar to this:
+
+```
+docker-compose-scripts
+    └── keystore
+        ├── keystore_password.txt
+        └── validator_keys
+            ├── deposit_data-1659326409.json
+            └── keystore-m_12381_3600_0_0_0-1659326408.json
+```
+
+### Conclusions
+
+Congratulations, you just installed and executed your first validator (and Ethereum full node) using Sedge. The only thing left is making the ETH deposit using the `deposit_data.json` you just generated and wait for the validator to be registered in the network.

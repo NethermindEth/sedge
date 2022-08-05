@@ -1,7 +1,68 @@
 # Sedge
-[![Go Report Card](https://goreportcard.com/badge/github.com/NethermindEth/sedge)](https://goreportcard.com/report/github.com/NethermindEth/sedge)
 
-A one click setup tool for PoS network/chain validators. Currently, `sedge` is designed primarily for solo stakers and testnet devs of the Beacon Chain and the Merge (Ethereum). `sedge` generates docker-compose scripts for the entire on-premise validator setup based on the chosen client.
+[![Go Report Card](https://goreportcard.com/badge/github.com/NethermindEth/sedge)](https://goreportcard.com/report/github.com/NethermindEth/sedge)
+[![Discord](https://user-images.githubusercontent.com/7288322/34471967-1df7808a-efbb-11e7-9088-ed0b04151291.png)](https://discord.com/invite/PaCMRFdvWT)
+[![codecov](https://codecov.io/gh/NethermindEth/sedge/branch/main/graph/badge.svg?token=8FERO4PO1V)](https://codecov.io/gh/NethermindEth/sedge)
+
+
+A one click setup tool for PoS network/chain validators. Currently, Sedge is designed primarily for solo stakers and testnet devs of the Beacon Chain and the Merge (Ethereum). Sedge generates docker-compose scripts for the entire on-premise validator setup based on the chosen client.
+
+- [Sedge](#sedge)
+  - [⚙️ Installation](#️-installation)
+    - [Dependencies](#dependencies)
+    - [Installation methods](#installation-methods)
+  - [📜 Documentation](#-documentation)
+  - [⚡️ Quick start](#️-quick-start)
+  - [💥 How this all started?](#-how-this-all-started)
+  - [🔥 What can you do with sedge today?](#-what-can-you-do-with-sedge-today)
+  - [Supported networks and clients](#supported-networks-and-clients)
+    - [Mainnet](#mainnet)
+    - [Kiln](#kiln)
+    - [Ropsten](#ropsten)
+    - [Sepolia](#sepolia)
+    - [Prater](#prater)
+    - [CL clients with Mev-Boost](#cl-clients-with-mev-boost)
+  - [Supported Linux flavours for dependency installation](#supported-linux-flavours-for-dependency-installation)
+  - [✅ Roadmap](#-roadmap)
+    - [Version 0.1 (Actual)](#version-01-actual)
+    - [Version 0.2](#version-02)
+    - [Version 0.3](#version-03)
+    - [Version 0.4](#version-04)
+    - [Version 0.X](#version-0x)
+    - [Version 1.0](#version-10)
+  - [💪 Want to contribute?](#-want-to-contribute)
+  - [⚠️ License](#️-license)
+
+## ⚙️ Installation
+### Dependencies
+Sedge dependencies are `docker` with `docker compose` plugin, but if you don't have those installed, Sedge will show instructions to install them, or install them for you. Check the [docs](https://docs.sedge.nethermind.io/docs/quickstart/dependencies) for more details.
+
+### Installation methods
+
+Check our [installation guide](https://docs.sedge.nethermind.io/docs/quickstart/install-guide) for detailed instructions on the supported methods:
+
+- Download binary from release page
+- Using the Go programmning language
+- Build from source
+
+## 📜 Documentation
+
+For further details, you can check the [documentation](https://docs.sedge.nethermind.io).
+
+## ⚡️ Quick start
+
+With `sedge cli` you can go through the entire workflow setup:
+1. Check dependencies
+2. Generate jwtsecret (not for mainnet)
+3. Generate a `docker-compose` script with randomized clients selection and `.env`
+4. Execute the `docker-compose` script (only execution and consensus nodes will be executed by default)
+5. Validator client will be executed automatically after execution and consensus nodes are synced.
+  
+Between steps 4 and 5 you can generate the validator(s) keystore folder using `sedge keys`. 
+
+The entire process is interactive, although you can use the `-y` flag to run Sedge without prompts.
+
+Check all the options and flags with `sedge cli --help`. More instructions or guides about sedge's features will come soon!
 
 ## 💥 How this all started?
 
@@ -14,126 +75,11 @@ As people who actively work on The Merge, we know how hard it is to set up an Et
   
 > Enter sedge
 
-We want `sedge` to take care of all of the above for you. With just a few clicks or steps, `sedge` can create an entire ethereum staking architecture that supports client diversity and Ethereum's latest features, while being completely free and open source. We want `sedge` to save you from making costly mistakes in this complex setup; along with hours or days of research, reading and testing. We want you to be able to stake easily with or without blockchain knowledge by giving you the tools to help this amazing community (and earn some good money of course 😉).
+We want Sedge to take care of all of the above for you. With just a few clicks or steps, Sedge can create an entire ethereum staking architecture that supports client diversity and Ethereum's latest features, while being completely free and open source. We want Sedge to save you from making costly mistakes in this complex setup; along with hours or days of research, reading and testing. We want you to be able to stake easily with or without blockchain knowledge by giving you the tools to help this amazing community (and earn some good money of course 😉).
 
 We want to share our knowledge in this topic and create something that allows everyone to easily and safely set up lots of diverse validators. 
 
 We don't want to stop at Ethereum. We also want to help stakers of other PoS networks/chains, so if your favourite chain is not here, you are more than welcome to contribute!
-
-## ⚡️ Quick start
-
-### Installation (Only UNIX systems)
-
-#### Using Go
-
-If you have at least `go1.18.2` installed then this command will install the `sedge` executable along with the library and its dependencies in your system:
-
-```
-go install github.com/NethermindEth/sedge/cmd/sedge@latest
-```
-
-The executable will be in your `$GOBIN` (`$GOPATH/bin`) 
-
-#### Manual
-
-Generate the executable manually (need Go installed):
-
-```
-git clone https://github.com/NethermindEth/sedge.git
-cd sedge
-go build -o sedge cmd/sedge/main.go
-```
-
-or if you have `make` installed:
-
-```
-git clone https://github.com/NethermindEth/sedge.git
-cd sedge
-make compile
-```
-
-The executable will be in the `sedge/build` folder
-
----
-In case you want the binary in your main PATH (or you don't have `$GOBIN` in your PATH), please copy the executable to `/usr/local/bin`:
-
-```
-# Using go install
-sudo cp $GOPATH/bin/sedge /usr/local/bin/
-# Manually
-sudo cp sedge/build/sedge /usr/local/bin/
-```
-
-#### Download binary from release page
-1. Download correct binary for the machine you want to use for Sedge, i.e choose the correct target OS/Arch.
-2. Set binary as executable with `chmod +x <binary>`. Replace `<binary>` with the name of the downloaded binary.
-3. (Optional) Put the binary on path with `cp <binary> /usr/local/bin/sedge`
-
-### Dependencies
-`sedge` dependencies are `docker` with `docker compose` plugin, but if you don't have those installed, `sedge` will show instructions to install them, or install them for you.
-
-### Quick run
-With `sedge cli` you can go through the entire workflow setup:
-1. Check dependencies
-2. Generate jwtsecret (not for mainnet and prater)
-3. Generate a `docker-compose` script with randomized clients selection and `.env`
-4. Execute the `docker-compose` script (only execution and consensus nodes will be executed by default)
-5. Validator client will be executed automatically after execution and consensus nodes are synced.
-  
-Between steps 4 and 5 you can generate the validator(s) keystore folder using `sedge keys`. 
-
-The entire process is interactive, although you can use the `-y` flag to run Sedge without prompts.
-
-Check all the options and flags with `sedge cli --help`. More instructions or guides about sedge's features will come soon!
-
-### Run a validator with mev-boost on Ropsten
-
-The following command takes care of the setup of a Teku consensus and validator nodes on Ropsten with a random execution client:
-
-```
-sedge cli --network ropsten -c teku
-```
-
-The `--network` flag allow you to choose the target network for the setup. Check out supported networks below. Default network is mainnet.
-
-The `-c/-v` flag is to select the desired consensus/validator client for the setup. If you only use one of those flags, then the same client pair will be used for consensus and validator nodes.
-
-There is also a `-e` flag to select the execution client. The default behavior is to choose a randomized client, that's why if we skip the `-e` flag this time, a randomized execution client will be used.
-
-mev-boost is a default setting as long as Sedge supports mev-boost for the selected client and network. If you don't want to use mev-boost in this case, then add the `--no-mev-boost` flag to the command.
-
-### Configuration file
-When you run Sedge for the first time, it generates a `.sedge.yml` on your HOME directory. This file should look like this:
-
-```yaml
-dependencies:
-  - docker
-
-executionClients:
-  - geth
-  - nethermind
-
-consensusClients:
-  - lighthouse
-  - lodestar
-  - prysm
-  - teku
- 
-validatorClients:
-  - lighthouse
-  - lodestar
-  - prysm
-  - teku
-
-logs:
-  logLevel: info
-```
-
-If you want to know what Sedge does in every step, then just read the logs. Sedge is logging every step. Some of the applied steps or commands are shown on the debug logs only. To see these logs you need to replace `info` for `debug` on the `logLevel` field.
-
-You can modify the clients there to customize Sedge's random selection of clients. If you remove a client there, it won't be randomly selected. Be careful not to add an unsupported client, if this client is choosed you will face an error. Sedge knows very well which clients it supports.
-
-You don't need to modify the `dependencies` field at all. If you alter it, Sedge may not work as expected.
 
 ## 🔥 What can you do with sedge today?
 
@@ -141,7 +87,7 @@ You don't need to modify the `dependencies` field at all. If you alter it, Sedge
 - Generate the keystore folder using the [staking-deposit-cli](https://github.com/ethereum/staking-deposit-cli) tool with `sedge keys`
 - Don't remember `docker-compose` commands or flags for your setup? Check docker logs of the running services with `sedge logs`, and shut them down with `sedge down`
 
-> The setup is currently designed to start all three nodes required to run a validator (execution, consensus and validator node). Soon `sedge` will let you directly connect to a public or remote node. The execution and consensus nodes will be executed first, and the validator node will be executed automatically after those nodes are synced, giving you time to prepare the keystore file and make the deposit for your staked ether.
+> The setup is currently designed to start all three nodes required to run a validator (execution, consensus and validator node). Soon Sedge will let you directly connect to a public or remote node. The execution and consensus nodes will be executed first, and the validator node will be executed automatically after those nodes are synced, giving you time to prepare the keystore file and make the deposit for your staked ether.
 
 If you are familiar with `docker`, `docker compose`, and the validator setup, then you can use Sedge to generate a base docker-compose script with the recommended settings, stop Sedge instead of letting it execute the script, and then edit the script as much as you want. Is a lot more easier than doing everything from scratch!
 
@@ -176,22 +122,40 @@ If you are familiar with `docker`, `docker compose`, and the validator setup, th
 |            | Prysm      | Prysm      |
 |            | Teku       | Teku       |
 
+### Sepolia
+
+| Execution  | Consensus  | Validator  |
+| ---------- | ---------- | ---------- |
+| Geth       | Lighthouse | Lighthouse |
+| Nethermind | Lodestar   | Lodestar   |
+|            | Prysm      | Prysm      |
+|            | Teku       | Teku       |
+
+### Prater
+
+| Execution  | Consensus  | Validator  |
+| ---------- | ---------- | ---------- |
+| Geth       | Lighthouse | Lighthouse |
+| Nethermind | Lodestar   | Lodestar   |
+|            | Prysm      | Prysm      |
+|            | Teku       | Teku       |
+
 
 ### CL clients with Mev-Boost
 
-| Client     | Mev-Boost | Networks   |
-| ---------- | --------- | ---------- |
-| Lighthouse | no*       | Ropsten    |
-| Lodestar   | no        | -          |
-| Prysm      | no        | -          |
-| Teku       | yes       | Ropsten    |
+| Client     | Mev-Boost | Networks        |
+| ---------- | --------- | --------------- |
+| Lighthouse | yes       | Ropsten, Prater |
+| Lodestar   | yes       | Prater          |
+| Prysm      | no*       | Prater          |
+| Teku       | yes       | Ropsten, Prater |
 
-> Settings for Lighthouse with mev-boost are quite ready, we are waiting for an official and stable Lighthouse docker image with mev-boost support
+> Settings for Prysm with mev-boost are quite ready, we are waiting for an official and stable Prysm docker image with mev-boost support
 ## Supported Linux flavours for dependency installation
 
 | OS             | Versions                |
 | -------------- | ----------------------- |
-| Ubuntu         | 22.04,21.10,21.04,20.04 |
+| Ubuntu         | 22.04, 20.04 |
 | Debian         | 11,10,9,8               |
 | Fedora         | 35,34                   |
 | CentOS         | 8                       |
@@ -211,13 +175,13 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Integrate Ropsten network
 
 ### Version 0.2
-- [ ] Set up and run only one node (execution/consensus/validator)
-- [ ] Integrate Sepolia network
-- [ ] Documentation with examples
+- [x] Integrate Goerli/Prater network
+- [x] Integrate Sepolia network
+- [x] Documentation with examples
 
 ### Version 0.3
+- [ ] Set up and run only one node (execution/consensus/validator)
 - [ ] Enable use of public execution and consensus nodes
-- [ ] Integrate Goerli network
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
 
 ### Version 0.4
@@ -237,8 +201,8 @@ Full Ethereum 2 support with MEV-Boost
 ## 💪 Want to contribute?
 Please check our Contributing Guidelines, Code of Conduct and our issues. In case you want to report or suggest something (any help is welcome) please file an issue first so the main team is aware and it can be discussed.
 
-If you know of any good tricks for validator setup that other people could make good use of as well, please consider adding it to `sedge`. Your efforts will be greatly appreciated by the community.
+If you know of any good tricks for validator setup that other people could make good use of as well, please consider adding it to Sedge. Your efforts will be greatly appreciated by the community.
 
 ## ⚠️ License
 
-`sedge` is a Nethermind free and open-source software licensed under the [Apache 2.0 License](https://github.com/NethermindEth/sedge/blob/main/LICENSE).
+Sedge is a Nethermind free and open-source software licensed under the [Apache 2.0 License](https://github.com/NethermindEth/sedge/blob/main/LICENSE).

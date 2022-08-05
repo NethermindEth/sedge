@@ -1,0 +1,15 @@
+{{/* prysm.tmpl */}}
+{{ define "consensus" }}
+# --- Consensus Layer - Beacon Node - configuration ---
+CC_PEER_COUNT=50
+CC_LOG_LEVEL=info
+EC_API_URL={{.ExecutionApiURL}}
+EC_AUTH_URL={{.ExecutionAuthURL}}
+CC_INSTANCE_NAME=Prysm
+CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}gcr.io/prysmaticlabs/prysm/beacon-chain:stable{{end}}
+CC_DATA_DIR={{.CcDataDir}}
+CC_JWT_SECRET_PATH={{.JWTSecretPath}}
+CL_FEE_RECIPIENT={{.FeeRecipient}}
+CL_BOOTNODE_1="enr:-Iq4QMCTfIMXnow27baRUb35Q8iiFHSIDBJh6hQM5Axohhf4b6Kr_cOCu0htQ5WvVqKvFgY28893DHAg8gnBAXsAVqmGAX53x8JggmlkgnY0gmlwhLKAlv6Jc2VjcDI1NmsxoQK6S-Cii_KmfFdUJL2TANL3ksaKUnNXvTCv1tLwXs0QgIN1ZHCCIyk"
+CL_BOOTNODE_2="enr:-Ly4QFoZTWR8ulxGVsWydTNGdwEESueIdj-wB6UmmjUcm-AOPxnQi7wprzwcdo7-1jBW_JxELlUKJdJES8TDsbl1EdNlh2F0dG5ldHOI__78_v2bsV-EZXRoMpA2-lATkAAAcf__________gmlkgnY0gmlwhBLYJjGJc2VjcDI1NmsxoQI0gujXac9rMAb48NtMqtSTyHIeNYlpjkbYpWJw46PmYYhzeW5jbmV0cw-DdGNwgiMog3VkcIIjKA"
+{{ end }}

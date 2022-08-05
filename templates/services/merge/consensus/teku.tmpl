@@ -23,7 +23,7 @@
     command:
       - --log-destination=CONSOLE
       - --logging=${CC_LOG_LEVEL}
-      - --network=${NETWORK}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
       - --p2p-discovery-bootnodes=${CL_BOOTNODES}
       - --p2p-enabled=true
       - --p2p-port={{.ClDiscoveryPort}}
@@ -47,10 +47,9 @@
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
       - --metrics-port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}
-      - --initial-state={{.}}/eth/v2/debug/beacon/states/{{end}}{{range $flag := .ClExtraFlags}}
+      - --initial-state={{.}}/eth/v2/debug/beacon/states/finalized{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
-      - --Xvalidators-proposer-blinded-blocks-enabled=true
-      - --Xeb-endpoint=http://mevboost:{{.MevPort}}{{end}}{{if .XeeVersion}}
+      - --builder-endpoint=http://mevboost:{{.MevPort}}{{end}}{{if .XeeVersion}}
       - --Xee-version=${XEE_VERSION}{{end}}
     logging:
       driver: "json-file"

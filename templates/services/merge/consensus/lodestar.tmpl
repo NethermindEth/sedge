@@ -22,7 +22,7 @@
     command: 
       - beacon 
       - --rootDir=/var/lib/lodestar/consensus
-      - --network=${NETWORK}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
       - --eth1.enabled=true
       - --eth1.providerUrls=${EC_API_URL}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
       - --execution.urls=${EC_AUTH_URL}{{with .TTD}}
@@ -43,7 +43,9 @@
       - --jwt-secret=/tmp/jwt/jwtsecret{{with .CheckpointSyncUrl}}
       - --weakSubjectivitySyncLatest
       - --weakSubjectivityServerUrl={{.}}{{end}}{{range $flag := .ClExtraFlags}}
-      - --{{$flag}}{{end}}
+      - --{{$flag}}{{end}}{{if .Mev}}
+      - --builder.enabled
+      - --builder.urls http://mevboost:{{.MevPort}}{{end}}
     logging:
       driver: "json-file"
       options:

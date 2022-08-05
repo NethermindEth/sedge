@@ -9,7 +9,7 @@
       - ${KEYSTORE_DIR}:/keystore
     command: |
       account validator import
-      --network ${NETWORK}
+      --network {{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
       --directory=/keystore/validator_keys
       --passphraseFile=/keystore/keystore_password.txt
 
@@ -28,7 +28,7 @@
       - ${KEYSTORE_DIR}:/var/lib/lodestar/keystore
     command: 
       - validator
-      - --network=${NETWORK}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
       - --rootDir=/var/lib/lodestar/validator
       - --logFile=/var/lib/lodestart/validator/logs/validator.log
       - --logLevelFile=${VL_LOG_LEVEL}
@@ -39,7 +39,8 @@
       - --metrics.address=0.0.0.0
       - --metrics.port={{.VlMetricsPort}}{{with .FeeRecipient}}
       - --defaultFeeRecipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
-      - --{{$flag}}{{end}}
+      - --{{$flag}}{{end}}{{if .Mev}}
+      - --builder.enabled{{end}}
     logging:
       driver: "json-file"
       options:

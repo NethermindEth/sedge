@@ -82,4 +82,5 @@ type DockerComposeData struct {
 	ClExtraFlags        []string
 	VlExtraFlags        []string
 	MapAllPorts         bool
+	SplittedNetwork     bool
 }
