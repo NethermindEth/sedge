@@ -28,6 +28,7 @@ func init() {
 		"sepolia": true,
 		"denver":  true,
 		"chiado":  true,
+		"gnosis":  true,
 	}
 
 	NetworksToServices = map[string]string{
@@ -38,5 +39,6 @@ func init() {
 		"sepolia": "merge",
 		"denver":  "merge",
 		"chiado":  "merge",
+		"gnosis":  "merge",
 	}
 }
