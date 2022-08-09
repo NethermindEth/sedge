@@ -11,8 +11,7 @@
       - ${EC_DATA_DIR}:/nethermind/data
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
-      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
-      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"{{if .MapAllPorts}}
       - "{{.ElApiPort}}:{{.ElApiPort}}"{{end}}
     expose:
       - {{.ElApiPort}}
@@ -20,10 +19,6 @@
       - --config=${NETWORK}
       - --datadir=/nethermind/data
       - --log=${NETHERMIND_LOG_LEVEL}
-      - --Metrics.Enabled=${EC_METRICS_ENABLED}
-      - --Metrics.NodeName=${EC_NODENAME}
-      - --Metrics.PushGatewayUrl=${NETHERMIND_METRICS_PUSH_GATEWAY_URL}
-      - --Metrics.ExposePort={{.ElMetricsPort}}
       - --Sync.SnapSync=${EC_SNAP_SYNC_ENABLED}
       - --Init.WebSocketsEnabled=true
       - --JsonRpc.Enabled=true
