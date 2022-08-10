@@ -20,6 +20,8 @@ type Client struct {
 	Name      string
 	Type      string
 	Supported bool
+	RemoteUrl string
+	IsRemote  bool
 }
 
 // Client : Struct Represent a combination of execution, consensus and validator clients

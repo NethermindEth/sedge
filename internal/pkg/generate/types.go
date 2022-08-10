@@ -38,6 +38,7 @@ type GenerationData struct {
 	ExecutionClient   string
 	ExecutionImage    string
 	ExecutionEndpoint string
+	ExecutionIsRemote bool
 	ConsensusClient   string
 	ConsensusImage    string
 	ConsensusEndpoint string

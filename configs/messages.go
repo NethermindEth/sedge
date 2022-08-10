@@ -20,6 +20,7 @@ const (
 	CheckingDependencies            = "Checking dependencies: %s"
 	DependenciesPending             = "pending dependencies: %s"
 	DependenciesOK                  = "All dependencies are installed on host machine"
+	DefaultPortSettings             = "No provided or invalid port for %s client, using default %s"
 	GeneratingDockerComposeScript   = "Generating docker-compose script for current selection of clients"
 	GeneratingEnvFile               = "Generating environment file for current selection of clients"
 	Exiting                         = "Exiting..."

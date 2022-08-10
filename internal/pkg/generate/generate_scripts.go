@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -48,7 +49,7 @@ Error if any
 func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 	// Create scripts directory if not exists
 	if _, err := os.Stat(gd.GenerationPath); os.IsNotExist(err) {
-		err = os.MkdirAll(gd.GenerationPath, 0755)
+		err = os.MkdirAll(gd.GenerationPath, 0o755)
 		if err != nil {
 			return "", "", err
 		}
@@ -73,8 +74,26 @@ func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 		return "", "", fmt.Errorf(configs.PortOccupationError, err)
 	}
 	gd.Ports = ports
-	// External endpoints will be configured here. Also Ports should be updated with external ports
-	gd.ExecutionEndpoint = configs.OnPremiseExecutionURL
+
+	// If an explicit execution endpoint was not set, Execution is local
+	if gd.ExecutionEndpoint == "" {
+		gd.ExecutionEndpoint = configs.OnPremiseExecutionURL + ":" + gd.Ports["ELApi"]
+	} else {
+		// Split the provided ExecutionEndpoint into host and port
+		splitUrl := strings.Split(gd.ExecutionEndpoint, ":")
+		host := splitUrl[0] + ":" + splitUrl[1]
+
+		// Check if valid port provided. If not, use default
+		port := splitUrl[len(splitUrl)-1]
+		if !utils.VerifyPortValid(port) {
+			log.Infof(configs.DefaultPortSettings, "execution", gd.Ports["ELApi"])
+			gd.ExecutionEndpoint = host + ":" + gd.Ports["ELApi"]
+		}
+
+		// Log port
+		log.Infof("Execution endpoint set to %s", gd.ExecutionEndpoint)
+	}
+
 	gd.ConsensusEndpoint = configs.OnPremiseConsensusURL
 
 	log.Info(configs.GeneratingDockerComposeScript)
@@ -270,7 +289,7 @@ func generateEnvFile(gd GenerationData) (err error) {
 		CcDataDir:                 configs.ConsensusDefaultDataDir,
 		VlImage:                   gd.ValidatorImage,
 		VlDataDir:                 configs.ValidatorDefaultDataDir,
-		ExecutionApiURL:           gd.ExecutionEndpoint + ":" + gd.Ports["ELApi"],
+		ExecutionApiURL:           gd.ExecutionEndpoint,
 		ExecutionAuthURL:          gd.ExecutionEndpoint + ":" + gd.Ports["ELAuth"],
 		ConsensusApiURL:           gd.ConsensusEndpoint + ":" + gd.Ports["CLApi"],
 		ConsensusAdditionalApiURL: gd.ConsensusEndpoint + ":" + gd.Ports["CLAdditionalApi"],
@@ -324,7 +343,7 @@ func writeTemplateToFile(template *template.Template, file string, data interfac
 	var f *os.File
 
 	if append {
-		f, err = os.OpenFile(file, os.O_APPEND|os.O_WRONLY, 0666)
+		f, err = os.OpenFile(file, os.O_APPEND|os.O_WRONLY, 0o666)
 		if err != nil {
 			return fmt.Errorf(configs.CreatingFileError, file, err)
 		}
