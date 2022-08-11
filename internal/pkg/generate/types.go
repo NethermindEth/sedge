@@ -25,6 +25,7 @@ type EnvData struct {
 	VlDataDir                 string
 	ExecutionApiURL           string
 	ExecutionAuthURL          string
+	ExecutionIsRemote         bool
 	ConsensusApiURL           string
 	ConsensusAdditionalApiURL string
 	FeeRecipient              string
@@ -73,6 +74,7 @@ type DockerComposeData struct {
 	ElApiPort           string
 	ElAuthPort          string
 	ElWsPort            string
+	ExecutionIsRemote   bool
 	ClDiscoveryPort     string
 	ClMetricsPort       string
 	ClApiPort           string

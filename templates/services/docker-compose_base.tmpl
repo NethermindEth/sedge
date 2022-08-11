@@ -3,6 +3,7 @@
 version: "3.9"
 
 services:
+{{ if not .ExecutionIsRemote }}
 {{template "execution" .}}
 {{if .Mev}}
   mevboost:
@@ -19,6 +20,7 @@ services:
       - -relay-check
       - -relays
       - ${RELAY_URL}{{end}}
+{{ end }}
 {{template "consensus" .}}
 {{template "validator" .}}
 

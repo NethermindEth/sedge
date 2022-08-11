@@ -131,11 +131,7 @@ a. error
 Error if any
 */
 func generateDockerComposeScripts(gd GenerationData) (err error) {
-	baseTmpLocation := filepath.Join("services", "docker-compose_base.tmpl")
-	if gd.ExecutionIsRemote {
-		baseTmpLocation = filepath.Join("services", "docker-compose_noExec.tmpl")
-	}
-	rawBaseTmp, err := templates.Services.ReadFile(filepath.Join(baseTmpLocation))
+	rawBaseTmp, err := templates.Services.ReadFile(filepath.Join(filepath.Join("services", "docker-compose_base.tmpl")))
 	if err != nil {
 		return
 	}
@@ -206,6 +202,7 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		ElApiPort:           gd.Ports["ELApi"],
 		ElAuthPort:          gd.Ports["ELAuth"],
 		ElWsPort:            gd.Ports["ELWS"],
+		ExecutionIsRemote:   gd.ExecutionIsRemote,
 		ClDiscoveryPort:     gd.Ports["CLDiscovery"],
 		ClMetricsPort:       gd.Ports["CLMetrics"],
 		ClApiPort:           gd.Ports["CLApi"],
@@ -262,8 +259,7 @@ a. error
 Error if any
 */
 func generateEnvFile(gd GenerationData) (err error) {
-	baseTmpLocation := filepath.Join("envs", gd.Network, "env_base.tmpl")
-	rawBaseTmp, err := templates.Envs.ReadFile(baseTmpLocation)
+	rawBaseTmp, err := templates.Envs.ReadFile(filepath.Join("envs", gd.Network, "env_base.tmpl"))
 	if err != nil {
 		return
 	}
@@ -280,18 +276,16 @@ func generateEnvFile(gd GenerationData) (err error) {
 	}
 
 	for tmpKind, clientName := range clients {
-		envTmpPath := filepath.Join("envs", gd.Network, tmpKind, clientName+".tmpl")
-		if strings.Contains(clientName, "remote") {
-			envTmpPath = filepath.Join("envs", clientName+".tmpl")
-		}
-
-		tmp, err := templates.Envs.ReadFile(envTmpPath)
-		if err != nil {
-			return err
-		}
-		_, err = baseTmp.Parse(string(tmp))
-		if err != nil {
-			return err
+		if !strings.Contains(clientName, "remote") {
+			envTmpPath := filepath.Join("envs", gd.Network, tmpKind, clientName+".tmpl")
+			tmp, err := templates.Envs.ReadFile(envTmpPath)
+			if err != nil {
+				return err
+			}
+			_, err = baseTmp.Parse(string(tmp))
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -305,6 +299,7 @@ func generateEnvFile(gd GenerationData) (err error) {
 		VlDataDir:                 configs.ValidatorDefaultDataDir,
 		ExecutionApiURL:           gd.ExecutionEndpoint,
 		ExecutionAuthURL:          gd.ExecutionEndpoint + ":" + gd.Ports["ELAuth"],
+		ExecutionIsRemote:         gd.ExecutionIsRemote,
 		ConsensusApiURL:           gd.ConsensusEndpoint + ":" + gd.Ports["CLApi"],
 		ConsensusAdditionalApiURL: gd.ConsensusEndpoint + ":" + gd.Ports["CLAdditionalApi"],
 		FeeRecipient:              gd.FeeRecipient,
