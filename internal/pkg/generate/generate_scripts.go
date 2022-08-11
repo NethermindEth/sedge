@@ -131,7 +131,11 @@ a. error
 Error if any
 */
 func generateDockerComposeScripts(gd GenerationData) (err error) {
-	rawBaseTmp, err := templates.Services.ReadFile(filepath.Join("services", "docker-compose_base.tmpl"))
+	baseTmpLocation := filepath.Join("services", "docker-compose_base.tmpl")
+	if gd.ExecutionIsRemote {
+		baseTmpLocation = filepath.Join("services", "docker-compose_noExec.tmpl")
+	}
+	rawBaseTmp, err := templates.Services.ReadFile(filepath.Join(baseTmpLocation))
 	if err != nil {
 		return
 	}
@@ -147,13 +151,16 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		"validator": gd.ValidatorClient,
 	}
 	for tmpKind, clientName := range clients {
-		tmp, err := templates.Services.ReadFile(filepath.Join("services", configs.NetworksToServices[gd.Network], tmpKind, clientName+".tmpl"))
-		if err != nil {
-			return err
-		}
-		_, err = baseTmp.Parse(string(tmp))
-		if err != nil {
-			return err
+		// If client name does not contain remote
+		if !strings.Contains(clientName, "remote") {
+			tmp, err := templates.Services.ReadFile(filepath.Join("services", configs.NetworksToServices[gd.Network], tmpKind, clientName+".tmpl"))
+			if err != nil {
+				return err
+			}
+			_, err = baseTmp.Parse(string(tmp))
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -255,7 +262,8 @@ a. error
 Error if any
 */
 func generateEnvFile(gd GenerationData) (err error) {
-	rawBaseTmp, err := templates.Envs.ReadFile(filepath.Join("envs", gd.Network, "env_base.tmpl"))
+	baseTmpLocation := filepath.Join("envs", gd.Network, "env_base.tmpl")
+	rawBaseTmp, err := templates.Envs.ReadFile(baseTmpLocation)
 	if err != nil {
 		return
 	}
@@ -270,8 +278,14 @@ func generateEnvFile(gd GenerationData) (err error) {
 		"consensus": gd.ConsensusClient,
 		"validator": gd.ValidatorClient,
 	}
+
 	for tmpKind, clientName := range clients {
-		tmp, err := templates.Envs.ReadFile(filepath.Join("envs", gd.Network, tmpKind, clientName+".tmpl"))
+		envTmpPath := filepath.Join("envs", gd.Network, tmpKind, clientName+".tmpl")
+		if strings.Contains(clientName, "remote") {
+			envTmpPath = filepath.Join("envs", clientName+".tmpl")
+		}
+
+		tmp, err := templates.Envs.ReadFile(envTmpPath)
 		if err != nil {
 			return err
 		}
