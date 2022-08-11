@@ -2,8 +2,7 @@
 {{ define "docker-compose" }}
 version: "3.9"
 
-services:
-{{ if not .ExecutionIsRemote }}
+services: {{ if not .ExecutionIsRemote }}
 {{template "execution" .}}
 {{if .Mev}}
   mevboost:
