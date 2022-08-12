@@ -94,7 +94,24 @@ func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 		log.Infof("Execution endpoint set to %s", gd.ExecutionEndpoint)
 	}
 
-	gd.ConsensusEndpoint = configs.OnPremiseConsensusURL
+	// If an explicit consensus endpoint was not set, Consensus is local
+	if gd.ConsensusEndpoint == "" {
+		gd.ConsensusEndpoint = configs.OnPremiseConsensusURL + ":" + gd.Ports["CLApi"]
+	} else {
+		// Split the provided ExecutionEndpoint into host and port
+		splitUrl := strings.Split(gd.ConsensusEndpoint, ":")
+		host := splitUrl[0] + ":" + splitUrl[1]
+
+		// Check if valid port provided. If not, use default
+		port := splitUrl[len(splitUrl)-1]
+		if !utils.VerifyPortValid(port) {
+			log.Infof(configs.DefaultPortSettings, "consensus", gd.Ports["CLApi"])
+			gd.ConsensusEndpoint = host + ":" + gd.Ports["CLApi"]
+		}
+
+		// Log port
+		log.Infof("Consensus endpoint set to %s", gd.ConsensusEndpoint)
+	}
 
 	log.Info(configs.GeneratingDockerComposeScript)
 	err = generateDockerComposeScripts(gd)
@@ -207,6 +224,7 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		ClMetricsPort:       gd.Ports["CLMetrics"],
 		ClApiPort:           gd.Ports["CLApi"],
 		ClAdditionalApiPort: gd.Ports["CLAdditionalApi"],
+		ConsensusIsRemote:   gd.ConsensusIsRemote,
 		VlMetricsPort:       gd.Ports["VLMetrics"],
 		FallbackELUrls:      gd.FallbackELUrls,
 		ElExtraFlags:        gd.ElExtraFlags,
@@ -276,6 +294,7 @@ func generateEnvFile(gd GenerationData) (err error) {
 	}
 
 	for tmpKind, clientName := range clients {
+		log.Infof(clientName)
 		if !strings.Contains(clientName, "remote") {
 			envTmpPath := filepath.Join("envs", gd.Network, tmpKind, clientName+".tmpl")
 			tmp, err := templates.Envs.ReadFile(envTmpPath)
@@ -300,8 +319,9 @@ func generateEnvFile(gd GenerationData) (err error) {
 		ExecutionApiURL:           gd.ExecutionEndpoint,
 		ExecutionAuthURL:          gd.ExecutionEndpoint + ":" + gd.Ports["ELAuth"],
 		ExecutionIsRemote:         gd.ExecutionIsRemote,
-		ConsensusApiURL:           gd.ConsensusEndpoint + ":" + gd.Ports["CLApi"],
+		ConsensusApiURL:           gd.ConsensusEndpoint,
 		ConsensusAdditionalApiURL: gd.ConsensusEndpoint + ":" + gd.Ports["CLAdditionalApi"],
+		ConsensusIsRemote:         gd.ConsensusIsRemote,
 		FeeRecipient:              gd.FeeRecipient,
 		JWTSecretPath:             gd.JWTSecretPath,
 		ExecutionEngineName:       gd.ExecutionClient,

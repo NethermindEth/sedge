@@ -234,10 +234,11 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		ExecutionClient:   combinedClients.Execution.Name,
 		ExecutionImage:    executionImage,
 		ExecutionEndpoint: remoteExecutionUrl,
-		// If specific URL provided, Execution is not remote
-		ExecutionIsRemote: len(remoteExecutionUrl) > 0,
+		ExecutionIsRemote: len(remoteExecutionUrl) > 0 || len(remoteConsensusUrl) > 0,
 		ConsensusClient:   combinedClients.Consensus.Name,
 		ConsensusImage:    consensusImage,
+		ConsensusEndpoint: remoteConsensusUrl,
+		ConsensusIsRemote: len(remoteConsensusUrl) > 0,
 		ValidatorClient:   combinedClients.Validator.Name,
 		ValidatorImage:    validatorImage,
 		GenerationPath:    generationPath,

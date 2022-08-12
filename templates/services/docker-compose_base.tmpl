@@ -20,7 +20,9 @@ services: {{ if not .ExecutionIsRemote }}
       - -relays
       - ${RELAY_URL}{{end}}
 {{ end }}
-{{template "consensus" .}}
+{{ if not .ConsensusIsRemote }}
+{{template "consensus" .}} 
+{{ end }}
 {{template "validator" .}}
 
 networks:

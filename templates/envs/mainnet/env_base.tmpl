@@ -2,7 +2,7 @@
 {{ define "env" }}
 # --- Global configuration ---
 NETWORK=mainnet {{ if not .ExecutionIsRemote }}
-{{template "execution" .}}{{ end }}
-{{template "consensus" .}}
+{{template "execution" .}}{{ end }} {{ if not .ConsensusIsRemote }}
+{{template "consensus" .}} {{ end }}
 {{template "validator" .}}
 {{ end }}
