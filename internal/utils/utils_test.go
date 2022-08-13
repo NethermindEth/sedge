@@ -162,43 +162,6 @@ func TestPortAvailable(t *testing.T) {
 	}
 }
 
-func TestVerifyPortValid(t *testing.T) {
-	tcs := []struct {
-		name string
-		port string
-		want bool
-	}{
-		{
-			"Test case 1, good port",
-			"9999",
-			true,
-		},
-		{
-			"Test case 2, bad port",
-			"b@dport",
-			false,
-		},
-		{
-			"Test case 3, empty port",
-			"",
-			false,
-		},
-		{
-			"Test case 4, port too high",
-			"68000",
-			false,
-		},
-	}
-
-	for _, tc := range tcs {
-		t.Run(tc.name, func(t *testing.T) {
-			if got := VerifyPortValid(tc.port); tc.want != got {
-				t.Errorf("VerifyPortValid(%s) failed; expected: %v, got: %v", tc.port, tc.want, got)
-			}
-		})
-	}
-}
-
 func TestAssingPorts(t *testing.T) {
 	server := httptest.NewServer(
 		http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {

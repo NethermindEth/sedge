@@ -118,29 +118,6 @@ func IsAddress(a string) bool {
 }
 
 /*
-VerifyPortValid :
-Checks if a given port is valid (1 > 65535)
-
-params :-
-a. a string
-Port to be checked
-
-returns :-
-a. bool
-True if <a> is a valid port. False if <a> is not a number / in range
-*/
-func VerifyPortValid(a string) bool {
-	port, err := strconv.Atoi(a)
-	if err != nil {
-		return false
-	}
-	if port < 1 || port > 65535 {
-		return false
-	}
-	return true
-}
-
-/*
 AssingPorts :
 Checks if port is occupied in a given host
 
