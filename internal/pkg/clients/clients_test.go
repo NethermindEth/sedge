@@ -25,7 +25,7 @@ import (
 // TODO: Add testcases for other networks
 
 func validateSupportedClients(t *testing.T, clientType string, supportedClients []string) {
-	//TODO: validate supported clients
+	// TODO: validate supported clients
 }
 
 func TestSupportedClients(t *testing.T) {
@@ -79,7 +79,7 @@ func cleanAll() {
 }
 
 func validateClients(resultClients OrderedClients, tc clientsTestCase) bool {
-	//Check if all query clients types are in the result types
+	// Check if all query clients types are in the result types
 Loop1:
 	for _, queryType := range tc.query {
 		for resultType := range resultClients {
@@ -187,6 +187,8 @@ func TestValidateClient(t *testing.T) {
 				"nethermind",
 				"execution",
 				true,
+				"",
+				false,
 			},
 			clientType: "execution",
 			isErr:      false,
@@ -195,6 +197,8 @@ func TestValidateClient(t *testing.T) {
 			client: Client{
 				"nethermind",
 				"execution",
+				false,
+				"",
 				false,
 			},
 			clientType: "execution",

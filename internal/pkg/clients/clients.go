@@ -109,7 +109,7 @@ func (c ClientInfo) Clients(clientTypes []string) (clients OrderedClients, errs 
 
 /*
 ValidateClient :
-Validate if the client is supported and configured
+Validate if the client is supported and configured (or is otherwise remote)
 
 params :-
 a. client Client
@@ -117,10 +117,10 @@ Client to be validated
 
 returns :-
 a. error
-Error if client is not supported or configured
+Error if client is not supported, configured, or remote
 */
 func ValidateClient(client Client, currentType string) error {
-	if client.Type == "" {
+	if client.Type == "" && !client.IsRemote {
 		return fmt.Errorf(configs.IncorrectClientError, currentType, client.Name)
 	}
 

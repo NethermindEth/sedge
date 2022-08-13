@@ -20,3 +20,9 @@ sudo cp ~/.docker/cli-plugins/docker-compose /root/.docker/cli-plugins/
 ### One of more services are not running after running the script
 
 Work in progress
+
+### When using a public execution or consensus node, the JWT token is not valid
+
+Currently, to use public execution or consensus nodes on any network other than mainned, you need to a valid JWT token.
+
+As sedge creates a JWT token for you, you can find the relevant public key in `docker-compose-scripts/jwtsecret`, which you should include in the remote node to enable communication between the two nodes.

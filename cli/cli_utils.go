@@ -100,7 +100,8 @@ func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error
 	combinedClients = clients.Clients{
 		Execution: executionClient,
 		Consensus: consensusClient,
-		Validator: consensusClient}
+		Validator: consensusClient,
+	}
 	return combinedClients, nil
 }
 
@@ -115,7 +116,7 @@ func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Cl
 	}
 
 	// Randomize missing clients, and choose same pair of client for consensus and validator if at least one of them is missing
-	if executionName == "" {
+	if executionName == "" && remoteExecutionUrl == "" {
 		log.Warnf(configs.ExecutionClientNotSpecifiedWarn, randomizedClients.Execution.Name)
 		executionName = randomizedClients.Execution.Name
 	}
@@ -134,10 +135,23 @@ func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Cl
 	exec, ok := allClients[execution][executionName]
 	if !ok {
 		exec.Name = executionName
+		exec.IsRemote = false
+	}
+	if remoteExecutionUrl != "" {
+		exec.Name = "remote-execution"
+		exec.Supported = true
+		exec.RemoteUrl = remoteExecutionUrl
+		exec.IsRemote = true
 	}
 	cons, ok := allClients[consensus][consensusName]
 	if !ok {
 		cons.Name = consensusName
+	}
+	if remoteConsensusUrl != "" {
+		cons.Name = "remote-consensus"
+		cons.Supported = true
+		cons.RemoteUrl = remoteConsensusUrl
+		cons.IsRemote = true
 	}
 	val, ok := allClients[validator][validatorName]
 	if !ok {
@@ -377,7 +391,7 @@ func handleJWTSecret() error {
 
 	// Create scripts directory if not exists
 	if _, err := os.Stat(generationPath); os.IsNotExist(err) {
-		err = os.MkdirAll(generationPath, 0755)
+		err = os.MkdirAll(generationPath, 0o755)
 		if err != nil {
 			return err
 		}
@@ -429,7 +443,6 @@ func feeRecipientPrompt() error {
 	}
 
 	result, err := prompt.Run()
-
 	if err != nil {
 		return fmt.Errorf(configs.PromptFailedError, err)
 	}
@@ -446,14 +459,14 @@ func preRunTeku() error {
 		if s == "all" || s == consensus {
 			// Prepare consensus datadir
 			path := filepath.Join(generationPath, configs.ConsensusDefaultDataDir)
-			if err := os.MkdirAll(path, 0777); err != nil {
+			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, consensus, err)
 			}
 		}
 		if s == "all" || s == validator {
 			// Prepare validator datadir
 			path := filepath.Join(generationPath, configs.ValidatorDefaultDataDir)
-			if err := os.MkdirAll(path, 0777); err != nil {
+			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, validator, err)
 			}
 		}

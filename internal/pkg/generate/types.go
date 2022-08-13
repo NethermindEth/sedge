@@ -25,8 +25,10 @@ type EnvData struct {
 	VlDataDir                 string
 	ExecutionApiURL           string
 	ExecutionAuthURL          string
+	ExecutionIsRemote         bool
 	ConsensusApiURL           string
 	ConsensusAdditionalApiURL string
+	ConsensusIsRemote         bool
 	FeeRecipient              string
 	JWTSecretPath             string
 	ExecutionEngineName       string
@@ -38,9 +40,11 @@ type GenerationData struct {
 	ExecutionClient   string
 	ExecutionImage    string
 	ExecutionEndpoint string
+	ExecutionIsRemote bool
 	ConsensusClient   string
 	ConsensusImage    string
 	ConsensusEndpoint string
+	ConsensusIsRemote bool
 	ValidatorClient   string
 	ValidatorImage    string
 	GenerationPath    string
@@ -72,10 +76,12 @@ type DockerComposeData struct {
 	ElApiPort           string
 	ElAuthPort          string
 	ElWsPort            string
+	ExecutionIsRemote   bool
 	ClDiscoveryPort     string
 	ClMetricsPort       string
 	ClApiPort           string
 	ClAdditionalApiPort string
+	ConsensusIsRemote   bool
 	VlMetricsPort       string
 	FallbackELUrls      []string
 	ElExtraFlags        []string

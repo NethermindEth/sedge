@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -48,7 +49,7 @@ Error if any
 func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 	// Create scripts directory if not exists
 	if _, err := os.Stat(gd.GenerationPath); os.IsNotExist(err) {
-		err = os.MkdirAll(gd.GenerationPath, 0755)
+		err = os.MkdirAll(gd.GenerationPath, 0o755)
 		if err != nil {
 			return "", "", err
 		}
@@ -73,9 +74,44 @@ func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 		return "", "", fmt.Errorf(configs.PortOccupationError, err)
 	}
 	gd.Ports = ports
-	// External endpoints will be configured here. Also Ports should be updated with external ports
-	gd.ExecutionEndpoint = configs.OnPremiseExecutionURL
-	gd.ConsensusEndpoint = configs.OnPremiseConsensusURL
+
+	// If an explicit execution endpoint was not set, Execution is local
+	if gd.ExecutionEndpoint == "" {
+		gd.ExecutionEndpoint = configs.OnPremiseExecutionURL + ":" + gd.Ports["ELApi"]
+	} else {
+		// Split the provided ExecutionEndpoint into host and port
+		splitUrl := strings.Split(gd.ExecutionEndpoint, ":")
+		host := splitUrl[0] + ":" + splitUrl[1]
+
+		// Check if valid port provided. If not, use default
+		port := splitUrl[len(splitUrl)-1]
+		if !utils.VerifyPortValid(port) {
+			log.Infof(configs.DefaultPortSettings, "execution", gd.Ports["ELApi"])
+			gd.ExecutionEndpoint = host + ":" + gd.Ports["ELApi"]
+		}
+
+		// Log port
+		log.Infof("Execution endpoint set to %s", gd.ExecutionEndpoint)
+	}
+
+	// If an explicit consensus endpoint was not set, Consensus is local
+	if gd.ConsensusEndpoint == "" {
+		gd.ConsensusEndpoint = configs.OnPremiseConsensusURL + ":" + gd.Ports["CLApi"]
+	} else {
+		// Split the provided ExecutionEndpoint into host and port
+		splitUrl := strings.Split(gd.ConsensusEndpoint, ":")
+		host := splitUrl[0] + ":" + splitUrl[1]
+
+		// Check if valid port provided. If not, use default
+		port := splitUrl[len(splitUrl)-1]
+		if !utils.VerifyPortValid(port) {
+			log.Infof(configs.DefaultPortSettings, "consensus", gd.Ports["CLApi"])
+			gd.ConsensusEndpoint = host + ":" + gd.Ports["CLApi"]
+		}
+
+		// Log port
+		log.Infof("Consensus endpoint set to %s", gd.ConsensusEndpoint)
+	}
 
 	log.Info(configs.GeneratingDockerComposeScript)
 	err = generateDockerComposeScripts(gd)
@@ -112,7 +148,7 @@ a. error
 Error if any
 */
 func generateDockerComposeScripts(gd GenerationData) (err error) {
-	rawBaseTmp, err := templates.Services.ReadFile(filepath.Join("services", "docker-compose_base.tmpl"))
+	rawBaseTmp, err := templates.Services.ReadFile(filepath.Join(filepath.Join("services", "docker-compose_base.tmpl")))
 	if err != nil {
 		return
 	}
@@ -128,13 +164,16 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		"validator": gd.ValidatorClient,
 	}
 	for tmpKind, clientName := range clients {
-		tmp, err := templates.Services.ReadFile(filepath.Join("services", configs.NetworksToServices[gd.Network], tmpKind, clientName+".tmpl"))
-		if err != nil {
-			return err
-		}
-		_, err = baseTmp.Parse(string(tmp))
-		if err != nil {
-			return err
+		// If client name does not contain remote
+		if !strings.Contains(clientName, "remote") {
+			tmp, err := templates.Services.ReadFile(filepath.Join("services", configs.NetworksToServices[gd.Network], tmpKind, clientName+".tmpl"))
+			if err != nil {
+				return err
+			}
+			_, err = baseTmp.Parse(string(tmp))
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -180,10 +219,12 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		ElApiPort:           gd.Ports["ELApi"],
 		ElAuthPort:          gd.Ports["ELAuth"],
 		ElWsPort:            gd.Ports["ELWS"],
+		ExecutionIsRemote:   gd.ExecutionIsRemote,
 		ClDiscoveryPort:     gd.Ports["CLDiscovery"],
 		ClMetricsPort:       gd.Ports["CLMetrics"],
 		ClApiPort:           gd.Ports["CLApi"],
 		ClAdditionalApiPort: gd.Ports["CLAdditionalApi"],
+		ConsensusIsRemote:   gd.ConsensusIsRemote,
 		VlMetricsPort:       gd.Ports["VLMetrics"],
 		FallbackELUrls:      gd.FallbackELUrls,
 		ElExtraFlags:        gd.ElExtraFlags,
@@ -251,14 +292,19 @@ func generateEnvFile(gd GenerationData) (err error) {
 		"consensus": gd.ConsensusClient,
 		"validator": gd.ValidatorClient,
 	}
+
 	for tmpKind, clientName := range clients {
-		tmp, err := templates.Envs.ReadFile(filepath.Join("envs", gd.Network, tmpKind, clientName+".tmpl"))
-		if err != nil {
-			return err
-		}
-		_, err = baseTmp.Parse(string(tmp))
-		if err != nil {
-			return err
+		log.Infof(clientName)
+		if !strings.Contains(clientName, "remote") {
+			envTmpPath := filepath.Join("envs", gd.Network, tmpKind, clientName+".tmpl")
+			tmp, err := templates.Envs.ReadFile(envTmpPath)
+			if err != nil {
+				return err
+			}
+			_, err = baseTmp.Parse(string(tmp))
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -270,10 +316,12 @@ func generateEnvFile(gd GenerationData) (err error) {
 		CcDataDir:                 configs.ConsensusDefaultDataDir,
 		VlImage:                   gd.ValidatorImage,
 		VlDataDir:                 configs.ValidatorDefaultDataDir,
-		ExecutionApiURL:           gd.ExecutionEndpoint + ":" + gd.Ports["ELApi"],
+		ExecutionApiURL:           gd.ExecutionEndpoint,
 		ExecutionAuthURL:          gd.ExecutionEndpoint + ":" + gd.Ports["ELAuth"],
-		ConsensusApiURL:           gd.ConsensusEndpoint + ":" + gd.Ports["CLApi"],
+		ExecutionIsRemote:         gd.ExecutionIsRemote,
+		ConsensusApiURL:           gd.ConsensusEndpoint,
 		ConsensusAdditionalApiURL: gd.ConsensusEndpoint + ":" + gd.Ports["CLAdditionalApi"],
+		ConsensusIsRemote:         gd.ConsensusIsRemote,
 		FeeRecipient:              gd.FeeRecipient,
 		JWTSecretPath:             gd.JWTSecretPath,
 		ExecutionEngineName:       gd.ExecutionClient,
@@ -324,7 +372,7 @@ func writeTemplateToFile(template *template.Template, file string, data interfac
 	var f *os.File
 
 	if append {
-		f, err = os.OpenFile(file, os.O_APPEND|os.O_WRONLY, 0666)
+		f, err = os.OpenFile(file, os.O_APPEND|os.O_WRONLY, 0o666)
 		if err != nil {
 			return fmt.Errorf(configs.CreatingFileError, file, err)
 		}

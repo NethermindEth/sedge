@@ -36,27 +36,29 @@ import (
 )
 
 var (
-	executionName     string
-	executionImage    string
-	consensusName     string
-	consensusImage    string
-	validatorName     string
-	validatorImage    string
-	generationPath    string
-	checkpointSyncUrl string
-	network           string
-	feeRecipient      string
-	jwtPath           string
-	install           bool
-	run               bool
-	y                 bool
-	services          *[]string
-	fallbackEL        *[]string
-	elExtraFlags      *[]string
-	clExtraFlags      *[]string
-	vlExtraFlags      *[]string
-	mapAllPorts       bool
-	noMev             bool
+	executionName      string
+	executionImage     string
+	remoteExecutionUrl string
+	consensusName      string
+	consensusImage     string
+	remoteConsensusUrl string
+	validatorName      string
+	validatorImage     string
+	generationPath     string
+	checkpointSyncUrl  string
+	network            string
+	feeRecipient       string
+	jwtPath            string
+	install            bool
+	run                bool
+	y                  bool
+	services           *[]string
+	fallbackEL         *[]string
+	elExtraFlags       *[]string
+	clExtraFlags       *[]string
+	vlExtraFlags       *[]string
+	mapAllPorts        bool
+	noMev              bool
 )
 
 const (
@@ -214,7 +216,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		if err = handleJWTSecret(); err != nil {
 			return []error{err}
 		}
-	} else if filepath.IsAbs(jwtPath) { //Ensure jwtPath is absolute
+	} else if filepath.IsAbs(jwtPath) { // Ensure jwtPath is absolute
 		if jwtPath, err = filepath.Abs(jwtPath); err != nil {
 			return []error{err}
 		}
@@ -231,8 +233,12 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	gd := generate.GenerationData{
 		ExecutionClient:   combinedClients.Execution.Name,
 		ExecutionImage:    executionImage,
+		ExecutionEndpoint: remoteExecutionUrl,
+		ExecutionIsRemote: len(remoteExecutionUrl) > 0 || len(remoteConsensusUrl) > 0,
 		ConsensusClient:   combinedClients.Consensus.Name,
 		ConsensusImage:    consensusImage,
+		ConsensusEndpoint: remoteConsensusUrl,
+		ConsensusIsRemote: len(remoteConsensusUrl) > 0,
 		ValidatorClient:   combinedClients.Validator.Name,
 		ValidatorImage:    validatorImage,
 		GenerationPath:    generationPath,
@@ -282,8 +288,8 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service in the previous step
 	if !utils.Contains(*services, validator) {
 		// Wait for clients to start
-		//log.Info(configs.WaitingForNodesToStart)
-		//time.Sleep(waitingTime)
+		// log.Info(configs.WaitingForNodesToStart)
+		// time.Sleep(waitingTime)
 		// Track sync of execution and consensus clients
 		// TODO: Parameterize wait arg of trackSync
 		if err = trackSync(monitor, elPort, clPort, time.Minute*5); err != nil {
@@ -313,17 +319,21 @@ func init() {
 	cliCmd.Flags().SortFlags = false
 
 	// Local flags
-	cliCmd.Flags().StringVarP(&executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
+	cliCmd.Flags().StringVarP(&executionName, "execution", "e", "", "Execution engine client, e.g., geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 
-	cliCmd.Flags().StringVarP(&consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
+	cliCmd.Flags().StringVarP(&consensusName, "consensus", "c", "", "Consensus engine client, e.g., teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 
-	cliCmd.Flags().StringVarP(&validatorName, "validator", "v", "", "Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
+	cliCmd.Flags().StringVarP(&validatorName, "validator", "v", "", "Validator engine client, e.g., teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
+
+	cliCmd.Flags().StringVar(&remoteExecutionUrl, "remote-execution-url", "", "Remote execution URL, e.g., an Infura node or self hosted node")
+
+	cliCmd.Flags().StringVar(&remoteConsensusUrl, "remote-consensus-url", "", "Remote consensus URL")
 
 	cliCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
 
 	cliCmd.Flags().StringVar(&checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity")
 
-	cliCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, prater, kiln, etc.")
+	cliCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g., mainnet, prater, kiln, etc.")
 
 	cliCmd.Flags().StringVar(&feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
 
