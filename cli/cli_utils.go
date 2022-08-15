@@ -305,26 +305,35 @@ func getContainerIP(service string) (ip string, err error) {
 	return
 }
 
-func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration) error {
+func trackSync(m MonitoringTool, elPort, clPort, executionUrl, consensusUrl string, wait time.Duration) error {
 	done := make(chan struct{})
 	defer close(done)
 
 	log.Info(configs.GettingContainersIP)
-	executionIP, errE := getContainerIP(execution)
-	if errE != nil {
-		log.Errorf(configs.GetContainerIPError, execution, errE)
-	}
-	consensusIP, errC := getContainerIP(consensus)
-	if errC != nil {
-		log.Errorf(configs.GetContainerIPError, consensus, errC)
+
+	// If execution URL not provided, use docker network IP
+	if executionUrl == "" {
+		executionIP, errE := getContainerIP(execution)
 		if errE != nil {
-			// Both IP were not detected, both containers probably failed
-			return errors.New(configs.UnableToTrackSyncError)
+			log.Errorf(configs.GetContainerIPError, execution, errE)
 		}
+
+		executionUrl = fmt.Sprintf("http://%s:%s", executionIP, elPort)
 	}
 
-	consensusUrl := fmt.Sprintf("http://%s:%s", consensusIP, clPort)
-	executionUrl := fmt.Sprintf("http://%s:%s", executionIP, elPort)
+	// If consensus URL not provided, use docker network IP
+	if consensusUrl == "" {
+		consensusIP, errC := getContainerIP(consensus)
+		if errC != nil {
+			log.Errorf(configs.GetContainerIPError, consensus, errC)
+			if errC != nil {
+				// Both IP were not detected, both containers probably failed
+				return errors.New(configs.UnableToTrackSyncError)
+			}
+		}
+
+		consensusUrl = fmt.Sprintf("http://%s:%s", consensusIP, clPort)
+	}
 
 	statuses := m.TrackSync(done, []string{consensusUrl}, []string{executionUrl}, wait)
 
