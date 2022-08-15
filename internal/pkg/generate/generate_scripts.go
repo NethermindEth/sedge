@@ -389,12 +389,20 @@ func writeTemplateToFile(template *template.Template, file string, data interfac
 /*
 handleExternalUrlPort :
 Handles the URL from an external URL, using port in the URL, or a default port.
+
+params :-
+a. user_url string
+URL to be handled, provided by the user
+b. default_port string
+Port to be used if no / invalid port specified in the URL.
+c. node_type string
+Type of node which is remote ("execution", "consensus")
 */
-func handleExternalUrlPort(str, default_port, node_type string) (string, error) {
-	parsed_url, _ := url.Parse(str)
+func handleExternalUrlPort(user_url, default_port, node_type string) (string, error) {
+	parsed_url, _ := url.Parse(user_url)
 	if !utils.VerifyPortValid(parsed_url.Port()) {
-		log.Infof(configs.DefaultPortSettings, node_type, parsed_url.Port())
-		return str + ":" + default_port, nil
+		log.Infof(configs.DefaultPortSettings, node_type)
+		return user_url + ":" + default_port, nil
 	}
 
 	return parsed_url.Hostname(), nil

@@ -20,7 +20,7 @@ const (
 	CheckingDependencies            = "Checking dependencies: %s"
 	DependenciesPending             = "pending dependencies: %s"
 	DependenciesOK                  = "All dependencies are installed on host machine"
-	DefaultPortSettings             = "No provided or invalid port for %s client, using default"
+	DefaultPortSettings             = "No provided or invalid port for remote %s client, using default"
 	GeneratingDockerComposeScript   = "Generating docker-compose script for current selection of clients"
 	GeneratingEnvFile               = "Generating environment file for current selection of clients"
 	Exiting                         = "Exiting..."
@@ -81,7 +81,7 @@ In case you don't know what to do next, please consider running sedge without th
 Follow https://launchpad.ethereum.org/ and happy staking!`
 	ExecutionClientNotSpecifiedWarn = "Execution client not provided. A random client will be selected. Random client: %s"
 	ConsensusClientNotSpecifiedWarn = "Consensus client not provided. Selecting same pair of clients for consensus and validator clients"
-	ValidatorClientNotSpecifiedWarn = "Validator client not provided. Selecting same pair of clients for consensus and validator clients"
+	ValidatorClientNotSpecifiedWarn = "Validator client not provided. A random client will be selected. Random client: %s"
 	CLNotSpecifiedWarn              = "Consensus and validator clients not provided. Selecting same pair of clients for consensus and validator clients using a random client. Random client: %s"
 	GeneratingJWTSecret             = "Generating JWT secret for client authentication"
 	JWTSecretGenerated              = "JWT secret generated"

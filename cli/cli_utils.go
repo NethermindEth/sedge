@@ -116,20 +116,20 @@ func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Cl
 	}
 
 	// Randomize missing clients, and choose same pair of client for consensus and validator if at least one of them is missing
-	if executionName == "" && remoteExecutionUrl == "" {
+	if executionName == "" && remoteExecutionUrl == "" && remoteConsensusUrl == "" {
 		log.Warnf(configs.ExecutionClientNotSpecifiedWarn, randomizedClients.Execution.Name)
 		executionName = randomizedClients.Execution.Name
 	}
-	if consensusName == "" && validatorName == "" {
+	if consensusName == "" && validatorName == "" && remoteConsensusUrl == "" {
 		log.Warnf(configs.CLNotSpecifiedWarn, randomizedClients.Consensus.Name)
 		consensusName = randomizedClients.Consensus.Name
 		validatorName = randomizedClients.Validator.Name
-	} else if consensusName == "" {
+	} else if consensusName == "" && remoteConsensusUrl == "" {
 		log.Warn(configs.ConsensusClientNotSpecifiedWarn)
 		consensusName = validatorName
 	} else if validatorName == "" {
-		log.Warn(configs.ValidatorClientNotSpecifiedWarn)
-		validatorName = consensusName
+		validatorName = randomizedClients.Validator.Name
+		log.Warnf(configs.ValidatorClientNotSpecifiedWarn, validatorName)
 	}
 
 	exec, ok := allClients[execution][executionName]
@@ -137,7 +137,7 @@ func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Cl
 		exec.Name = executionName
 		exec.IsRemote = false
 	}
-	if remoteExecutionUrl != "" {
+	if remoteExecutionUrl != "" || remoteConsensusUrl != "" {
 		exec.Name = "remote-execution"
 		exec.Supported = true
 		exec.RemoteUrl = remoteExecutionUrl
