@@ -37,6 +37,7 @@ var (
 	inspectExecutionUrl = "http://192.168.128.3"
 	inspectConsensusUrl = "http://192.168.128.3"
 )
+
 var inspectOut = `
 [
 	{
@@ -126,7 +127,9 @@ type cliCmdArgs struct {
 	run          bool
 	install      bool
 	execClient   string
+	execUrl      string
 	conClient    string
+	conUrl       string
 	valClient    string
 	network      string
 	feeRecipient string
@@ -147,8 +150,14 @@ func (args *cliCmdArgs) toString() string {
 	if args.execClient != "" {
 		s = append(s, "-e", args.execClient)
 	}
+	if args.execUrl != "" {
+		s = append(s, "--remote-execution-url", args.execUrl)
+	}
 	if args.conClient != "" {
 		s = append(s, "-c", args.conClient)
+	}
+	if args.conUrl != "" {
+		s = append(s, "--remote-consensus-url", args.conUrl)
 	}
 	if args.valClient != "" {
 		s = append(s, "-v", args.valClient)
@@ -170,7 +179,9 @@ func (args *cliCmdArgs) toString() string {
 func resetCliCmd() {
 	cfgFile = ""
 	executionName = ""
+	remoteExecutionUrl = ""
 	consensusName = ""
+	remoteConsensusUrl = ""
 	validatorName = ""
 	network = "mainnet"
 	feeRecipient = ""
@@ -495,6 +506,30 @@ func TestCliCmd(t *testing.T) {
 				network:   "kiln",
 				services:  []string{"all"},
 				conClient: "teku",
+			},
+			false,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"--network ropsten, with external execution URL", "case_1",
+			cliCmdArgs{
+				yes:      true,
+				network:  "ropsten",
+				services: []string{"consensus"},
+				execUrl:  "https://ropsten.infura.io/v3/f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8",
+			},
+			false,
+			false,
+		),
+		*buildCliTestCase(
+			t,
+			"--network mainnet, with external consensus URL", "case_1",
+			cliCmdArgs{
+				yes:      true,
+				network:  "mainnet",
+				services: []string{"validator"},
+				conUrl:   "https://ropsten.infura.io/v3/f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8",
 			},
 			false,
 			false,

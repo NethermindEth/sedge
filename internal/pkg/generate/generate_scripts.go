@@ -17,6 +17,7 @@ package generate
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -79,18 +80,7 @@ func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 	if gd.ExecutionEndpoint == "" {
 		gd.ExecutionEndpoint = configs.OnPremiseExecutionURL + ":" + gd.Ports["ELApi"]
 	} else {
-		// Split the provided ExecutionEndpoint into host and port
-		splitUrl := strings.Split(gd.ExecutionEndpoint, ":")
-		host := splitUrl[0] + ":" + splitUrl[1]
-
-		// Check if valid port provided. If not, use default
-		port := splitUrl[len(splitUrl)-1]
-		if !utils.VerifyPortValid(port) {
-			log.Infof(configs.DefaultPortSettings, "execution", gd.Ports["ELApi"])
-			gd.ExecutionEndpoint = host + ":" + gd.Ports["ELApi"]
-		}
-
-		// Log port
+		gd.ExecutionEndpoint, _ = handleExternalUrlPort(gd.ExecutionEndpoint, gd.Ports["ELApi"], "execution")
 		log.Infof("Execution endpoint set to %s", gd.ExecutionEndpoint)
 	}
 
@@ -98,18 +88,7 @@ func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 	if gd.ConsensusEndpoint == "" {
 		gd.ConsensusEndpoint = configs.OnPremiseConsensusURL + ":" + gd.Ports["CLApi"]
 	} else {
-		// Split the provided ExecutionEndpoint into host and port
-		splitUrl := strings.Split(gd.ConsensusEndpoint, ":")
-		host := splitUrl[0] + ":" + splitUrl[1]
-
-		// Check if valid port provided. If not, use default
-		port := splitUrl[len(splitUrl)-1]
-		if !utils.VerifyPortValid(port) {
-			log.Infof(configs.DefaultPortSettings, "consensus", gd.Ports["CLApi"])
-			gd.ConsensusEndpoint = host + ":" + gd.Ports["CLApi"]
-		}
-
-		// Log port
+		gd.ConsensusEndpoint, _ = handleExternalUrlPort(gd.ConsensusEndpoint, gd.Ports["CLApi"], "consensus")
 		log.Infof("Consensus endpoint set to %s", gd.ConsensusEndpoint)
 	}
 
@@ -183,22 +162,29 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		return err
 	}
 
-	// Check for prysm config
-	ccPrysmCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient)
-	if err != nil {
-		return err
+	// PATCH: Variables which are relevant only for some clients
+	ccPrysmCfg := false
+	xeeVersion := false
+
+	if !gd.ConsensusIsRemote {
+		// Check for prysm config
+		ccPrysmCfg, err = env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient)
+		if err != nil {
+			return err
+		}
+
+		// Check for XEE_VERSION in teku
+		xeeVersion, err = env.CheckVariable(env.ReXEEV, gd.Network, "consensus", gd.ConsensusClient)
+		if err != nil {
+			return err
+		}
 	}
+
+	// Validator expected to be local
 	vlPrysmCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient)
 	if err != nil {
 		return err
 	}
-
-	// Check for XEE_VERSION in teku
-	xeeVersion, err := env.CheckVariable(env.ReXEEV, gd.Network, "consensus", gd.ConsensusClient)
-	if err != nil {
-		return err
-	}
-
 	// Check for Mev
 	mev, err := env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient)
 	if err != nil {
@@ -398,4 +384,18 @@ func writeTemplateToFile(template *template.Template, file string, data interfac
 	}
 
 	return nil
+}
+
+/*
+handleExternalUrlPort :
+Handles the URL from an external URL, using port in the URL, or a default port.
+*/
+func handleExternalUrlPort(str, default_port, node_type string) (string, error) {
+	parsed_url, _ := url.Parse(str)
+	if !utils.VerifyPortValid(parsed_url.Port()) {
+		log.Infof(configs.DefaultPortSettings, node_type, parsed_url.Port())
+		return str + ":" + default_port, nil
+	}
+
+	return parsed_url.Hostname(), nil
 }

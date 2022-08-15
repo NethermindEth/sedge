@@ -146,6 +146,7 @@ func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Cl
 	cons, ok := allClients[consensus][consensusName]
 	if !ok {
 		cons.Name = consensusName
+		cons.IsRemote = false
 	}
 	if remoteConsensusUrl != "" {
 		cons.Name = "remote-consensus"
