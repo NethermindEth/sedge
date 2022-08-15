@@ -2,9 +2,7 @@
 {{ define "docker-compose" }}
 version: "3.9"
 
-services: {{ if not .ExecutionIsRemote }}
-{{template "execution" .}}
-{{if .Mev}}
+services: {{ if not .ExecutionIsRemote }} {{template "execution" .}} {{if .Mev}}
   mevboost:
     image: flashbots/mev-boost:latest
     networks:
@@ -19,8 +17,7 @@ services: {{ if not .ExecutionIsRemote }}
       - -relay-check
       - -relays
       - ${RELAY_URL}{{end}}
-{{ end }}
-{{ if not .ConsensusIsRemote }}
+{{ end }} {{ if not .ConsensusIsRemote }} 
 {{template "consensus" .}} 
 {{ end }}
 {{template "validator" .}}
