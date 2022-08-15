@@ -284,7 +284,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 
 	log.Info(configs.ValidatorTips)
 
-	if gd.ExecutionIsRemote || gd.ConsensusIsRemote {
+	if gd.ExecutionIsRemote && gd.Network != "mainnet" || gd.ConsensusIsRemote && gd.Network != "mainnet" {
 		log.Infof(configs.ReminderSetJWTRemote, gd.JWTSecretPath)
 	}
 
