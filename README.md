@@ -189,7 +189,6 @@ The following roadmap covers the main features and ideas we want to implement bu
 
 ### Version 0.X
 - [ ] TUI for guided and more interactive setup (better UX)
-- [ ] Integrate Prater network
 - [ ] Off-premise setup support
 - [ ] Cross platform support and documentation
 - [ ] More tests!!!
