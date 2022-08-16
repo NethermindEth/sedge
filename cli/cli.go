@@ -231,27 +231,27 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 
 	// Generate docker-compose scripts
 	gd := generate.GenerationData{
-		ExecutionClient:   combinedClients.Execution.Name,
-		ExecutionImage:    executionImage,
-		ExecutionEndpoint: remoteExecutionUrl,
-		ExecutionIsRemote: len(remoteExecutionUrl) > 0 || len(remoteConsensusUrl) > 0,
-		ConsensusClient:   combinedClients.Consensus.Name,
-		ConsensusImage:    consensusImage,
-		ConsensusEndpoint: remoteConsensusUrl,
-		ConsensusIsRemote: len(remoteConsensusUrl) > 0,
-		ValidatorClient:   combinedClients.Validator.Name,
-		ValidatorImage:    validatorImage,
-		GenerationPath:    generationPath,
-		Network:           network,
-		CheckpointSyncUrl: checkpointSyncUrl,
-		FeeRecipient:      feeRecipient,
-		JWTSecretPath:     jwtPath,
-		FallbackELUrls:    *fallbackEL,
-		ElExtraFlags:      *elExtraFlags,
-		ClExtraFlags:      *clExtraFlags,
-		VlExtraFlags:      *vlExtraFlags,
-		MapAllPorts:       mapAllPorts,
-		Mev:               !noMev,
+		ExecutionClient:      combinedClients.Execution.Name,
+		ExecutionImage:       executionImage,
+		ExecutionAPIEndpoint: remoteExecutionUrl,
+		ExecutionIsRemote:    len(remoteExecutionUrl) > 0 || len(remoteConsensusUrl) > 0,
+		ConsensusClient:      combinedClients.Consensus.Name,
+		ConsensusImage:       consensusImage,
+		ConsensusAPIEndpoint: remoteConsensusUrl,
+		ConsensusIsRemote:    len(remoteConsensusUrl) > 0,
+		ValidatorClient:      combinedClients.Validator.Name,
+		ValidatorImage:       validatorImage,
+		GenerationPath:       generationPath,
+		Network:              network,
+		CheckpointSyncUrl:    checkpointSyncUrl,
+		FeeRecipient:         feeRecipient,
+		JWTSecretPath:        jwtPath,
+		FallbackELUrls:       *fallbackEL,
+		ElExtraFlags:         *elExtraFlags,
+		ClExtraFlags:         *clExtraFlags,
+		VlExtraFlags:         *vlExtraFlags,
+		MapAllPorts:          mapAllPorts,
+		Mev:                  !noMev,
 	}
 	elPort, clPort, err := generate.GenerateScripts(gd)
 	if err != nil {
@@ -296,7 +296,6 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		// time.Sleep(waitingTime)
 		// Track sync of execution and consensus clients
 		// TODO: Parameterize wait arg of trackSync
-		// TODO: Need to track sync from remote execution and consensus clients
 		if err = trackSync(monitor, elPort, clPort, remoteExecutionUrl, remoteConsensusUrl, time.Minute*5); err != nil {
 			return []error{err}
 		}
@@ -330,9 +329,9 @@ func init() {
 
 	cliCmd.Flags().StringVarP(&validatorName, "validator", "v", "", "Validator engine client, e.g., teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 
-	cliCmd.Flags().StringVar(&remoteExecutionUrl, "remote-execution-url", "", "Remote execution URL, e.g., an Infura node or self hosted node")
+	cliCmd.Flags().StringVarP(&remoteExecutionUrl, "remote-execution-url", "E", "", "Remote execution URL, e.g., an Infura node or self hosted node")
 
-	cliCmd.Flags().StringVar(&remoteConsensusUrl, "remote-consensus-url", "", "Remote consensus URL")
+	cliCmd.Flags().StringVarP(&remoteConsensusUrl, "remote-consensus-url", "C", "", "Remote consensus URL")
 
 	cliCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
 

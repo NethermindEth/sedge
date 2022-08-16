@@ -17,6 +17,7 @@ package generate
 
 import (
 	"fmt"
+	"net"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -77,19 +78,20 @@ func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 	gd.Ports = ports
 
 	// If an explicit execution endpoint was not set, Execution is local
-	if gd.ExecutionEndpoint == "" {
-		gd.ExecutionEndpoint = configs.OnPremiseExecutionURL + ":" + gd.Ports["ELApi"]
+	if gd.ExecutionAPIEndpoint == "" {
+		gd.ExecutionAPIEndpoint = configs.OnPremiseExecutionURL + ":" + gd.Ports["ELApi"]
+		gd.ExecutionAuthEndpoint = configs.OnPremiseExecutionURL + ":" + gd.Ports["ELAuth"]
 	} else {
-		gd.ExecutionEndpoint, _ = handleExternalUrlPort(gd.ExecutionEndpoint, gd.Ports["ELApi"], "execution")
-		log.Infof("Execution endpoint set to %s", gd.ExecutionEndpoint)
+		gd.ExecutionAPIEndpoint, gd.ExecutionAuthEndpoint, _ = handleExternalUrlPort(gd.ExecutionAPIEndpoint, gd.Ports["ELApi"], gd.Ports["ELAuth"], "execution")
+		log.Infof("External Execution endpoints set to: \n API: %s \n Auth: %s", gd.ExecutionAPIEndpoint, gd.ExecutionAuthEndpoint)
 	}
 
 	// If an explicit consensus endpoint was not set, Consensus is local
-	if gd.ConsensusEndpoint == "" {
-		gd.ConsensusEndpoint = configs.OnPremiseConsensusURL + ":" + gd.Ports["CLApi"]
+	if gd.ConsensusAPIEndpoint == "" {
+		gd.ConsensusAPIEndpoint = configs.OnPremiseConsensusURL + ":" + gd.Ports["CLApi"]
 	} else {
-		gd.ConsensusEndpoint, _ = handleExternalUrlPort(gd.ConsensusEndpoint, gd.Ports["CLApi"], "consensus")
-		log.Infof("Consensus endpoint set to %s", gd.ConsensusEndpoint)
+		gd.ConsensusAPIEndpoint, gd.ConsensusAdditionalApiEndpoint, _ = handleExternalUrlPort(gd.ConsensusAPIEndpoint, gd.Ports["CLApi"], gd.Ports["CLAdditionalApi"], "consensus")
+		log.Infof("External Consensus endpoints set to \n API: %s \n Additional: %s", gd.ConsensusAPIEndpoint, gd.ConsensusAdditionalApiEndpoint)
 	}
 
 	log.Info(configs.GeneratingDockerComposeScript)
@@ -302,11 +304,11 @@ func generateEnvFile(gd GenerationData) (err error) {
 		CcDataDir:                 configs.ConsensusDefaultDataDir,
 		VlImage:                   gd.ValidatorImage,
 		VlDataDir:                 configs.ValidatorDefaultDataDir,
-		ExecutionApiURL:           gd.ExecutionEndpoint,
-		ExecutionAuthURL:          gd.ExecutionEndpoint + ":" + gd.Ports["ELAuth"],
+		ExecutionApiURL:           gd.ExecutionAPIEndpoint,
+		ExecutionAuthURL:          gd.ExecutionAuthEndpoint,
 		ExecutionIsRemote:         gd.ExecutionIsRemote,
-		ConsensusApiURL:           gd.ConsensusEndpoint,
-		ConsensusAdditionalApiURL: gd.ConsensusEndpoint + ":" + gd.Ports["CLAdditionalApi"],
+		ConsensusApiURL:           gd.ConsensusAPIEndpoint,
+		ConsensusAdditionalApiURL: gd.ConsensusAdditionalApiEndpoint,
 		ConsensusIsRemote:         gd.ConsensusIsRemote,
 		FeeRecipient:              gd.FeeRecipient,
 		JWTSecretPath:             gd.JWTSecretPath,
@@ -393,17 +395,32 @@ Handles the URL from an external URL, using port in the URL, or a default port.
 params :-
 a. user_url string
 URL to be handled, provided by the user
-b. default_port string
+b. default_api_port string
 Port to be used if no / invalid port specified in the URL.
 c. node_type string
 Type of node which is remote ("execution", "consensus")
 */
-func handleExternalUrlPort(user_url, default_port, node_type string) (string, error) {
+func handleExternalUrlPort(user_url, default_api_port, default_auth_port, node_type string) (string, string, error) {
 	parsed_url, _ := url.Parse(user_url)
-	if !utils.VerifyPortValid(parsed_url.Port()) {
-		log.Infof(configs.DefaultPortSettings, node_type)
-		return user_url + ":" + default_port, nil
+	port := parsed_url.Port()
+
+	// Attempt to get port from URL again if not found
+	// This is useful for remote consensus
+	if port == "" {
+		_, port, _ = net.SplitHostPort(parsed_url.Path)
 	}
 
-	return parsed_url.Hostname(), nil
+	// Extract the host name to create secondary URLs
+	host := strings.ReplaceAll(parsed_url.String(), ":"+port, "")
+
+	// If not a valid port (or missing)
+	if !utils.VerifyPortValid(port) {
+		log.Infof(configs.DefaultPortSettings, node_type)
+
+		// Use full path
+		return host + ":" + default_api_port, host + ":" + default_auth_port, nil
+	}
+
+	// If port is correct
+	return user_url, host + ":" + default_auth_port, nil
 }

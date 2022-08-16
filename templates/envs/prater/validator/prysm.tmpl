@@ -8,6 +8,6 @@ VL_INSTANCE_NAME=PrysmValidator
 VL_IMAGE_VERSION={{if .VlImage}}{{.VlImage}}{{else}}gcr.io/prysmaticlabs/prysm/validator:stable{{end}}
 KEYSTORE_DIR={{.KeystoreDir}}
 WALLET_DIR=./wallet
-VL_DATA_DIR={{.VlDataDir}}
+VL_DATA_DIR={{.VlDataDir}} 
 MEV=true
 {{ end }}

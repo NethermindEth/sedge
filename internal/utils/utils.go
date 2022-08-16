@@ -130,6 +130,7 @@ a. bool
 True if <a> is a valid port. False if <a> is not a number / in range
 */
 func VerifyPortValid(a string) bool {
+	// NOTE: Does not handle negative ports correctly
 	port, err := strconv.Atoi(a)
 	if err != nil {
 		return false
@@ -155,6 +156,7 @@ a. bool
 True if <port> is available. False otherwise
 */
 func AssingPorts(host string, defaults map[string]string) (ports map[string]string, err error) {
+	// TODO: When another instance of Sedge is run, ports are set to empty values
 	ports = make(map[string]string)
 	mask := make(map[string]bool)
 

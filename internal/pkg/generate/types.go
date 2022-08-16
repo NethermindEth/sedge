@@ -37,28 +37,30 @@ type EnvData struct {
 
 // GenerationData : Struct Data object for script's generation
 type GenerationData struct {
-	ExecutionClient   string
-	ExecutionImage    string
-	ExecutionEndpoint string
-	ExecutionIsRemote bool
-	ConsensusClient   string
-	ConsensusImage    string
-	ConsensusEndpoint string
-	ConsensusIsRemote bool
-	ValidatorClient   string
-	ValidatorImage    string
-	GenerationPath    string
-	Network           string
-	CheckpointSyncUrl string
-	FeeRecipient      string
-	JWTSecretPath     string
-	FallbackELUrls    []string
-	ElExtraFlags      []string
-	ClExtraFlags      []string
-	VlExtraFlags      []string
-	MapAllPorts       bool
-	Mev               bool
-	Ports             map[string]string
+	ExecutionClient                string
+	ExecutionImage                 string
+	ExecutionAPIEndpoint           string
+	ExecutionAuthEndpoint          string
+	ExecutionIsRemote              bool
+	ConsensusClient                string
+	ConsensusImage                 string
+	ConsensusAPIEndpoint           string
+	ConsensusAdditionalApiEndpoint string
+	ConsensusIsRemote              bool
+	ValidatorClient                string
+	ValidatorImage                 string
+	GenerationPath                 string
+	Network                        string
+	CheckpointSyncUrl              string
+	FeeRecipient                   string
+	JWTSecretPath                  string
+	FallbackELUrls                 []string
+	ElExtraFlags                   []string
+	ClExtraFlags                   []string
+	VlExtraFlags                   []string
+	MapAllPorts                    bool
+	Mev                            bool
+	Ports                          map[string]string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
