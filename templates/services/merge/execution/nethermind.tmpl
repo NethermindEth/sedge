@@ -12,8 +12,7 @@
       - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
-      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
-      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"{{if .MapAllPorts}}
       - "{{.ElApiPort}}:{{.ElApiPort}}"
       - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
     expose:
@@ -24,10 +23,6 @@
       - --datadir=/nethermind/data
       - --log=${NETHERMIND_LOG_LEVEL}{{with .TTD}}
       - --Merge.TerminalTotalDifficulty=${TTD}{{end}}
-      - --Metrics.Enabled=${EC_METRICS_ENABLED}
-      - --Metrics.NodeName=${EC_NODENAME}
-      - --Metrics.PushGatewayUrl=${NETHERMIND_METRICS_PUSH_GATEWAY_URL}
-      - --Metrics.ExposePort={{.ElMetricsPort}}
       - --Sync.SnapSync=${EC_SNAP_SYNC_ENABLED}
       - --JsonRpc.Enabled=true
       - --JsonRpc.Host=0.0.0.0
