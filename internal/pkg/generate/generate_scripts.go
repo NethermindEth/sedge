@@ -145,11 +145,11 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 	}
 
 	// Check for prysm config
-	ccPrysmCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient)
+	ccRemoteCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient)
 	if err != nil {
 		return err
 	}
-	vlPrysmCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient)
+	vlRemoteCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient)
 	if err != nil {
 		return err
 	}
@@ -168,8 +168,8 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 
 	data := DockerComposeData{
 		TTD:                 TTD,
-		CcPrysmCfg:          ccPrysmCfg,
-		VlPrysmCfg:          vlPrysmCfg,
+		CcRemoteCfg:         ccRemoteCfg,
+		VlRemoteCfg:         vlRemoteCfg,
 		XeeVersion:          xeeVersion,
 		Mev:                 mev && gd.Mev,
 		MevPort:             gd.Ports["MevPort"],
