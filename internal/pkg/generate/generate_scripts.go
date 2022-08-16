@@ -78,20 +78,20 @@ func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 	gd.Ports = ports
 
 	// If an explicit execution endpoint was not set, Execution is local
-	if gd.ExecutionAPIEndpoint == "" {
-		gd.ExecutionAPIEndpoint = configs.OnPremiseExecutionURL + ":" + gd.Ports["ELApi"]
+	if gd.ExecutionApiEndpoint == "" {
+		gd.ExecutionApiEndpoint = configs.OnPremiseExecutionURL + ":" + gd.Ports["ELApi"]
 		gd.ExecutionAuthEndpoint = configs.OnPremiseExecutionURL + ":" + gd.Ports["ELAuth"]
 	} else {
-		gd.ExecutionAPIEndpoint, gd.ExecutionAuthEndpoint, _ = handleExternalUrlPort(gd.ExecutionAPIEndpoint, gd.Ports["ELApi"], gd.Ports["ELAuth"], "execution")
-		log.Infof("External Execution endpoints set to: \n API: %s \n Auth: %s", gd.ExecutionAPIEndpoint, gd.ExecutionAuthEndpoint)
+		gd.ExecutionApiEndpoint, gd.ExecutionAuthEndpoint, _ = handleExternalUrlPort(gd.ExecutionApiEndpoint, gd.Ports["ELApi"], gd.Ports["ELAuth"], "execution")
+		log.Infof("External Execution endpoints set to: \n API: %s \n Auth: %s", gd.ExecutionApiEndpoint, gd.ExecutionAuthEndpoint)
 	}
 
 	// If an explicit consensus endpoint was not set, Consensus is local
-	if gd.ConsensusAPIEndpoint == "" {
-		gd.ConsensusAPIEndpoint = configs.OnPremiseConsensusURL + ":" + gd.Ports["CLApi"]
+	if gd.ConsensusApiEndpoint == "" {
+		gd.ConsensusApiEndpoint = configs.OnPremiseConsensusURL + ":" + gd.Ports["CLApi"]
 	} else {
-		gd.ConsensusAPIEndpoint, gd.ConsensusAdditionalApiEndpoint, _ = handleExternalUrlPort(gd.ConsensusAPIEndpoint, gd.Ports["CLApi"], gd.Ports["CLAdditionalApi"], "consensus")
-		log.Infof("External Consensus endpoints set to \n API: %s \n Additional: %s", gd.ConsensusAPIEndpoint, gd.ConsensusAdditionalApiEndpoint)
+		gd.ConsensusApiEndpoint, gd.ConsensusAdditionalApiEndpoint, _ = handleExternalUrlPort(gd.ConsensusApiEndpoint, gd.Ports["CLApi"], gd.Ports["CLAdditionalApi"], "consensus")
+		log.Infof("External Consensus endpoints set to \n API: %s \n Additional: %s", gd.ConsensusApiEndpoint, gd.ConsensusAdditionalApiEndpoint)
 	}
 
 	log.Info(configs.GeneratingDockerComposeScript)
@@ -304,10 +304,10 @@ func generateEnvFile(gd GenerationData) (err error) {
 		CcDataDir:                 configs.ConsensusDefaultDataDir,
 		VlImage:                   gd.ValidatorImage,
 		VlDataDir:                 configs.ValidatorDefaultDataDir,
-		ExecutionApiURL:           gd.ExecutionAPIEndpoint,
+		ExecutionApiURL:           gd.ExecutionApiEndpoint,
 		ExecutionAuthURL:          gd.ExecutionAuthEndpoint,
 		ExecutionIsRemote:         gd.ExecutionIsRemote,
-		ConsensusApiURL:           gd.ConsensusAPIEndpoint,
+		ConsensusApiURL:           gd.ConsensusApiEndpoint,
 		ConsensusAdditionalApiURL: gd.ConsensusAdditionalApiEndpoint,
 		ConsensusIsRemote:         gd.ConsensusIsRemote,
 		FeeRecipient:              gd.FeeRecipient,

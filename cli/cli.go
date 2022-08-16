@@ -233,11 +233,11 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	gd := generate.GenerationData{
 		ExecutionClient:      combinedClients.Execution.Name,
 		ExecutionImage:       executionImage,
-		ExecutionAPIEndpoint: remoteExecutionUrl,
+		ExecutionApiEndpoint: remoteExecutionUrl,
 		ExecutionIsRemote:    len(remoteExecutionUrl) > 0 || len(remoteConsensusUrl) > 0,
 		ConsensusClient:      combinedClients.Consensus.Name,
 		ConsensusImage:       consensusImage,
-		ConsensusAPIEndpoint: remoteConsensusUrl,
+		ConsensusApiEndpoint: remoteConsensusUrl,
 		ConsensusIsRemote:    len(remoteConsensusUrl) > 0,
 		ValidatorClient:      combinedClients.Validator.Name,
 		ValidatorImage:       validatorImage,

@@ -39,12 +39,12 @@ type EnvData struct {
 type GenerationData struct {
 	ExecutionClient                string
 	ExecutionImage                 string
-	ExecutionAPIEndpoint           string
+	ExecutionApiEndpoint           string
 	ExecutionAuthEndpoint          string
 	ExecutionIsRemote              bool
 	ConsensusClient                string
 	ConsensusImage                 string
-	ConsensusAPIEndpoint           string
+	ConsensusApiEndpoint           string
 	ConsensusAdditionalApiEndpoint string
 	ConsensusIsRemote              bool
 	ValidatorClient                string
