@@ -8,7 +8,7 @@ vendor
 
 coverage/*
 
-*.vscode/*
+.vscode/
 
 .DS_Store
 
