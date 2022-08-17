@@ -1,15 +1,29 @@
 {{/* lodestar.tmpl */}}
 {{ define "consensus" }}
+  {{with .CcRemoteCfg}}config_beacon:
+    container_name: config_lodestar_bc
+    image: busybox:latest
+    volumes:
+      - ./:/tmp/app
+    command: >
+      sh -c "wget -O /tmp/app/config.yml ${CONFIG_URL};
+      wget -O /tmp/app/genesis.ssz ${GENESIS_URL}"{{end}}
+
   consensus:
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}
+    image: ${CC_IMAGE_VERSION}{{with .CcRemoteCfg}}
+    depends_on:
+      config_beacon:
+        condition: service_completed_successfully{{end}}
     networks:
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/lodestar/consensus
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{with .CcRemoteCfg}}
+      - ./config.yml:/network_config/config.yml
+      - ./genesis.ssz:/network_config/genesis.ssz{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
@@ -21,8 +35,11 @@
       NODE_OPTIONS: --max_old_space_size=6144
     command: 
       - beacon 
-      - --rootDir=/var/lib/lodestar/consensus
-      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
+      - --rootDir=/var/lib/lodestar/consensus{{if .CcRemoteCfg}}
+      - --paramsFile=/network_config/config.yml
+      - --eth1.depositContractDeployBlock=${DEPLOY_BLOCK}
+      - --genesisStateFile=/network_config/genesis.ssz{{else}}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --eth1.enabled=true
       - --eth1.providerUrls=${EC_API_URL}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
       - --execution.urls=${EC_AUTH_URL}{{with .TTD}}

@@ -1,18 +1,31 @@
 {{/* teku.tmpl */}}
 {{ define "consensus" }}
+{{with .CcRemoteCfg}} config_beacon:
+    container_name: config_lighthouse_bc
+    image: busybox:latest
+    volumes:
+      - ./:/tmp/app
+    command: >
+      sh -c "wget -O /tmp/app/config.yml ${CONFIG_URL};
+      wget -O /tmp/app/genesis.ssz ${GENESIS_URL}"
+{{end}}
   consensus:
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{if .Mev}}
-    depends_on:
+    image: ${CC_IMAGE_VERSION}{{if or .Mev .CcRemoteCfg}}
+    depends_on:{{if .Mev}}
       mevboost:
-        condition: service_started{{end}}
+        condition: service_started{{end}}{{if .CcRemoteCfg}}
+      config_lighthouse_bc:
+        condition: service_completed_succesfully{{end}}{{end}}
     networks:
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/teku
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{with .CcRemoteCfg}}
+      - ./config.yml:/network_config/config.yml
+      - ./genesis.ssz:/network_config/genesis.ssz{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
@@ -22,8 +35,11 @@
       - {{.ClApiPort}}
     command:
       - --log-destination=CONSOLE
-      - --logging=${CC_LOG_LEVEL}
-      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
+      - --logging=${CC_LOG_LEVEL}{{if not .CcRemoteCfg}}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}
+      - --initial-state=/network_config/genesis.ssz
+      - --config-file=/network_config/config.yml
+      - --eth1-deposit-contract-address=${DEPLOY_BLOCK}{{end}}
       - --p2p-discovery-bootnodes=${CL_BOOTNODES}
       - --p2p-enabled=true
       - --p2p-port={{.ClDiscoveryPort}}

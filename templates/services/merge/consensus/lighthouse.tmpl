@@ -1,18 +1,34 @@
 {{/* lighthouse.tmpl */}}
 {{ define "consensus" }}
+  {{with .CcRemoteCfg}}config_beacon:
+    container_name: config_lighthouse_bc
+    image: busybox:latest
+    volumes:
+      - ./:/tmp/app
+    command: >
+      sh -c "wget -O /tmp/app/config.yml ${CONFIG_URL};
+      wget -O /tmp/app/genesis.ssz ${GENESIS_URL};
+      echo -n ${DEPLOY_BLOCK} > deploy_block.txt"{{end}}
+
   consensus:
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{if .Mev}}
-    depends_on:
+    image: ${CC_IMAGE_VERSION}{{if or .Mev .CcRemoteCfg}}
+    depends_on:{{if .Mev}}
       mevboost:
-        condition: service_started{{end}}
+        condition: service_started{{end}}{{if .CcRemoteCfg}}
+      config_lighthouse_bc:
+        condition: service_completed_succesfully{{end}}{{end}}
+
     networks:
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/lighthouse
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{with .CcRemoteCfg}}
+      - ./config.yml:/network_config/config.yml
+      - ./genesis.ssz:/network_config/genesis.ssz
+      - ./deploy_block.txt:/network_config/deploy_block.txt{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
@@ -21,7 +37,8 @@
     expose:
       - {{.ClApiPort}}     
     command:
-      - lighthouse
+      - lighthouse{{if .CcRemoteCfg}}
+      - --testnet-dir=/network_config{{end}}
       - bn
       - --staking
       - --merge
@@ -30,8 +47,8 @@
       - --port={{.ClDiscoveryPort}}
       - --http
       - --http-address=0.0.0.0
-      - --http-port={{.ClApiPort}}
-      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
+      - --http-port={{.ClApiPort}}{{if not .CcRemoteCfg}}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --target-peers=${CC_PEER_COUNT}
       - --execution-endpoints=${EC_AUTH_URL}
       - --execution-jwt=/tmp/jwt/jwtsecret

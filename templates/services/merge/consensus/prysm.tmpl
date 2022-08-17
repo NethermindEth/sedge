@@ -35,6 +35,7 @@
       - {{.ClAdditionalApiPort}}
     command:{{if .CcRemoteCfg}}
       - --chain-config-file=/network_config/config.yml
+      - --contract-deployment-block=${DEPLOY_BLOCK}
       - --genesis-state=/network_config/genesis.ssz{{else}}
       - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --bootstrap-node=${CL_BOOTNODE_1}
