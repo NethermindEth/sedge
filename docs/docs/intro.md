@@ -14,6 +14,6 @@ While Sedge assists in installing the validator, it is not designed to register 
 
 :::caution Disclaimer
 
-Users acknowledge that no warranty is being made of a successful installation. Sedge is a tool and ultimately depends on you to use it correctly and following all the best practice guidance, as found in the ReadMe and documentation.
+Users acknowledge that no warranty is being made of a successful installation. Sedge is a tool and ultimately depends on you to use it correctly and following all the best practice guidance, as found in the project's README and this documentation.
 
 :::

@@ -51,7 +51,7 @@ Check our [installation guide](https://docs.sedge.nethermind.io/docs/quickstart/
 
 ### **Disclaimer**
 
-Any binary comes with a risk of a malicious, third-party actor injecting it with malware. All users should check whether they are downloading the correct, clean binary.”
+Any binary comes with a risk of a malicious, third-party actor injecting it with malware. All users should check whether they are downloading the correct, clean binary.
 
 ## 📜 Documentation
 
@@ -106,7 +106,7 @@ If you are familiar with `docker`, `docker compose`, and the validator setup, th
 ### **Disclaimer**
 While Sedge assists in installing the validator, it is not designed to register or maintain it. The users are solely responsible for ensuring that they monitor and maintain the validator as required, so that they do not incur penalties and/or financial losses.
 
-Users acknowledge that no warranty is being made of a successful installation. Sedge is a tool and ultimately depends on you to use it correctly and following all the best practice guidance, as found in the ReadMe and documentation.
+Users acknowledge that no warranty is being made of a successful installation. Sedge is a tool and ultimately depends on you to use it correctly and following all the best practice guidance, as found in this README and documentation.
 
 ## Supported networks and clients
 
