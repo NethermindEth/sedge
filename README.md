@@ -7,7 +7,7 @@
 
 A one click setup tool for PoS network/chain validators. Currently, Sedge is designed primarily for solo stakers and testnet devs of the Beacon Chain and the Merge (Ethereum). Sedge generates docker-compose scripts for the entire on-premise validator setup based on the chosen client.
 
-The project **is still on beta** and although it should be stable enough, it might still have some issues and has not been audited yet.
+The project **is still on beta** and although it should be stable enough, it might still have some issues. Sedge has not been audited yet.
 
 - [Sedge](#sedge)
   - [⚙️ Installation](#️-installation)
