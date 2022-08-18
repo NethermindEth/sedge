@@ -8,7 +8,7 @@ sidebar_position: 1
 
 :::caution Disclaimer
 
-While Sedge assists in installing the validator, it is not designed to register or maintain it. The users are solely responsible for ensuring that they monitor and maintain the validator as required, so that they do not incur penalties and/or financial losses.
+While Sedge assists in installing the validator, it is not designed to register or maintain it. Users are solely responsible for ensuring that they monitor and maintain the validator as required, so that they do not incur penalties and/or financial losses. This includes promptly updating the tool to ensure the latest stable releases of clients are used.
 
 :::
 
