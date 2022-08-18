@@ -51,7 +51,7 @@ Check our [installation guide](https://docs.sedge.nethermind.io/docs/quickstart/
 
 ### **Disclaimer**
 
-Any binary comes with a risk of a malicious, third-party actor injecting it with malware. All users should check whether they are downloading the correct, clean binary.
+Downloading any binary from the internet comes with the risk of downloading files which malicious, third-party actors have injected with malware. All users should check that they are downloading the correct, clean binary, from a reputable source.
 
 ## 📜 Documentation
 
