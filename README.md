@@ -97,7 +97,7 @@ We don't want to stop at Ethereum. We also want to help stakers of other PoS net
 
 > **Disclaimer:** Users acknowledge that staking-deposit-cli is an external tool, which means that Nethermind exercises no control over its functioning and does not accept any liability for any issues that may arise from the use of the tool.
 
-The setup is currently designed to start all three nodes required to run a validator (execution, consensus and validator node). Soon Sedge will let you directly connect to a public or remote node. The execution and consensus nodes will be executed first, and the validator node will be executed automatically after those nodes are synced, giving you time to prepare the keystore file and make the deposit for your staked ether.
+The setup is currently designed to start all three nodes required to run a full local validator (execution, consensus and validator node). Soon, Sedge will let you connect to a public or remote node for the execution and consensus layers. Once the consensus node is synced, a validator node will be executed automatically. We suggest that you make use of the initial time taken to sync to prepare the keystore file and make the deposit for your staked ether.
 
 If you are familiar with `docker`, `docker compose`, and the validator setup, then you can use Sedge to generate a base docker-compose script with the recommended settings, stop Sedge instead of letting it execute the script, and then edit the script as much as you want. Is a lot more easier than doing everything from scratch!
 
