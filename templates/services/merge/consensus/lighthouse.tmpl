@@ -4,10 +4,10 @@
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{if or .Mev .CcRemoteCfg}}
+    image: ${CC_IMAGE_VERSION}{{if or .Mev .CcCustomCfg}}
     depends_on:{{if .Mev}}
       mevboost:
-        condition: service_started{{end}}{{if .CcRemoteCfg}}
+        condition: service_started{{end}}{{if .CcCustomCfg}}
       config_custom_network:
         condition: service_completed_succesfully{{end}}{{end}}
 
@@ -15,10 +15,10 @@
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/lighthouse
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{with .CcRemoteCfg}}
-      - ./config.yml:/network_config/config.yml
-      - ./genesis.ssz:/network_config/genesis.ssz
-      - ./deploy_block.txt:/network_config/deploy_block.txt{{end}}
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{with .CcCustomCfg}}{{if .CcRemoteCfg}}
+      - ./config.yml:/network_config/config.yml{{end}}{{if .CcRemoteGen}}
+      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{if .CcRemoteDpl}}
+      - ./deploy_block.txt:/network_config/deploy_block.txt{{end}}{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
@@ -27,7 +27,7 @@
     expose:
       - {{.ClApiPort}}     
     command:
-      - lighthouse{{if .CcRemoteCfg}}
+      - lighthouse{{if .CcRemoteDpl}}
       - --testnet-dir=/network_config{{end}}
       - bn
       - --staking
@@ -37,7 +37,7 @@
       - --port={{.ClDiscoveryPort}}
       - --http
       - --http-address=0.0.0.0
-      - --http-port={{.ClApiPort}}{{if not .CcRemoteCfg}}
+      - --http-port={{.ClApiPort}}{{if not .CcCustomCfg}}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --target-peers=${CC_PEER_COUNT}
       - --execution-endpoints=${EC_AUTH_URL}

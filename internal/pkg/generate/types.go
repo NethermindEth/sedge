@@ -60,8 +60,14 @@ type GenerationData struct {
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
 	TTD                 bool
+	CcCustomCfg         bool
 	CcRemoteCfg         bool
+	CcRemoteGen         bool
+	CcRemoteDpl         bool
+	VlCustomCfg         bool
 	VlRemoteCfg         bool
+	VlRemoteGen         bool
+	VlRemoteDpl         bool
 	XeeVersion          bool
 	Mev                 bool
 	MevPort             string

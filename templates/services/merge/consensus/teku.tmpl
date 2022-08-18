@@ -4,19 +4,19 @@
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{if or .Mev .CcRemoteCfg}}
+    image: ${CC_IMAGE_VERSION}{{if or .Mev .CcCustomCfg}}
     depends_on:{{if .Mev}}
       mevboost:
-        condition: service_started{{end}}{{if .CcRemoteCfg}}
+        condition: service_started{{end}}{{if .CcCustomCfg}}
       config_custom_network:
         condition: service_completed_succesfully{{end}}{{end}}
     networks:
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/teku
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{with .CcRemoteCfg}}
-      - ./config.yml:/network_config/config.yml
-      - ./genesis.ssz:/network_config/genesis.ssz{{end}}
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{with .CcCustomCfg}}{{if .CcRemoteCfg}}
+      - ./config.yml:/network_config/config.yml{{end}}{{if .CcRemoteGen}}
+      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
@@ -26,11 +26,11 @@
       - {{.ClApiPort}}
     command:
       - --log-destination=CONSOLE
-      - --logging=${CC_LOG_LEVEL}{{if not .CcRemoteCfg}}
-      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}
-      - --initial-state=/network_config/genesis.ssz
-      - --config-file=/network_config/config.yml
-      - --eth1-deposit-contract-address=${DEPLOY_BLOCK}{{end}}
+      - --logging=${CC_LOG_LEVEL}{{if not .CcCustomCfg}}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}{{if .CcRemoteGen}}
+      - --initial-state=/network_config/genesis.ssz{{end}}{{if .CcRemoteCfg}}
+      - --config-file=/network_config/config.yml{{end}}{{if .CcRemoteDpl}}
+      - --eth1-deposit-contract-address=${DEPLOY_BLOCK}{{end}}{{end}}
       - --p2p-discovery-bootnodes=${CL_BOOTNODES}
       - --p2p-enabled=true
       - --p2p-port={{.ClDiscoveryPort}}
