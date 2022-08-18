@@ -1,7 +1,7 @@
 {{/* teku.tmpl */}}
 {{ define "consensus" }}
 {{with .CcRemoteCfg}} config_beacon:
-    container_name: config_lighthouse_bc
+    container_name: config_teku_bc
     image: busybox:latest
     volumes:
       - ./:/tmp/app
@@ -17,7 +17,7 @@
     depends_on:{{if .Mev}}
       mevboost:
         condition: service_started{{end}}{{if .CcRemoteCfg}}
-      config_lighthouse_bc:
+      config_teku_bc:
         condition: service_completed_succesfully{{end}}{{end}}
     networks:
       - sedge
