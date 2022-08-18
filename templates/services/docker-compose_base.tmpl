@@ -19,6 +19,15 @@ services:
       - -relay-check
       - -relays
       - ${RELAY_URL}{{end}}
+  {{with .CcRemoteCfg}}config_beacon:
+    container_name: config_custom_network
+    image: busybox:latest
+    volumes:
+      - ./:/tmp/app
+    command: >
+      sh -c "wget -O /tmp/app/config.yml ${CONFIG_URL};
+      wget -O /tmp/app/genesis.ssz ${GENESIS_URL};
+      echo -n ${DEPLOY_BLOCK} > /tmp/app/deploy_block.txt"{{end}}
 {{template "consensus" .}}
 {{template "validator" .}}
 
