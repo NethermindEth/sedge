@@ -104,7 +104,7 @@ If you are familiar with `docker`, `docker compose`, and the validator setup, th
 > Although Sedge supports several clients, **is still on beta**. Some settings may not work because -at least on the testnets- the clients are constantly evolving. Please let us know any issues you encounter!
 
 ### **Disclaimer**
-While Sedge assists in installing the validator, it is not designed to register or maintain it. The users are solely responsible for ensuring that they monitor and maintain the validator as required, so that they do not incur penalties and/or financial losses.
+While Sedge assists in installing the validator, it is not designed to register or maintain it. Users are solely responsible for ensuring that they monitor and maintain the validator as required, so that they do not incur penalties and/or financial losses. This includes promptly updating the tool to ensure the latest stable releases of clients are used.
 
 Users acknowledge that no warranty is being made of a successful installation. Sedge is a tool and ultimately depends on you to use it correctly and following all the best practice guidance, as found in this README and documentation.
 
