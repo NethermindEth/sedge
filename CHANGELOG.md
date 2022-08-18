@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Enable support for public execution and consensus nodes.
 
+### Changed
+- Remove Nethermind metrics configuration
+
 ## [v0.2.0] - 2022-08-4
 
 ### Added
