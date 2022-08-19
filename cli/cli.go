@@ -123,6 +123,13 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf(configs.RunClientsError, strings.Join(*services, ","), strings.Join([]string{execution, consensus, validator}, ","))
 	}
 
+	// Do not start up services which are not necessary
+	if remoteConsensusUrl != "" {
+		services = &[]string{validator}
+	} else if remoteExecutionUrl != "" {
+		services = &[]string{consensus}
+	}
+
 	// Validate network
 	networks, err := utils.SupportedNetworks()
 	if err != nil {
