@@ -39,7 +39,7 @@
       - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --bootstrap-node=${CL_BOOTNODE_1}
       - --bootstrap-node=${CL_BOOTNODE_2}
-      - --terminal-total-difficulty-override=${TTD}
+      - --difficulty-override=${TTD}
       - --p2p-tcp-port={{.ClDiscoveryPort}}
       - --p2p-udp-port={{.ClDiscoveryPort}}
       - --jwt-secret=/tmp/jwt/jwtsecret
