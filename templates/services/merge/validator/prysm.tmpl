@@ -34,7 +34,7 @@
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
       - ${VL_DATA_DIR}:/var/lib/prysm
-      - ${KEYSTORE_DIR}/keystore_password.txt:/keystore/keystore_password.txt{{with .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - ${KEYSTORE_DIR}/keystore_password.txt:/keystore/keystore_password.txt{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - ./config.yml:/network_config/config.yml{{end}}{{end}}
     command:
       - --datadir=/var/lib/prysm
