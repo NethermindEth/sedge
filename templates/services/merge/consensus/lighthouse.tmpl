@@ -33,9 +33,8 @@
       - --http-port={{.ClApiPort}}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
       - --target-peers=${CC_PEER_COUNT}
-      - --execution-endpoints=${EC_AUTH_URL}
-      - --execution-jwt=/tmp/jwt/jwtsecret
-      - --eth1-endpoints=${EC_API_URL}{{range $url := .FallbackELUrls}},{{$url}}{{end}}{{with .TTD}}
+      - --execution-endpoints=${EC_API_URL}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
+      - --execution-jwt=/tmp/jwt/jwtsecret{{with .TTD}}
       - --terminal-total-difficulty-override=${TTD}{{end}}     
       - --debug-level=${CC_LOG_LEVEL}{{with .FeeRecipient}}
       - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
