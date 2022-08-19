@@ -25,7 +25,8 @@
     environment:
       NODE_OPTIONS: --max_old_space_size=6144
     command: 
-      - beacon 
+      - beacon
+      - --preset=${CC_LODESTAR_PRESET}
       - --rootDir=/var/lib/lodestar/consensus{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
       - --paramsFile=/network_config/config.yml{{end}}{{if .CcRemoteDpl}}
       - --eth1.depositContractDeployBlock=${DEPLOY_BLOCK}{{end}}{{if .CcRemoteGen}}

@@ -8,6 +8,7 @@ VL_INSTANCE_NAME=LodestarValidator
 VL_IMAGE_VERSION={{if .VlImage}}{{.VlImage}}{{else}}chainsafe/lodestar:next{{end}}
 KEYSTORE_DIR={{.KeystoreDir}}
 VL_DATA_DIR={{.VlDataDir}}
+VL_LODESTAR_PRESET=gnosis
 CONFIG_URL=https://github.com/gnosischain/consensus-deployment-ansible/raw/master/denver/custom_config_data/config.yaml
 GENESIS_URL=https://github.com/gnosischain/consensus-deployment-ansible/raw/master/denver/custom_config_data/genesis.ssz
 DEPLOY_BLOCK=0
