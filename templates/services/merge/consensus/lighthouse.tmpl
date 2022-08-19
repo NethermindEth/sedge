@@ -27,7 +27,7 @@
     expose:
       - {{.ClApiPort}}     
     command:
-      - lighthouse{{if .CcRemoteDpl}}
+      - lighthouse{{if .CcCustomCfg}}
       - --testnet-dir=/network_config{{end}}
       - bn
       - --staking
