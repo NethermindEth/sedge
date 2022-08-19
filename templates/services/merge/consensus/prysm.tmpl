@@ -6,7 +6,7 @@
     restart: unless-stopped
     image: ${CC_IMAGE_VERSION}{{with .CcCustomCfg}}
     depends_on:
-      config_custom_network:
+      config_consensus:
         condition: service_completed_successfully{{end}}
     networks:
       - sedge
