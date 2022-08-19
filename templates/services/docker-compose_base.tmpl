@@ -15,7 +15,7 @@ services:
       - /app/mev-boost
       - -addr
       - 0.0.0.0:{{.MevPort}}
-      - -${NETWORK}
+      - -{{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
       - -relay-check
       - -relays
       - ${RELAY_URL}{{end}}
