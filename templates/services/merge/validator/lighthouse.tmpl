@@ -10,7 +10,7 @@
       - sedge
     volumes:
       - ${KEYSTORE_DIR}:/keystore
-      - ${VL_DATA_DIR}:/var/lib/lighthouse{{with .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - ${VL_DATA_DIR}:/var/lib/lighthouse{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
       - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{if .VlRemoteDpl}}
       - ./deploy_block.txt:/network_config/deploy_block.txt{{end}}{{end}}

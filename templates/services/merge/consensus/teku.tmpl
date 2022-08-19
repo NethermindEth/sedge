@@ -14,7 +14,7 @@
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/teku
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{with .CcCustomCfg}}{{if .CcRemoteCfg}}
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
       - ./config.yml:/network_config/config.yml{{end}}{{if .CcRemoteGen}}
       - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
     ports:

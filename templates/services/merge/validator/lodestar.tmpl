@@ -9,10 +9,13 @@
     networks:
       - sedge
     volumes:
-      - ${KEYSTORE_DIR}:/keystore
+      - ${KEYSTORE_DIR}:/keystore{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
+      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
     command: |
-      account validator import
-      --network {{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
+      account validator import{{if not .VlCustomCfg}}
+      --network {{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}{{if .VlRemoteCfg}}
+      --paramsFile=/network_config/config.yml{{end}}{{end}}
       --directory=/keystore/validator_keys
       --passphraseFile=/keystore/keystore_password.txt
 
@@ -28,7 +31,7 @@
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
       - ${VL_DATA_DIR}:/var/lib/lodestar/validator
-      - ${KEYSTORE_DIR}:/var/lib/lodestar/keystore{{with .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - ${KEYSTORE_DIR}:/var/lib/lodestar/keystore{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
       - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
     command: 

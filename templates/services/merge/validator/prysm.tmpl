@@ -10,7 +10,7 @@
     container_name: validator-import-client
     volumes:
       - ${VL_DATA_DIR}:/var/lib/prysm
-      - ${KEYSTORE_DIR}:/keystore{{with .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - ${KEYSTORE_DIR}:/keystore{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - ./config.yml:/network_config/config.yml{{end}}{{end}}
     command: |{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       --chain-config-file=/network_config/config.yml{{end}}{{else}}

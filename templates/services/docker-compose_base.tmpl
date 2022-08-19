@@ -19,7 +19,7 @@ services:
       - -relay-check
       - -relays
       - ${RELAY_URL}{{end}}
-  {{with or .CcCustomCfg .VlCustomCfg}}config_beacon:
+  {{if or .CcCustomCfg .VlCustomCfg}}config_consensus:
     container_name: config_custom_network
     image: busybox:latest
     volumes:

@@ -12,7 +12,7 @@
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/lodestar/consensus
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{with .CcCustomCfg}}{{if .CcRemoteCfg}}
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
       - ./config.yml:/network_config/config.yml{{end}}{{if .CcRemoteDpl}}
       - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
     ports:

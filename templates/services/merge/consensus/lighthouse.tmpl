@@ -15,7 +15,7 @@
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/lighthouse
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{with .CcCustomCfg}}{{if .CcRemoteCfg}}
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
       - ./config.yml:/network_config/config.yml{{end}}{{if .CcRemoteGen}}
       - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{if .CcRemoteDpl}}
       - ./deploy_block.txt:/network_config/deploy_block.txt{{end}}{{end}}
