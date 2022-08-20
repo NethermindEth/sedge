@@ -51,6 +51,7 @@
       - --defaultFeeRecipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
       - --builder.enabled{{end}}
+      - --graffiti=${GRAFFITI}
     logging:
       driver: "json-file"
       options:
