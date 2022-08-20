@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Add support for gnosis merge testnets named chiado and denver
+- Add support for custom testnets by allowing custom remote config and genesis files
 - Remove Nethermind metrics configuration
 
 ## [v0.2.0] - 2022-08-4
