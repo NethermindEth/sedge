@@ -30,8 +30,6 @@
       - lighthouse{{if .CcCustomCfg}}
       - --testnet-dir=/network_config{{end}}
       - bn
-      - --staking
-      - --merge
       - --disable-upnp
       - --datadir=/var/lib/lighthouse
       - --port={{.ClDiscoveryPort}}
