@@ -81,9 +81,7 @@ func PreCheck(generationPath string) error {
 	}
 
 	// Check that compose plugin is installed with docker running 'docker compose ps'
-	dockerComposePsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path: filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
-	})
+	dockerComposePsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{})
 	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
 	dockerComposePsCMD.GetOutput = true
 	_, err = commands.Runner.RunCMD(dockerComposePsCMD)
