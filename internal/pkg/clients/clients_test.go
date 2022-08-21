@@ -184,18 +184,18 @@ func TestValidateClient(t *testing.T) {
 		},
 		{
 			client: Client{
-				"nethermind",
-				"execution",
-				true,
+				Name:      "nethermind",
+				Type:      "execution",
+				Supported: true,
 			},
 			clientType: "execution",
 			isErr:      false,
 		},
 		{
 			client: Client{
-				"nethermind",
-				"execution",
-				false,
+				Name:      "nethermind",
+				Type:      "execution",
+				Supported: false,
 			},
 			clientType: "execution",
 			isErr:      true,
