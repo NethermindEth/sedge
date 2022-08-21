@@ -9,6 +9,9 @@ compile-linux: ## compile:
 	@mkdir -p build
 	@env GOOS=linux go build -o build/sedge cmd/main.go
 
+install: compile ## compile the binary and copy it to PATH
+	@cp build/sedge /usr/local/bin
+
 run: ## run
 	@./build/sedge
 

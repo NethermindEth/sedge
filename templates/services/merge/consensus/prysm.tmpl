@@ -1,29 +1,20 @@
 {{/* prysm.tmpl */}}
 {{ define "consensus" }}
-  {{with .CcPrysmCfg}}config_beacon:
-    container_name: config_prysm_bc
-    image: busybox:latest
-    volumes:
-      - ./:/tmp/app
-    command: >
-      sh -c "wget -O /tmp/app/config.yml ${CONFIG_URL};
-      wget -O /tmp/app/genesis.ssz ${GENESIS_URL}"{{end}}
-
   consensus:
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{with .CcPrysmCfg}}
+    image: ${CC_IMAGE_VERSION}{{with .CcCustomCfg}}
     depends_on:
-      config_beacon:
+      config_consensus:
         condition: service_completed_successfully{{end}}
     networks:
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/prysm
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{with .CcPrysmCfg}}
-      - ./config.yml:/network_config/config.yml
-      - ./genesis.ssz:/network_config/genesis.ssz{{end}}
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
+      - ./config.yml:/network_config/config.yml{{end}}{{if .CcRemoteGen}}
+      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
@@ -33,13 +24,13 @@
     expose:
       - {{.ClApiPort}}
       - {{.ClAdditionalApiPort}}
-    command:{{if .CcPrysmCfg}}
-      - --chain-config-file=/network_config/config.yml
-      - --genesis-state=/network_config/genesis.ssz{{else}}
-      - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
-      - --bootstrap-node=${CL_BOOTNODE_1}
-      - --bootstrap-node=${CL_BOOTNODE_2}
-      - --terminal-total-difficulty-override=${TTD}
+    command:{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
+      - --chain-config-file=/network_config/config.yml{{end}}{{if .CcRemoteDpl}}
+      - --contract-deployment-block=${DEPLOY_BLOCK}{{end}}{{if .CcRemoteGen}}
+      - --genesis-state=/network_config/genesis.ssz{{end}}{{else}}
+      - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}{{range $enr := .Bootnodes}}
+      - --bootstrap-node={{$enr}}{{end}}{{with .TTD}}
+      - --terminal-total-difficulty-override=${TTD}{{end}}
       - --p2p-tcp-port={{.ClDiscoveryPort}}
       - --p2p-udp-port={{.ClDiscoveryPort}}
       - --jwt-secret=/tmp/jwt/jwtsecret

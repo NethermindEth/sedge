@@ -70,7 +70,13 @@ func (cr *UnixCMDRunner) BuildDockerComposePSCMD(options DockerComposePsOptions)
 	if options.ServiceName != "" {
 		name += " " + options.ServiceName
 	}
-	command := fmt.Sprintf("docker compose -f %s ps%s%s", options.Path, flags, name)
+
+	var command string
+	if options.Path != "" {
+		command = fmt.Sprintf("docker compose -f %s ps%s%s", options.Path, flags, name)
+	} else {
+		command = fmt.Sprintf("docker compose ps%s%s", flags, name)
+	}
 	return Command{Cmd: command}
 }
 

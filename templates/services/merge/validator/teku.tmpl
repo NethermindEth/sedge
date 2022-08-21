@@ -3,7 +3,10 @@
   validator-import:
     container_name: validator-import-client
     build:
-      context: github.com/NethermindEth/teku-init-validator
+      context: github.com/NethermindEth/teku-init-validator{{with .VlCustomCfg}}
+    depends_on:
+      config_consensus:
+        condition: service_completed_successfully{{end}}
     volumes:
       - ${VL_DATA_DIR}:/data
       - ${KEYSTORE_DIR}:/keystore
@@ -13,15 +16,21 @@
     image: ${VL_IMAGE_VERSION}
     depends_on:
       validator-import:
-        condition: service_completed_successfully
+        condition: service_completed_successfully{{if .VlCustomCfg}}
+      config_consensus:
+        condition: service_completed_successfully{{end}}
     networks:
       - sedge
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/var/lib/teku
+      - ${VL_DATA_DIR}:/var/lib/teku{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
+      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
     command:
-      - validator-client
+      - validator-client{{if .VlCustomCfg}}{{if .VlRemoteGen}}
+      - --initial-state=/network_config/genesis.ssz{{end}}{{if .VlRemoteCfg}}
+      - --network=/network_config/config.yml{{end}}{{end}}
       - --beacon-node-api-endpoint=${CC_API_URL}
       - --data-path=/var/lib/teku
       - --log-destination=CONSOLE

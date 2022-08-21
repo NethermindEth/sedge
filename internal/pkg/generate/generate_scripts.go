@@ -144,12 +144,28 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		return err
 	}
 
-	// Check for prysm config
-	ccPrysmCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient)
+	// Check for custom network config
+	ccRemoteCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient)
 	if err != nil {
 		return err
 	}
-	vlPrysmCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient)
+	ccRemoteGen, err := env.CheckVariable(env.ReGENESIS, gd.Network, "consensus", gd.ConsensusClient)
+	if err != nil {
+		return err
+	}
+	ccRemoteDpl, err := env.CheckVariable(env.ReDEPLOY, gd.Network, "consensus", gd.ConsensusClient)
+	if err != nil {
+		return err
+	}
+	vlRemoteCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient)
+	if err != nil {
+		return err
+	}
+	vlRemoteGen, err := env.CheckVariable(env.ReGENESIS, gd.Network, "validator", gd.ValidatorClient)
+	if err != nil {
+		return err
+	}
+	vlRemoteDpl, err := env.CheckVariable(env.ReDEPLOY, gd.Network, "validator", gd.ValidatorClient)
 	if err != nil {
 		return err
 	}
@@ -166,10 +182,22 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		return err
 	}
 
+	// Check for Bootstrap nodes
+	bootnodes, err := env.GetBootnodes(gd.Network, gd.ConsensusClient)
+	if err != nil {
+		return err
+	}
+
 	data := DockerComposeData{
 		TTD:                 TTD,
-		CcPrysmCfg:          ccPrysmCfg,
-		VlPrysmCfg:          vlPrysmCfg,
+		CcCustomCfg:         ccRemoteCfg || ccRemoteGen || ccRemoteDpl,
+		CcRemoteCfg:         ccRemoteCfg,
+		CcRemoteGen:         ccRemoteGen,
+		CcRemoteDpl:         ccRemoteDpl,
+		VlCustomCfg:         vlRemoteCfg || vlRemoteGen || vlRemoteDpl,
+		VlRemoteCfg:         vlRemoteCfg,
+		VlRemoteGen:         vlRemoteGen,
+		VlRemoteDpl:         vlRemoteDpl,
 		XeeVersion:          xeeVersion,
 		Mev:                 mev && gd.Mev,
 		MevPort:             gd.Ports["MevPort"],
@@ -189,6 +217,7 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		ElExtraFlags:        gd.ElExtraFlags,
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
+		Bootnodes:           bootnodes,
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     checkSplitedNetworks(gd.Network),
 	}
