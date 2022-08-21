@@ -181,3 +181,29 @@ func portAvailable(host, port string, timeout time.Duration) bool {
 	}
 	return conn == nil
 }
+
+/*
+Filter :
+Filter a slice given a predicate
+
+params :-
+a. list []K
+List to be filtered
+b. filter func(K) bool
+Predicate to be applied to each element of the list
+
+returns :-
+a. []K
+Filtered list
+*/
+func Filter[K comparable](list []K, filter func(K) bool) []K {
+	n := 0
+	for _, v := range list {
+		if filter(v) {
+			list[n] = v
+			n++
+		}
+	}
+
+	return list[:n]
+}
