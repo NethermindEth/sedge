@@ -39,11 +39,12 @@ type logsTestCase struct {
 	isErr         bool
 	dcPsRuns      int
 	dcLogsRuns    int
+	tail          int
 }
 
 func resetLogCmd() {
 	cfgFile = ""
-	tail = false
+	tail = 0
 	generationPath = configs.DefaultDockerComposeScriptsPath
 }
 
@@ -82,7 +83,7 @@ func prepareFiles(t *testing.T, tc *logsTestCase) {
 	tc.generatedPath = tcGeneratedPath
 }
 
-func buildLogsTestCase(t *testing.T, testName string, services []string, isErr bool) logsTestCase {
+func buildLogsTestCase(t *testing.T, testName string, tail int, services []string, isErr bool) logsTestCase {
 	tc := logsTestCase{}
 	tc.name = testName
 
@@ -118,6 +119,7 @@ func buildLogsTestCase(t *testing.T, testName string, services []string, isErr b
 	tc.fdOut = fdOut
 	tc.services = services
 	tc.isErr = isErr
+	tc.tail = tail
 	return tc
 }
 
@@ -125,19 +127,33 @@ func TestLogsCmd(t *testing.T) {
 	tc1 := buildLogsTestCase(
 		t,
 		"case_1",
+		0,
+		[]string{"execution", "consensus", "validator"},
+		false,
+	)
+	tc2 := buildLogsTestCase(
+		t,
+		"case_1",
+		50,
 		[]string{"execution", "consensus", "validator"},
 		false,
 	)
 
 	tcs := []logsTestCase{
 		tc1,
+		tc2,
 	}
 
 	t.Cleanup(resetLogCmd)
 
 	for _, tc := range tcs {
 		resetLogCmd()
-		args := []string{"logs", "--config", tc.configPath, "--path", tc.generatedPath, "--tail"}
+		var args []string
+		if tc.tail != 0 {
+			args = []string{"logs", "--config", tc.configPath, "--path", tc.generatedPath, "--tail", fmt.Sprintf("%d", tc.tail)}
+		} else {
+			args = []string{"logs", "--config", tc.configPath, "--path", tc.generatedPath}
+		}
 		args = append(args, tc.services...)
 		rootCmd.SetArgs(args)
 		rootCmd.SetOut(tc.fdOut)
