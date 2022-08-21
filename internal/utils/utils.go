@@ -196,7 +196,7 @@ returns :-
 a. []K
 Filtered list
 */
-func Filter[K comparable](list []K, filter func(K) bool) []K {
+func Filter[K any](list []K, filter func(K) bool) []K {
 	n := 0
 	for _, v := range list {
 		if filter(v) {
