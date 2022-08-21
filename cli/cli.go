@@ -57,6 +57,7 @@ var (
 	vlExtraFlags      *[]string
 	mapAllPorts       bool
 	noMev             bool
+	noValidator       bool
 )
 
 const (
@@ -120,6 +121,12 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 	} else if !utils.ContainsOnly(*services, []string{execution, consensus, validator}) {
 		return fmt.Errorf(configs.RunClientsError, strings.Join(*services, ","), strings.Join([]string{execution, consensus, validator}, ","))
 	}
+	// Exclude validator from run-clients if no-validator flag is set
+	if noValidator && utils.Contains(*services, validator) {
+		*services = utils.Filter(*services, func(s string) bool {
+			return s != validator
+		})
+	}
 
 	// Validate network
 	networks, err := utils.SupportedNetworks()
@@ -154,7 +161,7 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 
 	// Checkpoint Url
 	if checkpointSyncUrl == "" {
-		checkpointSyncUrl, _ = configs.NetworksToCheckpointUrl[network]
+		checkpointSyncUrl = configs.NetworksToCheckpointUrl[network]
 	}
 
 	return nil
@@ -227,14 +234,16 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		}
 	}
 
+	combinedClients.Execution.Image = executionImage
+	combinedClients.Consensus.Image = consensusImage
+	combinedClients.Validator.Image = validatorImage
+	combinedClients.Validator.Omited = noValidator
+
 	// Generate docker-compose scripts
 	gd := generate.GenerationData{
-		ExecutionClient:   combinedClients.Execution.Name,
-		ExecutionImage:    executionImage,
-		ConsensusClient:   combinedClients.Consensus.Name,
-		ConsensusImage:    consensusImage,
-		ValidatorClient:   combinedClients.Validator.Name,
-		ValidatorImage:    validatorImage,
+		ExecutionClient:   combinedClients.Execution,
+		ConsensusClient:   combinedClients.Consensus,
+		ValidatorClient:   combinedClients.Validator,
 		GenerationPath:    generationPath,
 		Network:           network,
 		CheckpointSyncUrl: checkpointSyncUrl,
@@ -245,7 +254,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		ClExtraFlags:      *clExtraFlags,
 		VlExtraFlags:      *vlExtraFlags,
 		MapAllPorts:       mapAllPorts,
-		Mev:               !noMev,
+		Mev:               !noMev && !noValidator,
 	}
 	elPort, clPort, err := generate.GenerateScripts(gd)
 	if err != nil {
@@ -276,33 +285,34 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		}
 	}
 
-	log.Info(configs.ValidatorTips)
+	if !noValidator {
+		log.Info(configs.ValidatorTips)
 
-	// TODO: Add ability to not run a validator at all
-	// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service in the previous step
-	if !utils.Contains(*services, validator) {
-		// Wait for clients to start
-		//log.Info(configs.WaitingForNodesToStart)
-		//time.Sleep(waitingTime)
-		// Track sync of execution and consensus clients
-		// TODO: Parameterize wait arg of trackSync
-		if err = trackSync(monitor, elPort, clPort, time.Minute*5); err != nil {
-			return []error{err}
-		}
-
-		// TODO: Prompt for waiting for keystore and validator registration to run the validator
-		if run {
-			if err = runAndShowContainers([]string{validator}); err != nil {
+		// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service in the previous step
+		if !utils.Contains(*services, validator) {
+			// Wait for clients to start
+			//log.Info(configs.WaitingForNodesToStart)
+			//time.Sleep(waitingTime)
+			// Track sync of execution and consensus clients
+			// TODO: Parameterize wait arg of trackSync
+			if err = trackSync(monitor, elPort, clPort, time.Minute*5); err != nil {
 				return []error{err}
 			}
-		} else {
-			// Let the user decide to see the instructions for executing the validator and exit or let the tool execute it
-			if err = RunValidatorOrExit(); err != nil {
-				return []error{err}
+
+			// TODO: Prompt for waiting for keystore and validator registration to run the validator
+			if run {
+				if err = runAndShowContainers([]string{validator}); err != nil {
+					return []error{err}
+				}
+			} else {
+				// Let the user decide to see the instructions for executing the validator and exit or let the tool execute it
+				if err = RunValidatorOrExit(); err != nil {
+					return []error{err}
+				}
 			}
 		}
+		log.Info(configs.HappyStaking)
 	}
-	log.Info(configs.HappyStaking)
 
 	return nil
 }
@@ -325,9 +335,11 @@ func init() {
 
 	cliCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, prater, kiln, etc.")
 
-	cliCmd.Flags().StringVar(&feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
+	cliCmd.Flags().StringVar(&feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
 
 	cliCmd.Flags().BoolVar(&noMev, "no-mev-boost", false, "Not use mev-boost if supported")
+
+	cliCmd.Flags().BoolVar(&noValidator, "no-validator", false, "Exclude the validator from the full node setup. Designed for execution and consensus nodes setup without a validator node. Exclude also the validator from other flags. If set, mev-boost will not be used.")
 
 	cliCmd.Flags().StringVar(&jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 

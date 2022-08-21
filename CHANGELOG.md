@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add support for gnosis merge testnets named chiado and denver
 - Add support for custom testnets by allowing custom remote config and genesis files
+- Add `--no-validator` flag to exclude the validator node from the full node setup
 
 ### Changed
 - Remove Nethermind metrics configuration
