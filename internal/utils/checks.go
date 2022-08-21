@@ -80,20 +80,20 @@ func PreCheck(generationPath string) error {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
 	}
 
-	// Check that compose plugin is installed with docker running 'docker compose ps'
-	dockerComposePsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{})
-	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
-	dockerComposePsCMD.GetOutput = true
-	_, err = commands.Runner.RunCMD(dockerComposePsCMD)
-	if err != nil {
-		return fmt.Errorf(configs.DockerComposeOffError, err)
-	}
-
 	// Check if docker-compose script was generated
 	file := generationPath + "/" + configs.DefaultDockerComposeScriptName
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		log.Errorf(configs.OpeningFileError, file, err)
 		return fmt.Errorf(configs.DockerComposeScriptNotFoundError, generationPath, configs.DefaultDockerComposeScriptsPath)
+	}
+
+	// Check that compose plugin is installed with docker running 'docker compose ps'
+	dockerComposePsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{Path: file})
+	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
+	dockerComposePsCMD.GetOutput = true
+	_, err = commands.Runner.RunCMD(dockerComposePsCMD)
+	if err != nil {
+		return fmt.Errorf(configs.DockerComposeOffError, err)
 	}
 
 	return nil
