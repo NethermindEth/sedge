@@ -10,7 +10,6 @@
         condition: service_started{{end}}{{if .CcCustomCfg}}
       config_consensus:
         condition: service_completed_successfully{{end}}{{end}}
-
     networks:
       - sedge
     volumes:
