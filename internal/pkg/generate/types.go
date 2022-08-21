@@ -15,6 +15,8 @@ limitations under the License.
 */
 package generate
 
+import "github.com/NethermindEth/sedge/internal/pkg/clients"
+
 // EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
 type EnvData struct {
 	ElImage                   string
@@ -35,14 +37,9 @@ type EnvData struct {
 
 // GenerationData : Struct Data object for script's generation
 type GenerationData struct {
-	ExecutionClient   string
-	ExecutionImage    string
-	ExecutionEndpoint string
-	ConsensusClient   string
-	ConsensusImage    string
-	ConsensusEndpoint string
-	ValidatorClient   string
-	ValidatorImage    string
+	ExecutionClient   clients.Client
+	ConsensusClient   clients.Client
+	ValidatorClient   clients.Client
 	GenerationPath    string
 	Network           string
 	CheckpointSyncUrl string
