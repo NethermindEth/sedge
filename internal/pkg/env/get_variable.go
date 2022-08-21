@@ -24,6 +24,22 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+/*
+GetBootnodes :
+Get the bootnodes (list of enr addresses) from the environment variable.
+
+params :-
+a. network string
+Target network
+b. client string
+Client's name
+
+returns :-
+a. []string
+List of bootnodes
+b. error
+Error if any
+*/
 func GetBootnodes(network, client string) ([]string, error) {
 	content, err := templates.Envs.ReadFile(filepath.Join("envs", network, "consensus", client+".tmpl"))
 	if err != nil {

@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow providing a number for `--tail` flag of `logs` command, e.g: `sedge logs --tail 50`
 
 ### Fixed
-- Check for compose plugin installed. The check was running compose with a wrong path flag. 
+- Check for compose plugin installed. The check was running compose with a wrong path flag 
 
 ## [v0.2.0] - 2022-08-4
 
