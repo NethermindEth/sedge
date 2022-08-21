@@ -182,6 +182,12 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		return err
 	}
 
+	// Check for Bootstrap nodes
+	bootnodes, err := env.GetBootnodes(gd.Network, gd.ConsensusClient)
+	if err != nil {
+		return err
+	}
+
 	data := DockerComposeData{
 		TTD:                 TTD,
 		CcCustomCfg:         ccRemoteCfg || ccRemoteGen || ccRemoteDpl,
@@ -211,6 +217,7 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		ElExtraFlags:        gd.ElExtraFlags,
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
+		Bootnodes:           bootnodes,
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     checkSplitedNetworks(gd.Network),
 	}

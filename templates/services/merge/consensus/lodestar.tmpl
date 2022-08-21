@@ -44,9 +44,8 @@
       - --api.rest.host=0.0.0.0
       - --api.rest.port={{.ClApiPort}}
       - --api.rest.cors=*
-      - --network.discv5.enabled=true
-      - --network.discv5.bootEnrs=${CL_BOOTNODE_1}
-      - --network.discv5.bootEnrs=${CL_BOOTNODE_2}
+      - --network.discv5.enabled=true{{range $enr := .Bootnodes}}
+      - --network.discv5.bootEnrs={{$enr}}{{end}}
       - --network.targetPeers=${CC_PEER_COUNT}
       - --metrics.enabled=true
       - --metrics.port={{.ClMetricsPort}}
