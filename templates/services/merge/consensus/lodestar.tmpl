@@ -41,7 +41,7 @@
       - --suggestedFeeRecipient=${CL_FEE_RECIPIENT}{{end}}
       - --port={{.ClDiscoveryPort}}
       - --rest=true
-      - --rest.host=0.0.0.0
+      - --rest.address=0.0.0.0
       - --rest.port={{.ClApiPort}}
       - --rest.cors=*
       - --discv5=true{{range $enr := .Bootnodes}}
