@@ -49,6 +49,6 @@ func init() {
 		"prater":  "https://goerli.checkpoint-sync.ethdevops.io",
 		"sepolia": "https://sepolia.checkpoint-sync.ethdevops.io",
 		"denver":  "",
-		"chiado":  "https://chiado.checkpoint-sync.nethermind.io",
+		"chiado":  "",
 	}
 }
