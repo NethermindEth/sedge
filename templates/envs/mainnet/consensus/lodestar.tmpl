@@ -4,8 +4,11 @@
 CC_PEER_COUNT=50
 CC_LOG_LEVEL=info
 EC_API_URL={{.ExecutionApiURL}}
+EC_AUTH_URL={{.ExecutionAuthURL}}
 CC_INSTANCE_NAME=Lodestar
 CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}chainsafe/lodestar:next{{end}}
 CC_DATA_DIR={{.CcDataDir}}
 CC_LODESTAR_PRESET=mainnet
+CC_JWT_SECRET_PATH={{.JWTSecretPath}}
+CL_FEE_RECIPIENT={{.FeeRecipient}}
 {{ end }}
