@@ -33,7 +33,7 @@ func init() {
 	}
 
 	NetworksToServices = map[string]string{
-		"mainnet": "mainnet",
+		"mainnet": "merge",
 		"kiln":    "merge",
 		"ropsten": "merge",
 		"prater":  "merge",
