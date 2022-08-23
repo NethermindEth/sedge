@@ -27,33 +27,32 @@
     command: 
       - beacon
       - --preset=${CC_LODESTAR_PRESET}
-      - --rootDir=/var/lib/lodestar/consensus{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
+      - --dataDir=/var/lib/lodestar/consensus{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
       - --paramsFile=/network_config/config.yml{{end}}{{if .CcRemoteGen}}
       - --genesisStateFile=/network_config/genesis.ssz{{end}}{{if .CcRemoteDpl}}
       - --eth1.depositContractDeployBlock=${DEPLOY_BLOCK}{{end}}{{else}}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
-      - --eth1.enabled=true
+      - --eth1=true
       - --eth1.providerUrls=${EC_API_URL}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
       - --execution.urls=${EC_AUTH_URL}{{with .TTD}}
       - --terminal-total-difficulty-override=${TTD}{{end}}
       - --logFile=/var/lib/lodestart/consensus/logs/beacon.log 
-      - --logLevelFile=${CC_LOG_LEVEL}{{with .FeeRecipient}}
-      - --chain.defaultFeeRecipient=${CL_FEE_RECIPIENT}{{end}}
+      - --logFileLevel=${CC_LOG_LEVEL}{{with .FeeRecipient}}
+      - --suggestedFeeRecipient=${CL_FEE_RECIPIENT}{{end}}
       - --port={{.ClDiscoveryPort}}
-      - --api.rest.enabled 
-      - --api.rest.host=0.0.0.0
-      - --api.rest.port={{.ClApiPort}}
-      - --api.rest.cors=*
-      - --network.discv5.enabled=true{{range $enr := .Bootnodes}}
-      - --network.discv5.bootEnrs={{$enr}}{{end}}
-      - --network.targetPeers=${CC_PEER_COUNT}
-      - --metrics.enabled=true
+      - --rest=true
+      - --rest.address=0.0.0.0
+      - --rest.port={{.ClApiPort}}
+      - --rest.cors=*
+      - --discv5=true{{range $enr := .Bootnodes}}
+      - --bootnodes={{$enr}}{{end}}
+      - --targetPeers=${CC_PEER_COUNT}
+      - --metrics=true
       - --metrics.port={{.ClMetricsPort}}
       - --jwt-secret=/tmp/jwt/jwtsecret{{with .CheckpointSyncUrl}}
-      - --weakSubjectivitySyncLatest
-      - --weakSubjectivityServerUrl={{.}}{{end}}{{range $flag := .ClExtraFlags}}
+      - --checkpointSyncUrl={{.}}{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
-      - --builder.enabled
+      - --builder=true
       - --builder.urls http://mevboost:{{.MevPort}}{{end}}
     logging:
       driver: "json-file"
