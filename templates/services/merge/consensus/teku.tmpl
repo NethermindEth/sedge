@@ -29,8 +29,8 @@
       - --logging=${CC_LOG_LEVEL}{{if not .CcCustomCfg}}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}{{if .CcRemoteGen}}
       - --initial-state=/network_config/genesis.ssz{{end}}{{if .CcRemoteCfg}}
-      - --network=/network_config/config.yml{{end}}{{end}}
-      - --p2p-discovery-bootnodes=${CL_BOOTNODES}
+      - --network=/network_config/config.yml{{end}}{{end}}{{if not .Bootnodes}}
+      - --p2p-discovery-bootnodes=${CL_BOOTNODES}{{end}}
       - --p2p-enabled=true
       - --p2p-port={{.ClDiscoveryPort}}
       - --p2p-peer-upper-bound=${CC_PEER_COUNT}
