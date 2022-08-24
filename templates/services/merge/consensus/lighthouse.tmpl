@@ -36,7 +36,7 @@
       - --http-address=0.0.0.0
       - --http-port={{.ClApiPort}}{{if not .CcCustomCfg}}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
-      - --target-peers=${CC_PEER_COUNT}{{if not .Bootnodes}}
+      - --target-peers=${CC_PEER_COUNT}{{if .Bootnodes}}
       - --boot-nodes=${CL_BOOTNODES}{{end}}
       - --execution-endpoints=${EC_AUTH_URL}
       - --execution-jwt=/tmp/jwt/jwtsecret
