@@ -87,4 +87,5 @@ type DockerComposeData struct {
 	Bootnodes           []string
 	MapAllPorts         bool
 	SplittedNetwork     bool
+	ClCheckpointSyncUrl bool
 }
