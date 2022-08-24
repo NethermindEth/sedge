@@ -39,18 +39,18 @@
       - --preset=${VL_LODESTAR_PRESET}{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - --paramsFile=/network_config/config.yml{{end}}{{else}}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
-      - --rootDir=/var/lib/lodestar/validator
+      - --dataDir=/var/lib/lodestar/validator
       - --logFile=/var/lib/lodestart/validator/logs/validator.log
-      - --logLevelFile=${VL_LOG_LEVEL}
-      - --importKeystoresPath=/var/lib/lodestar/keystore
+      - --logFileLevel=${VL_LOG_LEVEL}
+      - --importKeystores=/var/lib/lodestar/keystore
       - --importKeystoresPassword=/var/lib/lodestar/keystore/keystore_password.txt
       - --server=${CC_API_URL}
-      - --metrics.enabled=true
+      - --metrics=true
       - --metrics.address=0.0.0.0
       - --metrics.port={{.VlMetricsPort}}{{with .FeeRecipient}}
-      - --defaultFeeRecipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
+      - --suggestedFeeRecipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
-      - --builder.enabled{{end}}
+      - --builder=true{{end}}
       - --graffiti=${GRAFFITI}
     logging:
       driver: "json-file"

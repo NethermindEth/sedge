@@ -2,7 +2,7 @@ name: Deploy Documentation to Github Pages
 
 on:
   push:
-    branches: [main, develop ]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
