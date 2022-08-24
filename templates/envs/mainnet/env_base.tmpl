@@ -1,8 +1,8 @@
 {{/* docker-compose_base.tmpl */}}
 {{ define "env" }}
 # --- Global configuration ---
-NETWORK=mainnet {{ if not .ExecutionIsRemote }}
-{{template "execution" .}}{{ end }} {{ if not .ConsensusIsRemote }}
-{{template "consensus" .}} {{ end }}
+NETWORK=mainnet 
+{{template "execution" .}}
+{{template "consensus" .}}
 {{template "validator" .}}
 {{ end }}

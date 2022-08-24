@@ -203,6 +203,11 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 	if err != nil {
 		return err
 	}
+	// Check for Bootstrap nodes
+	bootnodes, err := env.GetBootnodes(gd.Network, gd.ConsensusClient.Name)
+	if err != nil {
+		return err
+	}
 
 	data := DockerComposeData{
 		TTD:                 TTD,
