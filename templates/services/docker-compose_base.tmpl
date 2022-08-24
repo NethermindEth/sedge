@@ -18,9 +18,14 @@ services: {{ if not .ExecutionIsRemote }} {{template "execution" .}}
       - -relay-check
       - -relays
       - ${RELAY_URL}{{end}}
-{{ end }} {{ if not .ConsensusIsRemote }} 
-{{template "consensus" .}} 
-{{ end }}
+  {{if or .CcCustomCfg .VlCustomCfg}}config_consensus:
+    container_name: config_custom_network
+    image: busybox:latest
+    volumes:
+      - ./:/tmp/app
+    command: >
+      sh -c "{{if or .CcRemoteCfg .VlRemoteCfg }}wget -O /tmp/app/config.yml ${CONFIG_URL};{{end}}{{if or .CcRemoteGen .VlRemoteGen }}wget -O /tmp/app/genesis.ssz ${GENESIS_URL};{{end}}{{if or .CcRemoteDpl .VlRemoteDpl }}echo -n ${DEPLOY_BLOCK} > /tmp/app/deploy_block.txt;{{end}}"{{end}}
+{{template "consensus" .}}
 {{template "validator" .}}
 
 networks:

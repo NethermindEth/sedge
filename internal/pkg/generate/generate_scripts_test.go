@@ -25,44 +25,50 @@ import (
 
 const (
 	wrongDep = "wrong_dep"
-	network  = "mainnet"
 )
 
 type generateTestCase struct {
-	execution, consensus, validator, path string
-	isErr                                 bool
+	execution, consensus, validator clients.Client
+	path, network                   string
+	isErr                           bool
 }
 
 func generateTestCases(t *testing.T) (tests []generateTestCase) {
-	tests = []generateTestCase{}
-	c := clients.ClientInfo{Network: network}
+	tests = []generateTestCase{{isErr: true}}
 
-	executionClients, err := c.SupportedClients("execution")
+	networks, err := utils.SupportedNetworks()
 	if err != nil {
-		t.Errorf("SupportedClients(\"execution\") failed: %v", err)
-	}
-	consensusClients, err := c.SupportedClients("consensus")
-	if err != nil {
-		t.Errorf("SupportedClients(\"consensus\") failed: %v", err)
-	}
-	validatorClients, err := c.SupportedClients("validator")
-	if err != nil {
-		t.Errorf("SupportedClients(\"validator\") failed: %v", err)
+		t.Error("SupportedNetworks() failed", err)
 	}
 
-	// TODO: Add CheckpointSyncUrl, FallbackELUrls and FeeRecipient to test data
+	for _, network := range networks {
+		c := clients.ClientInfo{Network: network}
 
-	tests = append(tests, generateTestCase{isErr: true})
+		executionClients, err := c.SupportedClients("execution")
+		if err != nil {
+			t.Errorf("SupportedClients(\"execution\") failed: %v", err)
+		}
+		consensusClients, err := c.SupportedClients("consensus")
+		if err != nil {
+			t.Errorf("SupportedClients(\"consensus\") failed: %v", err)
+		}
+		validatorClients, err := c.SupportedClients("validator")
+		if err != nil {
+			t.Errorf("SupportedClients(\"validator\") failed: %v", err)
+		}
 
-	for _, execution := range executionClients {
-		path := t.TempDir()
-		tests = append(tests, generateTestCase{execution, wrongDep, wrongDep, path, true})
-		for _, consensus := range consensusClients {
-			if utils.Contains(validatorClients, consensus) {
-				path := t.TempDir()
-				tests = append(tests, generateTestCase{
-					execution, consensus, consensus, path, false,
-				}, generateTestCase{execution, consensus, consensus, "", true})
+		// TODO: Add CheckpointSyncUrl, FallbackELUrls and FeeRecipient to test data
+		for _, execution := range executionClients {
+			path := t.TempDir()
+			tests = append(tests, generateTestCase{clients.Client{Name: execution}, clients.Client{Name: wrongDep}, clients.Client{Name: wrongDep}, path, network, true})
+			for _, consensus := range consensusClients {
+				if utils.Contains(validatorClients, consensus) {
+					path := t.TempDir()
+					tests = append(tests,
+						generateTestCase{clients.Client{Name: execution}, clients.Client{Name: consensus}, clients.Client{Name: consensus}, path, network, false},
+						generateTestCase{clients.Client{Name: execution}, clients.Client{Name: consensus}, clients.Client{Name: consensus}, "", network, true},
+						generateTestCase{clients.Client{Name: execution}, clients.Client{Name: consensus}, clients.Client{Name: consensus, Omited: true}, path, network, false})
+				}
 			}
 		}
 	}
@@ -85,7 +91,7 @@ func TestGenerateScripts(t *testing.T) {
 				ConsensusClient: input.consensus,
 				ValidatorClient: input.validator,
 				GenerationPath:  input.path,
-				Network:         network,
+				Network:         input.network,
 			}
 			descr := fmt.Sprintf("GenerateScripts(%+v)", gd)
 

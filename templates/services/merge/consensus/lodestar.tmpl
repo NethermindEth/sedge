@@ -4,12 +4,17 @@
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}
+    image: ${CC_IMAGE_VERSION}{{with .CcCustomCfg}}
+    depends_on:
+      config_consensus:
+        condition: service_completed_successfully{{end}}
     networks:
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/lodestar/consensus
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
+      - ./config.yml:/network_config/config.yml{{end}}{{if .CcRemoteDpl}}
+      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
@@ -20,9 +25,13 @@
     environment:
       NODE_OPTIONS: --max_old_space_size=6144
     command: 
-      - beacon 
-      - --rootDir=/var/lib/lodestar/consensus
-      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
+      - beacon
+      - --preset=${CC_LODESTAR_PRESET}
+      - --rootDir=/var/lib/lodestar/consensus{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
+      - --paramsFile=/network_config/config.yml{{end}}{{if .CcRemoteGen}}
+      - --genesisStateFile=/network_config/genesis.ssz{{end}}{{if .CcRemoteDpl}}
+      - --eth1.depositContractDeployBlock=${DEPLOY_BLOCK}{{end}}{{else}}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --eth1.enabled=true
       - --eth1.providerUrls=${EC_API_URL}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
       - --execution.urls=${EC_AUTH_URL}{{with .TTD}}
@@ -35,8 +44,8 @@
       - --api.rest.host=0.0.0.0
       - --api.rest.port={{.ClApiPort}}
       - --api.rest.cors=*
-      - --network.discv5.enabled=true
-      - --network.bootMultiaddrs=${CL_BOOTNODES}
+      - --network.discv5.enabled=true{{range $enr := .Bootnodes}}
+      - --network.discv5.bootEnrs={{$enr}}{{end}}
       - --network.targetPeers=${CC_PEER_COUNT}
       - --metrics.enabled=true
       - --metrics.port={{.ClMetricsPort}}

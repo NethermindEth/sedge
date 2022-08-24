@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -268,6 +269,42 @@ func TestAssingPorts(t *testing.T) {
 						t.Errorf("A mismatch in the result has been found. Expected (key: %s, value: %s); got (key: %s, value %s). Call: %s. Expected object: %+v, Got: %+v", k, tc.want[k], k, got[k], descr, tc.want, got)
 					}
 				}
+			}
+		})
+	}
+}
+
+func TestFilter(t *testing.T) {
+	tcs := []struct {
+		name   string
+		in     []string
+		want   []string
+		filter func(string) bool
+	}{
+		{
+			"Test case 1, no filter",
+			[]string{"a", "b", "c"},
+			[]string{"a", "b", "c"},
+			func(s string) bool {
+				return true
+			},
+		},
+		{
+			"Test case 2, filter",
+			[]string{"a", "b", "c"},
+			[]string{"a", "c"},
+			func(s string) bool {
+				return s != "b"
+			},
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			got := Filter(tc.in, tc.filter)
+
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("Filter(%+v) failed; expected: %+v, got: %+v", tc.in, tc.want, got)
 			}
 		})
 	}

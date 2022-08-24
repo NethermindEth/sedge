@@ -19,9 +19,12 @@ package clients
 type Client struct {
 	Name      string
 	Type      string
+	Image     string
+	Endpoint  string
 	Supported bool
 	RemoteUrl string
 	IsRemote  bool
+	Omited    bool
 }
 
 // Client : Struct Represent a combination of execution, consensus and validator clients

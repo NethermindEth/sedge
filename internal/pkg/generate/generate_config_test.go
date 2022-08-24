@@ -30,7 +30,7 @@ func TestGenerateConfig(t *testing.T) {
 		isErr bool
 	}{
 		{t.TempDir(), false},
-		{"", true},
+		{"$$$*&%^", true},
 	}
 
 	for _, input := range inputs {

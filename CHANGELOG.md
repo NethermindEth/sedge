@@ -7,8 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Enable support for public execution and consensus nodes.
 
+### Added
+- Add support for gnosis merge testnets named chiado and denver
+- Add support for custom testnets by allowing custom remote config and genesis files
+- Add `--no-validator` flag to exclude the validator node from the full node setup
+
 ### Changed
 - Remove Nethermind metrics configuration
+- Prysm and Lodestar can use now an undefined number of Bootnodes
+- Allow providing a number for `--tail` flag of `logs` command, e.g: `sedge logs --tail 50`
+
+### Fixed
+- Check for compose plugin installed. The check was running compose with a wrong path flag 
 
 ## [v0.2.0] - 2022-08-4
 
