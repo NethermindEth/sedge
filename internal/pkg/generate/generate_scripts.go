@@ -199,10 +199,6 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		return err
 	}
 
-	if gd.CheckpointSyncUrl != "" {
-		clCheckpointSyncUrl = false
-	}
-
 	data := DockerComposeData{
 		TTD:                 TTD,
 		CcCustomCfg:         ccRemoteCfg || ccRemoteGen || ccRemoteDpl,

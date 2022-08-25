@@ -49,9 +49,8 @@
       - --targetPeers=${CC_PEER_COUNT}
       - --metrics=true
       - --metrics.port={{.ClMetricsPort}}
-      - --jwt-secret=/tmp/jwt/jwtsecret{{if .ClCheckpointSyncUrl}}
-      - --checkpointSyncUrl=${CHECKPOINT_SYNC_URL}{{end}}{{with .CheckpointSyncUrl}}
-      - --checkpointSyncUrl={{.}}{{end}}{{range $flag := .ClExtraFlags}}
+      - --jwt-secret=/tmp/jwt/jwtsecret{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
+      - --checkpointSyncUrl={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
       - --builder=true
       - --builder.urls http://mevboost:{{.MevPort}}{{end}}
