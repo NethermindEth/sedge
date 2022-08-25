@@ -194,6 +194,11 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		return err
 	}
 
+	clCheckpointSyncUrl, err := env.CheckVariable(env.ReCHECKPOINT, gd.Network, "consensus", gd.ConsensusClient.Name)
+	if err != nil {
+		return err
+	}
+
 	data := DockerComposeData{
 		TTD:                 TTD,
 		CcCustomCfg:         ccRemoteCfg || ccRemoteGen || ccRemoteDpl,
@@ -226,6 +231,7 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		Bootnodes:           bootnodes,
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     checkSplitedNetworks(gd.Network),
+		ClCheckpointSyncUrl: clCheckpointSyncUrl,
 	}
 
 	// Print docker-compose file

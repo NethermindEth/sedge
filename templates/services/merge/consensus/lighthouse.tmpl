@@ -49,8 +49,8 @@
       - --import-all-attestations
       - --metrics
       - --metrics-port={{.ClMetricsPort}}
-      - --metrics-address=0.0.0.0{{with .CheckpointSyncUrl}}
-      - --checkpoint-sync-url={{.}}{{end}}{{range $flag := .ClExtraFlags}}
+      - --metrics-address=0.0.0.0{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
+      - --checkpoint-sync-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
       - --builder=http://mevboost:{{.MevPort}}{{end}}
     logging:

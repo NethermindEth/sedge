@@ -159,11 +159,6 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 		validatorImage = strings.Join(validatorParts[1:], ":")
 	}
 
-	// Checkpoint Url
-	if checkpointSyncUrl == "" {
-		checkpointSyncUrl = configs.NetworksToCheckpointUrl[network]
-	}
-
 	return nil
 }
 

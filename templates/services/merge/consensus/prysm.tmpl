@@ -46,9 +46,9 @@
       - --accept-terms-of-use{{with .FeeRecipient}}
       - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
       - --monitoring-host=0.0.0.0
-      - --monitoring-port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}
-      - --checkpoint-sync-url={{.}}
-      - --genesis-beacon-api-url={{.}}{{end}}{{range $flag := .ClExtraFlags}}
+      - --monitoring-port={{.ClMetricsPort}}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
+      - --checkpoint-sync-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}
+      - --genesis-beacon-api-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
       - --http-mev-relay=http://mevboost:{{.MevPort}}{{end}}
     logging:

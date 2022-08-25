@@ -18,11 +18,12 @@ package env
 import "regexp"
 
 var (
-	ReTTD       = regexp.MustCompile(`TTD=(.*)`)
-	ReCONFIG    = regexp.MustCompile(`CONFIG_URL=(.*)`)
-	ReGENESIS   = regexp.MustCompile(`GENESIS_URL=(.*)`)
-	ReDEPLOY    = regexp.MustCompile(`DEPLOY_BLOCK=(.*)`)
-	ReMEV       = regexp.MustCompile(`MEV=(.*)`)
-	ReXEEV      = regexp.MustCompile(`XEE_VERSION=(.*)`)
-	ReBOOTNODES = regexp.MustCompile(`CL_BOOTNODES=(.*)`)
+	ReTTD        = regexp.MustCompile(`TTD=(.*)`)
+	ReCONFIG     = regexp.MustCompile(`CONFIG_URL=(.*)`)
+	ReGENESIS    = regexp.MustCompile(`GENESIS_URL=(.*)`)
+	ReDEPLOY     = regexp.MustCompile(`DEPLOY_BLOCK=(.*)`)
+	ReMEV        = regexp.MustCompile(`MEV=(.*)`)
+	ReXEEV       = regexp.MustCompile(`XEE_VERSION=(.*)`)
+	ReBOOTNODES  = regexp.MustCompile(`CL_BOOTNODES=(.*)`)
+	ReCHECKPOINT = regexp.MustCompile(`CHECKPOINT_SYNC_URL=(.*)`)
 )
