@@ -52,7 +52,8 @@
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
-      - --metrics-port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}
+      - --metrics-port={{.ClMetricsPort}}{{if .ClCheckpointSyncUrl}}
+      - --initial-state=${CHECKPOINT_SYNC_URL}/eth/v2/debug/beacon/states/finalized{{end}}{{with .CheckpointSyncUrl}}
       - --initial-state={{.}}/eth/v2/debug/beacon/states/finalized{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
       - --builder-endpoint=http://mevboost:{{.MevPort}}{{end}}{{if .XeeVersion}}
