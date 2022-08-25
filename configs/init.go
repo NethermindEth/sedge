@@ -23,7 +23,7 @@ var NetworksToCheckpointUrl map[string]string
 
 func init() {
 	JWTNetworks = map[string]bool{
-		"mainnet": false,
+		"mainnet": true,
 		"kiln":    true,
 		"ropsten": true,
 		"prater":  true,
@@ -33,7 +33,7 @@ func init() {
 	}
 
 	NetworksToServices = map[string]string{
-		"mainnet": "mainnet",
+		"mainnet": "merge",
 		"kiln":    "merge",
 		"ropsten": "merge",
 		"prater":  "merge",
