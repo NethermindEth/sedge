@@ -181,7 +181,7 @@ Users acknowledge that no warranty is being made of a successful installation. S
 ## ✅ Roadmap
 The following roadmap covers the main features and ideas we want to implement but doesn't cover everything we are planning for this tool. Stay in touch if you are interested, a lot of improvements are coming in the next two months. Please note that this Roadmap is continually changing until version 1.0.
 
-### Version 0.1 (Actual)
+### Version 0.1 
 - [x] Generate `docker-compose` scripts and `.env` files for selected clients with a cli tool
 - [x] Generate keystore folder with the cli
 - [x] Test coverage (unit tests)
