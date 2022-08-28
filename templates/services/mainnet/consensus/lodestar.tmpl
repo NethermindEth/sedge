@@ -22,16 +22,15 @@
       - beacon 
       - --dataDir=/var/lib/lodestar/consensus
       - --network=${NETWORK}
-      - --logFile=/var/lib/lodestart/consensus/logs/beacon.log 
-      - --logLevelFile=${CC_LOG_LEVEL}
-      - --api.rest.enabled 
-      - --api.rest.host=0.0.0.0
-      - --api.rest.port={{.ClApiPort}}
-      - --network.discv5.bindAddr="/ip4/0.0.0.0/udp/{{.ClDiscoveryPort}}"
-      - --network.localMultiaddrs="/ip4/0.0.0.0/tcp/{{.ClDiscoveryPort}}"
+      - --logFile=/var/lib/lodestar/consensus/logs/beacon.log
+      - --logFileLevel=${CC_LOG_LEVEL}
+      - --rest.enabled
+      - --rest.host=0.0.0.0
+      - --rest.port={{.ClApiPort}}
       - --eth1.providerUrls=${EC_API_URL}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
-      - --network.targetPeers=${CC_PEER_COUNT}
-      - --metrics.enabled=true
+      - --targetPeers=${CC_PEER_COUNT}
+      - --metrics=true
+      - --metrics.address=0.0.0.0
       - --metrics.port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}
       - --weakSubjectivitySyncLatest
       - --weakSubjectivityServerUrl={{.}}{{end}}{{range $flag := .ClExtraFlags}}
