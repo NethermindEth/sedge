@@ -26,4 +26,5 @@ var (
 	ReXEEV       = regexp.MustCompile(`XEE_VERSION=(.*)`)
 	ReBOOTNODES  = regexp.MustCompile(`CL_BOOTNODES=(.*)`)
 	ReCHECKPOINT = regexp.MustCompile(`CHECKPOINT_SYNC_URL=(.*)`)
+	ReSPLITTED   = regexp.MustCompile(`EL_NETWORK=(.*)`)
 )
