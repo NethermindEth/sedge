@@ -149,6 +149,12 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		return err
 	}
 
+	// Check for splitted network flags
+	splittedNetwork, err := env.CheckVariableBase(env.ReSPLITTED, gd.Network)
+	if err != nil {
+		return err
+	}
+
 	// Check for custom network config
 	ccRemoteCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient.Name)
 	if err != nil {
@@ -230,7 +236,7 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		VlExtraFlags:        gd.VlExtraFlags,
 		Bootnodes:           bootnodes,
 		MapAllPorts:         gd.MapAllPorts,
-		SplittedNetwork:     checkSplitedNetworks(gd.Network),
+		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
 	}
 
@@ -249,11 +255,6 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 	log.Infof(configs.CreatedFile, filepath.Join(gd.GenerationPath, configs.DefaultDockerComposeScriptName))
 
 	return nil
-}
-
-func checkSplitedNetworks(network string) bool {
-	// TODO: use network names as constants
-	return (network == "prater" || network == "gnosis") // Check if network is goerli/prater
 }
 
 /*
