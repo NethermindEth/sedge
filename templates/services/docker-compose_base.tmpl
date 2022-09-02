@@ -28,6 +28,15 @@ services:
       sh -c "{{if or .CcRemoteCfg .VlRemoteCfg }}wget -O /tmp/app/config.yml ${CONFIG_URL};{{end}}{{if or .CcRemoteGen .VlRemoteGen }}wget -O /tmp/app/genesis.ssz ${GENESIS_URL};{{end}}{{if or .CcRemoteDpl .VlRemoteDpl }}echo -n ${DEPLOY_BLOCK} > /tmp/app/deploy_block.txt;{{end}}"{{end}}
 {{template "consensus" .}}
 {{template "validator" .}}
+{{if .Prom}}
+  prometheus:
+    image: ubuntu/prometheus
+    network_mode: host
+    container_name: prometheus-container
+    volumes:
+      - './prometheus.yml:/etc/prometheus/prometheus.yml'
+    environment:
+      - TZ=UTC{{ end }}
 
 networks:
   sedge:

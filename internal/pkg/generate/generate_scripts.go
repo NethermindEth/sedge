@@ -90,6 +90,12 @@ func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 		return "", "", err
 	}
 
+	log.Info(configs.GeneratingPrometheusFile)
+	err = generatePromFile(gd)
+	if err != nil {
+		return "", "", err
+	}
+
 	return ports["ELApi"], ports["CLApi"], nil
 }
 
@@ -234,6 +240,7 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		ElExtraFlags:        gd.ElExtraFlags,
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
+		Prom:                gd.Prom,
 		Bootnodes:           bootnodes,
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     splittedNetwork,
@@ -348,6 +355,61 @@ func generateEnvFile(gd GenerationData) (err error) {
 		return fmt.Errorf(configs.GeneratingScriptsError, gd.ExecutionClient.Name, gd.ConsensusClient.Name, gd.ValidatorClient.Name, err)
 	}
 	log.Infof(configs.CreatedFile, filepath.Join(gd.GenerationPath, ".env"))
+
+	return nil
+}
+
+/*
+generatePromFile :
+This function is responsible for generating the prometheus.yml file needed for
+the prometheus service to run
+
+params :-
+a. executionClient string
+Execution client whose script was generated
+b. consensusClient string
+Execution client whose script was generated
+c. validatorClient string
+Execution client whose script was generated
+d. path string
+Path of generated scripts
+
+returns :-
+a. error
+Error if any
+*/
+func generatePromFile(gd GenerationData) (err error) {
+	rawBaseTmp, err := templates.Prometheus.ReadFile(filepath.Join("prometheus", "prometheus.tmpl"))
+	if err != nil {
+		return
+	}
+
+	baseTmp, err := template.New("prometheus").Parse(string(rawBaseTmp))
+	if err != nil {
+		return
+	}
+
+	// TODO: Use OS wise delimiter for these data structs
+	data := PrometheusData{
+		ExecutionClient: gd.ExecutionClient.Name,
+		ClMetricsPort:   gd.Ports["CLMetrics"],
+		VlMetricsPort:   gd.Ports["VLMetrics"],
+		ElMetricsPort:   gd.Ports["ELMetrics"],
+	}
+
+	// Print prometheus configuration file
+	log.Infof(configs.PrintingFile, "prometheus.yml")
+	err = baseTmp.Execute(os.Stdout, data)
+	if err != nil {
+		return fmt.Errorf(configs.PrintingFileError, ".yml", err)
+	}
+	fmt.Println()
+
+	err = writeTemplateToFile(baseTmp, filepath.Join(gd.GenerationPath, "prometheus.yml"), data, false)
+	if err != nil {
+		return fmt.Errorf(configs.GeneratingScriptsError, gd.ExecutionClient.Name, gd.ConsensusClient.Name, gd.ValidatorClient.Name, err)
+	}
+	log.Infof(configs.CreatedFile, filepath.Join(gd.GenerationPath, "prometheus.yml"))
 
 	return nil
 }

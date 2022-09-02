@@ -52,6 +52,7 @@ type GenerationData struct {
 	MapAllPorts       bool
 	Mev               bool
 	Ports             map[string]string
+	Prom              bool
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -67,6 +68,7 @@ type DockerComposeData struct {
 	VlRemoteDpl         bool
 	XeeVersion          bool
 	Mev                 bool
+	Prom                bool
 	MevPort             string
 	CheckpointSyncUrl   string
 	FeeRecipient        string
@@ -88,4 +90,11 @@ type DockerComposeData struct {
 	MapAllPorts         bool
 	SplittedNetwork     bool
 	ClCheckpointSyncUrl bool
+}
+
+type PrometheusData struct {
+	ExecutionClient string
+	ElMetricsPort   string
+	ClMetricsPort   string
+	VlMetricsPort   string
 }

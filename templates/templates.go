@@ -34,3 +34,6 @@ var DepositCLI embed.FS
 
 //go:embed scripts
 var Scripts embed.FS
+
+//go:embed prometheus
+var Prometheus embed.FS

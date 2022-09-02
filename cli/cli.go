@@ -58,6 +58,7 @@ var (
 	mapAllPorts       bool
 	noMev             bool
 	noValidator       bool
+	noProm            bool
 )
 
 const (
@@ -250,6 +251,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		VlExtraFlags:      *vlExtraFlags,
 		MapAllPorts:       mapAllPorts,
 		Mev:               !noMev && !noValidator,
+		Prom:              !noProm,
 	}
 	elPort, clPort, err := generate.GenerateScripts(gd)
 	if err != nil {
@@ -333,6 +335,8 @@ func init() {
 	cliCmd.Flags().StringVar(&feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
 
 	cliCmd.Flags().BoolVar(&noMev, "no-mev-boost", false, "Not use mev-boost if supported")
+
+	cliCmd.Flags().BoolVar(&noProm, "no-prometheus", false, "Not use prometheus monitoring")
 
 	cliCmd.Flags().BoolVar(&noValidator, "no-validator", false, "Exclude the validator from the full node setup. Designed for execution and consensus nodes setup without a validator node. Exclude also the validator from other flags. If set, mev-boost will not be used.")
 

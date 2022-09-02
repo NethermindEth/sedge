@@ -27,6 +27,7 @@
       - --syncmode=${EC_SYNC_MODE}
       - --http
       - --http.addr=0.0.0.0
+      {{if .Prom}}- --metrics.addr=0.0.0.0{{end}}
       - --http.vhosts=*
       - --http.corsdomain=*
       - --http.api
