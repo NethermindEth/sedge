@@ -47,6 +47,7 @@ var (
 	network           string
 	feeRecipient      string
 	jwtPath           string
+	graffiti          string
 	install           bool
 	run               bool
 	y                 bool
@@ -244,6 +245,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		CheckpointSyncUrl: checkpointSyncUrl,
 		FeeRecipient:      feeRecipient,
 		JWTSecretPath:     jwtPath,
+		Graffiti:          graffiti,
 		FallbackELUrls:    *fallbackEL,
 		ElExtraFlags:      *elExtraFlags,
 		ClExtraFlags:      *clExtraFlags,
@@ -337,6 +339,8 @@ func init() {
 	cliCmd.Flags().BoolVar(&noValidator, "no-validator", false, "Exclude the validator from the full node setup. Designed for execution and consensus nodes setup without a validator node. Exclude also the validator from other flags. If set, mev-boost will not be used.")
 
 	cliCmd.Flags().StringVar(&jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
+
+	cliCmd.Flags().StringVar(&graffiti, "graffiti", "", "Graffiti to be used by the validator")
 
 	cliCmd.Flags().BoolVarP(&install, "install", "i", false, "Install dependencies if not installed without asking")
 

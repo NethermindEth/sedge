@@ -2,7 +2,7 @@
 {{ define "validator" }}
 # --- Consensus Layer - Validator Node - configuration ---
 CC_API_URL={{.ConsensusAdditionalApiURL}}
-GRAFFITI={{.ExecutionEngineName}}
+GRAFFITI={{if .Graffiti}}{{.Graffiti}}{{else}}{{.ExecutionEngineName}}-{{.ConsensusClientName}}{{end}}
 VL_LOG_LEVEL=info
 VL_INSTANCE_NAME=PrysmValidator
 VL_IMAGE_VERSION={{if .VlImage}}{{.VlImage}}{{else}}gcr.io/prysmaticlabs/prysm/validator@sha256:7ac120abe8732512ed9e8e193f00076ac05b75133ec3b04eca37921bad3ae07a{{end}}

@@ -2,7 +2,7 @@
 {{ define "validator" }}
 # --- Consensus Layer - Validator Node - configuration ---
 CC_API_URL={{.ConsensusApiURL}}
-GRAFFITI={{.ExecutionEngineName}}
+GRAFFITI={{if .Graffiti}}{{.Graffiti}}{{else}}{{.ExecutionEngineName}}-{{.ConsensusClientName}}{{end}}
 VL_LOG_LEVEL=info
 VL_INSTANCE_NAME=TekuValidator
 VL_IMAGE_VERSION={{if .VlImage}}{{.VlImage}}{{else}}consensys/teku:latest{{end}}

@@ -327,7 +327,9 @@ func generateEnvFile(gd GenerationData) (err error) {
 		FeeRecipient:              gd.FeeRecipient,
 		JWTSecretPath:             gd.JWTSecretPath,
 		ExecutionEngineName:       gd.ExecutionClient.Name,
+		ConsensusClientName:       gd.ConsensusClient.Name,
 		KeystoreDir:               configs.KeystoreDefaultDataDir,
+		Graffiti:                  gd.Graffiti,
 	}
 
 	// Fix prysm rpc url
