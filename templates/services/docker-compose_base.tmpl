@@ -31,12 +31,17 @@ services:
 {{if .Prom}}
   prometheus:
     image: ubuntu/prometheus
-    network_mode: host
+    ports:
+      - "9090:9090"
     container_name: prometheus-container
     volumes:
       - './prometheus.yml:/etc/prometheus/prometheus.yml'
     environment:
-      - TZ=UTC{{ end }}
+      - TZ=UTC
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"{{ end }}
 
 networks:
   sedge:

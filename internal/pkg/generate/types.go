@@ -92,6 +92,7 @@ type DockerComposeData struct {
 	ClCheckpointSyncUrl bool
 }
 
+// PrometheusData : Struct Data object to be applied to prometheus.yaml (configuration file of prometheus service)
 type PrometheusData struct {
 	ExecutionClient string
 	ElMetricsPort   string

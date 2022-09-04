@@ -367,12 +367,12 @@ the prometheus service to run
 params :-
 a. executionClient string
 Execution client whose script was generated
-b. consensusClient string
-Execution client whose script was generated
-c. validatorClient string
-Execution client whose script was generated
-d. path string
-Path of generated scripts
+b. ClMetricsPort string
+Consensus client metrics port
+c. VlMetricsPort string
+Validator client metrics port
+d. ElMetricsPort string
+Execution client metrics port
 
 returns :-
 a. error
