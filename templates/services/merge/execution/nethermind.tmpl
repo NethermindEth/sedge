@@ -12,13 +12,16 @@
       - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
-      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"{{if .MapAllPorts}}
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
+      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
       - "{{.ElApiPort}}:{{.ElApiPort}}"
       - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
     expose:
       - {{.ElApiPort}}
       - {{.ElAuthPort}}
-    command: 
+    command:{{if .Prom}}
+      - --Metrics.ExposePort={{.ElMetricsPort}}
+      - --Metrics.Enabled=true{{end}}
       - --config={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
       - --datadir=/nethermind/data
       - --log=${NETHERMIND_LOG_LEVEL}{{with .TTD}}
