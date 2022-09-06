@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for custom testnets by allowing custom remote config and genesis files
 - Add `--no-validator` flag to exclude the validator node from the full node setup
 - Gnosis Network support
+- Add `--graffiti` to allow overriding the default graffiti used by validators nodes
 
 ### Changed
 
@@ -21,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow providing a number for `--tail` flag of `logs` command, e.g: `sedge logs --tail 50`
 - Remove `mainnet` service templates and use `merge` service templates for Mainnet network.
 - `checkpoint-sync-url` can now be set separately for every consensus client of a network using `CHECKPOINT_SYNC_URL` as env variabe in the consensus client templates.
+- Use fixed docker images with latest tested versions
 
 ### Fixed
 
