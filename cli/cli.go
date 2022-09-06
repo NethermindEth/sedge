@@ -253,7 +253,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		MapAllPorts:       mapAllPorts,
 		Mev:               !noMev && !noValidator,
 	}
-	elPort, clPort, err := generate.GenerateScripts(gd)
+	results, err := generate.GenerateScripts(gd)
 	if err != nil {
 		return []error{err}
 	}
@@ -292,7 +292,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 			//time.Sleep(waitingTime)
 			// Track sync of execution and consensus clients
 			// TODO: Parameterize wait arg of trackSync
-			if err = trackSync(monitor, elPort, clPort, time.Minute*5); err != nil {
+			if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*5); err != nil {
 				return []error{err}
 			}
 

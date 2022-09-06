@@ -95,7 +95,7 @@ func TestGenerateScripts(t *testing.T) {
 			}
 			descr := fmt.Sprintf("GenerateScripts(%+v)", gd)
 
-			if _, _, err := GenerateScripts(gd); input.isErr && err == nil {
+			if _, err := GenerateScripts(gd); input.isErr && err == nil {
 				t.Errorf("%s expected to fail", descr)
 			} else if !input.isErr && err != nil {
 				t.Errorf("%s failed: %v", descr, err)

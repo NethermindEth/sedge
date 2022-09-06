@@ -92,3 +92,10 @@ type DockerComposeData struct {
 	SplittedNetwork     bool
 	ClCheckpointSyncUrl bool
 }
+
+type GenerationResults struct {
+	DockerComposePath string
+	EnvFilePath       string
+	ELPort            string
+	CLPort            string
+}
