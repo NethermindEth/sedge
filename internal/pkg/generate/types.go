@@ -32,7 +32,9 @@ type EnvData struct {
 	FeeRecipient              string
 	JWTSecretPath             string
 	ExecutionEngineName       string
+	ConsensusClientName       string
 	KeystoreDir               string
+	Graffiti                  string
 }
 
 // GenerationData : Struct Data object for script's generation
@@ -52,6 +54,7 @@ type GenerationData struct {
 	MapAllPorts       bool
 	Mev               bool
 	Ports             map[string]string
+	Graffiti          string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
