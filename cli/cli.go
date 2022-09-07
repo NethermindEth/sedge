@@ -258,6 +258,16 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		return []error{err}
 	}
 
+	// Clean generated .env and docker compose files
+	err = generate.CleanGenerated(results)
+	if err != nil {
+		return []error{err}
+	}
+
+	// Print final files
+	log.Infof(configs.CreatedFile, results.DockerComposePath)
+	log.Infof(configs.CreatedFile, results.EnvFilePath)
+
 	// If --run-clients=none was set then exit and don't run anything
 	if len(*services) == 0 {
 		log.Info(configs.HappyStaking2)

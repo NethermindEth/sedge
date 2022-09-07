@@ -259,7 +259,6 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 	if err != nil {
 		return "", fmt.Errorf(configs.GeneratingScriptsError, gd.ExecutionClient.Name, gd.ConsensusClient.Name, gd.ValidatorClient.Name, err)
 	}
-	log.Infof(configs.CreatedFile, filepath.Join(gd.GenerationPath, configs.DefaultDockerComposeScriptName))
 
 	return dockerComposePath, nil
 }
@@ -358,7 +357,6 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 	if err != nil {
 		return "", fmt.Errorf(configs.GeneratingScriptsError, gd.ExecutionClient.Name, gd.ConsensusClient.Name, gd.ValidatorClient.Name, err)
 	}
-	log.Infof(configs.CreatedFile, filepath.Join(gd.GenerationPath, ".env"))
 
 	return envFilePath, nil
 }
