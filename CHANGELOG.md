@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `--no-validator` flag to exclude the validator node from the full node setup
 - Gnosis Network support
 - Add `--graffiti` to allow overriding the default graffiti used by validators nodes
+- Allow the extra flags to overwrite fixed template images commands flags. Latest flag apparition will be used.
 
 ### Changed
 
