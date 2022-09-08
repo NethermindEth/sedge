@@ -11,6 +11,14 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var (
+	protectedFlags = map[string]bool{
+		"bootnodes":             true,
+		"bootstrap-node":        true,
+		"fallback-web3provider": true,
+	}
+)
+
 func cleanFlags(rawFlags any) any {
 	// Prepare raw flags
 	isString := false
@@ -53,7 +61,7 @@ func cleanFlags(rawFlags any) any {
 		result := ReFlag.FindStringSubmatch(flagString)
 		if result != nil && len(result) >= 3 {
 			flag := result[1]
-			if existingFlags[flag] != index {
+			if !protectedFlags[flag] && existingFlags[flag] != index {
 				continue
 			}
 		}
