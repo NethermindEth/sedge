@@ -70,6 +70,8 @@ type DockerComposeData struct {
 	Mev                 bool
 	Prom                bool
 	MevPort             string
+	PromPort            string
+	GrafanaPort         string
 	CheckpointSyncUrl   string
 	FeeRecipient        string
 	ElDiscoveryPort     string

@@ -68,6 +68,8 @@ func GenerateScripts(gd GenerationData) (elPort, clPort string, err error) {
 		"CLAdditionalApi": configs.DefaultAdditionalApiPortCL,
 		"VLMetrics":       configs.DefaultMetricsPortVL,
 		"MevPort":         configs.DefaultMevPort,
+		"PromPort":        configs.DefaultPrometheusPort,
+		"GrafanaPort":     configs.DefaultGrafanaPort,
 	}
 	ports, err := utils.AssingPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -224,6 +226,8 @@ func generateDockerComposeScripts(gd GenerationData) (err error) {
 		XeeVersion:          xeeVersion,
 		Mev:                 mev && gd.Mev,
 		MevPort:             gd.Ports["MevPort"],
+		PromPort:            gd.Ports["PromPort"],
+		GrafanaPort:         gd.Ports["GrafanaPort"],
 		CheckpointSyncUrl:   gd.CheckpointSyncUrl,
 		FeeRecipient:        gd.FeeRecipient,
 		ElDiscoveryPort:     gd.Ports["ELDiscovery"],
