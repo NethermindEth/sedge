@@ -41,7 +41,7 @@
       - --datadir=/var/lib/prysm/
       - --verbosity=${CC_LOG_LEVEL}
       - --p2p-max-peers=${CC_PEER_COUNT}
-      - --http-web3provider=${EC_AUTH_URL}{{range $url := .FallbackELUrls}}
+      - --execution-endpoint=${EC_AUTH_URL}{{range $url := .FallbackELUrls}}
       - --fallback-web3provider={{$url}}{{end}}
       - --accept-terms-of-use{{with .FeeRecipient}}
       - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
