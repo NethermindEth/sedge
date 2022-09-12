@@ -9,7 +9,7 @@
       - sedge
     container_name: validator-import-client
     volumes:
-      - ${VL_DATA_DIR}:/var/lib/prysm
+      - ${VL_DATA_DIR}:/data
       - ${KEYSTORE_DIR}:/keystore{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - ./config.yml:/network_config/config.yml{{end}}{{end}}
     command: |{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
@@ -18,7 +18,7 @@
       accounts import
       --accept-terms-of-use
       --keys-dir=/keystore/validator_keys
-      --wallet-dir=/var/lib/prysm/wallet
+      --wallet-dir=/data/wallet
       --wallet-password-file=/keystore/keystore_password.txt
       --account-password-file=/keystore/keystore_password.txt
 
@@ -33,12 +33,12 @@
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/var/lib/prysm
+      - ${VL_DATA_DIR}:/data
       - ${KEYSTORE_DIR}/keystore_password.txt:/keystore/keystore_password.txt{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - ./config.yml:/network_config/config.yml{{end}}{{end}}
     command:
-      - --datadir=/var/lib/prysm
-      - --wallet-dir=/var/lib/prysm/wallet
+      - --datadir=/data
+      - --wallet-dir=/data/wallet
       - --wallet-password-file=/keystore/keystore_password.txt{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - --chain-config-file=/network_config/config.yml{{end}}{{else}}
       - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}

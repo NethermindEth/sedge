@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Check for compose plugin installed. The check was running compose with a wrong path flag
+- Errors in validators templates
 
 ## [v0.2.0] - 2022-08-4
 
