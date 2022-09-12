@@ -46,6 +46,7 @@ Sedge dependencies are `docker` with `docker compose` plugin, but if you don't h
 Check our [installation guide](https://docs.sedge.nethermind.io/docs/quickstart/install-guide) for detailed instructions on the supported methods:
 
 - Download binary from release page
+- Using the Homebrew package manager
 - Using the Go programmning language
 - Build from source
 
