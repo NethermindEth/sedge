@@ -31,6 +31,7 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/spf13/cobra"
 )
@@ -265,8 +266,11 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	}
 
 	// Print final files
-	log.Infof(configs.CreatedFile, results.DockerComposePath)
 	log.Infof(configs.CreatedFile, results.EnvFilePath)
+	ui.PrintFileContent(cmd.OutOrStdout(), results.EnvFilePath)
+
+	log.Infof(configs.CreatedFile, results.DockerComposePath)
+	ui.PrintFileContent(cmd.OutOrStdout(), results.DockerComposePath)
 
 	// If --run-clients=none was set then exit and don't run anything
 	if len(*services) == 0 {

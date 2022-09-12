@@ -245,14 +245,6 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
 	}
 
-	// Print docker-compose file
-	log.Infof(configs.PrintingFile, configs.DefaultDockerComposeScriptName)
-	err = baseTmp.Execute(os.Stdout, data)
-	if err != nil {
-		return "", fmt.Errorf(configs.PrintingFileError, configs.DefaultDockerComposeScriptName, err)
-	}
-	fmt.Println()
-
 	dockerComposePath = filepath.Join(gd.GenerationPath, configs.DefaultDockerComposeScriptName)
 
 	err = writeTemplateToFile(baseTmp, dockerComposePath, data, false)
@@ -342,14 +334,6 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 	if gd.ValidatorClient.Name == "prysm" {
 		data.ConsensusAdditionalApiURL = fmt.Sprintf("%s:%s", "consensus", gd.Ports["CLAdditionalApi"])
 	}
-
-	// Print .env file
-	log.Infof(configs.PrintingFile, ".env")
-	err = baseTmp.Execute(os.Stdout, data)
-	if err != nil {
-		return "", fmt.Errorf(configs.PrintingFileError, ".env", err)
-	}
-	fmt.Println()
 
 	envFilePath = filepath.Join(gd.GenerationPath, ".env")
 
