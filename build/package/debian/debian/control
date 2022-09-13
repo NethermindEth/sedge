@@ -1,0 +1,17 @@
+Source: sedge
+Section: devel
+Priority: optional
+Maintainer: Demerzel Solutions Limited <hello@nethermind.io>
+Build-Depends: debhelper (>= 13~), golang-go
+Standards-Version: 4.6.1
+Homepage: https://github.com/NethermindEth/sedge
+
+Package: sedge
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: A tool to deploy validators with ease.
+ One click setup tool for PoS network/chain validators.
+ Currently, Sedge is designed primarily for solo stakers and
+ testnet devs of the Beacon Chain and the Merge (Ethereum).
+ Sedge generates docker-compose scripts for the entire
+ on-premise validator setup based on the chosen client.
