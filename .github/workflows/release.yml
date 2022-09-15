@@ -49,12 +49,44 @@ jobs:
         name: sedge-v${{env.VERSION}}-linux-arm64
         path: build/sedge-v${{env.VERSION}}-linux-arm64
 
+  update-homebrew:
+    name: Update Homebrew package
+    runs-on: ubuntu-latest
+    env: 
+      VERSION: ${{ github.event.inputs.tag }}
+    needs: build-sedge
+    steps:
+    - name: Download packages
+      uses: actions/download-artifact@v3
+      with: 
+        path: /tmp/binaries
+    - name: Checkout repository
+      uses: actions/checkout@master
+      with: 
+        repository: NethermindEth/homebrew-sedge
+        path: homebrew-sedge
+    - name: Update Homebrew file with new version and hash
+      run: | 
+          chmod +x /home/runner/work/sedge/sedge/homebrew-sedge/scripts/update-homebrew.sh
+          bash /home/runner/work/sedge/sedge/homebrew-sedge/scripts/update-homebrew.sh
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v4
+      with:
+        token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
+        commit-message: Update Homebrew to latest release
+        title: '[Release] Update Homebrew'
+        reviewers: falcoxyz, AntiD2ta, cbermudez97
+        draft: false
+        path: homebrew-sedge
+        add-paths: |
+          Formula/sedge.rb
+
   publish-github:
     name: "Release and upload binaries to github"
     runs-on: ubuntu-latest
     env: 
       VERSION: ${{ github.event.inputs.tag }}
-    needs: build-sedge
+    needs: update-homebrew
     steps:
     - name: Checkout
       uses: actions/checkout@v3

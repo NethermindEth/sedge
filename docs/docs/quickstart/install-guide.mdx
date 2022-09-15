@@ -11,18 +11,25 @@ import TabItem from '@theme/TabItem';
 Sedge is currently only available for Linux and macOS, and both amd64 and arm64 architectures. You can use any of the following methods to install Sedge:
 
 ## Download binary from release page
+
+:::caution Disclaimer
+
+Downloading any binary from the internet comes with the risk of downloading files which malicious, third-party actors have injected with malware. All users should check that they are downloading the correct, clean binary, from a reputable source.
+
+:::
+
 1. Download correct binary for the machine you want to use for Sedge from the [releases page](https://github.com/NethermindEth/sedge/releases), i.e choose the correct target OS / Arch. For example: if your machine is a Intel / M1 mac then download the `darwin-amd64` / `darwin-arm64` binary. You can also download the binary from the CLI (command line interface) or Terminal with `curl` and `wget`:
 <Tabs groupId="download-cmds">
   <TabItem value="curl" label="curl">
 
   ```
-  curl -OL https://github.com/NethermindEth/sedge/releases/download/<VERSION>/sedge-v<VERSION>-<OS>-<ARCH>
+  curl -OL https://github.com/NethermindEth/sedge/releases/download/v<VERSION>/sedge-v<VERSION>-<OS>-<ARCH>
   ```
 
   </TabItem>
   <TabItem value="wget" label="wget">
 
-    wget https://github.com/NethermindEth/sedge/releases/download/<VERSION>/sedge-v<VERSION>-<OS>-<ARCH>
+    wget https://github.com/NethermindEth/sedge/releases/download/v<VERSION>/sedge-v<VERSION>-<OS>-<ARCH>
 
   </TabItem>
 </Tabs>
@@ -33,6 +40,28 @@ Sedge is currently only available for Linux and macOS, and both amd64 and arm64 
 1. Set binary as executable executing `chmod +x <binary>` in the terminal. Replace `<binary>` with the name of the downloaded binary.
 1. Run Sedge `./sedge --help` to check if the executable is ok. The `.` represents the current directory (where your terminal session is pointing to)
 1. (Optional) Put the binary in your [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) with `cp <binary> /usr/local/bin/sedge` so you can execute Sedge from any directory using the terminal. Try `sedge --help` now.
+## Using Homebrew
+
+First install the Homebrew package manager using the [official install script](https://brew.sh/) located on their homepage. 
+
+After installing Homebrew, you are ready to install Sedge by tapping into the official Sedge repository and installing it: 
+
+```
+brew install nethermindeth/sedge/sedge
+```
+
+If you want to update Sedge you can use the following commands: 
+```
+brew update
+brew upgrade sedge
+```
+
+If you want to remove Sedge, you can use:
+
+```
+brew uninstall sedge
+brew untap nethermindeth/sedge
+```
 
 ## Using Go
 

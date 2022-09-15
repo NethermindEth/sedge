@@ -27,7 +27,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print sedge version",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Fprintln(cmd.OutOrStdout(), "sedge 0.1")
+		fmt.Fprintln(cmd.OutOrStdout(), "sedge v0.2.0")
 	},
 }
 

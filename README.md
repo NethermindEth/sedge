@@ -4,16 +4,20 @@
 [![Discord](https://user-images.githubusercontent.com/7288322/34471967-1df7808a-efbb-11e7-9088-ed0b04151291.png)](https://discord.com/invite/PaCMRFdvWT)
 [![codecov](https://codecov.io/gh/NethermindEth/sedge/branch/main/graph/badge.svg?token=8FERO4PO1V)](https://codecov.io/gh/NethermindEth/sedge)
 
-A one click setup tool for PoS network/chain validators. Currently, Sedge is designed primarily for solo stakers and testnet devs of the Beacon Chain and the Merge (Ethereum). Sedge generates docker-compose scripts for the entire on-premise validator setup based on the chosen client.
+A one click setup tool for PoS network/chain validators. Currently, Sedge is designed primarily for solo stakers and testnet devs of Ethereum. Sedge generates docker-compose scripts for the entire on-premise validator setup based on the chosen client.
+
+The project **is still on beta** and although it should be stable enough, it might still have some issues. Sedge has not been audited yet.
 
 - [Sedge](#sedge)
   - [⚙️ Installation](#️-installation)
     - [Dependencies](#dependencies)
     - [Installation methods](#installation-methods)
+    - [**Disclaimer**](#disclaimer)
   - [📜 Documentation](#-documentation)
   - [⚡️ Quick start](#️-quick-start)
   - [💥 How this all started?](#-how-this-all-started)
   - [🔥 What can you do with sedge today?](#-what-can-you-do-with-sedge-today)
+    - [**Disclaimer**](#disclaimer-1)
   - [Supported networks and clients](#supported-networks-and-clients)
     - [Mainnet](#mainnet)
     - [Ropsten](#ropsten)
@@ -45,8 +49,13 @@ Sedge dependencies are `docker` with `docker compose` plugin, but if you don't h
 Check our [installation guide](https://docs.sedge.nethermind.io/docs/quickstart/install-guide) for detailed instructions on the supported methods:
 
 - Download binary from release page
+- Using the Homebrew package manager
 - Using the Go programmning language
 - Build from source
+
+### **Disclaimer**
+
+Downloading any binary from the internet comes with the risk of downloading files which malicious, third-party actors have injected with malware. All users should check that they are downloading the correct, clean binary, from a reputable source.
 
 ## 📜 Documentation
 
@@ -89,14 +98,21 @@ We don't want to stop at Ethereum. We also want to help stakers of other PoS net
 ## 🔥 What can you do with sedge today?
 
 - Select an execution, consensus and validator node (manually or automatically) and generate a `docker-compose` script with production-tested configurations to run the setup you want.
-- Generate the keystore folder using the [staking-deposit-cli](https://github.com/ethereum/staking-deposit-cli) tool with `sedge keys`
 - Don't remember `docker-compose` commands or flags for your setup? Check docker logs of the running services with `sedge logs`, and shut them down with `sedge down`
+- Generate the keystore folder using the [staking-deposit-cli](https://github.com/ethereum/staking-deposit-cli) tool with `sedge keys`
 
-> The setup is currently designed to start all three nodes required to run a validator (execution, consensus and validator node). Soon Sedge will let you directly connect to a public or remote node. The execution and consensus nodes will be executed first, and the validator node will be executed automatically after those nodes are synced, giving you time to prepare the keystore file and make the deposit for your staked ether.
+> **Disclaimer:** Users acknowledge that staking-deposit-cli is an external tool, which means that Nethermind exercises no control over its functioning and does not accept any liability for any issues that may arise from the use of the tool.
+
+The setup is currently designed to start all three nodes required to run a full local validator (execution, consensus and validator node). Soon, Sedge will let you connect to a public or remote node for the execution and consensus layers. Once the consensus node is synced, a validator node will be executed automatically. We suggest that you make use of the initial time taken to sync to prepare the keystore file and make the deposit for your staked ether.
 
 If you are familiar with `docker`, `docker compose`, and the validator setup, then you can use Sedge to generate a base docker-compose script with the recommended settings, stop Sedge instead of letting it execute the script, and then edit the script as much as you want. Is a lot more easier than doing everything from scratch!
 
-> Although Sedge supports several clients, is still on beta. Some settings may not work because -at least on the testnets- the clients are constantly evolving. Please let us know any issues you encounter!
+> Although Sedge supports several clients, **is still on beta**. Some settings may not work because -at least on the testnets- the clients are constantly evolving. Please let us know any issues you encounter!
+
+### **Disclaimer**
+While Sedge assists in installing the validator, it is not designed to register or maintain it. Users are solely responsible for ensuring that they monitor and maintain the validator as required, so that they do not incur penalties and/or financial losses. This includes promptly updating the tool to ensure the latest stable releases of clients are used.
+
+Users acknowledge that no warranty is being made of a successful installation. Sedge is a tool and ultimately depends on you to use it correctly and following all the best practice guidance, as found in this README and documentation.
 
 ## Supported networks and clients
 
