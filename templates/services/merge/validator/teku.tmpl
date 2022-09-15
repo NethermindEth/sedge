@@ -24,7 +24,7 @@
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/var/lib/teku{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - ${VL_DATA_DIR}:/data{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
       - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
     command:
@@ -32,10 +32,10 @@
       - --initial-state=/network_config/genesis.ssz{{end}}{{if .VlRemoteCfg}}
       - --network=/network_config/config.yml{{end}}{{end}}
       - --beacon-node-api-endpoint=${CC_API_URL}
-      - --data-path=/var/lib/teku
+      - --data-path=/data/validator
       - --log-destination=CONSOLE
       - --validators-graffiti=${GRAFFITI}
-      - --validator-keys=/var/lib/teku/keys:/var/lib/teku/passwords
+      - --validator-keys=/data/keys:/data/passwords
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0

@@ -1,37 +1,15 @@
 {{/* lodestar.tmpl */}}
 {{ define "validator" }}
-  validator-import:
-    container_name: validator-import-client
-    image: ${VL_IMAGE_VERSION}{{with .VlCustomCfg}}
-    depends_on:
-      config_consensus:
-        condition: service_completed_successfully{{end}}
-    networks:
-      - sedge
-    volumes:
-      - ${KEYSTORE_DIR}:/keystore{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
-      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
-    command: |
-      account validator import{{if not .VlCustomCfg}}
-      --network {{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}{{if .VlRemoteCfg}}
-      --paramsFile=/network_config/config.yml{{end}}{{end}}
-      --directory=/keystore/validator_keys
-      --passphraseFile=/keystore/keystore_password.txt
-
   validator:
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
-    depends_on: 
-      validator-import:
-        condition: service_completed_successfully
     networks:
       - sedge
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/var/lib/lodestar/validator
-      - ${KEYSTORE_DIR}:/var/lib/lodestar/keystore{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - ${VL_DATA_DIR}:/data/validator
+      - ${KEYSTORE_DIR}:/data/keystore{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
       - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
     command: 
@@ -39,11 +17,11 @@
       - --preset=${VL_LODESTAR_PRESET}{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - --paramsFile=/network_config/config.yml{{end}}{{else}}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
-      - --dataDir=/var/lib/lodestar/validator
-      - --logFile=/var/lib/lodestart/validator/logs/validator.log
+      - --dataDir=/data/validator
+      - --logFile=/data/validator/logs/validator.log
       - --logFileLevel=${VL_LOG_LEVEL}
-      - --importKeystores=/var/lib/lodestar/keystore
-      - --importKeystoresPassword=/var/lib/lodestar/keystore/keystore_password.txt
+      - --importKeystores=/data/keystore
+      - --importKeystoresPassword=/data/keystore/keystore_password.txt
       - --server=${CC_API_URL}
       - --metrics=true
       - --metrics.address=0.0.0.0
