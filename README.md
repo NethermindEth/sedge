@@ -16,16 +16,18 @@ A one click setup tool for PoS network/chain validators. Currently, Sedge is des
   - [🔥 What can you do with sedge today?](#-what-can-you-do-with-sedge-today)
   - [Supported networks and clients](#supported-networks-and-clients)
     - [Mainnet](#mainnet)
-    - [Kiln](#kiln)
     - [Ropsten](#ropsten)
     - [Sepolia](#sepolia)
     - [Goerli](#goerli)
+    - [Gnosis](#gnosis)
+    - [Chiado (Gnosis testnet)](#chiado-gnosis-testnet)
+    - [Denver (Gnosis testnet)](#denver-gnosis-testnet)
     - [CL clients with Mev-Boost](#cl-clients-with-mev-boost)
   - [Supported Linux flavours for dependency installation](#supported-linux-flavours-for-dependency-installation)
   - [✅ Roadmap](#-roadmap)
-    - [Version 0.1 (Actual)](#version-01-actual)
+    - [Version 0.1](#version-01)
     - [Version 0.2](#version-02)
-    - [Version 0.3](#version-03)
+    - [Version 0.3 (Actual)](#version-03-actual)
     - [Version 0.4](#version-04)
     - [Version 0.X](#version-0x)
     - [Version 1.0](#version-10)
@@ -107,15 +109,6 @@ If you are familiar with `docker`, `docker compose`, and the validator setup, th
 |            | Prysm      | Prysm      |
 |            | Teku       | Teku       |
 
-### Kiln
-
-| Execution  | Consensus  | Validator  |
-| ---------- | ---------- | ---------- |
-| Geth       | Lighthouse | Lighthouse |
-| Nethermind | Lodestar   | Lodestar   |
-|            | Prysm      | Prysm      |
-|            | Teku       | Teku       |
-
 ### Ropsten
 
 | Execution  | Consensus  | Validator  |
@@ -140,6 +133,33 @@ If you are familiar with `docker`, `docker compose`, and the validator setup, th
 | ---------- | ---------- | ---------- |
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
+|            | Prysm      | Prysm      |
+|            | Teku       | Teku       |
+
+### Gnosis
+
+| Execution  | Consensus  | Validator  |
+| ---------- | ---------- | ---------- |
+| Nethermind | Lighthouse | Lighthouse |
+|            | Lodestar   | Lodestar   |
+|            | Prysm      | Prysm      |
+|            | Teku       | Teku       |
+
+### Chiado (Gnosis testnet)
+
+| Execution  | Consensus  | Validator  |
+| ---------- | ---------- | ---------- |
+| Nethermind | Lighthouse | Lighthouse |
+|            | Lodestar   | Lodestar   |
+|            | Prysm      | Prysm      |
+|            | Teku       | Teku       |
+
+### Denver (Gnosis testnet)
+
+| Execution  | Consensus  | Validator  |
+| ---------- | ---------- | ---------- |
+| Nethermind | Lighthouse | Lighthouse |
+|            | Lodestar   | Lodestar   |
 |            | Prysm      | Prysm      |
 |            | Teku       | Teku       |
 
@@ -170,7 +190,7 @@ If you are familiar with `docker`, `docker compose`, and the validator setup, th
 
 The following roadmap covers the main features and ideas we want to implement but doesn't cover everything we are planning for this tool. Stay in touch if you are interested, a lot of improvements are coming in the next two months. Please note that this Roadmap is continually changing until version 1.0.
 
-### Version 0.1 (Actual)
+### Version 0.1
 
 - [x] Generate `docker-compose` scripts and `.env` files for selected clients with a cli tool
 - [x] Generate keystore folder with the cli
@@ -185,15 +205,17 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Integrate Sepolia network
 - [x] Documentation with examples
 
-### Version 0.3
+### Version 0.3 (Actual)
 
-- [ ] Set up and run only one node (execution/consensus/validator)
-- [ ] Enable use of public execution and consensus nodes
-- [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
+- [x] Integrate Gnosis network
+- [x] Prepare for the Merge
 
 ### Version 0.4
 
-- [ ] Integrate Gnosis network
+- [ ] Set up and run only one node (execution/consensus/validator)
+- [ ] Grafana and Prometheus support for the clients
+- [ ] Besu and Erigon support
+- [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
 
 ### Version 0.X
 
@@ -201,6 +223,7 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [ ] Off-premise setup support
 - [ ] Cross platform support and documentation
 - [ ] More tests!!!
+- [ ] Support for Nimbus client
 - [ ] Integrate other PoS networks
 
 ### Version 1.0
