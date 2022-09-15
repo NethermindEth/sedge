@@ -71,4 +71,7 @@ const (
 	IPNotFoundError                   = "could not find IP address"
 	PortOccupationError               = "port occupation check failed. Error: %v"
 	DefaultPortEmptyError             = "default %s can not be empty"
+	PrintFileError                    = "error printing file content: %v"
+	CleaningEnvFileError              = "error cleaning env file: %v"
+	CleaningDCFileError               = "error cleaning docker compose file: %v"
 )

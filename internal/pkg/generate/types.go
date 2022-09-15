@@ -92,3 +92,11 @@ type DockerComposeData struct {
 	SplittedNetwork     bool
 	ClCheckpointSyncUrl bool
 }
+
+// GenerationResults: Struct for storing results of the generation process
+type GenerationResults struct {
+	DockerComposePath string
+	EnvFilePath       string
+	ELPort            string
+	CLPort            string
+}

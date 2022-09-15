@@ -31,6 +31,7 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/spf13/cobra"
 )
@@ -253,10 +254,23 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		MapAllPorts:       mapAllPorts,
 		Mev:               !noMev && !noValidator,
 	}
-	elPort, clPort, err := generate.GenerateScripts(gd)
+	results, err := generate.GenerateScripts(gd)
 	if err != nil {
 		return []error{err}
 	}
+
+	// Clean generated .env and docker compose files
+	err = generate.CleanGenerated(results)
+	if err != nil {
+		return []error{err}
+	}
+
+	// Print final files
+	log.Infof(configs.CreatedFile, results.EnvFilePath)
+	ui.PrintFileContent(cmd.OutOrStdout(), results.EnvFilePath)
+
+	log.Infof(configs.CreatedFile, results.DockerComposePath)
+	ui.PrintFileContent(cmd.OutOrStdout(), results.DockerComposePath)
 
 	// If --run-clients=none was set then exit and don't run anything
 	if len(*services) == 0 {
@@ -292,7 +306,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 			//time.Sleep(waitingTime)
 			// Track sync of execution and consensus clients
 			// TODO: Parameterize wait arg of trackSync
-			if err = trackSync(monitor, elPort, clPort, time.Minute*5); err != nil {
+			if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*5); err != nil {
 				return []error{err}
 			}
 
