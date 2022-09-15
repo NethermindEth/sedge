@@ -10,7 +10,7 @@
       - sedge
     volumes:
       - ${KEYSTORE_DIR}:/keystore
-      - ${VL_DATA_DIR}:/var/lib/lighthouse{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - ${VL_DATA_DIR}:/data{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - ./config.yml:/network_config/config.yaml{{end}}{{if .VlRemoteGen}}
       - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{if .VlRemoteDpl}}
       - ./deploy_block.txt:/network_config/deploy_block.txt{{end}}{{end}}
@@ -21,7 +21,7 @@
       --password-file=/keystore/keystore_password.txt
       --reuse-password
       --directory /keystore
-      --datadir /var/lib/lighthouse
+      --datadir /data
 
   validator:
     container_name: validator-client

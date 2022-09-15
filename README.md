@@ -4,7 +4,6 @@
 [![Discord](https://user-images.githubusercontent.com/7288322/34471967-1df7808a-efbb-11e7-9088-ed0b04151291.png)](https://discord.com/invite/PaCMRFdvWT)
 [![codecov](https://codecov.io/gh/NethermindEth/sedge/branch/main/graph/badge.svg?token=8FERO4PO1V)](https://codecov.io/gh/NethermindEth/sedge)
 
-
 A one click setup tool for PoS network/chain validators. Currently, Sedge is designed primarily for solo stakers and testnet devs of the Beacon Chain and the Merge (Ethereum). Sedge generates docker-compose scripts for the entire on-premise validator setup based on the chosen client.
 
 - [Sedge](#sedge)
@@ -20,7 +19,7 @@ A one click setup tool for PoS network/chain validators. Currently, Sedge is des
     - [Kiln](#kiln)
     - [Ropsten](#ropsten)
     - [Sepolia](#sepolia)
-    - [Prater](#prater)
+    - [Goerli](#goerli)
     - [CL clients with Mev-Boost](#cl-clients-with-mev-boost)
   - [Supported Linux flavours for dependency installation](#supported-linux-flavours-for-dependency-installation)
   - [✅ Roadmap](#-roadmap)
@@ -34,7 +33,9 @@ A one click setup tool for PoS network/chain validators. Currently, Sedge is des
   - [⚠️ License](#️-license)
 
 ## ⚙️ Installation
+
 ### Dependencies
+
 Sedge dependencies are `docker` with `docker compose` plugin, but if you don't have those installed, Sedge will show instructions to install them, or install them for you. Check the [docs](https://docs.sedge.nethermind.io/docs/quickstart/dependencies) for more details.
 
 ### Installation methods
@@ -52,13 +53,14 @@ For further details, you can check the [documentation](https://docs.sedge.nether
 ## ⚡️ Quick start
 
 With `sedge cli` you can go through the entire workflow setup:
+
 1. Check dependencies
 2. Generate jwtsecret (not for mainnet)
 3. Generate a `docker-compose` script with randomized clients selection and `.env`
 4. Execute the `docker-compose` script (only execution and consensus nodes will be executed by default)
 5. Validator client will be executed automatically after execution and consensus nodes are synced.
   
-Between steps 4 and 5 you can generate the validator(s) keystore folder using `sedge keys`. 
+Between steps 4 and 5 you can generate the validator(s) keystore folder using `sedge keys`.
 
 The entire process is interactive, although you can use the `-y` flag to run Sedge without prompts.
 
@@ -67,6 +69,7 @@ Check all the options and flags with `sedge cli --help`. More instructions or gu
 ## 💥 How this all started?
 
 As people who actively work on The Merge, we know how hard it is to set up an Ethereum validator:
+
 - You need to procure at least three (compatible) nodes: an execution node (geth, nethermind, etc), a consensus node, and a validator node (lighthouse, prysm, etc)
 - You then need to execute them, connect them, monitor them, and secure the validator keys (which includes staking 32 ETH).
 - There may be several valid combinations of clients to choose for your setup, so you need to go through each of the client's docs, evaluate it, get instructions for it and test it. You also need to feel comfortable executing commands in the cli, know docker, and understand basics of networking. On top of this, there are many different settings you must read up on and consider for your client node.
@@ -77,7 +80,7 @@ As people who actively work on The Merge, we know how hard it is to set up an Et
 
 We want Sedge to take care of all of the above for you. With just a few clicks or steps, Sedge can create an entire ethereum staking architecture that supports client diversity and Ethereum's latest features, while being completely free and open source. We want Sedge to save you from making costly mistakes in this complex setup; along with hours or days of research, reading and testing. We want you to be able to stake easily with or without blockchain knowledge by giving you the tools to help this amazing community (and earn some good money of course 😉).
 
-We want to share our knowledge in this topic and create something that allows everyone to easily and safely set up lots of diverse validators. 
+We want to share our knowledge in this topic and create something that allows everyone to easily and safely set up lots of diverse validators.
 
 We don't want to stop at Ethereum. We also want to help stakers of other PoS networks/chains, so if your favourite chain is not here, you are more than welcome to contribute!
 
@@ -131,7 +134,7 @@ If you are familiar with `docker`, `docker compose`, and the validator setup, th
 |            | Prysm      | Prysm      |
 |            | Teku       | Teku       |
 
-### Prater
+### Goerli
 
 | Execution  | Consensus  | Validator  |
 | ---------- | ---------- | ---------- |
@@ -140,17 +143,17 @@ If you are familiar with `docker`, `docker compose`, and the validator setup, th
 |            | Prysm      | Prysm      |
 |            | Teku       | Teku       |
 
-
 ### CL clients with Mev-Boost
 
 | Client     | Mev-Boost | Networks        |
 | ---------- | --------- | --------------- |
-| Lighthouse | yes       | Ropsten, Prater |
-| Lodestar   | yes       | Prater          |
-| Prysm      | no*       | Prater          |
-| Teku       | yes       | Ropsten, Prater |
+| Lighthouse | yes       | Ropsten, Goerli |
+| Lodestar   | yes       | Goerli          |
+| Prysm      | no*       | Goerli          |
+| Teku       | yes       | Ropsten, Goerli |
 
 > Settings for Prysm with mev-boost are quite ready, we are waiting for an official and stable Prysm docker image with mev-boost support
+
 ## Supported Linux flavours for dependency installation
 
 | OS             | Versions                |
@@ -164,9 +167,11 @@ If you are familiar with `docker`, `docker compose`, and the validator setup, th
 | Alpine         | 3.15,3.14,3.14.3        |
 
 ## ✅ Roadmap
+
 The following roadmap covers the main features and ideas we want to implement but doesn't cover everything we are planning for this tool. Stay in touch if you are interested, a lot of improvements are coming in the next two months. Please note that this Roadmap is continually changing until version 1.0.
 
 ### Version 0.1 (Actual)
+
 - [x] Generate `docker-compose` scripts and `.env` files for selected clients with a cli tool
 - [x] Generate keystore folder with the cli
 - [x] Test coverage (unit tests)
@@ -175,19 +180,23 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Integrate Ropsten network
 
 ### Version 0.2
+
 - [x] Integrate Goerli/Prater network
 - [x] Integrate Sepolia network
 - [x] Documentation with examples
 
 ### Version 0.3
+
 - [ ] Set up and run only one node (execution/consensus/validator)
 - [ ] Enable use of public execution and consensus nodes
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
 
 ### Version 0.4
+
 - [ ] Integrate Gnosis network
 
 ### Version 0.X
+
 - [ ] TUI for guided and more interactive setup (better UX)
 - [ ] Off-premise setup support
 - [ ] Cross platform support and documentation
@@ -195,9 +204,11 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [ ] Integrate other PoS networks
 
 ### Version 1.0
+
 Full Ethereum 2 support with MEV-Boost
 
 ## 💪 Want to contribute?
+
 Please check our Contributing Guidelines, Code of Conduct and our issues. In case you want to report or suggest something (any help is welcome) please file an issue first so the main team is aware and it can be discussed.
 
 If you know of any good tricks for validator setup that other people could make good use of as well, please consider adding it to Sedge. Your efforts will be greatly appreciated by the community.

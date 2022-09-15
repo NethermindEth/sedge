@@ -24,10 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove `mainnet` service templates and use `merge` service templates for Mainnet network.
 - `checkpoint-sync-url` can now be set separately for every consensus client of a network using `CHECKPOINT_SYNC_URL` as env variabe in the consensus client templates.
 - Use fixed docker images with latest tested versions
+- Change Prater to Goerli
 
 ### Fixed
 
 - Check for compose plugin installed. The check was running compose with a wrong path flag
+- Errors in validators templates
 
 ## [v0.2.0] - 2022-08-4
 
