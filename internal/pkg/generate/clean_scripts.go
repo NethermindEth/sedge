@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/NethermindEth/sedge/configs"
 	"gopkg.in/yaml.v2"
 )
 
@@ -115,24 +116,28 @@ func CleanDockerCompose(dockerComposePath string) error {
 	// Get docker compose file data
 	file, err := os.Open(dockerComposePath)
 	if err != nil {
-		return fmt.Errorf("error cleaning docker compose file: %v", err)
+		return fmt.Errorf(configs.CleaningDCFileError, err)
 	}
 
 	raw, err := ioutil.ReadAll(file)
 	if err != nil {
-		return fmt.Errorf("error cleaning docker compose file: %v", err)
+		return fmt.Errorf(configs.CleaningDCFileError, err)
 	}
 
 	info, err := file.Stat()
-	file.Close()
 	if err != nil {
-		return fmt.Errorf("error cleaning docker compose file: %v", err)
+		return fmt.Errorf(configs.CleaningDCFileError, err)
+	}
+
+	err = file.Close()
+	if err != nil {
+		return fmt.Errorf(configs.CleaningDCFileError, err)
 	}
 
 	// Parse docker compose data
 	dockerComposeData := yaml.MapSlice{}
 	if err = yaml.Unmarshal(raw, &dockerComposeData); err != nil {
-		return fmt.Errorf("error cleaning docker compose file: %v", err)
+		return fmt.Errorf(configs.CleaningDCFileError, err)
 	}
 
 	// Construct cleaned docker compose data
@@ -204,19 +209,19 @@ func CleanEnvFile(envFilePath string) error {
 	// Get `.env` file data
 	file, err := os.Open(envFilePath)
 	if err != nil {
-		return fmt.Errorf("error cleaning env file: %v", err)
+		return fmt.Errorf(configs.CleaningEnvFileError, err)
 	}
 
 	rawLines, err := ioutil.ReadAll(file)
 	if err != nil {
-		return fmt.Errorf("error cleaning env file: %v", err)
+		return fmt.Errorf(configs.CleaningEnvFileError, err)
 	}
 	lines := strings.Split(string(rawLines), "\n")
 
 	info, err := file.Stat()
 	file.Close()
 	if err != nil {
-		return fmt.Errorf("error cleaning env file: %v", err)
+		return fmt.Errorf(configs.CleaningEnvFileError, err)
 	}
 
 	var ReENVVAR = regexp.MustCompile(`^ *(?P<VAR>[a-zA-Z0-9_]+) *= *(?P<VAL>.+) *$`) // Variable regex
@@ -253,7 +258,7 @@ func CleanEnvFile(envFilePath string) error {
 	cleanedText := strings.Join(cleanedLines, "\n")
 	err = os.WriteFile(envFilePath, []byte(cleanedText), info.Mode())
 	if err != nil {
-		return fmt.Errorf("error cleaning env file: %v", err)
+		return fmt.Errorf(configs.CleaningEnvFileError, err)
 	}
 
 	return nil
