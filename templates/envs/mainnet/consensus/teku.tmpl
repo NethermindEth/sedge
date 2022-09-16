@@ -10,4 +10,5 @@ CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}consensys/teku:22.9.0{{end}}
 CC_DATA_DIR={{.CcDataDir}}
 CC_JWT_SECRET_PATH={{.JWTSecretPath}}
 CL_FEE_RECIPIENT={{.FeeRecipient}}
+CHECKPOINT_SYNC_URL=https://beaconstate.ethstaker.cc
 {{ end }}

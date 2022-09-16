@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [v0.3.0] - 2022-09-15
+
 ### Added
 
 - Add support for gnosis merge testnets named chiado and denver
@@ -17,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `--graffiti` to allow overriding the default graffiti used by validators nodes
 - Allow the extra flags to overwrite fixed template images commands flags. Latest flag apparition will be used.
 - Add Homebrew installation method
+- Add Checkpoint Sync for Ethereum Mainnet
 
 ### Changed
 
