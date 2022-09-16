@@ -15,6 +15,8 @@ limitations under the License.
 */
 package generate
 
+import "github.com/NethermindEth/sedge/internal/pkg/clients"
+
 // EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
 type EnvData struct {
 	ElImage                   string
@@ -30,19 +32,16 @@ type EnvData struct {
 	FeeRecipient              string
 	JWTSecretPath             string
 	ExecutionEngineName       string
+	ConsensusClientName       string
 	KeystoreDir               string
+	Graffiti                  string
 }
 
 // GenerationData : Struct Data object for script's generation
 type GenerationData struct {
-	ExecutionClient   string
-	ExecutionImage    string
-	ExecutionEndpoint string
-	ConsensusClient   string
-	ConsensusImage    string
-	ConsensusEndpoint string
-	ValidatorClient   string
-	ValidatorImage    string
+	ExecutionClient   clients.Client
+	ConsensusClient   clients.Client
+	ValidatorClient   clients.Client
 	GenerationPath    string
 	Network           string
 	CheckpointSyncUrl string
@@ -55,13 +54,20 @@ type GenerationData struct {
 	MapAllPorts       bool
 	Mev               bool
 	Ports             map[string]string
+	Graffiti          string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
 	TTD                 bool
-	CcPrysmCfg          bool
-	VlPrysmCfg          bool
+	CcCustomCfg         bool
+	CcRemoteCfg         bool
+	CcRemoteGen         bool
+	CcRemoteDpl         bool
+	VlCustomCfg         bool
+	VlRemoteCfg         bool
+	VlRemoteGen         bool
+	VlRemoteDpl         bool
 	XeeVersion          bool
 	Mev                 bool
 	MevPort             string
@@ -81,6 +87,16 @@ type DockerComposeData struct {
 	ElExtraFlags        []string
 	ClExtraFlags        []string
 	VlExtraFlags        []string
+	Bootnodes           []string
 	MapAllPorts         bool
 	SplittedNetwork     bool
+	ClCheckpointSyncUrl bool
+}
+
+// GenerationResults: Struct for storing results of the generation process
+type GenerationResults struct {
+	DockerComposePath string
+	EnvFilePath       string
+	ELPort            string
+	CLPort            string
 }

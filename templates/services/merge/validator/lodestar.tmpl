@@ -1,46 +1,35 @@
 {{/* lodestar.tmpl */}}
 {{ define "validator" }}
-  validator-import:
-    image: ${VL_IMAGE_VERSION}
-    networks:
-      - sedge
-    container_name: validator-import-client
-    volumes:
-      - ${KEYSTORE_DIR}:/keystore
-    command: |
-      account validator import
-      --network {{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
-      --directory=/keystore/validator_keys
-      --passphraseFile=/keystore/keystore_password.txt
-
   validator:
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
-    depends_on: 
-      validator-import:
-        condition: service_completed_successfully
     networks:
       - sedge
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/var/lib/lodestar/validator
-      - ${KEYSTORE_DIR}:/var/lib/lodestar/keystore
+      - ${VL_DATA_DIR}:/data/validator
+      - ${KEYSTORE_DIR}:/data/keystore{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
+      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
     command: 
       - validator
-      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
-      - --rootDir=/var/lib/lodestar/validator
-      - --logFile=/var/lib/lodestart/validator/logs/validator.log
-      - --logLevelFile=${VL_LOG_LEVEL}
-      - --importKeystoresPath=/var/lib/lodestar/keystore
-      - --importKeystoresPassword=/var/lib/lodestar/keystore/keystore_password.txt
+      - --preset=${VL_LODESTAR_PRESET}{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - --paramsFile=/network_config/config.yml{{end}}{{else}}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
+      - --dataDir=/data/validator
+      - --logFile=/data/validator/logs/validator.log
+      - --logFileLevel=${VL_LOG_LEVEL}
+      - --importKeystores=/data/keystore
+      - --importKeystoresPassword=/data/keystore/keystore_password.txt
       - --server=${CC_API_URL}
-      - --metrics.enabled=true
+      - --metrics=true
       - --metrics.address=0.0.0.0
       - --metrics.port={{.VlMetricsPort}}{{with .FeeRecipient}}
-      - --defaultFeeRecipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
+      - --suggestedFeeRecipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
-      - --builder.enabled{{end}}
+      - --builder=true{{end}}
+      - --graffiti=${GRAFFITI}
     logging:
       driver: "json-file"
       options:

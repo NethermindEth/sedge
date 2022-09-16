@@ -4,53 +4,58 @@
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{if .Mev}}
-    depends_on:
+    image: ${CC_IMAGE_VERSION}{{if or .Mev .CcCustomCfg}}
+    depends_on:{{if .Mev}}
       mevboost:
-        condition: service_started{{end}}
+        condition: service_started{{end}}{{if .CcCustomCfg}}
+      config_consensus:
+        condition: service_completed_successfully{{end}}{{end}}
     networks:
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/lighthouse
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
+      - ./config.yml:/network_config/config.yaml{{end}}{{if .CcRemoteGen}}
+      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{if .CcRemoteDpl}}
+      - ./deploy_block.txt:/network_config/deploy_block.txt{{end}}{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
       - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"{{if .MapAllPorts}}
       - "{{.ClApiPort}}:{{.ClApiPort}}"{{end}}
     expose:
-      - {{.ClApiPort}}     
+      - {{.ClApiPort}}
     command:
-      - lighthouse
+      - lighthouse{{if .CcCustomCfg}}
+      - --testnet-dir=/network_config{{end}}
       - bn
-      - --staking
-      - --merge
       - --disable-upnp
       - --datadir=/var/lib/lighthouse
       - --port={{.ClDiscoveryPort}}
       - --http
       - --http-address=0.0.0.0
-      - --http-port={{.ClApiPort}}
-      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
-      - --target-peers=${CC_PEER_COUNT}
+      - --http-port={{.ClApiPort}}{{if not .CcCustomCfg}}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
+      - --target-peers=${CC_PEER_COUNT}{{if .Bootnodes}}
+      - --boot-nodes=${CL_BOOTNODES}{{end}}
       - --execution-endpoints=${EC_AUTH_URL}
       - --execution-jwt=/tmp/jwt/jwtsecret
       - --eth1-endpoints=${EC_API_URL}{{range $url := .FallbackELUrls}},{{$url}}{{end}}{{with .TTD}}
-      - --terminal-total-difficulty-override=${TTD}{{end}}     
+      - --terminal-total-difficulty-override=${TTD}{{end}}
       - --debug-level=${CC_LOG_LEVEL}{{with .FeeRecipient}}
       - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
       - --validator-monitor-auto
       - --subscribe-all-subnets
-      - --import-all-attestations 
+      - --import-all-attestations
       - --metrics
       - --metrics-port={{.ClMetricsPort}}
-      - --metrics-address=0.0.0.0{{with .CheckpointSyncUrl}}
-      - --checkpoint-sync-url={{.}}{{end}}{{range $flag := .ClExtraFlags}}
+      - --metrics-address=0.0.0.0{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
+      - --checkpoint-sync-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
       - --builder=http://mevboost:{{.MevPort}}{{end}}
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
-        max-file: "10"    
+        max-file: "10"
 {{ end }}

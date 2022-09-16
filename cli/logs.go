@@ -28,7 +28,7 @@ import (
 )
 
 var (
-	tail bool
+	tail int
 )
 
 // logsCmd represents the logs command
@@ -61,8 +61,8 @@ By default will run 'docker compose -f <script> logs --follow <service>'`,
 		logsCMD := commands.Runner.BuildDockerComposeLogsCMD(commands.DockerComposeLogsOptions{
 			Path:     file,
 			Services: services,
-			Follow:   !tail,
-			Tail:     20, //TODO: allow to change this via command parameters
+			Follow:   tail == 0,
+			Tail:     tail,
 		})
 
 		log.Debugf(configs.RunningCommand, logsCMD.Cmd)
@@ -78,5 +78,5 @@ func init() {
 	// Local flags
 	logsCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose script path")
 
-	logsCmd.Flags().BoolVarP(&tail, "tail", "t", false, "Tail the last 20 logs")
+	logsCmd.Flags().IntVarP(&tail, "tail", "t", 0, "Tail the number of desired logs. If not set, or set to 0, logs are followed.")
 }

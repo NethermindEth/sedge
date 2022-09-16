@@ -1,0 +1,15 @@
+{{/* prysm.tmpl */}}
+{{ define "validator" }}
+# --- Consensus Layer - Validator Node - configuration ---
+CC_API_URL={{.ConsensusAdditionalApiURL}}
+GRAFFITI={{if .Graffiti}}{{.Graffiti}}{{else}}{{.ExecutionEngineName}}-{{.ConsensusClientName}}{{end}}
+VL_LOG_LEVEL=info
+VL_INSTANCE_NAME=PrysmValidator
+VL_IMAGE_VERSION={{if .VlImage}}{{.VlImage}}{{else}}ghcr.io/gnosischain/gbc-prysm-validator:v2.1.4-gbc{{end}}
+KEYSTORE_DIR={{.KeystoreDir}}
+WALLET_DIR=./wallet
+VL_DATA_DIR={{.VlDataDir}}
+CONFIG_URL=https://github.com/gnosischain/consensus-deployment-ansible/raw/master/chiado/custom_config_data/config.yaml
+GENESIS_URL=https://github.com/gnosischain/consensus-deployment-ansible/raw/master/chiado/custom_config_data/genesis.ssz
+DEPLOY_BLOCK=14675001
+{{ end }}

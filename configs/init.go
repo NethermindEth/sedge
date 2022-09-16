@@ -19,30 +19,26 @@ var JWTNetworks map[string]bool
 
 var NetworksToServices map[string]string
 
-var NetworksToCheckpointUrl map[string]string
-
 func init() {
 	JWTNetworks = map[string]bool{
-		"mainnet": false,
+		"mainnet": true,
 		"kiln":    true,
 		"ropsten": true,
-		"prater":  true,
+		"goerli":  true,
 		"sepolia": true,
+		"denver":  true,
+		"chiado":  true,
+		"gnosis":  true,
 	}
 
 	NetworksToServices = map[string]string{
-		"mainnet": "mainnet",
+		"mainnet": "merge",
 		"kiln":    "merge",
 		"ropsten": "merge",
-		"prater":  "merge",
+		"goerli":  "merge",
 		"sepolia": "merge",
-	}
-
-	NetworksToCheckpointUrl = map[string]string{
-		"mainnet": "",
-		"kiln":    "",
-		"ropsten": "https://ropsten.checkpoint-sync.ethdevops.io",
-		"prater":  "https://goerli.checkpoint-sync.ethdevops.io",
-		"sepolia": "https://sepolia.checkpoint-sync.ethdevops.io",
+		"denver":  "merge",
+		"chiado":  "merge",
+		"gnosis":  "merge",
 	}
 }

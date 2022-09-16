@@ -208,17 +208,12 @@ services:
     ports:
       - "30303:30303/tcp"
       - "30303:30303/udp"
-      - "8008:8008/tcp"
     expose:
       - 8545
     command:
       - --config=${NETWORK}
       - --datadir=/nethermind/data
       - --log=${NETHERMIND_LOG_LEVEL}
-      - --Metrics.Enabled=${EC_METRICS_ENABLED}
-      - --Metrics.NodeName=${EC_NODENAME}
-      - --Metrics.PushGatewayUrl=${NETHERMIND_METRICS_PUSH_GATEWAY_URL}
-      - --Metrics.ExposePort=8008
       - --Sync.SnapSync=${EC_SNAP_SYNC_ENABLED}
       - --Init.WebSocketsEnabled=true
       - --JsonRpc.Enabled=true
@@ -336,9 +331,6 @@ NETWORK=mainnet
 EC_IMAGE_VERSION=nethermind/nethermind
 NETHERMIND_LOG_LEVEL=INFO
 EC_ENABLED_MODULES=[Web3,Eth,Subscribe,Net]
-EC_METRICS_ENABLED=false
-EC_NODENAME=Nethermind
-NETHERMIND_METRICS_PUSH_GATEWAY_URL=http://localhost:9090/metrics
 NETHERMIND_HEALTH_CHECKS_ENABLED=false
 NETHERMIND_PRUNING_CACHEMB=2048
 EC_DATA_DIR=./execution-data
@@ -620,7 +612,7 @@ After you choose how many new validators you wish to run, a new generated mnemon
 Creating your keys.
 Creating your keys:		      [####################################]  1/1
 Creating your keystores:	  [####################################]  1/1
-Creating your depositdata:	  [####################################]  1/1
+Creating your depositdata:	[####################################]  1/1
 Verifying your keystores:	  [####################################]  1/1
 Verifying your deposits:	  [####################################]  1/1
 

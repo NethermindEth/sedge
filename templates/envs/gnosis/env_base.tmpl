@@ -1,0 +1,9 @@
+{{/* docker-compose_base.tmpl */}}
+{{ define "env" }}
+# --- Global configuration ---
+EL_NETWORK=xdai
+CL_NETWORK=gnosis
+{{template "execution" .}}
+{{template "consensus" .}}
+{{template "validator" .}}
+{{ end }}

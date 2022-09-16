@@ -2,10 +2,10 @@
 {{ define "validator" }}
 # --- Consensus Layer - Validator Node - configuration ---
 CC_API_URL={{.ConsensusApiURL}}
-GRAFFITI={{.ExecutionEngineName}}
+GRAFFITI={{if .Graffiti}}{{.Graffiti}}{{else}}{{.ExecutionEngineName}}-{{.ConsensusClientName}}{{end}}
 VL_LOG_LEVEL=info
 VL_INSTANCE_NAME=LighthouseValidator
-VL_IMAGE_VERSION={{if .VlImage}}{{.VlImage}}{{else}}sigp/lighthouse:latest{{end}}
+VL_IMAGE_VERSION={{if .VlImage}}{{.VlImage}}{{else}}sigp/lighthouse:v3.1.0{{end}}
 KEYSTORE_DIR={{.KeystoreDir}}
 VL_DATA_DIR={{.VlDataDir}}
 {{ end }}
