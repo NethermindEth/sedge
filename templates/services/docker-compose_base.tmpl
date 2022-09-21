@@ -6,7 +6,7 @@ services:
 {{template "execution" .}}
 {{if .Mev}}
   mevboost:
-    image: flashbots/mev-boost:latest
+    image: {{if .MevImage}}{{.MevImage}}{{else}}flashbots/mev-boost:latest{{end}}
     networks:
       - sedge
     container_name: mev-boost
