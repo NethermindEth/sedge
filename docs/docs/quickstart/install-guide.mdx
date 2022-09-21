@@ -23,14 +23,14 @@ Downloading any binary from the internet comes with the risk of downloading file
   <TabItem value="curl" label="curl">
 
   ```
-  curl -OL https://github.com/NethermindEth/sedge/releases/download/v<VERSION>/sedge-v<VERSION>-<OS>-<ARCH>
+  curl -L https://github.com/NethermindEth/sedge/releases/download/v<VERSION>/sedge-v<VERSION>-<OS>-<ARCH> --output sedge
   ```
 
   </TabItem>
   <TabItem value="wget" label="wget">
-
-    wget https://github.com/NethermindEth/sedge/releases/download/v<VERSION>/sedge-v<VERSION>-<OS>-<ARCH>
-
+  ```
+  wget https://github.com/NethermindEth/sedge/releases/download/v<VERSION>/sedge-v<VERSION>-<OS>-<ARCH> -O sedge
+  ```
   </TabItem>
 </Tabs>
 
