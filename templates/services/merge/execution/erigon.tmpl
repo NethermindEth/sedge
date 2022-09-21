@@ -1,0 +1,37 @@
+{{/* erigon.tmpl */}}
+{{ define "execution" }}
+  execution:
+    image: ${EC_IMAGE_VERSION}
+    container_name: execution_client
+    networks:
+    - sedge
+    user: root
+    ports:
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"{{if .MapAllPorts}}
+      - "{{.ElApiPort}}:{{.ElApiPort}}"
+      - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
+    expose:
+      - {{.ElApiPort}}
+      - {{.ElAuthPort}}
+    volumes:
+      - ${EC_DATA_DIR}:/home/erigon/.local/share/erigon
+      - ${EC_JWT_SECRET_PATH}:/home/erigon/.local/share/erigon/jwt.hex
+    command:
+    - erigon
+    - --private.api.addr=0.0.0.0:9090
+    - --txpool.disable
+    - ${EC_METRICS_ENABLED:-""}
+    - --metrics.addr=0.0.0.0
+    - --metrics.port={{.ElMetricsPort}}
+    - --pprof 
+    - --pprof.addr=0.0.0.0 
+    - --pprof.port=6061
+    - --authrpc.addr=0.0.0.0
+    - --authrpc.vhosts=*
+    - --authrpc.jwtsecret=/home/erigon/.local/share/erigon/jwt.hex 
+    - --datadir=/home/erigon/.local/share/erigon
+
+    restart: unless-stopped
+    mem_swappiness: 0
+{{ end }}
