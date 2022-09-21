@@ -8,7 +8,8 @@
     user: root
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
-      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"{{if .MapAllPorts}}
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
+      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
       - "{{.ElApiPort}}:{{.ElApiPort}}"
       - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
     expose:
@@ -22,6 +23,7 @@
     - --private.api.addr=0.0.0.0:9090
     - --txpool.disable
     - ${EC_METRICS_ENABLED:-""}
+    - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
     - --metrics.addr=0.0.0.0
     - --metrics.port={{.ElMetricsPort}}
     - --pprof 
