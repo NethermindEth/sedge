@@ -100,7 +100,8 @@ func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error
 	combinedClients = clients.Clients{
 		Execution: executionClient,
 		Consensus: consensusClient,
-		Validator: consensusClient}
+		Validator: consensusClient,
+	}
 	return combinedClients, nil
 }
 
@@ -377,7 +378,7 @@ func handleJWTSecret() error {
 
 	// Create scripts directory if not exists
 	if _, err := os.Stat(generationPath); os.IsNotExist(err) {
-		err = os.MkdirAll(generationPath, 0755)
+		err = os.MkdirAll(generationPath, 0o755)
 		if err != nil {
 			return err
 		}
@@ -429,7 +430,6 @@ func feeRecipientPrompt() error {
 	}
 
 	result, err := prompt.Run()
-
 	if err != nil {
 		return fmt.Errorf(configs.PromptFailedError, err)
 	}
@@ -446,14 +446,14 @@ func preRunTeku() error {
 		if s == "all" || s == consensus {
 			// Prepare consensus datadir
 			path := filepath.Join(generationPath, configs.ConsensusDefaultDataDir)
-			if err := os.MkdirAll(path, 0777); err != nil {
+			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, consensus, err)
 			}
 		}
 		if s == "all" || s == validator {
 			// Prepare validator datadir
 			path := filepath.Join(generationPath, configs.ValidatorDefaultDataDir)
-			if err := os.MkdirAll(path, 0777); err != nil {
+			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, validator, err)
 			}
 		}
