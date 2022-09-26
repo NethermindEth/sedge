@@ -34,5 +34,5 @@ jobs:
           exit 1
         fi
 
-    - name: Build
-      run: make build
+    - name: Check build
+      run: make compile
