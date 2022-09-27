@@ -45,7 +45,6 @@ Loop:
 			}
 		}
 	}
-
 }
 
 func TestZipStrings(t *testing.T) {

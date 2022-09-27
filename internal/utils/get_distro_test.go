@@ -29,7 +29,7 @@ func TestGetDistro(t *testing.T) {
 		t.Errorf("getOsInfo() failed: %v", err)
 	}
 
-	//TODO: validate distro info
+	// TODO: validate distro info
 }
 
 func TestGetDistroName(t *testing.T) {
@@ -41,5 +41,5 @@ func TestGetDistroName(t *testing.T) {
 		t.Errorf("GetDistroName() failed: %v", err)
 	}
 
-	//TODO: validate distro name
+	// TODO: validate distro name
 }

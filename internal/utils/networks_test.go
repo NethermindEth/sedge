@@ -25,7 +25,6 @@ var networks = []string{"mainnet", "kiln", "ropsten", "goerli", "sepolia", "denv
 
 func TestSupportedNetworks(t *testing.T) {
 	names, err := SupportedNetworks()
-
 	if err != nil {
 		t.Errorf("GetSupportedNetworks() failed, gave error: %v", err)
 	}

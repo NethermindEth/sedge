@@ -130,7 +130,6 @@ func TestPreCheck(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-
 			descr := fmt.Sprintf("PreCheck(%s)", tc.path)
 			dPath, dcPath := "", ""
 
