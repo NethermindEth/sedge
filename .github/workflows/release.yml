@@ -70,3 +70,40 @@ jobs:
         draft: true
         tag: ${{ github.event.inputs.tag }}
         name: ${{ github.event.inputs.tag }}
+
+  publish-ppa:
+    name: "Publishing Sedge to PPA repository"
+    runs-on: ubuntu-latest
+    env: 
+      VERSION: ${{ github.event.inputs.tag }}
+      PPA_GPG_KEYID: ${{ secrets.PPA_GPG_KEYID }}
+    needs: publish-github
+    steps:
+    - run: echo "$GPG_SECRET_KEY" > /tmp/SECRET_KEY
+      shell: bash
+      env:
+        GPG_SECRET_KEY: ${{secrets.PPA_GPG_SECRET_KEY}}
+    - run: echo "$GPG_PASSPHRASE" > /tmp/PASSPHRASE
+      shell: bash
+      env:
+        GPG_PASSPHRASE: ${{secrets.PPA_GPG_PASSPHRASE}}
+    - name: Import GPG key
+      run: base64 --decode -i /tmp/SECRET_KEY | gpg --import --no-tty --batch --yes
+    - name: Import GPG Owner Trust
+      run: echo ${{secrets.GPG_OWNERTRUST}} | base64 --decode | gpg --import-ownertrust
+    - name: Install dependencies for PPA
+      run: |
+        sudo apt update > /dev/null 2>&1 && sudo apt install golang-go debhelper/focal-backports libdebhelper-perl/focal-backports build-essential devscripts rsync -y > /dev/null 2>&1
+    - name: Checking out Sedge repository
+      uses: actions/checkout@master
+      with:
+        path: sedge
+    - uses: actions/setup-go@v3
+      with:
+        go-version: '1.18.3'
+    - name: Run publish PPA script
+      env: 
+        GOPATH: /home/runner/go
+      run: |
+        chmod +x scripts/publish-ppa.sh
+        ./scripts/publish-ppa.sh

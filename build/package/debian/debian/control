@@ -2,7 +2,7 @@ Source: sedge
 Section: devel
 Priority: medium
 Maintainer: Demerzel Solutions Limited <hello@nethermind.io>
-Build-Depends: debhelper (>= 13~), golang-go
+Build-Depends: debhelper (>= 13~)
 Standards-Version: 4.6.1
 Homepage: https://github.com/NethermindEth/sedge
 
