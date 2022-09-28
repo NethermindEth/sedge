@@ -1,12 +1,9 @@
 name: '[TEST] Publish PPA'
 
 on: 
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'The version number (e.g: 0.1.2) of the release you want to push'
-        required: true
-        default: 'master'
+  push:
+    branches: 
+      - 'build/debian-pkg'
 
 permissions: 
   contents: write
