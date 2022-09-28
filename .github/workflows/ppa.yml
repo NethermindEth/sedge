@@ -21,7 +21,7 @@ jobs:
       shell: bash
       env:
         GPG_SECRET_KEY: ${{secrets.PPA_GPG_SECRET_KEY}}
-    - run: echo "$GPG_PASSPHRASE" > /tmp/PASSPHRASE
+    - run: echo "$GPG_PASSPHRASE" | base64 -d > /tmp/PASSPHRASE
       shell: bash
       env:
         GPG_PASSPHRASE: ${{secrets.PPA_GPG_PASSPHRASE}}
