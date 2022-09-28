@@ -44,5 +44,5 @@ jobs:
         GOPATH: /home/runner/go
       run: |
         cd /home/runner/work/sedge/sedge/sedge
-        chmod +x /scripts/publish-ppa.sh
+        chmod +x scripts/publish-ppa.sh
         ./scripts/publish-ppa.sh
