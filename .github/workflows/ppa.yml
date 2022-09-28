@@ -14,7 +14,7 @@ jobs:
     name: "[TEST] Publishing Sedge to PPA repository"
     runs-on: ubuntu-latest
     env: 
-      VERSION: ${{ github.event.inputs.tag }}
+      VERSION: 0.3.0
       PPA_GPG_KEYID: ${{ secrets.PPA_GPG_KEYID }}
     steps:
     - run: echo "$GPG_SECRET_KEY" > /tmp/SECRET_KEY
