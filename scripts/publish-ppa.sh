@@ -1,17 +1,17 @@
 #!/bin/bash
 #exit when any command fails
 set -e
-cd $GITHUB_WORKSPACE
+cd /home/runner/work/sedge/sedge/sedge
 mkdir -p build/package/debian/src/github.com/NethermindEth/sedge/
 rsync -aq . build/package/debian/src/github.com/NethermindEth/sedge/ --exclude build/ --exclude .git/ --exclude docs/ --exclude scripts/
 cd build/package/debian/src/github.com/NethermindEth/sedge/ && go mod vendor
-cd $GITHUB_WORKSPACE
+cd /home/runner/work/sedge/sedge/sedge
 
 echo "sedge ($VERSION) jammy; urgency=medium
 
   * Sedge ($VERSION release)
 
- -- Nethermind <devops@nethermind.io>  $( date -R )" > $GITHUB_WORKSPACE/build/package/debian/debian/changelog
+ -- Nethermind <devops@nethermind.io>  $( date -R )" > /home/runner/work/sedge/sedge/sedge/build/package/debian/debian/changelog
 
 cd build/package/debian
 debuild -S -uc -us

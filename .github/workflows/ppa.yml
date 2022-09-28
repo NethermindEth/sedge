@@ -43,5 +43,6 @@ jobs:
       env: 
         GOPATH: /home/runner/go
       run: |
-        chmod +x scripts/publish-ppa.sh
+        cd /home/runner/work/sedge/sedge/sedge
+        chmod +x /scripts/publish-ppa.sh
         ./scripts/publish-ppa.sh
