@@ -17,6 +17,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/NethermindEth/sedge/internal/utils"
 	"os"
 	"strings"
 
@@ -52,6 +53,8 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+
+	checkVersion()
 
 	// Disable completion default cmd
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
@@ -98,6 +101,18 @@ func initConfig() {
 	}
 
 	initLogging()
+}
+
+func checkVersion() {
+	// Check version
+	ok, err := utils.IsLatestVersion()
+	if err != nil {
+		log.Warnf("%s %e", utils.MsgUnableToCheckVersion, err)
+	} else if !ok {
+		log.Warnf("%s %s", utils.MsgNeedVersionUpdate, utils.CurrentVersion())
+	} else {
+		log.Infof("%s %s", utils.MsgVersionUpdated, utils.CurrentVersion())
+	}
 }
 
 /*
