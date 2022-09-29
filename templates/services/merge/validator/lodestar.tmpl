@@ -2,7 +2,8 @@
 {{ define "validator" }}
   validator:
     container_name: validator-client
-    image: ${VL_IMAGE_VERSION}
+    image: ${VL_IMAGE_VERSION}{{if .ValRestart}}
+    restart: unless-stopped{{end}}
     networks:
       - sedge
     ports:
