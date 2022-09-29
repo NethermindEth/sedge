@@ -1,13 +1,19 @@
 .DEFAULT_GOAL 	:= help
 .PHONY: compile run run-cli test coverage clients logs all gomod_tidy go_fmt help
 
+# Variables
+PACKAGE_NAME="github.com/NethermindEth/nethermindEth/sedge"
+SEDGE_VERSION = $(shell git tag | sort | tail -n 1)
+LDFLAGS=("-X '${PACKAGE_NAME}/internal/utils.Version==${SEDGE_VERSION}'")
+
+# Commands
 compile: ## compile:
 	@mkdir -p build
-	@go build -o build/sedge cmd/sedge/main.go
+	@go build -ldflags="${LDFLAGS[*]}" -o build/sedge cmd/sedge/main.go
 
 compile-linux: ## compile:
 	@mkdir -p build
-	@env GOOS=linux go build -o build/sedge cmd/main.go
+	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/sedge cmd/main.go
 
 install: compile ## compile the binary and copy it to PATH
 	@cp build/sedge /usr/local/bin
