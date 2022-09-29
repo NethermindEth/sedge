@@ -1,0 +1,49 @@
+{{/* besu.tmpl */}}
+{{ define "execution" }}
+  execution:
+    image: ${EC_IMAGE_VERSION}
+    container_name: execution_client
+    networks:
+    - sedge
+    user: root
+    ports:
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
+      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
+      - "{{.ElApiPort}}:{{.ElApiPort}}"
+      - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
+    expose:
+      - {{.ElApiPort}}
+      - {{.ElAuthPort}}
+    volumes:
+      - ${EC_DATA_DIR}:/var/lib/besu/data
+      - ${CC_JWT_SECRET_PATH}:/var/lib/besu/jwtsecret
+    command:
+    - --network={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
+    - --data-path=/var/lib/besu/data
+    
+    # metrics
+    - --metrics-enabled=true
+    - --metrics-host=0.0.0.0
+    - --metrics-port={{.ElMetricsPort}}
+
+    - --engine-rpc-enabled=true
+    - --engine-jwt-secret=/var/lib/besu/jwtsecret
+    - --engine-rpc-port={{.ElAuthPort}}
+    - --engine-host-allowlist=*
+
+
+    # rpc
+    - --rpc-http-enabled=true
+    - --rpc-http-host=*
+    - --rpc-http-port={{.ElApiPort}}
+    - --rpc-http-api=ETH,NET,CLIQUE,DEBUG,MINER,NET,PERM,ADMIN,EEA,TXPOOL,PRIV,WEB3
+    - --rpc-http-cors-origins=*
+
+
+    - --host-whitelist=*
+
+
+    restart: unless-stopped
+    mem_swappiness: 0
+{{ end }}
