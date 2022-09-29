@@ -53,7 +53,10 @@ func versionFromGit() string {
 		return ""
 	}
 	outVersion := string(out)
-	return outVersion[:len(outVersion)-1]
+	if len(outVersion) > 0 {
+		return outVersion[:len(outVersion)-1]
+	}
+	return outVersion
 }
 
 func latestVersionOnGithub() (string, error) {
