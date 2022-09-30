@@ -42,21 +42,26 @@ var Version string
 
 func init() {
 	if Version == "" {
-		Version = versionFromGit()
+		version, err := versionFromGit()
+		if err != nil {
+			Version = "v0.0.0"
+		} else {
+			Version = version
+		}
 	}
 }
 
-func versionFromGit() string {
+func versionFromGit() (string, error) {
 	cmd := "git tag | sort | tail -n 1"
 	out, err := exec.Command("bash", "-c", cmd).Output()
 	if err != nil {
-		return ""
+		return "", err
 	}
 	outVersion := string(out)
 	if len(outVersion) > 0 {
-		return outVersion[:len(outVersion)-1]
+		return outVersion[:len(outVersion)-1], nil
 	}
-	return outVersion
+	return outVersion, errors.New("no version found")
 }
 
 func latestVersionOnGithub() (string, error) {

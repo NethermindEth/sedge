@@ -209,7 +209,7 @@ func TestAssingPorts(t *testing.T) {
 			false,
 		},
 		{
-			"Test case 5, good host and succesive increments",
+			"Test case 5, good host and successive increments",
 			host,
 			map[string]string{"CL": port, "EL": strconv.Itoa(portN + 1)},
 			map[string]string{"CL": strconv.Itoa(portN + 1), "EL": strconv.Itoa(portN + 2)},

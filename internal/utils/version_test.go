@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestGetLatestVersionOnGithub(t *testing.T) {
+func TestVersion(t *testing.T) {
 	tests := []struct {
 		name     string
 		response string
