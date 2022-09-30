@@ -27,9 +27,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var (
-	tail int
-)
+var tail int
 
 // logsCmd represents the logs command
 var logsCmd = &cobra.Command{
