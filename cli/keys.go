@@ -37,10 +37,8 @@ var (
 	existingMnemonic      bool
 )
 
-var (
-	//Windows and Unix path
-	rePath = regexp.MustCompile(`^[a-zA-Z]+:(\\[a-zA-Z0-9_.-]+)+|^~{0,1}\/[a-zA-Z0-9~]+(\/[a-zA-Z0-9_.-]+)+`)
-)
+// Windows and Unix path
+var rePath = regexp.MustCompile(`^[a-zA-Z]+:(\\[a-zA-Z0-9_.-]+)+|^~{0,1}\/[a-zA-Z0-9~]+(\/[a-zA-Z0-9_.-]+)+`)
 
 // keysCmd represents the keys command
 var keysCmd = &cobra.Command{
@@ -90,7 +88,7 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 
 		// Create keystore folder
 		log.Info(configs.GeneratingKeystore)
-		if err := os.MkdirAll(filepath.Join(path, "keystore"), 0766); err != nil {
+		if err := os.MkdirAll(filepath.Join(path, "keystore"), 0o766); err != nil {
 			log.Fatal(err)
 		}
 
@@ -115,7 +113,6 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 
 			log.Warn(configs.ReviewKeystorePath)
 		}
-
 	},
 }
 
@@ -148,7 +145,6 @@ func passwordPrompt() string {
 	}
 
 	result, err := prompt.Run()
-
 	if err != nil {
 		log.Errorf(configs.PromptFailedError, err)
 		return ""
@@ -225,7 +221,6 @@ func eth1WithdrawalPrompt() error {
 	}
 
 	result, err := prompt.Run()
-
 	if err != nil {
 		return fmt.Errorf(configs.PromptFailedError, err)
 	}
