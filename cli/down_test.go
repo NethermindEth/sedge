@@ -77,7 +77,7 @@ func buildDownTestCase(t *testing.T, caseName string, isErr bool) *downCmdTestCa
 }
 
 func TestDownCmd(t *testing.T) {
-	//TODO: allow to test error programs
+	// TODO: allow to test error programs
 	tcs := []downCmdTestCase{
 		*buildDownTestCase(t, "case_1", false),
 	}
