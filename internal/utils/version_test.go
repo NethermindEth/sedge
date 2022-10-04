@@ -15,14 +15,6 @@ func TestVersion(t *testing.T) {
 		err      error
 	}{
 		{
-			name:     "Version 3",
-			response: `[{"name": "v0.3.0"}]`,
-			tag:      "v0.3.0",
-			want:     true,
-			status:   200,
-			err:      nil,
-		},
-		{
 			name:     "No Version",
 			response: `[]`,
 			want:     false,
