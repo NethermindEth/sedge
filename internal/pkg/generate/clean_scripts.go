@@ -11,13 +11,11 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var (
-	protectedFlags = map[string]bool{
-		"bootnodes":             true,
-		"bootstrap-node":        true,
-		"fallback-web3provider": true,
-	}
-)
+var protectedFlags = map[string]bool{
+	"bootnodes":             true,
+	"bootstrap-node":        true,
+	"fallback-web3provider": true,
+}
 
 /*
 cleanFlags
@@ -224,7 +222,7 @@ func CleanEnvFile(envFilePath string) error {
 		return fmt.Errorf(configs.CleaningEnvFileError, err)
 	}
 
-	var ReENVVAR = regexp.MustCompile(`^ *(?P<VAR>[a-zA-Z0-9_]+) *= *(?P<VAL>.+) *$`) // Variable regex
+	ReENVVAR := regexp.MustCompile(`^ *(?P<VAR>[a-zA-Z0-9_]+) *= *(?P<VAL>.+) *$`) // Variable regex
 
 	// Find duplicated vars
 	existingVars := make(map[string]int, 0)

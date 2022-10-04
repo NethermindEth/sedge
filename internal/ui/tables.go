@@ -78,7 +78,6 @@ returns :-
 None
 */
 func WriteRandomizedClientsTable(w io.Writer, data RandomizedClientsTable) {
-
 	headers := []*simpletable.Cell{
 		{Align: simpletable.AlignCenter, Text: "Type of Client"},
 		{Align: simpletable.AlignCenter, Text: "Randomized Client"},
@@ -123,9 +122,9 @@ returns :-
 None
 */
 func WriteSimpleTable(w io.Writer, data *SimpleTableData) {
-	//Initialize table
+	// Initialize table
 	table := simpletable.New()
-	//Get maxium dimensions
+	// Get maxium dimensions
 	n := 0
 	for _, column := range data.Columns {
 		if n < len(column) {
@@ -138,7 +137,7 @@ func WriteSimpleTable(w io.Writer, data *SimpleTableData) {
 		return
 	}
 
-	//Add headers to table
+	// Add headers to table
 	table.Header = &simpletable.Header{
 		Cells: data.Headers,
 	}
@@ -151,29 +150,29 @@ func WriteSimpleTable(w io.Writer, data *SimpleTableData) {
 
 	if len(data.Headers) > 0 { // Don't write rows if no headers are provided
 		for x := 0; x < n; x++ {
-			//Initialize new row
+			// Initialize new row
 			row := []*simpletable.Cell{}
-			if data.Enumerate { //Add row number cell
+			if data.Enumerate { // Add row number cell
 				row = append(row, &simpletable.Cell{
 					Align: simpletable.AlignCenter,
 					Text:  fmt.Sprint(x + 1),
 				})
 			}
 			for y := 0; y < m; y++ {
-				if y < len(data.Columns) && x < len(data.Columns[y]) { //Add existing cell to row
+				if y < len(data.Columns) && x < len(data.Columns[y]) { // Add existing cell to row
 					row = append(row, data.Columns[y][x])
-				} else { //Add empty cell to row
+				} else { // Add empty cell to row
 					row = append(row, &simpletable.Cell{
 						Align: data.DefaultAlign,
 						Text:  "-",
 					})
 				}
 			}
-			//Add new row to table
+			// Add new row to table
 			table.Body.Cells = append(table.Body.Cells, row)
 		}
 	}
-	//Print table
+	// Print table
 	table.SetStyle(simpletable.StyleCompact)
 	fmt.Fprintln(w, table.String())
 	fmt.Fprintln(w)
