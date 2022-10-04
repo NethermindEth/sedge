@@ -58,7 +58,7 @@ func TestGetScriptPath(t *testing.T) {
 			if err != nil {
 				t.Errorf("%s failed: %v", descr, err)
 			} else {
-				//TODO: improve results tests
+				// TODO: improve results tests
 
 				// Check if path have correct format for dependency
 				match, err := regexp.MatchString(`^setup/.+/`+input.dependency+`/.*\.sh$`, path)
@@ -66,7 +66,7 @@ func TestGetScriptPath(t *testing.T) {
 					t.Errorf("returned path %s is invalid", path)
 				}
 
-				//TODO: validate if installation path distro is correct
+				// TODO: validate if installation path distro is correct
 			}
 		}
 
@@ -74,7 +74,7 @@ func TestGetScriptPath(t *testing.T) {
 }
 
 func TestDependencySupported(t *testing.T) {
-	if runtime.GOOS != "linux" { //TODO: update when other os's are supported
+	if runtime.GOOS != "linux" { // TODO: update when other os's are supported
 		t.Skipf("this os is not supported")
 	}
 

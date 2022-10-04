@@ -32,10 +32,15 @@ codecov-test: ## unit tests with coverage using the courtney tool
 	@mkdir -p coverage
 	@courtney/courtney -v -o coverage/coverage.out ./...
 
-install-deps: ## Install some project dependencies
+install-gofumpt: ## install gofumpt
+	go install mvdan.cc/gofumpt@latest
+
+install-courtney: ## Install courtney for code coverage
 	@git clone https://github.com/stdevMac/courtney
 	@(cd courtney && go get  ./... && go build courtney.go)
 	@go get ./...
+
+install-deps: | install-gofumpt install-courtney ## Install some project dependencies
 
 coverage: coverage/coverage.out ## show tests coverage
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
@@ -51,8 +56,13 @@ all: compile run ## build and run
 gomod_tidy: ## go mod tidy
 	 go mod tidy
 
-gofmt: ## go fmt
-	go fmt -x ./...
+format: ## run code formatting
+	gofumpt -l -w .
+
+format-check: ## check formatting
+	# assert `gofumpt -l` produces no output
+	test ! $$(gofumpt -l . | tee /dev/stderr)
+
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

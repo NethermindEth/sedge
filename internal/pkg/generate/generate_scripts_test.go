@@ -77,7 +77,7 @@ func generateTestCases(t *testing.T) (tests []generateTestCase) {
 }
 
 func validateGeneratedFiles(t *testing.T, testCase generateTestCase) {
-	//TODO: validate generated files
+	// TODO: validate generated files
 }
 
 func TestGenerateScripts(t *testing.T) {

@@ -3,7 +3,7 @@ module github.com/NethermindEth/sedge
 go 1.18
 
 require (
-	github.com/NethermindEth/posmoni v0.0.0-20220603012828-9d6e0e2ac277
+	github.com/NethermindEth/posmoni v0.0.0-20221003174544-256d5ef32aa1
 	github.com/alexeyco/simpletable v1.0.0
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
 	github.com/creack/pty v1.1.18

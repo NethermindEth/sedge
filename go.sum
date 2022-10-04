@@ -38,8 +38,8 @@ cloud.google.com/go/storage v1.14.0/go.mod h1:GrKmX003DSIwi9o29oFT7YDnHYwZoctc3f
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/NethermindEth/posmoni v0.0.0-20220603012828-9d6e0e2ac277 h1:o10WrS6xotS1X5TlMjfUUZ4GmllkaqMokx3QD5Jrv64=
-github.com/NethermindEth/posmoni v0.0.0-20220603012828-9d6e0e2ac277/go.mod h1:NgjsN32KJrCz+zZNG2DV2+jLZzQDF/yEVX+1vdZZNZs=
+github.com/NethermindEth/posmoni v0.0.0-20221003174544-256d5ef32aa1 h1:9ETptTL5IHYQGQZABih0gCwLpSHYvcGSAHT73u1ZB/c=
+github.com/NethermindEth/posmoni v0.0.0-20221003174544-256d5ef32aa1/go.mod h1:dqNrWME7DOoZdNgKUM7P988XJ5BcEb9UgkJi7nhJXII=
 github.com/alexeyco/simpletable v1.0.0 h1:ZQ+LvJ4bmoeHb+dclF64d0LX+7QAi7awsfCrptZrpHk=
 github.com/alexeyco/simpletable v1.0.0/go.mod h1:VJWVTtGUnW7EKbMRH8cE13SigKGx/1fO2SeeOiGeBkk=
 github.com/antonfisher/nested-logrus-formatter v1.3.1 h1:NFJIr+pzwv5QLHTPyKz9UMEoHck02Q9L0FP13b/xSbQ=
