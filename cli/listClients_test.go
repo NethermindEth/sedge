@@ -80,5 +80,4 @@ func TestListClientsCmd(t *testing.T) {
 			}
 		})
 	}
-
 }

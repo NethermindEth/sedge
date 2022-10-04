@@ -62,7 +62,7 @@ func HandleInstructions(dependencies []string, handler func(string) error) (err 
 					return
 				}
 			} else {
-				//TODO: Get OS version for other OS like Windows and Darwin
+				// TODO: Get OS version for other OS like Windows and Darwin
 				OS = runtime.GOOS
 			}
 			log.Errorf(configs.InstallNotSupported, dependency, OS)

@@ -21,7 +21,7 @@ import (
 )
 
 func validateGeneratedConfig(t *testing.T, path string) {
-	//TODO: validate generated config
+	// TODO: validate generated config
 }
 
 func TestGenerateConfig(t *testing.T) {
