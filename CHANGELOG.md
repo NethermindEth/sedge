@@ -8,7 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Add check for newer releases on GitHub
+- Check for new Sedge releases on GitHub. Sedge will now report if there is a new version released.
+
+### Fixed
+- Print generated files as string instead of []byte
+
 
 ## [v0.3.0] - 2022-09-15
 
