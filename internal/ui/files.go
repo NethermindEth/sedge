@@ -34,6 +34,6 @@ func PrintFileContent(w io.Writer, path string) error {
 		return fmt.Errorf(configs.PrintFileError, err)
 	}
 
-	fmt.Fprintln(w, content)
+	fmt.Fprintln(w, string(content))
 	return nil
 }

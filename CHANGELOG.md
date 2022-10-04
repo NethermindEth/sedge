@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Print generated files as string instead of []byte
+
 ## [v0.3.0] - 2022-09-15
 
 ### Added

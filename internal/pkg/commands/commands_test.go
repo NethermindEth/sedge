@@ -22,7 +22,7 @@ import (
 )
 
 func TestRunCmd(t *testing.T) {
-	//TODO: improve test and fix pty commands tests
+	// TODO: improve test and fix pty commands tests
 	inputs := []struct {
 		cmd       string
 		getOutput bool
@@ -124,7 +124,7 @@ func TestRunBashScript(t *testing.T) {
 	}
 }
 
-//TODO: add test cases for building and executing docker commands
+// TODO: add test cases for building and executing docker commands
 
 func TestBuildCommands(t *testing.T) {
 	inputs := [...]struct {
