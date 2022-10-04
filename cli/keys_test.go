@@ -78,7 +78,7 @@ func buildKeysTestCase(t *testing.T, caseName, caseNetwork string, mnemonic, isE
 }
 
 func TestKeysCmd(t *testing.T) {
-	//TODO: allow to test error programs
+	// TODO: allow to test error programs
 	tcs := []keysCmdTestCase{
 		*buildKeysTestCase(t, "case_1", "mainnet", false, false),
 		*buildKeysTestCase(t, "case_1", "mainnet", true, false),

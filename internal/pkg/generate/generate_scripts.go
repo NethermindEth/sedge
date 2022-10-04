@@ -49,7 +49,7 @@ Error if any
 func GenerateScripts(gd GenerationData) (result GenerationResults, err error) {
 	// Create scripts directory if not exists
 	if _, err := os.Stat(gd.GenerationPath); os.IsNotExist(err) {
-		err = os.MkdirAll(gd.GenerationPath, 0755)
+		err = os.MkdirAll(gd.GenerationPath, 0o755)
 		if err != nil {
 			return GenerationResults{}, err
 		}
@@ -368,7 +368,7 @@ func writeTemplateToFile(template *template.Template, file string, data interfac
 	var f *os.File
 
 	if append {
-		f, err = os.OpenFile(file, os.O_APPEND|os.O_WRONLY, 0666)
+		f, err = os.OpenFile(file, os.O_APPEND|os.O_WRONLY, 0o666)
 		if err != nil {
 			return fmt.Errorf(configs.CreatingFileError, file, err)
 		}

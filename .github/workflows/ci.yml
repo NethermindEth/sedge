@@ -20,8 +20,8 @@ jobs:
       with:
         go-version: '1.18.2'
 
-    - name: Check Go fmt
-      run: make gofmt
+    - name: Check Format
+      run: make format-check
 
     - name: Check go mod status
       run: |
@@ -34,5 +34,5 @@ jobs:
           exit 1
         fi
 
-    - name: Build
-      run: make build
+    - name: Check build
+      run: make compile

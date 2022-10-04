@@ -89,7 +89,7 @@ func buildLogsTestCase(t *testing.T, testName string, tail int, services []strin
 
 	fdOut := new(bytes.Buffer)
 
-	//TODO: allow modification of the simple runner
+	// TODO: allow modification of the simple runner
 	runner := test.SimpleCMDRunner{
 		SRunCMD: func(c commands.Command) (string, error) {
 			if strings.Contains(c.Cmd, "docker compose") {
