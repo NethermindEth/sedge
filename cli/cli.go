@@ -352,7 +352,7 @@ func init() {
 
 	cliCmd.Flags().BoolVar(&noMev, "no-mev-boost", false, "Not use mev-boost if supported")
 
-	cliCmd.Flags().StringVarP(&mevImage, "mev-boost-image", "m", "", "Custom docker image to use for Mev Boost. Example: 'sedge cli --mev-image lashbots/mev-boost:latest-portable'")
+	cliCmd.Flags().StringVarP(&mevImage, "mev-boost-image", "m", "", "Custom docker image to use for Mev Boost. Example: 'sedge cli --mev-boost-image flashbots/mev-boost:latest-portable'")
 
 	cliCmd.Flags().BoolVar(&noValidator, "no-validator", false, "Exclude the validator from the full node setup. Designed for execution and consensus nodes setup without a validator node. Exclude also the validator from other flags. If set, mev-boost will not be used.")
 
