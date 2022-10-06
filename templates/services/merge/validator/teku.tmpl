@@ -32,7 +32,7 @@
       - --initial-state=/network_config/genesis.ssz{{end}}{{if .VlRemoteCfg}}
       - --network=/network_config/config.yml{{end}}{{end}}
       - --beacon-node-api-endpoint=${CC_API_URL}
-      - --data-path=/data/validator
+      - --data-path=/data
       - --log-destination=CONSOLE
       - --validators-graffiti=${GRAFFITI}
       - --validator-keys=/data/keys:/data/passwords
