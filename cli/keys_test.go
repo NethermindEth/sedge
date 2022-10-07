@@ -84,7 +84,7 @@ func buildKeysTestCase(t *testing.T, caseName, caseDataPath, caseNetwork string,
 	tc.network = network
 	tc.keystorePath = keystorePath
 	tc.mnemnonicPath = mnemonicPath
-	tc.passphrasePath = passphrasePath
+	tc.passphrasePath = filepath.Join(configPath, "pass.txt")
 	tc.existingVal = existing
 	tc.numVal = num
 	tc.fdOut = new(bytes.Buffer)
