@@ -93,7 +93,6 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 			}
 		}
 		if passphrase == "" || len(passphrase) < 8 {
-
 			passphrase = passphrasePrompt()
 		}
 
@@ -113,7 +112,7 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 				log.Fatal(err)
 			}
 			mnemonic = candidate
-			log.Infof("\n\n%s\n\n", mnemonic)
+			fmt.Fprintf(cmd.OutOrStdout(), "Mnemonic:\n\n%s\n\n", mnemonic)
 			prompt := promptui.Prompt{
 				Label: configs.StoreMnemonic,
 			}
@@ -131,7 +130,6 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 			numberVal = numberValPrompt()
 		}
 
-		log.Info(configs.GeneratingKeystore)
 		keystorePath := filepath.Join(path, "keystore")
 
 		data := keystores.ValidatorKeysGenData{
@@ -149,13 +147,16 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 			AsJsonList:          true,
 		}
 
+		log.Info(configs.GeneratingKeystores)
 		if err := keystores.CreateKeystores(data); err != nil {
 			log.Fatal(err)
 		}
-
+		log.Info(configs.KeystoresGenerated)
+		log.Info(configs.GeneratingDepositData)
 		if err := keystores.CreateDepositData(data); err != nil {
 			log.Fatal(err)
 		}
+		log.Info(configs.DepositDataGenerated)
 	},
 }
 
@@ -252,7 +253,7 @@ func existingValPrompt() int64 {
 	}
 
 	prompt = promptui.Prompt{
-		Label:    "Please re-enter the number of previous validators keystores generated to confirm. Press Ctrl+C to retry",
+		Label:    "Please confirm the number of previous validators keystores generated. Press Ctrl+C to retry",
 		Validate: validate,
 	}
 
@@ -271,7 +272,7 @@ func numberValPrompt() int64 {
 	// notest
 	validate := func(input string) error {
 		if value, err := strconv.ParseInt(input, 10, 64); err != nil || value <= 0 {
-			if value < 0 {
+			if value <= 0 {
 				err = fmt.Errorf("value must be greater than 0")
 			}
 			return fmt.Errorf(configs.InvalidNumberOfValidatorsError, err)
@@ -287,25 +288,6 @@ func numberValPrompt() int64 {
 	result, err := prompt.Run()
 	if err != nil {
 		log.Fatalf(configs.PromptFailedError, err)
-	}
-
-	validate = func(input string) error {
-		if input != result {
-			return errors.New(configs.NumberOfValidatorsRetryError)
-		}
-		return nil
-	}
-
-	prompt = promptui.Prompt{
-		Label:    "Please re-enter the number of validators keystores to generate. Press Ctrl+C to retry",
-		Validate: validate,
-	}
-
-	_, err = prompt.Run()
-
-	if err != nil {
-		log.Errorf(configs.PromptFailedError, err)
-		return numberValPrompt()
 	}
 
 	index, _ := strconv.ParseInt(result, 10, 64)
