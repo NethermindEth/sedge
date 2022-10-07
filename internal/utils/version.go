@@ -18,9 +18,9 @@ package utils
 import (
 	"context"
 	"errors"
-	"os/exec"
-
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/google/go-github/v47/github"
+	"text/template"
 )
 
 const (
@@ -63,12 +63,24 @@ a. err error
 Error if any
 */
 func versionFromGit() (string, error) {
-	cmd := "git tag | sort | tail -n 1"
-	out, err := exec.Command("bash", "-c", cmd).Output()
+	const cmd = `
+#!/bin/bash
+
+git tag | sort | tail -n 1
+`
+	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
+		RunAsAdmin: false,
+	})
+	tt := template.Must(template.New("").Parse(cmd))
+	out, err := r.RunBash(commands.BashScript{
+		Tmp:       tt,
+		GetOutput: true,
+		Data:      struct{}{},
+	})
 	if err != nil {
 		return "", err
 	}
-	outVersion := string(out)
+	outVersion := out
 	if len(outVersion) > 0 {
 		return outVersion[:len(outVersion)-1], nil
 	}
