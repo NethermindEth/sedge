@@ -7,8 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+### Added 
+
 - Check for new Sedge releases on GitHub. Sedge will now report if there is a new version released.
+- Add `--mev-boost-image` flag to specify which Mev Boost docker image sedge uses.
 
 ### Fixed
 - Print generated files as string instead of []byte
