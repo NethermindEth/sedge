@@ -117,13 +117,6 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 			fmt.Fscan(cmd.InOrStdin())
 		}
 
-		// Create keystore folder
-		log.Info(configs.GeneratingKeystore)
-		keystorePath := filepath.Join(path, "keystore")
-		if err := os.MkdirAll(keystorePath, 0o766); err != nil {
-			log.Fatal(err)
-		}
-
 		// Get indexes
 		if mnemonicPath == "" {
 			existingVal = 0
@@ -134,6 +127,9 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 		if numberVal <= 0 {
 			numberVal = numberValPrompt()
 		}
+
+		log.Info(configs.GeneratingKeystore)
+		keystorePath := filepath.Join(path, "keystore")
 
 		data := keystores.ValidatorKeysGenData{
 			Mnemonic:    mnemonic,
@@ -236,7 +232,7 @@ func existingValPrompt() int64 {
 	}
 
 	prompt := promptui.Prompt{
-		Label:    "Please enter the number of previous validators keystores generated with this mnemonic:",
+		Label:    "Please enter the number of previous validators keystores generated with this mnemonic",
 		Validate: validate,
 	}
 
@@ -281,7 +277,7 @@ func numberValPrompt() int64 {
 	}
 
 	prompt := promptui.Prompt{
-		Label:    "Please enter the number of validators keystores to generate with this mnemonic:",
+		Label:    "Please enter the number of validators keystores to generate with this mnemonic",
 		Validate: validate,
 	}
 
