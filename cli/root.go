@@ -17,12 +17,12 @@ package cli
 
 import (
 	"fmt"
-	"github.com/NethermindEth/sedge/internal/utils"
 	"os"
 	"strings"
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	"github.com/NethermindEth/sedge/internal/utils"
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -107,11 +107,11 @@ func checkVersion() {
 	// Check version
 	ok, err := utils.IsLatestVersion()
 	if err != nil {
-		log.Warnf("%s %e", utils.MsgUnableToCheckVersion, err)
+		log.Warnf("%s %e", configs.UnableToCheckVersion, err)
 	} else if !ok {
-		log.Warnf("%s %s", utils.MsgNeedVersionUpdate, utils.CurrentVersion())
+		log.Warnf("%s %s", configs.NeedVersionUpdate, utils.CurrentVersion())
 	} else {
-		log.Infof("%s %s", utils.MsgVersionUpdated, utils.CurrentVersion())
+		log.Infof("%s %s", configs.VersionUpdated, utils.CurrentVersion())
 	}
 }
 

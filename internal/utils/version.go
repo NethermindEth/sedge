@@ -18,8 +18,9 @@ package utils
 import (
 	"context"
 	"errors"
-	"github.com/google/go-github/v47/github"
 	"os/exec"
+
+	"github.com/google/go-github/v47/github"
 )
 
 const (
@@ -27,17 +28,14 @@ const (
 	owner = "NethermindEth"
 	// repo is the name of the repository
 	repo = "sedge"
-	// MsgNeedVersionUpdate is the message to display when a new Version is available
-	MsgUnableToCheckVersion = "Unable to check for new Version. Please check manually at " +
-		"https://github.com/NethermindEth/sedge/releases, with error:"
-	MsgNeedVersionUpdate = "A new Version of sedge is available. Please update to the latest Version. See " +
-		"https://github.com/NethermindEth/sedge/releases for more information. Latest detected tag:"
-	MsgVersionUpdated = "You are running the latest version of sedge. Version: "
 )
 
-var ErrorNoTag = errors.New("no tag found on Github")
-var ErrorCheckingVersion = errors.New("error while checking for new Version, please check your internet connection")
+var (
+	ErrorNoTag           = errors.New("no tag found on Github")
+	ErrorCheckingVersion = errors.New("error while checking for new Version, please check your internet connection")
+)
 
+// Version represents the current version of Sedge
 var Version string
 
 func init() {
@@ -51,6 +49,19 @@ func init() {
 	}
 }
 
+/*
+versionFromGit :
+Extract the version using git on the terminal.
+
+params :-
+None
+
+returns :-
+a. string
+Version extracted from git calling a command on the terminal
+a. err error
+Error if any
+*/
 func versionFromGit() (string, error) {
 	cmd := "git tag | sort | tail -n 1"
 	out, err := exec.Command("bash", "-c", cmd).Output()
@@ -64,6 +75,19 @@ func versionFromGit() (string, error) {
 	return outVersion, errors.New("no version found")
 }
 
+/*
+latestVersionOnGithub :
+Fetch the latest version on GitHub
+
+params :-
+None
+
+returns :-
+a. string
+Version of Sedge fetched from GitHub
+a. err error
+Error if any
+*/
 func latestVersionOnGithub() (string, error) {
 	client := github.NewClient(nil)
 	tags, _, err := client.Repositories.ListTags(context.Background(), owner, repo, nil)
@@ -77,10 +101,34 @@ func latestVersionOnGithub() (string, error) {
 	return "", ErrorNoTag
 }
 
+/*
+CurrentVersion :
+Export the current version of Sedge
+
+params :-
+None
+
+returns :-
+a. string
+Return the current version of Sedge
+*/
 func CurrentVersion() string {
 	return Version
 }
 
+/*
+IsLatestVersion :
+Check if we are running the latest version that was released on GitHub
+
+params :-
+None
+
+returns :-
+a. bool
+Returns true if we are on the latest version, but false if we have a different version that latest on Github.
+a. err error
+Error if any
+*/
 func IsLatestVersion() (bool, error) {
 	versionOnGithub, err := latestVersionOnGithub()
 	if err != nil {

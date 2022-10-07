@@ -17,6 +17,7 @@ package cli
 
 import (
 	"fmt"
+
 	"github.com/NethermindEth/sedge/internal/utils"
 
 	"github.com/spf13/cobra"

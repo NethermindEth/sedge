@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"github.com/jarcoal/httpmock"
 	"testing"
+
+	"github.com/jarcoal/httpmock"
 )
 
 func TestVersion(t *testing.T) {
@@ -39,7 +40,6 @@ func TestVersion(t *testing.T) {
 			httpmock.RegisterResponder("GET", "https://api.github.com/repos/NethermindEth/sedge/tags",
 				httpmock.NewStringResponder(tt.status, tt.response))
 			got, err := IsLatestVersion()
-
 			if err != nil {
 				if err != tt.err {
 					t.Errorf("LatestVersionOnGithub() error = %v, wantErr %v", err, tt.err)
