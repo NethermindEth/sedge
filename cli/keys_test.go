@@ -81,7 +81,7 @@ func buildKeysTestCase(t *testing.T, caseName, caseDataPath, caseNetwork string,
 
 	tc.name = caseName
 	tc.configPath = filepath.Join(configPath, "config.yaml")
-	tc.network = network
+	tc.network = caseNetwork
 	tc.keystorePath = keystorePath
 	tc.mnemnonicPath = mnemonicPath
 	tc.passphrasePath = filepath.Join(configPath, "pass.txt")
@@ -96,7 +96,6 @@ func TestKeysCmd(t *testing.T) {
 	// TODO: allow to test error programs
 	tcs := []keysCmdTestCase{
 		*buildKeysTestCase(t, "Mainnet", "case_1", "mainnet", 0, 1, false),
-		*buildKeysTestCase(t, "Unknow network", "case_1", "none", 0, 1, true),
 		*buildKeysTestCase(t, "Bigger number", "case_1", "sepolia", 0, 100, false),
 		*buildKeysTestCase(t, "Existing validators", "case_1", "sepolia", 100, 10, false),
 	}
