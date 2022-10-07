@@ -112,13 +112,15 @@ func TestKeysCmd(t *testing.T) {
 					"--config", tc.configPath,
 					"--network", tc.network,
 					"--path", tc.keystorePath,
-					"--existing", string(tc.existingVal),
-					"--num-validators", string(tc.numVal),
+					"--mnemonic-path", tc.mnemnonicPath,
+					"--passphrase-path", tc.passphrasePath,
+					"--existing", fmt.Sprint(tc.existingVal),
+					"--num-validators", fmt.Sprint(tc.numVal),
 				})
 				rootCmd.SetOut(tc.fdOut)
 				log.SetOutput(tc.fdOut)
 
-				descr := fmt.Sprintf("sedge keys --network %s --existing %s --num-validators %s", tc.network, tc.existingVal, tc.numVal)
+				descr := fmt.Sprintf("sedge keys --network %s --existing %d --num-validators %d", tc.network, tc.existingVal, tc.numVal)
 				err := rootCmd.Execute()
 				if tc.isErr && err == nil {
 					t.Errorf("%s expected to fail", descr)
