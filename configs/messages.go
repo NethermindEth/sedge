@@ -88,7 +88,7 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 	KeystorePasswordCreated         = "keystore_password.txt on keystore folder created with provided password"
 	MnemonicTips                    = "The following mnemonic is going to be used to create the validator keystore. Please save it carefully. It can be used to generate the keystore folder again. If you lose the password and mnemonic, access to your keystore will be lost forever!"
 	GeneratingMnemonic              = "Existing mnemonic not provided. Generating mnemonic for validator keystore:"
-	StoreMnemonic                   = "\n\n%s\n\nMake sure to store your mnemonic somewhere safe. Losing it could end in the lost of your validators. Press enter to continue" // TODO: improve warning message
+	StoreMnemonic                   = "Make sure to store your mnemonic somewhere safe. Losing it could end in the lost of your validators. Press enter to continue" // TODO: improve warning message
 	PreparingTekuDatadir            = "Preparing teku datadirs (must have full read/write/execute permissions to work)"
 	GettingContainersIP             = "Proceding to get execution and consensus containers IP address for the monitoring tool"
 	WaitingForNodesToStart          = "Waiting a minute for nodes to start"

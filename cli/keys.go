@@ -18,7 +18,6 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -74,10 +73,11 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// Prompt for eth1WithdrawalAddress
-		if eth1WithdrawalAddress == "" {
-			eth1WithdrawalPrompt()
-		}
+		// TODO: allow usage of withdrawal address
+		// // Prompt for eth1WithdrawalAddress
+		// if eth1WithdrawalAddress == "" {
+		// 	eth1WithdrawalPrompt()
+		// }
 
 		// Get keystore passphrase
 		var passphrase string
@@ -113,8 +113,11 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 				log.Fatal(err)
 			}
 			mnemonic = candidate
-			log.Warnf(configs.StoreMnemonic, mnemonic)
-			fmt.Fscan(cmd.InOrStdin())
+			log.Infof("\n\n%s\n\n", mnemonic)
+			prompt := promptui.Prompt{
+				Label: configs.StoreMnemonic,
+			}
+			prompt.Run()
 		}
 
 		// Get indexes
@@ -164,7 +167,7 @@ func init() {
 
 	keysCmd.Flags().StringVarP(&path, "path", "p", configs.DefaultDockerComposeScriptsPath, "Absolute path to keystore folder. e.g. /home/user/keystore")
 
-	keysCmd.Flags().StringVar(&eth1WithdrawalAddress, "eth1-withdrawal-address", "", "If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
+	// keysCmd.Flags().StringVar(&eth1WithdrawalAddress, "eth1-withdrawal-address", "", "If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
 
 	keysCmd.Flags().StringVar(&mnemonicPath, "mnemonic-path", "", "Path to file with a existing mnemonic to use.")
 
@@ -185,7 +188,7 @@ func passphrasePrompt() string {
 	}
 
 	prompt := promptui.Prompt{
-		Label:    "Please enter the password you will use for the validator keystore",
+		Label:    "Please enter the passphrase you will use for the validator keystore",
 		Validate: validate,
 		Mask:     '*',
 	}
@@ -204,7 +207,7 @@ func passphrasePrompt() string {
 	}
 
 	prompt = promptui.Prompt{
-		Label:    "Please re-enter the password. Press Ctrl+C to retry",
+		Label:    "Please re-enter the passphrase. Press Ctrl+C to retry",
 		Validate: validate,
 		Mask:     '*',
 	}
@@ -267,9 +270,9 @@ func existingValPrompt() int64 {
 func numberValPrompt() int64 {
 	// notest
 	validate := func(input string) error {
-		if value, err := strconv.ParseInt(input, 10, 64); err != nil || value < 0 {
+		if value, err := strconv.ParseInt(input, 10, 64); err != nil || value <= 0 {
 			if value < 0 {
-				err = fmt.Errorf("value must be positive")
+				err = fmt.Errorf("value must be greater than 0")
 			}
 			return fmt.Errorf(configs.InvalidNumberOfValidatorsError, err)
 		}
@@ -294,7 +297,7 @@ func numberValPrompt() int64 {
 	}
 
 	prompt = promptui.Prompt{
-		Label:    "Please re-enter the number of validators keystores to genarete. Press Ctrl+C to retry",
+		Label:    "Please re-enter the number of validators keystores to generate. Press Ctrl+C to retry",
 		Validate: validate,
 	}
 
@@ -307,39 +310,6 @@ func numberValPrompt() int64 {
 
 	index, _ := strconv.ParseInt(result, 10, 64)
 	return index
-}
-
-func createKeystorePassword(password string) error {
-	log.Debug(configs.CreatingKeystorePassword)
-
-	// Create file keystore_password.txt
-	file, err := os.Create(filepath.Join(path, "keystore", "keystore_password.txt"))
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	// Write password to file
-	_, err = file.WriteString(password)
-	if err != nil {
-		return err
-	}
-
-	log.Info(configs.KeystorePasswordCreated)
-	return nil
-}
-
-// Check if keystore folder is not empty
-func emptyKeystore() bool {
-	f, err := os.Open(filepath.Join(path, "keystore"))
-	if err != nil {
-		return false
-	}
-	defer f.Close()
-
-	_, err = f.Readdirnames(1)
-	// Either not empty or error, suits both cases
-	return err == io.EOF
 }
 
 func eth1WithdrawalPrompt() error {
