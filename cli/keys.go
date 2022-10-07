@@ -19,22 +19,28 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
-	"strings"
+	"strconv"
 
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/keystores"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/manifoldco/promptui"
+	eth2 "github.com/protolambda/zrnt/eth2/configs"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var (
 	path                  string
+	mnemonicPath          string
+	passphrasePath        string
 	eth1WithdrawalAddress string
-	existingMnemonic      bool
+	existingVal           int64
+	numberVal             int64
 )
 
 // Windows and Unix path
@@ -49,6 +55,15 @@ var keysCmd = &cobra.Command{
 New mnemonic will be generated if -e/--existing flag is not provided.`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		var err error
+		// Validate network
+		networks, err := utils.SupportedNetworks()
+		if err != nil {
+			log.Fatalf(configs.NetworkValidationFailedError, err)
+		}
+		if !utils.Contains(networks, network) {
+			log.Fatalf(configs.UnknownNetworkError, network)
+		}
+
 		// Ensure that path is absolute
 		log.Debugf("Path to keystore file: %s", path)
 		if !filepath.IsAbs(path) {
@@ -59,59 +74,88 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Validate network when several networks are supported
-
-		// Check if dependencies are installed. Keep checking dependencies until they are all installed
-		for pending := utils.CheckDependencies([]string{"docker"}); len(pending) > 0; {
-			log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
-			if install {
-				// Install dependencies directly
-				if err := installDependencies(pending); err != nil {
-					log.Fatal(err)
-				}
-			} else {
-				// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
-				if err := installOrShowInstructions(pending); err != nil {
-					log.Fatal(err)
-				}
-			}
-		}
-		log.Info(configs.DependenciesOK)
-
 		// Prompt for eth1WithdrawalAddress
 		if eth1WithdrawalAddress == "" {
 			eth1WithdrawalPrompt()
 		}
 
-		// Get keystore password
-		password := passwordPrompt()
+		// Get keystore passphrase
+		var passphrase string
+		if passphrasePath != "" {
+			content, err := readFileContent(passphrasePath)
+			if err != nil {
+				log.Fatalf(configs.PassphraseReadFileError, err)
+			}
+			if len(passphrase) < 8 {
+				log.Warn(configs.KeystorePasswordError)
+			} else {
+				passphrase = content
+			}
+		}
+		if passphrase == "" || len(passphrase) < 8 {
+
+			passphrase = passphrasePrompt()
+		}
+
+		// Get or generate mnemonic
+		var mnemonic string
+		if mnemonicPath != "" {
+			content, err := readFileContent(mnemonicPath)
+			if err != nil {
+				log.Fatalf(configs.MnemonicReadFileError, err)
+			}
+			mnemonic = content
+		}
+		if mnemonic == "" {
+			log.Warn(configs.GeneratingMnemonic)
+			candidate, err := keystores.CreateMnemonic()
+			if err != nil {
+				log.Fatal(err)
+			}
+			mnemonic = candidate
+			log.Warnf(configs.StoreMnemonic, mnemonic)
+			fmt.Fscan(cmd.InOrStdin())
+		}
 
 		// Create keystore folder
 		log.Info(configs.GeneratingKeystore)
-		if err := os.MkdirAll(filepath.Join(path, "keystore"), 0o766); err != nil {
+		keystorePath := filepath.Join(path, "keystore")
+		if err := os.MkdirAll(keystorePath, 0o766); err != nil {
 			log.Fatal(err)
 		}
 
-		keystorePath := filepath.Join(path, "keystore", "validator_keys")
-		data := utils.ValidatorKeyData{
-			Existing:              existingMnemonic,
-			Network:               network,
-			Path:                  keystorePath,
-			Password:              password,
-			Eth1WithdrawalAddress: eth1WithdrawalAddress,
-		}
-		if err := utils.GenerateValidatorKey(data); err != nil {
-			log.Fatalf(configs.GeneratingKeystoreError, err)
+		// Get indexes
+		if mnemonicPath == "" {
+			existingVal = 0
+		} else if existingVal < 0 {
+			existingVal = existingValPrompt()
 		}
 
-		// Check if keystore generation went ok
-		if !emptyKeystore() {
-			log.Infof(configs.KeysFoundAt, keystorePath)
-			if err := createKeystorePassword(password); err != nil {
-				log.Fatalf(configs.CreatingKeystorePasswordError, err)
-			}
+		if numberVal <= 0 {
+			numberVal = numberValPrompt()
+		}
 
-			log.Warn(configs.ReviewKeystorePath)
+		data := keystores.ValidatorKeysGenData{
+			Mnemonic:    mnemonic,
+			Passphrase:  passphrase,
+			OutputPath:  keystorePath,
+			MinIndex:    uint64(existingVal),
+			MaxIndex:    uint64(existingVal) + uint64(numberVal),
+			NetworkName: network,
+			ForkVersion: configs.NetworksConfigs[network].GenesisForkVersion,
+			// Constants
+			UseUniquePassphrase: true,
+			Insecure:            false,
+			AmountGwei:          uint64(eth2.Mainnet.MAX_EFFECTIVE_BALANCE),
+			AsJsonList:          true,
+		}
+
+		if err := keystores.CreateKeystores(data); err != nil {
+			log.Fatal(err)
+		}
+
+		if err := keystores.CreateDepositData(data); err != nil {
+			log.Fatal(err)
 		}
 	},
 }
@@ -126,10 +170,16 @@ func init() {
 
 	keysCmd.Flags().StringVar(&eth1WithdrawalAddress, "eth1-withdrawal-address", "", "If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
 
-	keysCmd.Flags().BoolVarP(&existingMnemonic, "existing", "e", false, "Use existing mnemonic")
+	keysCmd.Flags().StringVar(&mnemonicPath, "mnemonic-path", "", "Path to file with a existing mnemonic to use.")
+
+	keysCmd.Flags().StringVar(&mnemonicPath, "passphrase-path", "", "Path to file with a keystores passphrase to use.")
+
+	keysCmd.Flags().Int64Var(&existingVal, "existing", -1, `"Number of validators generated with the provided mnemonic. Will be ignored if "--mnemonic-path" its not set.`)
+
+	keysCmd.Flags().Int64Var(&numberVal, "num-validators", -1, "Number of validators to generate.")
 }
 
-func passwordPrompt() string {
+func passphrasePrompt() string {
 	// notest
 	validate := func(input string) error {
 		if len(input) < 8 {
@@ -167,10 +217,100 @@ func passwordPrompt() string {
 
 	if err != nil {
 		log.Errorf(configs.PromptFailedError, err)
-		return passwordPrompt()
+		return passphrasePrompt()
 	}
 
 	return result
+}
+
+func existingValPrompt() int64 {
+	// notest
+	validate := func(input string) error {
+		if value, err := strconv.ParseInt(input, 10, 64); err != nil || value < 0 {
+			if value < 0 {
+				err = fmt.Errorf("value must be positive")
+			}
+			return fmt.Errorf(configs.InvalidNumberOfValidatorsError, err)
+		}
+		return nil
+	}
+
+	prompt := promptui.Prompt{
+		Label:    "Please enter the number of previous validators keystores generated with this mnemonic:",
+		Validate: validate,
+	}
+
+	result, err := prompt.Run()
+	if err != nil {
+		log.Fatalf(configs.PromptFailedError, err)
+	}
+
+	validate = func(input string) error {
+		if input != result {
+			return errors.New(configs.NumberOfValidatorsRetryError)
+		}
+		return nil
+	}
+
+	prompt = promptui.Prompt{
+		Label:    "Please re-enter the number of previous validators keystores generated to confirm. Press Ctrl+C to retry",
+		Validate: validate,
+	}
+
+	_, err = prompt.Run()
+
+	if err != nil {
+		log.Errorf(configs.PromptFailedError, err)
+		return existingValPrompt()
+	}
+
+	index, _ := strconv.ParseInt(result, 10, 64)
+	return index
+}
+
+func numberValPrompt() int64 {
+	// notest
+	validate := func(input string) error {
+		if value, err := strconv.ParseInt(input, 10, 64); err != nil || value < 0 {
+			if value < 0 {
+				err = fmt.Errorf("value must be positive")
+			}
+			return fmt.Errorf(configs.InvalidNumberOfValidatorsError, err)
+		}
+		return nil
+	}
+
+	prompt := promptui.Prompt{
+		Label:    "Please enter the number of validators keystores to generate with this mnemonic:",
+		Validate: validate,
+	}
+
+	result, err := prompt.Run()
+	if err != nil {
+		log.Fatalf(configs.PromptFailedError, err)
+	}
+
+	validate = func(input string) error {
+		if input != result {
+			return errors.New(configs.NumberOfValidatorsRetryError)
+		}
+		return nil
+	}
+
+	prompt = promptui.Prompt{
+		Label:    "Please re-enter the number of validators keystores to genarete. Press Ctrl+C to retry",
+		Validate: validate,
+	}
+
+	_, err = prompt.Run()
+
+	if err != nil {
+		log.Errorf(configs.PromptFailedError, err)
+		return numberValPrompt()
+	}
+
+	index, _ := strconv.ParseInt(result, 10, 64)
+	return index
 }
 
 func createKeystorePassword(password string) error {
@@ -227,4 +367,14 @@ func eth1WithdrawalPrompt() error {
 
 	eth1WithdrawalAddress = result
 	return nil
+}
+
+func readFileContent(path string) (string, error) {
+	file, err := os.Open(path)
+	defer file.Close()
+	if err != nil {
+		return "", err
+	}
+	content, err := ioutil.ReadAll(file)
+	return string(content), err
 }
