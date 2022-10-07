@@ -86,7 +86,7 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 			if err != nil {
 				log.Fatalf(configs.PassphraseReadFileError, err)
 			}
-			if len(passphrase) < 8 {
+			if len(content) < 8 {
 				log.Warn(configs.KeystorePasswordError)
 			} else {
 				passphrase = content
