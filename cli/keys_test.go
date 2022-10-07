@@ -104,10 +104,10 @@ func TestKeysCmd(t *testing.T) {
 	t.Cleanup(resetKeysCmd)
 
 	for _, tc := range tcs {
-		resetKeysCmd()
 		t.Run(
 			tc.name,
 			func(t *testing.T) {
+				resetKeysCmd()
 				rootCmd.SetArgs([]string{"keys",
 					"--config", tc.configPath,
 					"--network", tc.network,

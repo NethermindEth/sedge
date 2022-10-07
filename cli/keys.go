@@ -172,7 +172,7 @@ func init() {
 
 	keysCmd.Flags().StringVar(&mnemonicPath, "mnemonic-path", "", "Path to file with a existing mnemonic to use.")
 
-	keysCmd.Flags().StringVar(&mnemonicPath, "passphrase-path", "", "Path to file with a keystores passphrase to use.")
+	keysCmd.Flags().StringVar(&passphrasePath, "passphrase-path", "", "Path to file with a keystores passphrase to use.")
 
 	keysCmd.Flags().Int64Var(&existingVal, "existing", -1, `"Number of validators generated with the provided mnemonic. Will be ignored if "--mnemonic-path" its not set.`)
 
