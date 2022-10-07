@@ -8,4 +8,5 @@ VL_INSTANCE_NAME=LighthouseValidator
 VL_IMAGE_VERSION={{if .VlImage}}{{.VlImage}}{{else}}sigp/lighthouse:v3.1.0{{end}}
 KEYSTORE_DIR={{.KeystoreDir}}
 VL_DATA_DIR={{.VlDataDir}}
+MEV=true
 {{ end }}
