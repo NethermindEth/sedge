@@ -80,7 +80,7 @@ const (
 	KeyEntryGenerationError           = "error generating keystore: could not read sufficient secure random bytes"
 	AESParamsCreationError            = "failed to create AES128CTR params: %w"
 	SecretEncryptionError             = "failed to encrypt secret: %w"
-	KeystoreOutputExistingError       = "output for assignments already exists. aborting"
+	KeystoreOutputExistingError       = "output folder for keystores already exists"
 	KeystoreGenerationError           = "error generating keystores: %v"
 	KeystoreDerivationError           = "keystore %s cannot be derived, continuing to next keystore"
 	KeystoreExistingInWalletError     = "keystore with name \"%s\" already exists"

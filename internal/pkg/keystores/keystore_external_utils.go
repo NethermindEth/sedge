@@ -24,6 +24,7 @@ SOFTWARE.
 package keystores
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
@@ -307,13 +308,9 @@ func CreateDepositData(
 		return errors.New(configs.KeystoreOutputExistingError)
 	}
 
-	file, err := os.OpenFile(depositPath, os.O_CREATE, os.ModePerm)
-	if err != nil {
-		return fmt.Errorf(configs.DepositFileWriteError, err)
-	}
-
+	depositData := new(bytes.Buffer)
 	if vkgd.AsJsonList {
-		file.WriteString("[")
+		depositData.WriteString("[")
 	}
 	for i := vkgd.MinIndex; i < vkgd.MaxIndex; i++ {
 		valAccPath := fmt.Sprintf("m/12381/3600/%d/0/0", i)
@@ -374,10 +371,15 @@ func CreateDepositData(
 		if err != nil {
 			return fmt.Errorf(configs.DepositDataEncodingError, err)
 		}
-		file.WriteString(string(jsonStr))
+		depositData.WriteString(string(jsonStr))
 	}
 	if vkgd.AsJsonList {
-		file.WriteString("]")
+		depositData.WriteString("]")
+	}
+
+	err = ioutil.WriteFile(depositPath, depositData.Bytes(), 0644)
+	if err != nil {
+		return fmt.Errorf(configs.DepositFileWriteError, err)
 	}
 	return nil
 }
