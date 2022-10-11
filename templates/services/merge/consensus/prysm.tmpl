@@ -18,9 +18,10 @@
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
-      - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"{{if .MapAllPorts}}
       - "{{.ClApiPort}}:{{.ClApiPort}}"
-      - "{{.ClAdditionalApiPort}}:{{.ClAdditionalApiPort}}"{{end}}
+      - "{{.ClAdditionalApiPort}}:{{.ClAdditionalApiPort}}"
+      - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"{{if .MapAllPorts}}
+      - {{end}}
     expose:
       - {{.ClApiPort}}
       - {{.ClAdditionalApiPort}}

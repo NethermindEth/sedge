@@ -18,8 +18,9 @@
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
+      - "{{.ClApiPort}}:{{.ClApiPort}}"
       - "{{.ClMetricsPort}}:{{.ClMetricsPort}}/tcp"{{if .MapAllPorts}}
-      - "{{.ClApiPort}}:{{.ClApiPort}}"{{end}}
+      - {{end}}
     expose:
       - {{.ClApiPort}} 
     environment:
