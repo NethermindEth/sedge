@@ -12,7 +12,7 @@ require (
 	github.com/alexeyco/simpletable v1.0.0
 	github.com/creack/pty v1.1.17
 	github.com/google/uuid v1.3.0
-	github.com/herumi/bls-eth-go-binary v0.0.0-20210226112520-435ed8c04ddd
+	github.com/herumi/bls-eth-go-binary v1.28.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/protolambda/go-keystorev4 v0.0.0-20211007151826-f20444f6d564
 	github.com/protolambda/zrnt v0.14.0
