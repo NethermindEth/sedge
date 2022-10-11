@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add `--mev-boost-image` flag to specify which Mev Boost docker image sedge uses.
 
+### Changed
+
+- Changed how `sedge keys` works so it don't use staking deposit cli.
+
 ### Fixed
 
 - Print generated files as string instead of []byte
