@@ -306,7 +306,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 			// time.Sleep(waitingTime)
 			// Track sync of execution and consensus clients
 			// TODO: Parameterize wait arg of trackSync
-			if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*20); err != nil {
+			if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*5); err != nil {
 				return []error{err}
 			}
 
