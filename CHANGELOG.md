@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `--mev-boost-image` flag to specify which Mev Boost docker image sedge uses.
+
+### Fixed
+
+- Print generated files as string instead of []byte
+
 ## [v0.3.0] - 2022-09-15
 
 ### Added
