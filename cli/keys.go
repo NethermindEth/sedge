@@ -18,11 +18,13 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"io"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"text/template"
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/utils"
@@ -174,21 +176,24 @@ func passwordPrompt() string {
 }
 
 func createKeystorePassword(password string) error {
+
 	log.Debug(configs.CreatingKeystorePassword)
-
-	// Create file keystore_password.txt
-	file, err := os.Create(filepath.Join(path, "keystore", "keystore_password.txt"))
+	folderCreation := fmt.Sprintf("sudo mkdir -p %s", filepath.Join(path, "keystore"))
+	fileCreation := fmt.Sprintf("sudo touch %s", filepath.Join(path, "keystore", "keystore_password.txt"))
+	writePassword := fmt.Sprintf("sudo echo %s > %s", password, filepath.Join(path, "keystore", "keystore_password.txt"))
+	cmd := fmt.Sprintf("#!/bin/bash \n %s && %s && %s", folderCreation, fileCreation, writePassword)
+	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
+		RunAsAdmin: false,
+	})
+	tt := template.Must(template.New("").Parse(cmd))
+	_, err := r.RunBash(commands.BashScript{
+		Tmp:       tt,
+		GetOutput: false,
+		Data:      struct{}{},
+	})
 	if err != nil {
 		return err
 	}
-	defer file.Close()
-
-	// Write password to file
-	_, err = file.WriteString(password)
-	if err != nil {
-		return err
-	}
-
 	log.Info(configs.KeystorePasswordCreated)
 	return nil
 }
