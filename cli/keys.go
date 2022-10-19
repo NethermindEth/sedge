@@ -18,6 +18,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"io"
 	"os"
 	"path/filepath"
@@ -25,7 +26,6 @@ import (
 	"strings"
 
 	"github.com/NethermindEth/sedge/configs"
-	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/manifoldco/promptui"
 	log "github.com/sirupsen/logrus"
@@ -176,22 +176,17 @@ func passwordPrompt() string {
 
 func createKeystorePassword(password string) error {
 	log.Debug(configs.CreatingKeystorePassword)
-	fileCreation := fmt.Sprintf("touch %s", filepath.Join(path, "keystore", "keystore_password.txt"))
-	writePassword := fmt.Sprintf("echo %s > %s", password, filepath.Join(path, "keystore", "keystore_password.txt"))
-	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
-		RunAsAdmin: true,
-	})
-	_, err := r.RunCMD(commands.Command{
-		GetOutput: false,
-		Cmd:       fileCreation,
-	})
+	filename := filepath.Join(path, "keystore", "keystore_password.txt")
+	_, err := commands.Runner.RunCMD(commands.Runner.BuildCreateFileCMD(commands.CreateFileOptions{
+		FileName: filename,
+	}))
 	if err != nil {
 		return err
 	}
-	_, err = r.RunCMD(commands.Command{
-		GetOutput: false,
-		Cmd:       writePassword,
-	})
+	_, err = commands.Runner.RunCMD(commands.Runner.BuildEchoToFileCMD(commands.EchoToFileOptions{
+		FileName: filename,
+		Content:  password,
+	}))
 	if err != nil {
 		return err
 	}
