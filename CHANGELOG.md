@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add `--mev-boost-image` flag to specify which Mev Boost docker image sedge uses.
+- Documentation for How to Run a Validator Node on Sedge by yourself, once generated.
 
 ### Fixed
 
