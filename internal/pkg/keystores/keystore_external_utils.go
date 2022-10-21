@@ -31,7 +31,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -191,7 +190,7 @@ func (ww *WalletWriter) WriteOutputs(fpath string, passphrase string) error {
 			}
 			keystoreFilename := fmt.Sprintf("keystore-%s.json", strings.ReplaceAll(e.path, "/", "_"))
 			{
-				if err := ioutil.WriteFile(filepath.Join(valKeysPath, keystoreFilename), dat, 0644); err != nil {
+				if err := os.WriteFile(filepath.Join(valKeysPath, keystoreFilename), dat, 0644); err != nil {
 					return err
 				}
 			}
@@ -200,7 +199,7 @@ func (ww *WalletWriter) WriteOutputs(fpath string, passphrase string) error {
 	}
 	// Write passphrase file
 	passFileName := "keystore_password.txt"
-	if err := ioutil.WriteFile(filepath.Join(fpath, passFileName), []byte(passphrase), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(fpath, passFileName), []byte(passphrase), 0644); err != nil {
 		return err
 	}
 
@@ -377,7 +376,7 @@ func CreateDepositData(
 		depositData.WriteString("]")
 	}
 
-	err = ioutil.WriteFile(depositPath, depositData.Bytes(), 0644)
+	err = os.WriteFile(depositPath, depositData.Bytes(), 0644)
 	if err != nil {
 		return fmt.Errorf(configs.DepositFileWriteError, err)
 	}

@@ -18,7 +18,7 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -323,6 +323,6 @@ func readFileContent(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	content, err := ioutil.ReadAll(file)
+	content, err := io.ReadAll(file)
 	return string(content), err
 }
