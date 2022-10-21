@@ -14,7 +14,7 @@ Each time you execute `sedge cli` to generate the docker-compose file, that file
 
 :::
 
-## Modify the environment variables
+## Executing the cluster
 
 Once generated the docker-compose file, you can modify the environment variables in the `.env` file under the `docker-compose-scripts` directory.
 
@@ -24,4 +24,18 @@ After that, you can run the following command to start the cluster:
 docker compose up -d
 ```
 
+## Stopping the cluster
 
+To stop the cluster, you can run the following command:
+
+```bash
+docker compose stop
+```
+
+## Removing the cluster
+
+To remove the cluster, you can run the following command:
+
+```bash
+docker compose down
+```
