@@ -1,0 +1,27 @@
+---
+sidebar_position: 7
+id: by-yourself
+---
+
+# Running by yourself
+
+Once you use `sedge cli` to generate the docker-compose file, you can run it by yourself, but you will lose the ability
+to use sedge cli to manage the cluster.
+
+:::caution
+
+Each time you execute `sedge cli` to generate the docker-compose file, that file and all modified files under the `docker-compose-scripts` will be overwritten.
+
+:::
+
+## Modify the environment variables
+
+Once generated the docker-compose file, you can modify the environment variables in the `.env` file under the `docker-compose-scripts` directory.
+
+After that, you can run the following command to start the cluster:
+
+```bash
+docker compose up -d
+```
+
+
