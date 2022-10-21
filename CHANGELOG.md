@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add `--mev-boost-image` flag to specify which Mev Boost docker image sedge uses.
 
+### Changed
+
+- Drop support for deprecated networks. (Kiln, Ropsten, Denver)
+- Update Chiado testnet configs
+
 ### Fixed
 
 - Print generated files as string instead of []byte
