@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Dropped support for deprecated networks. (Kiln, Ropsten, Denver)
+- Drop support for deprecated networks. (Kiln, Ropsten, Denver)
+- Update Chiado testnet configs
 
 ### Fixed
 
