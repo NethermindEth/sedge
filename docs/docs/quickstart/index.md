@@ -4,7 +4,7 @@ keywords:
   - sedge
   - installation
   - validator
-  - ropsten
+  - goerli
   - mainnet
   - Ethereum
   - mev-boost
