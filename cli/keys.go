@@ -18,12 +18,13 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"io"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/utils"
@@ -176,6 +177,8 @@ func passwordPrompt() string {
 
 func createKeystorePassword(password string) error {
 	log.Debug(configs.CreatingKeystorePassword)
+
+	// Create file keystore_password.txt
 	filename := filepath.Join(path, "keystore", "keystore_password.txt")
 	_, err := commands.Runner.RunCMD(commands.Runner.BuildCreateFileCMD(commands.CreateFileOptions{
 		FileName: filename,
@@ -183,6 +186,8 @@ func createKeystorePassword(password string) error {
 	if err != nil {
 		return err
 	}
+
+	// Write password to file
 	_, err = commands.Runner.RunCMD(commands.Runner.BuildEchoToFileCMD(commands.EchoToFileOptions{
 		FileName: filename,
 		Content:  password,
@@ -190,6 +195,7 @@ func createKeystorePassword(password string) error {
 	if err != nil {
 		return err
 	}
+
 	log.Info(configs.KeystorePasswordCreated)
 	return nil
 }
