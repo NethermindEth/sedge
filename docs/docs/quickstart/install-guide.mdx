@@ -19,17 +19,20 @@ Downloading any binary from the internet comes with the risk of downloading file
 :::
 
 1. Download correct binary for the machine you want to use for Sedge from the [releases page](https://github.com/NethermindEth/sedge/releases), i.e choose the correct target OS / Arch. For example: if your machine is a Intel / M1 mac then download the `darwin-amd64` / `darwin-arm64` binary. You can also download the binary from the CLI (command line interface) or Terminal with `curl` and `wget`:
+
 <Tabs groupId="download-cmds">
   <TabItem value="curl" label="curl">
 
   ```
-  curl -OL https://github.com/NethermindEth/sedge/releases/download/v<VERSION>/sedge-v<VERSION>-<OS>-<ARCH>
+  curl -L https://github.com/NethermindEth/sedge/releases/download/v<VERSION>/sedge-v<VERSION>-<OS>-<ARCH> --output sedge
   ```
 
   </TabItem>
   <TabItem value="wget" label="wget">
 
-    wget https://github.com/NethermindEth/sedge/releases/download/v<VERSION>/sedge-v<VERSION>-<OS>-<ARCH>
+  ```
+  wget https://github.com/NethermindEth/sedge/releases/download/v<VERSION>/sedge-v<VERSION>-<OS>-<ARCH> -O sedge
+  ```
 
   </TabItem>
 </Tabs>
