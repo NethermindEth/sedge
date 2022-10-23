@@ -28,8 +28,7 @@
       - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
       - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
     command:
-      - validator-client{{if .VlCustomCfg}}{{if .VlRemoteGen}}
-      - --initial-state=/network_config/genesis.ssz{{end}}{{if .VlRemoteCfg}}
+      - validator-client{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - --network=/network_config/config.yml{{end}}{{end}}
       - --beacon-node-api-endpoint=${CC_API_URL}
       - --data-path=/data
