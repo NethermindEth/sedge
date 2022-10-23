@@ -20,12 +20,10 @@ The project **is still on beta** and although it should be stable enough, it mig
     - [**Disclaimer**](#disclaimer-1)
   - [Supported networks and clients](#supported-networks-and-clients)
     - [Mainnet](#mainnet)
-    - [Ropsten](#ropsten)
     - [Sepolia](#sepolia)
     - [Goerli](#goerli)
     - [Gnosis](#gnosis)
     - [Chiado (Gnosis testnet)](#chiado-gnosis-testnet)
-    - [Denver (Gnosis testnet)](#denver-gnosis-testnet)
     - [CL clients with Mev-Boost](#cl-clients-with-mev-boost)
   - [Supported Linux flavours for dependency installation](#supported-linux-flavours-for-dependency-installation)
   - [✅ Roadmap](#-roadmap)
@@ -110,6 +108,7 @@ If you are familiar with `docker`, `docker compose`, and the validator setup, th
 > Although Sedge supports several clients, **is still on beta**. Some settings may not work because -at least on the testnets- the clients are constantly evolving. Please let us know any issues you encounter!
 
 ### **Disclaimer**
+
 While Sedge assists in installing the validator, it is not designed to register or maintain it. Users are solely responsible for ensuring that they monitor and maintain the validator as required, so that they do not incur penalties and/or financial losses. This includes promptly updating the tool to ensure the latest stable releases of clients are used.
 
 Users acknowledge that no warranty is being made of a successful installation. Sedge is a tool and ultimately depends on you to use it correctly and following all the best practice guidance, as found in this README and documentation.
@@ -117,15 +116,6 @@ Users acknowledge that no warranty is being made of a successful installation. S
 ## Supported networks and clients
 
 ### Mainnet
-
-| Execution  | Consensus  | Validator  |
-| ---------- | ---------- | ---------- |
-| Geth       | Lighthouse | Lighthouse |
-| Nethermind | Lodestar   | Lodestar   |
-|            | Prysm      | Prysm      |
-|            | Teku       | Teku       |
-
-### Ropsten
 
 | Execution  | Consensus  | Validator  |
 | ---------- | ---------- | ---------- |
@@ -170,23 +160,14 @@ Users acknowledge that no warranty is being made of a successful installation. S
 |            | Prysm      | Prysm      |
 |            | Teku       | Teku       |
 
-### Denver (Gnosis testnet)
-
-| Execution  | Consensus  | Validator  |
-| ---------- | ---------- | ---------- |
-| Nethermind | Lighthouse | Lighthouse |
-|            | Lodestar   | Lodestar   |
-|            | Prysm      | Prysm      |
-|            | Teku       | Teku       |
-
 ### CL clients with Mev-Boost
 
-| Client     | Mev-Boost | Networks        |
-| ---------- | --------- | --------------- |
-| Lighthouse | yes       | Ropsten, Goerli |
-| Lodestar   | yes       | Goerli          |
-| Prysm      | no*       | Goerli          |
-| Teku       | yes       | Ropsten, Goerli |
+| Client     | Mev-Boost | Networks |
+| ---------- | --------- | -------- |
+| Lighthouse | yes       | Goerli   |
+| Lodestar   | yes       | Goerli   |
+| Prysm      | no*       | Goerli   |
+| Teku       | yes       | Goerli   |
 
 > Settings for Prysm with mev-boost are quite ready, we are waiting for an official and stable Prysm docker image with mev-boost support
 
