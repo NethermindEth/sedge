@@ -13,7 +13,7 @@ require (
 	github.com/jarcoal/httpmock v1.2.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/protolambda/go-keystorev4 v0.0.0-20211007151826-f20444f6d564
-	github.com/protolambda/zrnt v0.28.0
+	github.com/protolambda/zrnt v0.14.0
 	github.com/protolambda/ztyp v0.2.2
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.5.0
@@ -37,7 +37,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/kilic/bls12-381 v0.1.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.1.0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mattn/go-runewidth v0.0.12 // indirect
@@ -47,7 +46,6 @@ require (
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/protolambda/bls12-381-util v0.0.0-20210720105258-a772f2aac13e // indirect
 	github.com/r3labs/sse/v2 v2.7.7 // indirect
 	github.com/rivo/uniseg v0.1.0 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
