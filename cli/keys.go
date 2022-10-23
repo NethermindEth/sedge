@@ -24,8 +24,6 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/NethermindEth/sedge/internal/pkg/commands"
-
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
 	"github.com/NethermindEth/sedge/internal/utils"
