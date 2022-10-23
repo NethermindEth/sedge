@@ -25,18 +25,6 @@ func init() {
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00000000",
 		},
-		"kiln": {
-			Name:               "kiln",
-			RequireJWT:         true,
-			NetworkService:     "merge",
-			GenesisForkVersion: "0x70000069",
-		},
-		"ropsten": {
-			Name:               "ropsten",
-			RequireJWT:         true,
-			NetworkService:     "merge",
-			GenesisForkVersion: "0x80000069",
-		},
 		"goerli": {
 			Name:               "goerli",
 			RequireJWT:         true,
@@ -48,12 +36,6 @@ func init() {
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x90000069",
-		},
-		"denver": {
-			Name:               "denver",
-			RequireJWT:         true,
-			NetworkService:     "merge",
-			GenesisForkVersion: "0x0000006f",
 		},
 		"chiado": {
 			Name:               "chiado",

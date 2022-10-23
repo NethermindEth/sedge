@@ -34,6 +34,10 @@ type CommandRunner interface {
 
 	BuildDockerComposeDownCMD(options DockerComposeDownOptions) Command
 
+	BuildCreateFileCMD(options CreateFileOptions) Command
+
+	BuildEchoToFileCMD(options EchoToFileOptions) Command
+
 	RunCMD(cmd Command) (string, error)
 
 	RunBash(script BashScript) (string, error)

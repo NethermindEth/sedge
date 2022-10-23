@@ -110,4 +110,9 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 	MapAllPortsWarning              = "You are mapping all ports for the clients!!! Make sure this is intended. This could make the clients vulnerable to attacks. Be sure to setup a firewall."
 	CheckpointUrlUsedWarning        = "A Checkpoint Sync Url will be used for the consensus node. Using %s ."
 	NoBootnodesFound                = "No bootnodes found for %s/%s/%s"
+	UnableToCheckVersion            = "Unable to check for new Version. Please check manually at " +
+		"https://github.com/NethermindEth/sedge/releases, with error:"
+	NeedVersionUpdate = "A new Version of sedge is available. Please update to the latest Version. See " +
+		"https://github.com/NethermindEth/sedge/releases for more information. Latest detected tag:"
+	VersionUpdated = "You are running the latest version of sedge. Version: "
 )
