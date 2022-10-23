@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
@@ -55,6 +56,7 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		var err error
 		// Validate network
+		network = strings.ToLower(network)
 		_, ok := configs.NetworksConfigs[network]
 		if !ok {
 			log.Fatalf(configs.UnknownNetworkError, network)
@@ -70,12 +72,13 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: allow usage of withdrawal address
-		// // Prompt for eth1WithdrawalAddress
-		// if eth1WithdrawalAddress == "" {
-		// 	eth1WithdrawalPrompt()
-		// }
+		// Handle mainnet case
+		if network == "mainnet" {
+			runKeysWithStakingDeposit(cmd, args)
+			return
+		}
 
+		// TODO: allow usage of withdrawal address
 		// Get keystore passphrase
 		var passphrase string
 		if passphrasePath != "" {
@@ -165,7 +168,7 @@ func init() {
 
 	keysCmd.Flags().StringVarP(&path, "path", "p", configs.DefaultDockerComposeScriptsPath, "Absolute path to keystore folder. e.g. /home/user/keystore")
 
-	// keysCmd.Flags().StringVar(&eth1WithdrawalAddress, "eth1-withdrawal-address", "", "If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
+	keysCmd.Flags().StringVar(&eth1WithdrawalAddress, "eth1-withdrawal-address", "", "If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
 
 	keysCmd.Flags().StringVar(&mnemonicPath, "mnemonic-path", "", "Path to file with a existing mnemonic to use.")
 

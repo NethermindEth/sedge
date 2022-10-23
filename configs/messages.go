@@ -44,6 +44,7 @@ const (
 	DepositCLIDockerImageUrl        = "nethermindeth/staking-deposit-cli" //"github.com/ethereum/staking-deposit-cli"
 	DepositCLIDockerImageName       = "nethermindeth/staking-deposit-cli" //"deposit-cli:local"
 	GeneratingKeystores             = "Generating keystores..."
+	GeneratingKeystoresLegacy       = "Generating keystore folder"
 	KeystoresGenerated              = "Keystores generated."
 	GeneratingDepositData           = "Generating deposit data..."
 	DepositDataGenerated            = "Deposit data generated."
