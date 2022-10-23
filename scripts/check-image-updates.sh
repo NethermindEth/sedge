@@ -6,9 +6,9 @@ TEKU_CURR=$(cat teku.tmpl | grep -o -P '(?<=:).*?(?={)')
 cd ../execution
 NETH_CURR=$(cat nethermind.tmpl | grep -o -P '(?<=:).*?(?={)')
 GETH_CURR=$(cat geth.tmpl | grep -o -P '(?<=:).*?(?={)')
-cd ../../denver/
-PRYSM_VAL_CURR=$(cat validator/prysm.tmpl | grep -o -P '(?<=:).*?(?={)')
-PRYSM_BCN_CURR=$(cat consensus/prysm.tmpl | grep -o -P '(?<=:).*?(?={)')
+# cd ../../denver/
+# PRYSM_VAL_CURR=$(cat validator/prysm.tmpl | grep -o -P '(?<=:).*?(?={)')
+# PRYSM_BCN_CURR=$(cat consensus/prysm.tmpl | grep -o -P '(?<=:).*?(?={)')
 LIGHTHOUSE_LATEST=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/sigp/lighthouse/releases/latest | jq -r ".tag_name")
 LODESTAR_LATEST=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/ChainSafe/lodestar/releases/latest | jq -r ".tag_name")
 PRYSM_LATEST=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/prysmaticlabs/prysm/releases/latest | jq -r ".tag_name")
@@ -37,18 +37,18 @@ if [[ $PRYSM_CURR < $PRYSM_LATEST ]]; then
     sed -i "s/$PRYSM_CURR/$PRYSM_LATEST/g" $i;
     done
 fi
-if [[ $PRYSM_BCN_CURR < $PRYSM_BEACON_LATEST ]]; then
-    echo "New version of Prysm beacon is available. Current version: $PRYSM_BCN_CURR, new version: $PRYSM_BEACON_LATEST"
-    for i in '**/**/prysm.tmpl'; do  
-    sed -i "s/$PRYSM_BCN_CURR/$PRYSM_BEACON_LATEST/g" $i;
-    done
-fi
-if [[ $PRYSM_VAL_CURR < $PRYSM_VALIDATOR_LATEST ]]; then
-    echo "New version of Prysm validator is available. Current version: $PRYSM_VAL_CURR, new version: $PRYSM_VALIDATOR_LATEST"
-    for i in '**/**/prysm.tmpl'; do  
-    sed -i "s/$PRYSM_VAL_CURR/$PRYSM_VALIDATOR_LATEST/g" $i;
-    done
-fi
+# if [[ $PRYSM_BCN_CURR < $PRYSM_BEACON_LATEST ]]; then
+#     echo "New version of Prysm beacon is available. Current version: $PRYSM_BCN_CURR, new version: $PRYSM_BEACON_LATEST"
+#     for i in '**/**/prysm.tmpl'; do  
+#     sed -i "s/$PRYSM_BCN_CURR/$PRYSM_BEACON_LATEST/g" $i;
+#     done
+# fi
+# if [[ $PRYSM_VAL_CURR < $PRYSM_VALIDATOR_LATEST ]]; then
+#     echo "New version of Prysm validator is available. Current version: $PRYSM_VAL_CURR, new version: $PRYSM_VALIDATOR_LATEST"
+#     for i in '**/**/prysm.tmpl'; do  
+#     sed -i "s/$PRYSM_VAL_CURR/$PRYSM_VALIDATOR_LATEST/g" $i;
+#     done
+# fi
 if [[ $TEKU_CURR < $TEKU_LATEST ]]; then
     echo "New version of Teku is available. Current version: $TEKU_CURR, new version: $TEKU_LATEST"
     for i in '**/**/teku.tmpl'; do  
