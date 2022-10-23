@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Print generated files as string instead of []byte
+- keystore_password.txt permissions issue
 
 
 ## [v0.3.0] - 2022-09-15

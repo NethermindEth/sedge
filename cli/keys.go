@@ -24,6 +24,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
+
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/manifoldco/promptui"
@@ -177,14 +179,19 @@ func createKeystorePassword(password string) error {
 	log.Debug(configs.CreatingKeystorePassword)
 
 	// Create file keystore_password.txt
-	file, err := os.Create(filepath.Join(path, "keystore", "keystore_password.txt"))
+	filename := filepath.Join(path, "keystore", "keystore_password.txt")
+	_, err := commands.Runner.RunCMD(commands.Runner.BuildCreateFileCMD(commands.CreateFileOptions{
+		FileName: filename,
+	}))
 	if err != nil {
 		return err
 	}
-	defer file.Close()
 
 	// Write password to file
-	_, err = file.WriteString(password)
+	_, err = commands.Runner.RunCMD(commands.Runner.BuildEchoToFileCMD(commands.EchoToFileOptions{
+		FileName: filename,
+		Content:  password,
+	}))
 	if err != nil {
 		return err
 	}
