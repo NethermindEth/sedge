@@ -112,6 +112,8 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 				log.Fatal(err)
 			}
 			mnemonic = candidate
+			// TODO: improve prompts for the generated mnemonic. This should confirm user have copied the mnemonic by asking to input it again.
+			// TODO: clean screen after the generated mnemonic is printed.
 			fmt.Fprintf(cmd.OutOrStdout(), "Mnemonic:\n\n%s\n\n", mnemonic)
 			prompt := promptui.Prompt{
 				Label: configs.StoreMnemonic,
@@ -174,9 +176,9 @@ func init() {
 
 	keysCmd.Flags().StringVar(&passphrasePath, "passphrase-path", "", "Path to file with a keystores passphrase to use.")
 
-	keysCmd.Flags().Int64Var(&existingVal, "existing", -1, `"Number of validators generated with the provided mnemonic. Will be ignored if "--mnemonic-path" its not set.`)
+	keysCmd.Flags().Int64Var(&existingVal, "existing", -1, `"Number of validators generated with the provided mnemonic. Will be ignored if "--mnemonic-path" its not set. This number will be used as the initial index for the generated keystores.`)
 
-	keysCmd.Flags().Int64Var(&numberVal, "num-validators", -1, "Number of validators to generate.")
+	keysCmd.Flags().Int64Var(&numberVal, "num-validators", -1, "Number of validators to generate. This number will be used in addition to the existing flag as the end index for the generated keystores.")
 }
 
 func passphrasePrompt() string {
@@ -236,7 +238,7 @@ func existingValPrompt() int64 {
 	}
 
 	prompt := promptui.Prompt{
-		Label:    "Please enter the number of previous validators keystores generated with this mnemonic",
+		Label:    "Please enter the number of previous validators keystores generated with this mnemonic. This number will be used as the initial index for the generated keystores",
 		Validate: validate,
 	}
 
@@ -281,7 +283,7 @@ func numberValPrompt() int64 {
 	}
 
 	prompt := promptui.Prompt{
-		Label:    "Please enter the number of validators keystores to generate with this mnemonic",
+		Label:    "Please enter the number of validators keystores to generate with this mnemonic. This number will be used in addition to the existing validators as the end index for the generated keystores",
 		Validate: validate,
 	}
 
