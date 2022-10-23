@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Drop support for deprecated networks. (Kiln, Ropsten, Denver)
 - Update Chiado testnet configs
-- Changed how `sedge keys` works so it don't use staking deposit cli.
+- Sedge uses its own mechanism for keystore generation with `sedge keys` instead of the staking-deposit-cli tool. This is experimental and staking-deposit-cli is still being used for mainnet.
 
 ### Fixed
 
