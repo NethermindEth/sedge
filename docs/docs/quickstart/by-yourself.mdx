@@ -3,10 +3,11 @@ sidebar_position: 7
 id: by-yourself
 ---
 
-# Running by yourself
+# Manage the setup stack by yourself
 
-Once you use `sedge cli` to generate the docker-compose file, you can run it by yourself, but you will lose the ability
-to use sedge cli to manage the cluster.
+Once you use `sedge cli` to generate the `docker-compose.yml` file, you can handle it by yourself. This guide show you how. 
+
+There are several reasons why you would need to manage the setup after using Sedge for generating the setup files. You might want to modify the `.env` or `docker-compose.yml` file to change the setup configuration, or simply copy these files to another machine. Currently, Sedge runs the docker compose stack that was just generated, there is no way of using sedge to run an arbitrary `docker-compose.yml`. You can still use `sedge logs` and `sedge down` on any `docker-compose.yml` though. 
 
 :::caution
 
@@ -14,28 +15,50 @@ Each time you execute `sedge cli` to generate the docker-compose file, that file
 
 :::
 
-## Executing the cluster
+## Execute the setup
 
-Once generated the docker-compose file, you can modify the environment variables in the `.env` file under the `docker-compose-scripts` directory.
+Once generated the docker-compose file, you can modify either the environment variables in the `.env` file or the `docker-compose.yml` under the `docker-compose-scripts` directory.
 
-After that, you can run the following command to start the cluster:
+After that, you can run the following command to start the setup from the `docker-compose-scripts` directory:
 
 ```bash
 docker compose up -d
 ```
 
-## Stopping the cluster
-
-To stop the cluster, you can run the following command:
+or the following command from any directory assuming that you have the path to the `docker-compose-scripts` folder (let's call it `<path>`):
 
 ```bash
-docker compose stop
+docker compose -f <path> up -d
 ```
 
-## Removing the cluster
+## Stop the setup
 
-To remove the cluster, you can run the following command:
+To stop the setup, you can run the following command from the `docker-compose-scripts` directory:
 
 ```bash
 docker compose down
 ```
+
+or the following command from any directory assuming that you have the path to the `docker-compose-scripts` folder (let's call it `<path>`):
+
+```bash
+docker compose -f <path> down
+```
+
+## Check the container logs
+
+The compose stack is made of several running docker containers. The setup for an Ethereum full node that Sedge applies consists of a container for each node (execution, consensus and validator node). You can run the following command to check the logs of a given container/node from the `docker-compose-scripts` directory:
+
+```bash
+docker compose logs <node>
+```
+
+> Replace `<node>` with the node type, e.g: execution, consensus, validator
+
+or the following command from any directory assuming that you have the path to the `docker-compose-scripts` folder (let's call it `<path>`):
+
+```bash
+docker compose -f <path> logs <node>
+```
+
+Press `ctrl+c` or `control+c` to exit from the `docker compose logs` command. 
