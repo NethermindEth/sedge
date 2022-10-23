@@ -55,11 +55,8 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		var err error
 		// Validate network
-		networks, err := utils.SupportedNetworks()
-		if err != nil {
-			log.Fatalf(configs.NetworkValidationFailedError, err)
-		}
-		if !utils.Contains(networks, network) {
+		_, ok := configs.NetworksConfigs[network]
+		if !ok {
 			log.Fatalf(configs.UnknownNetworkError, network)
 		}
 
