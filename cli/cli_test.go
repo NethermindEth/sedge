@@ -369,34 +369,6 @@ func TestCliCmd(t *testing.T) {
 		),
 		*buildCliTestCase(
 			t,
-			"Bad fee recipient input", "case_1",
-			cliCmdArgs{
-				yes:          true,
-				execClient:   "nethermind",
-				conClient:    "lighthouse",
-				network:      "kiln",
-				feeRecipient: "666",
-				services:     []string{execution, consensus},
-			},
-			true,
-			false,
-		),
-		*buildCliTestCase(
-			t,
-			"Good fee recipient input", "case_1",
-			cliCmdArgs{
-				yes:          true,
-				execClient:   "nethermind",
-				conClient:    "lighthouse",
-				network:      "kiln",
-				feeRecipient: "0x5c00ABEf07604C59Ac72E859E5F93D5ab8546F83",
-				services:     []string{execution, consensus},
-			},
-			false,
-			false,
-		),
-		*buildCliTestCase(
-			t,
 			"--run-client all", "case_1",
 			cliCmdArgs{
 				yes:      true,
@@ -456,17 +428,6 @@ func TestCliCmd(t *testing.T) {
 		),
 		*buildCliTestCase(
 			t,
-			"--network kiln", "case_1",
-			cliCmdArgs{
-				yes:      true,
-				network:  "kiln",
-				services: []string{execution, consensus},
-			},
-			false,
-			false,
-		),
-		*buildCliTestCase(
-			t,
 			"Invalid network", "case_1",
 			cliCmdArgs{
 				yes:      true,
@@ -475,30 +436,6 @@ func TestCliCmd(t *testing.T) {
 			},
 			true,
 			true,
-		),
-		*buildCliTestCase(
-			t,
-			"--network kiln, testing teku datadirs preparation", "case_1",
-			cliCmdArgs{
-				yes:       true,
-				network:   "kiln",
-				services:  []string{execution, consensus},
-				conClient: "teku",
-			},
-			false,
-			false,
-		),
-		*buildCliTestCase(
-			t,
-			"--network kiln, testing teku datadirs preparation, all services", "case_1",
-			cliCmdArgs{
-				yes:       true,
-				network:   "kiln",
-				services:  []string{"all"},
-				conClient: "teku",
-			},
-			false,
-			false,
 		),
 	}
 

@@ -1,8 +1,0 @@
-{{/* docker-compose_base.tmpl */}}
-{{ define "env" }}
-# --- Global configuration ---
-NETWORK=denver
-{{template "execution" .}}
-{{template "consensus" .}}
-{{template "validator" .}}
-{{ end }}

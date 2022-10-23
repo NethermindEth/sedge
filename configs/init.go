@@ -22,22 +22,16 @@ var NetworksToServices map[string]string
 func init() {
 	JWTNetworks = map[string]bool{
 		"mainnet": true,
-		"kiln":    true,
-		"ropsten": true,
 		"goerli":  true,
 		"sepolia": true,
-		"denver":  true,
 		"chiado":  true,
 		"gnosis":  true,
 	}
 
 	NetworksToServices = map[string]string{
 		"mainnet": "merge",
-		"kiln":    "merge",
-		"ropsten": "merge",
 		"goerli":  "merge",
 		"sepolia": "merge",
-		"denver":  "merge",
 		"chiado":  "merge",
 		"gnosis":  "merge",
 	}
