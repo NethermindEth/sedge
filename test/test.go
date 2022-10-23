@@ -112,6 +112,20 @@ func (cr *SimpleCMDRunner) BuildDockerComposeDownCMD(options commands.DockerComp
 	return r.BuildDockerComposeDownCMD(options)
 }
 
+func (cr *SimpleCMDRunner) BuildCreateFileCMD(options commands.CreateFileOptions) commands.Command {
+	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
+		RunAsAdmin: false,
+	})
+	return r.BuildCreateFileCMD(options)
+}
+
+func (cr *SimpleCMDRunner) BuildEchoToFileCMD(options commands.EchoToFileOptions) commands.Command {
+	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
+		RunAsAdmin: false,
+	})
+	return r.BuildEchoToFileCMD(options)
+}
+
 func (cr *SimpleCMDRunner) RunCMD(cmd commands.Command) (string, error) {
 	return cr.SRunCMD(cmd)
 }

@@ -104,3 +104,17 @@ type DockerComposeDownOptions struct {
 	// Path : path to docker-compose.yaml
 	Path string
 }
+
+// CreateFileOptions : Represents create file command options
+type CreateFileOptions struct {
+	// FileName : path to file
+	FileName string
+}
+
+// EchoToFileOptions : Represents echo to file command options
+type EchoToFileOptions struct {
+	// FileName : path to file
+	FileName string
+	// Content : content to be written to file
+	Content string
+}
