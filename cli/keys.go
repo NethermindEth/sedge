@@ -24,6 +24,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
+
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/manifoldco/promptui"
@@ -120,7 +122,7 @@ func init() {
 	rootCmd.AddCommand(keysCmd)
 
 	// Local flags
-	keysCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, ropsten, sepolia etc.")
+	keysCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia etc.")
 
 	keysCmd.Flags().StringVarP(&path, "path", "p", configs.DefaultDockerComposeScriptsPath, "Absolute path to keystore folder. e.g. /home/user/keystore")
 
@@ -177,14 +179,19 @@ func createKeystorePassword(password string) error {
 	log.Debug(configs.CreatingKeystorePassword)
 
 	// Create file keystore_password.txt
-	file, err := os.Create(filepath.Join(path, "keystore", "keystore_password.txt"))
+	filename := filepath.Join(path, "keystore", "keystore_password.txt")
+	_, err := commands.Runner.RunCMD(commands.Runner.BuildCreateFileCMD(commands.CreateFileOptions{
+		FileName: filename,
+	}))
 	if err != nil {
 		return err
 	}
-	defer file.Close()
 
 	// Write password to file
-	_, err = file.WriteString(password)
+	_, err = commands.Runner.RunCMD(commands.Runner.BuildEchoToFileCMD(commands.EchoToFileOptions{
+		FileName: filename,
+		Content:  password,
+	}))
 	if err != nil {
 		return err
 	}

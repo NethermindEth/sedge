@@ -18,6 +18,8 @@ package cli
 import (
 	"fmt"
 
+	"github.com/NethermindEth/sedge/internal/utils"
+
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +29,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print sedge version",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Fprintln(cmd.OutOrStdout(), "sedge v0.3.0")
+		fmt.Fprintln(cmd.OutOrStdout(), "sedge "+utils.CurrentVersion())
 	},
 }
 

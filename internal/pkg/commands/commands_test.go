@@ -374,6 +374,30 @@ func TestBuildCommands(t *testing.T) {
 			},
 			output: "docker ps",
 		},
+		{
+			descr: `BuildCreateFileCMD(CreateFileOptions{
+				FileName: "./testdir/testfile",
+			})`,
+			builder: func() string {
+				return Runner.BuildCreateFileCMD(CreateFileOptions{
+					FileName: "./testdir/testfile",
+				}).Cmd
+			},
+			output: "touch ./testdir/testfile",
+		},
+		{
+			descr: `BuildEchoToFileCMD(EchoToFileOptions{
+				FileName: "./testdir/testfile",
+				Content: "test",
+			})`,
+			builder: func() string {
+				return Runner.BuildEchoToFileCMD(EchoToFileOptions{
+					FileName: "./testdir/testfile",
+					Content:  "test",
+				}).Cmd
+			},
+			output: "echo test > ./testdir/testfile",
+		},
 	}
 
 	for _, input := range inputs {

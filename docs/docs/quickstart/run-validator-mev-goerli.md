@@ -3,7 +3,7 @@ sidebar_position: 6
 id: run-teku-mev-boost
 ---
 
-# Run a validator with mev-boost on Ropsten
+# Run a validator with mev-boost on Goerli
 
 This guide shows you how to setup and run a validator using [Teku](https://github.com/Consensys/teku/) as consensus layer, with a random execution client, and mev-boost.
 
@@ -15,10 +15,10 @@ If you don't have Sedge in your PATH, just open your Terminal on the folder whic
 
 :::
 
-Run the following command from your Terminal to setup a Teku consensus and validator nodes on Ropsten with a random execution client:
+Run the following command from your Terminal to setup a Teku consensus and validator nodes on Goerli with a random execution client:
 
 ```
-sedge cli --network ropsten -c teku
+sedge cli --network goerli -c teku
 ```
 
 The `--network` flag allow you to choose the target network for the setup. To check out supported networks run `sedge networks`. Default network is mainnet.
