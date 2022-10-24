@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `--mev-boost-image` flag to specify which Mev Boost docker image sedge uses.
 - Set mev-boost as default on mainnet.
 - Documentation for How to Run a Validator Node on Sedge by yourself, once generated.
+- Documentation for How to Run a Validator or Full Node on Chiado, Gnosis testnet.
 
 ### Changed
 
