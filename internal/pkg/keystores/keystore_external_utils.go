@@ -74,8 +74,8 @@ type KeyEntry struct {
 	insecure   bool
 }
 
-func NewKeyEntry(priv e2types.PrivateKey, keyPath string, passphrase *string, insecure bool) (*KeyEntry, error) {
-	if *passphrase == "" {
+func NewKeyEntry(priv e2types.PrivateKey, keyPath string, ww *WalletWriter, insecure bool) (*KeyEntry, error) {
+	if ww.generalPassphrase == "" {
 		var pass [32]byte
 		n, err := rand.Read(pass[:])
 		if err != nil {
@@ -85,9 +85,7 @@ func NewKeyEntry(priv e2types.PrivateKey, keyPath string, passphrase *string, in
 			return nil, errors.New(configs.KeyEntryGenerationError)
 		}
 		// Convert it to human readable characters, to keep it manageable
-		*passphrase = base64.URLEncoding.EncodeToString(pass[:])
-	} else {
-		*passphrase = base64.URLEncoding.EncodeToString([]byte(*passphrase))
+		ww.generalPassphrase = base64.URLEncoding.EncodeToString(pass[:])
 	}
 	return &KeyEntry{
 		KeyFile: KeyFile{
@@ -97,7 +95,7 @@ func NewKeyEntry(priv e2types.PrivateKey, keyPath string, passphrase *string, in
 			secretKey: priv,
 		},
 		path:       keyPath,
-		passphrase: *passphrase,
+		passphrase: ww.generalPassphrase,
 		insecure:   insecure,
 	}, nil
 }
@@ -163,7 +161,7 @@ func NewWalletWriter(entries uint64, passphrase string) *WalletWriter {
 }
 
 func (ww *WalletWriter) InsertAccount(priv e2types.PrivateKey, keyPath string, insecure bool, idx uint64) error {
-	key, err := NewKeyEntry(priv, keyPath, &ww.generalPassphrase, insecure)
+	key, err := NewKeyEntry(priv, keyPath, ww, insecure)
 	if err != nil {
 		return err
 	}
