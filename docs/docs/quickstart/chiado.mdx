@@ -1,0 +1,130 @@
+---
+sidebar_position: 8
+id: chiado
+---
+
+# Setup Chiado Validator or Full Node
+
+Validators and Full Nodes, protect the network by validating transactions and blocks. They are the backbone of the
+network and are responsible for the security of the network. Validating the Gnosis Beacon Chain requires 1
+[GNO](https://docs.gnosischain.com/about/tokens/gno) per validator process.
+
+## Consensus Clients Requirements
+
+### Lighthouse Client
+#### Lighthouse Minimum
+
+- Dual-core CPU, 2015 or newer
+- 8 GB RAM
+- 500 GB SSD
+- 10 Mb/s download, 5 Mb/s upload broadband connection
+
+#### Lighthouse Recommended
+
+- Quad-core AMD Ryzen, Intel Broadwell, ARMv8 or newer
+- 16 GB RAM
+- 1 TB SSD
+- 100 Mb/s download, 20 Mb/s upload broadband connection
+
+### Teku Client
+#### Teku Minimum
+
+- Dual Core CPU, i5-760 or AMD FX-8100 or better
+- 8 GB RAM
+- 500 GB SSD
+- 1 Mb/s broadband connection
+
+#### Teku Recommended
+
+- Quad core CPU, Intel Core i7–4770 or AMD FX-8310 or better
+- 16 GB RAM
+- 1 TB SSD
+- 10 Mb/s broadband connection
+
+### Nimbus Client
+#### Nimbus Minimum
+
+- Dual-core CPU, 2015 or newer
+- 4 GB RAM
+- 500 GB solid state storage
+- 10 Mb/s download, 5 Mb/s upload broadband connection
+
+#### Nimbus Recommended
+
+- Quad-core CPU
+- 8 GB RAM
+- 1 TB solid state storage
+- 100 Mb/s download, 20 Mb/s upload broadband connection
+
+### Prysm Client
+#### Prysm Minimum
+
+- Operating System: 64-bit Linux, Mac OS X 10.14+, Windows 64-bit
+- Processor: Intel Core i5–760 or AMD FX-8100 or better
+- Memory: 8GB RAM
+- Storage: 500GB available space SSD
+- Internet: Broadband connection
+
+#### Prysm Recommended
+
+- Processor: Intel Core i7–4770 or AMD FX-8310 or better
+- Memory: 16GB RAM
+- Storage: 1 TB available space SSD
+- Internet: Broadband connection
+
+:::tip
+
+We recommend use `Lighthouse` or `Teku` while using sedge, as they are the most tested clients.
+
+:::
+
+For a more detailed description, you can look on the [Beacon Chain Node Requirements](https://docs.gnosischain.com/node/consensus-layer-validator#beacon-chain-node-requirements) at the Gnosis Chain documentation.
+
+## Execution Client Requirements
+
+### Nethermind Client
+- OS: Ubuntu
+- CPU: 2 cores
+- RAM: 8GB
+- Disk: 500gb SSD
+
+For a more detailed description, you can look on the [Guide for Run a Gnosis Execution Layer Node](https://docs.gnosischain.com/node/execution-layer-validator)
+
+## Running a Full Node
+
+For running a full node, you only need to add the `--no-validator` to `sedge cli`. For example:
+
+```bash
+sedge cli --no-validator --network=chiado
+```
+
+## Running a Validator
+
+For running a validator, you need to omit the `--no-validator` flag. For example:
+
+```bash
+sedge cli --network=gnosis
+```
+
+## Create keystore for validator
+
+To create a keystore for a validator, you need to run the following command:
+
+```bash
+sedge keys --network chiado
+```
+
+## Useful data
+
+- Native (fee) token: `Chiado-xDAI`
+- Staking token: `Chiado-GNO`
+- Chain ID: `10200`
+
+- [Gnosis Chain Documentation](https://docs.gnosischain.com/)
+- [Chiado Execution Explorer](https://blockscout.chiadochain.net/)
+- [Chiado Beacon Explorer](https://beacon.chiadochain.net/)
+- [Chiado Faucet](https://gnosisfaucet.com/)
+- [Execution Layer RPC (Archival)](https://rpc.eu-central-2.gateway.fm/v3/gnosis/archival/chiado)
+- [Execution Layer RPC](https://rpc.chiadochain.net)
+- [EthStats](https://ethstats.chiadochain.net/)
+- [Fork Monitor](https://forkmon.chiadochain.net/)
