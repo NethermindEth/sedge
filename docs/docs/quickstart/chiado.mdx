@@ -9,6 +9,30 @@ Validators and Full Nodes, protect the network by validating transactions and bl
 network and are responsible for the security of the network. Validating the Gnosis Beacon Chain requires 1
 [GNO](https://docs.gnosischain.com/about/tokens/gno) per validator process.
 
+## Running a Full Node
+
+For running a full node, you only need to add the `--no-validator` to `sedge cli`. For example:
+
+```bash
+sedge cli --no-validator --network=chiado
+```
+
+## Running a Validator
+
+For running a validator, you need to omit the `--no-validator` flag. For example:
+
+```bash
+sedge cli --network=chiado
+```
+
+## Create keystore for validator
+
+To create a keystore for a validator, you need to run the following command:
+
+```bash
+sedge keys --network gnosis
+```
+
 ## Consensus Clients Requirements
 
 ### Lighthouse Client
@@ -89,30 +113,6 @@ For a more detailed description, you can look on the [Beacon Chain Node Requirem
 - Disk: 500gb SSD
 
 For a more detailed description, you can look on the [Guide for Run a Gnosis Execution Layer Node](https://docs.gnosischain.com/node/execution-layer-validator)
-
-## Running a Full Node
-
-For running a full node, you only need to add the `--no-validator` to `sedge cli`. For example:
-
-```bash
-sedge cli --no-validator --network=chiado
-```
-
-## Running a Validator
-
-For running a validator, you need to omit the `--no-validator` flag. For example:
-
-```bash
-sedge cli --network=chiado
-```
-
-## Create keystore for validator
-
-To create a keystore for a validator, you need to run the following command:
-
-```bash
-sedge keys --network gnosis
-```
 
 ## Useful data
 
