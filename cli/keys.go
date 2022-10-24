@@ -40,6 +40,7 @@ var (
 	eth1WithdrawalAddress string
 	existingVal           int64
 	numberVal             int64
+	randomPassphrase      bool
 )
 
 // Windows and Unix path
@@ -80,7 +81,7 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 		// TODO: allow usage of withdrawal address
 		// Get keystore passphrase
 		var passphrase string
-		if passphrasePath != "" {
+		if !randomPassphrase && passphrasePath != "" {
 			content, err := readFileContent(passphrasePath)
 			if err != nil {
 				log.Fatalf(configs.PassphraseReadFileError, err)
@@ -91,7 +92,7 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 				passphrase = content
 			}
 		}
-		if passphrase == "" || len(passphrase) < 8 {
+		if !randomPassphrase && passphrase == "" || len(passphrase) < 8 {
 			passphrase = passphrasePrompt()
 		}
 
@@ -175,9 +176,11 @@ func init() {
 
 	keysCmd.Flags().StringVar(&passphrasePath, "passphrase-path", "", "Path to file with a keystores passphrase to use.")
 
-	keysCmd.Flags().Int64Var(&existingVal, "existing", -1, `"Number of validators generated with the provided mnemonic. Will be ignored if "--mnemonic-path" its not set. This number will be used as the initial index for the generated keystores.`)
+	keysCmd.Flags().Int64Var(&existingVal, "existing", -1, `Number of validators generated with the provided mnemonic. Will be ignored if "--mnemonic-path" its not set. This number will be used as the initial index for the generated keystores.`)
 
 	keysCmd.Flags().Int64Var(&numberVal, "num-validators", -1, "Number of validators to generate. This number will be used in addition to the existing flag as the end index for the generated keystores.")
+
+	keysCmd.Flags().BoolVar(&randomPassphrase, "random-passphrase", false, "Usa a randomly generated passphrase to encrypt keystores.")
 }
 
 func passphrasePrompt() string {
