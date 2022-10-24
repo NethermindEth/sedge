@@ -10,17 +10,15 @@ do
 	platform_split=(${platform//\// })
 	GOOS=${platform_split[0]}
 	GOARCH=${platform_split[1]}
-	PACKAGE_NAME="github.com/NethermindEth/nethermindEth/sedge"
 	SEDGE_VERSION=$(git tag | sort | tail -n 1)
-	output_name=$package_name'-v'$VERSION'-'$GOOS'-'$GOARCH
+	output_name=$package_name'-'$SEDGE_VERSION'-'$GOOS'-'$GOARCH
 
-	LDFLAGS=(
-    "-X '${PACKAGE_NAME}/internal/utils.Version==${SEDGE_VERSION}'"
-  )
+  LDFLAGS="-X github.com/NethermindEth/sedge/internal/utils.Version=${SEDGE_VERSION}"
 
-	env GOOS=$GOOS GOARCH=$GOARCH go build -ldflags="${LDFLAGS[*]}" -o build/$output_name $package
+	env GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "${LDFLAGS}" -o build/"$output_name" $package
 	if [ $? -ne 0 ]; then
    		echo 'An error has occurred! Aborting the script execution...'
 		exit 1
 	fi
+	echo "Generated ${output_name} file"
 done
