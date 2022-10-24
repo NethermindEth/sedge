@@ -152,9 +152,10 @@ type WalletWriter struct {
 	entries           []*KeyEntry
 }
 
-func NewWalletWriter(entries uint64) *WalletWriter {
+func NewWalletWriter(entries uint64, passphrase string) *WalletWriter {
 	return &WalletWriter{
-		entries: make([]*KeyEntry, entries),
+		entries:           make([]*KeyEntry, entries),
+		generalPassphrase: passphrase,
 	}
 
 }
@@ -209,7 +210,7 @@ func (ww *WalletWriter) WriteOutputs(fpath string, passphrase string) error {
 func CreateKeystores(
 	vkgd ValidatorKeysGenData,
 ) error {
-	ww := NewWalletWriter(vkgd.MaxIndex - vkgd.MinIndex)
+	ww := NewWalletWriter(vkgd.MaxIndex-vkgd.MinIndex, vkgd.Passphrase)
 	err := selectVals(vkgd.Mnemonic, vkgd.MinIndex, vkgd.MaxIndex, ww, vkgd.Insecure)
 	if err != nil {
 		return fmt.Errorf(configs.KeystoreGenerationError, err)
