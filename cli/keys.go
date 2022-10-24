@@ -18,7 +18,6 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -320,11 +319,7 @@ func eth1WithdrawalPrompt() error {
 }
 
 func readFileContent(path string) (string, error) {
-	file, err := os.Open(path)
-	defer file.Close()
-	if err != nil {
-		return "", err
-	}
-	content, err := io.ReadAll(file)
-	return string(content), err
+	raw, err := os.ReadFile(path)
+	content := strings.TrimSpace(strings.TrimSuffix(string(raw), "\n"))
+	return content, err
 }
