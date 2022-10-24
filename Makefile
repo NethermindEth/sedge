@@ -2,14 +2,13 @@
 .PHONY: compile run run-cli test coverage clients logs all gomod_tidy go_fmt help
 
 # Variables
-PACKAGE_NAME="github.com/NethermindEth/nethermindEth/sedge"
 SEDGE_VERSION = $(shell git tag | sort | tail -n 1)
-LDFLAGS=("-X '${PACKAGE_NAME}/internal/utils.Version==${SEDGE_VERSION}'")
+LDFLAGS=-X github.com/NethermindEth/sedge/internal/utils.Version="${SEDGE_VERSION}"
 
 # Commands
 compile: ## compile:
 	@mkdir -p build
-	@go build -ldflags="${LDFLAGS[*]}" -o build/sedge cmd/sedge/main.go
+	@go build -ldflags "${LDFLAGS}" -o build/sedge cmd/sedge/main.go
 
 compile-linux: ## compile:
 	@mkdir -p build
