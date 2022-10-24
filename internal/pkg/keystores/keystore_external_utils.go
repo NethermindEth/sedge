@@ -74,8 +74,8 @@ type KeyEntry struct {
 	insecure   bool
 }
 
-func NewKeyEntry(priv e2types.PrivateKey, keyPath, passphrase string, insecure bool) (*KeyEntry, error) {
-	if passphrase == "" {
+func NewKeyEntry(priv e2types.PrivateKey, keyPath string, passphrase *string, insecure bool) (*KeyEntry, error) {
+	if *passphrase == "" {
 		var pass [32]byte
 		n, err := rand.Read(pass[:])
 		if err != nil {
@@ -85,7 +85,7 @@ func NewKeyEntry(priv e2types.PrivateKey, keyPath, passphrase string, insecure b
 			return nil, errors.New(configs.KeyEntryGenerationError)
 		}
 		// Convert it to human readable characters, to keep it manageable
-		passphrase = base64.URLEncoding.EncodeToString(pass[:])
+		*passphrase = base64.URLEncoding.EncodeToString(pass[:])
 	}
 	return &KeyEntry{
 		KeyFile: KeyFile{
@@ -95,7 +95,7 @@ func NewKeyEntry(priv e2types.PrivateKey, keyPath, passphrase string, insecure b
 			secretKey: priv,
 		},
 		path:       keyPath,
-		passphrase: passphrase,
+		passphrase: *passphrase,
 		insecure:   insecure,
 	}, nil
 }
@@ -161,7 +161,7 @@ func NewWalletWriter(entries uint64, passphrase string) *WalletWriter {
 }
 
 func (ww *WalletWriter) InsertAccount(priv e2types.PrivateKey, keyPath string, insecure bool, idx uint64) error {
-	key, err := NewKeyEntry(priv, keyPath, ww.generalPassphrase, insecure)
+	key, err := NewKeyEntry(priv, keyPath, &ww.generalPassphrase, insecure)
 	if err != nil {
 		return err
 	}
@@ -171,7 +171,7 @@ func (ww *WalletWriter) InsertAccount(priv e2types.PrivateKey, keyPath string, i
 	return nil
 }
 
-func (ww *WalletWriter) WriteOutputs(fpath string, passphrase string) error {
+func (ww *WalletWriter) WriteOutputs(fpath string) error {
 	if _, err := os.Stat(fpath); !os.IsNotExist(err) {
 		return errors.New(configs.KeystoreOutputExistingError)
 	}
@@ -200,7 +200,7 @@ func (ww *WalletWriter) WriteOutputs(fpath string, passphrase string) error {
 	}
 	// Write passphrase file
 	passFileName := "keystore_password.txt"
-	if err := os.WriteFile(filepath.Join(fpath, passFileName), []byte(passphrase), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(fpath, passFileName), []byte(ww.generalPassphrase), 0644); err != nil {
 		return err
 	}
 
@@ -216,7 +216,7 @@ func CreateKeystores(
 		return fmt.Errorf(configs.KeystoreGenerationError, err)
 	}
 
-	err = ww.WriteOutputs(vkgd.OutputPath, vkgd.Passphrase)
+	err = ww.WriteOutputs(vkgd.OutputPath)
 	if err != nil {
 		return fmt.Errorf(configs.KeystoreGenerationError, err)
 	}
@@ -232,7 +232,6 @@ func selectVals(sourceMnemonic string,
 	minAcc uint64, maxAcc uint64,
 	output WalletOutput,
 	insecure bool,
-	// uniquePassphrase string,
 ) error {
 
 	valSeed, err := mnemonicToSeed(sourceMnemonic)
