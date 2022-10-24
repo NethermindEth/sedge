@@ -86,6 +86,8 @@ func NewKeyEntry(priv e2types.PrivateKey, keyPath string, passphrase *string, in
 		}
 		// Convert it to human readable characters, to keep it manageable
 		*passphrase = base64.URLEncoding.EncodeToString(pass[:])
+	} else {
+		*passphrase = base64.URLEncoding.EncodeToString([]byte(*passphrase))
 	}
 	return &KeyEntry{
 		KeyFile: KeyFile{
