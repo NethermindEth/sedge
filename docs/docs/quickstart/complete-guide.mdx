@@ -210,16 +210,19 @@ services:
       - "30303:30303/udp"
     expose:
       - 8545
+      - 8551
     command:
       - --config=${NETWORK}
       - --datadir=/nethermind/data
       - --log=${NETHERMIND_LOG_LEVEL}
       - --Sync.SnapSync=${EC_SNAP_SYNC_ENABLED}
-      - --Init.WebSocketsEnabled=true
       - --JsonRpc.Enabled=true
       - --JsonRpc.Host=0.0.0.0
       - --JsonRpc.Port=8545
       - --JsonRpc.EnabledModules=${EC_ENABLED_MODULES}
+      - --JsonRpc.JwtSecretFile=/tmp/jwt/jwtsecret
+      - --JsonRpc.EngineHost=0.0.0.0
+      - --JsonRpc.EnginePort=8551
       - --Network.DiscoveryPort=30303
       - --HealthChecks.Enabled=${NETHERMIND_HEALTH_CHECKS_ENABLED}
       - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}
@@ -255,6 +258,9 @@ services:
       - --http-port=4000
       - --network=${NETWORK}
       - --target-peers=${CC_PEER_COUNT}
+      - --execution-endpoints=${EC_AUTH_URL}
+      - --execution-jwt=/tmp/jwt/jwtsecret
+      - --eth1-endpoints=${EC_API_URL}
       - --eth1-endpoints=${EC_API_URL}
       - --eth1-blocks-per-log-query=150
       - --debug-level=${CC_LOG_LEVEL}
@@ -272,18 +278,16 @@ services:
 
   validator-import:
     container_name: validator-import-client
-    image: ${VL_IMAGE_VERSION}
+    build:
+      context: github.com/NethermindEth/lighthouse-init-validator
+      args:
+        LH_VERSION: ${VL_IMAGE_VERSION}
+        NETWORK: ${NETWORK}
     networks:
       - sedge
     volumes:
       - ${KEYSTORE_DIR}:/keystore
-      - ${VL_DATA_DIR}:/var/lib/lighthouse
-    command: |
-      lighthouse account validator import
-      --password-file=/keystore/keystore_password.txt
-      --reuse-password
-      --directory /keystore
-      --datadir /var/lib/lighthouse
+      - ${VL_DATA_DIR}:/data 
 
   validator:
     container_name: validator-client
@@ -304,7 +308,7 @@ services:
       - --graffiti=${GRAFFITI}
       - --network=${NETWORK}
       - --debug-level=${VL_LOG_LEVEL}
-      - --validators-dir=/var/lib/lighthouse
+      - --validators-dir=/data/validators
       - --metrics
       - --metrics-port=5056
       - --metrics-address=0.0.0.0
@@ -512,11 +516,17 @@ Date and time of the logs were modified to show more generic logs. Until this st
 
 ### 5. Generate validator keystore
 
-Sedge uses the [staking-deposit-cli](https://github.com/ethereum/staking-deposit-cli) tool docker image to generate the [validator keystore](/docs/concepts/keystore). 
+Sedge uses the [staking-deposit-cli](https://github.com/ethereum/staking-deposit-cli) tool docker image for mainnet to generate the [validator keystore](/docs/concepts/keystore), and uses our own experimental code for the rest of the supported networks. 
 
 :::caution Disclaimer
 
 Users acknowledge that staking-deposit-cli is an external tool, which means that Nethermind exercises no control over its functioning and does not accept any liability for any issues that may arise from the use of the tool.
+
+:::
+
+:::caution Disclaimer
+
+Users acknowledge that generating the keystore for other network apart from mainnet is an experimental and not audited feature. Nethermind takes no responsibility for any malfunctioning or lost money derived from an unexpected behavior during keystore generation.
 
 :::
 
@@ -645,6 +655,53 @@ docker-compose-scripts
             ├── deposit_data-1659326409.json
             └── keystore-m_12381_3600_0_0_0-1659326408.json
 ```
+
+:::note
+
+A guide for using our own experimental code for keystore generation is coming soon!
+
+:::
+
+### 6. Final steps
+
+When the execution and consensus clients are finally synced you will see the following logs:
+
+  ```logs
+  2022-XX-XX 00:00:00 -- [INFO] [ETH2 Monitor] [TrackSync] Tracking sync progress of consensus nodes...
+  2022-XX-XX 00:00:00 -- [INFO] [ETH2 Monitor] [TrackSync] Endpoint http://172.19.0.2:4000 is synced
+  2022-XX-XX 00:00:00 -- [INFO] [ETH2 Monitor] [TrackSync] Tracking sync progress of execution nodes...
+  2022-XX-XX 00:00:00 -- [INFO] [ETH2 Monitor] [TrackSync] Endpoint http://172.19.0.3:8545 is synced
+  # highlight-next-line
+  2022-XX-XX 00:00:00 -- [INFO] Execution and Consensus clients are synced, proceeding to start validator node
+  2022-XX-XX 00:00:00 -- [INFO] Instructions for running validator service of docker-compose script
+
+  docker compose -f docker-compose-scripts/docker-compose.yml up -d validator
+
+  # highlight-next-line
+  ? Run validator service? [Y/n]
+  ```
+
+Now you can proceed and finish the setup pressing `Y`. This will run the validator service with it your validator client will be up and running. Make sure you created or prepared the keystore folder before this step. If you forgot to do it you can take your time, prepare the keystore folder and then press `Y`. This will also take you to the final logs, which describe you how to validator is being run:
+
+  ```logs
+  2022-XX-XX 00:00:00 -- [INFO] Checking if docker engine is on
+  2022-XX-XX 00:00:00 -- [INFO] Running command: docker ps -a
+  2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml up -d validator
+  [+] Running 3/3
+  ⠿ Container config_custom_network    Exited                                                                                                       2.8s
+  ⠿ Container validator-import-client  Exited                                                                                                       3.9s
+  ⠿ Container validator-client         Started                                                                                                      4.3s
+  2022-10-23 21:21:04 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml ps --filter status=running
+  2022-10-23 21:21:04 -- [DEBU] Running command with sudo.
+  NAME                COMMAND                  SERVICE             STATUS              PORTS
+  consensus-client    "lighthouse bn --dis…"   consensus           running             0.0.0.0:5054->5054/tcp, :::5054->5054/tcp, 4000/tcp, 0.0.0.0:9000->9000/tcp, :::9000->9000/tcp, 0.0.0.0:9000->9000/udp, :::9000->9000/udp
+  execution-client    "./Nethermind.Runner…"   execution           running             8545/tcp, 8551/tcp, 0.0.0.0:30303->30303/tcp, 0.0.0.0:30303->30303/udp, :::30303->30303/tcp, :::30303->30303/udp
+  validator-client    "lighthouse vc --net…"   validator           running             0.0.0.0:5056->5056/tcp, :::5056->5056/tcp
+  2022-10-23 21:21:04 -- [INFO] 
+  Validator is up. Remember to setup the keystore folder and to make the deposit. If something went wrong and your validator node is down, don't panic! Short downtimes are not very bad. Check the logs and try to fix the errors. Make sure errors are not related to connection issues with the consensus nodes nor related to the keystore folder path or validator data directory. You can start the validator again using the instructions displayed by the tool.
+
+  Happy Staking!
+  ```
 
 ### Conclusions
 
