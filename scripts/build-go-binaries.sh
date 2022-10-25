@@ -15,7 +15,7 @@ do
   LDFLAGS="-X github.com/NethermindEth/sedge/internal/utils.Version=v${VERSION}"
 
   docker buildx build --platform="$GOOS"/"$GOARCH" -t nethermindeth/sedge:"$VERSION"-"$GOOS"-"$GOARCH" --build-arg TARGETOS="$GOOS" --build-arg TARGETARCH="$GOARCH" --build-arg LDFLAGS="$LDFLAGS" --build-arg OUTPUT_NAME="$output_name" --build-arg PACKAGE="$package" --load .
-  docker create --name sedge NethermindEth/sedge:"$VERSION"-"$GOOS"-"$GOARCH"
+  docker create --name sedge nethermindeth/sedge:"$VERSION"-"$GOOS"-"$GOARCH"
   docker cp sedge:/sedge ./build/"$output_name"
   docker rm -f sedge
 
