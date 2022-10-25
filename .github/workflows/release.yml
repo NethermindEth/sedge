@@ -43,18 +43,6 @@ jobs:
         go-version: '1.18.3'
     - run: chmod +x ./scripts/build-go-binaries.sh && ./scripts/build-go-binaries.sh
     - uses: actions/upload-artifact@master
-      name: Uploading sedge darwin amd64 package
-      with:
-        name: sedge-v${{env.VERSION}}-darwin-amd64
-        path: build/sedge-v${{env.VERSION}}-darwin-amd64
-
-    - uses: actions/upload-artifact@master
-      name: Uploading sedge darwin arm64 package
-      with:
-        name: sedge-v${{env.VERSION}}-darwin-arm64
-        path: build/sedge-v${{env.VERSION}}-darwin-arm64
-
-    - uses: actions/upload-artifact@master
       name: Uploading sedge linux amd64 package
       with:
         name: sedge-v${{env.VERSION}}-linux-amd64
