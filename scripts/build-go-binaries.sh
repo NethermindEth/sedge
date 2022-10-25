@@ -10,10 +10,9 @@ do
 	platform_split=(${platform//\// })
 	GOOS=${platform_split[0]}
 	GOARCH=${platform_split[1]}
-	SEDGE_VERSION=$(git tag | sort | tail -n 1)
-	output_name=$package_name'-'$SEDGE_VERSION'-'$GOOS'-'$GOARCH
+	output_name=$package_name'-v'$VERSION'-'$GOOS'-'$GOARCH
 
-  LDFLAGS="-X github.com/NethermindEth/sedge/internal/utils.Version=${SEDGE_VERSION}"
+  LDFLAGS="-X github.com/NethermindEth/sedge/internal/utils.Version=v${VERSION}"
 
 	env GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "${LDFLAGS}" -o build/"$output_name" $package
 	if [ $? -ne 0 ]; then

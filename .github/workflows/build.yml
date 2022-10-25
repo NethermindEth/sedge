@@ -17,7 +17,7 @@ jobs:
     name: Build sedge
     runs-on: ubuntu-latest
     env: 
-      VERSION: v${{ github.event.inputs.tag }}
+      VERSION: ${{ github.event.inputs.tag }}
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -28,32 +28,32 @@ jobs:
     - uses: actions/upload-artifact@master
       name: Uploading sedge darwin amd64 package
       with:
-        name: sedge-${{env.VERSION}}-darwin-amd64
-        path: build/sedge-${{env.VERSION}}-darwin-amd64
+        name: sedge-v${{env.VERSION}}-darwin-amd64
+        path: build/sedge-v${{env.VERSION}}-darwin-amd64
 
     - uses: actions/upload-artifact@master
       name: Uploading sedge darwin arm64 package
       with:
-        name: sedge-${{env.VERSION}}-darwin-arm64
-        path: build/sedge-${{env.VERSION}}-darwin-arm64
+        name: sedge-v${{env.VERSION}}-darwin-arm64
+        path: build/sedge-v${{env.VERSION}}-darwin-arm64
 
     - uses: actions/upload-artifact@master
       name: Uploading sedge linux amd64 package
       with:
-        name: sedge-${{env.VERSION}}-linux-amd64
-        path: build/sedge-${{env.VERSION}}-linux-amd64
+        name: sedge-v${{env.VERSION}}-linux-amd64
+        path: build/sedge-v${{env.VERSION}}-linux-amd64
         
     - uses: actions/upload-artifact@master
       name: Uploading sedge linux arm64 package
       with:
-        name: sedge-${{env.VERSION}}-linux-arm64
-        path: build/sedge-${{env.VERSION}}-linux-arm64
+        name: sedge-v${{env.VERSION}}-linux-arm64
+        path: build/sedge-v${{env.VERSION}}-linux-arm64
 
   publish-github:
     name: "Release and upload binaries to github"
     runs-on: ubuntu-latest
     env: 
-      VERSION: v${{ github.event.inputs.tag }}
+      VERSION: ${{ github.event.inputs.tag }}
     needs: build-sedge
     steps:
     - name: Checkout
@@ -68,5 +68,5 @@ jobs:
         artifacts: "/tmp/binaries/sedge-v*/*"
         bodyFile: "CHANGELOG.md"
         draft: true
-        tag: v${{ github.event.inputs.tag }}
-        name: v${{ github.event.inputs.tag }}
+        tag: ${{ github.event.inputs.tag }}
+        name: ${{ github.event.inputs.tag }}
