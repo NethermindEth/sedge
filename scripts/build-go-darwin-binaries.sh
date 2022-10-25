@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-set -x
+
 package=cmd/sedge/main.go
 package_name=sedge
 
-platforms=("linux/amd64" "linux/arm64")
+platforms=("darwin/amd64" "darwin/arm64")
 
 for platform in "${platforms[@]}"
 do
@@ -14,11 +14,7 @@ do
 
   LDFLAGS="-X github.com/NethermindEth/sedge/internal/utils.Version=v${VERSION}"
 
-  docker buildx build --platform="$GOOS"/"$GOARCH" -t nethermindeth/sedge:"$VERSION"-"$GOOS"-"$GOARCH" --build-arg TARGETOS="$GOOS" --build-arg TARGETARCH="$GOARCH" --build-arg LDFLAGS="$LDFLAGS" --build-arg OUTPUT_NAME="$output_name" --build-arg PACKAGE="$package" --load .
-  docker create --name sedge nethermindeth/sedge:"$VERSION"-"$GOOS"-"$GOARCH"
-  docker cp sedge:/sedge ./build/"$output_name"
-  docker rm -f sedge
-
+	env CGO_ENABLED=1 GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "${LDFLAGS}" -o build/"$output_name" $package
 	if [ $? -ne 0 ]; then
    		echo 'An error has occurred! Aborting the script execution...'
 		exit 1
