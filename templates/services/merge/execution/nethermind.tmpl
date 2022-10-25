@@ -18,7 +18,7 @@
     expose:
       - {{.ElApiPort}}
       - {{.ElAuthPort}}
-    command: 
+    command:
       - --config={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
       - --datadir=/nethermind/data
       - --log=${NETHERMIND_LOG_LEVEL}{{with .TTD}}
@@ -29,7 +29,8 @@
       - --JsonRpc.Port={{.ElApiPort}}
       - --JsonRpc.EnabledModules=${EC_ENABLED_MODULES}
       - --JsonRpc.JwtSecretFile=/tmp/jwt/jwtsecret
-      - --JsonRpc.AdditionalRpcUrls=["http://0.0.0.0:{{.ElAuthPort}}|http;ws|net;eth;subscribe;engine;web3;client"]
+      - --JsonRpc.EngineHost=0.0.0.0
+      - --JsonRpc.EnginePort={{.ElAuthPort}}
       - --Network.DiscoveryPort={{.ElDiscoveryPort}}
       - --HealthChecks.Enabled=${NETHERMIND_HEALTH_CHECKS_ENABLED}
       - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}{{range $flag := .ElExtraFlags}}

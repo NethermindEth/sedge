@@ -2,7 +2,7 @@ package generate
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"regexp"
 	"strings"
@@ -117,7 +117,7 @@ func CleanDockerCompose(dockerComposePath string) error {
 		return fmt.Errorf(configs.CleaningDCFileError, err)
 	}
 
-	raw, err := ioutil.ReadAll(file)
+	raw, err := io.ReadAll(file)
 	if err != nil {
 		return fmt.Errorf(configs.CleaningDCFileError, err)
 	}
@@ -186,7 +186,7 @@ func CleanDockerCompose(dockerComposePath string) error {
 		return fmt.Errorf("error cleaning docker compose file: %v", err)
 	}
 
-	return ioutil.WriteFile(dockerComposePath, fixed, info.Mode())
+	return os.WriteFile(dockerComposePath, fixed, info.Mode())
 }
 
 /*
@@ -210,7 +210,7 @@ func CleanEnvFile(envFilePath string) error {
 		return fmt.Errorf(configs.CleaningEnvFileError, err)
 	}
 
-	rawLines, err := ioutil.ReadAll(file)
+	rawLines, err := io.ReadAll(file)
 	if err != nil {
 		return fmt.Errorf(configs.CleaningEnvFileError, err)
 	}

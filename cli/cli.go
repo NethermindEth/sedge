@@ -215,7 +215,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	log.Info(configs.DependenciesOK)
 
 	// Generate JWT secret if necessary
-	if jwtPath == "" && configs.JWTNetworks[network] {
+	if jwtPath == "" && configs.NetworksConfigs[network].RequireJWT {
 		if err = handleJWTSecret(); err != nil {
 			return []error{err}
 		}
