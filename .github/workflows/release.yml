@@ -1,6 +1,6 @@
 name: 'Release Sedge'
 
-on: 
+on:
   workflow_dispatch:
     inputs:
       tag:
@@ -8,15 +8,32 @@ on:
         required: true
         default: 'master'
 
-permissions: 
+permissions:
   contents: write
   packages: write
 
 jobs:
-  build-sedge:
-    name: Build sedge
+  sedge-darwin:
+    name: Build sedge darwin
+    runs-on: macos-latest
+    env:
+      VERSION: ${{ github.event.inputs.tag }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - uses: actions/setup-go@v3
+        with:
+            go-version: '1.18.3'
+    - run: make compile && mv build/sedge build/sedge-v${{env.VERSION}}-darwin-amd64
+    - uses: actions/upload-artifact@master
+      name: Uploading sedge darwin amd64 package
+      with:
+        name: sedge-v${{env.VERSION}}-darwin-amd64
+        path: build/sedge-v${{env.VERSION}}-darwin-amd64
+  sedge-linux:
+    name: Build sedge linux
     runs-on: ubuntu-latest
-    env: 
+    env:
       VERSION: ${{ github.event.inputs.tag }}
     steps:
     - name: Checkout
@@ -42,7 +59,7 @@ jobs:
       with:
         name: sedge-v${{env.VERSION}}-linux-amd64
         path: build/sedge-v${{env.VERSION}}-linux-amd64
-        
+
     - uses: actions/upload-artifact@master
       name: Uploading sedge linux arm64 package
       with:
@@ -52,17 +69,17 @@ jobs:
   update-homebrew:
     name: Update Homebrew package
     runs-on: ubuntu-latest
-    env: 
+    env:
       VERSION: ${{ github.event.inputs.tag }}
     needs: build-sedge
     steps:
     - name: Download packages
       uses: actions/download-artifact@v3
-      with: 
+      with:
         path: /tmp/binaries
     - name: Checkout repository
       uses: actions/checkout@master
-      with: 
+      with:
         repository: NethermindEth/homebrew-sedge
         path: homebrew-sedge
     - name: Update Homebrew file with new version and hash
@@ -84,7 +101,7 @@ jobs:
   publish-github:
     name: "Release and upload binaries to github"
     runs-on: ubuntu-latest
-    env: 
+    env:
       VERSION: ${{ github.event.inputs.tag }}
     needs: update-homebrew
     steps:
@@ -92,7 +109,7 @@ jobs:
       uses: actions/checkout@v3
     - name: Download packages
       uses: actions/download-artifact@v3
-      with: 
+      with:
         path: /tmp/binaries
     - name: Upload release to Github Releases
       uses: ncipollo/release-action@v1
