@@ -3,15 +3,21 @@ sidebar_position: 8
 id: chiado
 ---
 
-# Setup Chiado Validator or Full Node
+# Run a Validator or Full Node on Chiado
 
 Validators and Full Nodes, protect the network by validating transactions and blocks. They are the backbone of the
-network and are responsible for the security of the network. Validating the Gnosis Beacon Chain requires 1
+network and are responsible for the security of the network. This guide shows you how to use Sedge to setup a full node or a validator in Chiado, a Gnosis testnet.
+
+:::info
+
+ Validating the Gnosis Beacon Chain requires 1
 [GNO](https://docs.gnosischain.com/about/tokens/gno) per validator process.
+
+:::
 
 ## Running a Full Node
 
-For running a full node, you only need to add the `--no-validator` to `sedge cli`. For example:
+For running a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge cli`. For example:
 
 ```bash
 sedge cli --no-validator --network=chiado
@@ -19,7 +25,7 @@ sedge cli --no-validator --network=chiado
 
 ## Running a Validator
 
-For running a validator, you need to omit the `--no-validator` flag. For example:
+For running a validator with random clients, you need to omit the `--no-validator` flag. For example:
 
 ```bash
 sedge cli --network=chiado
@@ -34,6 +40,15 @@ sedge keys --network chiado
 ```
 
 ## Consensus Clients Requirements
+
+:::tip
+
+The hardware requirements you are about to see are for Gnosis. Chiado is a lighter network, the following requirements can be considered as minimum for a full node in Chiado:
+- 2 CPU cores
+- 4 GB RAM
+- 160 GB SDD
+
+:::
 
 ### Lighthouse Client
 #### Lighthouse Minimum
@@ -98,7 +113,13 @@ sedge keys --network chiado
 
 :::tip
 
-We recommend use `Lighthouse` or `Teku` while using sedge, as they are the most tested clients.
+We recommend use `Lighthouse` or `Teku` while using Sedge for Chiado, as they are the most stable and tested clients.
+
+:::
+
+:::caution
+
+Sedge supports Prysm for Chiado, but Prysm version for this network is not stable. Use it at your own risk. We do not recommend to use Prysm for Chiado.
 
 :::
 
