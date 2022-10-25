@@ -43,7 +43,11 @@ const (
 	CheckingDockerEngine            = "Checking if docker engine is on"
 	DepositCLIDockerImageUrl        = "nethermindeth/staking-deposit-cli" //"github.com/ethereum/staking-deposit-cli"
 	DepositCLIDockerImageName       = "nethermindeth/staking-deposit-cli" //"deposit-cli:local"
-	GeneratingKeystore              = "Generating keystore folder"
+	GeneratingKeystores             = "Generating keystores..."
+	GeneratingKeystoresLegacy       = "Generating keystore folder"
+	KeystoresGenerated              = "Keystores generated."
+	GeneratingDepositData           = "Generating deposit data..."
+	DepositDataGenerated            = "Deposit data generated."
 	KeysFoundAt                     = "If everything went well, your keys can be found at: %s"
 	ImageNotFoundBuilding           = "Image %s not found, building it"
 	ImageNotFoundPulling            = "Image %s not found, pulling it"
@@ -52,11 +56,11 @@ const (
 	ValidatorDefaultDataDir         = "./validator-data"
 	KeystoreDefaultDataDir          = "./keystore"
 	ReviewKeystorePath              = "In case you used custom paths for the 'cli' or the 'keys' commands, please review if the keystore path in the generated .env file points to the generated keystore folder (the .env key should be KEYSTORE_DIR). If not, change the path in the .env file to the correct one."
-	NodesSynced                     = "Execution and Consensus clients are synced, proceding to start validator node"
+	NodesSynced                     = "Execution and Consensus clients are synced, proceeding to start validator node"
 	RemoteNodeNeeded                = `
 If you want to run a validator, make sure you have access to a remote or external consensus node.
 	
-You can use one of your own, a friend's node or providers such as Infura. Edit the .env file accordinly please, check that variable CC_NODE <-> (consensus endpoint) have the correct value. The validator node requires a high available consensus node, and consensus in turn needs a high available execution node.`
+You can use one of your own, a friend's node or providers such as Infura. Edit the .env file accordingly please, check that variable CC_NODE <-> (consensus endpoint) have the correct value. The validator node requires a high available consensus node, and consensus in turn needs a high available execution node.`
 	ValidatorTips = `
 A validator node needs to connect to a synced consensus node, and the consensus node in turn needs to connect to a synced execution node. 
 	
@@ -87,9 +91,10 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 	CreatingKeystorePassword        = "Creating keystore_password.txt on keystore folder"
 	KeystorePasswordCreated         = "keystore_password.txt on keystore folder created with provided password"
 	MnemonicTips                    = "The following mnemonic is going to be used to create the validator keystore. Please save it carefully. It can be used to generate the keystore folder again. If you lose the password and mnemonic, access to your keystore will be lost forever!"
-	GeneratingMnemonic              = "Generating mnemonic for validator keystore"
+	GeneratingMnemonic              = "Existing mnemonic not provided. Generating mnemonic for validator keystore:"
+	StoreMnemonic                   = "Make sure to store your mnemonic somewhere safe. Losing it could end in the lost of your validators. Press enter to continue" // TODO: improve warning message
 	PreparingTekuDatadir            = "Preparing teku datadirs (must have full read/write/execute permissions to work)"
-	GettingContainersIP             = "Proceding to get execution and consensus containers IP address for the monitoring tool"
+	GettingContainersIP             = "Proceeding to get execution and consensus containers IP address for the monitoring tool"
 	WaitingForNodesToStart          = "Waiting a minute for nodes to start"
 	CustomImagesWarning             = "You are using custom images for the execution, consensus or validator clients!!! Make sure this is intended. Also check these images are correct and available from this device otherwise the setup will fail or have an unexpected behavior."
 	DefaultDiscoveryPortEL          = "30303"
@@ -106,4 +111,9 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 	MapAllPortsWarning              = "You are mapping all ports for the clients!!! Make sure this is intended. This could make the clients vulnerable to attacks. Be sure to setup a firewall."
 	CheckpointUrlUsedWarning        = "A Checkpoint Sync Url will be used for the consensus node. Using %s ."
 	NoBootnodesFound                = "No bootnodes found for %s/%s/%s"
+	UnableToCheckVersion            = "Unable to check for new Version. Please check manually at " +
+		"https://github.com/NethermindEth/sedge/releases, with error:"
+	NeedVersionUpdate = "A new Version of sedge is available. Please update to the latest Version. See " +
+		"https://github.com/NethermindEth/sedge/releases for more information. Latest detected tag:"
+	VersionUpdated = "You are running the latest version of sedge. Version: "
 )

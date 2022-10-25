@@ -15,30 +15,39 @@ limitations under the License.
 */
 package configs
 
-var JWTNetworks map[string]bool
-
-var NetworksToServices map[string]string
+var NetworksConfigs map[string]NetworkConfig
 
 func init() {
-	JWTNetworks = map[string]bool{
-		"mainnet": true,
-		"kiln":    true,
-		"ropsten": true,
-		"goerli":  true,
-		"sepolia": true,
-		"denver":  true,
-		"chiado":  true,
-		"gnosis":  true,
-	}
-
-	NetworksToServices = map[string]string{
-		"mainnet": "merge",
-		"kiln":    "merge",
-		"ropsten": "merge",
-		"goerli":  "merge",
-		"sepolia": "merge",
-		"denver":  "merge",
-		"chiado":  "merge",
-		"gnosis":  "merge",
+	NetworksConfigs = map[string]NetworkConfig{
+		"mainnet": {
+			Name:               "mainnet",
+			RequireJWT:         true,
+			NetworkService:     "merge",
+			GenesisForkVersion: "0x00000000",
+		},
+		"goerli": {
+			Name:               "goerli",
+			RequireJWT:         true,
+			NetworkService:     "merge",
+			GenesisForkVersion: "0x00001020",
+		},
+		"sepolia": {
+			Name:               "sepolia",
+			RequireJWT:         true,
+			NetworkService:     "merge",
+			GenesisForkVersion: "0x90000069",
+		},
+		"chiado": {
+			Name:               "chiado",
+			RequireJWT:         true,
+			NetworkService:     "merge",
+			GenesisForkVersion: "0x0000006f",
+		},
+		"gnosis": {
+			Name:               "gnosis",
+			RequireJWT:         true,
+			NetworkService:     "merge",
+			GenesisForkVersion: "0x0000006f",
+		},
 	}
 }

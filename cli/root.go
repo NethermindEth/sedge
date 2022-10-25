@@ -22,6 +22,7 @@ import (
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	"github.com/NethermindEth/sedge/internal/utils"
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -52,6 +53,8 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+
+	checkVersion()
 
 	// Disable completion default cmd
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
@@ -98,6 +101,18 @@ func initConfig() {
 	}
 
 	initLogging()
+}
+
+func checkVersion() {
+	// Check version
+	ok, err := utils.IsLatestVersion()
+	if err != nil {
+		log.Warnf("%s %e", configs.UnableToCheckVersion, err)
+	} else if !ok {
+		log.Warnf("%s %s", configs.NeedVersionUpdate, utils.CurrentVersion())
+	} else {
+		log.Infof("%s %s", configs.VersionUpdated, utils.CurrentVersion())
+	}
 }
 
 /*
