@@ -33,6 +33,7 @@ The project **is still on beta** and although it should be stable enough, it mig
     - [Version 0.4](#version-04)
     - [Version 0.X](#version-0x)
     - [Version 1.0](#version-10)
+  - [Version X.0](#version-x0)
   - [💪 Want to contribute?](#-want-to-contribute)
   - [⚠️ License](#️-license)
 
@@ -77,7 +78,7 @@ Check all the options and flags with `sedge cli --help`. More instructions or gu
 
 ## 💥 How this all started?
 
-As people who actively work on The Merge, we know how hard it is to set up an Ethereum validator:
+As people who actively deployed validators way before The Merge, we know how hard it is to set up an Ethereum validator:
 
 - You need to procure at least three (compatible) nodes: an execution node (geth, nethermind, etc), a consensus node, and a validator node (lighthouse, prysm, etc)
 - You then need to execute them, connect them, monitor them, and secure the validator keys (which includes staking 32 ETH).
@@ -95,11 +96,13 @@ We don't want to stop at Ethereum. We also want to help stakers of other PoS net
 
 ## 🔥 What can you do with sedge today?
 
-- Select an execution, consensus and validator node (manually or automatically) and generate a `docker-compose` script with production-tested configurations to run the setup you want.
+- Select an execution, consensus and validator client node (manually or automatically) and generate a `docker-compose` script with production-tested configurations to run the setup you want.
 - Don't remember `docker-compose` commands or flags for your setup? Check docker logs of the running services with `sedge logs`, and shut them down with `sedge down`
-- Generate the keystore folder using the [staking-deposit-cli](https://github.com/ethereum/staking-deposit-cli) tool with `sedge keys`
+- Generate the keystore folder with `sedge keys` for mainnet using the [staking-deposit-cli](https://github.com/ethereum/staking-deposit-cli) tool or for the rest of supported networks using our own experimental code.
 
 > **Disclaimer:** Users acknowledge that staking-deposit-cli is an external tool, which means that Nethermind exercises no control over its functioning and does not accept any liability for any issues that may arise from the use of the tool.
+
+> **Disclaimer:** Users acknowledge that generating the keystore for other network apart from mainnet is an experimental and not audited feature. Nethermind takes no responsibility for any malfunctioning or lost money derived from an unexpected behavior during keystore generation.
 
 The setup is currently designed to start all three nodes required to run a full local validator (execution, consensus and validator node). Soon, Sedge will let you connect to a public or remote node for the execution and consensus layers. Once the consensus node is synced, a validator node will be executed automatically. We suggest that you make use of the initial time taken to sync to prepare the keystore file and make the deposit for your staked ether.
 
@@ -157,7 +160,6 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | ---------- | ---------- | ---------- |
 | Nethermind | Lighthouse | Lighthouse |
 |            | Lodestar   | Lodestar   |
-|            | Prysm      | Prysm      |
 |            | Teku       | Teku       |
 
 ### CL clients with Mev-Boost
@@ -209,24 +211,31 @@ The following roadmap covers the main features and ideas we want to implement bu
 
 ### Version 0.4
 
+- [x] Create and handle keystores on our own instead of using staking-deposit-cli
+- [x] Improve validator testing
+- [x] Bug fixes
+- [x] Deprecate Kiln, Ropsten, Denver networks
+- [x] Improve support for chiado network (Gnosis testnet)
+
+### Version 0.X
+
 - [ ] Set up and run only one node (execution/consensus/validator)
 - [ ] Grafana and Prometheus support for the clients
 - [ ] Besu and Erigon support
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
-
-### Version 0.X
-
-- [ ] TUI for guided and more interactive setup (better UX)
-- [ ] Off-premise setup support
 - [ ] Cross platform support and documentation
 - [ ] More tests!!!
 - [ ] Support for Nimbus client
-- [ ] Integrate other PoS networks
 
 ### Version 1.0
 
-Full Ethereum 2 support with MEV-Boost
+Full Ethereum PoS support with MEV-Boost
 
+## Version X.0
+
+- [ ] Integrate other PoS networks
+- [ ] TUI for guided and more interactive setup (better UX)
+- [ ] Off-premise setup support
 ## 💪 Want to contribute?
 
 Please check our Contributing Guidelines, Code of Conduct and our issues. In case you want to report or suggest something (any help is welcome) please file an issue first so the main team is aware and it can be discussed.
