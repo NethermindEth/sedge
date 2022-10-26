@@ -6,7 +6,7 @@ sidebar_position: 1
 
 **Sedge** is a one-click setup tool for PoS network/chain validators and nodes written entirely in the [Go programming language](https://golang.org/). **Sedge** takes care of the entire on-premise full node setup based on the chosen client, using generated docker-compose scripts based on the desired configuration. The following list shows some of the use cases for Sedge:
 
-- **Staking**. You can use Sedge to set up and deploy an Ethereum and Gnosis full node, including a validator node, and nodes with mev-boost. Sedge's on-premise setup design favors solo stakers but can also be integrated with other staking solutions.
+- **Staking**. You can use Sedge to set up and deploy an Ethereum and Gnosis full node, including a validator node and nodes with mev-boost. Sedge's on-premise setup design favors solo stakers but can also be integrated with other staking solutions.
 - **Automated testing**. If you need to set up nodes very often to test your application or node, you can integrate Sedge to an automated solution, and make use of Sedge as a one-click tool with which you can quickly set up a full node in just a single step. This can be the case for protocol and dapps developers.
 - **API and Checkpoint Sync endpoints**. Sedge allows you to set up a full node without a validator so that you can use this node either to expose the execution JSON-RPC API or the Beacon Chain HTTP API, or to expose a [Checkpoint Sync](concepts/checkpoint-sync.md) endpoint.
 
