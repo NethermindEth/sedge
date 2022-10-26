@@ -4,7 +4,7 @@
 [![Discord](https://user-images.githubusercontent.com/7288322/34471967-1df7808a-efbb-11e7-9088-ed0b04151291.png)](https://discord.com/invite/PaCMRFdvWT)
 [![codecov](https://codecov.io/gh/NethermindEth/sedge/branch/main/graph/badge.svg?token=8FERO4PO1V)](https://codecov.io/gh/NethermindEth/sedge)
 
-A one click setup tool for PoS network/chain validators. Currently, Sedge is designed primarily for solo stakers and testnet devs of Ethereum. Sedge generates docker-compose scripts for the entire on-premise validator setup based on the chosen client.
+A one-click setup tool for PoS network/chain validators. Currently, Sedge is designed primarily for solo stakers and testnet devs of Ethereum. Sedge generates docker-compose scripts for the entire on-premise validator setup based on the chosen client.
 
 The project **is still on beta** and although it should be stable enough, it might still have some issues. Sedge has not been audited yet.
 
