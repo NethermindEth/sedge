@@ -8,7 +8,7 @@ import TabItem from '@theme/TabItem';
 
 # Complete quickstart guide
 
-Sedge is a one-click setup tool which you can use to setup and run a validator on Ethereum easily and without any prior knowledge. In this guide you will go through every step in the validator setup using Sedge, along with detailed explanations for beginners. 
+Sedge is a one-click setup tool that you can use to set up and run a validator on Ethereum easily and without any prior knowledge. In this guide you will go through every step in the validator setup using Sedge, along with detailed explanations for beginners. 
 
 This is a beginner-friendly guide. Familiarity with the command line is expected, but otherwise this guide makes no assumptions about your technical skills or prior knowledge.
 
@@ -65,7 +65,7 @@ The `$` symbol represents the Terminal prompt
 
 :::info
 
-This guide assume your Terminal session is pointing all the time to the folder in which you downloaded Sedge. You can check the directory pointed by your Terminal session if you execute `pwd`. 
+This guide assumes your Terminal session is pointing all the time to the folder in which you downloaded Sedge. You can check the directory pointed by your Terminal session if you execute `pwd`. 
 
 :::
 
@@ -374,13 +374,13 @@ docker compose -f docker-compose-scripts/docker-compose.yml up -d execution cons
 ? Run the script with the selected services execution, consensus? [Y/n]
 ```
 
-Notice that it says "Run the script with the selected services **execution, consensus**?". This is because by default only this nodes will be up and running at the beginning, as they need to sync with the network first and these can take days.
+Notice that it says "Run the script with the selected services **execution, consensus**?". This is because by default only these nodes will be up and running at the beginning, as they need to sync with the network first and these can take days.
 
-> On some testnets the sync process takes hours; dependending on the network age and your internet bandwidth
+> On some testnets the sync process takes hours; depending on the network age and your internet bandwidth
 
-Sedge will track the syncing progress of the execution and consensus nodes, and after they are completely synced, Sedge will automatically spin up the validator node. This give you time for you to prepare the validator keystore (we will do that shortly) and to be familiar with the validator registration.
+Sedge will track the syncing progress of the execution and consensus nodes, and after they are completely synced, Sedge will automatically spin up the validator node. This gives you time to prepare the validator keystore (we will do that shortly) and to become familiar with the validator registration.
 
-Now type `Y` or enter to start the following flow (You just need to read carefully all the logs from now on):
+Now type `Y` or enter to start the following flow (You need to read carefully all the logs from now on):
 
 :::info
 
@@ -393,13 +393,13 @@ Docker commands need to be executed with `sudo` by default, which requires root 
     2022-XX-XX 00:00:00 -- [INFO] Checking if docker engine is on
     2022-XX-XX 00:00:00 -- [INFO] Running command: docker ps -a
     ```
-    Sedge runs `docker ps -a` to check if docker engine is on. You might have docker installed previously, but this not means docker is up and running. Docker engine is usually off when you use Docker Desktop and doesn't have the app on. If this is your case, just start Docker Desktop.
+    Sedge runs `docker ps -a` to check if docker engine is on. You might have previously installed docker, but this does not mean docker is up and running. Docker engine is usually off when you use Docker Desktop and doesn't have the app on. If this is your case, just start Docker Desktop.
 
     In this case docker engine is on.
 
 - Run the docker-compose script
     
-    In this step the docker-compose script will be executed, which needs to pull the client's docker images from Docker Hub. This can take a while dependending on your internet connection.
+    In this step the docker-compose script will be executed, which needs to pull the client's docker images from Docker Hub. This can take a while depending on your internet connection.
 
     ```
     2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml up -d execution consensus
@@ -423,7 +423,7 @@ Docker commands need to be executed with `sudo` by default, which requires root 
     ⠿ Container execution-client  Started
     ```
 
-    The above logs are an example of healthy logs when going on through this step.
+    The above logs are an example of healthy logs when going through this step.
 
 - Display running nodes
 
@@ -434,7 +434,7 @@ Docker commands need to be executed with `sudo` by default, which requires root 
     execution-client    "./Nethermind.Runner…"   execution           running             0.0.0.0:8008->8008/tcp, :::8008->8008/tcp, 0.0.0.0:30303->30303/tcp, :::30303->30303/tcp, 8545/tcp, 0.0.0.0:30303->30303/udp, :::30303->30303/udp
     ```
 
-    Double check there are both `consensus-client` and `execution-client` entries. If one of them is missing then something [wrong happened](/docs/troubleshooting). 
+    Double check there are both `consensus-client` and `execution-client` entries. If one of them is missing then something [wrong has happened](/docs/troubleshooting). 
 
 - Futher instructions
     
@@ -495,9 +495,9 @@ Docker commands need to be executed with `sudo` by default, which requires root 
     # highlight-end
     ```  
 
-    **Is normal that some requests fail** at the beginning because the nodes are not ready yet. It should take a few minutes for the nodes to be ready. After they are ready you shouldn't see more failed requests unless there is a network problem in your machine or you shutdown the nodes.
+    **It's normal that some requests fail** at the beginning because the nodes are not ready yet. It should take a few minutes for the nodes to be ready. Once they are ready you shouldn't see more failed requests unless there is a network problem in your machine or you shut down the nodes.
 
-    **Is also normal to see some logs saying a node is synced** at the beginning. This are false reports from the node itself. Sedge knows how to handle this and tell if a node is truly synced. 
+    **It's also normal to see some logs saying a node is synced** at the beginning. These are false reports from the node itself. Sedge knows how to handle this and can tell if a node is truly synced. 
 
     For a long time (until the nodes are synced) and every 5 minutes you will see logs like this:
 
@@ -510,7 +510,7 @@ Docker commands need to be executed with `sudo` by default, which requires root 
 
 :::info
 
-Date and time of the logs were modified to show more generic logs. Until this step, and depending on your internet connection, the entire process should take just a few minutes.
+The date and time of the logs were modified to show more generic logs. Until this step, and depending on your internet connection, the entire process should take just a few minutes.
 
 :::
 
@@ -520,13 +520,13 @@ Sedge uses the [staking-deposit-cli](https://github.com/ethereum/staking-deposit
 
 :::caution Disclaimer
 
-Users acknowledge that staking-deposit-cli is an external tool, which means that Nethermind exercises no control over its functioning and does not accept any liability for any issues that may arise from the use of the tool.
+Users acknowledge that staking-deposit-cli is an external tool, which means that Nethermind exercises no control over its functioning and does not accept any liability for any issues that may arise from using the tool.
 
 :::
 
 :::caution Disclaimer
 
-Users acknowledge that generating the keystore for other network apart from mainnet is an experimental and not audited feature. Nethermind takes no responsibility for any malfunctioning or lost money derived from an unexpected behavior during keystore generation.
+Users acknowledge that generating the keystore for any network other than the mainnet is an experimental and unaudited feature of Sedge. Nethermind provides this feature on an ‘as is’ basis and makes no warranties regarding its proper functioning. The use of this feature is at the user’s own risk - Nethermind excludes all liability for any malfunction or loss of money that may occur as the result of an unexpected behavior during the keystore generation.
 
 :::
 
@@ -538,7 +538,7 @@ To get started, first open another Terminal on the same working directory we use
 
 The `keys` command will first check if Docker is installed (because use docker to run the staking-deposit-cli docker image). As we already installed Docker in the previous steps, Sedge will continue the process.
 
-The next step involves a prompt for a Eth1 address to be used to create the [withdrawal credentials](/docs/concepts/keystore). If you don't provide one then the tool will generate withdrawal credentials with the mnemonic-derived withdrawal public key.
+The next step involves a prompt for an Eth1 address to be used to create the [withdrawal credentials](/docs/concepts/keystore). If you don't provide one then the tool will generate withdrawal credentials with the mnemonic-derived withdrawal public key.
 
 ```logs
 Initializing configuration
@@ -549,7 +549,7 @@ Using config file: /Users/teno/.sedge.yaml
 ✔ Please enter a Eth1 address to be used to create the withdrawal credentials. You can leave it blank and press enter:
 ```
 
-The keystore must be secured with a password with a minimum lenght of 8. Sedge will ask you to provide this password so it can be used by the staking-deposit-cli to secure the generated keystore and then create a `keystore_password.txt` for the validator node. The password input will be hidden so you don't need to worried about your password getting registered in the Terminal logs or history.
+The keystore must be secured with a password with a minimum length of 8. Sedge will ask you to provide this password so it can be used by the staking-deposit-cli to secure the generated keystore and then create a `keystore_password.txt` for the validator node. The password input will be hidden so you don't need to worry about your password getting registered in the Terminal logs or history.
 
 ```
 ✔ Please enter the password you will use for the validator keystore: ********█
@@ -559,7 +559,7 @@ Please enter the password you will use for the validator keystore: ********
 
 :::info
 
-A **password prompt** may arise again because Sedge use docker commands to run the staking-deposit-cli docker image, and these commands need to be executed with `sudo` by default. The required password is your **machine password**, not the keystore password.
+A **password prompt** may arise again because Sedge uses docker commands to run the staking-deposit-cli docker image, and these commands need to be executed with `sudo` by default. The required password is your **machine password**, not the keystore password.
 
 :::
 
@@ -582,7 +582,7 @@ Be careful to type correctly the keystore password provided previously to Sedge.
 
 :::
 
-The staking-deposit-cli tool let you create a keystore using an existing mnemonic or creating a new one. By default, Sedge's `keys` command goes with creating a new mnemonic.
+The staking-deposit-cli tool lets you create a keystore using an existing mnemonic or by creating a new one. By default, Sedge's `keys` command goes with creating a new mnemonic.
 
 ```
 Please choose your mnemonic language ['1. 简体中文', '2. 繁體中文', '3. čeština', '4. English', '5. Italiano', '6. 한국어', '7. Português', '8. Español']:  [english]:
@@ -595,7 +595,7 @@ One validator node can handle hundreds of validators (validator keys). We recomm
 
 :::
 
-After you choose how many new validators you wish to run, a new generated mnemonic will be displayed. You must copy it using safe methods such as pen and paper. Then you will be asked to insert the mnemonic for validation. This is the final step, after which the keystore will be generated:
+After you choose how many new validators you wish to run, a newly generated mnemonic will be displayed. You must copy it using safe methods such as pen and paper. Then you will be asked to insert the mnemonic for validation. This is the final step, after which the keystore will be generated:
 
 ```
                   #####     #####
@@ -681,7 +681,7 @@ When the execution and consensus clients are finally synced you will see the fol
   ? Run validator service? [Y/n]
   ```
 
-Now you can proceed and finish the setup pressing `Y`. This will run the validator service with it your validator client will be up and running. Make sure you created or prepared the keystore folder before this step. If you forgot to do it you can take your time, prepare the keystore folder and then press `Y`. This will also take you to the final logs, which describe you how to validator is being run:
+Now you can proceed and finish the setup by pressing `Y`. This will run the validator service with it your validator client will be up and running. Make sure you created or prepared the keystore folder before this step. If you forgot to do it you can take your time, prepare the keystore folder and then press `Y`. This will also take you to the final logs, which describe how the validator is being run:
 
   ```logs
   2022-XX-XX 00:00:00 -- [INFO] Checking if docker engine is on
