@@ -56,11 +56,11 @@ const (
 	ValidatorDefaultDataDir         = "./validator-data"
 	KeystoreDefaultDataDir          = "./keystore"
 	ReviewKeystorePath              = "In case you used custom paths for the 'cli' or the 'keys' commands, please review if the keystore path in the generated .env file points to the generated keystore folder (the .env key should be KEYSTORE_DIR). If not, change the path in the .env file to the correct one."
-	NodesSynced                     = "Execution and Consensus clients are synced, proceding to start validator node"
+	NodesSynced                     = "Execution and Consensus clients are synced, proceeding to start validator node"
 	RemoteNodeNeeded                = `
 If you want to run a validator, make sure you have access to a remote or external consensus node.
 	
-You can use one of your own, a friend's node or providers such as Infura. Edit the .env file accordinly please, check that variable CC_NODE <-> (consensus endpoint) have the correct value. The validator node requires a high available consensus node, and consensus in turn needs a high available execution node.`
+You can use one of your own, a friend's node or providers such as Infura. Edit the .env file accordingly please, check that variable CC_NODE <-> (consensus endpoint) have the correct value. The validator node requires a high available consensus node, and consensus in turn needs a high available execution node.`
 	ValidatorTips = `
 A validator node needs to connect to a synced consensus node, and the consensus node in turn needs to connect to a synced execution node. 
 	
@@ -94,7 +94,7 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 	GeneratingMnemonic              = "Existing mnemonic not provided. Generating mnemonic for validator keystore:"
 	StoreMnemonic                   = "Make sure to store your mnemonic somewhere safe. Losing it could end in the lost of your validators. Press enter to continue" // TODO: improve warning message
 	PreparingTekuDatadir            = "Preparing teku datadirs (must have full read/write/execute permissions to work)"
-	GettingContainersIP             = "Proceding to get execution and consensus containers IP address for the monitoring tool"
+	GettingContainersIP             = "Proceeding to get execution and consensus containers IP address for the monitoring tool"
 	WaitingForNodesToStart          = "Waiting a minute for nodes to start"
 	CustomImagesWarning             = "You are using custom images for the execution, consensus or validator clients!!! Make sure this is intended. Also check these images are correct and available from this device otherwise the setup will fail or have an unexpected behavior."
 	DefaultDiscoveryPortEL          = "30303"

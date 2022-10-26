@@ -1,6 +1,6 @@
 name: 'Release Sedge'
 
-on: 
+on:
   workflow_dispatch:
     inputs:
       tag:
@@ -8,74 +8,103 @@ on:
         required: true
         default: 'master'
 
-permissions: 
+permissions:
   contents: write
   packages: write
 
 jobs:
-  build-sedge:
-    name: Build sedge
-    runs-on: ubuntu-latest
-    env: 
-      VERSION: v${{ github.event.inputs.tag }}
+  sedge-darwin:
+    name: Build sedge darwin
+    runs-on: macos-latest
+    env:
+      VERSION: ${{ github.event.inputs.tag }}
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+
     - uses: actions/setup-go@v3
       with:
         go-version: '1.18.3'
-    - run: chmod +x ./scripts/build-go-binaries.sh && ./scripts/build-go-binaries.sh
+
+    - run: chmod +x ./scripts/build-go-darwin-binaries.sh && ./scripts/build-go-darwin-binaries.sh
+
     - uses: actions/upload-artifact@master
       name: Uploading sedge darwin amd64 package
       with:
-        name: sedge-${{env.VERSION}}-darwin-amd64
-        path: build/sedge-${{env.VERSION}}-darwin-amd64
+        name: sedge-v${{env.VERSION}}-darwin-amd64
+        path: build/sedge-v${{env.VERSION}}-darwin-amd64
 
     - uses: actions/upload-artifact@master
       name: Uploading sedge darwin arm64 package
       with:
-        name: sedge-${{env.VERSION}}-darwin-arm64
-        path: build/sedge-${{env.VERSION}}-darwin-arm64
+        name: sedge-v${{env.VERSION}}-darwin-arm64
+        path: build/sedge-v${{env.VERSION}}-darwin-arm64
+
+  sedge-linux:
+    name: Build sedge linux
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ github.event.inputs.tag }}
+    needs: sedge-darwin
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - uses: actions/setup-go@v3
+      with:
+        go-version: '1.18.3'
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v2
+
+    - run: chmod +x ./scripts/build-go-linux-binaries.sh && ./scripts/build-go-linux-binaries.sh
 
     - uses: actions/upload-artifact@master
       name: Uploading sedge linux amd64 package
       with:
-        name: sedge-${{env.VERSION}}-linux-amd64
-        path: build/sedge-${{env.VERSION}}-linux-amd64
-        
+        name: sedge-v${{env.VERSION}}-linux-amd64
+        path: build/sedge-v${{env.VERSION}}-linux-amd64
+
     - uses: actions/upload-artifact@master
       name: Uploading sedge linux arm64 package
       with:
-        name: sedge-${{env.VERSION}}-linux-arm64
-        path: build/sedge-${{env.VERSION}}-linux-arm64
+        name: sedge-v${{env.VERSION}}-linux-arm64
+        path: build/sedge-v${{env.VERSION}}-linux-arm64
 
   update-homebrew:
     name: Update Homebrew package
     runs-on: ubuntu-latest
-    env: 
-      VERSION: v${{ github.event.inputs.tag }}
-    needs: build-sedge
+    env:
+      VERSION: ${{ github.event.inputs.tag }}
+    needs: sedge-linux
     steps:
     - name: Download packages
       uses: actions/download-artifact@v3
-      with: 
+      with:
         path: /tmp/binaries
+
     - name: Checkout repository
       uses: actions/checkout@master
-      with: 
+      with:
         repository: NethermindEth/homebrew-sedge
         path: homebrew-sedge
+
     - name: Update Homebrew file with new version and hash
       run: | 
           chmod +x /home/runner/work/sedge/sedge/homebrew-sedge/scripts/update-homebrew.sh
           bash /home/runner/work/sedge/sedge/homebrew-sedge/scripts/update-homebrew.sh
+
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v4
       with:
         token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
         commit-message: Update Homebrew to latest release
         title: '[Release] Update Homebrew'
-        reviewers: falcoxyz, AntiD2ta, cbermudez97, stdevMac
+        reviewers: falcoxyz, AntiD2ta, cbermudez97
         draft: false
         path: homebrew-sedge
         add-paths: |
@@ -84,21 +113,23 @@ jobs:
   publish-github:
     name: "Release and upload binaries to github"
     runs-on: ubuntu-latest
-    env: 
-      VERSION: v${{ github.event.inputs.tag }}
+    env:
+      VERSION: ${{ github.event.inputs.tag }}
     needs: update-homebrew
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+
     - name: Download packages
       uses: actions/download-artifact@v3
-      with: 
+      with:
         path: /tmp/binaries
+
     - name: Upload release to Github Releases
       uses: ncipollo/release-action@v1
       with:
         artifacts: "/tmp/binaries/sedge-v*/*"
         bodyFile: "CHANGELOG.md"
         draft: true
-        tag: v${{ github.event.inputs.tag }}
-        name: v${{ github.event.inputs.tag }}
+        tag: ${{ github.event.inputs.tag }}
+        name: ${{ github.event.inputs.tag }}
