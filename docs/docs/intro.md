@@ -26,7 +26,7 @@ Users acknowledge that no warranty is being made of a successful installation. S
 
 ## Why you should try Sedge
 
-Sedge is a tool that focuses on ease of use and as such lowers the entry barrier for non technical users. With Sedge, you can run a node or a validator on Ethereum with little to no technical background and set it all up in less than 5 minutes! Don't know which client to choose? No problem! Let Sedge choose it for you.
+Sedge is a tool that focuses on ease of use and, as such, lowers the entry barrier for non-technical users. With Sedge, you can run a node or a validator on Ethereum with little to no technical background and set it all up in less than 5 minutes! Don't know which client to choose? No problem! Let Sedge choose it for you.
 
 If you have enough technical knowledge, you can also take advantage of Sedge and its features. You can generate the setup files, modify them according to your needs, and integrate Sedge with other solutions.
 
