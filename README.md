@@ -164,14 +164,12 @@ Users acknowledge that no warranty is being made of a successful installation. S
 
 ### CL clients with Mev-Boost
 
-| Client     | Mev-Boost | Networks |
-| ---------- | --------- | -------- |
-| Lighthouse | yes       | Goerli   |
-| Lodestar   | yes       | Goerli   |
-| Prysm      | no*       | Goerli   |
-| Teku       | yes       | Goerli   |
-
-> Settings for Prysm with mev-boost are quite ready, we are waiting for an official and stable Prysm docker image with mev-boost support
+| Client     | Mev-Boost | Networks          |
+| ---------- | --------- | ----------------- |
+| Lighthouse | yes       | Mainnet, Goerli   |
+| Lodestar   | yes       | Mainnet, Goerli   |
+| Prysm      | yes       | Mainnet, Goerli   |
+| Teku       | yes       | Mainnet, Goerli   |
 
 ## Supported Linux flavours for dependency installation
 
