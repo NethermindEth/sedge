@@ -102,7 +102,7 @@ We don't want to stop at Ethereum. We also want to help stakers of other PoS net
 
 > **Disclaimer:** Users acknowledge that staking-deposit-cli is an external tool, which means that Nethermind exercises no control over its functioning and does not accept any liability for any issues that may arise from the use of the tool.
 
-> **Disclaimer:** Users acknowledge that generating the keystore for other network apart from mainnet is an experimental and not audited feature. Nethermind takes no responsibility for any malfunctioning or lost money derived from an unexpected behavior during keystore generation.
+> **Disclaimer:** Users acknowledge that generating the keystore for any network other than the mainnet is an experimental and unaudited feature of Sedge. Nethermind provides this feature on an ‘as is’ basis and makes no warranties regarding its proper functioning. The use of this feature is at the user’s own risk - Nethermind excludes all liability for any malfunction or loss of money that may occur as the result of an unexpected behavior during the keystore generation.
 
 The setup is currently designed to start all three nodes required to run a full local validator (execution, consensus and validator node). Soon, Sedge will let you connect to a public or remote node for the execution and consensus layers. Once the consensus node is synced, a validator node will be executed automatically. We suggest that you make use of the initial time taken to sync to prepare the keystore file and make the deposit for your staked ether.
 
