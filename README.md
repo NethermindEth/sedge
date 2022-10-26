@@ -4,7 +4,7 @@
 [![Discord](https://user-images.githubusercontent.com/7288322/34471967-1df7808a-efbb-11e7-9088-ed0b04151291.png)](https://discord.com/invite/PaCMRFdvWT)
 [![codecov](https://codecov.io/gh/NethermindEth/sedge/branch/main/graph/badge.svg?token=8FERO4PO1V)](https://codecov.io/gh/NethermindEth/sedge)
 
-A one click setup tool for PoS network/chain validators. Currently, Sedge is designed primarily for solo stakers and testnet devs of Ethereum. Sedge generates docker-compose scripts for the entire on-premise validator setup based on the chosen client.
+A one-click setup tool for PoS network/chain validators. Currently, Sedge is designed primarily for solo stakers and testnet devs of Ethereum. Sedge generates docker-compose scripts for the entire on-premise validator setup based on the chosen client.
 
 The project **is still on beta** and although it should be stable enough, it might still have some issues. Sedge has not been audited yet.
 
@@ -102,7 +102,7 @@ We don't want to stop at Ethereum. We also want to help stakers of other PoS net
 
 > **Disclaimer:** Users acknowledge that staking-deposit-cli is an external tool, which means that Nethermind exercises no control over its functioning and does not accept any liability for any issues that may arise from the use of the tool.
 
-> **Disclaimer:** Users acknowledge that generating the keystore for other network apart from mainnet is an experimental and not audited feature. Nethermind takes no responsibility for any malfunctioning or lost money derived from an unexpected behavior during keystore generation.
+> **Disclaimer:** Users acknowledge that generating the keystore for any network other than the mainnet is an experimental and unaudited feature of Sedge. Nethermind provides this feature on an ‘as is’ basis and makes no warranties regarding its proper functioning. The use of this feature is at the user’s own risk - Nethermind excludes all liability for any malfunction or loss of money that may occur as the result of an unexpected behavior during the keystore generation.
 
 The setup is currently designed to start all three nodes required to run a full local validator (execution, consensus and validator node). Soon, Sedge will let you connect to a public or remote node for the execution and consensus layers. Once the consensus node is synced, a validator node will be executed automatically. We suggest that you make use of the initial time taken to sync to prepare the keystore file and make the deposit for your staked ether.
 
