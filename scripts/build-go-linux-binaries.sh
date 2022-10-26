@@ -3,6 +3,8 @@ set -x
 package=cmd/sedge/main.go
 package_name=sedge
 
+mkdir -p build
+
 platforms=("linux/amd64" "linux/arm64")
 
 for platform in "${platforms[@]}"
