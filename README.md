@@ -202,12 +202,12 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Integrate Sepolia network
 - [x] Documentation with examples
 
-### Version 0.3 (Actual)
+### Version 0.3
 
 - [x] Integrate Gnosis network
 - [x] Prepare for the Merge
 
-### Version 0.4
+### Version 0.4 (Actual)
 
 - [x] Create and handle keystores on our own instead of using staking-deposit-cli
 - [x] Improve validator testing
