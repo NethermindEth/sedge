@@ -30,5 +30,5 @@ Sedge is a tool that focuses on ease of use and as such lowers the entry barrier
 
 If you have enough technical knowledge, you can also take advantage of Sedge and its features. You can generate the setup files, modify them according to your needs, and integrate Sedge with other solutions.
 
-Sedge codebase design allow us to create many features in a way Sedge will be able to satisfy most of your needs: setup a single node or a full node, cross platform support, alerting mechanisms, support for other networks and much more. [Stay tuned](https://twitter.com/nethermindeth) to get the most of these features as soon as we ship them.
+The Sedge codebase design allows us to create many features and support you with setting up a single node or a full node, cross-platform support, alerting mechanisms, support for other networks, and much more. [Stay tuned](https://twitter.com/nethermindeth) to find out when they’re shipped!
 
