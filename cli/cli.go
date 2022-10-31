@@ -384,7 +384,7 @@ func init() {
 
 	vlExtraFlags = cliCmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 
-	cliCmd.Flags().StringVar(&loggingDriver, "logging", "json-file", "Docker logging driver used by all the services")
+	cliCmd.Flags().StringVar(&loggingDriver, "logging", "json-file", "Docker logging driver used by all the services. Set 'none' to use the default docker logging driver")
 
 	// Initialize monitoring tool
 	initMonitor(func() MonitoringTool {
