@@ -15,9 +15,11 @@ limitations under the License.
 */
 package configs
 
+// TODO: Remove public level to this variable (NetworksConfigs), use getters to access instead
 var NetworksConfigs map[string]NetworkConfig
 
 func init() {
+	// TODO: This initialization can be made in the variable declaration
 	NetworksConfigs = map[string]NetworkConfig{
 		"mainnet": {
 			Name:               "mainnet",
