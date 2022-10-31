@@ -16,10 +16,10 @@
       - ${KEYSTORE_DIR}:/keystore
       - ${VL_DATA_DIR}:/data{{if .LoggingDriver}}
     logging:
-      driver: "{{.LoggingDriver}}"
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
         max-size: "10m"
-        max-file: "10"{{end}}
+        max-file: "10"{{end}}{{end}}
 
   validator:
     container_name: validator-client
@@ -52,8 +52,8 @@
       - --{{$flag}}{{end}}{{if .Mev}}
       - --builder-proposals{{end}}{{if .LoggingDriver}}
     logging:
-      driver: "{{.LoggingDriver}}"
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
         max-size: "10m"
-        max-file: "10"{{end}}
+        max-file: "10"{{end}}{{end}}
 {{ end }}

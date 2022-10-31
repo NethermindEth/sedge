@@ -55,8 +55,8 @@
       - --builder=true
       - --builder.urls http://mevboost:{{.MevPort}}{{end}}{{if .LoggingDriver}}
     logging:
-      driver: "{{.LoggingDriver}}"
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
         max-size: "10m"
-        max-file: "10"{{end}}
+        max-file: "10"{{end}}{{end}}
 {{ end }}

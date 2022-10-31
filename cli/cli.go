@@ -61,7 +61,7 @@ var (
 	mapAllPorts       bool
 	noMev             bool
 	noValidator       bool
-	loggingDriver     string
+	loggingFlag       string
 )
 
 const (
@@ -163,8 +163,8 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 		validatorImage = strings.Join(validatorParts[1:], ":")
 	}
 
-	if loggingDriver == "none" {
-		loggingDriver = ""
+	if err := configs.ValidateLoggingFlag(loggingFlag); err != nil {
+		return err
 	}
 
 	return nil
@@ -260,7 +260,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		MapAllPorts:       mapAllPorts,
 		Mev:               !noMev && !noValidator,
 		MevImage:          mevImage,
-		LoggingDriver:     loggingDriver,
+		LoggingDriver:     configs.GetLoggingDriver(loggingFlag),
 	}
 	results, err := generate.GenerateScripts(gd)
 	if err != nil {
@@ -384,7 +384,7 @@ func init() {
 
 	vlExtraFlags = cliCmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 
-	cliCmd.Flags().StringVar(&loggingDriver, "logging", "json-file", "Docker logging driver used by all the services. Set 'none' to use the default docker logging driver")
+	cliCmd.Flags().StringVar(&loggingFlag, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
 
 	// Initialize monitoring tool
 	initMonitor(func() MonitoringTool {

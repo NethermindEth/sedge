@@ -22,10 +22,10 @@
       --wallet-password-file=/keystore/keystore_password.txt
       --account-password-file=/keystore/keystore_password.txt{{if .LoggingDriver}}
     logging:
-      driver: "{{.LoggingDriver}}"
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
         max-size: "10m"
-        max-file: "10"{{end}}
+        max-file: "10"{{end}}{{end}}
 
   validator:
     container_name: validator-client
@@ -58,8 +58,8 @@
       - --enable-builder
       - --enable-validator-registration{{end}}{{if .LoggingDriver}}
     logging:
-      driver: "{{.LoggingDriver}}"
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
         max-size: "10m"
-        max-file: "10"{{end}}
+        max-file: "10"{{end}}{{end}}
 {{ end }}

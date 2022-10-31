@@ -27,10 +27,10 @@ services:
     command: >
       sh -c "{{if or .CcRemoteCfg .VlRemoteCfg }}wget -O /tmp/app/config.yml ${CONFIG_URL};{{end}}{{if or .CcRemoteGen .VlRemoteGen }}wget -O /tmp/app/genesis.ssz ${GENESIS_URL};{{end}}{{if or .CcRemoteDpl .VlRemoteDpl }}echo -n ${DEPLOY_BLOCK} > /tmp/app/deploy_block.txt;{{end}}"{{end}}{{if .LoggingDriver}}
     logging:
-      driver: "{{.LoggingDriver}}"
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
         max-size: "10m"
-        max-file: "10"{{end}}
+        max-file: "10"{{end}}{{end}}
 {{template "consensus" .}}
 {{template "validator" .}}
 
