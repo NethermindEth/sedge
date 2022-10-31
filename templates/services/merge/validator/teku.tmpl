@@ -9,7 +9,12 @@
         condition: service_completed_successfully{{end}}
     volumes:
       - ${VL_DATA_DIR}:/data
-      - ${KEYSTORE_DIR}:/keystore
+      - ${KEYSTORE_DIR}:/keystore{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}
 
   validator:
     container_name: validator-client
@@ -42,10 +47,10 @@
       - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
       - --validators-builder-registration-default-enabled=true
-      - --Xvalidators-builder-registration-default-gas-limit=29000000{{end}}
+      - --Xvalidators-builder-registration-default-gas-limit=29000000{{end}}{{if .LoggingDriver}}
     logging:
-      driver: "json-file"
+      driver: "{{.LoggingDriver}}"
       options:
         max-size: "10m"
-        max-file: "10"
+        max-file: "10"{{end}}
 {{ end }}

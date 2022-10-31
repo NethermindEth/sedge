@@ -20,7 +20,12 @@
       --keys-dir=/keystore/validator_keys
       --wallet-dir=/data/wallet
       --wallet-password-file=/keystore/keystore_password.txt
-      --account-password-file=/keystore/keystore_password.txt
+      --account-password-file=/keystore/keystore_password.txt{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}
 
   validator:
     container_name: validator-client
@@ -51,10 +56,10 @@
       - --{{$flag}}{{end}}{{with .FeeRecipient}}
       - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{if .Mev}}
       - --enable-builder
-      - --enable-validator-registration{{end}}
+      - --enable-validator-registration{{end}}{{if .LoggingDriver}}
     logging:
-      driver: "json-file"
+      driver: "{{.LoggingDriver}}"
       options:
         max-size: "10m"
-        max-file: "10"
+        max-file: "10"{{end}}
 {{ end }}

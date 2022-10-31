@@ -20,7 +20,12 @@
       --paramsFile /network_config/config.yaml{{end}}
       --dataDir=/data
       --importKeystores=/keystore/validator_keys
-      --importKeystoresPassword=/keystore/keystore_password.txt
+      --importKeystoresPassword=/keystore/keystore_password.txt{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}
   validator:
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
@@ -46,10 +51,10 @@
       - --suggestedFeeRecipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
       - --builder=true{{end}}
-      - --graffiti=${GRAFFITI}
+      - --graffiti=${GRAFFITI}{{if .LoggingDriver}}
     logging:
-      driver: "json-file"
+      driver: "{{.LoggingDriver}}"
       options:
         max-size: "10m"
-        max-file: "10"
+        max-file: "10"{{end}}
 {{ end }}
