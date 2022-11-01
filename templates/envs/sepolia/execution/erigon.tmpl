@@ -1,0 +1,8 @@
+{{/* erigon.tmpl */}}
+{{ define "execution" }}
+# --- Execution Layer - Execution Node - configuration ---
+EC_IMAGE_VERSION={{if .ElImage}}{{.ElImage}}{{else}}thorax/erigon:v2.28.1{{end}}
+EC_DATA_DIR={{.ElDataDir}}
+EC_METRICS_ENABLED="--metrics"
+EC_JWT_SECRET_PATH={{.JWTSecretPath}}
+{{ end }}
