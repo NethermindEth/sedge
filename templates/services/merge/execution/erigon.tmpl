@@ -1,71 +1,69 @@
 {{/* erigon.tmpl */}}
 {{ define "execution" }}
   # Basic erigon's service
-  execution: &default-erigon-service
-    image: ${EC_IMAGE_VERSION}
-    pid: service:erigon
-    volumes_from: [ erigon ]
+  execution:
+    stop_grace_period: 30m
+    container_name: execution-client
     restart: unless-stopped
-    mem_swappiness: 0
-    user: ${DOCKER_UID:-1000}:${DOCKER_GID:-1000}
-  services:
-    erigon:
-      image: ${EC_IMAGE_VERSION}
-      build:
-        args:
-          UID: ${DOCKER_UID:-1000}
-          GID: ${DOCKER_GID:-1000}
-      container_name: execution_client
-      restart: unless-stopped
-      networks:
+    image: ${EC_IMAGE_VERSION}
+    networks:
       - sedge
-      ports:
-        - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
-        - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
-        - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
-        - "{{.ElApiPort}}:{{.ElApiPort}}"
-        - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
-      expose:
-        - {{.ElApiPort}}
-        - {{.ElAuthPort}}
-      volumes:
-        - ${EC_DATA_DIR}:/home/erigon/.local/share/erigon
-        - ${EC_JWT_SECRET_PATH}:/home/erigon/.local/share/erigon/jwt.hex
-      command:
-      - erigon
-      - --private.api.addr=0.0.0.0:9090
-      - --txpool.disable
-      - ${EC_METRICS_ENABLED:-""}
-      - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
-      - --metrics.addr=0.0.0.0
-      - --metrics.port={{.ElMetricsPort}}
-      - --pprof
-      - --pprof.addr=0.0.0.0
-      - --pprof.port=6061
-      - --authrpc.addr=0.0.0.0
-      - --authrpc.vhosts=*
-      - --authrpc.jwtsecret=/home/erigon/.local/share/erigon/jwt.hex
-      - --datadir=/home/erigon/.local/share/erigon
-    sentry:
-      <<: *default-erigon-service
-      command: sentry ${SENTRY_FLAGS-} --sentry.api.addr=0.0.0.0:9091 --datadir=/home/erigon/.local/share/erigon
-      ports: [ "30303:30303/tcp", "30303:30303/udp" ]
+    volumes:
+      - ${XDG_DATA_HOME:-~/.local/share}/erigon:/home/erigon/.local/share/erigon
+   ports:
+     - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
+     - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
+     - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
+     - "{{.ElApiPort}}:{{.ElApiPort}}"
+     - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
+    command:
+    - erigon
+    - --private.api.addr=0.0.0.0:9090
+    - --txpool.disable
+    - ${EC_METRICS_ENABLED:-""}
+    - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
+    - --metrics.addr=0.0.0.0
+    - --metrics.port={{.ElMetricsPort}}
+    - --pprof
+    - --pprof.addr=0.0.0.0
+    - --pprof.port=6061
+    - --authrpc.addr=0.0.0.0
+    - --authrpc.vhosts=*
+    - --authrpc.jwtsecret=/home/erigon/.local/share/erigon/jwt.hex
+    - --datadir=/home/erigon/.local/share/erigon
+  prometheus:
+    image: prom/prometheus:v2.30.2
+    user: 1000:1000 # Uses erigon user from Dockerfile
+    command: --log.level=warn --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles
+    ports:
+      - "9090:9090"
+    volumes:
+      - ${ERIGON_PROMETHEUS_CONFIG:-./cmd/prometheus/prometheus.yml}:/etc/prometheus/prometheus.yml
+      - ${XDG_DATA_HOME:-~/.local/share}/erigon-prometheus:/prometheus
+    restart: unless-stopped
 
-    downloader:
-      <<: *default-erigon-service
-      command: downloader ${DOWNLOADER_FLAGS-} --downloader.api.addr=0.0.0.0:9093 --datadir=/home/erigon/.local/share/erigon
-      ports: [ "42069:42069/tcp", "42069:42069/udp" ]
+  grafana:
+    image: grafana/grafana:8.2.2
+    user: 1000:1000 # Uses erigon user from Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ${ERIGON_GRAFANA_CONFIG:-./cmd/prometheus/grafana.ini}:/etc/grafana/grafana.ini
+      - ./cmd/prometheus/datasources:/etc/grafana/provisioning/datasources
+      - ./cmd/prometheus/dashboards:/etc/grafana/provisioning/dashboards
+      - ${XDG_DATA_HOME:-~/.local/share}/erigon-grafana:/var/lib/grafana
+    restart: unless-stopped
 
-    txpool:
-      <<: *default-erigon-service
-      command: txpool ${TXPOOL_FLAGS-} --private.api.addr=erigon:9090 --txpool.api.addr=0.0.0.0:9094 --sentry.api.addr=sentry:9091 --datadir=/home/erigon/.local/share/erigon
+  rpcdaemon:
+    image: thorax/erigon:latest
+    command: rpcdaemon --datadir=/home/erigon/.local/share/erigon --private.api.addr=erigon:9090 --http.addr=0.0.0.0 --http.vhosts=* --http.corsdomain=* --http.api=eth,debug,net --ws
+    pid: service:execution# Use erigon's PID namespace. It's required to open Erigon's DB from another process (RPCDaemon local-mode)
+    volumes:
+      - ${XDG_DATA_HOME:-~/.local/share}/erigon:/home/erigon/.local/share/erigon
+    ports:
+      - "8545:8545"
+    restart: unless-stopped
 
-    rpcdaemon:
-      <<: *default-erigon-service
-      command: |
-        rpcdaemon ${RPCDAEMON_FLAGS-} --http.addr=0.0.0.0 --http.vhosts=* --http.corsdomain=* --ws
-        --private.api.addr=erigon:9090 --txpool.api.addr=txpool:9094 --datadir=/home/erigon/.local/share/erigon
-      ports: [ "8545:8545" ]
 
 
 {{ end }}
