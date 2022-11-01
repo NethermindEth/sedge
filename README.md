@@ -6,7 +6,7 @@
 
 A one-click setup tool for PoS network/chain validators. Currently, Sedge is designed primarily for solo stakers and testnet devs of Ethereum. Sedge generates docker-compose scripts for the entire on-premise validator setup based on the chosen client.
 
-The project **is still on beta** and although it should be stable enough, it might still have some issues. Sedge has not been audited yet.
+The project **is still on beta** and although it should be stable enough, it still might have some issues. Sedge has not been audited yet.
 
 - [Sedge](#sedge)
   - [⚙️ Installation](#️-installation)
@@ -54,7 +54,7 @@ Check our [installation guide](https://docs.sedge.nethermind.io/docs/quickstart/
 
 ### **Disclaimer**
 
-Downloading any binary from the internet comes with the risk of downloading files which malicious, third-party actors have injected with malware. All users should check that they are downloading the correct, clean binary, from a reputable source.
+Downloading any binary from the internet comes with the risk of downloading files that malicious, third-party actors have injected with malware. All users should check that they are downloading the correct, clean binary from a reputable source.
 
 ## 📜 Documentation
 
@@ -74,9 +74,9 @@ Between steps 4 and 5 you can generate the validator(s) keystore folder using `s
 
 The entire process is interactive, although you can use the `-y` flag to run Sedge without prompts.
 
-Check all the options and flags with `sedge cli --help`. More instructions or guides about sedge's features will come soon!
+Check all the options and flags with `sedge cli --help`. More instructions or guides about Sedge's features are coming soon!
 
-## 💥 How this all started?
+## 💥 Why did we start Sedge?
 
 As people who actively deployed validators way before The Merge, we know how hard it is to set up an Ethereum validator:
 
@@ -88,13 +88,13 @@ As people who actively deployed validators way before The Merge, we know how har
   
 > Enter sedge
 
-We want Sedge to take care of all of the above for you. With just a few clicks or steps, Sedge can create an entire ethereum staking architecture that supports client diversity and Ethereum's latest features, while being completely free and open source. We want Sedge to save you from making costly mistakes in this complex setup; along with hours or days of research, reading and testing. We want you to be able to stake easily with or without blockchain knowledge by giving you the tools to help this amazing community (and earn some good money of course 😉).
+We want Sedge to take care of all of the above for you. With just a few clicks or steps, Sedge can create an entire Ethereum staking architecture that supports client diversity and Ethereum's latest features, while being completely free and open source. We want Sedge to save you from making costly mistakes in this complex setup; along with hours or days of research, reading and testing. We want you to be able to stake easily with or without blockchain knowledge by giving you the tools to help this amazing community (and earn some good money of course 😉).
 
 We want to share our knowledge in this topic and create something that allows everyone to easily and safely set up lots of diverse validators.
 
 We don't want to stop at Ethereum. We also want to help stakers of other PoS networks/chains, so if your favourite chain is not here, you are more than welcome to contribute!
 
-## 🔥 What can you do with sedge today?
+## 🔥 What can you do with Sedge today?
 
 - Select an execution, consensus and validator client node (manually or automatically) and generate a `docker-compose` script with production-tested configurations to run the setup you want.
 - Don't remember `docker-compose` commands or flags for your setup? Check docker logs of the running services with `sedge logs`, and shut them down with `sedge down`
@@ -106,15 +106,15 @@ We don't want to stop at Ethereum. We also want to help stakers of other PoS net
 
 The setup is currently designed to start all three nodes required to run a full local validator (execution, consensus and validator node). Soon, Sedge will let you connect to a public or remote node for the execution and consensus layers. Once the consensus node is synced, a validator node will be executed automatically. We suggest that you make use of the initial time taken to sync to prepare the keystore file and make the deposit for your staked ether.
 
-If you are familiar with `docker`, `docker compose`, and the validator setup, then you can use Sedge to generate a base docker-compose script with the recommended settings, stop Sedge instead of letting it execute the script, and then edit the script as much as you want. Is a lot more easier than doing everything from scratch!
+If you are familiar with `docker`, `docker compose`, and the validator setup, then you can use Sedge to generate a base docker-compose script with the recommended settings, stop Sedge instead of letting it execute the script, and then edit the script as much as you want. It is a lot more easier than doing everything from scratch!
 
-> Although Sedge supports several clients, **is still on beta**. Some settings may not work because -at least on the testnets- the clients are constantly evolving. Please let us know any issues you encounter!
+> Although Sedge supports several clients, **is still on beta**. Some settings may not work because -at least on the testnets- the clients are constantly evolving. Please let us know about any issues you encounter!
 
 ### **Disclaimer**
 
 While Sedge assists in installing the validator, it is not designed to register or maintain it. Users are solely responsible for ensuring that they monitor and maintain the validator as required, so that they do not incur penalties and/or financial losses. This includes promptly updating the tool to ensure the latest stable releases of clients are used.
 
-Users acknowledge that no warranty is being made of a successful installation. Sedge is a tool and ultimately depends on you to use it correctly and following all the best practice guidance, as found in this README and documentation.
+Users acknowledge that no warranty is being made of a successful installation. Sedge is a tool and it ultimately depends on you to use it correctly and follow all the best practice guidance, as found in this README and documentation.
 
 ## Supported networks and clients
 
@@ -236,7 +236,7 @@ Full Ethereum PoS support with MEV-Boost
 - [ ] Off-premise setup support
 ## 💪 Want to contribute?
 
-Please check our Contributing Guidelines, Code of Conduct and our issues. In case you want to report or suggest something (any help is welcome) please file an issue first so the main team is aware and it can be discussed.
+Please check our Contributing Guidelines, Code of Conduct and our issues. In case you want to report or suggest something (any help is welcome), please file an issue first so that the main team is aware and can discuss it.
 
 If you know of any good tricks for validator setup that other people could make good use of as well, please consider adding it to Sedge. Your efforts will be greatly appreciated by the community.
 
