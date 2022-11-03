@@ -56,6 +56,7 @@ type GenerationData struct {
 	MevImage          string
 	Ports             map[string]string
 	Graffiti          string
+	LoggingDriver     string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -93,6 +94,7 @@ type DockerComposeData struct {
 	MapAllPorts         bool
 	SplittedNetwork     bool
 	ClCheckpointSyncUrl bool
+	LoggingDriver       string
 }
 
 // GenerationResults: Struct for storing results of the generation process
