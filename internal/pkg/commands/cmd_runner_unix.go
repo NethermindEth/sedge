@@ -126,6 +126,14 @@ func (cr *UnixCMDRunner) BuildDockerComposeDownCMD(options DockerComposeDownOpti
 	return Command{Cmd: command}
 }
 
+func (cr *UnixCMDRunner) BuildCreateFileCMD(options CreateFileOptions) Command {
+	return Command{Cmd: fmt.Sprintf("touch %s", options.FileName)}
+}
+
+func (cr *UnixCMDRunner) BuildEchoToFileCMD(options EchoToFileOptions) Command {
+	return Command{Cmd: fmt.Sprintf("echo %s > %s", options.Content, options.FileName)}
+}
+
 func (cr *UnixCMDRunner) RunCMD(cmd Command) (string, error) {
 	if cr.RunWithSudo {
 		log.Debug(`Running command with sudo.`)

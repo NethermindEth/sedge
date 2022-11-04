@@ -1,5 +1,31 @@
 {{/* lodestar.tmpl */}}
 {{ define "validator" }}
+  validator-import:
+    container_name: validator-import-client
+    image: ${VL_IMAGE_VERSION}{{with .VlCustomCfg}}
+    depends_on:
+      config_consensus:
+        condition: service_completed_successfully{{end}}
+    networks:
+      - sedge
+    volumes:
+      - ${KEYSTORE_DIR}:/keystore
+      - ${VL_DATA_DIR}:/data{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - ./config.yml:/network_config/config.yaml{{end}}{{if .VlRemoteGen}}
+      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{if .VlRemoteDpl}}
+      - ./deploy_block.txt:/network_config/deploy_block.txt{{end}}{{end}}
+    command: |
+      validator import{{if not .VlCustomCfg}}
+      --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}
+      --paramsFile /network_config/config.yaml{{end}}
+      --dataDir=/data
+      --importKeystores=/keystore/validator_keys
+      --importKeystoresPassword=/keystore/keystore_password.txt{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}
   validator:
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
@@ -8,20 +34,16 @@
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/data/validator
-      - ${KEYSTORE_DIR}:/data/keystore{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - ${VL_DATA_DIR}:/data/validator{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
       - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
     command: 
-      - validator
-      - --preset=${VL_LODESTAR_PRESET}{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - validator{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - --paramsFile=/network_config/config.yml{{end}}{{else}}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --dataDir=/data/validator
       - --logFile=/data/validator/logs/validator.log
       - --logFileLevel=${VL_LOG_LEVEL}
-      - --importKeystores=/data/keystore
-      - --importKeystoresPassword=/data/keystore/keystore_password.txt
       - --server=${CC_API_URL}
       - --metrics=true
       - --metrics.address=0.0.0.0
@@ -29,10 +51,10 @@
       - --suggestedFeeRecipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
       - --builder=true{{end}}
-      - --graffiti=${GRAFFITI}
+      - --graffiti=${GRAFFITI}{{if .LoggingDriver}}
     logging:
-      driver: "json-file"
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
         max-size: "10m"
-        max-file: "10"
+        max-file: "10"{{end}}{{end}}
 {{ end }}

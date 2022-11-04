@@ -53,8 +53,10 @@ type GenerationData struct {
 	VlExtraFlags      []string
 	MapAllPorts       bool
 	Mev               bool
+	MevImage          string
 	Ports             map[string]string
 	Graffiti          string
+	LoggingDriver     string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -71,6 +73,7 @@ type DockerComposeData struct {
 	XeeVersion          bool
 	Mev                 bool
 	MevPort             string
+	MevImage            string
 	CheckpointSyncUrl   string
 	FeeRecipient        string
 	ElDiscoveryPort     string
@@ -91,6 +94,7 @@ type DockerComposeData struct {
 	MapAllPorts         bool
 	SplittedNetwork     bool
 	ClCheckpointSyncUrl bool
+	LoggingDriver       string
 }
 
 // GenerationResults: Struct for storing results of the generation process
