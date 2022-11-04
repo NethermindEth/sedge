@@ -49,6 +49,7 @@ var (
 	feeRecipient      string
 	jwtPath           string
 	graffiti          string
+	mevImage          string
 	install           bool
 	run               bool
 	y                 bool
@@ -60,6 +61,7 @@ var (
 	mapAllPorts       bool
 	noMev             bool
 	noValidator       bool
+	loggingFlag       string
 )
 
 const (
@@ -161,6 +163,10 @@ func preRunCliCmd(cmd *cobra.Command, args []string) error {
 		validatorImage = strings.Join(validatorParts[1:], ":")
 	}
 
+	if err := configs.ValidateLoggingFlag(loggingFlag); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -214,7 +220,7 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 	log.Info(configs.DependenciesOK)
 
 	// Generate JWT secret if necessary
-	if jwtPath == "" && configs.JWTNetworks[network] {
+	if jwtPath == "" && configs.NetworksConfigs[network].RequireJWT {
 		if err = handleJWTSecret(); err != nil {
 			return []error{err}
 		}
@@ -253,6 +259,8 @@ func runCliCmd(cmd *cobra.Command, args []string) []error {
 		VlExtraFlags:      *vlExtraFlags,
 		MapAllPorts:       mapAllPorts,
 		Mev:               !noMev && !noValidator,
+		MevImage:          mevImage,
+		LoggingDriver:     configs.GetLoggingDriver(loggingFlag),
 	}
 	results, err := generate.GenerateScripts(gd)
 	if err != nil {
@@ -350,6 +358,8 @@ func init() {
 
 	cliCmd.Flags().BoolVar(&noMev, "no-mev-boost", false, "Not use mev-boost if supported")
 
+	cliCmd.Flags().StringVarP(&mevImage, "mev-boost-image", "m", "", "Custom docker image to use for Mev Boost. Example: 'sedge cli --mev-boost-image flashbots/mev-boost:latest-portable'")
+
 	cliCmd.Flags().BoolVar(&noValidator, "no-validator", false, "Exclude the validator from the full node setup. Designed for execution and consensus nodes setup without a validator node. Exclude also the validator from other flags. If set, mev-boost will not be used.")
 
 	cliCmd.Flags().StringVar(&jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
@@ -373,6 +383,8 @@ func init() {
 	clExtraFlags = cliCmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge cli --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 
 	vlExtraFlags = cliCmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+
+	cliCmd.Flags().StringVar(&loggingFlag, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
 
 	// Initialize monitoring tool
 	initMonitor(func() MonitoringTool {

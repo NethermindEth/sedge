@@ -9,7 +9,12 @@
         condition: service_completed_successfully{{end}}
     volumes:
       - ${VL_DATA_DIR}:/data
-      - ${KEYSTORE_DIR}:/keystore
+      - ${KEYSTORE_DIR}:/keystore{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}
 
   validator:
     container_name: validator-client
@@ -28,11 +33,10 @@
       - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
       - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
     command:
-      - validator-client{{if .VlCustomCfg}}{{if .VlRemoteGen}}
-      - --initial-state=/network_config/genesis.ssz{{end}}{{if .VlRemoteCfg}}
+      - validator-client{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - --network=/network_config/config.yml{{end}}{{end}}
       - --beacon-node-api-endpoint=${CC_API_URL}
-      - --data-path=/data/validator
+      - --data-path=/data
       - --log-destination=CONSOLE
       - --validators-graffiti=${GRAFFITI}
       - --validator-keys=/data/keys:/data/passwords
@@ -43,10 +47,10 @@
       - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
       - --validators-builder-registration-default-enabled=true
-      - --Xvalidators-builder-registration-default-gas-limit=29000000{{end}}
+      - --Xvalidators-builder-registration-default-gas-limit=29000000{{end}}{{if .LoggingDriver}}
     logging:
-      driver: "json-file"
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
         max-size: "10m"
-        max-file: "10"
+        max-file: "10"{{end}}{{end}}
 {{ end }}
