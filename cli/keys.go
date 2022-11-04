@@ -92,7 +92,7 @@ New mnemonic will be generated if -e/--existing flag is not provided.`,
 				passphrase = content
 			}
 		}
-		if !randomPassphrase && passphrase == "" || len(passphrase) < 8 {
+		if !randomPassphrase && len(passphrase) < 8 {
 			passphrase = passphrasePrompt()
 		}
 
