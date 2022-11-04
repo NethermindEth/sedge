@@ -32,7 +32,7 @@
       - --JsonRpc.EngineHost=0.0.0.0
       - --JsonRpc.EnginePort={{.ElAuthPort}}
       - --Network.DiscoveryPort={{.ElDiscoveryPort}}
-      - --HealthChecks.Enabled=${NETHERMIND_HEALTH_CHECKS_ENABLED}
+      - --HealthChecks.Enabled=true
       - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}{{range $flag := .ElExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:
