@@ -19,6 +19,8 @@
       - ${EC_DATA_DIR}:/var/lib/besu/data
       - ${CC_JWT_SECRET_PATH}:/var/lib/besu/jwtsecret
     command:
+    - --sync-mode=X_SNAP
+    - --data-storage-format=BONSAI
     - --network={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
     - --data-path=/var/lib/besu/data
     - --metrics-enabled=true
@@ -29,7 +31,7 @@
     - --engine-rpc-port={{.ElAuthPort}}
     - --engine-host-allowlist=*
     - --rpc-http-enabled=true
-    - --rpc-http-host=*
+    - --rpc-http-host=0.0.0.0
     - --rpc-http-port={{.ElApiPort}}
     - --rpc-http-api=ETH,NET,CLIQUE,DEBUG,MINER,NET,PERM,ADMIN,EEA,TXPOOL,PRIV,WEB3
     - --rpc-http-cors-origins=*
