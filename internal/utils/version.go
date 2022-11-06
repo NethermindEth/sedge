@@ -18,9 +18,10 @@ package utils
 import (
 	"context"
 	"errors"
+	"text/template"
+
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/google/go-github/v47/github"
-	"text/template"
 )
 
 const (

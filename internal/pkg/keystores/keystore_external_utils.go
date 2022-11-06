@@ -157,7 +157,6 @@ func NewWalletWriter(entries uint64, passphrase string) *WalletWriter {
 		entries:           make([]*KeyEntry, entries),
 		generalPassphrase: passphrase,
 	}
-
 }
 
 func (ww *WalletWriter) InsertAccount(priv e2types.PrivateKey, keyPath string, insecure bool, idx uint64) error {
@@ -191,7 +190,7 @@ func (ww *WalletWriter) WriteOutputs(fpath string) error {
 			}
 			keystoreFilename := fmt.Sprintf("keystore-%s.json", strings.ReplaceAll(e.path, "/", "_"))
 			{
-				if err := os.WriteFile(filepath.Join(valKeysPath, keystoreFilename), dat, 0644); err != nil {
+				if err := os.WriteFile(filepath.Join(valKeysPath, keystoreFilename), dat, 0o644); err != nil {
 					return err
 				}
 			}
@@ -200,7 +199,7 @@ func (ww *WalletWriter) WriteOutputs(fpath string) error {
 	}
 	// Write passphrase file
 	passFileName := "keystore_password.txt"
-	if err := os.WriteFile(filepath.Join(fpath, passFileName), []byte(ww.generalPassphrase), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(fpath, passFileName), []byte(ww.generalPassphrase), 0o644); err != nil {
 		return err
 	}
 
@@ -233,7 +232,6 @@ func selectVals(sourceMnemonic string,
 	output WalletOutput,
 	insecure bool,
 ) error {
-
 	valSeed, err := mnemonicToSeed(sourceMnemonic)
 	if err != nil {
 		return err
@@ -376,7 +374,7 @@ func CreateDepositData(
 		depositData.WriteString("]")
 	}
 
-	err = os.WriteFile(depositPath, depositData.Bytes(), 0644)
+	err = os.WriteFile(depositPath, depositData.Bytes(), 0o644)
 	if err != nil {
 		return fmt.Errorf(configs.DepositFileWriteError, err)
 	}
