@@ -215,6 +215,16 @@ func runAndShowContainers(services []string) error {
 		return fmt.Errorf(configs.DockerComposeOffError, err)
 	}
 
+	// Download images
+	pullCmd := commands.Runner.BuildDockerComposePullCMD(commands.DockerComposePullOptions{
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Services: services,
+	})
+	log.Infof(configs.RunningCommand, pullCmd.Cmd)
+	if _, err := commands.Runner.RunCMD(pullCmd); err != nil {
+		return fmt.Errorf(configs.CommandError, pullCmd.Cmd, err)
+	}
+
 	// Run docker-compose script
 	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
 		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
