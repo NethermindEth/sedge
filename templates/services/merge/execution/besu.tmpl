@@ -3,6 +3,8 @@
   execution:
     image: ${EC_IMAGE_VERSION}
     container_name: execution_client
+    restart: unless-stopped
+    stop_grace_period: 30s
     networks:
     - sedge
     user: root
@@ -35,7 +37,12 @@
     - --rpc-http-port={{.ElApiPort}}
     - --rpc-http-api=ETH,NET,CLIQUE,DEBUG,MINER,NET,PERM,ADMIN,EEA,TXPOOL,PRIV,WEB3
     - --rpc-http-cors-origins=*
-    - --host-whitelist=*
-    restart: unless-stopped
+    - --host-whitelist=*{{range $flag := .ElExtraFlags}}
+    - --{{$flag}}{{end}}{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
     mem_swappiness: 0
 {{ end }}
