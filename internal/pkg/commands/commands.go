@@ -20,6 +20,8 @@ import "runtime"
 type CommandRunner interface {
 	BuildDockerComposeUpCMD(options DockerComposeUpOptions) Command
 
+	BuildDockerComposePullCMD(options DockerComposePullOptions) Command
+
 	BuildDockerPSCMD(options DockerPSOptions) Command
 
 	BuildDockerComposePSCMD(options DockerComposePsOptions) Command
