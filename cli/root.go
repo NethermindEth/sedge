@@ -56,6 +56,7 @@ func Execute() {
 func addCommands(root *cobra.Command) {
 	rootCmd.AddCommand(KeysCmd(prompts.NewPromptCli()))
 	rootCmd.AddCommand(DownCmd())
+	rootCmd.AddCommand(ClientsCmd())
 }
 
 func init() {
