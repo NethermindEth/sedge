@@ -1,7 +1,7 @@
 {{/* besu.tmpl */}}
 {{ define "execution" }}
 # --- Execution Layer - Execution Node - configuration ---
-EC_IMAGE_VERSION={{if .ElImage}}{{.ElImage}}{{else}}hyperledger/besu:22.7.4{{end}}
+EC_IMAGE_VERSION={{if .ElImage}}{{.ElImage}}{{else}}hyperledger/besu:22.10.0{{end}}
 EC_ENABLED_MODULES=ETH,NET,CLIQUE,DEBUG,MINER,NET,PERM,ADMIN,EEA,TXPOOL,PRIV,WEB3
 EC_DATA_DIR={{.ElDataDir}}
 EC_JWT_SECRET_PATH={{.JWTSecretPath}}
