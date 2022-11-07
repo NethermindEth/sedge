@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
 	"github.com/NethermindEth/sedge/test"
 	log "github.com/sirupsen/logrus"
@@ -38,17 +39,6 @@ type keysCmdTestCase struct {
 	numVal         int64
 	fdOut          *bytes.Buffer
 	isErr          bool
-}
-
-func resetKeysCmd() {
-	cfgFile = ""
-	path = ""
-	network = ""
-	mnemonicPath = ""
-	passphrasePath = ""
-	eth1WithdrawalAddress = ""
-	existingVal = 0
-	numberVal = 0
 }
 
 func buildKeysTestCase(t *testing.T, caseName, caseDataPath, caseNetwork string, existing, num int64, isErr bool) *keysCmdTestCase {
@@ -100,34 +90,30 @@ func TestKeysCmd(t *testing.T) {
 		*buildKeysTestCase(t, "Existing validators", "case_1", "sepolia", 100, 10, false),
 	}
 
-	t.Cleanup(resetKeysCmd)
-
 	for _, tc := range tcs {
-		t.Run(
-			tc.name,
-			func(t *testing.T) {
-				resetKeysCmd()
-				rootCmd.SetArgs([]string{
-					"keys",
-					"--config", tc.configPath,
-					"--network", tc.network,
-					"--path", tc.keystorePath,
-					"--mnemonic-path", tc.mnemnonicPath,
-					"--passphrase-path", tc.passphrasePath,
-					"--existing", fmt.Sprint(tc.existingVal),
-					"--num-validators", fmt.Sprint(tc.numVal),
-				})
-				rootCmd.SetOut(tc.fdOut)
-				log.SetOutput(tc.fdOut)
+		t.Run(tc.name, func(t *testing.T) {
+			rootCmd.AddCommand(KeysCmd(prompts.NewPromptCli()))
+			rootCmd.SetArgs([]string{
+				"keys",
+				"--config", tc.configPath,
+				"--network", tc.network,
+				"--path", tc.keystorePath,
+				"--mnemonic-path", tc.mnemnonicPath,
+				"--passphrase-path", tc.passphrasePath,
+				"--existing", fmt.Sprint(tc.existingVal),
+				"--num-validators", fmt.Sprint(tc.numVal),
+			})
+			rootCmd.SetOut(tc.fdOut)
+			log.SetOutput(tc.fdOut)
 
-				descr := fmt.Sprintf("sedge keys --network %s --existing %d --num-validators %d", tc.network, tc.existingVal, tc.numVal)
-				err := rootCmd.Execute()
-				if tc.isErr && err == nil {
-					t.Errorf("%s expected to fail", descr)
-				} else if !tc.isErr && err != nil {
-					t.Errorf("%s failed: %v", descr, err)
-				}
-			},
+			descr := fmt.Sprintf("sedge keys --network %s --existing %d --num-validators %d", tc.network, tc.existingVal, tc.numVal)
+			err := rootCmd.Execute()
+			if tc.isErr && err == nil {
+				t.Errorf("%s expected to fail", descr)
+			} else if !tc.isErr && err != nil {
+				t.Errorf("%s failed: %v", descr, err)
+			}
+		},
 		)
 	}
 }
