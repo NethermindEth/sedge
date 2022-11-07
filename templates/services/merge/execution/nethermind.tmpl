@@ -13,7 +13,7 @@
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
-      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}{{if .MapAllPorts}}
+      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}"{{if .MapAllPorts}}
       - "{{.ElApiPort}}:{{.ElApiPort}}"
       - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
     expose:
@@ -34,9 +34,9 @@
       - --JsonRpc.EnginePort={{.ElAuthPort}}
       - --Network.DiscoveryPort={{.ElDiscoveryPort}}
       - --HealthChecks.Enabled=true
+      - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}
       - --Metrics.Enabled=true
-      - --Metrics.ExposePort={{.ElMetricsPort}}
-      - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}{{range $flag := .ElExtraFlags}}
+      - --Metrics.ExposePort={{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
