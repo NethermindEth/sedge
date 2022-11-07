@@ -323,7 +323,7 @@ networks:
     name: sedge_network
 
 # highlight-start
-2022-07-31 21:06:40 -- [INFO] Created file docker-compose-scripts/docker-compose.yml
+2022-07-31 21:06:40 -- [INFO] Created file sedge-data/docker-compose.yml
 2022-07-31 21:06:40 -- [INFO] Generating environment file for current selection of clients
 # highlight-end
 2022-07-31 21:06:40 -- [INFO] File .env:
@@ -358,7 +358,7 @@ KEYSTORE_DIR=./keystore
 VL_DATA_DIR=./validator-data
 
 # highlight-next-line
-2022-XX-XX 00:00:00 -- [INFO] Created file docker-compose-scripts/.env
+2022-XX-XX 00:00:00 -- [INFO] Created file sedge-data/.env
 ```
 
 ### 4. Run the `docker-compose` script
@@ -368,7 +368,7 @@ Instructions on how to run the docker-compose script will be displayed and next 
 ```logs
 2022-XX-XX 00:00:00 -- [INFO] Instructions for running docker-compose script
 
-docker compose -f docker-compose-scripts/docker-compose.yml up -d execution consensus
+docker compose -f sedge-data/docker-compose.yml up -d execution consensus
 
 # highlight-next-line
 ? Run the script with the selected services execution, consensus? [Y/n]
@@ -402,7 +402,7 @@ Docker commands need to be executed with `sudo` by default, which requires root 
     In this step the docker-compose script will be executed, which needs to pull the client's docker images from Docker Hub. This can take a while dependending on your internet connection.
 
     ```
-    2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml up -d execution consensus
+    2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f sedge-data/docker-compose.yml up -d execution consensus
     [+] Running 13/13
     ⠿ consensus Pulled
         ⠿ 45ea9169a5e4 Pull complete
@@ -428,7 +428,7 @@ Docker commands need to be executed with `sudo` by default, which requires root 
 - Display running nodes
 
     ```
-    2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml ps --filter status=running
+    2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f sedge-data/docker-compose.yml ps --filter status=running
     NAME                COMMAND                  SERVICE             STATUS              PORTS
     consensus-client    "lighthouse bn --dis…"   consensus           running             0.0.0.0:5054->5054/tcp, :::5054->5054/tcp, 4000/tcp, 0.0.0.0:9000->9000/tcp, :::9000->9000/tcp, 0.0.0.0:9000->9000/udp, :::9000->9000/udp
     execution-client    "./Nethermind.Runner…"   execution           running             0.0.0.0:8008->8008/tcp, :::8008->8008/tcp, 0.0.0.0:30303->30303/tcp, :::30303->30303/tcp, 8545/tcp, 0.0.0.0:30303->30303/udp, :::30303->30303/udp
@@ -457,10 +457,10 @@ Docker commands need to be executed with `sudo` by default, which requires root 
 
     ```
     2022-XX-XX 00:00:00 -- [INFO] Proceding to get execution and consensus containers IP address for the monitoring tool
-    2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml ps --quiet execution
+    2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f sedge-data/docker-compose.yml ps --quiet execution
     2022-XX-XX 00:00:00 -- [INFO] Running command: docker inspect 13d0364c2ea3016c689def9b9e3e0f1d060ccca033274f3d30b8e2998a13a392
 
-    2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml ps --quiet consensus
+    2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f sedge-data/docker-compose.yml ps --quiet consensus
     2022-XX-XX 00:00:00 -- [INFO] Running command: docker inspect 5f22960d056013b25a884e21462e019ee4ed50eccb3a065ba14cfa4eed17820e
     ```
 
@@ -568,7 +568,7 @@ From here the rest of the flow belongs to the staking-deposit-cli tool:
 ```
 2022-07-31 23:08:53 -- [INFO] Generating keystore folder
 2022-07-31 23:08:53 -- [INFO] Running command:
-docker run -it --rm -v /home/sedge/docker-compose-scripts/keystore/validator_keys:/app/validator_keys nethermindeth/staking-deposit-cli new-mnemonic --chain mainnet --keystore_password ********
+docker run -it --rm -v /home/sedge/sedge-data/keystore/validator_keys:/app/validator_keys nethermindeth/staking-deposit-cli new-mnemonic --chain mainnet --keystore_password ********
 Please choose your language ['1. العربية', '2. ελληνικά', '3. English', '4. Français', '5. Bahasa melayu', '6. Italiano', '7. 日本語', '8. 한국어', '9. Português do Brasil', '10. român', '11. 简体中文']:  [English]:
 Repeat your keystore password for confirmation:
 ```
@@ -638,7 +638,7 @@ The above logs mark the end of the staking-deposit-cli execution and Sedge retak
 ```logs
 2022-XX-XX 00:00:00 -- [INFO] deposit-cli tool exited
 # highlight-next-line
-2022-XX-XX 00:00:00 -- [INFO] If everything went well, your keys can be found at: /home/sedge/docker-compose-scripts/keystore/validator_keys
+2022-XX-XX 00:00:00 -- [INFO] If everything went well, your keys can be found at: /home/sedge/sedge-data/keystore/validator_keys
 2022-XX-XX 00:00:00 -- [INFO] keystore_password.txt on keystore folder created with provided password
 2022-XX-XX 00:00:00 -- [WARN] In case you used custom paths for the 'cli' or the 'keys' commands, please review if the keystore path in the generated .env file points to the generated keystore folder (the .env key should be KEYSTORE_DIR). If not, change the path in the .env file to the correct one.
 ```
@@ -648,7 +648,7 @@ As we stick to default configuration values all the time, we can ignore the fina
 Your keystore folder should look similar to this:
 
 ```
-docker-compose-scripts
+sedge-data
     └── keystore
         ├── keystore_password.txt
         └── validator_keys
@@ -675,7 +675,7 @@ When the execution and consensus clients are finally synced you will see the fol
   2022-XX-XX 00:00:00 -- [INFO] Execution and Consensus clients are synced, proceeding to start validator node
   2022-XX-XX 00:00:00 -- [INFO] Instructions for running validator service of docker-compose script
 
-  docker compose -f docker-compose-scripts/docker-compose.yml up -d validator
+  docker compose -f sedge-data/docker-compose.yml up -d validator
 
   # highlight-next-line
   ? Run validator service? [Y/n]
@@ -686,12 +686,12 @@ Now you can proceed and finish the setup pressing `Y`. This will run the validat
   ```logs
   2022-XX-XX 00:00:00 -- [INFO] Checking if docker engine is on
   2022-XX-XX 00:00:00 -- [INFO] Running command: docker ps -a
-  2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml up -d validator
+  2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f sedge-data/docker-compose.yml up -d validator
   [+] Running 3/3
   ⠿ Container config_custom_network    Exited                                                                                                       2.8s
   ⠿ Container validator-import-client  Exited                                                                                                       3.9s
   ⠿ Container validator-client         Started                                                                                                      4.3s
-  2022-10-23 21:21:04 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml ps --filter status=running
+  2022-10-23 21:21:04 -- [INFO] Running command: docker compose -f sedge-data/docker-compose.yml ps --filter status=running
   2022-10-23 21:21:04 -- [DEBU] Running command with sudo.
   NAME                COMMAND                  SERVICE             STATUS              PORTS
   consensus-client    "lighthouse bn --dis…"   consensus           running             0.0.0.0:5054->5054/tcp, :::5054->5054/tcp, 4000/tcp, 0.0.0.0:9000->9000/tcp, :::9000->9000/tcp, 0.0.0.0:9000->9000/udp, :::9000->9000/udp

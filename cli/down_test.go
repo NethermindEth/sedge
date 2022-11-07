@@ -37,7 +37,7 @@ type downCmdTestCase struct {
 
 func resetDownCmd() {
 	cfgFile = ""
-	generationPath = configs.DefaultDockerComposeScriptsPath
+	generationPath = configs.DefaultSedgeDataPath
 }
 
 func buildDownTestCase(t *testing.T, caseName string, isErr bool) *downCmdTestCase {
@@ -49,12 +49,12 @@ func buildDownTestCase(t *testing.T, caseName string, isErr bool) *downCmdTestCa
 		t.Fatalf("Can't build test case: %v", err)
 	}
 
-	dcPath := filepath.Join(configPath, "docker-compose-scripts")
+	dcPath := filepath.Join(configPath, configs.DefaultSedgeDataFolderName)
 	if err = os.Mkdir(dcPath, os.ModePerm); err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
 
-	err = test.PrepareTestCaseDir(filepath.Join("testdata", "down_tests", caseName, "docker-compose-scripts"), dcPath)
+	err = test.PrepareTestCaseDir(filepath.Join("testdata", "down_tests", caseName, configs.DefaultSedgeDataFolderName), dcPath)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}

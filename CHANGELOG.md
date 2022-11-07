@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Change sedge data path from `docker-compose-scripts` to `sedge-data`.e
+
 ## [v0.4.0] - 2022-10-25
 
 ### Added

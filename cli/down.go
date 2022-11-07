@@ -55,5 +55,5 @@ func init() {
 	rootCmd.AddCommand(downCmd)
 
 	// Local flags
-	downCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose script path")
+	downCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultSedgeDataPath, "docker-compose script path")
 }

@@ -45,7 +45,7 @@ type logsTestCase struct {
 func resetLogCmd() {
 	cfgFile = ""
 	tail = 0
-	generationPath = configs.DefaultDockerComposeScriptsPath
+	generationPath = configs.DefaultSedgeDataPath
 }
 
 func prepareLogsTestCaseConfigDir(name, dest string) (string, error) {
@@ -59,8 +59,8 @@ func prepareLogsTestCaseConfigDir(name, dest string) (string, error) {
 }
 
 func prepareLogsTestCaseDCScripts(name, dest string) (string, error) {
-	caseDCScriptsPath := filepath.Join("testdata", "logs_tests", name, "docker-compose-scripts")
-	dcPath := filepath.Join(dest, "docker-compose-scripts")
+	caseDCScriptsPath := filepath.Join("testdata", "logs_tests", name, configs.DefaultSedgeDataFolderName)
+	dcPath := filepath.Join(dest, configs.DefaultSedgeDataFolderName)
 	if err := os.MkdirAll(dcPath, os.ModePerm); err != nil {
 		return "", err
 	}

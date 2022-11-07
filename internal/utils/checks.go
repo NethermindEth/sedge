@@ -84,7 +84,7 @@ func PreCheck(generationPath string) error {
 	file := generationPath + "/" + configs.DefaultDockerComposeScriptName
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		log.Errorf(configs.OpeningFileError, file, err)
-		return fmt.Errorf(configs.DockerComposeScriptNotFoundError, generationPath, configs.DefaultDockerComposeScriptsPath)
+		return fmt.Errorf(configs.DockerComposeScriptNotFoundError, generationPath, configs.DefaultSedgeDataPath)
 	}
 
 	// Check that compose plugin is installed with docker running 'docker compose ps'

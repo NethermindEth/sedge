@@ -175,7 +175,7 @@ func resetCliCmd() {
 	validatorName = ""
 	network = "mainnet"
 	feeRecipient = ""
-	generationPath = configs.DefaultDockerComposeScriptsPath
+	generationPath = configs.DefaultSedgeDataPath
 	install = false
 	run = false
 	y = false
@@ -240,7 +240,7 @@ func buildCliTestCase(
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
-	dcPath := filepath.Join(configPath, "docker-compose-scripts")
+	dcPath := filepath.Join(configPath, configs.DefaultSedgeDataFolderName)
 	err = os.Mkdir(dcPath, os.ModePerm)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)

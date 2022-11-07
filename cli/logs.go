@@ -74,7 +74,7 @@ func init() {
 	rootCmd.AddCommand(logsCmd)
 
 	// Local flags
-	logsCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose script path")
+	logsCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultSedgeDataPath, "docker-compose script path")
 
 	logsCmd.Flags().IntVarP(&tail, "tail", "t", 0, "Tail the number of desired logs. If not set, or set to 0, logs are followed.")
 }
