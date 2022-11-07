@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Support for Besu Execution Client
+- Support for Besu as Execution Client
 
 ## [v0.4.0] - 2022-10-25
 
