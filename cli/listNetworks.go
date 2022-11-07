@@ -25,17 +25,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listNetworksCmd represents the networks command
-var listNetworksCmd = &cobra.Command{
-	Use:   "networks",
-	Short: "List supported networks",
-	Long:  `List supported networks`,
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := runListNetworksCmd(cmd, args); err != nil {
-			log.Fatal(err)
-		}
-	},
+func NetworksCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "networks",
+		Short: "List supported networks",
+		Long:  `List supported networks`,
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := runListNetworksCmd(cmd, args); err != nil {
+				log.Fatal(err)
+			}
+		},
+	}
+	return cmd
 }
+
+// listNetworksCmd represents the networks command
 
 func runListNetworksCmd(cmd *cobra.Command, args []string) error {
 	// Get supported networks and print table of networks
@@ -49,8 +53,4 @@ func runListNetworksCmd(cmd *cobra.Command, args []string) error {
 	ui.WriteListNetworksTable(cmd.OutOrStdout(), networks)
 
 	return nil
-}
-
-func init() {
-	rootCmd.AddCommand(listNetworksCmd)
 }

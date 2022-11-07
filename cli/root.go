@@ -57,6 +57,7 @@ func addCommands(root *cobra.Command) {
 	rootCmd.AddCommand(KeysCmd(prompts.NewPromptCli()))
 	rootCmd.AddCommand(DownCmd())
 	rootCmd.AddCommand(ClientsCmd())
+	rootCmd.AddCommand(NetworksCmd())
 }
 
 func init() {
