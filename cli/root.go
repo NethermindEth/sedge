@@ -20,6 +20,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/utils"
@@ -45,6 +46,7 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	rootCmd.AddCommand(KeysCmd(prompts.NewPromptCli()))
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
