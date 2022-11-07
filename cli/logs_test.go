@@ -23,7 +23,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/test"
 	log "github.com/sirupsen/logrus"
@@ -44,8 +43,6 @@ type logsTestCase struct {
 
 func resetLogCmd() {
 	cfgFile = ""
-	tail = 0
-	generationPath = configs.DefaultDockerComposeScriptsPath
 }
 
 func prepareLogsTestCaseConfigDir(name, dest string) (string, error) {
@@ -148,6 +145,7 @@ func TestLogsCmd(t *testing.T) {
 
 	for _, tc := range tcs {
 		resetLogCmd()
+		rootCmd.AddCommand(LogsCmd())
 		var args []string
 		if tc.tail != 0 {
 			args = []string{"logs", "--config", tc.configPath, "--path", tc.generatedPath, "--tail", fmt.Sprintf("%d", tc.tail)}
