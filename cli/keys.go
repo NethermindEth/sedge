@@ -28,9 +28,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Windows and Unix path
-// var rePath = regexp.MustCompile(`^[a-zA-Z]+:(\\[a-zA-Z0-9_.-]+)+|^~{0,1}\/[a-zA-Z0-9~]+(\/[a-zA-Z0-9_.-]+)+`)
-
 type KeysCmdFlags struct {
 	network               string
 	path                  string
