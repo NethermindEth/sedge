@@ -107,7 +107,8 @@ func TestKeysCmd(t *testing.T) {
 			tc.name,
 			func(t *testing.T) {
 				resetKeysCmd()
-				rootCmd.SetArgs([]string{"keys",
+				rootCmd.SetArgs([]string{
+					"keys",
 					"--config", tc.configPath,
 					"--network", tc.network,
 					"--path", tc.keystorePath,

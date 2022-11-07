@@ -248,6 +248,7 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
+		LoggingDriver:       gd.LoggingDriver,
 	}
 
 	dockerComposePath = filepath.Join(gd.GenerationPath, configs.DefaultDockerComposeScriptName)

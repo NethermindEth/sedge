@@ -95,4 +95,5 @@ const (
 	DepositDataEncodingError          = "could not encode deposit data to json: %v"
 	InvalidNumberOfValidatorsError    = "invalid number of validators: %v"
 	NumberOfValidatorsRetryError      = "provided numbers do not match"
+	InvalidLoggingFlag                = "bad logging flag: %v"
 )
