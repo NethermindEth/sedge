@@ -28,6 +28,7 @@ func TestVersionCmdExecute(t *testing.T) {
 
 	versionRegexp := regexp.MustCompile(`sedge v[0-9][0-9|\.]+[0-9]`)
 
+	rootCmd.AddCommand(VersionCmd())
 	rootCmd.SetArgs([]string{"version"})
 	rootCmd.SetOut(fdOut)
 	log.SetOutput(fdOut)

@@ -60,6 +60,7 @@ func addCommands(root *cobra.Command) {
 		ClientsCmd(),
 		NetworksCmd(),
 		LogsCmd(),
+		VersionCmd(),
 	)
 }
 

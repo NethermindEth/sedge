@@ -23,16 +23,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// versionCmd represents the version command
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Print sedge version",
-	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Fprintln(cmd.OutOrStdout(), "sedge "+utils.CurrentVersion())
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(versionCmd)
+func VersionCmd() *cobra.Command {
+	// Build command
+	cmd := &cobra.Command{
+		Use:   "version",
+		Short: "Print sedge version",
+		Long:  ``,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Fprintln(cmd.OutOrStdout(), "sedge "+utils.CurrentVersion())
+		},
+	}
+	return cmd
 }
