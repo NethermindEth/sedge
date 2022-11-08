@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/utils"
@@ -15,8 +16,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func runKeysWithStakingDeposit(cmd *cobra.Command, args []string) {
-	existingMnemonic := mnemonicPath != ""
+func runKeysWithStakingDeposit(cmd *cobra.Command, args []string, flags *KeysCmdFlags, prompt prompts.Prompt) error {
+	existingMnemonic := flags.mnemonicPath != ""
 	// Check if dependencies are installed. Keep checking dependencies until they are all installed
 	for pending := utils.CheckDependencies([]string{"docker"}); len(pending) > 0; {
 		log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
@@ -35,8 +36,12 @@ func runKeysWithStakingDeposit(cmd *cobra.Command, args []string) {
 	log.Info(configs.DependenciesOK)
 
 	// Prompt for eth1WithdrawalAddress
-	if eth1WithdrawalAddress == "" {
-		eth1WithdrawalPrompt()
+	if flags.eth1WithdrawalAddress == "" {
+		eth1Address, err := prompt.Eth1Withdrawal()
+		if err != nil {
+			return err
+		}
+		flags.eth1WithdrawalAddress = eth1Address
 	}
 
 	// Get keystore password
@@ -44,31 +49,32 @@ func runKeysWithStakingDeposit(cmd *cobra.Command, args []string) {
 
 	// Create keystore folder
 	log.Info(configs.GeneratingKeystoresLegacy)
-	if err := os.MkdirAll(filepath.Join(path, "keystore"), 0o766); err != nil {
+	if err := os.MkdirAll(filepath.Join(flags.path, "keystore"), 0o766); err != nil {
 		log.Fatal(err)
 	}
 
-	keystorePath := filepath.Join(path, "keystore", "validator_keys")
+	keystorePath := filepath.Join(flags.path, "keystore", "validator_keys")
 	data := utils.ValidatorKeyData{
 		Existing:              existingMnemonic,
-		Network:               network,
+		Network:               flags.network,
 		Path:                  keystorePath,
 		Password:              password,
-		Eth1WithdrawalAddress: eth1WithdrawalAddress,
+		Eth1WithdrawalAddress: flags.eth1WithdrawalAddress,
 	}
 	if err := utils.GenerateValidatorKey(data); err != nil {
 		log.Fatalf(configs.GeneratingKeystoreError, err)
 	}
 
 	// Check if keystore generation went ok
-	if !emptyKeystore() {
+	if !emptyKeystore(flags.path) {
 		log.Infof(configs.KeysFoundAt, keystorePath)
-		if err := createKeystorePassword(password); err != nil {
+		if err := createKeystorePassword(password, flags.path); err != nil {
 			log.Fatalf(configs.CreatingKeystorePasswordError, err)
 		}
 
 		log.Warn(configs.ReviewKeystorePath)
 	}
+	return nil
 }
 
 func passwordPrompt() string {
@@ -115,7 +121,7 @@ func passwordPrompt() string {
 	return result
 }
 
-func createKeystorePassword(password string) error {
+func createKeystorePassword(password string, path string) error {
 	log.Debug(configs.CreatingKeystorePassword)
 
 	// Create file keystore_password.txt
@@ -141,7 +147,7 @@ func createKeystorePassword(password string) error {
 }
 
 // Check if keystore folder is not empty
-func emptyKeystore() bool {
+func emptyKeystore(path string) bool {
 	f, err := os.Open(filepath.Join(path, "keystore"))
 	if err != nil {
 		return false

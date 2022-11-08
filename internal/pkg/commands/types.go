@@ -51,6 +51,14 @@ type DockerComposeUpOptions struct {
 	Services []string
 }
 
+// DockerComposePullOptions represents 'docker compose pull' command options
+type DockerComposePullOptions struct {
+	// Path to the docker-compose.yaml
+	Path string
+	// Services names
+	Services []string
+}
+
 // DockerPSOptions : Represent docker ps command options
 type DockerPSOptions struct {
 	// All : use with --all
