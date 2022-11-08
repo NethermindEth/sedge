@@ -12,7 +12,8 @@
       - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
-      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"{{if .MapAllPorts}}
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
+      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}"{{if .MapAllPorts}}
       - "{{.ElApiPort}}:{{.ElApiPort}}"
       - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
     expose:
@@ -32,8 +33,10 @@
       - --JsonRpc.EngineHost=0.0.0.0
       - --JsonRpc.EnginePort={{.ElAuthPort}}
       - --Network.DiscoveryPort={{.ElDiscoveryPort}}
-      - --HealthChecks.Enabled=${NETHERMIND_HEALTH_CHECKS_ENABLED}
-      - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}{{range $flag := .ElExtraFlags}}
+      - --HealthChecks.Enabled=true
+      - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}
+      - --Metrics.Enabled=true
+      - --Metrics.ExposePort={{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}

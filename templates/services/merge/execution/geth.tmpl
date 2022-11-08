@@ -45,7 +45,7 @@
       - --authrpc.addr=0.0.0.0
       - --authrpc.port={{.ElAuthPort}}
       - --authrpc.vhosts=*
-      - ${EC_METRICS_ENABLED:-""}
+      - --metrics
       - --metrics.port={{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:

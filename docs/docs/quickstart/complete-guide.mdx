@@ -224,7 +224,7 @@ services:
       - --JsonRpc.EngineHost=0.0.0.0
       - --JsonRpc.EnginePort=8551
       - --Network.DiscoveryPort=30303
-      - --HealthChecks.Enabled=${NETHERMIND_HEALTH_CHECKS_ENABLED}
+      - --HealthChecks.Enabled=true
       - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}
     logging:
       driver: "json-file"
@@ -335,7 +335,6 @@ NETWORK=mainnet
 EC_IMAGE_VERSION=nethermind/nethermind
 NETHERMIND_LOG_LEVEL=INFO
 EC_ENABLED_MODULES=[Web3,Eth,Subscribe,Net]
-NETHERMIND_HEALTH_CHECKS_ENABLED=false
 NETHERMIND_PRUNING_CACHEMB=2048
 EC_DATA_DIR=./execution-data
 EC_SNAP_SYNC_ENABLED=true
