@@ -1,12 +1,15 @@
 {{/* besu.tmpl */}}
 {{ define "execution" }}
   execution:
-    image: ${EC_IMAGE_VERSION}
-    container_name: execution_client
+    stop_grace_period: 30m
+    container_name: execution-client
     restart: unless-stopped
-    stop_grace_period: 30s
+    image: ${EC_IMAGE_VERSION}
     networks:
-    - sedge
+      - sedge
+    volumes:
+      - ${EC_DATA_DIR}:/var/lib/besu/data
+      - ${CC_JWT_SECRET_PATH}:/var/lib/besu/jwtsecret
     user: root
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
@@ -17,9 +20,6 @@
     expose:
       - {{.ElApiPort}}
       - {{.ElAuthPort}}
-    volumes:
-      - ${EC_DATA_DIR}:/var/lib/besu/data
-      - ${CC_JWT_SECRET_PATH}:/var/lib/besu/jwtsecret
     command:
     - --sync-mode=X_SNAP
     - --data-storage-format=BONSAI
@@ -35,7 +35,7 @@
     - --rpc-http-enabled=true
     - --rpc-http-host=0.0.0.0
     - --rpc-http-port={{.ElApiPort}}
-    - --rpc-http-api=ETH,NET,CLIQUE,DEBUG,MINER,NET,PERM,ADMIN,EEA,TXPOOL,PRIV,WEB3
+    - --rpc-http-api=${EC_ENABLED_MODULES}
     - --rpc-http-cors-origins=*
     - --host-whitelist=*{{range $flag := .ElExtraFlags}}
     - --{{$flag}}{{end}}{{if .LoggingDriver}}
@@ -44,5 +44,4 @@
       options:
         max-size: "10m"
         max-file: "10"{{end}}{{end}}
-    mem_swappiness: 0
 {{ end }}
