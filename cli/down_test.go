@@ -86,6 +86,7 @@ func TestDownCmd(t *testing.T) {
 
 	for _, tc := range tcs {
 		resetDownCmd()
+		rootCmd := RootCmd()
 		rootCmd.AddCommand(DownCmd())
 		rootCmd.SetArgs([]string{"down", "--config", tc.configPath, "--path", tc.generationPath})
 		rootCmd.SetOut(tc.fdOut)

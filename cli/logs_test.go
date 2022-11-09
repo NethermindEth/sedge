@@ -145,6 +145,7 @@ func TestLogsCmd(t *testing.T) {
 
 	for _, tc := range tcs {
 		resetLogCmd()
+		rootCmd := RootCmd()
 		rootCmd.AddCommand(LogsCmd())
 		var args []string
 		if tc.tail != 0 {

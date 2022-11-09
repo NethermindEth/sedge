@@ -20,7 +20,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/utils"
@@ -32,48 +31,25 @@ import (
 
 var cfgFile string
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "sedge",
-	Short: "A brief description of your application",
-	Long:  `A tool to allow deploying validators with ease.`,
-	// TODO: Start the TUI engine in this callback. Default behavior
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
-}
-
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	addCommands(rootCmd)
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
+func RootCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "sedge",
+		Short: "A brief description of your application",
+		Long:  `A tool to allow deploying validators with ease.`,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			initConfig()
+			checkVersion()
+		},
+		// TODO: Start the TUI engine in this callback. Default behavior
+		// Uncomment the following line if your bare application
+		// has an action associated with it:
+		// Run: func(cmd *cobra.Command, args []string) { },
 	}
-}
-
-func addCommands(root *cobra.Command) {
-	rootCmd.AddCommand(
-		KeysCmd(prompts.NewPromptCli()),
-		DownCmd(),
-		ClientsCmd(),
-		NetworksCmd(),
-		LogsCmd(),
-		VersionCmd(),
-	)
-}
-
-func init() {
-	cobra.OnInitialize(initConfig)
-
-	checkVersion()
-
 	// Disable completion default cmd
-	rootCmd.CompletionOptions.DisableDefaultCmd = true
-
+	cmd.CompletionOptions.DisableDefaultCmd = true
 	// Persistent flags
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.sedge.yaml)")
+	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.sedge.yaml)")
+	return cmd
 }
 
 // initConfig reads in config file and ENV variables if set.

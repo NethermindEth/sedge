@@ -15,8 +15,27 @@ limitations under the License.
 */
 package main
 
-import "github.com/NethermindEth/sedge/cli"
+import (
+	"os"
+
+	"github.com/NethermindEth/sedge/cli"
+	"github.com/NethermindEth/sedge/cli/prompts"
+)
 
 func main() {
-	cli.Execute()
+	// Prompt used to interact with the user input
+	prompt := prompts.NewPromptCli()
+	sedgeCmd := cli.RootCmd()
+	sedgeCmd.AddCommand(
+		cli.CliCmd,
+		cli.KeysCmd(prompt),
+		cli.DownCmd(),
+		cli.ClientsCmd(),
+		cli.NetworksCmd(),
+		cli.LogsCmd(),
+		cli.VersionCmd(),
+	)
+	if err := sedgeCmd.Execute(); err != nil {
+		os.Exit(1)
+	}
 }

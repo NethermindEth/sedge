@@ -31,6 +31,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/test"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -185,7 +186,7 @@ func resetCliCmd() {
 	checkpointSyncUrl = ""
 }
 
-func prepareCliCmd(tc cliCmdTestCase) error {
+func prepareCliCmd(rootCmd *cobra.Command, tc cliCmdTestCase) error {
 	// Set output buffers
 	rootCmd.SetOut(tc.fdOut)
 	log.SetOutput(tc.fdOut)
@@ -446,7 +447,10 @@ func TestCliCmd(t *testing.T) {
 			resetCliCmd()
 			descr := fmt.Sprintf("sedge cli %s", tc.args.toString())
 
-			err := prepareCliCmd(tc)
+			rootCmd := RootCmd()
+			rootCmd.AddCommand(CliCmd)
+
+			err := prepareCliCmd(rootCmd, tc)
 			if tc.isPreErr && err == nil {
 				t.Errorf("%s expected to fail", descr)
 			} else if !tc.isPreErr && err != nil {
