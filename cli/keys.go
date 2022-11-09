@@ -37,6 +37,7 @@ type KeysCmdFlags struct {
 	existingVal           int64
 	numberVal             int64
 	randomPassphrase      bool
+	install               bool
 }
 
 func KeysCmd(prompt prompts.Prompt) *cobra.Command {
@@ -160,5 +161,6 @@ func KeysCmd(prompt prompts.Prompt) *cobra.Command {
 	cmd.Flags().Int64Var(&flags.existingVal, "existing", -1, `Number of validators generated with the provided mnemonic. Will be ignored if "--mnemonic-path" its not set. This number will be used as the initial index for the generated keystores.`)
 	cmd.Flags().Int64Var(&flags.numberVal, "num-validators", -1, "Number of validators to generate. This number will be used in addition to the existing flag as the end index for the generated keystores.")
 	cmd.Flags().BoolVar(&flags.randomPassphrase, "random-passphrase", false, "Usa a randomly generated passphrase to encrypt keystores.")
+	cmd.Flags().BoolVarP(&flags.install, "install", "i", false, "Install dependencies if not installed without asking")
 	return cmd
 }
