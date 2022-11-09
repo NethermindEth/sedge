@@ -113,15 +113,14 @@ var inspectOut = `
 `
 
 type cliCmdTestCase struct {
-	name           string
-	configPath     string
-	generationPath string
-	runner         commands.CommandRunner
-	monitor        MonitoringTool
-	fdOut          *bytes.Buffer
-	args           CliCmdFlags
-	isPreErr       bool
-	isErr          bool
+	name       string
+	configPath string
+	runner     commands.CommandRunner
+	monitor    MonitoringTool
+	fdOut      *bytes.Buffer
+	args       CliCmdFlags
+	isPreErr   bool
+	isErr      bool
 }
 
 func (flags *CliCmdFlags) argsList() []string {
