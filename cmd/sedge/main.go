@@ -27,7 +27,7 @@ func main() {
 	prompt := prompts.NewPromptCli()
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
-		cli.CliCmd,
+		cli.CliCmd(prompt),
 		cli.KeysCmd(prompt),
 		cli.DownCmd(),
 		cli.ClientsCmd(),

@@ -105,7 +105,7 @@ func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error
 	return combinedClients, nil
 }
 
-func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Clients, error) {
+func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliCmdFlags) (clients.Clients, error) {
 	var combinedClients clients.Clients
 	var err error
 
@@ -116,33 +116,37 @@ func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Cl
 	}
 
 	// Randomize missing clients, and choose same pair of client for consensus and validator if at least one of them is missing
-	if executionName == "" {
+	if flags.executionName == "" {
 		log.Warnf(configs.ExecutionClientNotSpecifiedWarn, randomizedClients.Execution.Name)
-		executionName = randomizedClients.Execution.Name
+		// TODO: avoid flag edition
+		flags.executionName = randomizedClients.Execution.Name
 	}
-	if consensusName == "" && validatorName == "" {
+	if flags.consensusName == "" && flags.validatorName == "" {
 		log.Warnf(configs.CLNotSpecifiedWarn, randomizedClients.Consensus.Name)
-		consensusName = randomizedClients.Consensus.Name
-		validatorName = randomizedClients.Validator.Name
-	} else if consensusName == "" {
+		// TODO: avoid edit flags
+		flags.consensusName = randomizedClients.Consensus.Name
+		flags.validatorName = randomizedClients.Validator.Name
+	} else if flags.consensusName == "" {
 		log.Warn(configs.ConsensusClientNotSpecifiedWarn)
-		consensusName = validatorName
-	} else if validatorName == "" {
+		// TODO: avoid flag edition
+		flags.consensusName = flags.validatorName
+	} else if flags.validatorName == "" {
 		log.Warn(configs.ValidatorClientNotSpecifiedWarn)
-		validatorName = consensusName
+		// TODO: avoid flag edition
+		flags.validatorName = flags.consensusName
 	}
 
-	exec, ok := allClients[execution][executionName]
+	exec, ok := allClients[execution][flags.executionName]
 	if !ok {
-		exec.Name = executionName
+		exec.Name = flags.executionName
 	}
-	cons, ok := allClients[consensus][consensusName]
+	cons, ok := allClients[consensus][flags.consensusName]
 	if !ok {
-		cons.Name = consensusName
+		cons.Name = flags.consensusName
 	}
-	val, ok := allClients[validator][validatorName]
+	val, ok := allClients[validator][flags.validatorName]
 	if !ok {
-		val.Name = validatorName
+		val.Name = flags.validatorName
 	}
 
 	combinedClients = clients.Clients{
@@ -164,17 +168,17 @@ func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Cl
 	return combinedClients, nil
 }
 
-func runScriptOrExit() (err error) {
+func runScriptOrExit(flags *CliCmdFlags) (err error) {
 	// notest
 	log.Infof(configs.InstructionsFor, "running docker-compose script")
 	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
-		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
-		Services: *services,
+		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
+		Services: *flags.services,
 	})
 	fmt.Printf("\n%s\n\n", upCMD.Cmd)
 
 	prompt := promptui.Prompt{
-		Label:     fmt.Sprintf("Run the script with the selected services %s", strings.Join(*services, ", ")),
+		Label:     fmt.Sprintf("Run the script with the selected services %s", strings.Join(*flags.services, ", ")),
 		IsConfirm: true,
 		Default:   "Y",
 	}
@@ -184,14 +188,15 @@ func runScriptOrExit() (err error) {
 		os.Exit(0)
 	}
 
-	if err = runAndShowContainers(*services); err != nil {
+	if err = runAndShowContainers(*flags.services, flags); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func runAndShowContainers(services []string) error {
+// TODO: use flags.services instead a separated arg
+func runAndShowContainers(services []string, flags *CliCmdFlags) error {
 	// TODO: (refac) Put this check to checks.go and call it from there
 	// Check if docker engine is on
 	log.Info(configs.CheckingDockerEngine)
@@ -206,7 +211,7 @@ func runAndShowContainers(services []string) error {
 
 	// Check that compose plugin is installed with docker running 'docker compose ps'
 	dockerComposePsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path: filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Path: filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 	})
 	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
 	dockerComposePsCMD.GetOutput = true
@@ -217,7 +222,7 @@ func runAndShowContainers(services []string) error {
 
 	// Run docker-compose script
 	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
-		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		Services: services,
 	})
 	log.Infof(configs.RunningCommand, upCMD.Cmd)
@@ -227,7 +232,7 @@ func runAndShowContainers(services []string) error {
 
 	// Run docker compose ps --filter status=running to show script running containers
 	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path:          filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Path:          filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		FilterRunning: true,
 	})
 	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
@@ -262,10 +267,10 @@ func parseNetwork(js string) (string, error) {
 	return "", errors.New(configs.IPNotFoundError)
 }
 
-func getContainerIP(service string) (ip string, err error) {
+func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
 	// Run docker compose ps --quiet <service> to show service's ID
 	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path:        filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Path:        filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		Quiet:       true,
 		ServiceName: service,
 	})
@@ -291,16 +296,16 @@ func getContainerIP(service string) (ip string, err error) {
 	return
 }
 
-func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration) error {
+func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flags *CliCmdFlags) error {
 	done := make(chan struct{})
 	defer close(done)
 
 	log.Info(configs.GettingContainersIP)
-	executionIP, errE := getContainerIP(execution)
+	executionIP, errE := getContainerIP(execution, flags)
 	if errE != nil {
 		log.Errorf(configs.GetContainerIPError, execution, errE)
 	}
-	consensusIP, errC := getContainerIP(consensus)
+	consensusIP, errC := getContainerIP(consensus, flags)
 	if errC != nil {
 		log.Errorf(configs.GetContainerIPError, consensus, errC)
 		if errE != nil {
@@ -346,11 +351,11 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration) erro
 	return nil
 }
 
-func RunValidatorOrExit() error {
+func RunValidatorOrExit(flags *CliCmdFlags) error {
 	// notest
 	log.Infof(configs.InstructionsFor, "running validator service of docker-compose script")
 	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
-		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		Services: []string{validator},
 	})
 	fmt.Printf("\n%s\n\n", upCMD.Cmd)
@@ -366,19 +371,19 @@ func RunValidatorOrExit() error {
 		os.Exit(0)
 	}
 
-	if err = runAndShowContainers([]string{validator}); err != nil {
+	if err = runAndShowContainers([]string{validator}, flags); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func handleJWTSecret() error {
+func handleJWTSecret(flags *CliCmdFlags) error {
 	log.Info(configs.GeneratingJWTSecret)
 
 	// Create scripts directory if not exists
-	if _, err := os.Stat(generationPath); os.IsNotExist(err) {
-		err = os.MkdirAll(generationPath, 0o755)
+	if _, err := os.Stat(flags.generationPath); os.IsNotExist(err) {
+		err = os.MkdirAll(flags.generationPath, 0o755)
 		if err != nil {
 			return err
 		}
@@ -398,7 +403,7 @@ func handleJWTSecret() error {
 		Tmp:       tmp,
 		GetOutput: false,
 		Data: map[string]string{
-			"Path": generationPath,
+			"Path": flags.generationPath,
 		},
 	}
 
@@ -406,7 +411,8 @@ func handleJWTSecret() error {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	jwtPath, err = filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+	// TODO: avoid flag edition
+	flags.jwtPath, err = filepath.Abs(filepath.Join(flags.generationPath, "jwtsecret"))
 	if err != nil {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
@@ -415,44 +421,21 @@ func handleJWTSecret() error {
 	return nil
 }
 
-func feeRecipientPrompt() error {
-	// notest
-	validate := func(input string) error {
-		if input != "" && !utils.IsAddress(input) {
-			return errors.New(configs.InvalidFeeRecipientError)
-		}
-		return nil
-	}
-
-	prompt := promptui.Prompt{
-		Label:    "Please enter the Fee Recipient address. You can leave it blank and press enter (not recommended)",
-		Validate: validate,
-	}
-
-	result, err := prompt.Run()
-	if err != nil {
-		return fmt.Errorf(configs.PromptFailedError, err)
-	}
-
-	feeRecipient = result
-	return nil
-}
-
-func preRunTeku() error {
+func preRunTeku(flags *CliCmdFlags) error {
 	log.Info(configs.PreparingTekuDatadir)
 	// Change umask to avoid OS from changing the permissions
 	syscall.Umask(0)
-	for _, s := range *services {
+	for _, s := range *flags.services {
 		if s == "all" || s == consensus {
 			// Prepare consensus datadir
-			path := filepath.Join(generationPath, configs.ConsensusDefaultDataDir)
+			path := filepath.Join(flags.generationPath, configs.ConsensusDefaultDataDir)
 			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, consensus, err)
 			}
 		}
 		if s == "all" || s == validator {
 			// Prepare validator datadir
-			path := filepath.Join(generationPath, configs.ValidatorDefaultDataDir)
+			path := filepath.Join(flags.generationPath, configs.ValidatorDefaultDataDir)
 			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, validator, err)
 			}

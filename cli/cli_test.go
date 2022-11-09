@@ -30,8 +30,9 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/test"
+	"github.com/NethermindEth/sedge/test/mock_prompts"
+	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -118,119 +119,73 @@ type cliCmdTestCase struct {
 	runner         commands.CommandRunner
 	monitor        MonitoringTool
 	fdOut          *bytes.Buffer
-	args           cliCmdArgs
+	args           CliCmdFlags
 	isPreErr       bool
 	isErr          bool
 }
 
-type cliCmdArgs struct {
-	yes          bool
-	run          bool
-	install      bool
-	execClient   string
-	conClient    string
-	valClient    string
-	network      string
-	feeRecipient string
-	services     []string
-}
-
-func (args *cliCmdArgs) toString() string {
+func (flags *CliCmdFlags) argsList() []string {
 	s := []string{}
-	if args.yes {
+	if flags.yes {
 		s = append(s, "--yes")
 	}
-	if args.run {
+	if flags.run {
 		s = append(s, "--run")
 	}
-	if args.install {
+	if flags.install {
 		s = append(s, "-i")
 	}
-	if args.execClient != "" {
-		s = append(s, "-e", args.execClient)
+	if flags.executionName != "" {
+		s = append(s, "-e", flags.executionName)
 	}
-	if args.conClient != "" {
-		s = append(s, "-c", args.conClient)
+	if flags.consensusName != "" {
+		s = append(s, "-c", flags.consensusName)
 	}
-	if args.valClient != "" {
-		s = append(s, "-v", args.valClient)
+	if flags.validatorName != "" {
+		s = append(s, "-v", flags.validatorName)
 	}
-	if args.network != "" {
-		s = append(s, "-n", args.network)
+	if flags.network != "" {
+		s = append(s, "-n", flags.network)
 	}
-	if args.feeRecipient != "" {
-		s = append(s, "--fee-recipient", args.feeRecipient)
+	if flags.feeRecipient != "" {
+		s = append(s, "--fee-recipient", flags.feeRecipient)
 	}
-	if len(*services) == 0 {
-		s = append(s, "--run-client none")
-	} else {
-		s = append(s, strings.Join(*services, ", "))
+	if flags.services != nil {
+		if len(*flags.services) == 0 {
+			s = append(s, "--run-client none")
+		} else {
+			s = append(s, "--run-clients", strings.Join(*flags.services, ","))
+		}
 	}
-	return strings.Join(s, " ")
+	if flags.generationPath != "" {
+		s = append(s, "-p", flags.generationPath)
+	}
+	return s
 }
 
-func resetCliCmd() {
-	cfgFile = ""
-	executionName = ""
-	consensusName = ""
-	validatorName = ""
-	network = "mainnet"
-	feeRecipient = ""
-	generationPath = configs.DefaultDockerComposeScriptsPath
-	install = false
-	run = false
-	y = false
-	services = &[]string{}
-	fallbackEL = &[]string{}
-	jwtPath = ""
-	checkpointSyncUrl = ""
+func (flags *CliCmdFlags) toString() string {
+	return strings.Join(flags.argsList(), " ")
 }
 
-func prepareCliCmd(rootCmd *cobra.Command, tc cliCmdTestCase) error {
+func prepareCliCmd(tc cliCmdTestCase) {
 	// Set output buffers
-	rootCmd.SetOut(tc.fdOut)
 	log.SetOutput(tc.fdOut)
 	// Set config file path
 	cfgFile = tc.configPath
 	initConfig()
-	// Set flags
-	generationPath = tc.generationPath
-	y = tc.args.yes
-	run = tc.args.run
-	install = tc.args.install
-	services = &tc.args.services
-	if tc.args.execClient != "" {
-		executionName = tc.args.execClient
-	}
-	if tc.args.conClient != "" {
-		consensusName = tc.args.conClient
-	}
-	if tc.args.valClient != "" {
-		validatorName = tc.args.valClient
-	}
-	if tc.args.network != "" {
-		network = tc.args.network
-	}
-	if tc.args.feeRecipient != "" {
-		feeRecipient = tc.args.feeRecipient
-	}
-	if err := preRunCliCmd(rootCmd, []string{}); err != nil {
-		return err
-	}
 	commands.InitRunner(func() commands.CommandRunner {
 		return tc.runner
 	})
 	initMonitor(func() MonitoringTool {
 		return tc.monitor
 	})
-	return nil
 }
 
 func buildCliTestCase(
 	t *testing.T,
 	name,
 	caseTestDataDir string,
-	args cliCmdArgs,
+	args CliCmdFlags,
 	isPreErr,
 	isErr bool,
 ) *cliCmdTestCase {
@@ -284,7 +239,7 @@ func buildCliTestCase(
 
 	tc.name = name
 	tc.args = args
-	tc.generationPath = dcPath
+	tc.args.generationPath = dcPath
 	tc.configPath = filepath.Join(configPath, "config.yaml")
 	tc.fdOut = new(bytes.Buffer)
 	tc.isPreErr = isPreErr
@@ -298,9 +253,9 @@ func TestCliCmd(t *testing.T) {
 		*buildCliTestCase(
 			t,
 			"Random clients", "case_1",
-			cliCmdArgs{
+			CliCmdFlags{
 				yes:      true,
-				services: []string{execution, consensus},
+				services: &[]string{execution, consensus},
 			},
 			false,
 			false,
@@ -308,12 +263,12 @@ func TestCliCmd(t *testing.T) {
 		*buildCliTestCase(
 			t,
 			"Fixed clients", "case_1",
-			cliCmdArgs{
-				yes:        true,
-				execClient: "nethermind",
-				conClient:  "lighthouse",
-				valClient:  "lighthouse",
-				services:   []string{execution, consensus},
+			CliCmdFlags{
+				yes:           true,
+				executionName: "nethermind",
+				consensusName: "lighthouse",
+				validatorName: "lighthouse",
+				services:      &[]string{execution, consensus},
 			},
 			false,
 			false,
@@ -321,11 +276,11 @@ func TestCliCmd(t *testing.T) {
 		*buildCliTestCase(
 			t,
 			"Missing consensus client", "case_1",
-			cliCmdArgs{
-				yes:        true,
-				execClient: "nethermind",
-				valClient:  "lighthouse",
-				services:   []string{execution, consensus},
+			CliCmdFlags{
+				yes:           true,
+				executionName: "nethermind",
+				validatorName: "lighthouse",
+				services:      &[]string{execution, consensus},
 			},
 			false,
 			false,
@@ -333,11 +288,11 @@ func TestCliCmd(t *testing.T) {
 		*buildCliTestCase(
 			t,
 			"Missing validator client", "case_1",
-			cliCmdArgs{
-				yes:        true,
-				execClient: "nethermind",
-				conClient:  "lighthouse",
-				services:   []string{execution, consensus},
+			CliCmdFlags{
+				yes:           true,
+				executionName: "nethermind",
+				consensusName: "lighthouse",
+				services:      &[]string{execution, consensus},
 			},
 			false,
 			false,
@@ -345,12 +300,12 @@ func TestCliCmd(t *testing.T) {
 		*buildCliTestCase(
 			t,
 			"Good network input", "case_1",
-			cliCmdArgs{
-				yes:        true,
-				execClient: "nethermind",
-				conClient:  "lighthouse",
-				network:    "mainnet",
-				services:   []string{execution, consensus},
+			CliCmdFlags{
+				yes:           true,
+				executionName: "nethermind",
+				consensusName: "lighthouse",
+				network:       "mainnet",
+				services:      &[]string{execution, consensus},
 			},
 			false,
 			false,
@@ -358,12 +313,12 @@ func TestCliCmd(t *testing.T) {
 		*buildCliTestCase(
 			t,
 			"Bad network input", "case_1",
-			cliCmdArgs{
-				yes:        true,
-				execClient: "nethermind",
-				conClient:  "lighthouse",
-				network:    "sedge",
-				services:   []string{execution, consensus},
+			CliCmdFlags{
+				yes:           true,
+				executionName: "nethermind",
+				consensusName: "lighthouse",
+				network:       "sedge",
+				services:      &[]string{execution, consensus},
 			},
 			true,
 			true,
@@ -371,9 +326,9 @@ func TestCliCmd(t *testing.T) {
 		*buildCliTestCase(
 			t,
 			"--run-client all", "case_1",
-			cliCmdArgs{
+			CliCmdFlags{
 				yes:      true,
-				services: []string{"all"},
+				services: &[]string{"all"},
 			},
 			false,
 			false,
@@ -381,7 +336,7 @@ func TestCliCmd(t *testing.T) {
 		*buildCliTestCase(
 			t,
 			"--run-client none", "case_1",
-			cliCmdArgs{
+			CliCmdFlags{
 				yes: true,
 			},
 			false,
@@ -390,19 +345,19 @@ func TestCliCmd(t *testing.T) {
 		*buildCliTestCase(
 			t,
 			"--run-client none, execution, ambiguos error", "case_1",
-			cliCmdArgs{
+			CliCmdFlags{
 				yes:      true,
-				services: []string{execution, "none"},
+				services: &[]string{execution, "none"},
 			},
 			true,
-			false,
+			true,
 		),
 		*buildCliTestCase(
 			t,
 			"--run-client validator", "case_1",
-			cliCmdArgs{
+			CliCmdFlags{
 				yes:      true,
-				services: []string{validator},
+				services: &[]string{validator},
 			},
 			false,
 			false,
@@ -410,62 +365,55 @@ func TestCliCmd(t *testing.T) {
 		*buildCliTestCase(
 			t,
 			"--run-client all, validator, ambiguos error", "case_1",
-			cliCmdArgs{
+			CliCmdFlags{
 				yes:      true,
-				services: []string{validator, "all"},
+				services: &[]string{validator, "all"},
 			},
 			true,
-			false,
+			true,
 		),
 		*buildCliTestCase(
 			t,
 			"--run-client all, validator, ambiguos error", "case_1",
-			cliCmdArgs{
+			CliCmdFlags{
 				yes:      true,
-				services: []string{validator, "all"},
+				services: &[]string{validator, "all"},
 			},
 			true,
-			false,
+			true,
 		),
 		*buildCliTestCase(
 			t,
 			"Invalid network", "case_1",
-			cliCmdArgs{
+			CliCmdFlags{
 				yes:      true,
 				network:  "test",
-				services: []string{execution, consensus},
+				services: &[]string{execution, consensus},
 			},
 			true,
 			true,
 		),
 	}
 
-	t.Cleanup(resetCliCmd)
-
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			resetCliCmd()
 			descr := fmt.Sprintf("sedge cli %s", tc.args.toString())
 
+			ctrl := gomock.NewController(t)
+			prompt := mock_prompts.NewMockPrompt(ctrl)
+			defer ctrl.Finish()
+
 			rootCmd := RootCmd()
-			rootCmd.AddCommand(CliCmd)
+			rootCmd.AddCommand(CliCmd(prompt))
+			argsL := append([]string{"cli"}, tc.args.argsList()...)
+			rootCmd.SetArgs(argsL)
 
-			err := prepareCliCmd(rootCmd, tc)
-			if tc.isPreErr && err == nil {
-				t.Errorf("%s expected to fail", descr)
-			} else if !tc.isPreErr && err != nil {
+			prepareCliCmd(tc)
+
+			if err := rootCmd.Execute(); !tc.isErr && err != nil {
 				t.Errorf("%s failed: %v", descr, err)
-			}
-
-			errs := runCliCmd(rootCmd, []string{})
-			if tc.isErr && (errs == nil || len(errs) < 1) {
+			} else if tc.isErr && err == nil {
 				t.Errorf("%s expected to fail", descr)
-			} else if !tc.isErr && errs != nil && len(errs) > 0 {
-				errsStr := []string{}
-				for _, err := range errs {
-					errsStr = append(errsStr, fmt.Sprintf("%v", err))
-				}
-				t.Errorf("%s failed with errors: %v", descr, strings.Join(errsStr, "\n"))
 			}
 		})
 	}
@@ -509,12 +457,16 @@ func TestTrackSync(t *testing.T) {
 	tcs := []struct {
 		name    string
 		data    []posmoni.EndpointSyncStatus
+		flags   CliCmdFlags
 		isError bool
 	}{
 		{
 			"Test case 1, execution client got an error",
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
+			},
+			CliCmdFlags{
+				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
 			true,
 		},
@@ -524,6 +476,9 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 			},
+			CliCmdFlags{
+				generationPath: configs.DefaultDockerComposeScriptsPath,
+			},
 			true,
 		},
 		{
@@ -531,6 +486,9 @@ func TestTrackSync(t *testing.T) {
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			CliCmdFlags{
+				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
 			true,
 		},
@@ -540,6 +498,9 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true, Error: errors.New("")},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
+			CliCmdFlags{
+				generationPath: configs.DefaultDockerComposeScriptsPath,
+			},
 			true,
 		},
 		{
@@ -548,6 +509,9 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
 			},
+			CliCmdFlags{
+				generationPath: configs.DefaultDockerComposeScriptsPath,
+			},
 			true,
 		},
 		{
@@ -555,6 +519,9 @@ func TestTrackSync(t *testing.T) {
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+			},
+			CliCmdFlags{
+				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
 			true,
 		},
@@ -566,6 +533,9 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			CliCmdFlags{
+				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
 			false,
 		},
@@ -581,6 +551,9 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 			},
+			CliCmdFlags{
+				generationPath: configs.DefaultDockerComposeScriptsPath,
+			},
 			false,
 		},
 		{
@@ -592,6 +565,9 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
 			},
+			CliCmdFlags{
+				generationPath: configs.DefaultDockerComposeScriptsPath,
+			},
 			true,
 		},
 	}
@@ -601,7 +577,7 @@ func TestTrackSync(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			ms := monitorStub{data: tc.data}
 
-			err := trackSync(&ms, "", "", time.Millisecond*100)
+			err := trackSync(&ms, "", "", time.Millisecond*100, &tc.flags)
 			utils.CheckErr("trackSync(...) failed", tc.isError, err)
 		})
 	}
