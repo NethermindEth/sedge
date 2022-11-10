@@ -39,8 +39,6 @@ func NetworksCmd() *cobra.Command {
 	return cmd
 }
 
-// listNetworksCmd represents the networks command
-
 func runListNetworksCmd(cmd *cobra.Command, args []string) error {
 	// Get supported networks and print table of networks
 	networks, err := utils.SupportedNetworks()
