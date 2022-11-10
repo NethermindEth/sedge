@@ -62,6 +62,21 @@ func (mr *MockPromptMockRecorder) ExistingVal() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistingVal", reflect.TypeOf((*MockPrompt)(nil).ExistingVal))
 }
 
+// FeeRecipient mocks base method.
+func (m *MockPrompt) FeeRecipient() (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FeeRecipient")
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FeeRecipient indicates an expected call of FeeRecipient.
+func (mr *MockPromptMockRecorder) FeeRecipient() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeRecipient", reflect.TypeOf((*MockPrompt)(nil).FeeRecipient))
+}
+
 // NumberVal mocks base method.
 func (m *MockPrompt) NumberVal() int64 {
 	m.ctrl.T.Helper()
