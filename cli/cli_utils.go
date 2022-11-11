@@ -331,7 +331,7 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flag
 	executionUrl := fmt.Sprintf("http://%s:%s", executionIP, elPort)
 
 	statuses := make(chan responseStruct)
-	log.Infof("tracking")
+	log.Info("Starting tracking tracking")
 	err := track("localhost:12001", []string{consensusUrl}, []string{executionUrl}, done, wait, statuses)
 	if err != nil {
 		return err
@@ -341,7 +341,7 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flag
 	// Threshold to stop tracking, to avoid false responses
 	times := 0
 	for s := range statuses {
-		log.Infof("Read response")
+		log.Infof("Checking status: %v", s)
 		if s.Error.Code != 0 {
 			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
 		}
@@ -411,7 +411,8 @@ func track(monitorUrl string, consensusUrl, executionUrl []string, done chan str
 		for {
 			select {
 			case <-done:
-				log.Fatal(err)
+				c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+				return
 			default:
 				_, message, err := c.ReadMessage()
 				if err != nil {
@@ -425,7 +426,6 @@ func track(monitorUrl string, consensusUrl, executionUrl []string, done chan str
 					return
 				}
 				response <- resp
-				log.Printf("recv: %s", message)
 			}
 		}
 	}()
