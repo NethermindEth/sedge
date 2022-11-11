@@ -94,6 +94,7 @@ func TestKeysCmd(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
+			rootCmd := RootCmd()
 			rootCmd.AddCommand(KeysCmd(prompts.NewPromptCli()))
 			rootCmd.SetArgs([]string{
 				"keys",
@@ -133,6 +134,7 @@ func TestKeysCmd_RandomPassphrase(t *testing.T) {
 			Passphrase().
 			Times(0)
 
+		rootCmd := RootCmd()
 		rootCmd.AddCommand(KeysCmd(prompt))
 		rootCmd.SetArgs([]string{
 			"keys",
