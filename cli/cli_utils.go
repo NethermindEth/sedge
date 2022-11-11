@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/NethermindEth/posmoni/pkg/eth2/networking"
 	"github.com/gorilla/websocket"
 	"io"
 	"net/url"
@@ -329,7 +330,7 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flag
 	consensusUrl := fmt.Sprintf("http://%s:%s", consensusIP, clPort)
 	executionUrl := fmt.Sprintf("http://%s:%s", executionIP, elPort)
 
-	statuses := make(chan posmoni.EndpointSyncStatus)
+	statuses := make(chan responseStruct)
 	log.Infof("tracking")
 	err := track("localhost:12001", []string{consensusUrl}, []string{executionUrl}, done, wait, statuses)
 	if err != nil {
@@ -341,7 +342,7 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flag
 	times := 0
 	for s := range statuses {
 		log.Infof("Read response")
-		if s.Error != nil {
+		if s.Error.Code != 0 {
 			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
 		}
 
@@ -378,10 +379,10 @@ type info struct {
 type responseStruct struct {
 	Endpoint string
 	Synced   bool
-	Error    []byte
+	Error    networking.Eth1Error
 }
 
-func track(monitorUrl string, consensusUrl, executionUrl []string, done chan struct{}, wait time.Duration, response chan posmoni.EndpointSyncStatus) error {
+func track(monitorUrl string, consensusUrl, executionUrl []string, done chan struct{}, wait time.Duration, response chan responseStruct) error {
 	u := url.URL{Scheme: "ws", Host: monitorUrl, Path: "/trackSync"}
 	log.Debugf("connecting to %s", u.String())
 
@@ -423,18 +424,7 @@ func track(monitorUrl string, consensusUrl, executionUrl []string, done chan str
 					log.Fatal(err)
 					return
 				}
-				if resp.Error == nil {
-					response <- posmoni.EndpointSyncStatus{
-						Endpoint: resp.Endpoint,
-						Synced:   resp.Synced,
-					}
-				} else {
-					response <- posmoni.EndpointSyncStatus{
-						Endpoint: resp.Endpoint,
-						Synced:   resp.Synced,
-						Error:    fmt.Errorf(string(resp.Error)),
-					}
-				}
+				response <- resp
 				log.Printf("recv: %s", message)
 			}
 		}
