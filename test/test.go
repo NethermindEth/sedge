@@ -134,9 +134,15 @@ func (cr *SimpleCMDRunner) BuildEchoToFileCMD(options commands.EchoToFileOptions
 }
 
 func (cr *SimpleCMDRunner) RunCMD(cmd commands.Command) (string, error) {
+	if cr.SRunCMD != nil {
+		return "", nil
+	}
 	return cr.SRunCMD(cmd)
 }
 
 func (cr *SimpleCMDRunner) RunScript(script commands.ScriptFile) (string, error) {
+	if cr.SRunBash != nil {
+		return "", nil
+	}
 	return cr.SRunBash(script)
 }

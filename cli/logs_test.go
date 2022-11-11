@@ -146,7 +146,7 @@ func TestLogsCmd(t *testing.T) {
 	for _, tc := range tcs {
 		resetLogCmd()
 		rootCmd := RootCmd()
-		rootCmd.AddCommand(LogsCmd())
+		rootCmd.AddCommand(LogsCmd(tc.runner))
 		var args []string
 		if tc.tail != 0 {
 			args = []string{"logs", "--config", tc.configPath, "--path", tc.generatedPath, "--tail", fmt.Sprintf("%d", tc.tail)}
@@ -157,10 +157,6 @@ func TestLogsCmd(t *testing.T) {
 		rootCmd.SetArgs(args)
 		rootCmd.SetOut(tc.fdOut)
 		log.SetOutput(tc.fdOut)
-
-		commands.InitRunner(func() commands.CommandRunner {
-			return tc.runner
-		})
 
 		descr := fmt.Sprintf("sedge logs --tail %s", strings.Join(tc.services, " "))
 

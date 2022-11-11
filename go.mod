@@ -6,7 +6,6 @@ require (
 	github.com/NethermindEth/posmoni v0.0.0-20221003174544-256d5ef32aa1
 	github.com/alexeyco/simpletable v1.0.0
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
-	github.com/creack/pty v1.1.18
 	github.com/golang/mock v1.4.4
 	github.com/google/go-github/v47 v47.1.0
 	github.com/google/uuid v1.3.0

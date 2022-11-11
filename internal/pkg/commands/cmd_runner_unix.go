@@ -147,7 +147,7 @@ func (cr *UnixCMDRunner) RunCMD(cmd Command) (string, error) {
 	} else {
 		log.Debug(`Running command without sudo.`)
 	}
-	return runCmd(cmd.Cmd, cmd.GetOutput, cmd.RunInPty)
+	return runCmd(cmd.Cmd, cmd.GetOutput)
 }
 
 func (cr *UnixCMDRunner) RunScript(script ScriptFile) (string, error) {

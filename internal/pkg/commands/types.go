@@ -23,8 +23,6 @@ type Command struct {
 	Cmd string
 	// GetOutput : get output of command
 	GetOutput bool
-	// RunInPty : run command in a pty
-	RunInPty bool
 }
 
 // ScriptFile : Represents a bash or bat script to be executed

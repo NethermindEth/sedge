@@ -45,12 +45,12 @@ returns :-
 a. error
 Error if any
 */
-func HandleInstructions(dependencies []string, handler func(string) error) (err error) {
+func HandleInstructions(cmdRunner commands.CommandRunner, dependencies []string, handler func(commands.CommandRunner, string) error) (err error) {
 	pending := make([]string, 0)
 
 	for _, dependency := range dependencies {
 		if dependencySupported(dependency) {
-			err = handler(dependency)
+			err = handler(cmdRunner, dependency)
 			if err != nil {
 				log.Error(err)
 				pending = append(pending, dependency)
@@ -89,7 +89,7 @@ returns :-
 a. error
 Error if any
 */
-func ShowInstructions(dependency string) error {
+func ShowInstructions(_ commands.CommandRunner, dependency string) error {
 	scriptPath, _, err := getScriptPath(dependency)
 	if err != nil {
 		return fmt.Errorf(configs.ScriptPathError, err)
@@ -120,7 +120,7 @@ returns :-
 a. error
 Error if any
 */
-func InstallDependency(dependency string) (err error) {
+func InstallDependency(cmdRunner commands.CommandRunner, dependency string) (err error) {
 	scriptPath, _, err := getScriptPath(dependency)
 	if err != nil {
 		return
@@ -142,7 +142,7 @@ func InstallDependency(dependency string) (err error) {
 		Data:      struct{}{},
 	}
 
-	if _, err = commands.Runner.RunScript(script); err != nil {
+	if _, err = cmdRunner.RunScript(script); err != nil {
 		return
 	}
 

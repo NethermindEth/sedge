@@ -49,7 +49,7 @@ func initMonitor(builder func() MonitoringTool) {
 	monitor = builder()
 }
 
-func installOrShowInstructions(pending []string) (err error) {
+func installOrShowInstructions(cmdRunner commands.CommandRunner, pending []string) (err error) {
 	// notest
 	optInstall, optExit := "Install dependencies", "Exit. You will manage this dependencies on your own"
 	prompt := promptui.Select{
@@ -57,7 +57,7 @@ func installOrShowInstructions(pending []string) (err error) {
 		Items: []string{optInstall, optExit},
 	}
 
-	if err = utils.HandleInstructions(pending, utils.ShowInstructions); err != nil {
+	if err = utils.HandleInstructions(cmdRunner, pending, utils.ShowInstructions); err != nil {
 		return fmt.Errorf(configs.ShowingInstructionsError, err)
 	}
 	_, result, err := prompt.Run()
@@ -67,7 +67,7 @@ func installOrShowInstructions(pending []string) (err error) {
 
 	switch result {
 	case optInstall:
-		return installDependencies(pending)
+		return installDependencies(cmdRunner, pending)
 	default:
 		log.Info(configs.Exiting)
 		os.Exit(0)
@@ -76,9 +76,9 @@ func installOrShowInstructions(pending []string) (err error) {
 	return nil
 }
 
-func installDependencies(pending []string) error {
+func installDependencies(cmdRunner commands.CommandRunner, pending []string) error {
 	if runtime.GOOS != "windows" { // Windows doesn't support docker installation through scripts
-		if err := utils.HandleInstructions(pending, utils.InstallDependency); err != nil {
+		if err := utils.HandleInstructions(cmdRunner, pending, utils.InstallDependency); err != nil {
 			return fmt.Errorf(configs.InstallingDependenciesError, err)
 		}
 	}
@@ -169,10 +169,10 @@ func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliC
 	return combinedClients, nil
 }
 
-func runScriptOrExit(flags *CliCmdFlags) (err error) {
+func runScriptOrExit(cmdRunner commands.CommandRunner, flags *CliCmdFlags) (err error) {
 	// notest
 	log.Infof(configs.InstructionsFor, "running docker-compose script")
-	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
+	upCMD := cmdRunner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
 		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		Services: *flags.services,
 	})
@@ -189,7 +189,7 @@ func runScriptOrExit(flags *CliCmdFlags) (err error) {
 		os.Exit(0)
 	}
 
-	if err = runAndShowContainers(*flags.services, flags); err != nil {
+	if err = runAndShowContainers(cmdRunner, *flags.services, flags); err != nil {
 		return err
 	}
 
@@ -197,57 +197,57 @@ func runScriptOrExit(flags *CliCmdFlags) (err error) {
 }
 
 // TODO: use flags.services instead a separated arg
-func runAndShowContainers(services []string, flags *CliCmdFlags) error {
+func runAndShowContainers(cmdRunner commands.CommandRunner, services []string, flags *CliCmdFlags) error {
 	// TODO: (refac) Put this check to checks.go and call it from there
 	// Check if docker engine is on
 	log.Info(configs.CheckingDockerEngine)
-	psCMD := commands.Runner.BuildDockerPSCMD(commands.DockerPSOptions{
+	psCMD := cmdRunner.BuildDockerPSCMD(commands.DockerPSOptions{
 		All: true,
 	})
 	psCMD.GetOutput = true
 	log.Infof(configs.RunningCommand, psCMD.Cmd)
-	if _, err := commands.Runner.RunCMD(psCMD); err != nil {
+	if _, err := cmdRunner.RunCMD(psCMD); err != nil {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
 	}
 
 	// Check that compose plugin is installed with docker running 'docker compose ps'
-	dockerComposePsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+	dockerComposePsCMD := cmdRunner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
 		Path: filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 	})
 	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
 	dockerComposePsCMD.GetOutput = true
-	_, err := commands.Runner.RunCMD(dockerComposePsCMD)
+	_, err := cmdRunner.RunCMD(dockerComposePsCMD)
 	if err != nil {
 		return fmt.Errorf(configs.DockerComposeOffError, err)
 	}
 
 	// Download images
-	pullCmd := commands.Runner.BuildDockerComposePullCMD(commands.DockerComposePullOptions{
+	pullCmd := cmdRunner.BuildDockerComposePullCMD(commands.DockerComposePullOptions{
 		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		Services: services,
 	})
 	log.Infof(configs.RunningCommand, pullCmd.Cmd)
-	if _, err := commands.Runner.RunCMD(pullCmd); err != nil {
+	if _, err := cmdRunner.RunCMD(pullCmd); err != nil {
 		return fmt.Errorf(configs.CommandError, pullCmd.Cmd, err)
 	}
 
 	// Run docker-compose script
-	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
+	upCMD := cmdRunner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
 		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		Services: services,
 	})
 	log.Infof(configs.RunningCommand, upCMD.Cmd)
-	if _, err := commands.Runner.RunCMD(upCMD); err != nil {
+	if _, err := cmdRunner.RunCMD(upCMD); err != nil {
 		return fmt.Errorf(configs.CommandError, upCMD.Cmd, err)
 	}
 
 	// Run docker compose ps --filter status=running to show script running containers
-	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+	dcpsCMD := cmdRunner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
 		Path:          filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		FilterRunning: true,
 	})
 	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
-	if _, err := commands.Runner.RunCMD(dcpsCMD); err != nil {
+	if _, err := cmdRunner.RunCMD(dcpsCMD); err != nil {
 		return fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
 	}
 
@@ -278,27 +278,27 @@ func parseNetwork(js string) (string, error) {
 	return "", errors.New(configs.IPNotFoundError)
 }
 
-func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
+func getContainerIP(cmdRunner commands.CommandRunner, service string, flags *CliCmdFlags) (ip string, err error) {
 	// Run docker compose ps --quiet <service> to show service's ID
-	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+	dcpsCMD := cmdRunner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
 		Path:        filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		Quiet:       true,
 		ServiceName: service,
 	})
 	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
 	dcpsCMD.GetOutput = true
-	id, err := commands.Runner.RunCMD(dcpsCMD)
+	id, err := cmdRunner.RunCMD(dcpsCMD)
 	if err != nil {
 		return ip, fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
 	}
 
 	// Run docker inspect <id> to get IP address
-	inspectCmd := commands.Runner.BuildDockerInspectCMD(commands.DockerInspectOptions{
+	inspectCmd := cmdRunner.BuildDockerInspectCMD(commands.DockerInspectOptions{
 		Name: id,
 	})
 	log.Infof(configs.RunningCommand, inspectCmd.Cmd)
 	inspectCmd.GetOutput = true
-	data, err := commands.Runner.RunCMD(inspectCmd)
+	data, err := cmdRunner.RunCMD(inspectCmd)
 	if err != nil {
 		return
 	}
@@ -307,16 +307,16 @@ func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
 	return
 }
 
-func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flags *CliCmdFlags) error {
+func trackSync(cmdRunner commands.CommandRunner, m MonitoringTool, elPort, clPort string, wait time.Duration, flags *CliCmdFlags) error {
 	done := make(chan struct{})
 	defer close(done)
 
 	log.Info(configs.GettingContainersIP)
-	executionIP, errE := getContainerIP(execution, flags)
+	executionIP, errE := getContainerIP(cmdRunner, execution, flags)
 	if errE != nil {
 		log.Errorf(configs.GetContainerIPError, execution, errE)
 	}
-	consensusIP, errC := getContainerIP(consensus, flags)
+	consensusIP, errC := getContainerIP(cmdRunner, consensus, flags)
 	if errC != nil {
 		log.Errorf(configs.GetContainerIPError, consensus, errC)
 		if errE != nil {
@@ -362,10 +362,10 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flag
 	return nil
 }
 
-func RunValidatorOrExit(flags *CliCmdFlags) error {
+func RunValidatorOrExit(cmdRunner commands.CommandRunner, flags *CliCmdFlags) error {
 	// notest
 	log.Infof(configs.InstructionsFor, "running validator service of docker-compose script")
-	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
+	upCMD := cmdRunner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
 		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		Services: []string{validator},
 	})
@@ -382,7 +382,7 @@ func RunValidatorOrExit(flags *CliCmdFlags) error {
 		os.Exit(0)
 	}
 
-	if err = runAndShowContainers([]string{validator}, flags); err != nil {
+	if err = runAndShowContainers(cmdRunner, []string{validator}, flags); err != nil {
 		return err
 	}
 
