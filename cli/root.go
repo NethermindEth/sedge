@@ -56,8 +56,6 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	checkVersion()
-
 	// Disable completion default cmd
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 
@@ -103,6 +101,8 @@ func initConfig() {
 	}
 
 	initLogging()
+
+	checkVersion()
 }
 
 func checkVersion() {

@@ -169,7 +169,7 @@ func (cr *WindowsCMDRunner) RunScript(script ScriptFile) (string, error) {
 		return out, err
 	}
 
-	tempBat := filepath.Join(tempFileDir, "temp.bat")
+	tempBat := filepath.Join(tempFileDir, "temp.ps1")
 	if err := os.WriteFile(tempBat, rawScript, os.ModePerm); err != nil {
 		return out, err
 	}
@@ -229,5 +229,6 @@ func (cr *WindowsCMDRunner) RunScript(script ScriptFile) (string, error) {
 		out = combinedOut.String()
 	}
 
+	out = strings.ReplaceAll(out, "\r", "")
 	return out, nil
 }

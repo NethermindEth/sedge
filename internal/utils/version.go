@@ -18,6 +18,7 @@ package utils
 import (
 	"context"
 	"errors"
+	"runtime"
 	"text/template"
 
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
@@ -64,11 +65,16 @@ a. err error
 Error if any
 */
 func versionFromGit() (string, error) {
-	const cmd = `
-#!/bin/bash
-
-git tag | sort | tail -n 1
-`
+	var cmd string
+	if runtime.GOOS == "windows" {
+		cmd = `git tag | sort | Select-Object -last 1`
+	} else {
+		cmd = `
+	#!/bin/bash
+	
+	git tag | sort | tail -n 1
+	`
+	}
 	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
 		RunAsAdmin: false,
 	})
