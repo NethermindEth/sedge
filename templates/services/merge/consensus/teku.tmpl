@@ -12,6 +12,8 @@
         condition: service_completed_successfully{{end}}{{end}}
     networks:
       - sedge
+    depends_on:
+      - monitor
     volumes:
       - ${CC_DATA_DIR}:/var/lib/teku
       - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CcCustomCfg}}{{if .CcRemoteCfg}}

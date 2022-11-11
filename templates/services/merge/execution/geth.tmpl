@@ -10,6 +10,8 @@
     volumes:
       - ${EC_DATA_DIR}:/var/lib/goethereum
       - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    depends_on:
+      - monitor
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"

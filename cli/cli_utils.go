@@ -20,7 +20,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/gorilla/websocket"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -327,12 +329,18 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flag
 	consensusUrl := fmt.Sprintf("http://%s:%s", consensusIP, clPort)
 	executionUrl := fmt.Sprintf("http://%s:%s", executionIP, elPort)
 
-	statuses := m.TrackSync(done, []string{consensusUrl}, []string{executionUrl}, wait)
+	statuses := make(chan posmoni.EndpointSyncStatus)
+	log.Infof("tracking")
+	err := track("localhost:12001", []string{consensusUrl}, []string{executionUrl}, done, wait, statuses)
+	if err != nil {
+		return err
+	}
 
 	var esynced, csynced bool
 	// Threshold to stop tracking, to avoid false responses
 	times := 0
 	for s := range statuses {
+		log.Infof("Read response")
 		if s.Error != nil {
 			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
 		}
@@ -357,6 +365,80 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flag
 			times = 0
 		}
 	}
+
+	return nil
+}
+
+type info struct {
+	ConsensusUrls []string      `json:"consensus_urls"`
+	ExecutionUrls []string      `json:"execution_urls"`
+	Wait          time.Duration `json:"wait"`
+}
+
+type responseStruct struct {
+	Endpoint string
+	Synced   bool
+	Error    []byte
+}
+
+func track(monitorUrl string, consensusUrl, executionUrl []string, done chan struct{}, wait time.Duration, response chan posmoni.EndpointSyncStatus) error {
+	u := url.URL{Scheme: "ws", Host: monitorUrl, Path: "/trackSync"}
+	log.Debugf("connecting to %s", u.String())
+
+	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	if err != nil {
+		return err
+	}
+
+	requestInfo := info{
+		ConsensusUrls: consensusUrl,
+		ExecutionUrls: executionUrl,
+		Wait:          wait,
+	}
+	val, err := json.Marshal(requestInfo)
+	if err != nil {
+		return err
+	}
+	err = c.WriteMessage(websocket.TextMessage, val)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		defer c.Close()
+		defer close(done)
+		for {
+			select {
+			case <-done:
+				log.Fatal(err)
+			default:
+				_, message, err := c.ReadMessage()
+				if err != nil {
+					log.Fatal(err)
+					return
+				}
+				var resp responseStruct
+				err = json.Unmarshal(message, &resp)
+				if err != nil {
+					log.Fatal(err)
+					return
+				}
+				if resp.Error == nil {
+					response <- posmoni.EndpointSyncStatus{
+						Endpoint: resp.Endpoint,
+						Synced:   resp.Synced,
+					}
+				} else {
+					response <- posmoni.EndpointSyncStatus{
+						Endpoint: resp.Endpoint,
+						Synced:   resp.Synced,
+						Error:    fmt.Errorf(string(resp.Error)),
+					}
+				}
+				log.Printf("recv: %s", message)
+			}
+		}
+	}()
 
 	return nil
 }

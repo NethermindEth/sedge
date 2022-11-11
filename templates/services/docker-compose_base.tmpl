@@ -34,6 +34,16 @@ services:
 {{template "consensus" .}}
 {{template "validator" .}}
 
+  monitor:
+    image: posmoni:latest
+    networks:
+      - sedge
+    container_name: monitor
+    restart: on-failure
+    ports:
+      - "12001:12001"
+    command: api --port 12001
+
 networks:
   sedge:
     name: sedge_network
