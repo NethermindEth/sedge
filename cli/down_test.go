@@ -64,7 +64,7 @@ func buildDownTestCase(t *testing.T, caseName string, isErr bool) *downCmdTestCa
 		SRunCMD: func(c commands.Command) (string, error) {
 			return "", nil
 		},
-		SRunBash: func(bs commands.BashScript) (string, error) {
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
 		},
 	}

@@ -150,6 +150,6 @@ func (cr *UnixCMDRunner) RunCMD(cmd Command) (string, error) {
 	return runCmd(cmd.Cmd, cmd.GetOutput, cmd.RunInPty)
 }
 
-func (cr *UnixCMDRunner) RunBash(script BashScript) (string, error) {
+func (cr *UnixCMDRunner) RunScript(script ScriptFile) (string, error) {
 	return executeBashScript(script)
 }

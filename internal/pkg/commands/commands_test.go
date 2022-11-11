@@ -108,7 +108,7 @@ func TestRunBashScript(t *testing.T) {
 			t.Fatalf("Unexpected error at case %q: %v", input.cmd, err)
 		}
 
-		got, err := Runner.RunBash(BashScript{
+		got, err := Runner.RunScript(ScriptFile{
 			Tmp:       tmp,
 			GetOutput: input.getOutput,
 		})

@@ -218,7 +218,7 @@ func TestInstallDependency(t *testing.T) {
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", nil
 				},
-				SRunBash: func(bs commands.BashScript) (string, error) {
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
 				},
 			},
@@ -230,7 +230,7 @@ func TestInstallDependency(t *testing.T) {
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", nil
 				},
-				SRunBash: func(bs commands.BashScript) (string, error) {
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", fmt.Errorf("test unexpected error")
 				},
 			},
@@ -242,7 +242,7 @@ func TestInstallDependency(t *testing.T) {
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", nil
 				},
-				SRunBash: func(bs commands.BashScript) (string, error) {
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
 				},
 			},

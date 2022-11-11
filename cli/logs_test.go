@@ -108,7 +108,7 @@ func buildLogsTestCase(t *testing.T, testName string, tail int, services []strin
 			}
 			return "", nil
 		},
-		SRunBash: func(bs commands.BashScript) (string, error) {
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
 		},
 	}

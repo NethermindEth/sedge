@@ -27,8 +27,8 @@ type Command struct {
 	RunInPty bool
 }
 
-// BashScript : Represents a script to be executed
-type BashScript struct {
+// ScriptFile : Represents a bash or bat script to be executed
+type ScriptFile struct {
 	// Tmp : script template
 	Tmp *template.Template
 	// getOutput : get output of the script

@@ -136,13 +136,13 @@ func InstallDependency(dependency string) (err error) {
 		return
 	}
 
-	script := commands.BashScript{
+	script := commands.ScriptFile{
 		Tmp:       tmp,
 		GetOutput: false,
 		Data:      struct{}{},
 	}
 
-	if _, err = commands.Runner.RunBash(script); err != nil {
+	if _, err = commands.Runner.RunScript(script); err != nil {
 		return
 	}
 

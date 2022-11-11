@@ -92,7 +92,7 @@ func TestPreCheck(t *testing.T) {
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", nil
 				},
-				SRunBash: func(bs commands.BashScript) (string, error) {
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
 				},
 			},
@@ -106,7 +106,7 @@ func TestPreCheck(t *testing.T) {
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", nil
 				},
-				SRunBash: func(bs commands.BashScript) (string, error) {
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
 				},
 			},
@@ -120,7 +120,7 @@ func TestPreCheck(t *testing.T) {
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", fmt.Errorf("test unknown error")
 				},
-				SRunBash: func(bs commands.BashScript) (string, error) {
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
 				},
 			},
@@ -182,7 +182,7 @@ func buildCheckContainersTestCase(t *testing.T, caseName string, isErr bool) *ch
 			}
 			return "", nil
 		},
-		SRunBash: func(bs commands.BashScript) (string, error) {
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
 		},
 	}

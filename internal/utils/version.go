@@ -73,7 +73,7 @@ git tag | sort | tail -n 1
 		RunAsAdmin: false,
 	})
 	tt := template.Must(template.New("").Parse(cmd))
-	out, err := r.RunBash(commands.BashScript{
+	out, err := r.RunScript(commands.ScriptFile{
 		Tmp:       tt,
 		GetOutput: true,
 		Data:      struct{}{},

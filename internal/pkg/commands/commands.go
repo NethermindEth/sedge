@@ -42,7 +42,7 @@ type CommandRunner interface {
 
 	RunCMD(cmd Command) (string, error)
 
-	RunBash(script BashScript) (string, error)
+	RunScript(script ScriptFile) (string, error)
 }
 
 var Runner CommandRunner
