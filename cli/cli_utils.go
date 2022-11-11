@@ -23,19 +23,18 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
-	"syscall"
-	"text/template"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/crypto"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/utils"
-	"github.com/NethermindEth/sedge/templates"
 	"github.com/manifoldco/promptui"
 )
 
@@ -78,8 +77,10 @@ func installOrShowInstructions(pending []string) (err error) {
 }
 
 func installDependencies(pending []string) error {
-	if err := utils.HandleInstructions(pending, utils.InstallDependency); err != nil {
-		return fmt.Errorf(configs.InstallingDependenciesError, err)
+	if runtime.GOOS != "windows" { // Windows doesn't support docker installation through scripts
+		if err := utils.HandleInstructions(pending, utils.InstallDependency); err != nil {
+			return fmt.Errorf(configs.InstallingDependenciesError, err)
+		}
 	}
 	return nil
 }
@@ -386,37 +387,17 @@ func RunValidatorOrExit() error {
 func handleJWTSecret() error {
 	log.Info(configs.GeneratingJWTSecret)
 
-	// Create scripts directory if not exists
-	if _, err := os.Stat(generationPath); os.IsNotExist(err) {
-		err = os.MkdirAll(generationPath, 0o755)
-		if err != nil {
-			return err
-		}
-	}
-
-	rawScript, err := templates.Scripts.ReadFile(filepath.Join("scripts", "jwt_secret.sh"))
+	jwtscret, err := crypto.GenerateJWTSecret()
 	if err != nil {
-		return fmt.Errorf(configs.GenerateJWTSecretError, err)
-	}
-
-	tmp, err := template.New("script").Parse(string(rawScript))
-	if err != nil {
-		return fmt.Errorf(configs.GenerateJWTSecretError, err)
-	}
-
-	script := commands.BashScript{
-		Tmp:       tmp,
-		GetOutput: false,
-		Data: map[string]string{
-			"Path": generationPath,
-		},
-	}
-
-	if _, err = commands.Runner.RunBash(script); err != nil {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
 	jwtPath, err = filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+	if err != nil {
+		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	err = os.WriteFile(jwtPath, []byte(jwtscret), os.ModePerm)
 	if err != nil {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
@@ -451,7 +432,7 @@ func feeRecipientPrompt() error {
 func preRunTeku() error {
 	log.Info(configs.PreparingTekuDatadir)
 	// Change umask to avoid OS from changing the permissions
-	syscall.Umask(0)
+	utils.SetUmask(0)
 	for _, s := range *services {
 		if s == "all" || s == consensus {
 			// Prepare consensus datadir
