@@ -12,9 +12,9 @@ do
 	platform_split=(${platform//\// })
 	GOOS=${platform_split[0]}
 	GOARCH=${platform_split[1]}
-	output_name=$package_name'-v'$VERSION'-'$GOOS'-'$GOARCH
+	output_name=$package_name'-'$VERSION'-'$GOOS'-'$GOARCH
 
-  LDFLAGS="-X github.com/NethermindEth/sedge/internal/utils.Version=v${VERSION}"
+  LDFLAGS="-X github.com/NethermindEth/sedge/internal/utils.Version=${VERSION}"
 
   docker buildx build --platform="$GOOS"/"$GOARCH" -t nethermindeth/sedge:"$VERSION"-"$GOOS"-"$GOARCH" --build-arg TARGETOS="$GOOS" --build-arg TARGETARCH="$GOARCH" --build-arg LDFLAGS="$LDFLAGS" --build-arg OUTPUT_NAME="$output_name" --build-arg PACKAGE="$package" --load . -f scripts/Dockerfile
   docker create --name sedge nethermindeth/sedge:"$VERSION"-"$GOOS"-"$GOARCH"

@@ -31,14 +31,14 @@ jobs:
     - uses: actions/upload-artifact@master
       name: Uploading sedge darwin amd64 package
       with:
-        name: sedge-v${{env.VERSION}}-darwin-amd64
-        path: build/sedge-v${{env.VERSION}}-darwin-amd64
+        name: sedge-${{env.VERSION}}-darwin-amd64
+        path: build/sedge-${{env.VERSION}}-darwin-amd64
 
     - uses: actions/upload-artifact@master
       name: Uploading sedge darwin arm64 package
       with:
-        name: sedge-v${{env.VERSION}}-darwin-arm64
-        path: build/sedge-v${{env.VERSION}}-darwin-arm64
+        name: sedge-${{env.VERSION}}-darwin-arm64
+        path: build/sedge-${{env.VERSION}}-darwin-arm64
 
   sedge-linux:
     name: Build sedge linux
@@ -66,14 +66,14 @@ jobs:
     - uses: actions/upload-artifact@master
       name: Uploading sedge linux amd64 package
       with:
-        name: sedge-v${{env.VERSION}}-linux-amd64
-        path: build/sedge-v${{env.VERSION}}-linux-amd64
+        name: sedge-${{env.VERSION}}-linux-amd64
+        path: build/sedge-${{env.VERSION}}-linux-amd64
 
     - uses: actions/upload-artifact@master
       name: Uploading sedge linux arm64 package
       with:
-        name: sedge-v${{env.VERSION}}-linux-arm64
-        path: build/sedge-v${{env.VERSION}}-linux-arm64
+        name: sedge-${{env.VERSION}}-linux-arm64
+        path: build/sedge-${{env.VERSION}}-linux-arm64
 
   update-homebrew:
     name: Update Homebrew package
@@ -104,7 +104,7 @@ jobs:
         token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
         commit-message: Update Homebrew to latest release
         title: '[Release] Update Homebrew'
-        reviewers: falcoxyz, AntiD2ta, cbermudez97
+        reviewers: falcoxyz, AntiD2ta, cbermudez97, stdevMac
         draft: false
         path: homebrew-sedge
         add-paths: |
@@ -128,7 +128,7 @@ jobs:
     - name: Upload release to Github Releases
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "/tmp/binaries/sedge-v*/*"
+        artifacts: "/tmp/binaries/sedge-*/*"
         bodyFile: "CHANGELOG.md"
         draft: true
         tag: ${{ github.event.inputs.tag }}
