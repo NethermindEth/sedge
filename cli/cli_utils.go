@@ -343,12 +343,15 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flag
 	for s := range statuses {
 		log.Infof("Checking status: %v", s)
 		if s.Error.Code != 0 {
+			log.Errorf("Error: %v", s.Error.Message)
 			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
 		}
 
 		if s.Endpoint == executionUrl {
+			log.Infof("Execution synced status: %v", s.Synced)
 			esynced = s.Synced
 		} else if s.Endpoint == consensusUrl {
+			log.Infof("Consensus synced status: %v", s.Synced)
 			csynced = s.Synced
 		}
 
@@ -357,16 +360,20 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flag
 			// Stop tracking after consecutive synced reports
 			if times == 3 {
 				// Stop tracking
+				log.Info("Stopping tracking, nodes synced 3 times")
 				done <- struct{}{}
 				log.Info(configs.NodesSynced)
 				break // statuses channel might still have data before closing done channel
 			}
 		} else {
+			log.Infof("Resetting times, nodes not synced")
 			// Restart threshold
 			times = 0
 		}
+		log.Info("Waiting for next status")
 	}
 
+	log.Info("Stopping monitoring")
 	return nil
 }
 
@@ -411,7 +418,13 @@ func track(monitorUrl string, consensusUrl, executionUrl []string, done chan str
 		for {
 			select {
 			case <-done:
-				c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+				log.Info("Line 414, closing websocket")
+				err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+				if err != nil {
+					log.Error("Line 417, error closing websocket")
+					return
+				}
+				log.Info("Line 420, websocket closed")
 				return
 			default:
 				_, message, err := c.ReadMessage()
@@ -425,6 +438,7 @@ func track(monitorUrl string, consensusUrl, executionUrl []string, done chan str
 					log.Fatal(err)
 					return
 				}
+				log.Debug("Response from monitor received")
 				response <- resp
 			}
 		}
