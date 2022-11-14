@@ -339,7 +339,8 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flag
 
 	var esynced, csynced bool
 	// Threshold to stop tracking, to avoid false responses
-	times := 0
+	eTimes := 0
+	cTimes := 0
 	for s := range statuses {
 		log.Infof("Checking status: %v", s)
 		if s.Error.Code != 0 {
@@ -350,25 +351,27 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flag
 		if s.Endpoint == executionUrl {
 			log.Infof("Execution synced status: %v", s.Synced)
 			esynced = s.Synced
+			if esynced {
+				eTimes++
+			} else {
+				cTimes = 0
+			}
 		} else if s.Endpoint == consensusUrl {
 			log.Infof("Consensus synced status: %v", s.Synced)
 			csynced = s.Synced
+			if csynced {
+				cTimes++
+			} else {
+				cTimes = 0
+			}
 		}
 
-		if esynced && csynced {
-			times++
-			// Stop tracking after consecutive synced reports
-			if times == 3 {
-				// Stop tracking
-				log.Info("Stopping tracking, nodes synced 3 times")
-				done <- struct{}{}
-				log.Info(configs.NodesSynced)
-				break // statuses channel might still have data before closing done channel
-			}
-		} else {
-			log.Infof("Resetting times, nodes not synced")
-			// Restart threshold
-			times = 0
+		if cTimes >= 3 && eTimes >= 3 {
+			// Stop tracking
+			log.Info("Stopping tracking, nodes synced 3 times")
+			done <- struct{}{}
+			log.Info(configs.NodesSynced)
+			break // statuses channel might still have data before closing done channel
 		}
 		log.Info("Waiting for next status")
 	}
