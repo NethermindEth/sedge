@@ -411,7 +411,6 @@ func track(monitorUrl string, consensusUrl, executionUrl []string, done chan boo
 	}
 
 	go func() {
-		defer c.Close()
 		defer close(done)
 		for {
 			_, message, err := c.ReadMessage()
@@ -430,7 +429,7 @@ func track(monitorUrl string, consensusUrl, executionUrl []string, done chan boo
 			response <- resp
 			if ok := <-done; ok {
 				log.Info("Line 414, closing websocket")
-				err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+				err := c.Close()
 				if err != nil {
 					log.Error("Line 417, error closing websocket")
 					return
