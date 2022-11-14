@@ -411,7 +411,6 @@ func track(monitorUrl string, consensusUrl, executionUrl []string, done chan boo
 	}
 
 	go func() {
-		defer close(done)
 		for {
 			_, message, err := c.ReadMessage()
 			if err != nil {
