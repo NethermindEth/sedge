@@ -25,9 +25,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
-	posmonidb "github.com/NethermindEth/posmoni/pkg/eth2/db"
-	posmoninet "github.com/NethermindEth/posmoni/pkg/eth2/networking"
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
@@ -74,27 +71,6 @@ type clientImages struct {
 
 func CliCmd(prompt prompts.Prompt) *cobra.Command {
 	// Initialize monitoring tool
-	initMonitor(func() MonitoringTool {
-		// Initialize Eth2 Monitoring tool
-		moniCfg := posmoni.ConfigOpts{
-			Checkers: []posmoni.CfgChecker{
-				{Key: posmoni.Execution, ErrMsg: posmoni.NoExecutionFoundError, Data: []string{configs.OnPremiseExecutionURL}},
-				{Key: posmoni.Consensus, ErrMsg: posmoni.NoConsensusFoundError, Data: []string{configs.OnPremiseConsensusURL}},
-			},
-		}
-		m, err := posmoni.NewEth2Monitor(
-			posmonidb.EmptyRepository{},
-			&posmoninet.BeaconClient{RetryDuration: time.Minute * 10},
-			&posmoninet.ExecutionClient{RetryDuration: time.Minute * 10},
-			posmoninet.SubscribeOpts{},
-			moniCfg,
-		)
-		if err != nil {
-			log.Fatalf(configs.MonitoringToolInitError, err)
-		}
-
-		return m
-	})
 	var (
 		flags  CliCmdFlags
 		images clientImages
@@ -386,7 +362,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 			// time.Sleep(waitingTime)
 			// Track sync of execution and consensus clients
 			// TODO: Parameterize wait arg of trackSync
-			if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*5, flags); err != nil {
+			if err = trackSync(results.ELPort, results.CLPort, time.Minute*1, flags); err != nil {
 				return []error{err}
 			}
 

@@ -47,12 +47,6 @@ type MonitoringTool interface {
 	TrackSync(done <-chan struct{}, beaconEndpoints, executionEndpoints []string, wait time.Duration) <-chan posmoni.EndpointSyncStatus
 }
 
-var monitor MonitoringTool
-
-func initMonitor(builder func() MonitoringTool) {
-	monitor = builder()
-}
-
 func installOrShowInstructions(pending []string) (err error) {
 	// notest
 	optInstall, optExit := "Install dependencies", "Exit. You will manage this dependencies on your own"
@@ -309,7 +303,7 @@ func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
 	return
 }
 
-func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flags *CliCmdFlags) error {
+func trackSync(elPort, clPort string, wait time.Duration, flags *CliCmdFlags) error {
 	done := make(chan bool)
 	defer close(done)
 
