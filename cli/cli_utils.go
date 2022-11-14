@@ -310,7 +310,7 @@ func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
 }
 
 func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flags *CliCmdFlags) error {
-	done := make(chan struct{})
+	done := make(chan bool)
 	defer close(done)
 
 	log.Info(configs.GettingContainersIP)
@@ -369,10 +369,11 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flag
 		if cTimes >= 3 && eTimes >= 3 {
 			// Stop tracking
 			log.Info("Stopping tracking, nodes synced 3 times")
-			done <- struct{}{}
+			done <- true
 			log.Info(configs.NodesSynced)
 			break // statuses channel might still have data before closing done channel
 		}
+		done <- false
 		log.Info("Waiting for next status")
 	}
 
@@ -392,7 +393,7 @@ type responseStruct struct {
 	Error    networking.Eth1Error
 }
 
-func track(monitorUrl string, consensusUrl, executionUrl []string, done chan struct{}, wait time.Duration, response chan responseStruct) error {
+func track(monitorUrl string, consensusUrl, executionUrl []string, done chan bool, wait time.Duration, response chan responseStruct) error {
 	u := url.URL{Scheme: "ws", Host: monitorUrl, Path: "/trackSync"}
 	log.Debugf("connecting to %s", u.String())
 
@@ -419,8 +420,21 @@ func track(monitorUrl string, consensusUrl, executionUrl []string, done chan str
 		defer c.Close()
 		defer close(done)
 		for {
-			select {
-			case <-done:
+			_, message, err := c.ReadMessage()
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+			var resp responseStruct
+			err = json.Unmarshal(message, &resp)
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+
+			log.Debug("Response from monitor received")
+			response <- resp
+			if ok := <-done; ok {
 				log.Info("Line 414, closing websocket")
 				err := c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 				if err != nil {
@@ -429,20 +443,7 @@ func track(monitorUrl string, consensusUrl, executionUrl []string, done chan str
 				}
 				log.Info("Line 420, websocket closed")
 				return
-			default:
-				_, message, err := c.ReadMessage()
-				if err != nil {
-					log.Fatal(err)
-					return
-				}
-				var resp responseStruct
-				err = json.Unmarshal(message, &resp)
-				if err != nil {
-					log.Fatal(err)
-					return
-				}
-				log.Debug("Response from monitor received")
-				response <- resp
+
 			}
 		}
 	}()
