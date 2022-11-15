@@ -10,6 +10,10 @@
         condition: service_started{{end}}{{if .CcCustomCfg}}
       config_consensus:
         condition: service_completed_successfully{{end}}{{end}}
+    healthcheck:
+      test: "curl -f -X GET http://127.0.0.1:4000/eth/v1/node/health || exit 1"
+      retries: 5
+      start_period: 1m
     networks:
       - sedge
     volumes:
