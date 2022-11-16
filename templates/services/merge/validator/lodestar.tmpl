@@ -28,7 +28,8 @@
         max-file: "10"{{end}}
   validator:
     container_name: validator-client
-    image: ${VL_IMAGE_VERSION}{{if .WithConsensusClient}}
+    image: ${VL_IMAGE_VERSION}
+    restart: unless-stopped{{if .WithConsensusClient}}
     depends_on:
       consensus:
         condition: service_healthy{{end}}

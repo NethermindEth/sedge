@@ -24,6 +24,7 @@
   validator:
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
+    restart: unless-stopped
     depends_on: 
       validator-import:
         condition: service_completed_successfully{{if .WithConsensusClient}}
