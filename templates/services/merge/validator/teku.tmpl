@@ -23,7 +23,9 @@
       validator-import:
         condition: service_completed_successfully{{if .VlCustomCfg}}
       config_consensus:
-        condition: service_completed_successfully{{end}}
+        condition: service_completed_successfully{{end}}{{if .WithConsensusClient}}
+      consensus:
+        condition: service_healthy{{end}}
     networks:
       - sedge
     ports:

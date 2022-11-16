@@ -32,7 +32,9 @@
     image: ${VL_IMAGE_VERSION}
     depends_on: 
       validator-import:
-        condition: service_completed_successfully
+        condition: service_completed_successfully{{if .WithConsensusClient}}
+      consensus:
+        condition: service_healthy{{end}}
     networks:
       - sedge
     ports:

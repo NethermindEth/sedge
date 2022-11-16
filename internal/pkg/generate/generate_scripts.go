@@ -215,6 +215,7 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 	}
 
 	data := DockerComposeData{
+		Services:            gd.Services,
 		TTD:                 TTD,
 		CcCustomCfg:         ccRemoteCfg || ccRemoteGen || ccRemoteDpl,
 		CcRemoteCfg:         ccRemoteCfg,

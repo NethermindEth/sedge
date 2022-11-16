@@ -316,6 +316,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 
 	// Generate docker-compose scripts
 	gd := generate.GenerationData{
+		Services:          *flags.services,
 		ExecutionClient:   combinedClients.Execution,
 		ConsensusClient:   combinedClients.Consensus,
 		ValidatorClient:   combinedClients.Validator,

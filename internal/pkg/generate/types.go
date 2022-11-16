@@ -39,6 +39,7 @@ type EnvData struct {
 
 // GenerationData : Struct Data object for script's generation
 type GenerationData struct {
+	Services          []string
 	ExecutionClient   clients.Client
 	ConsensusClient   clients.Client
 	ValidatorClient   clients.Client
@@ -61,6 +62,7 @@ type GenerationData struct {
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
+	Services            []string
 	TTD                 bool
 	CcCustomCfg         bool
 	CcRemoteCfg         bool
@@ -95,6 +97,15 @@ type DockerComposeData struct {
 	SplittedNetwork     bool
 	ClCheckpointSyncUrl bool
 	LoggingDriver       string
+}
+
+func (d DockerComposeData) WithConsensusClient() bool {
+	for _, service := range d.Services {
+		if service == "consensus" {
+			return true
+		}
+	}
+	return false
 }
 
 // GenerationResults: Struct for storing results of the generation process

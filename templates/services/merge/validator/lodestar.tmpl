@@ -28,7 +28,10 @@
         max-file: "10"{{end}}
   validator:
     container_name: validator-client
-    image: ${VL_IMAGE_VERSION}
+    image: ${VL_IMAGE_VERSION}{{if .WithConsensusClient}}
+    depends_on:
+      consensus:
+        condition: service_healthy{{end}}
     networks:
       - sedge
     ports:
