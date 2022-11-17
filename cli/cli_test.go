@@ -451,8 +451,6 @@ func (ms *monitorStub) TrackSync(done <-chan struct{}, beaconEndpoints, executio
 }
 
 func TestTrackSync(t *testing.T) {
-	t.Parallel()
-
 	tcs := []struct {
 		name    string
 		data    []posmoni.EndpointSyncStatus
@@ -525,7 +523,7 @@ func TestTrackSync(t *testing.T) {
 			true,
 		},
 		{
-			"Test case 7, mixed results",
+			"Test case 7, timeout error",
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
@@ -536,10 +534,10 @@ func TestTrackSync(t *testing.T) {
 			CliCmdFlags{
 				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
-			false,
+			true,
 		},
 		{
-			"Test case 8, mixed results",
+			"Test case 8, timeout error",
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
@@ -553,7 +551,7 @@ func TestTrackSync(t *testing.T) {
 			CliCmdFlags{
 				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
-			false,
+			true,
 		},
 		{
 			"Test case 9, mixed results, error",
@@ -562,7 +560,62 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("error failed")},
+			},
+			CliCmdFlags{
+				generationPath: configs.DefaultDockerComposeScriptsPath,
+			},
+			true,
+		},
+		{
+			"Test case 10, mixed results",
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			CliCmdFlags{
+				generationPath: configs.DefaultDockerComposeScriptsPath,
+			},
+			false,
+		},
+		{
+			"Test case 11, restart counter",
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			},
+			CliCmdFlags{
+				generationPath: configs.DefaultDockerComposeScriptsPath,
+			},
+			false,
+		},
+		{
+			"Test case 11, restart counter error",
+			[]posmoni.EndpointSyncStatus{
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			CliCmdFlags{
 				generationPath: configs.DefaultDockerComposeScriptsPath,
@@ -576,8 +629,15 @@ func TestTrackSync(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			ms := monitorStub{data: tc.data}
 
-			err := trackSync(&ms, "", "", time.Millisecond*100, &tc.flags)
-			utils.CheckErr("trackSync(...) failed", tc.isError, err)
+			err := trackSync(&ms, ipFetcher, "", "", time.Millisecond*100, time.Second*10, &tc.flags)
+			err = utils.CheckErr("trackSync(...) failed", tc.isError, err)
+			if err != nil {
+				t.Fail()
+			}
 		})
 	}
+}
+
+func ipFetcher(service string, flags *CliCmdFlags) (ip string, err error) {
+	return service, nil
 }

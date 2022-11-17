@@ -362,7 +362,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 			// time.Sleep(waitingTime)
 			// Track sync of execution and consensus clients
 			// TODO: Parameterize wait arg of trackSync
-			if err = trackSync(results.ELPort, results.CLPort, time.Minute*1, flags); err != nil {
+			if err = trackSync(monitor, getContainerIP, results.ELPort, results.CLPort, time.Minute*5, 0, flags); err != nil {
 				return []error{err}
 			}
 

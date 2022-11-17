@@ -303,16 +303,18 @@ func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
 	return
 }
 
-func trackSync(elPort, clPort string, wait time.Duration, flags *CliCmdFlags) error {
-	done := make(chan bool)
+type containerIPFetcher func(service string, flags *CliCmdFlags) (ip string, err error)
+
+func trackSync(m MonitoringTool, fetchContainerIP containerIPFetcher, elPort, clPort string, wait, longestTimes time.Duration, flags *CliCmdFlags) error {
+	done := make(chan struct{})
 	defer close(done)
 
 	log.Info(configs.GettingContainersIP)
-	executionIP, errE := getContainerIP(execution, flags)
+	executionIP, errE := fetchContainerIP(execution, flags)
 	if errE != nil {
 		log.Errorf(configs.GetContainerIPError, execution, errE)
 	}
-	consensusIP, errC := getContainerIP(consensus, flags)
+	consensusIP, errC := fetchContainerIP(consensus, flags)
 	if errC != nil {
 		log.Errorf(configs.GetContainerIPError, consensus, errC)
 		if errE != nil {
@@ -321,58 +323,77 @@ func trackSync(elPort, clPort string, wait time.Duration, flags *CliCmdFlags) er
 		}
 	}
 
-	consensusUrl := fmt.Sprintf("http://%s:%s", consensusIP, clPort)
-	executionUrl := fmt.Sprintf("http://%s:%s", executionIP, elPort)
+	separator := ""
+	if clPort != "" || elPort != "" {
+		separator = ":"
+	}
+
+	consensusUrl := fmt.Sprintf("http://%s%s%s", consensusIP, separator, clPort)
+	executionUrl := fmt.Sprintf("http://%s%s%s", executionIP, separator, elPort)
 
 	statuses := make(chan responseStruct)
 	log.Info("Starting tracking tracking")
 	err := track("localhost:12001", []string{consensusUrl}, []string{executionUrl}, done, wait, statuses)
-	if err != nil {
-		return err
-	}
-
-	var esynced, csynced bool
-	// Threshold to stop tracking, to avoid false responses
-	eTimes := 0
-	cTimes := 0
-	for s := range statuses {
-		log.Infof("Checking status: %v", s)
-		if s.Error.Code != 0 {
-			log.Errorf("Error: %v", s.Error.Message)
-			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
-		}
-
-		if s.Endpoint == executionUrl {
-			log.Infof("Execution synced status: %v", s.Synced)
-			esynced = s.Synced
-			if esynced {
-				eTimes++
-			} else {
-				cTimes = 0
-			}
-		} else if s.Endpoint == consensusUrl {
-			log.Infof("Consensus synced status: %v", s.Synced)
-			csynced = s.Synced
-			if csynced {
-				cTimes++
-			} else {
-				cTimes = 0
-			}
-		}
-
-		if cTimes >= 3 && eTimes >= 3 {
-			// Stop tracking
-			log.Info("Stopping tracking, nodes synced 3 times")
-			done <- true
-			log.Info(configs.NodesSynced)
-			break // statuses channel might still have data before closing done channel
-		}
-		done <- false
-		log.Info("Waiting for next status")
-	}
-
-	log.Info("Stopping monitoring")
-	return nil
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//var esynced, csynced bool
+	//// Threshold to stop tracking, to avoid false responses
+	//eTimes := 0
+	//cTimes := 0
+	//for s := range statuses {
+	//
+	//timeout := func() <-chan time.Time {
+	//	if longestTimes == 0 {
+	//		return nil
+	//	}
+	//	return time.After(longestTimes)
+	//}()
+	//
+	//times := 0
+	//for {
+	//	select {
+	//	case <-timeout:
+	//		return errors.New(configs.TrackSyncTimeOut)
+	//	case s := <-statuses:
+	//		log.Infof("Checking status: %v", s)
+	//		if s.Error.Code != 0 {
+	//			log.Errorf("Error: %v", s.Error.Message)
+	//			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
+	//		}
+	//
+	//		if s.Endpoint == executionUrl {
+	//			log.Infof("Execution synced status: %v", s.Synced)
+	//			esynced = s.Synced
+	//			if esynced {
+	//				eTimes++
+	//			} else {
+	//				cTimes = 0
+	//			}
+	//		} else if s.Endpoint == consensusUrl {
+	//			log.Infof("Consensus synced status: %v", s.Synced)
+	//			csynced = s.Synced
+	//			if csynced {
+	//				cTimes++
+	//			} else {
+	//				cTimes = 0
+	//			}
+	//		}
+	//
+	//	if cTimes >= 3 && eTimes >= 3 {
+	//		// Stop tracking
+	//		log.Info("Stopping tracking, nodes synced 3 times")
+	//		done <- true
+	//		log.Info(configs.NodesSynced)
+	//		break // statuses channel might still have data before closing done channel
+	//	}
+	//	done <- false
+	//	log.Info("Waiting for next status")
+	//}
+	//
+	//log.Info("Stopping monitoring")
+	////return nil
 }
 
 type info struct {

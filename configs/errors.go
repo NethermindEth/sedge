@@ -53,6 +53,7 @@ const (
 	DistroInfoError                   = "failed to get linux distribution info. Error: %v"
 	MonitoringToolInitError           = "monitoring tool initialization failed. Error: %v"
 	TrackSyncError                    = "endpoint %s returned an error. Error: %v"
+	TrackSyncTimeOut                  = "reached timeout for TrackSync"
 	RunClientsError                   = "provided values %v for run-clients are incorrect. Possible correct values are %v"
 	EmptyClientMapError               = "is not possible to select a random element from an empty collection"
 	NoSupportedClientsError           = "collection of clients given for random choice doesn't have any supported client. Check the target network (flag --network). Use 'clients' command to see the list of supported clients for every supported network"
