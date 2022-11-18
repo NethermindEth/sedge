@@ -103,4 +103,5 @@ type GenerationResults struct {
 	EnvFilePath       string
 	ELPort            string
 	CLPort            string
+	MonitorPort       string
 }

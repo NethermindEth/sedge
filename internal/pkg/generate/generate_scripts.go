@@ -68,6 +68,7 @@ func GenerateScripts(gd GenerationData) (result GenerationResults, err error) {
 		"CLAdditionalApi": configs.DefaultAdditionalApiPortCL,
 		"VLMetrics":       configs.DefaultMetricsPortVL,
 		"MevPort":         configs.DefaultMevPort,
+		"MonitorPort":     configs.DefaultMonitorPort,
 	}
 	ports, err := utils.AssingPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -93,6 +94,7 @@ func GenerateScripts(gd GenerationData) (result GenerationResults, err error) {
 	return GenerationResults{
 		ELPort:            ports["ELApi"],
 		CLPort:            ports["CLApi"],
+		MonitorPort:       ports["MonitorPort"],
 		EnvFilePath:       envFilePath,
 		DockerComposePath: dockerComposePath,
 	}, nil

@@ -331,13 +331,13 @@ func trackSync(monitor MonitoringTool, fetchContainerIP containerIPFetcher, elPo
 	executionUrl := fmt.Sprintf("http://%s%s%s", executionIP, separator, elPort)
 
 	statuses := make(chan responseStruct)
-	log.Info("Starting tracking tracking")
+	log.Info("Starting tracking")
 	err := monitor.Track(done, []string{consensusUrl}, []string{executionUrl}, wait, statuses)
 	if err != nil {
 		return err
 	}
 
-	var esynced, csynced bool
+	var eSynced, cSynced bool
 	// Threshold to stop tracking, to avoid false responses
 	eTimes := 0
 	cTimes := 0
@@ -360,16 +360,16 @@ func trackSync(monitor MonitoringTool, fetchContainerIP containerIPFetcher, elPo
 
 			if s.Endpoint == executionUrl {
 				log.Infof("Execution synced status: %v", s.Synced)
-				esynced = s.Synced
-				if esynced {
+				eSynced = s.Synced
+				if eSynced {
 					eTimes++
 				} else {
 					eTimes = 0
 				}
 			} else if s.Endpoint == consensusUrl {
 				log.Infof("Consensus synced status: %v", s.Synced)
-				csynced = s.Synced
-				if csynced {
+				cSynced = s.Synced
+				if cSynced {
 					cTimes++
 				} else {
 					cTimes = 0
