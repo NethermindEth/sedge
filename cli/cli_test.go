@@ -17,15 +17,14 @@ package cli
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
+	"github.com/NethermindEth/posmoni/pkg/eth2/networking"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
-	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/utils"
@@ -175,9 +174,6 @@ func prepareCliCmd(tc cliCmdTestCase) {
 	commands.InitRunner(func() commands.CommandRunner {
 		return tc.runner
 	})
-	initMonitor(func() MonitoringTool {
-		return tc.monitor
-	})
 }
 
 func buildCliTestCase(
@@ -228,7 +224,7 @@ func buildCliTestCase(
 	}
 
 	tc.monitor = &monitorStub{
-		data: []posmoni.EndpointSyncStatus{
+		data: []responseStruct{
 			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
 			{Endpoint: inspectConsensusUrl + ":" + ports["CLApi"], Synced: true},
 			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
@@ -418,49 +414,50 @@ func TestCliCmd(t *testing.T) {
 	}
 }
 
+// AQUIIIIII
 // Stub for MonitoringTool interface
 type monitorStub struct {
-	data  []posmoni.EndpointSyncStatus
-	calls int
+	data []responseStruct
 }
 
-func (ms *monitorStub) TrackSync(done <-chan struct{}, beaconEndpoints, executionEndpoints []string, wait time.Duration) <-chan posmoni.EndpointSyncStatus {
-	ms.calls++
-	c := make(chan posmoni.EndpointSyncStatus, len(ms.data))
+//Track(done chan bool, consensusUrl, executionUrl []string, wait time.Duration, response chan responseStruct) error
+func (ms *monitorStub) Track(done chan bool, beaconEndpoints, executionEndpoints []string, wait time.Duration, response chan responseStruct) error {
 	var w time.Duration
 
 	go func() {
-		for {
+		iterator := 0
+		for iterator < len(ms.data) {
 			select {
-			case <-done:
-				close(c)
-				return
 			case <-time.After(w):
 				if w == 0 {
 					// Don't wait the first time
 					w = wait
 				}
-				for _, d := range ms.data {
-					c <- d
-				}
+				response <- ms.data[iterator]
+				iterator++
+				<-done
 			}
 		}
+
 	}()
 
-	return c
+	return nil
 }
 
 func TestTrackSync(t *testing.T) {
 	tcs := []struct {
 		name    string
-		data    []posmoni.EndpointSyncStatus
+		data    []responseStruct
 		flags   CliCmdFlags
 		isError bool
 	}{
 		{
 			"Test case 1, execution client got an error",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
+			[]responseStruct{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: networking.Eth1Error{
+					Code:    100,
+					Message: "Error",
+				}},
 			},
 			CliCmdFlags{
 				generationPath: configs.DefaultDockerComposeScriptsPath,
@@ -469,8 +466,11 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 2, execution client got an error, consensus client not synced",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
+			[]responseStruct{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: networking.Eth1Error{
+					Code:    100,
+					Message: "Error",
+				}},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 			},
 			CliCmdFlags{
@@ -480,8 +480,11 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 3, execution client got an error, consensus client synced",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
+			[]responseStruct{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: networking.Eth1Error{
+					Code:    100,
+					Message: "Error",
+				}},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			CliCmdFlags{
@@ -491,8 +494,11 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 4, bad execution client response, good consensus client response",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true, Error: errors.New("")},
+			[]responseStruct{
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true, Error: networking.Eth1Error{
+					Code:    100,
+					Message: "Error",
+				}},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			CliCmdFlags{
@@ -502,8 +508,11 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 5, consensus client got an error, consensus client not synced",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
+			[]responseStruct{
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: networking.Eth1Error{
+					Code:    100,
+					Message: "Error",
+				}},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
 			},
 			CliCmdFlags{
@@ -513,8 +522,11 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 6, consensus client got an error, consensus client synced",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
+			[]responseStruct{
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: networking.Eth1Error{
+					Code:    100,
+					Message: "Error",
+				}},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 			},
 			CliCmdFlags{
@@ -524,7 +536,7 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 7, timeout error",
-			[]posmoni.EndpointSyncStatus{
+			[]responseStruct{
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
@@ -538,7 +550,7 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 8, timeout error",
-			[]posmoni.EndpointSyncStatus{
+			[]responseStruct{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
@@ -555,12 +567,19 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 9, mixed results, error",
-			[]posmoni.EndpointSyncStatus{
+			[]responseStruct{
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("error failed")},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: networking.Eth1Error{
+					Code:    100,
+					Message: "Error",
+				}},
+				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: networking.Eth1Error{
+					Code:    100,
+					Message: "Error",
+				}},
 			},
 			CliCmdFlags{
 				generationPath: configs.DefaultDockerComposeScriptsPath,
@@ -569,7 +588,7 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 10, mixed results",
-			[]posmoni.EndpointSyncStatus{
+			[]responseStruct{
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
@@ -588,12 +607,13 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 11, restart counter",
-			[]posmoni.EndpointSyncStatus{
+			[]responseStruct{
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
@@ -606,8 +626,8 @@ func TestTrackSync(t *testing.T) {
 			false,
 		},
 		{
-			"Test case 11, restart counter error",
-			[]posmoni.EndpointSyncStatus{
+			"Test case 12, restart counter error",
+			[]responseStruct{
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
@@ -629,7 +649,7 @@ func TestTrackSync(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			ms := monitorStub{data: tc.data}
 
-			err := trackSync(&ms, ipFetcher, "", "", time.Millisecond*100, time.Second*10, &tc.flags)
+			err := trackSync(&ms, ipFetcher, "", "", time.Millisecond*100, time.Second*30, &tc.flags)
 			err = utils.CheckErr("trackSync(...) failed", tc.isError, err)
 			if err != nil {
 				t.Fail()

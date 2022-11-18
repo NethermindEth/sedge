@@ -16,35 +16,34 @@ limitations under the License.
 package cli
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/NethermindEth/posmoni/pkg/eth2/networking"
-	"github.com/gorilla/websocket"
-	"io"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
-	"text/template"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 
-	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
+	"bytes"
+	"encoding/json"
+	"github.com/NethermindEth/posmoni/pkg/eth2/networking"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/templates"
+	"github.com/gorilla/websocket"
 	"github.com/manifoldco/promptui"
+	"io"
+	"net/url"
+	"syscall"
+	"text/template"
 )
 
 // Interface for Posmoni Eth2 monitor
 type MonitoringTool interface {
-	TrackSync(done <-chan struct{}, beaconEndpoints, executionEndpoints []string, wait time.Duration) <-chan posmoni.EndpointSyncStatus
+	Track(done chan bool, consensusUrl, executionUrl []string, wait time.Duration, response chan responseStruct) error
 }
 
 func installOrShowInstructions(pending []string) (err error) {
@@ -305,8 +304,8 @@ func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
 
 type containerIPFetcher func(service string, flags *CliCmdFlags) (ip string, err error)
 
-func trackSync(m MonitoringTool, fetchContainerIP containerIPFetcher, elPort, clPort string, wait, longestTimes time.Duration, flags *CliCmdFlags) error {
-	done := make(chan struct{})
+func trackSync(monitor MonitoringTool, fetchContainerIP containerIPFetcher, elPort, clPort string, wait, longestTimes time.Duration, flags *CliCmdFlags) error {
+	done := make(chan bool)
 	defer close(done)
 
 	log.Info(configs.GettingContainersIP)
@@ -333,67 +332,61 @@ func trackSync(m MonitoringTool, fetchContainerIP containerIPFetcher, elPort, cl
 
 	statuses := make(chan responseStruct)
 	log.Info("Starting tracking tracking")
-	err := track("localhost:12001", []string{consensusUrl}, []string{executionUrl}, done, wait, statuses)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//var esynced, csynced bool
-	//// Threshold to stop tracking, to avoid false responses
-	//eTimes := 0
-	//cTimes := 0
-	//for s := range statuses {
-	//
-	//timeout := func() <-chan time.Time {
-	//	if longestTimes == 0 {
-	//		return nil
-	//	}
-	//	return time.After(longestTimes)
-	//}()
-	//
-	//times := 0
-	//for {
-	//	select {
-	//	case <-timeout:
-	//		return errors.New(configs.TrackSyncTimeOut)
-	//	case s := <-statuses:
-	//		log.Infof("Checking status: %v", s)
-	//		if s.Error.Code != 0 {
-	//			log.Errorf("Error: %v", s.Error.Message)
-	//			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
-	//		}
-	//
-	//		if s.Endpoint == executionUrl {
-	//			log.Infof("Execution synced status: %v", s.Synced)
-	//			esynced = s.Synced
-	//			if esynced {
-	//				eTimes++
-	//			} else {
-	//				cTimes = 0
-	//			}
-	//		} else if s.Endpoint == consensusUrl {
-	//			log.Infof("Consensus synced status: %v", s.Synced)
-	//			csynced = s.Synced
-	//			if csynced {
-	//				cTimes++
-	//			} else {
-	//				cTimes = 0
-	//			}
-	//		}
-	//
-	//	if cTimes >= 3 && eTimes >= 3 {
-	//		// Stop tracking
-	//		log.Info("Stopping tracking, nodes synced 3 times")
-	//		done <- true
-	//		log.Info(configs.NodesSynced)
-	//		break // statuses channel might still have data before closing done channel
-	//	}
-	//	done <- false
-	//	log.Info("Waiting for next status")
-	//}
-	//
-	//log.Info("Stopping monitoring")
-	////return nil
+	err := monitor.Track(done, []string{consensusUrl}, []string{executionUrl}, wait, statuses)
+	if err != nil {
+		return err
+	}
+
+	var esynced, csynced bool
+	// Threshold to stop tracking, to avoid false responses
+	eTimes := 0
+	cTimes := 0
+	timeout := func() <-chan time.Time {
+		if longestTimes == 0 {
+			return nil
+		}
+		return time.After(longestTimes)
+	}()
+	for {
+		select {
+		case <-timeout:
+			return errors.New(configs.TrackSyncTimeOut)
+		case s := <-statuses:
+			log.Infof("Checking status: %v", s)
+			if s.Error.Code != 0 {
+				log.Errorf("Error: %v", s.Error.Message)
+				return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
+			}
+
+			if s.Endpoint == executionUrl {
+				log.Infof("Execution synced status: %v", s.Synced)
+				esynced = s.Synced
+				if esynced {
+					eTimes++
+				} else {
+					eTimes = 0
+				}
+			} else if s.Endpoint == consensusUrl {
+				log.Infof("Consensus synced status: %v", s.Synced)
+				csynced = s.Synced
+				if csynced {
+					cTimes++
+				} else {
+					cTimes = 0
+				}
+			}
+
+			if cTimes >= 3 && eTimes >= 3 {
+				// Stop tracking
+				log.Info("Stopping tracking, nodes synced 3 times")
+				done <- true
+				log.Info(configs.NodesSynced)
+				return nil
+			}
+			done <- false
+			log.Info("Waiting for next status")
+		}
+	}
 }
 
 type info struct {
@@ -406,62 +399,6 @@ type responseStruct struct {
 	Endpoint string
 	Synced   bool
 	Error    networking.Eth1Error
-}
-
-func track(monitorUrl string, consensusUrl, executionUrl []string, done chan bool, wait time.Duration, response chan responseStruct) error {
-	u := url.URL{Scheme: "ws", Host: monitorUrl, Path: "/trackSync"}
-	log.Debugf("connecting to %s", u.String())
-
-	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
-	if err != nil {
-		return err
-	}
-
-	requestInfo := info{
-		ConsensusUrls: consensusUrl,
-		ExecutionUrls: executionUrl,
-		Wait:          wait,
-	}
-	val, err := json.Marshal(requestInfo)
-	if err != nil {
-		return err
-	}
-	err = c.WriteMessage(websocket.TextMessage, val)
-	if err != nil {
-		return err
-	}
-
-	go func() {
-		for {
-			_, message, err := c.ReadMessage()
-			if err != nil {
-				log.Fatal(err)
-				return
-			}
-			var resp responseStruct
-			err = json.Unmarshal(message, &resp)
-			if err != nil {
-				log.Fatal(err)
-				return
-			}
-
-			log.Debug("Response from monitor received")
-			response <- resp
-			if ok := <-done; ok {
-				log.Info("Line 414, closing websocket")
-				err := c.Close()
-				if err != nil {
-					log.Error("Line 417, error closing websocket")
-					return
-				}
-				log.Info("Line 420, websocket closed")
-				return
-
-			}
-		}
-	}()
-
-	return nil
 }
 
 func RunValidatorOrExit(flags *CliCmdFlags) error {
@@ -554,5 +491,63 @@ func preRunTeku(flags *CliCmdFlags) error {
 			}
 		}
 	}
+	return nil
+}
+
+type monitorTracker struct {
+	monitorUrl string
+}
+
+func NewMonitorTracker(monitorUrl string) *monitorTracker {
+	return &monitorTracker{monitorUrl: monitorUrl}
+}
+
+func (m *monitorTracker) Track(done chan bool, consensusUrl, executionUrl []string, wait time.Duration, response chan responseStruct) error {
+	u := url.URL{Scheme: "ws", Host: m.monitorUrl, Path: "/trackSync"}
+	log.Debugf("connecting to %s", u.String())
+
+	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+
+	requestInfo := info{
+		ConsensusUrls: consensusUrl,
+		ExecutionUrls: executionUrl,
+		Wait:          wait,
+	}
+	val, err := json.Marshal(requestInfo)
+	if err != nil {
+		return err
+	}
+	err = c.WriteMessage(websocket.TextMessage, val)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		for {
+			_, message, err := c.ReadMessage()
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+			var resp responseStruct
+			err = json.Unmarshal(message, &resp)
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+
+			response <- resp
+			if ok := <-done; ok {
+				log.Info("Closing monitor connection")
+				return
+
+			}
+		}
+	}()
+
 	return nil
 }

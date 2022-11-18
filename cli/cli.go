@@ -357,6 +357,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 
 		// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service in the previous step
 		if !utils.Contains(*flags.services, validator) {
+			monitor := NewMonitorTracker("localhost:12001")
 			// Wait for clients to start
 			// log.Info(configs.WaitingForNodesToStart)
 			// time.Sleep(waitingTime)
