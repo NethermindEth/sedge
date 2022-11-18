@@ -359,9 +359,11 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 
 		// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service in the previous step
 		if !utils.Contains(*flags.services, validator) {
-			monitor := NewMonitorTracker("localhost:" + results.MonitorPort)
+			if monitor == nil {
+				monitor = NewMonitorTracker("localhost:" + results.MonitorPort)
+			}
 			// Track sync of execution and consensus clients
-			if err = trackSync(monitor, getContainerIP, results.ELPort, results.CLPort, time.Minute*time.Duration(flags.trackSyncWait), 0, flags); err != nil {
+			if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*time.Duration(flags.trackSyncWait), 0, flags); err != nil {
 				return []error{err}
 			}
 

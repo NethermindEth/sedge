@@ -46,6 +46,12 @@ type MonitoringTool interface {
 	Track(done chan bool, consensusUrl, executionUrl []string, wait time.Duration, response chan responseStruct) error
 }
 
+type containerIPFetcher func(service string, flags *CliCmdFlags) (ip string, err error)
+
+var ContainerIPFetcher containerIPFetcher = getContainerIP
+
+var monitor MonitoringTool
+
 func installOrShowInstructions(pending []string) (err error) {
 	// notest
 	optInstall, optExit := "Install dependencies", "Exit. You will manage this dependencies on your own"
@@ -302,18 +308,16 @@ func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
 	return
 }
 
-type containerIPFetcher func(service string, flags *CliCmdFlags) (ip string, err error)
-
-func trackSync(monitor MonitoringTool, fetchContainerIP containerIPFetcher, elPort, clPort string, wait, longestTimes time.Duration, flags *CliCmdFlags) error {
+func trackSync(monitor MonitoringTool, elPort, clPort string, wait, longestTimes time.Duration, flags *CliCmdFlags) error {
 	done := make(chan bool)
 	defer close(done)
 
 	log.Info(configs.GettingContainersIP)
-	executionIP, errE := fetchContainerIP(execution, flags)
+	executionIP, errE := ContainerIPFetcher(execution, flags)
 	if errE != nil {
 		log.Errorf(configs.GetContainerIPError, execution, errE)
 	}
-	consensusIP, errC := fetchContainerIP(consensus, flags)
+	consensusIP, errC := ContainerIPFetcher(consensus, flags)
 	if errC != nil {
 		log.Errorf(configs.GetContainerIPError, consensus, errC)
 		if errE != nil {

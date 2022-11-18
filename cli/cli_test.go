@@ -21,6 +21,7 @@ import (
 	"github.com/NethermindEth/posmoni/pkg/eth2/networking"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -158,6 +159,7 @@ func (flags *CliCmdFlags) argsList() []string {
 	if flags.generationPath != "" {
 		s = append(s, "-p", flags.generationPath)
 	}
+	s = append(s, "--track-sync-wait", strconv.FormatInt(int64(flags.trackSyncWait), 10))
 	return s
 }
 
@@ -223,8 +225,12 @@ func buildCliTestCase(
 		t.Fatalf(configs.PortOccupationError, err)
 	}
 
-	tc.monitor = &monitorStub{
+	monitor = &monitorStub{
 		data: []responseStruct{
+			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
+			{Endpoint: inspectConsensusUrl + ":" + ports["CLApi"], Synced: true},
+			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
+			{Endpoint: inspectConsensusUrl + ":" + ports["CLApi"], Synced: true},
 			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
 			{Endpoint: inspectConsensusUrl + ":" + ports["CLApi"], Synced: true},
 			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
@@ -232,6 +238,7 @@ func buildCliTestCase(
 		},
 	}
 
+	args.trackSyncWait = 0
 	tc.name = name
 	tc.args = args
 	tc.args.generationPath = dcPath
@@ -414,7 +421,6 @@ func TestCliCmd(t *testing.T) {
 	}
 }
 
-// AQUIIIIII
 // Stub for MonitoringTool interface
 type monitorStub struct {
 	data []responseStruct
@@ -648,8 +654,8 @@ func TestTrackSync(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			ms := monitorStub{data: tc.data}
-
-			err := trackSync(&ms, ipFetcher, "", "", time.Millisecond*100, time.Second*30, &tc.flags)
+			ContainerIPFetcher = ipFetcherStub
+			err := trackSync(&ms, "", "", time.Millisecond*100, time.Second*30, &tc.flags)
 			err = utils.CheckErr("trackSync(...) failed", tc.isError, err)
 			if err != nil {
 				t.Fail()
@@ -658,6 +664,6 @@ func TestTrackSync(t *testing.T) {
 	}
 }
 
-func ipFetcher(service string, flags *CliCmdFlags) (ip string, err error) {
+func ipFetcherStub(service string, flags *CliCmdFlags) (ip string, err error) {
 	return service, nil
 }
