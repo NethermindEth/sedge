@@ -1,0 +1,59 @@
+---
+sidebar_position: 2
+id: goerli
+---
+
+# Goerli
+
+Goerli is an Ethereum test network that allows for blockchain development testing before deployment on Mainnet, the
+main Ethereum network. The Proof-of-Authority test network was established in March 2019. It uses the Clique consensus
+mechanism and was originally proposed by Chainsafe and Afri Schoedon.
+
+## Supported Consensus Clients
+- [Lighthouse](https://lighthouse-book.sigmaprime.io/)
+- [Lodestar](https://chainsafe.github.io/lodestar/)
+- [Prysm](https://docs.prylabs.network/docs/getting-started/)
+- [Teku](https://docs.teku.consensys.net/en/latest/)
+
+### MEV-Boost
+
+We support [mev-boost](https://github.com/flashbots/mev-boost) on mainnet by default, in case you want to remove it,
+run `sedge cli` using the `--no-mev-boost` flag, for example:
+
+```
+sedge cli --no-mev-boost=true
+```
+
+## Supported Execution Clients
+- [Nethermind](https://docs.nethermind.io/)
+- [Geth](https://geth.ethereum.org/docs/)
+
+## Supported Validator Clients
+- [Lighthouse](https://lighthouse-book.sigmaprime.io/)
+- [Lodestar](https://chainsafe.github.io/lodestar/)
+- [Prysm](https://docs.prylabs.network/docs/getting-started/)
+- [Teku](https://docs.teku.consensys.net/en/latest/)
+
+## Running a Full Node
+
+For running a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge cli`. For example:
+
+```bash
+sedge cli --no-validator --network=goerli
+```
+
+## Running a Validator
+
+For running a validator with random clients, you need to omit the `--no-validator` flag. For example:
+
+```bash
+sedge cli --network=goerli
+```
+
+## Create keystore for validator
+
+To create a keystore for a validator, you need to run the following command:
+
+```bash
+sedge keys --network goerli
+```

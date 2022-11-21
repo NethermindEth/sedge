@@ -1,0 +1,65 @@
+---
+sidebar_position: 1
+id: mainnet
+---
+
+# Mainnet
+
+Mainnet is the public and decentralized network of Ethereum. It is the network that all validators participate in to
+earn staking rewards and is the network that all users interact with to send transactions and store state. Mainnet is
+secured by the Proof-of-Stake (PoS) algorithm.
+
+## Supported Consensus Clients
+- [Lighthouse](https://lighthouse-book.sigmaprime.io/)
+- [Lodestar](https://chainsafe.github.io/lodestar/)
+- [Prysm](https://docs.prylabs.network/docs/getting-started/)
+- [Teku](https://docs.teku.consensys.net/en/latest/)
+
+### MEV-Boost
+
+We support [mev-boost](https://github.com/flashbots/mev-boost) on mainnet by default, in case you want to remove it,
+run `sedge cli` using the `--no-mev-boost` flag, for example:
+
+```
+sedge cli --no-mev-boost=true
+```
+
+## Supported Execution Clients
+- [Nethermind](https://docs.nethermind.io/)
+- [Geth](https://geth.ethereum.org/docs/)
+
+## Supported Validator Clients
+- [Lighthouse](https://lighthouse-book.sigmaprime.io/)
+- [Lodestar](https://chainsafe.github.io/lodestar/)
+- [Prysm](https://docs.prylabs.network/docs/getting-started/)
+- [Teku](https://docs.teku.consensys.net/en/latest/)
+
+## Running a Full Node
+
+For running a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge cli`. For example:
+
+```bash
+sedge cli --no-validator
+```
+
+:::info
+
+Sedge uses Mainnet as default network, so you don't have to specify.
+
+:::
+
+## Running a Validator
+
+For running a validator with random clients, you need to omit the `--no-validator` flag. For example:
+
+```bash
+sedge cli
+```
+
+## Create keystore for validator
+
+To create a keystore for a validator, you need to run the following command:
+
+```bash
+sedge keys
+```
