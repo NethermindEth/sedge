@@ -126,3 +126,9 @@ type EchoToFileOptions struct {
 	// Content : content to be written to file
 	Content string
 }
+
+// OpenTextEditorOptions represents options to open file in a text editor
+type OpenTextEditorOptions struct {
+	// FilePath path to the file to open
+	FilePath string
+}

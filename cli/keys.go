@@ -17,12 +17,14 @@ package cli
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
-	"github.com/manifoldco/promptui"
 	eth2 "github.com/protolambda/zrnt/eth2/configs"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -103,13 +105,9 @@ func KeysCmd(prompt prompts.Prompt) *cobra.Command {
 					log.Fatal(err)
 				}
 				mnemonic = candidate
-				// TODO: improve prompts for the generated mnemonic. This should confirm user have copied the mnemonic by asking to input it again.
-				// TODO: clean screen after the generated mnemonic is printed.
-				fmt.Fprintf(cmd.OutOrStdout(), "Mnemonic:\n\n%s\n\n", mnemonic)
-				prompt := promptui.Prompt{
-					Label: configs.StoreMnemonic,
+				if err := saveMnemonic(mnemonic); err != nil {
+					log.Fatal(err)
 				}
-				prompt.Run()
 			}
 
 			// Get indexes
@@ -163,4 +161,23 @@ func KeysCmd(prompt prompts.Prompt) *cobra.Command {
 	cmd.Flags().BoolVar(&flags.randomPassphrase, "random-passphrase", false, "Usa a randomly generated passphrase to encrypt keystores.")
 	cmd.Flags().BoolVarP(&flags.install, "install", "i", false, "Install dependencies if not installed without asking")
 	return cmd
+}
+
+func saveMnemonic(mnemonic string) error {
+	file, err := ioutil.TempFile(os.TempDir(), "sedge_mnemonic")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(file.Name())
+	if _, err := file.WriteString(fmt.Sprintf("Mnemonic:\n\n%s\n\n", mnemonic)); err != nil {
+		return fmt.Errorf("error writing mnemonic to tempfile: %v", err)
+	}
+	if err := file.Sync(); err != nil {
+		return fmt.Errorf("error writing mnemonic to tempfile: %v", err)
+	}
+	openTextEditorCmd := commands.Runner.BuildOpenTextEditor(commands.OpenTextEditorOptions{
+		FilePath: file.Name(),
+	})
+	_, err = commands.Runner.RunCMD(openTextEditorCmd)
+	return err
 }
