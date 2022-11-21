@@ -20,18 +20,10 @@ package commands
 
 import (
 	"bytes"
-	"fmt"
-	"io"
 	"os"
 	"os/exec"
-	"os/signal"
 	"strings"
 	"sync"
-	"syscall"
-
-	"github.com/NethermindEth/sedge/configs"
-	log "github.com/sirupsen/logrus"
-	"golang.org/x/term"
 )
 
 /*
