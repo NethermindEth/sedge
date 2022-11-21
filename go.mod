@@ -22,7 +22,6 @@ require (
 	github.com/wealdtech/go-eth2-types/v2 v2.7.0
 	github.com/wealdtech/go-eth2-util v1.7.0
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
-	golang.org/x/term v0.0.0-20220919170432-7a66f970e087
 	gopkg.in/yaml.v2 v2.4.0
 )
 
