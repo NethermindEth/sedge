@@ -50,7 +50,7 @@ The output of the command.
 b. error
 Error if any
 */
-func runCmd(cmd string, getOutput) (out string, err error) {
+func runCmd(cmd string, getOutput bool) (out string, err error) {
 	r := strings.ReplaceAll(cmd, "\n", "")
 	spl := strings.Split(r, " ")
 	c, args := spl[0], spl[1:]
