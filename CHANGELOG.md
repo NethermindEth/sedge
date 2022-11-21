@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed wrong fork version in Gnosis network config
+
 ## [v0.4.0] - 2022-10-25
 
 ### Added
