@@ -131,11 +131,11 @@ func (cr *WindowsCMDRunner) BuildEchoToFileCMD(options EchoToFileOptions) Comman
 func (cr *WindowsCMDRunner) RunCMD(cmd Command) (string, error) {
 	var out string
 	r := strings.ReplaceAll(cmd.Cmd, "\n", "")
-	args := strings.Split(r, " ")
 
-	exc := exec.Command(cr.terminal, args...)
+	exc := exec.Command(cr.terminal, r)
 
 	var combinedOut bytes.Buffer
+	exc.Stdin = os.Stdin
 	if cmd.GetOutput {
 		exc.Stdout = &combinedOut
 		exc.Stderr = &combinedOut
