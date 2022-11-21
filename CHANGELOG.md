@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Windows Support.
+
+### Changed
+
+- Completely replace keystore generation mechanism for Ethereum mainnet.
+
 ## [v0.4.0] - 2022-10-25
 
 ### Added
