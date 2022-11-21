@@ -29,20 +29,15 @@ func TestRunCmd(t *testing.T) {
 		isErr     bool
 	}{
 		{
-			cmd:       "echo hello world",
+			cmd:       "echo 'hello world'",
 			getOutput: true,
 			output:    "hello world\n",
 			isErr:     false,
 		},
 		{
-			cmd:       "echo hello world",
+			cmd:       "wr0n6",
 			getOutput: true,
-			output:    "hello world\n",
 			isErr:     true,
-		},
-		{
-			cmd:   "wr0n6",
-			isErr: true,
 		},
 	}
 
@@ -77,14 +72,15 @@ func TestRunBashScript(t *testing.T) {
 		isErr     bool
 	}{
 		{
-			cmd:       "echo hello world",
+			cmd:       "echo 'hello world'",
 			getOutput: true,
 			output:    "hello world\n",
 			isErr:     false,
 		},
 		{
-			cmd:   "wr0n6",
-			isErr: true,
+			cmd:       "wr0n6",
+			getOutput: true,
+			isErr:     true,
 		},
 	}
 

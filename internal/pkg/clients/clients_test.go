@@ -38,7 +38,6 @@ func TestSupportedClients(t *testing.T) {
 		{"consensus", "mainnet", false},
 		{"validator", "mainnet", false},
 		{"random", "mainnet", true},
-		{"", "mainnet", false}, // This must fail at validation
 	}
 
 	for _, input := range inputs {

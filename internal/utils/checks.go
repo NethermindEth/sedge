@@ -81,7 +81,7 @@ func PreCheck(cmdRunner commands.CommandRunner, generationPath string) error {
 	}
 
 	// Check if docker-compose script was generated
-	file := generationPath + "/" + configs.DefaultDockerComposeScriptName
+	file := filepath.Join(generationPath, configs.DefaultDockerComposeScriptName)
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		log.Errorf(configs.OpeningFileError, file, err)
 		return fmt.Errorf(configs.DockerComposeScriptNotFoundError, generationPath, configs.DefaultDockerComposeScriptsPath)

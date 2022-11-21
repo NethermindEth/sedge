@@ -151,6 +151,7 @@ func (cr *WindowsCMDRunner) RunCMD(cmd Command) (string, error) {
 	err := exc.Wait()
 	if cmd.GetOutput {
 		out = combinedOut.String()
+		out = strings.ReplaceAll(out, "\r", "") // Remove windows \r character
 	}
 
 	return out, err
@@ -159,6 +160,7 @@ func (cr *WindowsCMDRunner) RunCMD(cmd Command) (string, error) {
 func (cr *WindowsCMDRunner) RunScript(script ScriptFile) (string, error) {
 	var out string
 	var scriptBuffer, combinedOut bytes.Buffer
+	scriptBuffer.WriteString("$ErrorActionPreference = \"Stop\"\n") // Force powershell to stop on errors
 	if err := script.Tmp.Execute(&scriptBuffer, script.Data); err != nil {
 		return out, err
 	}
@@ -169,12 +171,12 @@ func (cr *WindowsCMDRunner) RunScript(script ScriptFile) (string, error) {
 		return out, err
 	}
 
-	tempBat := filepath.Join(tempFileDir, "temp.ps1")
-	if err := os.WriteFile(tempBat, rawScript, os.ModePerm); err != nil {
+	tempScript := filepath.Join(tempFileDir, "temp.ps1")
+	if err := os.WriteFile(tempScript, rawScript, os.ModePerm); err != nil {
 		return out, err
 	}
 
-	cmd := exec.Command(cr.terminal, tempBat)
+	cmd := exec.Command(cr.terminal, tempScript)
 
 	// Prepare pipes for stdin, stdout and stderr
 	stdin, err := cmd.StdinPipe()
