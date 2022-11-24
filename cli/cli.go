@@ -61,7 +61,7 @@ type CliCmdFlags struct {
 	clExtraFlags      *[]string
 	vlExtraFlags      *[]string
 	logging           string
-	trackSyncWait     int
+	trackSyncWait     int64
 }
 
 type clientImages struct {
@@ -122,7 +122,7 @@ func CliCmd(prompt prompts.Prompt) *cobra.Command {
 	cmd.Flags().BoolVar(&flags.noValidator, "no-validator", false, "Exclude the validator from the full node setup. Designed for execution and consensus nodes setup without a validator node. Exclude also the validator from other flags. If set, mev-boost will not be used.")
 	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 	cmd.Flags().StringVar(&flags.graffiti, "graffiti", "", "Graffiti to be used by the validator")
-	cmd.Flags().IntVar(&flags.trackSyncWait, "track-sync-wait", 5, "Time that we are going to wait before check if execution and consensus nodes are synced")
+	cmd.Flags().Int64Var(&flags.trackSyncWait, "track-sync-wait", 5, "Time that we are going to wait before check if execution and consensus nodes are synced")
 	cmd.Flags().BoolVarP(&flags.install, "install", "i", false, "Install dependencies if not installed without asking")
 	cmd.Flags().BoolVarP(&flags.run, "run", "r", false, "Run the generated docker-compose scripts without asking")
 	cmd.Flags().BoolVarP(&flags.yes, "yes", "y", false, "Shortcut for 'sedge cli -r -i --run'. Run without prompts")
