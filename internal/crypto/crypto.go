@@ -2,8 +2,8 @@ package crypto
 
 import (
 	"crypto/rand"
-	"encoding/base64"
 	"errors"
+	"fmt"
 )
 
 func GenerateJWTSecret() (string, error) {
@@ -16,5 +16,5 @@ func GenerateJWTSecret() (string, error) {
 		return "", errors.New("cannot generate 32 bytes long secret")
 	}
 
-	return base64.URLEncoding.EncodeToString(secret), err
+	return fmt.Sprintf("%x", secret), nil
 }
