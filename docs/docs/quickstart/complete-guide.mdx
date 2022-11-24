@@ -323,10 +323,10 @@ networks:
     name: sedge_network
 
 # highlight-start
-2022-07-31 21:06:40 -- [INFO] Created file docker-compose-scripts/docker-compose.yml
-2022-07-31 21:06:40 -- [INFO] Generating environment file for current selection of clients
+2022-XX-XX 00:00:00 -- [INFO] Created file docker-compose-scripts/docker-compose.yml
+2022-XX-XX 00:00:00 -- [INFO] Generating environment file for current selection of clients
 # highlight-end
-2022-07-31 21:06:40 -- [INFO] File .env:
+2022-XX-XX 00:00:00 -- [INFO] File .env:
 
 # --- Global configuration ---
 NETWORK=mainnet
@@ -543,8 +543,8 @@ The next step involves a prompt for an Eth1 address to be used to create the [wi
 ```logs
 Initializing configuration
 Using config file: /Users/teno/.sedge.yaml
-2022-07-31 22:18:50 -- [INFO] [Logger Init] Logging configuration: {Level:info}
-2022-07-31 22:18:50 -- [INFO] All dependencies are installed on host machine
+2022-XX-XX 00:00:00 -- [INFO] [Logger Init] Logging configuration: {Level:info}
+2022-XX-XX 00:00:00 -- [INFO] All dependencies are installed on host machine
 # highlight-next-line
 ✔ Please enter a Eth1 address to be used to create the withdrawal credentials. You can leave it blank and press enter:
 ```
@@ -566,8 +566,8 @@ A **password prompt** may show up again because Sedge uses docker commands to ru
 From here, the rest of the flow belongs to the staking-deposit-cli tool:
 
 ```
-2022-07-31 23:08:53 -- [INFO] Generating keystore folder
-2022-07-31 23:08:53 -- [INFO] Running command:
+2022-XX-XX 00:00:00 -- [INFO] Generating keystore folder
+2022-XX-XX 00:00:00 -- [INFO] Running command:
 docker run -it --rm -v /home/sedge/docker-compose-scripts/keystore/validator_keys:/app/validator_keys nethermindeth/staking-deposit-cli new-mnemonic --chain mainnet --keystore_password ********
 Please choose your language ['1. العربية', '2. ελληνικά', '3. English', '4. Français', '5. Bahasa melayu', '6. Italiano', '7. 日本語', '8. 한국어', '9. Português do Brasil', '10. român', '11. 简体中文']:  [English]:
 Repeat your keystore password for confirmation:
@@ -691,13 +691,13 @@ Now you can proceed and finish the setup by pressing `Y`. This will run the vali
   ⠿ Container config_custom_network    Exited                                                                                                       2.8s
   ⠿ Container validator-import-client  Exited                                                                                                       3.9s
   ⠿ Container validator-client         Started                                                                                                      4.3s
-  2022-10-23 21:21:04 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml ps --filter status=running
-  2022-10-23 21:21:04 -- [DEBU] Running command with sudo.
+  2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml ps --filter status=running
+  2022-XX-XX 00:00:00 -- [DEBU] Running command with sudo.
   NAME                COMMAND                  SERVICE             STATUS              PORTS
   consensus-client    "lighthouse bn --dis…"   consensus           running             0.0.0.0:5054->5054/tcp, :::5054->5054/tcp, 4000/tcp, 0.0.0.0:9000->9000/tcp, :::9000->9000/tcp, 0.0.0.0:9000->9000/udp, :::9000->9000/udp
   execution-client    "./Nethermind.Runner…"   execution           running             8545/tcp, 8551/tcp, 0.0.0.0:30303->30303/tcp, 0.0.0.0:30303->30303/udp, :::30303->30303/tcp, :::30303->30303/udp
   validator-client    "lighthouse vc --net…"   validator           running             0.0.0.0:5056->5056/tcp, :::5056->5056/tcp
-  2022-10-23 21:21:04 -- [INFO] 
+  2022-XX-XX 00:00:00 -- [INFO] 
   Validator is up. Remember to set up the keystore folder and to make the deposit. If something went wrong and your validator node is down, don't panic! Short downtimes are not very bad. Check the logs and try to fix the errors. Make sure errors are not related to connection issues with the consensus nodes or related to the keystore folder path or validator data directory. You can start the validator again using the instructions displayed by the tool.
 
   Happy Staking!
