@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed `v` from the tag on release scripts. Now we should use `Tag=v1.0.0` instead of `Tag=1.0.0`.
 
+### Fixed
+
+- Fixed wrong fork version in Gnosis network config
+
 ## [v0.4.0] - 2022-10-25
 
 ### Added
