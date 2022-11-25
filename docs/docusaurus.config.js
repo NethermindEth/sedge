@@ -7,7 +7,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Sedge documentation',
-  tagline: 'A one click setup tool for PoS network/chain validators',
+  tagline: 'Sedge was created for the setup and deployment of Validator, Consensus and Execution clients with ease',
   url: 'https://docs.sedge.nethermind.io/',
   baseUrl: '/',
   onBrokenLinks: 'throw',
