@@ -70,7 +70,7 @@ type clientImages struct {
 	validator string
 }
 
-func CliCmd(prompt prompts.Prompt) *cobra.Command {
+func CliCmd(prompt prompts.Prompt, ipFetcher ContainerIPFetcherI) *cobra.Command {
 	// Initialize monitoring tool
 	var (
 		flags  CliCmdFlags
@@ -101,7 +101,7 @@ func CliCmd(prompt prompts.Prompt) *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			// notest
-			if errs := runCliCmd(cmd, args, &flags, &images, prompt); len(errs) > 0 {
+			if errs := runCliCmd(cmd, args, &flags, &images, prompt, ipFetcher); len(errs) > 0 {
 				for _, err := range errs {
 					log.Error(err)
 				}
@@ -217,7 +217,8 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 	return &clientImages, nil
 }
 
-func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, prompt prompts.Prompt) []error {
+func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, prompt prompts.Prompt,
+	ipFetcher ContainerIPFetcherI) []error {
 	// Warnings
 	// Warn if custom images are used
 	if clientImages.execution != "" || clientImages.consensus != "" || clientImages.validator != "" {
@@ -363,7 +364,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 				monitor = NewMonitorTracker("localhost:" + results.MonitorPort)
 			}
 			// Track sync of execution and consensus clients
-			if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*time.Duration(flags.trackSyncWait), 0, flags); err != nil {
+			if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*time.Duration(flags.trackSyncWait), 0, flags, ipFetcher); err != nil {
 				return []error{err}
 			}
 

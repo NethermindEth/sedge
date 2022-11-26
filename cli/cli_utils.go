@@ -43,12 +43,12 @@ import (
 
 // Interface for Posmoni Eth2 monitor
 type MonitoringTool interface {
-	Track(done chan bool, consensusUrl, executionUrl []string, wait time.Duration, response chan responseStruct) error
+	Track(done chan bool, consensusUrl, executionUrl []string, wait time.Duration, response chan ResponseStruct) error
 }
 
-type containerIPFetcher func(service string, flags *CliCmdFlags) (ip string, err error)
-
-var ContainerIPFetcher containerIPFetcher = getContainerIP
+type ContainerIPFetcherI interface {
+	FetchIP(service, generationPath string) (ip string, err error)
+}
 
 var monitor MonitoringTool
 
@@ -279,10 +279,12 @@ func parseNetwork(js string) (string, error) {
 	return "", errors.New(configs.IPNotFoundError)
 }
 
-func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
+type IpFetcher struct{}
+
+func (IpFetcher) FetchIP(service, generationPath string) (ip string, err error) {
 	// Run docker compose ps --quiet <service> to show service's ID
 	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path:        filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
+		Path:        filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 		Quiet:       true,
 		ServiceName: service,
 	})
@@ -308,16 +310,16 @@ func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
 	return
 }
 
-func trackSync(monitor MonitoringTool, elPort, clPort string, wait, longestTimes time.Duration, flags *CliCmdFlags) error {
+func trackSync(monitor MonitoringTool, elPort, clPort string, wait, longestTimes time.Duration, flags *CliCmdFlags, ipFetcher ContainerIPFetcherI) error {
 	done := make(chan bool)
 	defer close(done)
 
 	log.Info(configs.GettingContainersIP)
-	executionIP, errE := ContainerIPFetcher(execution, flags)
+	executionIP, errE := ipFetcher.FetchIP(execution, flags.generationPath)
 	if errE != nil {
 		log.Errorf(configs.GetContainerIPError, execution, errE)
 	}
-	consensusIP, errC := ContainerIPFetcher(consensus, flags)
+	consensusIP, errC := ipFetcher.FetchIP(consensus, flags.generationPath)
 	if errC != nil {
 		log.Errorf(configs.GetContainerIPError, consensus, errC)
 		if errE != nil {
@@ -334,7 +336,7 @@ func trackSync(monitor MonitoringTool, elPort, clPort string, wait, longestTimes
 	consensusUrl := fmt.Sprintf("http://%s%s%s", consensusIP, separator, clPort)
 	executionUrl := fmt.Sprintf("http://%s%s%s", executionIP, separator, elPort)
 
-	statuses := make(chan responseStruct)
+	statuses := make(chan ResponseStruct)
 	log.Info("Starting tracking")
 	err := monitor.Track(done, []string{consensusUrl}, []string{executionUrl}, wait, statuses)
 	if err != nil {
@@ -399,7 +401,7 @@ type info struct {
 	Wait          time.Duration `json:"wait"`
 }
 
-type responseStruct struct {
+type ResponseStruct struct {
 	Endpoint string
 	Synced   bool
 	Error    networking.Eth1Error
@@ -506,7 +508,7 @@ func NewMonitorTracker(monitorUrl string) *monitorTracker {
 	return &monitorTracker{monitorUrl: monitorUrl}
 }
 
-func (m *monitorTracker) Track(done chan bool, consensusUrl, executionUrl []string, wait time.Duration, response chan responseStruct) error {
+func (m *monitorTracker) Track(done chan bool, consensusUrl, executionUrl []string, wait time.Duration, response chan ResponseStruct) error {
 	u := url.URL{Scheme: "ws", Host: m.monitorUrl, Path: "/trackSync"}
 	log.Debugf("connecting to %s", u.String())
 
@@ -537,7 +539,7 @@ func (m *monitorTracker) Track(done chan bool, consensusUrl, executionUrl []stri
 				log.Fatal(err)
 				return
 			}
-			var resp responseStruct
+			var resp ResponseStruct
 			err = json.Unmarshal(message, &resp)
 			if err != nil {
 				log.Fatal(err)

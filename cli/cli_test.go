@@ -226,7 +226,7 @@ func buildCliTestCase(
 	}
 
 	monitor = &monitorStub{
-		data: []responseStruct{
+		data: []ResponseStruct{
 			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
 			{Endpoint: inspectConsensusUrl + ":" + ports["CLApi"], Synced: true},
 			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
@@ -405,8 +405,10 @@ func TestCliCmd(t *testing.T) {
 			prompt := mock_prompts.NewMockPrompt(ctrl)
 			defer ctrl.Finish()
 
+			ipFetcher := IpFetcher{}
+
 			rootCmd := RootCmd()
-			rootCmd.AddCommand(CliCmd(prompt))
+			rootCmd.AddCommand(CliCmd(prompt, ipFetcher))
 			argsL := append([]string{"cli"}, tc.args.argsList()...)
 			rootCmd.SetArgs(argsL)
 
@@ -423,11 +425,11 @@ func TestCliCmd(t *testing.T) {
 
 // Stub for MonitoringTool interface
 type monitorStub struct {
-	data []responseStruct
+	data []ResponseStruct
 }
 
-//Track(done chan bool, consensusUrl, executionUrl []string, wait time.Duration, response chan responseStruct) error
-func (ms *monitorStub) Track(done chan bool, beaconEndpoints, executionEndpoints []string, wait time.Duration, response chan responseStruct) error {
+//Track(done chan bool, consensusUrl, executionUrl []string, wait time.Duration, response chan ResponseStruct) error
+func (ms *monitorStub) Track(done chan bool, beaconEndpoints, executionEndpoints []string, wait time.Duration, response chan ResponseStruct) error {
 	var w time.Duration
 
 	go func() {
@@ -453,13 +455,13 @@ func (ms *monitorStub) Track(done chan bool, beaconEndpoints, executionEndpoints
 func TestTrackSync(t *testing.T) {
 	tcs := []struct {
 		name    string
-		data    []responseStruct
+		data    []ResponseStruct
 		flags   CliCmdFlags
 		isError bool
 	}{
 		{
 			"Test case 1, execution client got an error",
-			[]responseStruct{
+			[]ResponseStruct{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: networking.Eth1Error{
 					Code:    100,
 					Message: "Error",
@@ -472,7 +474,7 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 2, execution client got an error, consensus client not synced",
-			[]responseStruct{
+			[]ResponseStruct{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: networking.Eth1Error{
 					Code:    100,
 					Message: "Error",
@@ -486,7 +488,7 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 3, execution client got an error, consensus client synced",
-			[]responseStruct{
+			[]ResponseStruct{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: networking.Eth1Error{
 					Code:    100,
 					Message: "Error",
@@ -500,7 +502,7 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 4, bad execution client response, good consensus client response",
-			[]responseStruct{
+			[]ResponseStruct{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true, Error: networking.Eth1Error{
 					Code:    100,
 					Message: "Error",
@@ -514,7 +516,7 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 5, consensus client got an error, consensus client not synced",
-			[]responseStruct{
+			[]ResponseStruct{
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: networking.Eth1Error{
 					Code:    100,
 					Message: "Error",
@@ -528,7 +530,7 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 6, consensus client got an error, consensus client synced",
-			[]responseStruct{
+			[]ResponseStruct{
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: networking.Eth1Error{
 					Code:    100,
 					Message: "Error",
@@ -542,7 +544,7 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 7, timeout error",
-			[]responseStruct{
+			[]ResponseStruct{
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
@@ -556,7 +558,7 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 8, timeout error",
-			[]responseStruct{
+			[]ResponseStruct{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
@@ -573,7 +575,7 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 9, mixed results, error",
-			[]responseStruct{
+			[]ResponseStruct{
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
@@ -594,7 +596,7 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 10, mixed results",
-			[]responseStruct{
+			[]ResponseStruct{
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
@@ -613,7 +615,7 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 11, restart counter",
-			[]responseStruct{
+			[]ResponseStruct{
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
@@ -633,7 +635,7 @@ func TestTrackSync(t *testing.T) {
 		},
 		{
 			"Test case 12, restart counter error",
-			[]responseStruct{
+			[]ResponseStruct{
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
@@ -650,12 +652,15 @@ func TestTrackSync(t *testing.T) {
 		},
 	}
 	// TODO: Starvation bc a synced status from one of the clients is not tested
+	ctrl := gomock.NewController(t)
+	ipFetcher := NewMockContainerIPFetcherI(ctrl)
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			ms := monitorStub{data: tc.data}
-			ContainerIPFetcher = ipFetcherStub
-			err := trackSync(&ms, "", "", time.Millisecond*100, time.Second*30, &tc.flags)
+			ipFetcher.EXPECT().FetchIP("execution", "./docker-compose-scripts").Return("execution", nil).Times(1)
+			ipFetcher.EXPECT().FetchIP("consensus", "./docker-compose-scripts").Return("consensus", nil).Times(1)
+			err := trackSync(&ms, "", "", time.Millisecond*100, time.Second*30, &tc.flags, ipFetcher)
 			err = utils.CheckErr("trackSync(...) failed", tc.isError, err)
 			if err != nil {
 				t.Fail()

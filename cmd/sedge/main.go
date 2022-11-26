@@ -25,9 +25,10 @@ import (
 func main() {
 	// Prompt used to interact with the user input
 	prompt := prompts.NewPromptCli()
+	ipFetcher := cli.IpFetcher{}
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
-		cli.CliCmd(prompt),
+		cli.CliCmd(prompt, ipFetcher),
 		cli.KeysCmd(prompt),
 		cli.DownCmd(),
 		cli.ClientsCmd(),
