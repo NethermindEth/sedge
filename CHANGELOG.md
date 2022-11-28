@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add checkpoint sync url for Chiado
+
 ### Changed 
 
+- Update Gnosis and Chiado networks default clients images to merge ready versions
 - Updated checkpoint sync url for gnosis.
 
 ### Fixed
