@@ -90,22 +90,22 @@ func TestCheckVariable(t *testing.T) {
 			false,
 		},
 		{
-			"Test case 7, chiado, prysm config, consensus",
+			"Test case 7, chiado, prysm config, no consensus config",
 			ReCONFIG,
 			"chiado",
 			"consensus",
 			"prysm",
-			true,
 			false,
+			true,
 		},
 		{
-			"Test case 8, chiado, prysm config, validator",
+			"Test case 8, chiado, prysm config, no validator config",
 			ReCONFIG,
 			"chiado",
 			"validator",
 			"prysm",
 			true,
-			false,
+			true,
 		},
 	}
 
