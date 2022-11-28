@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update Gnosis and Chiado networks default clients images to merge ready versions
+
 ### Fixed
 
 - Added missing `depends_on` tag to lodestar validator
