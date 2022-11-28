@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed 
+
+- Updated checkpoint sync url for gnosis.
+
 ### Fixed
 
 - Added missing `depends_on` tag to lodestar validator
