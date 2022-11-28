@@ -104,7 +104,7 @@ func TestCheckVariable(t *testing.T) {
 			"chiado",
 			"validator",
 			"prysm",
-			true,
+			false,
 			true,
 		},
 	}
