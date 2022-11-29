@@ -41,6 +41,12 @@ func (cr *UnixCMDRunner) BuildDockerComposeUpCMD(options DockerComposeUpOptions)
 	return Command{Cmd: command}
 }
 
+func (cr *UnixCMDRunner) BuildDockerComposePullCMD(options DockerComposePullOptions) Command {
+	services := strings.Join(options.Services, " ")
+	command := fmt.Sprintf("docker compose -f %s pull %s", options.Path, services)
+	return Command{Cmd: command}
+}
+
 func (cr *UnixCMDRunner) BuildDockerPSCMD(options DockerPSOptions) Command {
 	command := "docker ps"
 	if options.All {

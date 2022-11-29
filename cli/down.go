@@ -26,34 +26,38 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// downCmd represents the down command
-var downCmd = &cobra.Command{
-	Use:   "down [flags]",
-	Short: "Shutdown sedge running containers",
-	Long:  `Shutdown sedge running containers using docker compose CLI. Shortcut for 'docker compose -f <script> down'`,
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := utils.PreCheck(generationPath); err != nil {
-			log.Fatal(err)
-		}
-
-		if _, err := utils.CheckContainers(generationPath); err != nil {
-			log.Fatal(err)
-		}
-
-		downCMD := commands.Runner.BuildDockerComposeDownCMD(commands.DockerComposeDownOptions{
-			Path: filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
-		})
-
-		log.Debugf(configs.RunningCommand, downCMD.Cmd)
-		if _, err := commands.Runner.RunCMD(downCMD); err != nil {
-			log.Fatalf(configs.CommandError, downCMD.Cmd, err)
-		}
-	},
+type DownCmdFlags struct {
+	path string
 }
 
-func init() {
-	rootCmd.AddCommand(downCmd)
+func DownCmd() *cobra.Command {
+	// Flags
+	var flags DownCmdFlags
+	// Build command
+	cmd := &cobra.Command{
+		Use:   "down [flags]",
+		Short: "Shutdown sedge running containers",
+		Long:  `Shutdown sedge running containers using docker compose CLI. Shortcut for 'docker compose -f <script> down'`,
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := utils.PreCheck(flags.path); err != nil {
+				log.Fatal(err)
+			}
 
-	// Local flags
-	downCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose script path")
+			if _, err := utils.CheckContainers(flags.path); err != nil {
+				log.Fatal(err)
+			}
+
+			downCMD := commands.Runner.BuildDockerComposeDownCMD(commands.DockerComposeDownOptions{
+				Path: filepath.Join(flags.path, configs.DefaultDockerComposeScriptName),
+			})
+
+			log.Debugf(configs.RunningCommand, downCMD.Cmd)
+			if _, err := commands.Runner.RunCMD(downCMD); err != nil {
+				log.Fatalf(configs.CommandError, downCMD.Cmd, err)
+			}
+		},
+	}
+	// Bind flags
+	cmd.Flags().StringVarP(&flags.path, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose script path")
+	return cmd
 }

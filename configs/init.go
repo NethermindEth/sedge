@@ -15,9 +15,16 @@ limitations under the License.
 */
 package configs
 
+import (
+	"fmt"
+	"strings"
+)
+
+// TODO: Remove public level to this variable (NetworksConfigs), use getters to access instead
 var NetworksConfigs map[string]NetworkConfig
 
 func init() {
+	// TODO: This initialization can be made in the variable declaration
 	NetworksConfigs = map[string]NetworkConfig{
 		"mainnet": {
 			Name:               "mainnet",
@@ -47,7 +54,16 @@ func init() {
 			Name:               "gnosis",
 			RequireJWT:         true,
 			NetworkService:     "merge",
-			GenesisForkVersion: "0x0000006f",
+			GenesisForkVersion: "0x00000064",
 		},
 	}
+}
+
+// TODO: add doc
+// TODO: test
+func CheckNetwork(networkName string) error {
+	if _, ok := NetworksConfigs[strings.ToLower(networkName)]; !ok {
+		return fmt.Errorf(UnknownNetworkError, networkName)
+	}
+	return nil
 }

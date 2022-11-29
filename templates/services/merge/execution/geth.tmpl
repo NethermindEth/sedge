@@ -45,12 +45,12 @@
       - --authrpc.addr=0.0.0.0
       - --authrpc.port={{.ElAuthPort}}
       - --authrpc.vhosts=*
-      - ${EC_METRICS_ENABLED:-""}
+      - --metrics
       - --metrics.port={{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
-      - --{{$flag}}{{end}}
+      - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:
-      driver: "json-file"
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
         max-size: "10m"
-        max-file: "10"
+        max-file: "10"{{end}}{{end}}
 {{ end }}
