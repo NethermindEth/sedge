@@ -29,8 +29,9 @@ The project **is still on beta** and although it should be stable enough, it mig
   - [✅ Roadmap](#-roadmap)
     - [Version 0.1](#version-01)
     - [Version 0.2](#version-02)
-    - [Version 0.3 (Actual)](#version-03-actual)
+    - [Version 0.3](#version-03)
     - [Version 0.4](#version-04)
+    - [Version 0.5 (Actual)](#version-05-actual)
     - [Version 0.X](#version-0x)
     - [Version 1.0](#version-10)
   - [Version X.0](#version-x0)
@@ -207,13 +208,18 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Integrate Gnosis network
 - [x] Prepare for the Merge
 
-### Version 0.4 (Actual)
+### Version 0.4
 
 - [x] Create and handle keystores on our own instead of using staking-deposit-cli
 - [x] Improve validator testing
 - [x] Bug fixes
 - [x] Deprecate Kiln, Ropsten, Denver networks
 - [x] Improve support for chiado network (Gnosis testnet)
+
+### Version 0.5 (Actual)
+
+- [x] Support for Gnosis Merge
+- [x] Bug fixes
 
 ### Version 0.X
 
