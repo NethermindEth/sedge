@@ -7,19 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.5.0] - 2022-11-29
+
 ### Added
 
-- Add checkpoint sync url for Chiado
+- Add checkpoint sync url for Chiado.
 
 ### Changed 
 
-- Update Gnosis and Chiado networks default clients images to merge ready versions
-- Updated checkpoint sync url for gnosis.
+- Update Gnosis and Chiado networks default clients images to merge ready versions.
+- Update client versions.
+- Update checkpoint sync url for gnosis.
 
 ### Fixed
 
-- Added missing `depends_on` tag to lodestar validator
-- Fixed wrong fork version in Gnosis network config
+- Add missing `depends_on` tag to lodestar validator.
+- Fix wrong fork version in Gnosis network config.
 
 ## [v0.4.0] - 2022-10-25
 
@@ -34,69 +37,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Drop support for deprecated networks. (Kiln, Ropsten, Denver)
-- Update Chiado testnet configs
+- Drop support for deprecated networks. (Kiln, Ropsten, Denver).
+- Update Chiado testnet configs.
 - Sedge uses its own mechanism for keystore generation with `sedge keys` instead of the staking-deposit-cli tool. This is experimental and staking-deposit-cli is still being used for mainnet.
 - Updated docker image tags for all clients except Teku.
 
 ### Fixed
 
-- Print generated files as string instead of []byte
-- keystore_password.txt permissions issue
+- Print generated files as string instead of []byte.
+- keystore_password.txt permissions issue.
 
 ## [v0.3.0] - 2022-09-15
 
 ### Added
 
-- Add support for gnosis merge testnets named chiado and denver
-- Add support for custom testnets by allowing custom remote config and genesis files
-- Add `--no-validator` flag to exclude the validator node from the full node setup
-- Gnosis Network support
-- Add `--graffiti` to allow overriding the default graffiti used by validators nodes
+- Add support for gnosis merge testnets named chiado and denver.
+- Add support for custom testnets by allowing custom remote config and genesis files.
+- Add `--no-validator` flag to exclude the validator node from the full node setup.
+- Gnosis Network support.
+- Add `--graffiti` to allow overriding the default graffiti used by validators nodes.
 - Allow the extra flags to overwrite fixed template images commands flags. Latest flag apparition will be used.
-- Add Homebrew installation method
-- Add Checkpoint Sync for Ethereum Mainnet
+- Add Homebrew installation method.
+- Add Checkpoint Sync for Ethereum Mainnet.
 
 ### Changed
 
-- Remove Nethermind metrics configuration
-- Prysm and Lodestar can use now an undefined number of Bootnodes
+- Remove Nethermind metrics configuration.
+- Prysm and Lodestar can use now an undefined number of Bootnodes.
 - Allow providing a number for `--tail` flag of `logs` command, e.g: `sedge logs --tail 50`
 - Remove `mainnet` service templates and use `merge` service templates for Mainnet network.
 - `checkpoint-sync-url` can now be set separately for every consensus client of a network using `CHECKPOINT_SYNC_URL` as env variabe in the consensus client templates.
-- Use fixed docker images with latest tested versions
-- Change Prater to Goerli
+- Use fixed docker images with latest tested versions.
+- Change Prater to Goerli.
 
 ### Fixed
 
-- Check for compose plugin installed. The check was running compose with a wrong path flag
-- Errors in validators templates
+- Check for compose plugin installed. The check was running compose with a wrong path flag.
+- Errors in validators templates.
 
 ## [v0.2.0] - 2022-08-4
 
 ### Added
 
-- Support for Goerli/Prater network
-- Docusaurus documentation engine with initial version of docs
-- CI workflows to test and deploy documentation to Github Pages
-- Goerli/Prater support
-- Sepolia support
-- Mev-boost settings for all the currently supported CL clients
-- Relays URLs for all the testnets
-- Mev-boost set on by default in Prater
+- Support for Goerli/Prater network.
+- Docusaurus documentation engine with initial version of docs.
+- CI workflows to test and deploy documentation to Github Pages.
+- Goerli/Prater support.
+- Sepolia support.
+- Mev-boost settings for all the currently supported CL clients.
+- Relays URLs for all the testnets.
+- Mev-boost set on by default in Prater.
 
 ### Changed
 
 - Update Readme. Some instructions were moved to the docs. Roadmap updated.
-- Updated Teku mev-boost configuration
+- Updated Teku mev-boost configuration.
 
 ## [v0.1.2] - 2022-07-21
 
 ### Added
 
-- Table with mev-boost support information on the Readme
-- Table with OS support for dependency installation
-- More instructions and descriptions about the tool on the Readme
+- Table with mev-boost support information on the Readme.
+- Table with OS support for dependency installation.
+- More instructions and descriptions about the tool on the Readme.
 
 ### Changed
 
