@@ -118,7 +118,7 @@ func IsAddress(a string) bool {
 }
 
 /*
-AssingPorts :
+AssignPorts :
 Checks if port is occupied in a given host
 
 params :-
@@ -131,7 +131,7 @@ returns :-
 a. bool
 True if <port> is available. False otherwise
 */
-func AssingPorts(host string, defaults map[string]string) (ports map[string]string, err error) {
+func AssignPorts(host string, defaults map[string]string) (ports map[string]string, err error) {
 	ports = make(map[string]string)
 	mask := make(map[string]bool)
 
@@ -169,7 +169,7 @@ a. bool
 True if <port> is available. False otherwise
 */
 func portAvailable(host, port string, timeout time.Duration) bool {
-	log.Debugf("Checking port ocuppation of %s\n", net.JoinHostPort(host, port))
+	log.Debugf("Checking port occupation of %s\n", net.JoinHostPort(host, port))
 	conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, port), timeout)
 	if err != nil {
 		log.Debugf("Port seems available, got connecting error: %v", err)
