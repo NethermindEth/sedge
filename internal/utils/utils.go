@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -135,7 +136,14 @@ func AssignPorts(host string, defaults map[string]string) (ports map[string]stri
 	ports = make(map[string]string)
 	mask := make(map[string]bool)
 
-	for k, v := range defaults {
+	keys := make([]string, 0, len(defaults))
+	for k := range defaults {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		v := defaults[k]
 		if v == "" {
 			return ports, fmt.Errorf(configs.DefaultPortEmptyError, k)
 		}
