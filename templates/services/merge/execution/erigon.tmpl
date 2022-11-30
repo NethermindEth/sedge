@@ -15,8 +15,7 @@
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
       - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
       - "{{.ElApiPort}}:{{.ElApiPort}}"
-      - "{{.ElAuthPort}}:{{.ElAuthPort}}"
-      - {{end}}
+      - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
     expose:
       - {{.ElApiPort}}
       - {{.ElAuthPort}}
