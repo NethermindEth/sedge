@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add checkpoint sync url for Chiado.
 
-### Changed 
+### Changed
 
 - Update Gnosis and Chiado networks default clients images to merge ready versions.
 - Update client versions.
@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add missing `depends_on` tag to lodestar validator.
 - Fix wrong fork version in Gnosis network config.
+- Fix inconsistent behavior of `AssignPorts` function test
 
 ## [v0.4.0] - 2022-10-25
 
