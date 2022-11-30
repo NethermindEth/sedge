@@ -26,16 +26,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listClientsCmd represents the clients command
-var listClientsCmd = &cobra.Command{
-	Use:   "clients",
-	Short: "List supported clients",
-	Long:  `List supported clients for execution and consensus engines`,
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := runListClientsCmd(cmd, args); err != nil {
-			log.Fatal(err)
-		}
-	},
+func ClientsCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "clients",
+		Short: "List supported clients",
+		Long:  `List supported clients for execution and consensus engines`,
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := runListClientsCmd(cmd, args); err != nil {
+				log.Fatal(err)
+			}
+		},
+	}
+	return cmd
 }
 
 func runListClientsCmd(cmd *cobra.Command, args []string) error {
@@ -63,10 +65,6 @@ func runListClientsCmd(cmd *cobra.Command, args []string) error {
 	ui.WriteListClientsTable(cmd.OutOrStdout(), data)
 
 	return nil
-}
-
-func init() {
-	rootCmd.AddCommand(listClientsCmd)
 }
 
 /*

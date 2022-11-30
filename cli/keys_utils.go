@@ -21,7 +21,7 @@ func runKeysWithStakingDeposit(cmd *cobra.Command, args []string, flags *KeysCmd
 	// Check if dependencies are installed. Keep checking dependencies until they are all installed
 	for pending := utils.CheckDependencies([]string{"docker"}); len(pending) > 0; {
 		log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
-		if install {
+		if flags.install {
 			// Install dependencies directly
 			if err := installDependencies(pending); err != nil {
 				log.Fatal(err)

@@ -6,7 +6,7 @@ CC_LOG_LEVEL=info
 EC_API_URL={{.ExecutionApiURL}}
 EC_AUTH_URL={{.ExecutionAuthURL}}
 CC_INSTANCE_NAME=Teku
-CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}consensys/teku:latest{{end}}
+CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}consensys/teku:22.11.0{{end}}
 CC_DATA_DIR={{.CcDataDir}}
 CC_JWT_SECRET_PATH={{.JWTSecretPath}}
 CL_FEE_RECIPIENT={{.FeeRecipient}}
@@ -14,4 +14,5 @@ CL_BOOTNODES="enr:-L64QOijsdi9aVIawMb5h5PWueaPM9Ai6P17GNPFlHzz7MGJQ8tFMdYrEx8WQi
 CONFIG_URL=https://github.com/gnosischain/configs/raw/main/chiado/config.yaml
 GENESIS_URL=https://github.com/gnosischain/configs/raw/main/chiado/genesis.ssz
 DEPLOY_BLOCK=0
+CHECKPOINT_SYNC_URL=https://beacon.chiadochain.net/checkpoint-sync
 {{ end }}

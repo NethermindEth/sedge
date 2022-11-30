@@ -5,4 +5,5 @@ type Prompt interface {
 	ExistingVal() int64
 	NumberVal() int64
 	Eth1Withdrawal() (string, error)
+	FeeRecipient() (string, error)
 }

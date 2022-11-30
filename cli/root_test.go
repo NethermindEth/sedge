@@ -34,6 +34,7 @@ func TestRootCmdExecute(t *testing.T) {
 		t.Errorf("Can't create config file: %v", err)
 	}
 
+	rootCmd := RootCmd()
 	rootCmd.SetArgs([]string{"--config", configPath})
 
 	if err := rootCmd.Execute(); err != nil {
