@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -39,6 +40,7 @@ import (
 
 const (
 	execution, consensus, validator = "execution", "consensus", "validator"
+	slashingDataFile                = "slashing-data.json"
 )
 
 type CliCmdFlags struct {
@@ -259,9 +261,9 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 
 	// Get all clients: supported + configured
 	c := clients.ClientInfo{Network: flags.network}
-	clientsMap, errors := c.Clients([]string{execution, consensus, validator})
-	if len(errors) > 0 {
-		return errors
+	clientsMap, clientsErrors := c.Clients([]string{execution, consensus, validator})
+	if len(clientsErrors) > 0 {
+		return clientsErrors
 	}
 
 	// Handle selection and validation of clients
@@ -315,6 +317,16 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	combinedClients.Consensus.Image = clientImages.consensus
 	combinedClients.Validator.Image = clientImages.validator
 	combinedClients.Validator.Omited = flags.noValidator
+
+	// Import slashing protection data into data path
+	if flags.slashingProtection != "" {
+		if _, err := os.Stat(flags.slashingProtection); err != nil {
+			return []error{err}
+		}
+		if err := copyFile(flags.slashingProtection, path.Join(flags.generationPath, slashingDataFile)); err != nil {
+			return []error{err}
+		}
+	}
 
 	// Generate docker-compose scripts
 	gd := generate.GenerationData{
