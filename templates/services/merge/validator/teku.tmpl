@@ -22,6 +22,8 @@
     restart: unless-stopped
     depends_on:
       validator-import:
+        condition: service_completed_successfully
+      validator-locker:
         condition: service_completed_successfully{{if .VlCustomCfg}}
       config_consensus:
         condition: service_completed_successfully{{end}}{{if .WithConsensusClient}}

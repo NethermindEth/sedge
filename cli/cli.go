@@ -314,26 +314,37 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	combinedClients.Validator.Image = clientImages.validator
 	combinedClients.Validator.Omited = flags.noValidator
 
+	var vlStartGracePeriod time.Duration
+	switch flags.network {
+	case "mainnet", "goerli", "sepolia":
+		vlStartGracePeriod = 2 * configs.EpochTimeETH
+	case "gnosis", "chiado":
+		vlStartGracePeriod = 2 * configs.EpochTimeGNO
+	default:
+		vlStartGracePeriod = 2 * configs.EpochTimeETH
+	}
+
 	// Generate docker-compose scripts
 	gd := generate.GenerationData{
-		Services:          *flags.services,
-		ExecutionClient:   combinedClients.Execution,
-		ConsensusClient:   combinedClients.Consensus,
-		ValidatorClient:   combinedClients.Validator,
-		GenerationPath:    flags.generationPath,
-		Network:           flags.network,
-		CheckpointSyncUrl: flags.checkpointSyncUrl,
-		FeeRecipient:      flags.feeRecipient,
-		JWTSecretPath:     flags.jwtPath,
-		Graffiti:          flags.graffiti,
-		FallbackELUrls:    *flags.fallbackEL,
-		ElExtraFlags:      *flags.elExtraFlags,
-		ClExtraFlags:      *flags.clExtraFlags,
-		VlExtraFlags:      *flags.vlExtraFlags,
-		MapAllPorts:       flags.mapAllPorts,
-		Mev:               !flags.noMev && !flags.noValidator,
-		MevImage:          flags.mevImage,
-		LoggingDriver:     configs.GetLoggingDriver(flags.logging),
+		Services:           *flags.services,
+		ExecutionClient:    combinedClients.Execution,
+		ConsensusClient:    combinedClients.Consensus,
+		ValidatorClient:    combinedClients.Validator,
+		GenerationPath:     flags.generationPath,
+		Network:            flags.network,
+		CheckpointSyncUrl:  flags.checkpointSyncUrl,
+		FeeRecipient:       flags.feeRecipient,
+		JWTSecretPath:      flags.jwtPath,
+		Graffiti:           flags.graffiti,
+		FallbackELUrls:     *flags.fallbackEL,
+		ElExtraFlags:       *flags.elExtraFlags,
+		ClExtraFlags:       *flags.clExtraFlags,
+		VlExtraFlags:       *flags.vlExtraFlags,
+		MapAllPorts:        flags.mapAllPorts,
+		Mev:                !flags.noMev && !flags.noValidator,
+		MevImage:           flags.mevImage,
+		LoggingDriver:      configs.GetLoggingDriver(flags.logging),
+		VLStartGracePeriod: uint(vlStartGracePeriod.Seconds()),
 	}
 	results, err := generate.GenerateScripts(gd)
 	if err != nil {

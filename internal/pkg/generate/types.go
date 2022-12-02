@@ -39,25 +39,26 @@ type EnvData struct {
 
 // GenerationData : Struct Data object for script's generation
 type GenerationData struct {
-	Services          []string
-	ExecutionClient   clients.Client
-	ConsensusClient   clients.Client
-	ValidatorClient   clients.Client
-	GenerationPath    string
-	Network           string
-	CheckpointSyncUrl string
-	FeeRecipient      string
-	JWTSecretPath     string
-	FallbackELUrls    []string
-	ElExtraFlags      []string
-	ClExtraFlags      []string
-	VlExtraFlags      []string
-	MapAllPorts       bool
-	Mev               bool
-	MevImage          string
-	Ports             map[string]string
-	Graffiti          string
-	LoggingDriver     string
+	Services           []string
+	ExecutionClient    clients.Client
+	ConsensusClient    clients.Client
+	ValidatorClient    clients.Client
+	GenerationPath     string
+	Network            string
+	CheckpointSyncUrl  string
+	FeeRecipient       string
+	JWTSecretPath      string
+	FallbackELUrls     []string
+	ElExtraFlags       []string
+	ClExtraFlags       []string
+	VlExtraFlags       []string
+	MapAllPorts        bool
+	Mev                bool
+	MevImage           string
+	Ports              map[string]string
+	Graffiti           string
+	LoggingDriver      string
+	VLStartGracePeriod uint
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -97,6 +98,7 @@ type DockerComposeData struct {
 	SplittedNetwork     bool
 	ClCheckpointSyncUrl bool
 	LoggingDriver       string
+	VLStartGracePeriod  uint
 }
 
 func (d DockerComposeData) WithConsensusClient() bool {

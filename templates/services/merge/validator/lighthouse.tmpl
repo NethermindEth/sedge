@@ -27,6 +27,8 @@
     restart: unless-stopped
     depends_on: 
       validator-import:
+        condition: service_completed_successfully
+      validator-locker:
         condition: service_completed_successfully{{if .WithConsensusClient}}
       consensus:
         condition: service_healthy{{end}}

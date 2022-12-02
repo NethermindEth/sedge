@@ -152,6 +152,15 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 		}
 	}
 
+	// Parse validator-locker template
+	tmp, err := templates.Services.ReadFile(filepath.Join("services", "validator-locker.tmpl"))
+	if err != nil {
+		return "", err
+	}
+	if _, err := baseTmp.Parse(string(tmp)); err != nil {
+		return "", err
+	}
+
 	// Check for TTD in env base template
 	TTD, err := env.CheckVariableBase(env.ReTTD, gd.Network)
 	if err != nil {
@@ -250,6 +259,7 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
 		LoggingDriver:       gd.LoggingDriver,
+		VLStartGracePeriod:  gd.VLStartGracePeriod,
 	}
 
 	dockerComposePath = filepath.Join(gd.GenerationPath, configs.DefaultDockerComposeScriptName)
