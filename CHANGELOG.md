@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.5.1] - 2022-12-2
+
+### Fixed
+
+- Fix missing preset flag for Lodestar validator service.
+- Support custom configuration for Lighthouse validator-import service.
+
 ## [v0.5.0] - 2022-11-29
 
 ### Added
