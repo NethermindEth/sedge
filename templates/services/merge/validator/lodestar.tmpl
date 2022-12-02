@@ -34,7 +34,7 @@
     depends_on:
       validator-import:
         condition: service_completed_successfully
-      validator-locker:
+      validator-blocker:
         condition: service_completed_successfully{{if .WithConsensusClient}}
       consensus:
         condition: service_healthy{{end}}

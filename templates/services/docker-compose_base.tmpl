@@ -33,7 +33,7 @@ services:
         max-file: "10"{{end}}{{end}}
 {{template "consensus" .}}
 {{template "validator" .}}
-{{template "validator-locker" .}}
+{{template "validator-blocker" .}}
 
 networks:
   sedge:
