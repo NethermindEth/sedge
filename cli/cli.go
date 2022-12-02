@@ -42,28 +42,29 @@ const (
 )
 
 type CliCmdFlags struct {
-	executionName     string
-	consensusName     string
-	validatorName     string
-	generationPath    string
-	checkpointSyncUrl string
-	network           string
-	feeRecipient      string
-	noMev             bool
-	mevImage          string
-	noValidator       bool
-	jwtPath           string
-	graffiti          string
-	install           bool
-	run               bool
-	yes               bool
-	mapAllPorts       bool
-	services          *[]string
-	fallbackEL        *[]string
-	elExtraFlags      *[]string
-	clExtraFlags      *[]string
-	vlExtraFlags      *[]string
-	logging           string
+	executionName      string
+	consensusName      string
+	validatorName      string
+	generationPath     string
+	checkpointSyncUrl  string
+	network            string
+	feeRecipient       string
+	noMev              bool
+	mevImage           string
+	noValidator        bool
+	jwtPath            string
+	graffiti           string
+	install            bool
+	run                bool
+	yes                bool
+	mapAllPorts        bool
+	services           *[]string
+	fallbackEL         *[]string
+	elExtraFlags       *[]string
+	clExtraFlags       *[]string
+	vlExtraFlags       *[]string
+	logging            string
+	slashingProtection string
 }
 
 type clientImages struct {
@@ -155,6 +156,7 @@ func CliCmd(prompt prompts.Prompt) *cobra.Command {
 	flags.clExtraFlags = cmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge cli --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	flags.vlExtraFlags = cmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringVar(&flags.logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
+	cmd.Flags().StringVar(&flags.slashingProtection, "slashing-protection", "", "Path to the file with slashing protection interchange data (EIP-3076)")
 	// TODO: check if this condition is still necessary
 	cmd.Flags().SortFlags = false
 	return cmd
