@@ -6,7 +6,7 @@
       context: github.com/NethermindEth/lighthouse-init-validator
       args:
         LH_VERSION: ${VL_IMAGE_VERSION}
-        NETWORK: {{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{with .VlCustomCfg}}
+        NETWORK: {{if .VlCustomCfg}}CUSTOM{{else}}{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}{{with .VlCustomCfg}}
     depends_on:
       config_consensus:
         condition: service_completed_successfully{{end}}
@@ -14,7 +14,10 @@
       - sedge
     volumes:
       - ${KEYSTORE_DIR}:/keystore
-      - ${VL_DATA_DIR}:/data{{if .LoggingDriver}}
+      - ${VL_DATA_DIR}:/data{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - ./config.yml:/network_config/config.yaml{{end}}{{if .VlRemoteGen}}
+      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{if .VlRemoteDpl}}
+      - ./deploy_block.txt:/network_config/deploy_block.txt{{end}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
