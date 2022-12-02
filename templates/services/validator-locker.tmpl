@@ -1,0 +1,11 @@
+{{/* validator-locker.tmpl */}}
+{{ define "validator-locker" }}
+  validator-locker:
+    image: busybox:latest
+    command: >
+      sh -c "
+        echo 'Waiting {{ .VLStartGracePeriod }} secs of grace period before start validator';
+        sleep {{ .VLStartGracePeriod }};
+        echo 'Done';
+      "
+{{ end }}
