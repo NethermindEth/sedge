@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for Erigon as Execution Client
+- Support for Besu as Execution Client
+
 ### Fixed
 
 - Fix inconsistent behavior of `AssignPorts` function test.
@@ -50,7 +55,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Drop support for deprecated networks. (Kiln, Ropsten, Denver).
 - Update Chiado testnet configs.
-- Sedge uses its own mechanism for keystore generation with `sedge keys` instead of the staking-deposit-cli tool. This is experimental and staking-deposit-cli is still being used for mainnet.
+- Sedge uses its own mechanism for keystore generation with `sedge keys` instead of the staking-deposit-cli tool. This
+  is experimental and staking-deposit-cli is still being used for mainnet.
 - Updated docker image tags for all clients except Teku.
 
 ### Fixed
@@ -77,7 +83,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prysm and Lodestar can use now an undefined number of Bootnodes.
 - Allow providing a number for `--tail` flag of `logs` command, e.g: `sedge logs --tail 50`
 - Remove `mainnet` service templates and use `merge` service templates for Mainnet network.
-- `checkpoint-sync-url` can now be set separately for every consensus client of a network using `CHECKPOINT_SYNC_URL` as env variabe in the consensus client templates.
+- `checkpoint-sync-url` can now be set separately for every consensus client of a network using `CHECKPOINT_SYNC_URL` as
+  env variabe in the consensus client templates.
 - Use fixed docker images with latest tested versions.
 - Change Prater to Goerli.
 
@@ -119,7 +126,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix bad checks for compose availability.
-- Stop running Lighthouse with mev-boost settings on Ropsten. Official and stable docker image doesn't support mev-boost yet.
+- Stop running Lighthouse with mev-boost settings on Ropsten. Official and stable docker image doesn't support mev-boost
+  yet.
 - Fix compose installation. Now compose is installed on root user, as sedge runs everything using sudo currently.
 - Fix track sync of nodes stoping early.
 
@@ -139,7 +147,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Create cli tool able to set up a Ethereum based validator in an on-premise way.
 - Generate `docker-compose` scripts and `.env` files for selected clients with the `cli` command.
-- Generate keystore folder with the cli using `keys` command. The inner tool used for this is the [staking-deposit-cli](https://github.com/ethereum/staking-deposit-cli) tool.
+- Generate keystore folder with the cli using `keys` command. The inner tool used for this is
+  the [staking-deposit-cli](https://github.com/ethereum/staking-deposit-cli) tool.
 - Generate `jwtsecret` for post-merge networks.
 - Test coverage (unit tests).
 - Integrate Kiln network.
