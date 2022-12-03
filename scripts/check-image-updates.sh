@@ -7,6 +7,7 @@ cd ../execution
 NETH_CURR=$(cat nethermind.tmpl | grep -o -P '(?<=:).*?(?={)')
 GETH_CURR=$(cat geth.tmpl | grep -o -P '(?<=:).*?(?={)')
 ERIGON_CURR=$(cat erigon.tmpl | grep -o -P '(?<=:).*?(?={)')
+BESU_CURR=$(cat besu.tmpl | grep -o -P '(?<=:).*?(?={)')
 cd ../../gnosis/
 PRYSM_VAL_CURR=$(cat validator/prysm.tmpl | grep -o -P '(?<=:).*?(?={)')
 PRYSM_BCN_CURR=$(cat consensus/prysm.tmpl | grep -o -P '(?<=:).*?(?={)')
@@ -19,6 +20,7 @@ TEKU_LATEST=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/re
 NETH_LATEST=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/NethermindEth/nethermind/releases/latest | jq -r ".tag_name")
 GETH_LATEST=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/ethereum/go-ethereum/releases/latest | jq -r ".tag_name")
 ERIGON_LATEST=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/ledgerwatch/erigon/releases/latest | jq -r ".tag_name")
+BESU_LATEST=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/hyperledger/besu/releases/latest | jq -r ".tag_name")
 cd ..
 
 if [[ $LIGHTHOUSE_CURR < $LIGHTHOUSE_LATEST ]]; then
@@ -69,9 +71,17 @@ if [[ $GETH_CURR < $GETH_LATEST ]]; then
     sed -i "s/$GETH_CURR/$GETH_LATEST/g" $i; 
     done
 fi
+
 if [[ $ERIGON_CURR < $ERIGON_LATEST ]]; then
     echo "New version of Erigon is available. Current version: $ERIGON_CURR, new version: $ERIGON_LATEST"
     for i in '**/**/erigon.tmpl'; do
     sed -i "s/$ERIGON_CURR/$ERIGON_LATEST/g" $i;
+    done
+fi
+
+if [[ $BESU_CURR < $BESU_LATEST ]]; then
+    echo "New version of Besu is available. Current version: $BESU_CURR, new version: $BESU_LATEST"
+    for i in '**/**/besu.tmpl'; do
+    sed -i "s/$BESU_CURR/$BESU_LATEST/g" $i;
     done
 fi

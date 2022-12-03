@@ -126,7 +126,7 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
-|            | Teku       | Teku       |
+| Besu       | Teku       | Teku       |
 
 ### Sepolia
 
@@ -135,7 +135,7 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
-|            | Teku       | Teku       |
+| Besu       | Teku       | Teku       |
 
 ### Goerli
 
@@ -144,7 +144,7 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
-|            | Teku       | Teku       |
+| Besu       | Teku       | Teku       |
 
 ### Gnosis
 
@@ -221,11 +221,14 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Support for Gnosis Merge
 - [x] Bug fixes
 
+### Version 0.6
+
+- [x] Besu and Erigon support
+- [x] Set up and run only one node (execution/consensus/validator)
+
 ### Version 0.X
 
-- [ ] Set up and run only one node (execution/consensus/validator)
 - [ ] Grafana and Prometheus support for the clients
-- [ ] Besu and Erigon support
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
 - [ ] Cross platform support and documentation
 - [ ] More tests!!!
@@ -240,6 +243,7 @@ Full Ethereum PoS support with MEV-Boost
 - [ ] Integrate other PoS networks
 - [ ] TUI for guided and more interactive setup (better UX)
 - [ ] Off-premise setup support
+
 ## 💪 Want to contribute?
 
 Please check our Contributing Guidelines, Code of Conduct and our issues. In case you want to report or suggest something (any help is welcome), please file an issue first so that the main team is aware and can discuss it.
