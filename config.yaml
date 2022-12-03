@@ -4,6 +4,7 @@ dependencies:
 executionClients:
   - nethermind
   - geth
+  - erigon
   - besu
 
 consensusClients:

@@ -81,7 +81,7 @@ Check all the options and flags with `sedge cli --help`. More instructions or gu
 
 As people who actively deployed validators way before The Merge, we know how hard it is to set up an Ethereum validator:
 
-- You need to procure at least three (compatible) nodes: an execution node (geth, nethermind, besu, etc), a consensus node, and a validator node (lighthouse, prysm, etc)
+- You need to procure at least three (compatible) nodes: an execution node (geth, nethermind, erigon, etc), a consensus node, and a validator node (lighthouse, prysm, etc)
 - You then need to execute them, connect them, monitor them, and secure the validator keys (which includes staking 32 ETH).
 - There may be several valid combinations of clients to choose for your setup, so you need to go through each of the client's docs, evaluate it, get instructions for it and test it. You also need to feel comfortable executing commands in the cli, know docker, and understand basics of networking. On top of this, there are many different settings you must read up on and consider for your client node.
 - In the case of working with the Ethereum Mainnet, you are working with real money that can potentially be lost in the event of having downtime or being slashed. To avoid losing real value, you must be aware of and follow best practices on the validator setup, and correctly monitor your nodes.
@@ -125,8 +125,8 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | ---------- | ---------- | ---------- |
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
-| Besu       | Prysm      | Prysm      |
-|            | Teku       | Teku       |
+| Erigon     | Prysm      | Prysm      |
+| Besu       | Teku       | Teku       |
 
 ### Sepolia
 
@@ -134,8 +134,8 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | ---------- | ---------- | ---------- |
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
-| Besu       | Prysm      | Prysm      |
-|            | Teku       | Teku       |
+| Erigon     | Prysm      | Prysm      |
+| Besu       | Teku       | Teku       |
 
 ### Goerli
 
@@ -143,8 +143,8 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | ---------- | ---------- | ---------- |
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
-| Besu       | Prysm      | Prysm      |
-|            | Teku       | Teku       |
+| Erigon     | Prysm      | Prysm      |
+| Besu       | Teku       | Teku       |
 
 ### Gnosis
 
@@ -221,11 +221,14 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Support for Gnosis Merge
 - [x] Bug fixes
 
+### Version 0.6
+
+- [x] Besu and Erigon support
+- [x] Set up and run only one node (execution/consensus/validator)
+
 ### Version 0.X
 
-- [ ] Set up and run only one node (execution/consensus/validator)
 - [ ] Grafana and Prometheus support for the clients
-- [ ] Besu and Erigon support
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
 - [ ] Cross platform support and documentation
 - [ ] More tests!!!
@@ -240,6 +243,7 @@ Full Ethereum PoS support with MEV-Boost
 - [ ] Integrate other PoS networks
 - [ ] TUI for guided and more interactive setup (better UX)
 - [ ] Off-premise setup support
+
 ## 💪 Want to contribute?
 
 Please check our Contributing Guidelines, Code of Conduct and our issues. In case you want to report or suggest something (any help is welcome), please file an issue first so that the main team is aware and can discuss it.
