@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Erigon as Execution Client
 - Support for Besu as Execution Client
 
+### Fixed
+
+- Fix inconsistent behavior of `AssignPorts` function test.
+
 ## [v0.5.1] - 2022-12-2
 
 ### Fixed
