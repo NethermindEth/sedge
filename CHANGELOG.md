@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for Besu as Execution Client
+
 ## [v0.5.1] - 2022-12-2
 
 ### Fixed

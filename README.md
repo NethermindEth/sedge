@@ -81,7 +81,7 @@ Check all the options and flags with `sedge cli --help`. More instructions or gu
 
 As people who actively deployed validators way before The Merge, we know how hard it is to set up an Ethereum validator:
 
-- You need to procure at least three (compatible) nodes: an execution node (geth, nethermind, etc), a consensus node, and a validator node (lighthouse, prysm, etc)
+- You need to procure at least three (compatible) nodes: an execution node (geth, nethermind, besu, etc), a consensus node, and a validator node (lighthouse, prysm, etc)
 - You then need to execute them, connect them, monitor them, and secure the validator keys (which includes staking 32 ETH).
 - There may be several valid combinations of clients to choose for your setup, so you need to go through each of the client's docs, evaluate it, get instructions for it and test it. You also need to feel comfortable executing commands in the cli, know docker, and understand basics of networking. On top of this, there are many different settings you must read up on and consider for your client node.
 - In the case of working with the Ethereum Mainnet, you are working with real money that can potentially be lost in the event of having downtime or being slashed. To avoid losing real value, you must be aware of and follow best practices on the validator setup, and correctly monitor your nodes.
@@ -125,7 +125,7 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | ---------- | ---------- | ---------- |
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
-|            | Prysm      | Prysm      |
+| Besu       | Prysm      | Prysm      |
 |            | Teku       | Teku       |
 
 ### Sepolia
@@ -134,7 +134,7 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | ---------- | ---------- | ---------- |
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
-|            | Prysm      | Prysm      |
+| Besu       | Prysm      | Prysm      |
 |            | Teku       | Teku       |
 
 ### Goerli
@@ -143,7 +143,7 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | ---------- | ---------- | ---------- |
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
-|            | Prysm      | Prysm      |
+| Besu       | Prysm      | Prysm      |
 |            | Teku       | Teku       |
 
 ### Gnosis
