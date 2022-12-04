@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed validator restart failure.
   - Validator waits a grace period (2 epochs) before starting.
   - Validator waits for the consensus sync to finish.
-  - Validator restart unless stopped.
+  - Validator service now always restarts unless stopped.
 
 ## [v0.4.0] - 2022-10-25
 
