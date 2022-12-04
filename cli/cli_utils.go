@@ -105,7 +105,43 @@ func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error
 	return combinedClients, nil
 }
 
-func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliCmdFlags) (clients.Clients, error) {
+func validateClientsForRun(allClients clients.OrderedClients, w io.Writer, flags *RunCmdFlags) (clients.Client, error) {
+	var err error
+
+	// Select a random execution client, consensus client and validator client
+	randomizedClients, err := randomizeClients(allClients)
+	if err != nil {
+		return clients.Client{}, err
+	}
+
+	if flags.nodeValue == "" {
+		switch flags.nodeType {
+		case consensus:
+			log.Warn(configs.ConsensusClientNotSpecifiedWarn)
+			flags.nodeValue = randomizedClients.Consensus.Name
+		case execution:
+			flags.nodeValue = randomizedClients.Execution.Name
+			log.Warnf(configs.ExecutionClientNotSpecifiedWarn, randomizedClients.Execution.Name)
+		case validator:
+			flags.nodeValue = randomizedClients.Validator.Name
+			log.Warn(configs.ValidatorClientNotSpecifiedWarn)
+			break
+		}
+	}
+
+	node, ok := allClients[flags.nodeType][flags.nodeValue]
+	if !ok {
+		node.Name = flags.nodeValue
+	}
+
+	if err = clients.ValidateClient(node, flags.nodeType); err != nil {
+		return node, err
+	}
+
+	return node, nil
+}
+
+func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CmdFlags) (clients.Clients, error) {
 	var combinedClients clients.Clients
 	var err error
 
@@ -168,7 +204,7 @@ func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliC
 	return combinedClients, nil
 }
 
-func runScriptOrExit(flags *CliCmdFlags) (err error) {
+func runScriptOrExit(flags *CmdFlags) (err error) {
 	// notest
 	log.Infof(configs.InstructionsFor, "running docker-compose script")
 	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
@@ -196,7 +232,7 @@ func runScriptOrExit(flags *CliCmdFlags) (err error) {
 }
 
 // TODO: use flags.services instead a separated arg
-func runAndShowContainers(services []string, flags *CliCmdFlags) error {
+func runAndShowContainers(services []string, flags *CmdFlags) error {
 	// TODO: (refac) Put this check to checks.go and call it from there
 	// Check if docker engine is on
 	log.Info(configs.CheckingDockerEngine)
@@ -277,7 +313,7 @@ func parseNetwork(js string) (string, error) {
 	return "", errors.New(configs.IPNotFoundError)
 }
 
-func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
+func getContainerIP(service string, flags *CmdFlags) (ip string, err error) {
 	// Run docker compose ps --quiet <service> to show service's ID
 	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
 		Path:        filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
@@ -306,7 +342,7 @@ func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
 	return
 }
 
-func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flags *CliCmdFlags) error {
+func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flags *CmdFlags) error {
 	done := make(chan struct{})
 	defer close(done)
 
@@ -361,7 +397,7 @@ func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flag
 	return nil
 }
 
-func RunValidatorOrExit(flags *CliCmdFlags) error {
+func RunValidatorOrExit(flags *CmdFlags) error {
 	// notest
 	log.Infof(configs.InstructionsFor, "running validator service of docker-compose script")
 	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
@@ -388,7 +424,7 @@ func RunValidatorOrExit(flags *CliCmdFlags) error {
 	return nil
 }
 
-func handleJWTSecret(flags *CliCmdFlags) error {
+func handleJWTSecret(flags *CmdFlags) error {
 	log.Info(configs.GeneratingJWTSecret)
 
 	// Create scripts directory if not exists
@@ -431,7 +467,7 @@ func handleJWTSecret(flags *CliCmdFlags) error {
 	return nil
 }
 
-func preRunTeku(flags *CliCmdFlags) error {
+func preRunTeku(flags *CmdFlags) error {
 	log.Info(configs.PreparingTekuDatadir)
 	// Change umask to avoid OS from changing the permissions
 	syscall.Umask(0)

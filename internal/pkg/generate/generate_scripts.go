@@ -164,54 +164,65 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 		return "", err
 	}
 
-	// Check for custom network config
-	ccRemoteCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient.Name)
-	if err != nil {
-		return "", err
-	}
-	ccRemoteGen, err := env.CheckVariable(env.ReGENESIS, gd.Network, "consensus", gd.ConsensusClient.Name)
-	if err != nil {
-		return "", err
-	}
-	ccRemoteDpl, err := env.CheckVariable(env.ReDEPLOY, gd.Network, "consensus", gd.ConsensusClient.Name)
-	if err != nil {
-		return "", err
+	// Check vars related to Consensus service
+	var ccRemoteCfg, ccRemoteGen, ccRemoteDpl, xeeVersion, clCheckpointSyncUrl bool
+	var bootnodes []string
+
+	if !gd.ConsensusClient.Omited {
+		// Check for custom network config
+		ccRemoteCfg, err = env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient.Name)
+		if err != nil {
+			return "", err
+		}
+		ccRemoteGen, err = env.CheckVariable(env.ReGENESIS, gd.Network, "consensus", gd.ConsensusClient.Name)
+		if err != nil {
+			return "", err
+		}
+		ccRemoteDpl, err = env.CheckVariable(env.ReDEPLOY, gd.Network, "consensus", gd.ConsensusClient.Name)
+		if err != nil {
+			return "", err
+		}
+		// Check for XEE_VERSION in teku
+		xeeVersion, err = env.CheckVariable(env.ReXEEV, gd.Network, "consensus", gd.ConsensusClient.Name)
+		if err != nil {
+			return "", err
+		}
+
+		clCheckpointSyncUrl, err = env.CheckVariable(env.ReCHECKPOINT, gd.Network, "consensus", gd.ConsensusClient.Name)
+		if err != nil {
+			return "", err
+		}
+
+		// Check for Bootstrap nodes
+		bootnodes, err = env.GetBootnodes(gd.Network, gd.ConsensusClient.Name)
+		if err != nil {
+			return "", err
+		}
 	}
 
-	vlRemoteCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient.Name)
-	if err != nil {
-		return "", err
-	}
-	vlRemoteGen, err := env.CheckVariable(env.ReGENESIS, gd.Network, "validator", gd.ValidatorClient.Name)
-	if err != nil {
-		return "", err
-	}
-	vlRemoteDpl, err := env.CheckVariable(env.ReDEPLOY, gd.Network, "validator", gd.ValidatorClient.Name)
-	if err != nil {
-		return "", err
-	}
+	// Check vars related to Validator service
+	var vlRemoteCfg, vlRemoteGen, vlRemoteDpl, mev bool
 
-	// Check for XEE_VERSION in teku
-	xeeVersion, err := env.CheckVariable(env.ReXEEV, gd.Network, "consensus", gd.ConsensusClient.Name)
-	if err != nil {
-		return "", err
-	}
+	if !gd.ValidatorClient.Omited {
+		vlRemoteCfg, err = env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient.Name)
+		if err != nil {
+			return "", err
+		}
+		vlRemoteGen, err = env.CheckVariable(env.ReGENESIS, gd.Network, "validator", gd.ValidatorClient.Name)
+		if err != nil {
+			return "", err
+		}
+		vlRemoteDpl, err = env.CheckVariable(env.ReDEPLOY, gd.Network, "validator", gd.ValidatorClient.Name)
+		if err != nil {
+			return "", err
+		}
 
-	// Check for Mev
-	mev, err := env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient.Name)
-	if err != nil {
-		return "", err
-	}
+		// Check for Mev
+		mev, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient.Name)
+		if err != nil {
+			return "", err
+		}
 
-	// Check for Bootstrap nodes
-	bootnodes, err := env.GetBootnodes(gd.Network, gd.ConsensusClient.Name)
-	if err != nil {
-		return "", err
-	}
-
-	clCheckpointSyncUrl, err := env.CheckVariable(env.ReCHECKPOINT, gd.Network, "consensus", gd.ConsensusClient.Name)
-	if err != nil {
-		return "", err
 	}
 
 	data := DockerComposeData{
