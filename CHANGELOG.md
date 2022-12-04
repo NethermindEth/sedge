@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix inconsistent behavior of `AssignPorts` function test.
+- When generating new mnemonic, show it without a trace (linux, MacOS).
 
 ## [v0.5.1] - 2022-12-2
 
@@ -39,7 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add missing `depends_on` tag to lodestar validator.
 - Fix wrong fork version in Gnosis network config.
-- When generating new mnemonic, show it without a trace (linux, MacOS).
 
 ## [v0.4.0] - 2022-10-25
 
