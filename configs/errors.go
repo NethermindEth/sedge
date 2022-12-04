@@ -96,4 +96,5 @@ const (
 	InvalidNumberOfValidatorsError    = "invalid number of validators: %v"
 	NumberOfValidatorsRetryError      = "provided numbers do not match"
 	InvalidLoggingFlag                = "bad logging flag: %v"
+	ShowMnemonicError                 = "error displaying mnemonic: %v"
 )

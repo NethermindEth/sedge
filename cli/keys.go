@@ -166,18 +166,21 @@ func KeysCmd(prompt prompts.Prompt) *cobra.Command {
 func saveMnemonic(mnemonic string) error {
 	file, err := ioutil.TempFile(os.TempDir(), "sedge_mnemonic")
 	if err != nil {
-		return err
+		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
 	defer os.Remove(file.Name())
 	if _, err := file.WriteString(fmt.Sprintf("Mnemonic:\n\n%s\n\n", mnemonic)); err != nil {
-		return fmt.Errorf("error writing mnemonic to tempfile: %v", err)
+		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
 	if err := file.Sync(); err != nil {
-		return fmt.Errorf("error writing mnemonic to tempfile: %v", err)
+		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
 	openTextEditorCmd := commands.Runner.BuildOpenTextEditor(commands.OpenTextEditorOptions{
 		FilePath: file.Name(),
 	})
 	_, err = commands.Runner.RunCMD(openTextEditorCmd)
-	return err
+	if err != nil {
+		return fmt.Errorf(configs.ShowMnemonicError, err)
+	}
+	return nil
 }
