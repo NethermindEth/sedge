@@ -145,7 +145,7 @@ func (cr *UnixCMDRunner) BuildOpenTextEditor(options OpenTextEditorOptions) Comm
 }
 
 func (cr *UnixCMDRunner) RunCMD(cmd Command) (string, error) {
-	if cr.RunWithSudo {
+	if cr.RunWithSudo && !cmd.ForceNoSudo {
 		log.Debug(`Running command with sudo.`)
 		cmd.Cmd = fmt.Sprintf("sudo %s", cmd.Cmd)
 	} else {

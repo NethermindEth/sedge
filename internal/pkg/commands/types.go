@@ -25,6 +25,8 @@ type Command struct {
 	GetOutput bool
 	// RunInPty : run command in a pty
 	RunInPty bool
+	// ForceNoSudo : force the command to not be run with sudo
+	ForceNoSudo bool
 }
 
 // BashScript : Represents a script to be executed

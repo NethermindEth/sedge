@@ -169,18 +169,24 @@ func saveMnemonic(mnemonic string) error {
 		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
 	defer os.Remove(file.Name())
+
 	if _, err := file.WriteString(fmt.Sprintf(configs.MnemonicPresentation, mnemonic)); err != nil {
 		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
+
 	if err := file.Sync(); err != nil {
 		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
+
 	openTextEditorCmd := commands.Runner.BuildOpenTextEditor(commands.OpenTextEditorOptions{
 		FilePath: file.Name(),
 	})
+	openTextEditorCmd.ForceNoSudo = true
+
 	_, err = commands.Runner.RunCMD(openTextEditorCmd)
 	if err != nil {
 		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
+
 	return nil
 }
