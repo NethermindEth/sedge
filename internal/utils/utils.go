@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -118,7 +119,7 @@ func IsAddress(a string) bool {
 }
 
 /*
-AssingPorts :
+AssignPorts :
 Checks if port is occupied in a given host
 
 params :-
@@ -131,11 +132,18 @@ returns :-
 a. bool
 True if <port> is available. False otherwise
 */
-func AssingPorts(host string, defaults map[string]string) (ports map[string]string, err error) {
+func AssignPorts(host string, defaults map[string]string) (ports map[string]string, err error) {
 	ports = make(map[string]string)
 	mask := make(map[string]bool)
 
-	for k, v := range defaults {
+	keys := make([]string, 0, len(defaults))
+	for k := range defaults {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		v := defaults[k]
 		if v == "" {
 			return ports, fmt.Errorf(configs.DefaultPortEmptyError, k)
 		}
@@ -169,7 +177,7 @@ a. bool
 True if <port> is available. False otherwise
 */
 func portAvailable(host, port string, timeout time.Duration) bool {
-	log.Debugf("Checking port ocuppation of %s\n", net.JoinHostPort(host, port))
+	log.Debugf("Checking port occupation of %s\n", net.JoinHostPort(host, port))
 	conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, port), timeout)
 	if err != nil {
 		log.Debugf("Port seems available, got connecting error: %v", err)
