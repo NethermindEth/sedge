@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add missing `depends_on` tag to lodestar validator.
 - Fix wrong fork version in Gnosis network config.
-- Show mnemonic without a trace (linux, MacOS).
+- When generating new mnemonic, show it without a trace (linux, MacOS).
 
 ## [v0.4.0] - 2022-10-25
 
