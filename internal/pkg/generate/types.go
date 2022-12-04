@@ -101,6 +101,8 @@ type DockerComposeData struct {
 	VLStartGracePeriod  uint
 }
 
+// WithConsensusClient returns true if the consensus client is explicitly required
+// by the user, with the --run-clients flag.
 func (d DockerComposeData) WithConsensusClient() bool {
 	for _, service := range d.Services {
 		if service == "consensus" {
