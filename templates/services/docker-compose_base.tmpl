@@ -32,8 +32,8 @@ services:
         max-size: "10m"
         max-file: "10"{{end}}{{end}}
 {{template "consensus" .}}
-{{template "validator" .}}
 {{template "validator-blocker" .}}
+{{template "validator" .}}
 
 networks:
   sedge:
