@@ -7,13 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed 
+
+- Fixed validator restart failure.
+  - Validator waits a grace period (2 epochs) before starting.
+  - Validator waits for the consensus sync to finish.
+  - Validator service now always restarts unless stopped.
+
 ## [v0.5.0] - 2022-11-29
 
 ### Added
 
 - Add checkpoint sync url for Chiado.
 
-### Changed 
+### Changed
 
 - Update Gnosis and Chiado networks default clients images to merge ready versions.
 - Update client versions.
@@ -23,10 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add missing `depends_on` tag to lodestar validator.
 - Fix wrong fork version in Gnosis network config.
-- Fixed validator restart failure.
-  - Validator waits a grace period (2 epochs) before starting.
-  - Validator waits for the consensus sync to finish.
-  - Validator service now always restarts unless stopped.
 
 ## [v0.4.0] - 2022-10-25
 
