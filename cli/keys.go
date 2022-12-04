@@ -169,7 +169,7 @@ func saveMnemonic(mnemonic string) error {
 		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
 	defer os.Remove(file.Name())
-	if _, err := file.WriteString(fmt.Sprintf("Mnemonic:\n\n%s\n\n", mnemonic)); err != nil {
+	if _, err := file.WriteString(fmt.Sprintf(configs.MnemonicPresentation, mnemonic)); err != nil {
 		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
 	if err := file.Sync(); err != nil {
