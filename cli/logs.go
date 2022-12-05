@@ -27,54 +27,57 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var tail int
-
-// logsCmd represents the logs command
-var logsCmd = &cobra.Command{
-	Use:   "logs [flags] [services]",
-	Short: "Get running container logs",
-	Long: `Get running container logs using docker-compose CLI. If no services are provided, the logs of all running services will be displayed.
-
-By default will run 'docker compose -f <script> logs --follow <service>'`,
-	Run: func(cmd *cobra.Command, args []string) {
-		var err error
-		if err = utils.PreCheck(generationPath); err != nil {
-			log.Fatal(err)
-		}
-
-		var rawServices string
-		if rawServices, err = utils.CheckContainers(generationPath); err != nil {
-			log.Fatal(err)
-		}
-
-		file := filepath.Join(generationPath, configs.DefaultDockerComposeScriptName)
-		// Get logs from docker compose script services
-		services := strings.Split(rawServices, "\n")
-		// Remove empty string resulting of spliting the last blank line of rawServices
-		services = services[:len(services)-1]
-		if len(args) > 0 {
-			services = args
-		}
-
-		logsCMD := commands.Runner.BuildDockerComposeLogsCMD(commands.DockerComposeLogsOptions{
-			Path:     file,
-			Services: services,
-			Follow:   tail == 0,
-			Tail:     tail,
-		})
-
-		log.Debugf(configs.RunningCommand, logsCMD.Cmd)
-		if _, err := commands.Runner.RunCMD(logsCMD); err != nil {
-			log.Fatalf(configs.GettingLogsError, strings.Join(services, " "), err)
-		}
-	},
+type LogsCmdFlags struct {
+	path string
+	tail int
 }
 
-func init() {
-	rootCmd.AddCommand(logsCmd)
+func LogsCmd() *cobra.Command {
+	// Flags
+	var flags LogsCmdFlags
+	// Build command
+	cmd := &cobra.Command{
+		Use:   "logs [flags] [services]",
+		Short: "Get running container logs",
+		Long: `Get running container logs using docker-compose CLI. If no services are provided, the logs of all running services will be displayed.
+	
+	By default will run 'docker compose -f <script> logs --follow <service>'`,
+		Run: func(cmd *cobra.Command, args []string) {
+			var err error
+			if err = utils.PreCheck(flags.path); err != nil {
+				log.Fatal(err)
+			}
 
-	// Local flags
-	logsCmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultSedgeDataPath, "docker-compose script path")
+			var rawServices string
+			if rawServices, err = utils.CheckContainers(flags.path); err != nil {
+				log.Fatal(err)
+			}
 
-	logsCmd.Flags().IntVarP(&tail, "tail", "t", 0, "Tail the number of desired logs. If not set, or set to 0, logs are followed.")
+			file := filepath.Join(flags.path, configs.DefaultDockerComposeScriptName)
+			// Get logs from docker compose script services
+			services := strings.Split(rawServices, "\n")
+			// Remove empty string resulting of spliting the last blank line of rawServices
+			services = services[:len(services)-1]
+			if len(args) > 0 {
+				services = args
+			}
+
+			logsCMD := commands.Runner.BuildDockerComposeLogsCMD(commands.DockerComposeLogsOptions{
+				Path:     file,
+				Services: services,
+				Follow:   flags.tail == 0,
+				Tail:     flags.tail,
+			})
+
+			log.Debugf(configs.RunningCommand, logsCMD.Cmd)
+			if _, err := commands.Runner.RunCMD(logsCMD); err != nil {
+				log.Fatalf(configs.GettingLogsError, strings.Join(services, " "), err)
+			}
+		},
+	}
+	// Bind flags
+	cmd.Flags().StringVarP(&flags.path, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose script path")
+	cmd.Flags().IntVarP(&flags.tail, "tail", "t", 0, "Tail the number of desired logs. If not set, or set to 0, logs are followed.")
+
+	return cmd
 }

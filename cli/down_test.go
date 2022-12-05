@@ -21,7 +21,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/test"
 	log "github.com/sirupsen/logrus"
@@ -37,7 +36,6 @@ type downCmdTestCase struct {
 
 func resetDownCmd() {
 	cfgFile = ""
-	generationPath = configs.DefaultSedgeDataPath
 }
 
 func buildDownTestCase(t *testing.T, caseName string, isErr bool) *downCmdTestCase {
@@ -86,6 +84,8 @@ func TestDownCmd(t *testing.T) {
 
 	for _, tc := range tcs {
 		resetDownCmd()
+		rootCmd := RootCmd()
+		rootCmd.AddCommand(DownCmd())
 		rootCmd.SetArgs([]string{"down", "--config", tc.configPath, "--path", tc.generationPath})
 		rootCmd.SetOut(tc.fdOut)
 		log.SetOutput(tc.fdOut)

@@ -151,7 +151,25 @@ func (p *promptCli) Eth1Withdrawal() (string, error) {
 		return "", fmt.Errorf(configs.PromptFailedError, err)
 	}
 	return result, nil
+}
 
-	// flags.eth1WithdrawalAddress = result
-	// return nil
+func (p *promptCli) FeeRecipient() (string, error) {
+	// notest
+	validate := func(input string) error {
+		if input != "" && !utils.IsAddress(input) {
+			return errors.New(configs.InvalidFeeRecipientError)
+		}
+		return nil
+	}
+
+	prompt := promptui.Prompt{
+		Label:    "Please enter the Fee Recipient address. You can leave it blank and press enter (not recommended)",
+		Validate: validate,
+	}
+
+	result, err := prompt.Run()
+	if err != nil {
+		return "", fmt.Errorf(configs.PromptFailedError, err)
+	}
+	return result, nil
 }

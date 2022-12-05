@@ -61,7 +61,7 @@ func cleanFlags(rawFlags any) any {
 		}
 
 		result := ReFlag.FindStringSubmatch(flagString) // Check if element its a valid flag
-		if result != nil && len(result) >= 3 {
+		if len(result) >= 3 {
 			flag := result[1]           // Get flag name
 			existingFlags[flag] = index // Save latest apparition for the flag name
 		}
@@ -73,7 +73,7 @@ func cleanFlags(rawFlags any) any {
 	for index, flagElem := range flagsElems {
 		flagString := flagElem.(string)
 		result := ReFlag.FindStringSubmatch(flagString) // Check if element its a valid flag
-		if result != nil && len(result) >= 3 {
+		if len(result) >= 3 {
 			flag := result[1]
 			if !protectedFlags[flag] && existingFlags[flag] != index { // Check if flag its not protected and its not latest apparition
 				continue // Remove duplicated flag
@@ -231,7 +231,7 @@ func CleanEnvFile(envFilePath string) error {
 			continue
 		}
 		result := ReENVVAR.FindStringSubmatch(line) // Check line its a valid variable
-		if result != nil && len(result) >= 3 {
+		if len(result) >= 3 {
 			envVar := result[1]            // Get var name
 			existingVars[(envVar)] = index // Save latest apparition for the var name
 		}
@@ -243,7 +243,7 @@ func CleanEnvFile(envFilePath string) error {
 			continue
 		}
 		result := ReENVVAR.FindStringSubmatch(line) // Check line its a valid variable
-		if result != nil && len(result) >= 3 {
+		if len(result) >= 3 {
 			envVar := result[1]
 			if existingVars[envVar] != index { // Check if its not latest apparition
 				continue // Remove duplicates

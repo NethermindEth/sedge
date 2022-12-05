@@ -65,6 +65,7 @@ func TestListClientsCmd(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			resetListClientsCmd()
+			rootCmd := RootCmd()
 			rootCmd.SetOut(tc.tableOut)
 			log.SetOutput(tc.logsOut)
 			args := []string{}

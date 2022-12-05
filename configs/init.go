@@ -54,7 +54,7 @@ func init() {
 			Name:               "gnosis",
 			RequireJWT:         true,
 			NetworkService:     "merge",
-			GenesisForkVersion: "0x0000006f",
+			GenesisForkVersion: "0x00000064",
 		},
 	}
 }
