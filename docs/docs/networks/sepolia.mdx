@@ -5,25 +5,17 @@ id: sepolia
 
 # Sepolia
 
-Sepolia is a proof-of-work (PoW) testnet where dApp developers can test their applications. What differentiates Sepolia
-from other Ethereum testnets is that most of its PoW validators are public validators. Combined with Sepolia being a
-testnet, this creates the chance that validators will stop validating and the chain will fail to finalize,
-making Sepolia one of the best testnets to see how decentralized applications will perform under the harshest conditions.
+Sepolia is a Proof-of-Stake(PoS) testnet where dApp developers can test their applications, and previously, was
+Proof-of-Work(PoW). What differentiates Sepolia from other Ethereum testnets is that most of its PoW validators
+are public validators. Combined with Sepolia being a testnet, this creates the chance that validators will stop
+validating and the chain will fail to finalize, making Sepolia one of the best testnets to see how decentralized
+applications will perform under the harshest conditions.
 
 ## Supported Consensus Clients
 - [Lighthouse](https://lighthouse-book.sigmaprime.io/)
 - [Lodestar](https://chainsafe.github.io/lodestar/)
 - [Prysm](https://docs.prylabs.network/docs/getting-started/)
 - [Teku](https://docs.teku.consensys.net/en/latest/)
-
-### MEV-Boost
-
-We support [mev-boost](https://github.com/flashbots/mev-boost) on mainnet by default, in case you want to remove it,
-run `sedge cli` using the `--no-mev-boost` flag, for example:
-
-```
-sedge cli --no-mev-boost=true
-```
 
 ## Supported Execution Clients
 - [Nethermind](https://docs.nethermind.io/)
@@ -34,6 +26,15 @@ sedge cli --no-mev-boost=true
 - [Lodestar](https://chainsafe.github.io/lodestar/)
 - [Prysm](https://docs.prylabs.network/docs/getting-started/)
 - [Teku](https://docs.teku.consensys.net/en/latest/)
+
+## MEV-Boost
+
+We support [mev-boost](https://github.com/flashbots/mev-boost) on sepolia by default, in case you want to remove it,
+run `sedge cli` using the `--no-mev-boost` flag, for example:
+
+```
+sedge cli --network=sepolia --no-mev-boost=true
+```
 
 ## Running a Full Node
 

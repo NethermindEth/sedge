@@ -6,23 +6,15 @@ id: goerli
 # Goerli
 
 Goerli is an Ethereum test network that allows for blockchain development testing before deployment on Mainnet, the
-main Ethereum network. The Proof-of-Authority test network was established in March 2019. It uses the Clique consensus
-mechanism and was originally proposed by Chainsafe and Afri Schoedon.
+main Ethereum network. The test network was established in March 2019 with Proof-of-Authority .It uses the Clique consensus
+mechanism and was originally proposed by Chainsafe and Afri Schoedon. Goerli has successfully transitioned to
+Proof-of-Stake following the network’s total block difficulty having crossed 10,079,000 on August 10.
 
 ## Supported Consensus Clients
 - [Lighthouse](https://lighthouse-book.sigmaprime.io/)
 - [Lodestar](https://chainsafe.github.io/lodestar/)
 - [Prysm](https://docs.prylabs.network/docs/getting-started/)
 - [Teku](https://docs.teku.consensys.net/en/latest/)
-
-### MEV-Boost
-
-We support [mev-boost](https://github.com/flashbots/mev-boost) on mainnet by default, in case you want to remove it,
-run `sedge cli` using the `--no-mev-boost` flag, for example:
-
-```
-sedge cli --no-mev-boost=true
-```
 
 ## Supported Execution Clients
 - [Nethermind](https://docs.nethermind.io/)
@@ -33,6 +25,15 @@ sedge cli --no-mev-boost=true
 - [Lodestar](https://chainsafe.github.io/lodestar/)
 - [Prysm](https://docs.prylabs.network/docs/getting-started/)
 - [Teku](https://docs.teku.consensys.net/en/latest/)
+
+## MEV-Boost
+
+We support [mev-boost](https://github.com/flashbots/mev-boost) on goerli by default, in case you want to remove it,
+run `sedge cli` using the `--no-mev-boost` flag, for example:
+
+```
+sedge cli --network goerli --no-mev-boost=true
+```
 
 ## Running a Full Node
 
