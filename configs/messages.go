@@ -15,6 +15,12 @@ limitations under the License.
 */
 package configs
 
+import (
+	"fmt"
+	"os"
+	"path"
+)
+
 // All the strings that are needed for debugging and info logging, and constant strings.
 const (
 	CheckingDependencies           = "Checking dependencies: %s"
@@ -28,7 +34,6 @@ const (
 	ProvideClients                 = "Please provide both execution client and consensus client"
 	CreatedFile                    = "Created file %s"
 	DefaultSedgeDataFolderName     = "sedge-data"
-	DefaultSedgeDataPath           = "./" + DefaultSedgeDataFolderName
 	OnPremiseExecutionURL          = "http://execution"
 	OnPremiseConsensusURL          = "http://consensus"
 	ClientNotSupported             = "client %s is not supported. Please use 'clients' command to see the list of supported clients"
@@ -118,3 +123,13 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 		"https://github.com/NethermindEth/sedge/releases for more information. Latest detected tag:"
 	VersionUpdated = "You are running the latest version of sedge. Version: "
 )
+
+var DefaultSedgeDataPath string
+
+func init() {
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
+	DefaultSedgeDataPath = path.Join(cwd, DefaultSedgeDataFolderName)
+}

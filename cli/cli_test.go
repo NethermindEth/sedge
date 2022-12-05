@@ -465,7 +465,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
 			},
 			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
+				generationPath: configs.DefaultSedgeDataPath,
 			},
 			true,
 		},
@@ -476,7 +476,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 			},
 			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
+				generationPath: configs.DefaultSedgeDataPath,
 			},
 			true,
 		},
@@ -487,7 +487,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
+				generationPath: configs.DefaultSedgeDataPath,
 			},
 			true,
 		},
@@ -498,7 +498,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
+				generationPath: configs.DefaultSedgeDataPath,
 			},
 			true,
 		},
@@ -509,7 +509,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
 			},
 			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
+				generationPath: configs.DefaultSedgeDataPath,
 			},
 			true,
 		},
@@ -520,7 +520,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 			},
 			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
+				generationPath: configs.DefaultSedgeDataPath,
 			},
 			true,
 		},
@@ -534,7 +534,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
 			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
+				generationPath: configs.DefaultSedgeDataPath,
 			},
 			false,
 		},
@@ -551,7 +551,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 			},
 			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
+				generationPath: configs.DefaultSedgeDataPath,
 			},
 			false,
 		},
@@ -565,7 +565,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
 			},
 			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
+				generationPath: configs.DefaultSedgeDataPath,
 			},
 			true,
 		},

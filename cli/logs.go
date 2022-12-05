@@ -76,7 +76,7 @@ func LogsCmd() *cobra.Command {
 		},
 	}
 	// Bind flags
-	cmd.Flags().StringVarP(&flags.path, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose script path")
+	cmd.Flags().StringVarP(&flags.path, "path", "p", configs.DefaultSedgeDataPath, "generation path for sedge data")
 	cmd.Flags().IntVarP(&flags.tail, "tail", "t", 0, "Tail the number of desired logs. If not set, or set to 0, logs are followed.")
 
 	return cmd

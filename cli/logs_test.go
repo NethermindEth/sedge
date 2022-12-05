@@ -18,6 +18,7 @@ package cli
 import (
 	"bytes"
 	"fmt"
+	"github.com/NethermindEth/sedge/configs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -56,7 +57,7 @@ func prepareLogsTestCaseConfigDir(name, dest string) (string, error) {
 }
 
 func prepareLogsTestCaseDCScripts(name, dest string) (string, error) {
-	caseDCScriptsPath := filepath.Join("testdata", "logs_tests", name, configs.DefaultSedgeDataFolderName)
+	caseDCScriptsPath := filepath.Join("testdata", "logs_tests", name, configs.DefaultSedgeDataPath)
 	dcPath := filepath.Join(dest, configs.DefaultSedgeDataFolderName)
 	if err := os.MkdirAll(dcPath, os.ModePerm); err != nil {
 		return "", err

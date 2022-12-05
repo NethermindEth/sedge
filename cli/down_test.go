@@ -17,6 +17,7 @@ package cli
 
 import (
 	"bytes"
+	"github.com/NethermindEth/sedge/configs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -47,7 +48,7 @@ func buildDownTestCase(t *testing.T, caseName string, isErr bool) *downCmdTestCa
 		t.Fatalf("Can't build test case: %v", err)
 	}
 
-	dcPath := filepath.Join(configPath, configs.DefaultSedgeDataFolderName)
+	dcPath := filepath.Join(configPath, configs.DefaultSedgeDataPath)
 	if err = os.Mkdir(dcPath, os.ModePerm); err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
