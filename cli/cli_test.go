@@ -30,11 +30,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var (
-	inspectExecutionUrl = "http://192.168.128.3"
-	inspectConsensusUrl = "http://192.168.128.3"
-)
-
 var inspectOut = `
 [
 	{
