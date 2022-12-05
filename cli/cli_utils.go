@@ -26,11 +26,9 @@ import (
 	"strings"
 	"syscall"
 	"text/template"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
-	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
@@ -38,17 +36,6 @@ import (
 	"github.com/NethermindEth/sedge/templates"
 	"github.com/manifoldco/promptui"
 )
-
-// Interface for Posmoni Eth2 monitor
-type MonitoringTool interface {
-	TrackSync(done <-chan struct{}, beaconEndpoints, executionEndpoints []string, wait time.Duration) <-chan posmoni.EndpointSyncStatus
-}
-
-var monitor MonitoringTool
-
-func initMonitor(builder func() MonitoringTool) {
-	monitor = builder()
-}
 
 func installOrShowInstructions(pending []string) (err error) {
 	// notest
@@ -304,61 +291,6 @@ func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
 
 	ip, err = parseNetwork(data)
 	return
-}
-
-func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flags *CliCmdFlags) error {
-	done := make(chan struct{})
-	defer close(done)
-
-	log.Info(configs.GettingContainersIP)
-	executionIP, errE := getContainerIP(execution, flags)
-	if errE != nil {
-		log.Errorf(configs.GetContainerIPError, execution, errE)
-	}
-	consensusIP, errC := getContainerIP(consensus, flags)
-	if errC != nil {
-		log.Errorf(configs.GetContainerIPError, consensus, errC)
-		if errE != nil {
-			// Both IP were not detected, both containers probably failed
-			return errors.New(configs.UnableToTrackSyncError)
-		}
-	}
-
-	consensusUrl := fmt.Sprintf("http://%s:%s", consensusIP, clPort)
-	executionUrl := fmt.Sprintf("http://%s:%s", executionIP, elPort)
-
-	statuses := m.TrackSync(done, []string{consensusUrl}, []string{executionUrl}, wait)
-
-	var esynced, csynced bool
-	// Threshold to stop tracking, to avoid false responses
-	times := 0
-	for s := range statuses {
-		if s.Error != nil {
-			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
-		}
-
-		if s.Endpoint == executionUrl {
-			esynced = s.Synced
-		} else if s.Endpoint == consensusUrl {
-			csynced = s.Synced
-		}
-
-		if esynced && csynced {
-			times++
-			// Stop tracking after consecutive synced reports
-			if times == 3 {
-				// Stop tracking
-				done <- struct{}{}
-				log.Info(configs.NodesSynced)
-				break // statuses channel might still have data before closing done channel
-			}
-		} else {
-			// Restart threshold
-			times = 0
-		}
-	}
-
-	return nil
 }
 
 func RunValidatorOrExit(flags *CliCmdFlags) error {
