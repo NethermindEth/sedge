@@ -59,6 +59,7 @@ func (run *RunCmdFlags) ToFlag() *CmdFlags {
 		clExtraFlags:      run.clExtraFlags,
 		vlExtraFlags:      run.vlExtraFlags,
 		logging:           run.logging,
+		services:          &[]string{run.nodeType},
 	}
 }
 
@@ -294,13 +295,13 @@ func runRunCmd(cmd *cobra.Command, args []string, flags *RunCmdFlags, clientImag
 
 	// If teku is chosen, then prepare datadir with 777 permissions
 	if nodeToRun.Name == "teku" {
-		if err = preRunTeku(flags.ToFlag()); err != nil {
+		if err = preRunTekuRunCmd(flags); err != nil {
 			return []error{err}
 		}
 	}
 
 	//if flags.run {
-	if err = runAndShowContainers(*flags.services, flags.ToFlag()); err != nil {
+	if err = runAndShowContainers([]string{flags.nodeValue}, flags.ToFlag()); err != nil {
 		return []error{err}
 	}
 	//} else {

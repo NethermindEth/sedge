@@ -473,19 +473,52 @@ func preRunTeku(flags *CmdFlags) error {
 	syscall.Umask(0)
 	for _, s := range *flags.services {
 		if s == "all" || s == consensus {
-			// Prepare consensus datadir
-			path := filepath.Join(flags.generationPath, configs.ConsensusDefaultDataDir)
-			if err := os.MkdirAll(path, 0o777); err != nil {
-				return fmt.Errorf(configs.TekuDatadirError, consensus, err)
+			err := prepareTekuConsensus(flags)
+			if err != nil {
+				return err
 			}
 		}
 		if s == "all" || s == validator {
-			// Prepare validator datadir
-			path := filepath.Join(flags.generationPath, configs.ValidatorDefaultDataDir)
-			if err := os.MkdirAll(path, 0o777); err != nil {
-				return fmt.Errorf(configs.TekuDatadirError, validator, err)
+			err := prepareTekuValidator(flags)
+			if err != nil {
+				return err
 			}
 		}
+	}
+	return nil
+}
+
+func preRunTekuRunCmd(flags *RunCmdFlags) error {
+	if flags.nodeType == consensus {
+		err := prepareTekuConsensus(flags.ToFlag())
+		if err != nil {
+			return err
+		}
+	}
+	if flags.nodeType == validator {
+		err := prepareTekuValidator(flags.ToFlag())
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func prepareTekuValidator(flags *CmdFlags) error {
+	// Prepare validator datadir
+	path := filepath.Join(flags.generationPath, configs.ValidatorDefaultDataDir)
+	if err := os.MkdirAll(path, 0o777); err != nil {
+		return fmt.Errorf(configs.TekuDatadirError, validator, err)
+	}
+	return nil
+}
+
+func prepareTekuConsensus(flags *CmdFlags) error {
+	// Prepare consensus datadir
+	path := filepath.Join(flags.generationPath, configs.ConsensusDefaultDataDir)
+	if err := os.MkdirAll(path, 0o777); err != nil {
+		return fmt.Errorf(configs.TekuDatadirError, consensus, err)
 	}
 	return nil
 }

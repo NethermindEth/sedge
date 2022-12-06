@@ -96,6 +96,7 @@ func (cli *CliCmdFlags) ToFlag() *CmdFlags {
 		clExtraFlags:      cli.clExtraFlags,
 		vlExtraFlags:      cli.vlExtraFlags,
 		logging:           cli.logging,
+		services:          cli.services,
 	}
 }
 
