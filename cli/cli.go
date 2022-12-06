@@ -40,7 +40,7 @@ import (
 
 const (
 	execution, consensus, validator = "execution", "consensus", "validator"
-	slashingDataFile                = "slashing-data.json"
+	slashingImportFile              = "slashing-import.json"
 )
 
 type CliCmdFlags struct {
@@ -323,7 +323,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		if _, err := os.Stat(flags.slashingProtection); err != nil {
 			return []error{err}
 		}
-		if err := copyFile(flags.slashingProtection, path.Join(flags.generationPath, slashingDataFile)); err != nil {
+		if err := copyFile(flags.slashingProtection, path.Join(flags.generationPath, configs.ValidatorDir, slashingImportFile)); err != nil {
 			return []error{err}
 		}
 	}

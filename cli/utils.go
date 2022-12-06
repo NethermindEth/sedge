@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -29,6 +30,9 @@ func copyFile(src, dst string) error {
 	}
 	defer source.Close()
 
+	if err := os.MkdirAll(path.Dir(dst), os.ModePerm); err != nil {
+		return err
+	}
 	destination, err := os.Create(dst)
 	if err != nil {
 		return err
