@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `sedge run` command. It allows the users to run a consensus, a validator or an execution node.
 - Support for Erigon as Execution Client
 - Support for Besu as Execution Client
 
