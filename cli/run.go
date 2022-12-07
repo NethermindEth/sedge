@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -91,38 +90,35 @@ func RunCmd(prompt prompts.Prompt) *cobra.Command {
 			images = *clientImages
 			return nil
 		},
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			// notest
 			if errs := runRunCmd(cmd, args, &flags, &images, prompt); len(errs) > 0 {
 				for _, err := range errs {
 					log.Error(err)
+					return err
 				}
-				os.Exit(1)
 			}
+			return nil
 		},
 	}
 
 	// Bind flags
-	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
-	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
-	cmd.Flags().StringVarP(&flags.validatorName, "validator", "v", "", "Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
 	cmd.Flags().StringVar(&flags.checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity")
 	cmd.Flags().StringVarP(&flags.network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, etc.")
 	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
-	cmd.Flags().StringVar(&flags.nodeType, "node-type", "", "Node to select")
-	cmd.Flags().StringVar(&flags.nodeValue, "node-value", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
+	cmd.Flags().StringVar(&flags.nodeType, "node-type", "", "Target node to run, select between consensus, execution or validator")
+	cmd.Flags().StringVar(&flags.nodeValue, "node-value", "", "Select the client you want to use in the node you are about to run. Example: 'sedge run --node-type execution --node-value nethermind'. Run 'sedge clients' for more details on each client according the network and type.")
 	cmd.Flags().BoolVar(&flags.noMev, "no-mev-boost", true, "Not use mev-boost if supported")
 	cmd.Flags().StringVarP(&flags.mevImage, "mev-boost-image", "m", "", "Custom docker image to use for Mev Boost. Example: 'sedge cli --mev-boost-image flashbots/mev-boost:latest-portable'")
 	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 	cmd.Flags().StringVar(&flags.graffiti, "graffiti", "", "Graffiti to be used by the validator")
 	cmd.Flags().BoolVarP(&flags.install, "install", "i", false, "Install dependencies if not installed without asking")
-	cmd.Flags().BoolVarP(&flags.yes, "yes", "y", false, "Shortcut for 'sedge cli -r -i --run'. Run without prompts")
 	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
 	flags.fallbackEL = cmd.Flags().StringSlice("fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge cli -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
-	flags.elExtraFlags = cmd.Flags().StringArray("el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge cli --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	flags.clExtraFlags = cmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge cli --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	flags.vlExtraFlags = cmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	flags.elExtraFlags = cmd.Flags().StringArray("el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge run --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	flags.clExtraFlags = cmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge run --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	flags.vlExtraFlags = cmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge run --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringVar(&flags.logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
 	err := cmd.MarkFlagRequired("node-type")
 	if err != nil {
@@ -138,7 +134,7 @@ func preRunRunCmd(cmd *cobra.Command, args []string, flags *RunCmdFlags) (*clien
 
 	// Validate run-clients flag
 	if !utils.ContainsOnly([]string{flags.nodeType}, []string{execution, consensus, validator}) {
-		return nil, fmt.Errorf(configs.RunClientsError, flags.nodeType, strings.Join([]string{execution, consensus, validator}, ","))
+		return nil, fmt.Errorf(configs.RunCmdError, flags.nodeType, strings.Join([]string{execution, consensus, validator}, ","))
 	}
 	// Validate network
 	networks, err := utils.SupportedNetworks()
@@ -300,46 +296,9 @@ func runRunCmd(cmd *cobra.Command, args []string, flags *RunCmdFlags, clientImag
 		}
 	}
 
-	//if flags.run {
 	if err = runAndShowContainers([]string{flags.nodeValue}, flags.ToFlag()); err != nil {
 		return []error{err}
 	}
-	//} else {
-	//	// Let the user decide to see the instructions for executing the scripts and exit or let the tool execute them
-	//	if err = runScriptOrExit(flags.ToFlag()); err != nil {
-	//		return []error{err}
-	//	}
-	//}
-	//
-	//if !flags.noValidator {
-	//	log.Info(configs.ValidatorTips)
-	//
-	//	// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service in the previous step
-	//	if !utils.Contains(*flags.services, validator) {
-	//		// Wait for clients to start
-	//		// log.Info(configs.WaitingForNodesToStart)
-	//		// time.Sleep(waitingTime)
-	//		// Track sync of execution and consensus clients
-	//		// TODO: Parameterize wait arg of trackSync
-	//		if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*5, flags.ToFlag()); err != nil {
-	//			return []error{err}
-	//		}
-	//
-	//		// TODO: Prompt for waiting for keystore and validator registration to run the validator
-	//		if flags.run {
-	//			if err = runAndShowContainers([]string{validator}, flags.ToFlag()); err != nil {
-	//				return []error{err}
-	//			}
-	//		} else {
-	//			// Let the user decide to see the instructions for executing the validator and exit or let the tool execute it
-	//			if err = RunValidatorOrExit(flags.ToFlag()); err != nil {
-	//				return []error{err}
-	//			}
-	//		}
-	//	}
-	//	log.Info(configs.HappyStaking)
-	//}
-
 	return nil
 }
 
