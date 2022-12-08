@@ -1,0 +1,10 @@
+{
+  "label": "Sedge cli Commands",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Overview of Sedge cli commands",
+    "slug": "commands"
+  }
+}
+
