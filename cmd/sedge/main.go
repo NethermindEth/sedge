@@ -27,7 +27,7 @@ import (
 func main() {
 	// Commands Runner
 	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{
-		RunAsAdmin: runtime.GOOS != "windows",
+		RunAsAdmin: runtime.GOOS == "linux",
 	})
 	// Prompt used to interact with the user input
 	prompt := prompts.NewPromptCli()
