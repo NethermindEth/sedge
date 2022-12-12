@@ -32,7 +32,9 @@ import (
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	"github.com/NethermindEth/sedge/internal/pkg/slashing"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/spf13/cobra"
@@ -75,7 +77,7 @@ type clientImages struct {
 	validator string
 }
 
-func CliCmd(prompt prompts.Prompt) *cobra.Command {
+func CliCmd(prompt prompts.Prompt, slashingManager slashing.SlashingDataManager) *cobra.Command {
 	// Initialize monitoring tool
 	initMonitor(func() MonitoringTool {
 		// Initialize Eth2 Monitoring tool
@@ -127,7 +129,7 @@ func CliCmd(prompt prompts.Prompt) *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			// notest
-			if errs := runCliCmd(cmd, args, &flags, &images, prompt); len(errs) > 0 {
+			if errs := runCliCmd(cmd, args, &flags, &images, prompt, slashingManager); len(errs) > 0 {
 				for _, err := range errs {
 					log.Error(err)
 				}
@@ -243,7 +245,7 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 	return &clientImages, nil
 }
 
-func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, prompt prompts.Prompt) []error {
+func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, prompt prompts.Prompt, slashingManager slashing.SlashingDataManager) []error {
 	// Warnings
 	// Warn if custom images are used
 	if clientImages.execution != "" || clientImages.consensus != "" || clientImages.validator != "" {
@@ -381,7 +383,18 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	if flags.run {
-		if err = runAndShowContainers(*flags.services, flags); err != nil {
+		// Create containers
+		_, err := commands.Runner.RunCMD(commands.Runner.BuildDockerComposeCreateCMD(commands.DockerComposeCreateOptions{
+			Path: filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
+		}))
+		if err != nil {
+			return []error{fmt.Errorf("error creating containers: %w", err)}
+		}
+		if flags.slashingProtection != "" {
+			if err := runAndImportSlashingData(*flags.services, flags, slashingManager); err != nil {
+				return []error{err}
+			}
+		} else if err = runAndShowContainers(*flags.services, flags); err != nil {
 			return []error{err}
 		}
 	} else {

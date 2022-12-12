@@ -17,6 +17,7 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -34,8 +35,10 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/slashing"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/templates"
+	"github.com/docker/docker/client"
 	"github.com/manifoldco/promptui"
 )
 
@@ -249,8 +252,58 @@ func runAndShowContainers(services []string, flags *CliCmdFlags) error {
 	if _, err := commands.Runner.RunCMD(dcpsCMD); err != nil {
 		return fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
 	}
-
 	return nil
+}
+
+func runAndImportSlashingData(services []string, flags *CliCmdFlags, slashingManager slashing.SlashingDataManager) error {
+	var servicesToRun []string
+	for _, service := range services {
+		if service != "validator" {
+			servicesToRun = append(servicesToRun, service)
+		}
+	}
+	servicesToRun = append(servicesToRun, "validator-import")
+	if err := runAndShowContainers(servicesToRun, flags); err != nil {
+		return err
+	}
+	if err := importSlashingData(flags, slashingManager); err != nil {
+		return err
+	}
+	return runAndShowContainers([]string{validator}, flags)
+}
+
+func importSlashingData(flags *CliCmdFlags, slashingManager slashing.SlashingDataManager) error {
+	log.Info("Importing slashing data")
+	dockerCli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return err
+	}
+	defer dockerCli.Close()
+	log.Info("Waiting for validator-import")
+	for {
+		time.Sleep(time.Second)
+		ctInfo, err := dockerCli.ContainerInspect(context.Background(), "validator-import-client")
+		if err != nil {
+			return err
+		}
+		if ctInfo.State.Status == "created" {
+			log.Info("The validator-import has not been run yet")
+			continue
+		}
+		if ctInfo.State.Status == "running" {
+			log.Info("The validator-import is still running")
+			continue
+		}
+		if ctInfo.State.Status == "exited" {
+			if ctInfo.State.ExitCode != 0 {
+				return fmt.Errorf("validator-import unexpected exit code: %d", ctInfo.State.ExitCode)
+			}
+			break
+		}
+		return fmt.Errorf("validator-import unexpected status: %s", ctInfo.State.Status)
+	}
+	log.Info("validator-import ends successfully")
+	return slashingManager.Import(flags.validatorName, flags.network)
 }
 
 type container struct {

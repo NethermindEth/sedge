@@ -28,9 +28,11 @@ import (
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/slashing"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/test"
 	"github.com/NethermindEth/sedge/test/mock_prompts"
+	"github.com/docker/docker/client"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 )
@@ -402,8 +404,15 @@ func TestCliCmd(t *testing.T) {
 			prompt := mock_prompts.NewMockPrompt(ctrl)
 			defer ctrl.Finish()
 
+			dockerClient, err := client.NewClientWithOpts(client.FromEnv)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer dockerClient.Close()
+			slashingManager := slashing.NewSlashingDataManager(dockerClient)
+
 			rootCmd := RootCmd()
-			rootCmd.AddCommand(CliCmd(prompt))
+			rootCmd.AddCommand(CliCmd(prompt, slashingManager))
 			argsL := append([]string{"cli"}, tc.args.argsList()...)
 			rootCmd.SetArgs(argsL)
 

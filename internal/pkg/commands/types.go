@@ -59,6 +59,10 @@ type DockerComposePullOptions struct {
 	Services []string
 }
 
+type DockerComposeCreateOptions struct {
+	Path string
+}
+
 // DockerPSOptions : Represent docker ps command options
 type DockerPSOptions struct {
 	// All : use with --all

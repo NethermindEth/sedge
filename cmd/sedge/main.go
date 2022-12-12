@@ -16,18 +16,26 @@ limitations under the License.
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/prompts"
+	"github.com/NethermindEth/sedge/internal/pkg/slashing"
+	"github.com/docker/docker/client"
 )
 
 func main() {
 	// Prompt used to interact with the user input
 	prompt := prompts.NewPromptCli()
+	dockerClient, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		log.Fatal(err)
+	}
+	slashingManager := slashing.NewSlashingDataManager(dockerClient)
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
-		cli.CliCmd(prompt),
+		cli.CliCmd(prompt, slashingManager),
 		cli.KeysCmd(prompt),
 		cli.DownCmd(),
 		cli.ClientsCmd(),
