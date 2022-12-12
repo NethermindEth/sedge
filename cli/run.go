@@ -38,28 +38,9 @@ type RunCmdFlags struct {
 }
 
 func (run *RunCmdFlags) ToFlag() *CmdFlags {
-	return &CmdFlags{
-		executionName:     run.executionName,
-		consensusName:     run.consensusName,
-		validatorName:     run.validatorName,
-		generationPath:    run.generationPath,
-		checkpointSyncUrl: run.checkpointSyncUrl,
-		network:           run.network,
-		feeRecipient:      run.feeRecipient,
-		noMev:             run.noMev,
-		mevImage:          run.mevImage,
-		jwtPath:           run.jwtPath,
-		graffiti:          run.graffiti,
-		install:           run.install,
-		yes:               run.yes,
-		mapAllPorts:       run.mapAllPorts,
-		fallbackEL:        run.fallbackEL,
-		elExtraFlags:      run.elExtraFlags,
-		clExtraFlags:      run.clExtraFlags,
-		vlExtraFlags:      run.vlExtraFlags,
-		logging:           run.logging,
-		services:          &[]string{run.nodeType},
-	}
+	cmd := run.CmdFlags
+	cmd.services = &[]string{run.nodeType}
+	return &cmd
 }
 
 func RunCmd(prompt prompts.Prompt) *cobra.Command {

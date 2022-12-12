@@ -76,28 +76,7 @@ type CliCmdFlags struct {
 }
 
 func (cli *CliCmdFlags) ToFlag() *CmdFlags {
-	return &CmdFlags{
-		executionName:     cli.executionName,
-		consensusName:     cli.consensusName,
-		validatorName:     cli.validatorName,
-		generationPath:    cli.generationPath,
-		checkpointSyncUrl: cli.checkpointSyncUrl,
-		network:           cli.network,
-		feeRecipient:      cli.feeRecipient,
-		noMev:             cli.noMev,
-		mevImage:          cli.mevImage,
-		jwtPath:           cli.jwtPath,
-		graffiti:          cli.graffiti,
-		install:           cli.install,
-		yes:               cli.yes,
-		mapAllPorts:       cli.mapAllPorts,
-		fallbackEL:        cli.fallbackEL,
-		elExtraFlags:      cli.elExtraFlags,
-		clExtraFlags:      cli.clExtraFlags,
-		vlExtraFlags:      cli.vlExtraFlags,
-		logging:           cli.logging,
-		services:          cli.services,
-	}
+	return &cli.CmdFlags
 }
 
 type clientImages struct {
