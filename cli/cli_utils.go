@@ -21,6 +21,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -452,4 +454,59 @@ func preRunTeku(flags *CliCmdFlags) error {
 		}
 	}
 	return nil
+}
+
+func handleUrlOrPath(
+	s string,
+	handleUrl func(url string) error,
+	handlePath func(path string) error,
+) error {
+	if _, err := url.ParseRequestURI(s); err == nil {
+		return handleUrl(s)
+	} else if _, err := os.Stat(s); err == nil {
+		return handlePath(s)
+	}
+	return fmt.Errorf("invalid filepath or url: %s", s)
+}
+
+func checkUrlOrPath(s string) error {
+	return handleUrlOrPath(
+		s,
+		func(url string) error { return nil },
+		func(path string) error { return nil },
+	)
+}
+
+func getUrlOrPathContent(s string) (string, error) {
+	urlContent := ""
+	fileContent := ""
+
+	err := handleUrlOrPath(
+		s,
+		func(url string) error {
+			resp, err := http.Get(url)
+			if err != nil {
+				return fmt.Errorf("cannot get  \"%s\" url content: %v", s, err)
+			}
+
+			rawContent, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return fmt.Errorf("cannot get  \"%s\" url content: %v", s, err)
+			}
+
+			urlContent = string(rawContent)
+			return nil
+		},
+		func(path string) error {
+			rawContent, err := os.ReadFile(path)
+			if err != nil {
+				return fmt.Errorf("cannot read \"%s\" file content: %v", s, err)
+			}
+
+			fileContent = string(rawContent)
+			return nil
+		},
+	)
+
+	return strings.ReplaceAll(strings.TrimSpace(urlContent+fileContent), "\r", ""), err
 }
