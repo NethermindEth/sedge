@@ -219,7 +219,7 @@ func buildCliTestCase(
 		"ELApi": configs.DefaultApiPortEL,
 		"CLApi": configs.DefaultApiPortCL,
 	}
-	ports, err := utils.AssingPorts("localhost", defaultsPorts)
+	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
 		t.Fatalf(configs.PortOccupationError, err)
 	}

@@ -70,7 +70,7 @@ func GenerateScripts(gd GenerationData) (result GenerationResults, err error) {
 		"VLMetrics":       configs.DefaultMetricsPortVL,
 		"MevPort":         configs.DefaultMevPort,
 	}
-	ports, err := utils.AssingPorts("localhost", defaultsPorts)
+	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
 		return GenerationResults{}, fmt.Errorf(configs.PortOccupationError, err)
 	}
