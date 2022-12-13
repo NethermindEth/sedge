@@ -52,15 +52,17 @@ func RunCmd(prompt prompts.Prompt) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "run [flags]",
 		Short: "Run only one client using Sedge",
-		Long: `Run the setup tool on-premise in a quick way. Provide only the command line
-	options and the tool will do all the work.
+		Long: `Run one node in a quick way. Provide only the command 
+options and the tool will do all the work.
+
+Possible nodes to run: consensus, execution, validator.
 	
-	First it will check if dependencies such as docker are installed on your machine
-	and provide instructions for installing them if they are not installed.
+First it will check if dependencies such as docker are installed on your machine
+and provide instructions for installing them if they are not installed.
 	
-	Second, it will generate docker-compose scripts to run the full setup according to your selection.
+Second, it will generate docker-compose scripts to run a client according to your selection.
 	
-	Finally, it will run the generated docker-compose script. Only execution and consensus clients will be executed by default.`,
+Finally, it will run the generated docker-compose script.`,
 		Args: cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// notest
