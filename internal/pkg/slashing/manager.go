@@ -15,7 +15,7 @@ import (
 
 type SlashingDataManager interface {
 	Import(clientName, network string) error
-	Export(clientName string) error
+	Export(clientName, network string) error
 }
 
 type slashingDataManager struct {
@@ -66,6 +66,46 @@ func (s *slashingDataManager) Import(clientName, network string) error {
 	return importSlashing(s.dockerClient, cmd)
 }
 
+func (s *slashingDataManager) Export(clientName, network string) error {
+	log.Info("Exporting slashing data from client %s", clientName)
+	var cmd []string
+	switch clientName {
+	case "prysm":
+		cmd = []string{
+			"--", "slashing-protection-history",
+			"export",
+			"--accept-terms-of-use",
+			"--" + network,
+			"--datadir=/data",
+			"--slashing-protection-export-dir=/data",
+		}
+	case "lighthouse":
+		cmd = []string{
+			"lighthouse", "account", "validator", "slashing-protection", "export",
+			"--network", network,
+			"--datadir", "/data",
+			"/data/slashing-export.json",
+		}
+	case "lodestar":
+		cmd = []string{
+			"validator", "slashing-protection", "export",
+			"--network", network,
+			"--dataDir", "/data/validator",
+			"--file", "/data/validator/slashing-export.json",
+		}
+	case "teku":
+		cmd = []string{
+			"slashing-protection",
+			"export",
+			"--data-path=/data",
+			"--to=/data/slashing-export.json",
+		}
+	default:
+		return fmt.Errorf("slashing export not supported for client %s", clientName)
+	}
+	return runSlashingContainer(s.dockerClient, cmd)
+}
+
 func importSlashing(dockerClient client.APIClient, cmd []string) error {
 	validatorImage, err := services.Image(dockerClient, services.ServiceValidator)
 	if err != nil {
@@ -107,6 +147,43 @@ func importSlashing(dockerClient client.APIClient, cmd []string) error {
 	}
 }
 
-func (s *slashingDataManager) Export(clientName string) error {
-	return nil
+func runSlashingContainer(dockerClient client.APIClient, cmd []string) error {
+	validatorImage, err := services.Image(dockerClient, services.ServiceValidator)
+	if err != nil {
+		return err
+	}
+	ct, err := dockerClient.ContainerCreate(context.Background(),
+		&container.Config{
+			Image: validatorImage,
+			Cmd:   cmd,
+		},
+		&container.HostConfig{
+			VolumesFrom: []string{services.ServiceContainer[services.ServiceValidator]},
+		},
+		&network.NetworkingConfig{},
+		&v1.Platform{},
+		"",
+	)
+	if err != nil {
+		return err
+	}
+	log.Infof("slashing container id: %s", ct.ID)
+	ctExit, errChan := dockerClient.ContainerWait(context.Background(), ct.ID, container.WaitConditionNextExit)
+	if err := dockerClient.ContainerStart(context.Background(), ct.ID, types.ContainerStartOptions{}); err != nil {
+		return err
+	}
+	log.Infof("Waiting for slashing service (container id: %s)", ct.ID)
+	for {
+		select {
+		case exitResult := <-ctExit:
+			fmt.Printf("Exit result: %v\n", exitResult.StatusCode)
+			if exitResult.StatusCode != 0 {
+				return fmt.Errorf("slashing service ends with status code %d", exitResult.StatusCode)
+			}
+			return nil
+		case exitErr := <-errChan:
+			fmt.Printf("Exit err: %v\n", exitErr)
+			return exitErr
+		}
+	}
 }

@@ -42,6 +42,7 @@ func main() {
 		cli.NetworksCmd(),
 		cli.LogsCmd(),
 		cli.VersionCmd(),
+		cli.SlashingExportCmd(slashingManager),
 	)
 	if err := sedgeCmd.Execute(); err != nil {
 		os.Exit(1)

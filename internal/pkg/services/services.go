@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
 )
@@ -49,7 +50,33 @@ func Stop(serviceName string) error {
 	return nil
 }
 
+func Start(serviceName string) error {
+	containerName, ok := ServiceContainer[serviceName]
+	if !ok {
+		return fmt.Errorf("unknown container name for service: %s", serviceName)
+	}
+	dockerCli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return err
+	}
+	defer dockerCli.Close()
+	if err := dockerCli.ContainerStart(context.Background(), containerName, types.ContainerStartOptions{}); err != nil {
+		return fmt.Errorf("error starting service %s (with container %s): %w", serviceName, containerName, err)
+	}
+	return nil
+}
+
 func Volumes(dockerClient client.APIClient, serviceName string) (map[string]struct{}, error) {
 	info, err := ctInfo(dockerClient, serviceName)
 	return info.Config.Volumes, err
+}
+
+func IsRunning(serviceName string) (bool, error) {
+	dockerCli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return false, err
+	}
+	defer dockerCli.Close()
+	info, err := ctInfo(dockerCli, serviceName)
+	return info.State.Running, err
 }
