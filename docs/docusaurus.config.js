@@ -123,6 +123,27 @@ const config = {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
       },
+      algolia: {
+        // The application ID provided by Algolia
+        appId: 'HR7BYPH22J',
+
+        // Public API key: it is safe to commit it
+        apiKey: '9fd1f2f1dfdc41503fea4f38c11fe89f',
+
+        indexName: 'sedge-nethermind',
+
+        contextualSearch: true,
+
+        // Optional: Specify domains where the navigation should occur through window.location instead on history.push. Useful when our Algolia config crawls multiple documentation sites and we want to navigate with window.location.href to them.
+        externalUrlRegex: 'external\\.com|domain\\.com',
+
+        // Optional: Algolia search parameters
+        searchParameters: {},
+
+        // Optional: path for search page that enabled by default (`false` to disable it)
+        searchPagePath: 'false',
+
+      },
     }),
 };
 

@@ -163,7 +163,7 @@ func TestPortAvailable(t *testing.T) {
 	}
 }
 
-func TestAssingPorts(t *testing.T) {
+func TestAssignPorts(t *testing.T) {
 	server := httptest.NewServer(
 		http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			rw.WriteHeader(http.StatusOK)
@@ -219,7 +219,7 @@ func TestAssingPorts(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := AssingPorts(tc.host, tc.defaults)
+			got, err := AssignPorts(tc.host, tc.defaults)
 
 			descr := fmt.Sprintf("AssingPorts(%s, %+v)", tc.host, tc.defaults)
 			if cerr := CheckErr(descr, tc.isErr, err); cerr != nil {
