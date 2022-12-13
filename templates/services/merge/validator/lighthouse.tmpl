@@ -17,8 +17,7 @@
       - ${VL_DATA_DIR}:/data{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
       - ./config.yml:/network_config/config.yaml{{end}}{{if .VlRemoteGen}}
       - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{if .VlRemoteDpl}}
-      - ./deploy_block.txt:/network_config/deploy_block.txt{{end}}{{end}}{{if .ImportSlashingProtection}}
-    command: ["/bin/sh","validator-init.sh","/data/slashing-import.json"]{{end}}{{if .LoggingDriver}}
+      - ./deploy_block.txt:/network_config/deploy_block.txt{{end}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:

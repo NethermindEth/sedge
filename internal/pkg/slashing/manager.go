@@ -39,6 +39,13 @@ func (s *slashingDataManager) Import(clientName, network string) error {
 			"--datadir=/data",
 			"--slashing-protection-json-file=/data/slashing-import.json",
 		}
+	case "lighthouse":
+		cmd = []string{
+			"lighthouse", "account", "validator", "slashing-protection", "import",
+			"--network", network,
+			"--datadir", "/data",
+			"/data/slashing-import.json",
+		}
 	case "teku":
 		cmd = []string{
 			"slashing-protection",
