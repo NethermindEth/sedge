@@ -2,3 +2,44 @@
 sidebar_position: 1
 id: networks
 ---
+
+# Networks
+
+Running `sedge networks` will give you a list of supported networks
+
+## Help
+
+```
+$ sedge networks
+Initializing configuration
+List supported networks
+
+Usage:
+  sedge networks [flags]
+
+Flags:
+  -h, --help   help for networks
+
+Global Flags:
+      --config string   config file (default is $HOME/.sedge.yaml)
+
+```
+
+## Execution Example
+
+```
+$ sedge networks
+Initializing configuration
+Using config file: /Users/maceo/.sedge.yaml
+2022-12-13 10:13:02 -- [INFO] [Logger Init] Logging configuration: {Level:info}
+2022-12-13 10:13:03 -- [INFO] You are running the latest version of sedge. Version:  v0.5.1
+2022-12-13 10:13:03 -- [INFO] Listing supported networks
+
+ #   Supported Networks
+=== ====================
+ 1   chiado
+ 2   gnosis
+ 3   goerli
+ 4   mainnet
+ 5   sepolia
+```
