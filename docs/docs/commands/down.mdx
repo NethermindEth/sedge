@@ -5,6 +5,40 @@ id: down
 
 # Down
 
-Running `sedge down` will shut down running containers using docker compose CLI. Shortcut for 'docker compose -f <script> down'
+Running `sedge down` will shut down running containers using docker compose CLI.
 
+## Help
 
+```
+$ sedge down -h
+Shutdown sedge running containers using docker compose CLI. Shortcut for 'docker compose -f <script> down'
+
+Usage:
+  sedge down [flags]
+
+Flags:
+  -h, --help          help for down
+  -p, --path string   docker-compose script path (default "./docker-compose-scripts")
+
+Global Flags:
+      --config string   config file (default is $HOME/.sedge.yaml)
+```
+
+## Execution Example
+
+The execution of `sedge down` will close and remove all the opened containers and networks used by sedge.
+
+```
+$ sedge down
+Using config file: /home/maceo/.sedge.yaml
+2022-12-12 16:54:24 -- [INFO] [Logger Init] Logging configuration: {Level:info}
+2022-12-12 16:54:24 -- [INFO] You are running the latest version of sedge. Version:  v0.5.1
+[sudo] password for maceo:
+[+] Running 7/7
+ ⠿ Container execution-client                            Removed                                                                 93.8s
+ ⠿ Container validator-client                            Removed                                                                  0.0s
+ ⠿ Container consensus-client                            Removed                                                                  3.8s
+ ⠿ Container validator-import-client                     Removed                                                                  0.0s
+ ⠿ Network docker-compose-scripts_default                Removed                                                                  0.2s
+ ⠿ Network sedge_network                                 Removed                                                                  0.1s
+```
