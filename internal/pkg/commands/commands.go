@@ -24,6 +24,8 @@ type CommandRunner interface {
 
 	BuildDockerComposeCreateCMD(options DockerComposeCreateOptions) Command
 
+	BuildDockerComposeBuildCMD(options DockerComposeBuildOptions) Command
+
 	BuildDockerPSCMD(options DockerPSOptions) Command
 
 	BuildDockerComposePSCMD(options DockerComposePsOptions) Command

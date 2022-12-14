@@ -60,7 +60,13 @@ type DockerComposePullOptions struct {
 }
 
 type DockerComposeCreateOptions struct {
-	Path string
+	Path     string
+	Services []string
+}
+
+type DockerComposeBuildOptions struct {
+	Path     string
+	Services []string
 }
 
 // DockerPSOptions : Represent docker ps command options

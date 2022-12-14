@@ -35,7 +35,6 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
-	"github.com/NethermindEth/sedge/internal/pkg/slashing"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/templates"
 	"github.com/docker/docker/client"
@@ -191,6 +190,9 @@ func runScriptOrExit(flags *CliCmdFlags) (err error) {
 		os.Exit(0)
 	}
 
+	if err := buildContainers(*flags.services, flags.generationPath); err != nil {
+		return err
+	}
 	if err = runAndShowContainers(*flags.services, flags); err != nil {
 		return err
 	}
@@ -198,8 +200,7 @@ func runScriptOrExit(flags *CliCmdFlags) (err error) {
 	return nil
 }
 
-// TODO: use flags.services instead a separated arg
-func runAndShowContainers(services []string, flags *CliCmdFlags) error {
+func checkRunDependencies(generationPath string) error {
 	// TODO: (refac) Put this check to checks.go and call it from there
 	// Check if docker engine is on
 	log.Info(configs.CheckingDockerEngine)
@@ -211,10 +212,9 @@ func runAndShowContainers(services []string, flags *CliCmdFlags) error {
 	if _, err := commands.Runner.RunCMD(psCMD); err != nil {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
 	}
-
 	// Check that compose plugin is installed with docker running 'docker compose ps'
 	dockerComposePsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path: filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
+		Path: filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 	})
 	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
 	dockerComposePsCMD.GetOutput = true
@@ -222,17 +222,63 @@ func runAndShowContainers(services []string, flags *CliCmdFlags) error {
 	if err != nil {
 		return fmt.Errorf(configs.DockerComposeOffError, err)
 	}
+	return nil
+}
 
+func buildImages(services []string, generationPath string) error {
+	// Build images
+	buildCmd := commands.Runner.BuildDockerComposeBuildCMD(commands.DockerComposeBuildOptions{
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Services: services,
+	})
+	log.Infof(configs.RunningCommand, buildCmd.Cmd)
+	if _, err := commands.Runner.RunCMD(buildCmd); err != nil {
+		return fmt.Errorf(configs.CommandError, buildCmd.Cmd, err)
+	}
+	return nil
+}
+
+func downloadImages(services []string, generationPath string) error {
 	// Download images
 	pullCmd := commands.Runner.BuildDockerComposePullCMD(commands.DockerComposePullOptions{
-		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 		Services: services,
 	})
 	log.Infof(configs.RunningCommand, pullCmd.Cmd)
 	if _, err := commands.Runner.RunCMD(pullCmd); err != nil {
 		return fmt.Errorf(configs.CommandError, pullCmd.Cmd, err)
 	}
+	return nil
+}
 
+func createContainers(services []string, generationPath string) error {
+	if _, err := commands.Runner.RunCMD(commands.Runner.BuildDockerComposeCreateCMD(commands.DockerComposeCreateOptions{
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Services: services,
+	})); err != nil {
+		return fmt.Errorf("error creating containers: %w", err)
+	}
+	return nil
+}
+
+func buildContainers(services []string, generationPath string) error {
+	if err := checkRunDependencies(generationPath); err != nil {
+		return err
+	}
+	if err := buildImages(services, generationPath); err != nil {
+		return err
+	}
+	if err := downloadImages(services, generationPath); err != nil {
+		return err
+	}
+	if err := createContainers(services, generationPath); err != nil {
+		return err
+	}
+	return nil
+}
+
+// TODO: use flags.services instead a separated arg
+func runAndShowContainers(services []string, flags *CliCmdFlags) error {
 	// Run docker-compose script
 	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
 		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
@@ -255,34 +301,16 @@ func runAndShowContainers(services []string, flags *CliCmdFlags) error {
 	return nil
 }
 
-func runAndImportSlashingData(services []string, flags *CliCmdFlags, slashingManager slashing.SlashingDataManager) error {
-	var servicesToRun []string
-	for _, service := range services {
-		if service != "validator" {
-			servicesToRun = append(servicesToRun, service)
-		}
-	}
-	servicesToRun = append(servicesToRun, "validator-import")
-	if err := runAndShowContainers(servicesToRun, flags); err != nil {
-		return err
-	}
-	if err := importSlashingData(flags, slashingManager); err != nil {
-		return err
-	}
-	return runAndShowContainers([]string{validator}, flags)
-}
-
-func importSlashingData(flags *CliCmdFlags, slashingManager slashing.SlashingDataManager) error {
-	log.Info("Importing slashing data")
+func waitForContainerExit0(container string) error {
 	dockerCli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return err
 	}
 	defer dockerCli.Close()
-	log.Info("Waiting for validator-import")
+	log.Infof("Waiting for container %s", container)
 	for {
 		time.Sleep(time.Second)
-		ctInfo, err := dockerCli.ContainerInspect(context.Background(), "validator-import-client")
+		ctInfo, err := dockerCli.ContainerInspect(context.Background(), container)
 		if err != nil {
 			return err
 		}
@@ -296,14 +324,14 @@ func importSlashingData(flags *CliCmdFlags, slashingManager slashing.SlashingDat
 		}
 		if ctInfo.State.Status == "exited" {
 			if ctInfo.State.ExitCode != 0 {
-				return fmt.Errorf("validator-import unexpected exit code: %d", ctInfo.State.ExitCode)
+				return fmt.Errorf("%s unexpected exit code: %d", container, ctInfo.State.ExitCode)
 			}
 			break
 		}
-		return fmt.Errorf("validator-import unexpected status: %s", ctInfo.State.Status)
+		return fmt.Errorf("%s unexpected status: %s", container, ctInfo.State.Status)
 	}
-	log.Info("validator-import ends successfully")
-	return slashingManager.Import(flags.validatorName, flags.network)
+	log.Infof("%s ends successfully", container)
+	return nil
 }
 
 type container struct {

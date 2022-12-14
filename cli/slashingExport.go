@@ -1,8 +1,12 @@
 package cli
 
 import (
+	"path/filepath"
+
+	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/NethermindEth/sedge/internal/pkg/slashing"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -11,6 +15,8 @@ type SlashingExportFlags struct {
 	network         string
 	stopValidator   bool
 	startValidator  bool
+	generationPath  string
+	out             string
 }
 
 func SlashingExportCmd(slashingManager slashing.SlashingDataManager) *cobra.Command {
@@ -21,28 +27,29 @@ func SlashingExportCmd(slashingManager slashing.SlashingDataManager) *cobra.Comm
 		Short: "Export slashing protection data",
 		Long:  "Export slashing protection interchange data (EIP-3076). Validator is stopped if is currently running",
 		PreRun: func(cmd *cobra.Command, args []string) {
-
+			if flags.out == "" {
+				flags.out = filepath.Join(flags.generationPath, "slashing_export.json")
+			}
 		},
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Run: func(cmd *cobra.Command, args []string) {
 			previouslyRunning, err := services.IsRunning(services.ServiceValidator)
 			if err != nil {
-				return err
+				log.Fatal(err)
 			}
 			// Stop validator client
 			if err := services.Stop(services.ServiceValidator); err != nil {
-				return err
+				log.Fatal(err)
 			}
 			// Export slashing data
-			if err := slashingManager.Export(flags.validatorClient, flags.network); err != nil {
-				return err
+			if err := slashingManager.Export(flags.validatorClient, flags.network, flags.generationPath, flags.out); err != nil {
+				log.Fatal(err)
 			}
 			// Run validator again
 			if (previouslyRunning && !flags.stopValidator) || flags.startValidator {
 				if err := services.Start(services.ServiceValidator); err != nil {
-					return err
+					log.Fatal(err)
 				}
 			}
-			return nil
 		},
 	}
 
@@ -50,5 +57,7 @@ func SlashingExportCmd(slashingManager slashing.SlashingDataManager) *cobra.Comm
 	cmd.Flags().StringVarP(&flags.network, "network", "n", "", "Network")
 	cmd.Flags().BoolVar(&flags.startValidator, "start-validator", false, "If the validator client is currently stopped, then it is started after slashing import")
 	cmd.Flags().BoolVar(&flags.stopValidator, "stop-validator", false, "If the validator client is currently running then it is not started after slashing import")
+	cmd.Flags().StringVarP(&flags.generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
+	cmd.Flags().StringVarP(&flags.out, "out", "o", "", `Path to write slashing protection data (default "[GENERATION_PATH]/slashing_export.json")`)
 	return cmd
 }

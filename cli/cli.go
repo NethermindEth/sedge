@@ -32,7 +32,6 @@ import (
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
-	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/pkg/slashing"
 	"github.com/NethermindEth/sedge/internal/ui"
@@ -325,7 +324,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		if _, err := os.Stat(flags.slashingProtection); err != nil {
 			return []error{err}
 		}
-		if err := copyFile(flags.slashingProtection, path.Join(flags.generationPath, configs.ValidatorDir, slashingImportFile)); err != nil {
+		if err := utils.CopyFile(flags.slashingProtection, path.Join(flags.generationPath, configs.ValidatorDir, slashingImportFile)); err != nil {
 			return []error{err}
 		}
 	}
@@ -383,18 +382,27 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	if flags.run {
-		// Create containers
-		_, err := commands.Runner.RunCMD(commands.Runner.BuildDockerComposeCreateCMD(commands.DockerComposeCreateOptions{
-			Path: filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
-		}))
-		if err != nil {
-			return []error{fmt.Errorf("error creating containers: %w", err)}
+		if utils.Contains(*flags.services, "validator") {
+			*flags.services = append(*flags.services, "validator-import")
+		}
+		if err := buildContainers(*flags.services, flags.generationPath); err != nil {
+			return []error{err}
 		}
 		if flags.slashingProtection != "" {
-			if err := runAndImportSlashingData(*flags.services, flags, slashingManager); err != nil {
+			// Run validator-import
+			if err := runAndShowContainers([]string{"validator-import"}, flags); err != nil {
 				return []error{err}
 			}
-		} else if err = runAndShowContainers(*flags.services, flags); err != nil {
+			// Wait for validator-import
+			if err := waitForContainerExit0("validator-import-client"); err != nil {
+				return []error{err}
+			}
+			// Import slashing data
+			if err := slashingManager.Import(flags.validatorName, flags.network); err != nil {
+				return []error{err}
+			}
+		}
+		if err = runAndShowContainers(*flags.services, flags); err != nil {
 			return []error{err}
 		}
 	} else {
@@ -404,34 +412,34 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		}
 	}
 
-	if !flags.noValidator {
-		log.Info(configs.ValidatorTips)
+	// if !flags.noValidator {
+	// 	log.Info(configs.ValidatorTips)
 
-		// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service in the previous step
-		if !utils.Contains(*flags.services, validator) {
-			// Wait for clients to start
-			// log.Info(configs.WaitingForNodesToStart)
-			// time.Sleep(waitingTime)
-			// Track sync of execution and consensus clients
-			// TODO: Parameterize wait arg of trackSync
-			if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*5, flags); err != nil {
-				return []error{err}
-			}
+	// 	// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service in the previous step
+	// 	if !utils.Contains(*flags.services, validator) {
+	// 		// Wait for clients to start
+	// 		// log.Info(configs.WaitingForNodesToStart)
+	// 		// time.Sleep(waitingTime)
+	// 		// Track sync of execution and consensus clients
+	// 		// TODO: Parameterize wait arg of trackSync
+	// 		if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*5, flags); err != nil {
+	// 			return []error{err}
+	// 		}
 
-			// TODO: Prompt for waiting for keystore and validator registration to run the validator
-			if flags.run {
-				if err = runAndShowContainers([]string{validator}, flags); err != nil {
-					return []error{err}
-				}
-			} else {
-				// Let the user decide to see the instructions for executing the validator and exit or let the tool execute it
-				if err = RunValidatorOrExit(flags); err != nil {
-					return []error{err}
-				}
-			}
-		}
-		log.Info(configs.HappyStaking)
-	}
+	// 		// TODO: Prompt for waiting for keystore and validator registration to run the validator
+	// 		if flags.run {
+	// 			if err = runAndShowContainers([]string{validator}, flags); err != nil {
+	// 				return []error{err}
+	// 			}
+	// 		} else {
+	// 			// Let the user decide to see the instructions for executing the validator and exit or let the tool execute it
+	// 			if err = RunValidatorOrExit(flags); err != nil {
+	// 				return []error{err}
+	// 			}
+	// 		}
+	// 	}
+	// 	log.Info(configs.HappyStaking)
+	// }
 
 	return nil
 }
