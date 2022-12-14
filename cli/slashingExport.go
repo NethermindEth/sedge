@@ -19,7 +19,7 @@ type SlashingExportFlags struct {
 	out             string
 }
 
-func SlashingExportCmd(slashingManager slashing.SlashingDataManager) *cobra.Command {
+func SlashingExportCmd(slashingManager slashing.SlashingDataManager, serviceManager services.ServiceManager) *cobra.Command {
 	var flags SlashingExportFlags
 
 	cmd := &cobra.Command{
@@ -32,12 +32,12 @@ func SlashingExportCmd(slashingManager slashing.SlashingDataManager) *cobra.Comm
 			}
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			previouslyRunning, err := services.IsRunning(services.ServiceValidator)
+			previouslyRunning, err := serviceManager.IsRunning(services.ServiceValidator)
 			if err != nil {
 				log.Fatal(err)
 			}
 			// Stop validator client
-			if err := services.Stop(services.ServiceValidator); err != nil {
+			if err := serviceManager.Stop(services.ServiceValidator); err != nil {
 				log.Fatal(err)
 			}
 			// Export slashing data
@@ -46,7 +46,7 @@ func SlashingExportCmd(slashingManager slashing.SlashingDataManager) *cobra.Comm
 			}
 			// Run validator again
 			if (previouslyRunning && !flags.stopValidator) || flags.startValidator {
-				if err := services.Start(services.ServiceValidator); err != nil {
+				if err := serviceManager.Start(services.ServiceValidator); err != nil {
 					log.Fatal(err)
 				}
 			}

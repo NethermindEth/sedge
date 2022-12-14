@@ -28,6 +28,7 @@ import (
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/NethermindEth/sedge/internal/pkg/slashing"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/test"
@@ -409,7 +410,8 @@ func TestCliCmd(t *testing.T) {
 				log.Fatal(err)
 			}
 			defer dockerClient.Close()
-			slashingManager := slashing.NewSlashingDataManager(dockerClient)
+			serviceManager := services.NewServiceManager(dockerClient)
+			slashingManager := slashing.NewSlashingDataManager(dockerClient, serviceManager)
 
 			rootCmd := RootCmd()
 			rootCmd.AddCommand(CliCmd(prompt, slashingManager))

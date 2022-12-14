@@ -21,11 +21,15 @@ type SlashingDataManager interface {
 }
 
 type slashingDataManager struct {
-	dockerClient client.APIClient
+	dockerClient   client.APIClient
+	serviceManager services.ServiceManager
 }
 
-func NewSlashingDataManager(dockerClient client.APIClient) SlashingDataManager {
-	return &slashingDataManager{dockerClient: dockerClient}
+func NewSlashingDataManager(dockerClient client.APIClient, serviceManager services.ServiceManager) SlashingDataManager {
+	return &slashingDataManager{
+		dockerClient:   dockerClient,
+		serviceManager: serviceManager,
+	}
 }
 
 func (s *slashingDataManager) Import(clientName, network string) error {
@@ -65,7 +69,7 @@ func (s *slashingDataManager) Import(clientName, network string) error {
 	default:
 		return fmt.Errorf("slashing import nos supported for client %s", clientName)
 	}
-	return runSlashingContainer(s.dockerClient, cmd)
+	return runSlashingContainer(s.dockerClient, s.serviceManager, cmd)
 }
 
 func (s *slashingDataManager) Export(clientName, network, generationPath, out string) error {
@@ -105,14 +109,14 @@ func (s *slashingDataManager) Export(clientName, network, generationPath, out st
 	default:
 		return fmt.Errorf("slashing export not supported for client %s", clientName)
 	}
-	if err := runSlashingContainer(s.dockerClient, cmd); err != nil {
+	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd); err != nil {
 		return err
 	}
 	return utils.CopyFile(filepath.Join(generationPath, "validator-data", "slashing_protection.json"), out)
 }
 
-func runSlashingContainer(dockerClient client.APIClient, cmd []string) error {
-	validatorImage, err := services.Image(dockerClient, services.ServiceValidator)
+func runSlashingContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, cmd []string) error {
+	validatorImage, err := serviceManager.Image(services.ServiceValidator)
 	if err != nil {
 		return err
 	}
