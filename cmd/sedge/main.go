@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"github.com/NethermindEth/sedge/cli"
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/NethermindEth/sedge/internal/pkg/slashing"
@@ -36,6 +37,7 @@ func main() {
 	defer dockerClient.Close()
 	serviceManager := services.NewServiceManager(dockerClient)
 	slashingManager := slashing.NewSlashingDataManager(dockerClient, serviceManager)
+	sedgeActions := actions.NewSedgeActions(serviceManager, slashingManager)
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
 		cli.CliCmd(prompt, slashingManager),
@@ -45,7 +47,7 @@ func main() {
 		cli.NetworksCmd(),
 		cli.LogsCmd(),
 		cli.VersionCmd(),
-		cli.SlashingExportCmd(slashingManager, serviceManager),
+		cli.SlashingExportCmd(sedgeActions),
 	)
 	if err := sedgeCmd.Execute(); err != nil {
 		os.Exit(1)
