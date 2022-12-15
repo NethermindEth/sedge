@@ -96,4 +96,13 @@ const (
 	InvalidNumberOfValidatorsError    = "invalid number of validators: %v"
 	NumberOfValidatorsRetryError      = "provided numbers do not match"
 	InvalidLoggingFlag                = "bad logging flag: %v"
+	InvalidFilePathOrUrl              = "invalid filepath or url: %s"
+	CannotGetUrlContent               = "cannot get url %s content: %v"
+	CannotReadFileContent             = "cannot read file %s content: %v"
+	ErrorCheckingFile                 = "error checking file %s: %v"
+	DestFileAlreadyExist              = "destiny file %s already exist"
+	ErrorCreatingFile                 = "error creating file %s: %v"
+	ErrorDownloadingFile              = "error downloading file from %s: %v"
+	ErrorCopyingFile                  = "error copying file from %s: %v"
+	ErrorWritingDeployBlockFile       = "error writing custom deploy block file %s: %v"
 )

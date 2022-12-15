@@ -42,28 +42,34 @@ const (
 )
 
 type CliCmdFlags struct {
-	executionName     string
-	consensusName     string
-	validatorName     string
-	generationPath    string
-	checkpointSyncUrl string
-	network           string
-	feeRecipient      string
-	noMev             bool
-	mevImage          string
-	noValidator       bool
-	jwtPath           string
-	graffiti          string
-	install           bool
-	run               bool
-	yes               bool
-	mapAllPorts       bool
-	services          *[]string
-	fallbackEL        *[]string
-	elExtraFlags      *[]string
-	clExtraFlags      *[]string
-	vlExtraFlags      *[]string
-	logging           string
+	executionName       string
+	consensusName       string
+	validatorName       string
+	generationPath      string
+	checkpointSyncUrl   string
+	network             string
+	feeRecipient        string
+	noMev               bool
+	mevImage            string
+	noValidator         bool
+	jwtPath             string
+	graffiti            string
+	install             bool
+	run                 bool
+	yes                 bool
+	mapAllPorts         bool
+	services            *[]string
+	fallbackEL          *[]string
+	elExtraFlags        *[]string
+	clExtraFlags        *[]string
+	vlExtraFlags        *[]string
+	logging             string
+	customChainspec     string
+	customNetworkConfig string
+	customGenesis       string
+	customDeployBlock   int
+	customEnodes        string
+	customEnrs          string
 }
 
 type clientImages struct {
@@ -155,6 +161,12 @@ func CliCmd(prompt prompts.Prompt) *cobra.Command {
 	flags.clExtraFlags = cmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge cli --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	flags.vlExtraFlags = cmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringVar(&flags.logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
+	cmd.Flags().StringVar(&flags.customChainspec, "custom-chainspec", "", "File path or url to use as custom network chainspec for execution client.")
+	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
+	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
+	cmd.Flags().IntVar(&flags.customDeployBlock, "custom-deploy-block", -1, "Custom network deploy block to use for consensus client.")
+	cmd.Flags().StringVar(&flags.customEnodes, "custom-enodes", "", "List of comma separeted enodes to use as custom network peers for execution client.")
+	cmd.Flags().StringVar(&flags.customEnrs, "custom-enrs", "", "List of comma separeted enrs to use as custom network peers for consensus client.")
 	// TODO: check if this condition is still necessary
 	cmd.Flags().SortFlags = false
 	return cmd
@@ -236,6 +248,18 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 		return nil, err
 	}
 
+	// validate custom network flags
+	urlOrPaths := []string{
+		flags.customChainspec,
+		flags.customNetworkConfig,
+		flags.customGenesis,
+	}
+	for _, value := range urlOrPaths {
+		if err := utils.CheckUrlOrPath(value); err != nil {
+			return nil, err
+		}
+	}
+
 	return &clientImages, nil
 }
 
@@ -307,6 +331,16 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		}
 		// TODO: avoid flag edition
 		flags.feeRecipient = feeRecipient
+	}
+
+	// Get custom networks configs
+	if flags.customChainspec != "" || flags.customDeployBlock >= 0 || flags.customGenesis != "" || flags.customNetworkConfig != "" {
+		// TODO: add results to generation data
+		// chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err := LoadCustomNetworksConfig(flags)
+		_, _, _, _, err := LoadCustomNetworksConfig(flags)
+		if err != nil {
+			return []error{err}
+		}
 	}
 
 	combinedClients.Execution.Image = clientImages.execution

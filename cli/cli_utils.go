@@ -21,8 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -456,57 +454,41 @@ func preRunTeku(flags *CliCmdFlags) error {
 	return nil
 }
 
-func handleUrlOrPath(
-	s string,
-	handleUrl func(url string) error,
-	handlePath func(path string) error,
-) error {
-	if _, err := url.ParseRequestURI(s); err == nil {
-		return handleUrl(s)
-	} else if _, err := os.Stat(s); err == nil {
-		return handlePath(s)
+func LoadCustomNetworksConfig(flags *CliCmdFlags) (string, string, string, string, error) {
+	destFolder := filepath.Join(flags.generationPath, configs.CustomNetworkConfigsFolder)
+	var chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath string
+
+	if flags.customChainspec != "" {
+		chainspecPath = filepath.Join(destFolder, configs.ExecutionNetworkConfigFileName)
+		err := utils.DownloadOrCopy(flags.customChainspec, chainspecPath, true)
+		if err != nil {
+			return chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+		}
 	}
-	return fmt.Errorf("invalid filepath or url: %s", s)
-}
 
-func checkUrlOrPath(s string) error {
-	return handleUrlOrPath(
-		s,
-		func(url string) error { return nil },
-		func(path string) error { return nil },
-	)
-}
+	if flags.customNetworkConfig != "" {
+		networkConfigPath = filepath.Join(destFolder, configs.ConsensusNetworkConfigFileName)
+		err := utils.DownloadOrCopy(flags.customNetworkConfig, networkConfigPath, true)
+		if err != nil {
+			return chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+		}
+	}
 
-func getUrlOrPathContent(s string) (string, error) {
-	urlContent := ""
-	fileContent := ""
+	if flags.customGenesis != "" {
+		networkGenesisPath = filepath.Join(destFolder, configs.ConsensusNetworkGenesisFileName)
+		err := utils.DownloadOrCopy(flags.customGenesis, networkGenesisPath, true)
+		if err != nil {
+			return chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+		}
+	}
 
-	err := handleUrlOrPath(
-		s,
-		func(url string) error {
-			resp, err := http.Get(url)
-			if err != nil {
-				return fmt.Errorf("cannot get  \"%s\" url content: %v", s, err)
-			}
+	if flags.customDeployBlock >= 0 {
+		networkDeployBlockPath = filepath.Join(destFolder, configs.ConsensusNetworkDeployBlockFileName)
+		err := os.WriteFile(networkDeployBlockPath, []byte(fmt.Sprintf("%d", flags.customDeployBlock)), os.ModePerm)
+		if err != nil {
+			return chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, fmt.Errorf(configs.ErrorWritingDeployBlockFile, networkDeployBlockPath, err)
+		}
+	}
 
-			rawContent, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return fmt.Errorf("cannot get  \"%s\" url content: %v", s, err)
-			}
-
-			urlContent = string(rawContent)
-			return nil
-		},
-		func(path string) error {
-			rawContent, err := os.ReadFile(path)
-			if err != nil {
-				return fmt.Errorf("cannot read \"%s\" file content: %v", s, err)
-			}
-
-			fileContent = string(rawContent)
-			return nil
-		},
-	)
-
-	return strings.ReplaceAll(strings.TrimSpace(urlContent+fileContent), "\r", ""), err
+	return chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, nil
 }
