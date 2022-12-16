@@ -95,4 +95,5 @@ const (
 	InvalidNumberOfValidatorsError    = "invalid number of validators: %v"
 	NumberOfValidatorsRetryError      = "provided numbers do not match"
 	InvalidLoggingFlag                = "bad logging flag: %v"
+	CannotGenerateSecret              = "cannot generate 32 bytes long secret"
 )
