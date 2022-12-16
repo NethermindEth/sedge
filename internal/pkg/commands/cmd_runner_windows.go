@@ -121,7 +121,7 @@ func (cr *WindowsCMDRunner) BuildDockerComposeDownCMD(options DockerComposeDownO
 }
 
 func (cr *WindowsCMDRunner) BuildCreateFileCMD(options CreateFileOptions) Command {
-	return Command{Cmd: fmt.Sprintf("touch %s", options.FileName)}
+	return Command{Cmd: fmt.Sprintf("echo $null >> %s", options.FileName)}
 }
 
 func (cr *WindowsCMDRunner) BuildEchoToFileCMD(options EchoToFileOptions) Command {
