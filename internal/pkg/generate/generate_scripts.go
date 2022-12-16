@@ -78,15 +78,23 @@ func GenerateScripts(gd GenerationData) (result GenerationResults, err error) {
 	gd.ExecutionClient.Endpoint = configs.OnPremiseExecutionURL
 	gd.ConsensusClient.Endpoint = configs.OnPremiseConsensusURL
 
-	log.Info(configs.GeneratingDockerComposeScript)
-	dockerComposePath, err := generateDockerComposeScripts(gd)
+	log.Info(configs.GeneratingEnvFile)
+	envFilePath, err := generateEnvFile(gd)
 	if err != nil {
 		return GenerationResults{}, err
 	}
 
-	log.Info(configs.GeneratingEnvFile)
-	envFilePath, err := generateEnvFile(gd)
+	if err := CleanEnvFile(envFilePath); err != nil {
+		return GenerationResults{}, err
+	}
+
+	log.Info(configs.GeneratingDockerComposeScript)
+	dockerComposePath, err := generateDockerComposeScripts(gd, envFilePath)
 	if err != nil {
+		return GenerationResults{}, err
+	}
+
+	if err := CleanDockerCompose(dockerComposePath); err != nil {
 		return GenerationResults{}, err
 	}
 

@@ -373,12 +373,6 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		return []error{err}
 	}
 
-	// Clean generated .env and docker compose files
-	err = generate.CleanGenerated(results)
-	if err != nil {
-		return []error{err}
-	}
-
 	// Print final files
 	log.Infof(configs.CreatedFile, results.EnvFilePath)
 	ui.PrintFileContent(cmd.OutOrStdout(), results.EnvFilePath)
