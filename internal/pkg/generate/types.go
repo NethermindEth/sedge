@@ -35,6 +35,8 @@ type EnvData struct {
 	ConsensusClientName       string
 	KeystoreDir               string
 	Graffiti                  string
+	ECBootnodes               []string
+	CCBootnodes               []string
 }
 
 // GenerationData : Struct Data object for script's generation
@@ -57,6 +59,8 @@ type GenerationData struct {
 	Ports             map[string]string
 	Graffiti          string
 	LoggingDriver     string
+	ECBootnodes       []string
+	CCBootnodes       []string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -90,7 +94,8 @@ type DockerComposeData struct {
 	ElExtraFlags        []string
 	ClExtraFlags        []string
 	VlExtraFlags        []string
-	Bootnodes           []string
+	ECBootnodes         []string
+	CCBootnodes         []string
 	MapAllPorts         bool
 	SplittedNetwork     bool
 	ClCheckpointSyncUrl bool

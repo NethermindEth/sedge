@@ -54,7 +54,7 @@
       - --monitoring-host=0.0.0.0
       - --monitoring-port={{.VlMetricsPort}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{with .FeeRecipient}}
-      - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{if .Mev}}
+      - --suggested-fee-recipient=${CC_FEE_RECIPIENT}{{end}}{{if .Mev}}
       - --enable-builder
       - --enable-validator-registration{{end}}{{if .LoggingDriver}}
     logging:

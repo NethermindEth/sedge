@@ -43,6 +43,7 @@ b. error
 Error if any
 */
 func CheckVariable(re *regexp.Regexp, network, clientType, client string) (bool, error) {
+	//TODO: change usage to check variables from generated config instead of template
 	content, err := templates.Envs.ReadFile(filepath.Join("envs", network, clientType, client+".tmpl"))
 	if err != nil {
 		return false, err
@@ -72,6 +73,7 @@ b. error
 Error if any
 */
 func CheckVariableBase(re *regexp.Regexp, network string) (bool, error) {
+	//TODO: change usage to check variables from generated config instead of template
 	content, err := templates.Envs.ReadFile(filepath.Join("envs", network, "env_base.tmpl"))
 	if err != nil {
 		return false, err

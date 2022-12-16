@@ -44,7 +44,7 @@
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
       - --metrics-port={{.VlMetricsPort}}{{with .FeeRecipient}}
-      - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
+      - --validators-proposer-default-fee-recipient=${CC_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
       - --validators-builder-registration-default-enabled=true
       - --Xvalidators-builder-registration-default-gas-limit=29000000{{end}}{{if .LoggingDriver}}

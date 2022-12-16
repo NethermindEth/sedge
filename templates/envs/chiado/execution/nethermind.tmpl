@@ -8,4 +8,5 @@ NETHERMIND_PRUNING_CACHEMB=2048
 EC_DATA_DIR={{.ElDataDir}}
 EC_SNAP_SYNC_ENABLED=false
 EC_JWT_SECRET_PATH={{.JWTSecretPath}}
+{{if .ECBootnodes}}EC_BOOTNODES="{{ range $index, $enode := .ECBootnodes}}{{if $index}},{{end}}{{$enode}}{{end}}"{{end}}
 {{ end }}

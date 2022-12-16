@@ -90,7 +90,7 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 	CustomImagesWarning             = "You are using custom images for the execution, consensus or validator clients!!! Make sure this is intended. Also check these images are correct and available from this device otherwise the setup will fail or have an unexpected behavior."
 	MapAllPortsWarning              = "You are mapping all ports for the clients!!! Make sure this is intended. This could make the clients vulnerable to attacks. Be sure to setup a firewall."
 	CheckpointUrlUsedWarning        = "A Checkpoint Sync Url will be used for the consensus node. Using %s ."
-	NoBootnodesFound                = "No bootnodes found for %s/%s/%s"
+	NoBootnodesFound                = "No bootnodes found in %s env file "
 	UnableToCheckVersion            = "Unable to check for new Version. Please check manually at " +
 		"https://github.com/NethermindEth/sedge/releases, with error:"
 	NeedVersionUpdate = "A new Version of sedge is available. Please update to the latest Version. See " +

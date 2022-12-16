@@ -68,8 +68,8 @@ type CliCmdFlags struct {
 	customNetworkConfig string
 	customGenesis       string
 	customDeployBlock   int
-	customEnodes        string
-	customEnrs          string
+	customEnodes        *[]string
+	customEnrs          *[]string
 }
 
 type clientImages struct {
@@ -165,8 +165,8 @@ func CliCmd(prompt prompts.Prompt) *cobra.Command {
 	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
 	cmd.Flags().IntVar(&flags.customDeployBlock, "custom-deploy-block", -1, "Custom network deploy block to use for consensus client.")
-	cmd.Flags().StringVar(&flags.customEnodes, "custom-enodes", "", "List of comma separeted enodes to use as custom network peers for execution client.")
-	cmd.Flags().StringVar(&flags.customEnrs, "custom-enrs", "", "List of comma separeted enrs to use as custom network peers for consensus client.")
+	flags.customEnodes = cmd.Flags().StringSlice("execution-bootnodes", []string{}, "List of comma separeted enodes to use as custom network peers for execution client.")
+	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separeted enrs to use as custom network peers for consensus client.")
 	// TODO: check if this condition is still necessary
 	cmd.Flags().SortFlags = false
 	return cmd
@@ -367,6 +367,8 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		Mev:               !flags.noMev && !flags.noValidator,
 		MevImage:          flags.mevImage,
 		LoggingDriver:     configs.GetLoggingDriver(flags.logging),
+		ECBootnodes:       *flags.customEnodes,
+		CCBootnodes:       *flags.customEnrs,
 	}
 	results, err := generate.GenerateScripts(gd)
 	if err != nil {

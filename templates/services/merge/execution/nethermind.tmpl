@@ -32,7 +32,10 @@
       - --JsonRpc.JwtSecretFile=/tmp/jwt/jwtsecret
       - --JsonRpc.EngineHost=0.0.0.0
       - --JsonRpc.EnginePort={{.ElAuthPort}}
-      - --Network.DiscoveryPort={{.ElDiscoveryPort}}
+      - --Network.DiscoveryPort={{.ElDiscoveryPort}}{{if .ECBootnodes}}
+      - --Network.Bootnodes=${EC_BOOTNODES}
+      - --Discovery.Bootnodes=${EC_BOOTNODES}
+      - --Network.StaticPeers=${EC_BOOTNODES}{{end}}
       - --HealthChecks.Enabled=true
       - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}
       - --Metrics.Enabled=true

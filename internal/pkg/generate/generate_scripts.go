@@ -125,7 +125,7 @@ returns :-
 a. error
 Error if any
 */
-func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, err error) {
+func generateDockerComposeScripts(gd GenerationData, envFilePath string) (dockerComposePath string, err error) {
 	rawBaseTmp, err := templates.Services.ReadFile(filepath.Join("services", "docker-compose_base.tmpl"))
 	if err != nil {
 		return
@@ -211,8 +211,14 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 		return "", err
 	}
 
+	// Check for CC Bootstrap nodes
+	ccBootnodes, err := env.GetCCBootnodes(envFilePath)
+	if err != nil {
+		return "", err
+	}
+
 	// Check for Bootstrap nodes
-	bootnodes, err := env.GetBootnodes(gd.Network, gd.ConsensusClient.Name)
+	ecBootnodes, err := env.GetECBootnodes(envFilePath)
 	if err != nil {
 		return "", err
 	}
@@ -252,7 +258,8 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 		ElExtraFlags:        gd.ElExtraFlags,
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
-		Bootnodes:           bootnodes,
+		ECBootnodes:         ecBootnodes,
+		CCBootnodes:         ccBootnodes,
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
@@ -347,6 +354,8 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 		ConsensusClientName:       gd.ConsensusClient.Name,
 		KeystoreDir:               configs.KeystoreDefaultDataDir,
 		Graffiti:                  gd.Graffiti,
+		ECBootnodes:               gd.ECBootnodes,
+		CCBootnodes:               gd.CCBootnodes,
 	}
 
 	// Fix prysm rpc url

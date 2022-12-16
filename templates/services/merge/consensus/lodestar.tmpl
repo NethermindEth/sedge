@@ -38,13 +38,13 @@
       - --terminal-total-difficulty-override=${TTD}{{end}}
       - --logFile=/var/lib/lodestart/consensus/logs/beacon.log 
       - --logFileLevel=${CC_LOG_LEVEL}{{with .FeeRecipient}}
-      - --suggestedFeeRecipient=${CL_FEE_RECIPIENT}{{end}}
+      - --suggestedFeeRecipient=${CC_FEE_RECIPIENT}{{end}}
       - --port={{.ClDiscoveryPort}}
       - --rest=true
       - --rest.address=0.0.0.0
       - --rest.port={{.ClApiPort}}
       - --rest.cors=*
-      - --discv5=true{{range $enr := .Bootnodes}}
+      - --discv5=true{{range $enr := .CCBootnodes}}
       - --bootnodes={{$enr}}{{end}}
       - --targetPeers=${CC_PEER_COUNT}
       - --metrics=true
