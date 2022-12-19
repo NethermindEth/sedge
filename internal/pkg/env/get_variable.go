@@ -28,10 +28,7 @@ GetECBootnodes :
 Get the execution bootnodes (list of enodes addresses) from the environment variables.
 
 params :-
-a. network string
-Target network
-b. client string
-Client's name
+a. path to generated env file
 
 returns :-
 a. []string
@@ -60,10 +57,7 @@ GetCCBootnodes :
 Get the consensus bootnodes (list of enr addresses) from the environment variables.
 
 params :-
-a. network string
-Target network
-b. client string
-Client's name
+a. path to generated env file
 
 returns :-
 a. []string
@@ -85,4 +79,32 @@ func GetCCBootnodes(envFilePath string) ([]string, error) {
 
 	log.Warnf(configs.NoBootnodesFound, envFilePath)
 	return nil, nil
+}
+
+/*
+GetTTD :
+Get TTD from the environment variables.
+
+params :-
+a. path to generated env file
+
+returns :-
+a. []string
+List of bootnodes
+b. error
+Error if any
+*/
+func GetTTD(envFilePath string) (string, error) {
+	content, err := os.ReadFile(envFilePath)
+	if err != nil {
+		return "", err
+	}
+
+	if m := ReTTD.FindStringSubmatch(string(content)); m != nil {
+		m[1] = strings.ReplaceAll(m[1], "\"", "")
+		return m[1], nil
+	}
+
+	log.Warnf(configs.NoBootnodesFound, envFilePath)
+	return "", nil
 }

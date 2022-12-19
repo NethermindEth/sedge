@@ -105,4 +105,5 @@ const (
 	ErrorDownloadingFile              = "error downloading file from %s: %v"
 	ErrorCopyingFile                  = "error copying file from %s: %v"
 	ErrorWritingDeployBlockFile       = "error writing custom deploy block file %s: %v"
+	InvalidTTD                        = "invalid terminal total difficulty"
 )

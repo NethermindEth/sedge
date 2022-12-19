@@ -37,30 +37,36 @@ type EnvData struct {
 	Graffiti                  string
 	ECBootnodes               []string
 	CCBootnodes               []string
+	CustomTTD                 string
 }
 
 // GenerationData : Struct Data object for script's generation
 type GenerationData struct {
-	ExecutionClient   clients.Client
-	ConsensusClient   clients.Client
-	ValidatorClient   clients.Client
-	GenerationPath    string
-	Network           string
-	CheckpointSyncUrl string
-	FeeRecipient      string
-	JWTSecretPath     string
-	FallbackELUrls    []string
-	ElExtraFlags      []string
-	ClExtraFlags      []string
-	VlExtraFlags      []string
-	MapAllPorts       bool
-	Mev               bool
-	MevImage          string
-	Ports             map[string]string
-	Graffiti          string
-	LoggingDriver     string
-	ECBootnodes       []string
-	CCBootnodes       []string
+	ExecutionClient         clients.Client
+	ConsensusClient         clients.Client
+	ValidatorClient         clients.Client
+	GenerationPath          string
+	Network                 string
+	CheckpointSyncUrl       string
+	FeeRecipient            string
+	JWTSecretPath           string
+	FallbackELUrls          []string
+	ElExtraFlags            []string
+	ClExtraFlags            []string
+	VlExtraFlags            []string
+	MapAllPorts             bool
+	Mev                     bool
+	MevImage                string
+	Ports                   map[string]string
+	Graffiti                string
+	LoggingDriver           string
+	ECBootnodes             []string
+	CCBootnodes             []string
+	CustomTTD               string
+	CustomChainspecPath     string
+	CustomNetworkConfigPath string
+	CustomGenesisPath       string
+	CustomDeployBlockPath   string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script

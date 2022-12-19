@@ -2,6 +2,7 @@
 {{ define "env" }}
 # --- Global configuration ---
 EL_NETWORK=xdai
+{{if .CustomTTD}}TTD={{.CustomTTD}}{{end}}
 CL_NETWORK=gnosis
 {{template "execution" .}}
 {{template "consensus" .}}

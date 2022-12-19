@@ -103,3 +103,43 @@ func TestGetElBootnodes(t *testing.T) {
 		})
 	}
 }
+
+func TestGetTTD(t *testing.T) {
+	t.Parallel()
+
+	tcs := []struct {
+		name         string
+		testdataCase string
+		want         string
+		isErr        bool
+	}{
+		{
+			name:         "Test case 1, no bootnodes",
+			testdataCase: "case_1",
+			want:         "",
+			isErr:        false,
+		},
+		{
+			name:         "Test case 2, bootnodes",
+			testdataCase: "case_2",
+			want:         "8000000000000000000000001000000000000",
+			isErr:        false,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			testCaseEnvFilePath := filepath.Join("testdata", tc.testdataCase, ".env")
+			got, err := GetTTD(testCaseEnvFilePath)
+
+			descr := fmt.Sprintf("GetTTD(%s)", testCaseEnvFilePath)
+			if err = utils.CheckErr(descr, tc.isErr, err); err != nil {
+				t.Error(err)
+			}
+
+			if got != tc.want {
+				t.Errorf("Expected %v, got %v. Function call: %s", tc.want, got, descr)
+			}
+		})
+	}
+}

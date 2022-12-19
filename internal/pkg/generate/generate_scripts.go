@@ -160,8 +160,8 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 		}
 	}
 
-	// Check for TTD in env base template
-	TTD, err := env.CheckVariableBase(env.ReTTD, gd.Network)
+	// Check for TTD in generated env file
+	TTD, err := env.GetTTD(envFilePath)
 	if err != nil {
 		return "", err
 	}
@@ -229,7 +229,7 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 	}
 
 	data := DockerComposeData{
-		TTD:                 TTD,
+		TTD:                 TTD != "",
 		CcCustomCfg:         ccRemoteCfg || ccRemoteGen || ccRemoteDpl,
 		CcRemoteCfg:         ccRemoteCfg,
 		CcRemoteGen:         ccRemoteGen,
@@ -356,6 +356,7 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 		Graffiti:                  gd.Graffiti,
 		ECBootnodes:               gd.ECBootnodes,
 		CCBootnodes:               gd.CCBootnodes,
+		CustomTTD:                 gd.CustomTTD,
 	}
 
 	// Fix prysm rpc url
