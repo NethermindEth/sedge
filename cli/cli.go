@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -29,13 +28,15 @@ import (
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
 	posmonidb "github.com/NethermindEth/posmoni/pkg/eth2/db"
 	posmoninet "github.com/NethermindEth/posmoni/pkg/eth2/networking"
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
-	"github.com/NethermindEth/sedge/internal/pkg/slashing"
+	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
+	dockerct "github.com/docker/docker/api/types/container"
 	"github.com/spf13/cobra"
 )
 
@@ -76,7 +77,7 @@ type clientImages struct {
 	validator string
 }
 
-func CliCmd(prompt prompts.Prompt, slashingManager slashing.SlashingDataManager) *cobra.Command {
+func CliCmd(prompt prompts.Prompt, serviceManager services.ServiceManager, sedgeActions actions.SedgeActions) *cobra.Command {
 	// Initialize monitoring tool
 	initMonitor(func() MonitoringTool {
 		// Initialize Eth2 Monitoring tool
@@ -128,7 +129,7 @@ func CliCmd(prompt prompts.Prompt, slashingManager slashing.SlashingDataManager)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			// notest
-			if errs := runCliCmd(cmd, args, &flags, &images, prompt, slashingManager); len(errs) > 0 {
+			if errs := runCliCmd(cmd, args, &flags, &images, prompt, serviceManager, sedgeActions); len(errs) > 0 {
 				for _, err := range errs {
 					log.Error(err)
 				}
@@ -244,7 +245,7 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 	return &clientImages, nil
 }
 
-func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, prompt prompts.Prompt, slashingManager slashing.SlashingDataManager) []error {
+func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, prompt prompts.Prompt, serviceManager services.ServiceManager, sedgeActions actions.SedgeActions) []error {
 	// Warnings
 	// Warn if custom images are used
 	if clientImages.execution != "" || clientImages.consensus != "" || clientImages.validator != "" {
@@ -319,16 +320,6 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	combinedClients.Validator.Image = clientImages.validator
 	combinedClients.Validator.Omited = flags.noValidator
 
-	// Import slashing protection data into data path
-	if flags.slashingProtection != "" {
-		if _, err := os.Stat(flags.slashingProtection); err != nil {
-			return []error{err}
-		}
-		if err := utils.CopyFile(flags.slashingProtection, path.Join(flags.generationPath, configs.ValidatorDir, slashingImportFile)); err != nil {
-			return []error{err}
-		}
-	}
-
 	// Generate docker-compose scripts
 	gd := generate.GenerationData{
 		ExecutionClient:          combinedClients.Execution,
@@ -389,16 +380,36 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 			return []error{err}
 		}
 		if flags.slashingProtection != "" {
+			// Setup wait for validator import
+			exitCh, errCh := serviceManager.Wait(services.ServiceCtValidatorImport, dockerct.WaitConditionNextExit)
 			// Run validator-import
 			if err := runAndShowContainers([]string{"validator-import"}, flags); err != nil {
 				return []error{err}
 			}
-			// Wait for validator-import
-			if err := waitForContainerExit0("validator-import-client"); err != nil {
+			exitCode, err := func(exitCh <-chan dockerct.ContainerWaitOKBody, errCh <-chan error) (int64, error) {
+				for {
+					select {
+					case exitOk := <-exitCh:
+						return exitOk.StatusCode, nil
+					case err := <-errCh:
+						return -1, err
+					}
+				}
+			}(exitCh, errCh)
+			if err != nil {
 				return []error{err}
 			}
-			// Import slashing data
-			if err := slashingManager.Import(flags.validatorName, flags.network); err != nil {
+			if exitCode != 0 {
+				return []error{fmt.Errorf("%s ends with unexpected status code %d", services.ServiceCtValidatorImport, exitCode)}
+			}
+			if err := sedgeActions.ImportSlashingInterchangeData(actions.SlashingImportOptions{
+				ValidatorClient: flags.validatorName,
+				Network:         flags.network,
+				StopValidator:   false,
+				StartValidator:  false,
+				GenerationPath:  flags.generationPath,
+				From:            flags.slashingProtection,
+			}); err != nil {
 				return []error{err}
 			}
 		}
@@ -411,35 +422,6 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 			return []error{err}
 		}
 	}
-
-	// if !flags.noValidator {
-	// 	log.Info(configs.ValidatorTips)
-
-	// 	// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service in the previous step
-	// 	if !utils.Contains(*flags.services, validator) {
-	// 		// Wait for clients to start
-	// 		// log.Info(configs.WaitingForNodesToStart)
-	// 		// time.Sleep(waitingTime)
-	// 		// Track sync of execution and consensus clients
-	// 		// TODO: Parameterize wait arg of trackSync
-	// 		if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*5, flags); err != nil {
-	// 			return []error{err}
-	// 		}
-
-	// 		// TODO: Prompt for waiting for keystore and validator registration to run the validator
-	// 		if flags.run {
-	// 			if err = runAndShowContainers([]string{validator}, flags); err != nil {
-	// 				return []error{err}
-	// 			}
-	// 		} else {
-	// 			// Let the user decide to see the instructions for executing the validator and exit or let the tool execute it
-	// 			if err = RunValidatorOrExit(flags); err != nil {
-	// 				return []error{err}
-	// 			}
-	// 		}
-	// 	}
-	// 	log.Info(configs.HappyStaking)
-	// }
 
 	return nil
 }

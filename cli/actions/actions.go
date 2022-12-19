@@ -2,22 +2,22 @@ package actions
 
 import (
 	"github.com/NethermindEth/sedge/internal/pkg/services"
-	"github.com/NethermindEth/sedge/internal/pkg/slashing"
+	"github.com/docker/docker/client"
 )
 
 type SedgeActions interface {
-	ImportSlashingInterchangeData() error
+	ImportSlashingInterchangeData(SlashingImportOptions) error
 	ExportSlashingInterchangeData(SlashingExportOptions) error
 }
 
 type sedgeActions struct {
-	serviceManager  services.ServiceManager
-	slashingManager slashing.SlashingDataManager
+	dockerClient   client.APIClient
+	serviceManager services.ServiceManager
 }
 
-func NewSedgeActions(serviceManager services.ServiceManager, slashingManager slashing.SlashingDataManager) SedgeActions {
+func NewSedgeActions(dockerClient client.APIClient, serviceManager services.ServiceManager) SedgeActions {
 	return &sedgeActions{
-		serviceManager:  serviceManager,
-		slashingManager: slashingManager,
+		dockerClient:   dockerClient,
+		serviceManager: serviceManager,
 	}
 }

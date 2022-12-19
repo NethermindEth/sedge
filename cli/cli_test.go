@@ -26,10 +26,10 @@ import (
 	"time"
 
 	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
-	"github.com/NethermindEth/sedge/internal/pkg/slashing"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/test"
 	"github.com/NethermindEth/sedge/test/mock_prompts"
@@ -411,10 +411,10 @@ func TestCliCmd(t *testing.T) {
 			}
 			defer dockerClient.Close()
 			serviceManager := services.NewServiceManager(dockerClient)
-			slashingManager := slashing.NewSlashingDataManager(dockerClient, serviceManager)
+			sedgeActions := actions.NewSedgeActions(dockerClient, serviceManager)
 
 			rootCmd := RootCmd()
-			rootCmd.AddCommand(CliCmd(prompt, slashingManager))
+			rootCmd.AddCommand(CliCmd(prompt, serviceManager, sedgeActions))
 			argsL := append([]string{"cli"}, tc.args.argsList()...)
 			rootCmd.SetArgs(argsL)
 
