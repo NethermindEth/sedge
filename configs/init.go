@@ -21,42 +21,55 @@ import (
 )
 
 // TODO: Remove public level to this variable (NetworksConfigs), use getters to access instead
-var NetworksConfigs map[string]NetworkConfig
+var NetworksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
+	EthereumMainnet.Name:        EthereumMainnet,
+	GoerliEthereumTestnet.Name:  GoerliEthereumTestnet,
+	SepoliaEthereumTestnet.Name: SepoliaEthereumTestnet,
+	ChiadoGnosisTestnet.Name:    ChiadoGnosisTestnet,
+	GnosisMainnet.Name:          GnosisMainnet,
+	CustomNetwork.Name:          CustomNetwork,
+}
 
-func init() {
-	// TODO: This initialization can be made in the variable declaration
-	NetworksConfigs = map[string]NetworkConfig{
-		"mainnet": {
-			Name:               "mainnet",
-			RequireJWT:         true,
-			NetworkService:     "merge",
-			GenesisForkVersion: "0x00000000",
-		},
-		"goerli": {
-			Name:               "goerli",
-			RequireJWT:         true,
-			NetworkService:     "merge",
-			GenesisForkVersion: "0x00001020",
-		},
-		"sepolia": {
-			Name:               "sepolia",
-			RequireJWT:         true,
-			NetworkService:     "merge",
-			GenesisForkVersion: "0x90000069",
-		},
-		"chiado": {
-			Name:               "chiado",
-			RequireJWT:         true,
-			NetworkService:     "merge",
-			GenesisForkVersion: "0x0000006f",
-		},
-		"gnosis": {
-			Name:               "gnosis",
-			RequireJWT:         true,
-			NetworkService:     "merge",
-			GenesisForkVersion: "0x00000064",
-		},
-	}
+var EthereumMainnet NetworkConfig = NetworkConfig{
+	Name:               "mainnet",
+	RequireJWT:         true,
+	NetworkService:     "merge",
+	GenesisForkVersion: "0x00000000",
+}
+
+var GoerliEthereumTestnet NetworkConfig = NetworkConfig{
+	Name:               "goerli",
+	RequireJWT:         true,
+	NetworkService:     "merge",
+	GenesisForkVersion: "0x00001020",
+}
+
+var SepoliaEthereumTestnet NetworkConfig = NetworkConfig{
+	Name:               "sepolia",
+	RequireJWT:         true,
+	NetworkService:     "merge",
+	GenesisForkVersion: "0x90000069",
+}
+
+var ChiadoGnosisTestnet NetworkConfig = NetworkConfig{
+	Name:               "chiado",
+	RequireJWT:         true,
+	NetworkService:     "merge",
+	GenesisForkVersion: "0x0000006f",
+}
+
+var GnosisMainnet NetworkConfig = NetworkConfig{
+	Name:               "gnosis",
+	RequireJWT:         true,
+	NetworkService:     "merge",
+	GenesisForkVersion: "0x00000064",
+}
+
+var CustomNetwork NetworkConfig = NetworkConfig{
+	Name:               "custom",
+	RequireJWT:         true,
+	NetworkService:     "merge",
+	GenesisForkVersion: "0x00000000", // TODO: only affects keystores generation, ensure the deposit method does not conflict over this.
 }
 
 // TODO: add doc

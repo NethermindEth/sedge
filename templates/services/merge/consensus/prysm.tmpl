@@ -4,7 +4,7 @@
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{with .CcCustomCfg}}
+    image: ${CC_IMAGE_VERSION}{{with .CcCustomCfgDownload}}
     depends_on:
       config_consensus:
         condition: service_completed_successfully{{end}}
@@ -12,9 +12,9 @@
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/prysm
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}{{if .CcRemoteGen}}
-      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{if .CustomGenesisPath}}
+      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
@@ -24,9 +24,9 @@
     expose:
       - {{.ClApiPort}}
       - {{.ClAdditionalApiPort}}
-    command:{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
-      - --chain-config-file=/network_config/config.yml{{end}}{{if .CcRemoteDpl}}
-      - --contract-deployment-block=${DEPLOY_BLOCK}{{end}}{{if .CcRemoteGen}}
+    command:{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - --chain-config-file=/network_config/config.yml{{end}}{{if .CustomDeployBlockPath}}
+      - --contract-deployment-block=${DEPLOY_BLOCK}{{end}}{{if .CustomGenesisPath}}
       - --genesis-state=/network_config/genesis.ssz{{end}}{{else}}
       - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}{{range $enr := .CCBootnodes}}
       - --bootstrap-node={{$enr}}{{end}}{{with .TTD}}

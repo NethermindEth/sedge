@@ -456,13 +456,13 @@ func preRunTeku(flags *CliCmdFlags) error {
 
 func LoadCustomNetworksConfig(flags *CliCmdFlags) (string, string, string, string, error) {
 	destFolder := filepath.Join(flags.generationPath, configs.CustomNetworkConfigsFolder)
-	var chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath string
+	var chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath string
 
-	if flags.customChainspec != "" {
-		chainspecPath = filepath.Join(destFolder, configs.ExecutionNetworkConfigFileName)
-		err := utils.DownloadOrCopy(flags.customChainspec, chainspecPath, true)
+	if flags.customChainSpec != "" {
+		chainSpecPath = filepath.Join(destFolder, configs.ExecutionNetworkConfigFileName)
+		err := utils.DownloadOrCopy(flags.customChainSpec, chainSpecPath, true)
 		if err != nil {
-			return chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
 		}
 	}
 
@@ -470,7 +470,7 @@ func LoadCustomNetworksConfig(flags *CliCmdFlags) (string, string, string, strin
 		networkConfigPath = filepath.Join(destFolder, configs.ConsensusNetworkConfigFileName)
 		err := utils.DownloadOrCopy(flags.customNetworkConfig, networkConfigPath, true)
 		if err != nil {
-			return chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
 		}
 	}
 
@@ -478,7 +478,7 @@ func LoadCustomNetworksConfig(flags *CliCmdFlags) (string, string, string, strin
 		networkGenesisPath = filepath.Join(destFolder, configs.ConsensusNetworkGenesisFileName)
 		err := utils.DownloadOrCopy(flags.customGenesis, networkGenesisPath, true)
 		if err != nil {
-			return chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
 		}
 	}
 
@@ -486,9 +486,9 @@ func LoadCustomNetworksConfig(flags *CliCmdFlags) (string, string, string, strin
 		networkDeployBlockPath = filepath.Join(destFolder, configs.ConsensusNetworkDeployBlockFileName)
 		err := os.WriteFile(networkDeployBlockPath, []byte(fmt.Sprintf("%d", flags.customDeployBlock)), os.ModePerm)
 		if err != nil {
-			return chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, fmt.Errorf(configs.ErrorWritingDeployBlockFile, networkDeployBlockPath, err)
+			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, fmt.Errorf(configs.ErrorWritingDeployBlockFile, networkDeployBlockPath, err)
 		}
 	}
 
-	return chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, nil
+	return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, nil
 }

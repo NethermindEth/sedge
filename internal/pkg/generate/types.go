@@ -63,7 +63,7 @@ type GenerationData struct {
 	ECBootnodes             []string
 	CCBootnodes             []string
 	CustomTTD               string
-	CustomChainspecPath     string
+	CustomChainSpecPath     string
 	CustomNetworkConfigPath string
 	CustomGenesisPath       string
 	CustomDeployBlockPath   string
@@ -71,41 +71,47 @@ type GenerationData struct {
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
-	TTD                 bool
-	CcCustomCfg         bool
-	CcRemoteCfg         bool
-	CcRemoteGen         bool
-	CcRemoteDpl         bool
-	VlCustomCfg         bool
-	VlRemoteCfg         bool
-	VlRemoteGen         bool
-	VlRemoteDpl         bool
-	XeeVersion          bool
-	Mev                 bool
-	MevPort             string
-	MevImage            string
-	CheckpointSyncUrl   string
-	FeeRecipient        string
-	ElDiscoveryPort     string
-	ElMetricsPort       string
-	ElApiPort           string
-	ElAuthPort          string
-	ElWsPort            string
-	ClDiscoveryPort     string
-	ClMetricsPort       string
-	ClApiPort           string
-	ClAdditionalApiPort string
-	VlMetricsPort       string
-	FallbackELUrls      []string
-	ElExtraFlags        []string
-	ClExtraFlags        []string
-	VlExtraFlags        []string
-	ECBootnodes         []string
-	CCBootnodes         []string
-	MapAllPorts         bool
-	SplittedNetwork     bool
-	ClCheckpointSyncUrl bool
-	LoggingDriver       string
+	TTD                     bool
+	XeeVersion              bool
+	Mev                     bool
+	MevPort                 string
+	MevImage                string
+	CheckpointSyncUrl       string
+	FeeRecipient            string
+	ElDiscoveryPort         string
+	ElMetricsPort           string
+	ElApiPort               string
+	ElAuthPort              string
+	ElWsPort                string
+	ClDiscoveryPort         string
+	ClMetricsPort           string
+	ClApiPort               string
+	ClAdditionalApiPort     string
+	VlMetricsPort           string
+	FallbackELUrls          []string
+	ElExtraFlags            []string
+	ClExtraFlags            []string
+	VlExtraFlags            []string
+	ECBootnodes             []string
+	CCBootnodes             []string
+	MapAllPorts             bool
+	SplittedNetwork         bool
+	ClCheckpointSyncUrl     bool
+	LoggingDriver           string
+	CustomCfgDownload       bool
+	RemoteCfg               bool
+	RemoteGen               bool
+	RemoteDpl               bool
+	VlCustomCfgDownload     bool
+	VlRemoteCfg             bool
+	VlRemoteGen             bool
+	VlRemoteDpl             bool
+	CustomConsensusConfigs  bool
+	CustomNetwork           bool
+	CustomChainSpecPath     string
+	CustomNetworkConfigPath string
+	CustomGenesisPath       string
+	CustomDeployBlockPath   string
 }
 
 // GenerationResults: Struct for storing results of the generation process

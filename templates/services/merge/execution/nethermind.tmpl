@@ -9,7 +9,8 @@
       - sedge
     volumes:
       - ${EC_DATA_DIR}:/nethermind/data
-      - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+      - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CustomChainSpecPath}}
+      - {{.CustomChainSpecPath}}:/nethermind/custom_config/chainspec.json{{end}}
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
@@ -19,8 +20,9 @@
     expose:
       - {{.ElApiPort}}
       - {{.ElAuthPort}}
-    command:
-      - --config={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
+    command:{{if .CustomChainSpecPath}}
+      - --Init.ChainSpecPath=/nethermind/custom_config/chainspec.json{{end}}
+      - --config={{if .CustomNetwork}}none{{else}}{{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --datadir=/nethermind/data
       - --log=${NETHERMIND_LOG_LEVEL}{{with .TTD}}
       - --Merge.TerminalTotalDifficulty=${TTD}{{end}}

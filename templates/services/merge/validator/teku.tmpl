@@ -3,7 +3,7 @@
   validator-import:
     container_name: validator-import-client
     build:
-      context: github.com/NethermindEth/teku-init-validator{{with .VlCustomCfg}}
+      context: github.com/NethermindEth/teku-init-validator{{with .VlCustomCfgDownload}}
     depends_on:
       config_consensus:
         condition: service_completed_successfully{{end}}
@@ -21,7 +21,7 @@
     image: ${VL_IMAGE_VERSION}
     depends_on:
       validator-import:
-        condition: service_completed_successfully{{if .VlCustomCfg}}
+        condition: service_completed_successfully{{if .VlCustomCfgDownload}}
       config_consensus:
         condition: service_completed_successfully{{end}}
     networks:
@@ -29,11 +29,11 @@
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/data{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
-      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
+      - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{if .CustomGenesisPath}}
+      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{end}}
     command:
-      - validator-client{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - validator-client{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       - --network=/network_config/config.yml{{end}}{{end}}
       - --beacon-node-api-endpoint=${CC_API_URL}
       - --data-path=/data

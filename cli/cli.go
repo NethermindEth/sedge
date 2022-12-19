@@ -66,7 +66,7 @@ type CliCmdFlags struct {
 	vlExtraFlags        *[]string
 	logging             string
 	customTTD           string
-	customChainspec     string
+	customChainSpec     string
 	customNetworkConfig string
 	customGenesis       string
 	customDeployBlock   int
@@ -164,7 +164,7 @@ func CliCmd(prompt prompts.Prompt) *cobra.Command {
 	flags.vlExtraFlags = cmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringVar(&flags.logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
 	cmd.Flags().StringVar(&flags.customTTD, "custom-ttd", "", "Custom Terminal Total Difficulty to use for execution and consensus clients")
-	cmd.Flags().StringVar(&flags.customChainspec, "custom-chainspec", "", "File path or url to use as custom network chainspec for execution client.")
+	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
 	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
 	cmd.Flags().IntVar(&flags.customDeployBlock, "custom-deploy-block", -1, "Custom network deploy block to use for consensus client.")
@@ -219,8 +219,8 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 	if !utils.Contains(networks, flags.network) {
 		return nil, fmt.Errorf(configs.UnknownNetworkError, flags.network)
 	}
-	if flags.network == configs.NetworksConfigs["custom"].Name {
-		if flags.customChainspec == "" || flags.customNetworkConfig == "" || flags.customGenesis != "" || flags.customTTD == "" || flags.customDeployBlock == -1 {
+	if flags.network == configs.CustomNetwork.Name {
+		if flags.customChainSpec == "" || flags.customNetworkConfig == "" || flags.customGenesis != "" || flags.customTTD == "" || flags.customDeployBlock == -1 {
 			return nil, fmt.Errorf(configs.MissingCustomConfigs)
 		}
 	}
@@ -264,7 +264,7 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 
 	// validate custom network flags
 	urlOrPaths := []string{
-		flags.customChainspec,
+		flags.customChainSpec,
 		flags.customNetworkConfig,
 		flags.customGenesis,
 	}
@@ -348,10 +348,10 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	// Get custom networks configs
-	var chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath string
-	if flags.customChainspec != "" || flags.customDeployBlock >= 0 || flags.customGenesis != "" || flags.customNetworkConfig != "" {
+	var chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath string
+	if flags.customChainSpec != "" || flags.customDeployBlock >= 0 || flags.customGenesis != "" || flags.customNetworkConfig != "" {
 		// TODO: add results to generation data
-		chainspecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err = LoadCustomNetworksConfig(flags)
+		chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err = LoadCustomNetworksConfig(flags)
 		if err != nil {
 			return []error{err}
 		}
@@ -384,7 +384,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		ECBootnodes:             *flags.customEnodes,
 		CCBootnodes:             *flags.customEnrs,
 		CustomTTD:               flags.customTTD,
-		CustomChainspecPath:     chainspecPath,
+		CustomChainSpecPath:     chainSpecPath,
 		CustomNetworkConfigPath: networkConfigPath,
 		CustomGenesisPath:       networkGenesisPath,
 		CustomDeployBlockPath:   networkDeployBlockPath,

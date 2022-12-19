@@ -177,26 +177,68 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 	if err != nil {
 		return "", err
 	}
+	if ccRemoteCfg { // Have to download custom configs
+		if gd.CustomNetworkConfigPath == "" { // Setup paths to use downloaded configs
+			gd.CustomNetworkConfigPath = "./config.yaml"
+		} else { // Overriding custom configs, no need to download
+			ccRemoteCfg = false
+		}
+	}
 	ccRemoteGen, err := env.CheckVariable(env.ReGENESIS, gd.Network, "consensus", gd.ConsensusClient.Name)
 	if err != nil {
 		return "", err
 	}
+	if ccRemoteGen { // Have to download custom configs
+		if gd.CustomGenesisPath == "" { // Setup paths to use downloaded configs
+			gd.CustomGenesisPath = "./genesis.ssz"
+		} else { // Overriding custom configs, no need to download
+			ccRemoteGen = false
+		}
+	}
 	ccRemoteDpl, err := env.CheckVariable(env.ReDEPLOY, gd.Network, "consensus", gd.ConsensusClient.Name)
 	if err != nil {
 		return "", err
+	}
+	if ccRemoteDpl { // Have to download custom configs
+		if gd.CustomDeployBlockPath == "" { // Setup paths to use downloaded configs
+			gd.CustomDeployBlockPath = "./deploy_block.txt"
+		} else { // Overriding custom configs, no need to download
+			ccRemoteDpl = false
+		}
 	}
 
 	vlRemoteCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient.Name)
 	if err != nil {
 		return "", err
 	}
+	if vlRemoteCfg { // Have to download custom configs
+		if gd.CustomNetworkConfigPath == "" { // Setup paths to use downloaded configs
+			gd.CustomNetworkConfigPath = "config.yaml"
+		} else { // Overriding custom configs, no need to download
+			vlRemoteCfg = false
+		}
+	}
 	vlRemoteGen, err := env.CheckVariable(env.ReGENESIS, gd.Network, "validator", gd.ValidatorClient.Name)
 	if err != nil {
 		return "", err
 	}
+	if vlRemoteGen { // Have to download custom configs
+		if gd.CustomGenesisPath == "" { // Setup paths to use downloaded configs
+			gd.CustomGenesisPath = "./genesis.ssz"
+		} else { // Overriding custom configs, no need to download
+			vlRemoteGen = false
+		}
+	}
 	vlRemoteDpl, err := env.CheckVariable(env.ReDEPLOY, gd.Network, "validator", gd.ValidatorClient.Name)
 	if err != nil {
 		return "", err
+	}
+	if vlRemoteDpl { // Have to download custom configs
+		if gd.CustomDeployBlockPath == "" { // Setup paths to use downloaded configs
+			gd.CustomDeployBlockPath = "./deploy_block.txt"
+		} else { // Overriding custom configs, no need to download
+			vlRemoteDpl = false
+		}
 	}
 
 	// Check for XEE_VERSION in teku
@@ -230,14 +272,6 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 
 	data := DockerComposeData{
 		TTD:                 TTD != "",
-		CcCustomCfg:         ccRemoteCfg || ccRemoteGen || ccRemoteDpl,
-		CcRemoteCfg:         ccRemoteCfg,
-		CcRemoteGen:         ccRemoteGen,
-		CcRemoteDpl:         ccRemoteDpl,
-		VlCustomCfg:         vlRemoteCfg || vlRemoteGen || vlRemoteDpl,
-		VlRemoteCfg:         vlRemoteCfg,
-		VlRemoteGen:         vlRemoteGen,
-		VlRemoteDpl:         vlRemoteDpl,
 		XeeVersion:          xeeVersion,
 		Mev:                 mev && gd.Mev,
 		MevPort:             gd.Ports["MevPort"],
@@ -264,6 +298,20 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
 		LoggingDriver:       gd.LoggingDriver,
+		// Custom configs data
+		CustomCfgDownload: ccRemoteCfg || ccRemoteGen || ccRemoteDpl ||
+			vlRemoteCfg || vlRemoteGen || vlRemoteDpl, // Need to download something for consensus node
+		RemoteCfg:     ccRemoteCfg || vlRemoteCfg,               // Download config.yaml
+		RemoteGen:     ccRemoteGen || vlRemoteGen,               // Download genesis.ssz
+		RemoteDpl:     ccRemoteDpl || vlRemoteDpl,               // Download deploy_block.txt
+		CustomNetwork: gd.Network == configs.CustomNetwork.Name, // Used custom templates
+		CustomConsensusConfigs: gd.CustomNetworkConfigPath != "" ||
+			gd.CustomGenesisPath != "" ||
+			gd.CustomDeployBlockPath != "", // Have custom configs paths
+		CustomChainSpecPath:     gd.CustomChainSpecPath,     // Path to chainspec.json
+		CustomNetworkConfigPath: gd.CustomNetworkConfigPath, // Path to config.yaml
+		CustomGenesisPath:       gd.CustomGenesisPath,       // Path to genesis.ssz
+		CustomDeployBlockPath:   gd.CustomDeployBlockPath,   // Path to deploy_block.txt
 	}
 
 	dockerComposePath = filepath.Join(gd.GenerationPath, configs.DefaultDockerComposeScriptName)

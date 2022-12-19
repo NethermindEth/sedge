@@ -4,19 +4,19 @@
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{if or .Mev .CcCustomCfg}}
+    image: ${CC_IMAGE_VERSION}{{if or .Mev .CcCustomCfgDownload}}
     depends_on:{{if .Mev}}
       mevboost:
-        condition: service_started{{end}}{{if .CcCustomCfg}}
+        condition: service_started{{end}}{{if .CustomConsensusConfigs}}
       config_consensus:
         condition: service_completed_successfully{{end}}{{end}}
     networks:
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/teku
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}{{if .CcRemoteGen}}
-      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{if .CustomGenesisPath}}
+      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
@@ -26,9 +26,9 @@
       - {{.ClApiPort}}
     command:
       - --log-destination=CONSOLE
-      - --logging=${CC_LOG_LEVEL}{{if not .CcCustomCfg}}
-      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}{{if .CcRemoteGen}}
-      - --initial-state=/network_config/genesis.ssz{{end}}{{if .CcRemoteCfg}}
+      - --logging=${CC_LOG_LEVEL}{{if not .CustomConsensusConfigs}}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}{{if .CustomGenesisPath}}
+      - --initial-state=/network_config/genesis.ssz{{end}}{{if .CustomNetworkConfigPath}}
       - --network=/network_config/config.yml{{end}}{{end}}{{if .CCBootnodes}}
       - --p2p-discovery-bootnodes=${CC_BOOTNODES}{{end}}
       - --p2p-enabled=true

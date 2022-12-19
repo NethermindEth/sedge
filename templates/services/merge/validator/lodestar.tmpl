@@ -2,7 +2,7 @@
 {{ define "validator" }}
   validator-import:
     container_name: validator-import-client
-    image: ${VL_IMAGE_VERSION}{{with .VlCustomCfg}}
+    image: ${VL_IMAGE_VERSION}{{with .VlCustomCfgDownload}}
     depends_on:
       config_consensus:
         condition: service_completed_successfully{{end}}
@@ -10,13 +10,13 @@
       - sedge
     volumes:
       - ${KEYSTORE_DIR}:/keystore
-      - ${VL_DATA_DIR}:/data{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
-      - ./config.yml:/network_config/config.yaml{{end}}{{if .VlRemoteGen}}
-      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{if .VlRemoteDpl}}
-      - ./deploy_block.txt:/network_config/deploy_block.txt{{end}}{{end}}
+      - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yaml{{end}}{{if .CustomGenesisPath}}
+      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{if .CustomDeployBlockPath}}
+      - {{.CustomDeployBlockPath}}:/network_config/deploy_block.txt{{end}}{{end}}
     command: |
       validator import
-      --preset=${VL_LODESTAR_PRESET}{{if not .VlCustomCfg}}
+      --preset=${VL_LODESTAR_PRESET}{{if not .CustomConsensusConfigs}}
       --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}
       --paramsFile /network_config/config.yaml{{end}}
       --dataDir=/data
@@ -38,12 +38,12 @@
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/data/validator{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
-      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
+      - ${VL_DATA_DIR}:/data/validator{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{if .CustomGenesisPath}}
+      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{end}}
     command: 
       - validator
-      - --preset=${VL_LODESTAR_PRESET}{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - --preset=${VL_LODESTAR_PRESET}{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       - --paramsFile=/network_config/config.yml{{end}}{{else}}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --dataDir=/data/validator

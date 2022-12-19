@@ -9,7 +9,7 @@ const (
 	ConsensusDefaultDataDir             = "./consensus-data"
 	ValidatorDefaultDataDir             = "./validator-data"
 	KeystoreDefaultDataDir              = "./keystore"
-	ExecutionNetworkConfigFileName      = "chainspec.json"
+	ExecutionNetworkConfigFileName      = "chainSpec.json"
 	ConsensusNetworkConfigFileName      = "config.yaml"
 	ConsensusNetworkGenesisFileName     = "genesis.ssz"
 	ConsensusNetworkDeployBlockFileName = "deploy_block.txt"
