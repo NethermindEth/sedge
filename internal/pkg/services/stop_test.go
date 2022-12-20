@@ -75,11 +75,13 @@ func TestStopContainerError(t *testing.T) {
 	defer ctrl.Finish()
 
 	expectedError := errors.New("error")
+	validatorCtId := "validatorctid"
 
 	dockerClient.EXPECT().
 		ContainerInspect(context.Background(), "validator-client").
 		Return(types.ContainerJSON{
 			ContainerJSONBase: &types.ContainerJSONBase{
+				ID: validatorCtId,
 				State: &types.ContainerState{
 					Running: true,
 				},
@@ -87,7 +89,7 @@ func TestStopContainerError(t *testing.T) {
 		}, nil).
 		Times(1)
 	dockerClient.EXPECT().
-		ContainerStop(context.Background(), "validator-client", gomock.Any()).
+		ContainerStop(context.Background(), validatorCtId, gomock.Any()).
 		Return(expectedError).
 		Times(1)
 
