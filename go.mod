@@ -21,6 +21,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.13.0
+	github.com/stretchr/testify v1.8.0
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/wealdtech/go-eth2-types/v2 v2.7.0
 	github.com/wealdtech/go-eth2-util v1.7.0
@@ -33,6 +34,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
@@ -57,6 +59,7 @@ require (
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/r3labs/sse/v2 v2.7.7 // indirect
 	github.com/rivo/uniseg v0.1.0 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
