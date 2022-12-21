@@ -84,7 +84,7 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 			"--from=/data/slashing-import.json",
 		}
 	default:
-		return fmt.Errorf("slashing import nos supported for client %s", options.ValidatorClient)
+		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
 	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd); err != nil {
 		return err
@@ -157,7 +157,7 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 			"--to=/data/slashing_protection.json",
 		}
 	default:
-		return fmt.Errorf("slashing export not supported for client %s", options.ValidatorClient)
+		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
 	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd); err != nil {
 		return err

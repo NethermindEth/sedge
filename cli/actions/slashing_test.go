@@ -3,6 +3,7 @@ package actions_test
 import (
 	"errors"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -19,8 +20,25 @@ import (
 
 func TestSlashingImport_ValidatorNotFound(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
+	s := validatorNotFoundHelper(t, ctrl)
+
+	err := s.ImportSlashingInterchangeData(actions.SlashingImportOptions{})
+	assert.ErrorIs(t, err, services.ErrContainerNotFound)
+}
+
+func TestSlashingExport_ValidatorNotFound(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	s := validatorNotFoundHelper(t, ctrl)
+	err := s.ExportSlashingInterchangeData(actions.SlashingExportOptions{})
+	assert.ErrorIs(t, err, services.ErrContainerNotFound)
+}
+
+func validatorNotFoundHelper(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
+	t.Helper()
+	dockerClient := mock_client.NewMockAPIClient(ctrl)
 
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
@@ -31,18 +49,33 @@ func TestSlashingImport_ValidatorNotFound(t *testing.T) {
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	s := actions.NewSedgeActions(dockerClient, serviceManager)
-
-	err := s.ImportSlashingInterchangeData(actions.SlashingImportOptions{})
-	assert.ErrorIs(t, err, services.ErrContainerNotFound)
+	return actions.NewSedgeActions(dockerClient, serviceManager)
 }
 
 func TestSlashingImport_CheckValidatorFailure(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	wantError := errors.New("error")
+	s := checkValidatorFailureHelper(t, ctrl, wantError)
+
+	err := s.ImportSlashingInterchangeData(actions.SlashingImportOptions{})
+	assert.ErrorIs(t, err, wantError)
+}
+
+func TestSlashingExport_CheckValidatorFailure(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	wantError := errors.New("error")
+	s := checkValidatorFailureHelper(t, ctrl, wantError)
+
+	err := s.ImportSlashingInterchangeData(actions.SlashingImportOptions{})
+	assert.ErrorIs(t, err, wantError)
+}
+
+func checkValidatorFailureHelper(t *testing.T, ctrl *gomock.Controller, wantError error) actions.SedgeActions {
+	dockerClient := mock_client.NewMockAPIClient(ctrl)
 
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
@@ -59,16 +92,31 @@ func TestSlashingImport_CheckValidatorFailure(t *testing.T) {
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	s := actions.NewSedgeActions(dockerClient, serviceManager)
-
-	err := s.ImportSlashingInterchangeData(actions.SlashingImportOptions{})
-	assert.ErrorIs(t, err, wantError)
+	return actions.NewSedgeActions(dockerClient, serviceManager)
 }
 
 func TestSlashingImport_ValidatorStopFailure(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
+
+	s := validatorStopFailureHelper(t, ctrl)
+
+	err := s.ImportSlashingInterchangeData(actions.SlashingImportOptions{})
+	assert.ErrorIs(t, err, services.ErrStoppingContainer)
+}
+
+func TestSlashingExport_ValidatorStopFailure(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	s := validatorStopFailureHelper(t, ctrl)
+
+	err := s.ExportSlashingInterchangeData(actions.SlashingExportOptions{})
+	assert.ErrorIs(t, err, services.ErrStoppingContainer)
+}
+
+func validatorStopFailureHelper(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
+	dockerClient := mock_client.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
 
@@ -98,10 +146,7 @@ func TestSlashingImport_ValidatorStopFailure(t *testing.T) {
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	s := actions.NewSedgeActions(dockerClient, serviceManager)
-
-	err := s.ImportSlashingInterchangeData(actions.SlashingImportOptions{})
-	assert.ErrorIs(t, err, services.ErrStoppingContainer)
+	return actions.NewSedgeActions(dockerClient, serviceManager)
 }
 
 func TestSlashingImport_ValidatorRunning(t *testing.T) {
@@ -109,74 +154,12 @@ func TestSlashingImport_ValidatorRunning(t *testing.T) {
 	for _, validatorClient := range clients {
 		t.Run(validatorClient, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
-			dockerClient := mock_client.NewMockAPIClient(ctrl)
 			defer ctrl.Finish()
 
-			validatorCtId := "validatorctid"
-			slashingCtName := "validator-slashing-data"
-			slashingCtId := "slashing-ct-id"
-
-			// Mock ContainerList
-			dockerClient.EXPECT().
-				ContainerList(gomock.Any(), types.ContainerListOptions{
-					All:     true,
-					Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
-				}).
-				Return([]types.Container{
-					{ID: validatorCtId},
-				}, nil).
-				Times(1)
-			// Mock ContainerInspect
-			dockerClient.EXPECT().
-				ContainerInspect(gomock.Any(), services.ServiceCtValidator).
-				Return(types.ContainerJSON{
-					ContainerJSONBase: &types.ContainerJSONBase{
-						ID: validatorCtId,
-						State: &types.ContainerState{
-							Running: true,
-						},
-					},
-				}, nil).
-				Times(3)
-			// Mock ContainerStop
-			dockerClient.EXPECT().
-				ContainerStop(gomock.Any(), validatorCtId, gomock.Any()).
-				Return(nil).
-				Times(1)
-			// Mock ContainerCreate
-			dockerClient.EXPECT().
-				ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), slashingCtName).
-				Return(container.ContainerCreateCreatedBody{ID: slashingCtId}, nil).
-				Times(1)
-			// Mock ContainerStart
-			dockerClient.EXPECT().
-				ContainerStart(gomock.Any(), slashingCtId, gomock.Any()).
-				Return(nil).
-				Times(1)
-			dockerClient.EXPECT().
-				ContainerStart(gomock.Any(), services.ServiceCtValidator, gomock.Any()).
-				Return(nil).
-				Times(1)
-			// Mock ContainerWait
-			exitCh := make(chan container.ContainerWaitOKBody, 1)
-			exitCh <- container.ContainerWaitOKBody{
-				StatusCode: 0,
-			}
-			dockerClient.EXPECT().
-				ContainerWait(gomock.Any(), slashingCtName, container.WaitConditionNextExit).
-				Return(exitCh, make(chan error)).
-				Times(1)
-			// Mock ContainerRemove
-			dockerClient.EXPECT().
-				ContainerRemove(gomock.Any(), slashingCtId, types.ContainerRemoveOptions{}).
-				Return(nil).
-				Times(1)
-
-			serviceManager := services.NewServiceManager(dockerClient)
-			s := actions.NewSedgeActions(dockerClient, serviceManager)
+			s := slashingGoldenPath(t, ctrl)
 
 			generationPath := t.TempDir()
-			from := setupSlashingDataFile(t)
+			from := setupSlashingDataFile(t, filepath.Join(t.TempDir(), "slashing-data.json"))
 			copiedFile := filepath.Join(generationPath, configs.ValidatorDir, actions.SlashingImportFile)
 			err := s.ImportSlashingInterchangeData(actions.SlashingImportOptions{
 				ValidatorClient: validatorClient,
@@ -193,6 +176,194 @@ func TestSlashingImport_ValidatorRunning(t *testing.T) {
 			assert.Equal(t, []byte(slashingFile), copiedData)
 		})
 	}
+}
+
+func TestSlashingExport_ValidatorRunning(t *testing.T) {
+	clients := []string{"prysm", "lighthouse", "lodestar", "teku"}
+	for _, validatorClient := range clients {
+		t.Run(validatorClient, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			s := slashingGoldenPath(t, ctrl)
+
+			generationPath := t.TempDir()
+
+			setupSlashingDataFile(t, filepath.Join(generationPath, "validator-data", "slashing_protection.json"))
+			out := filepath.Join(t.TempDir(), "slashing-out.json")
+			err := s.ExportSlashingInterchangeData(actions.SlashingExportOptions{
+				ValidatorClient: validatorClient,
+				Network:         "sepolia",
+				GenerationPath:  generationPath,
+				Out:             out,
+			})
+			assert.Nil(t, err)
+			assert.FileExists(t, out)
+			copiedData, err := ioutil.ReadFile(out)
+			if err != nil {
+				panic(err)
+			}
+			assert.Equal(t, []byte(slashingFile), copiedData)
+		})
+	}
+}
+
+func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
+	dockerClient := mock_client.NewMockAPIClient(ctrl)
+
+	validatorCtId := "validatorctid"
+	slashingCtName := "validator-slashing-data"
+	slashingCtId := "slashing-ct-id"
+
+	// Mock ContainerList
+	dockerClient.EXPECT().
+		ContainerList(gomock.Any(), types.ContainerListOptions{
+			All:     true,
+			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+		}).
+		Return([]types.Container{
+			{ID: validatorCtId},
+		}, nil).
+		Times(1)
+	// Mock ContainerInspect
+	dockerClient.EXPECT().
+		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
+		Return(types.ContainerJSON{
+			ContainerJSONBase: &types.ContainerJSONBase{
+				ID: validatorCtId,
+				State: &types.ContainerState{
+					Running: true,
+				},
+			},
+		}, nil).
+		Times(3)
+	// Mock ContainerStop
+	dockerClient.EXPECT().
+		ContainerStop(gomock.Any(), validatorCtId, gomock.Any()).
+		Return(nil).
+		Times(1)
+	// Mock ContainerCreate
+	dockerClient.EXPECT().
+		ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), slashingCtName).
+		Return(container.ContainerCreateCreatedBody{ID: slashingCtId}, nil).
+		Times(1)
+	// Mock ContainerStart
+	dockerClient.EXPECT().
+		ContainerStart(gomock.Any(), slashingCtId, gomock.Any()).
+		Return(nil).
+		Times(1)
+	dockerClient.EXPECT().
+		ContainerStart(gomock.Any(), services.ServiceCtValidator, gomock.Any()).
+		Return(nil).
+		Times(1)
+	// Mock ContainerWait
+	exitCh := make(chan container.ContainerWaitOKBody, 1)
+	exitCh <- container.ContainerWaitOKBody{
+		StatusCode: 0,
+	}
+	dockerClient.EXPECT().
+		ContainerWait(gomock.Any(), slashingCtName, container.WaitConditionNextExit).
+		Return(exitCh, make(chan error)).
+		Times(1)
+	// Mock ContainerRemove
+	dockerClient.EXPECT().
+		ContainerRemove(gomock.Any(), slashingCtId, types.ContainerRemoveOptions{}).
+		Return(nil).
+		Times(1)
+
+	serviceManager := services.NewServiceManager(dockerClient)
+	return actions.NewSedgeActions(dockerClient, serviceManager)
+}
+
+func TestSlashingImport_UnsupportedClient(t *testing.T) {
+	clients := []string{"", "unsupported", "kfjkdshjkr24"}
+	for _, validatorClient := range clients {
+		t.Run(validatorClient, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			s := unsupportedClientsHelper(t, ctrl)
+
+			generationPath := t.TempDir()
+			from := setupSlashingDataFile(t, filepath.Join(t.TempDir(), "slashing-data.json"))
+			copiedFile := filepath.Join(generationPath, configs.ValidatorDir, actions.SlashingImportFile)
+			err := s.ImportSlashingInterchangeData(actions.SlashingImportOptions{
+				ValidatorClient: validatorClient,
+				Network:         "sepolia",
+				GenerationPath:  generationPath,
+				From:            from,
+			})
+			assert.ErrorIs(t, err, actions.ErrUnsupportedValidatorClient)
+			assert.FileExists(t, copiedFile)
+			copiedData, err := ioutil.ReadFile(copiedFile)
+			if err != nil {
+				panic(err)
+			}
+			assert.Equal(t, []byte(slashingFile), copiedData)
+		})
+	}
+}
+
+func TestSlashingExport_UnsupportedClient(t *testing.T) {
+	clients := []string{"", "unsupported", "kfjkdshjkr24"}
+	for _, validatorClient := range clients {
+		t.Run(validatorClient, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			s := unsupportedClientsHelper(t, ctrl)
+
+			generationPath := t.TempDir()
+
+			setupSlashingDataFile(t, filepath.Join(generationPath, "validator-data", "slashing_protection.json"))
+			out := filepath.Join(t.TempDir(), "slashing-out.json")
+			err := s.ExportSlashingInterchangeData(actions.SlashingExportOptions{
+				ValidatorClient: validatorClient,
+				Network:         "sepolia",
+				GenerationPath:  generationPath,
+				Out:             out,
+			})
+			assert.ErrorIs(t, err, actions.ErrUnsupportedValidatorClient)
+			assert.NoFileExists(t, out)
+		})
+	}
+}
+
+func unsupportedClientsHelper(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
+	dockerClient := mock_client.NewMockAPIClient(ctrl)
+
+	validatorCtId := "validatorctid"
+
+	// Mock ContainerList
+	dockerClient.EXPECT().
+		ContainerList(gomock.Any(), types.ContainerListOptions{
+			All:     true,
+			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+		}).
+		Return([]types.Container{
+			{ID: validatorCtId},
+		}, nil).
+		Times(1)
+	// Mock ContainerInspect
+	dockerClient.EXPECT().
+		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
+		Return(types.ContainerJSON{
+			ContainerJSONBase: &types.ContainerJSONBase{
+				ID: validatorCtId,
+				State: &types.ContainerState{
+					Running: true,
+				},
+			},
+		}, nil).
+		Times(2)
+	// Mock ContainerStop
+	dockerClient.EXPECT().
+		ContainerStop(gomock.Any(), validatorCtId, gomock.Any()).
+		Return(nil).
+		Times(1)
+
+	serviceManager := services.NewServiceManager(dockerClient)
+	return actions.NewSedgeActions(dockerClient, serviceManager)
 }
 
 const (
@@ -229,10 +400,11 @@ const (
 	}`
 )
 
-func setupSlashingDataFile(t *testing.T) string {
+func setupSlashingDataFile(t *testing.T, path string) string {
 	t.Helper()
-	dir := t.TempDir()
-	path := filepath.Join(dir, "slashing-data.json")
+	if err := os.MkdirAll(filepath.Dir(path), 0o777); err != nil {
+		t.Fatal(err.Error())
+	}
 	if err := ioutil.WriteFile(path, []byte(slashingFile), 0o777); err != nil {
 		t.Fatal(err.Error())
 	}
