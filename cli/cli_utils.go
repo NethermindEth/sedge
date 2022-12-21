@@ -17,7 +17,6 @@ package cli
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -37,19 +36,12 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/templates"
-	"github.com/docker/docker/client"
 	"github.com/manifoldco/promptui"
 )
 
 // Interface for Posmoni Eth2 monitor
 type MonitoringTool interface {
 	TrackSync(done <-chan struct{}, beaconEndpoints, executionEndpoints []string, wait time.Duration) <-chan posmoni.EndpointSyncStatus
-}
-
-var monitor MonitoringTool
-
-func initMonitor(builder func() MonitoringTool) {
-	monitor = builder()
 }
 
 func installOrShowInstructions(pending []string) (err error) {
@@ -301,39 +293,6 @@ func runAndShowContainers(services []string, flags *CliCmdFlags) error {
 	return nil
 }
 
-func waitForContainerExit0(container string) error {
-	dockerCli, err := client.NewClientWithOpts(client.FromEnv)
-	if err != nil {
-		return err
-	}
-	defer dockerCli.Close()
-	log.Infof("Waiting for container %s", container)
-	for {
-		time.Sleep(time.Second)
-		ctInfo, err := dockerCli.ContainerInspect(context.Background(), container)
-		if err != nil {
-			return err
-		}
-		if ctInfo.State.Status == "created" {
-			log.Info("The validator-import has not been run yet")
-			continue
-		}
-		if ctInfo.State.Status == "running" {
-			log.Info("The validator-import is still running")
-			continue
-		}
-		if ctInfo.State.Status == "exited" {
-			if ctInfo.State.ExitCode != 0 {
-				return fmt.Errorf("%s unexpected exit code: %d", container, ctInfo.State.ExitCode)
-			}
-			break
-		}
-		return fmt.Errorf("%s unexpected status: %s", container, ctInfo.State.Status)
-	}
-	log.Infof("%s ends successfully", container)
-	return nil
-}
-
 type container struct {
 	NetworkSettings networkSettings
 }
@@ -385,61 +344,6 @@ func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
 
 	ip, err = parseNetwork(data)
 	return
-}
-
-func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flags *CliCmdFlags) error {
-	done := make(chan struct{})
-	defer close(done)
-
-	log.Info(configs.GettingContainersIP)
-	executionIP, errE := getContainerIP(execution, flags)
-	if errE != nil {
-		log.Errorf(configs.GetContainerIPError, execution, errE)
-	}
-	consensusIP, errC := getContainerIP(consensus, flags)
-	if errC != nil {
-		log.Errorf(configs.GetContainerIPError, consensus, errC)
-		if errE != nil {
-			// Both IP were not detected, both containers probably failed
-			return errors.New(configs.UnableToTrackSyncError)
-		}
-	}
-
-	consensusUrl := fmt.Sprintf("http://%s:%s", consensusIP, clPort)
-	executionUrl := fmt.Sprintf("http://%s:%s", executionIP, elPort)
-
-	statuses := m.TrackSync(done, []string{consensusUrl}, []string{executionUrl}, wait)
-
-	var esynced, csynced bool
-	// Threshold to stop tracking, to avoid false responses
-	times := 0
-	for s := range statuses {
-		if s.Error != nil {
-			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
-		}
-
-		if s.Endpoint == executionUrl {
-			esynced = s.Synced
-		} else if s.Endpoint == consensusUrl {
-			csynced = s.Synced
-		}
-
-		if esynced && csynced {
-			times++
-			// Stop tracking after consecutive synced reports
-			if times == 3 {
-				// Stop tracking
-				done <- struct{}{}
-				log.Info(configs.NodesSynced)
-				break // statuses channel might still have data before closing done channel
-			}
-		} else {
-			// Restart threshold
-			times = 0
-		}
-	}
-
-	return nil
 }
 
 func RunValidatorOrExit(flags *CliCmdFlags) error {

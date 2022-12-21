@@ -21,13 +21,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
-	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
-	posmonidb "github.com/NethermindEth/posmoni/pkg/eth2/db"
-	posmoninet "github.com/NethermindEth/posmoni/pkg/eth2/networking"
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
@@ -79,27 +75,6 @@ type clientImages struct {
 
 func CliCmd(prompt prompts.Prompt, serviceManager services.ServiceManager, sedgeActions actions.SedgeActions) *cobra.Command {
 	// Initialize monitoring tool
-	initMonitor(func() MonitoringTool {
-		// Initialize Eth2 Monitoring tool
-		moniCfg := posmoni.ConfigOpts{
-			Checkers: []posmoni.CfgChecker{
-				{Key: posmoni.Execution, ErrMsg: posmoni.NoExecutionFoundError, Data: []string{configs.OnPremiseExecutionURL}},
-				{Key: posmoni.Consensus, ErrMsg: posmoni.NoConsensusFoundError, Data: []string{configs.OnPremiseConsensusURL}},
-			},
-		}
-		m, err := posmoni.NewEth2Monitor(
-			posmonidb.EmptyRepository{},
-			&posmoninet.BeaconClient{RetryDuration: time.Minute * 10},
-			&posmoninet.ExecutionClient{RetryDuration: time.Minute * 10},
-			posmoninet.SubscribeOpts{},
-			moniCfg,
-		)
-		if err != nil {
-			log.Fatalf(configs.MonitoringToolInitError, err)
-		}
-
-		return m
-	})
 	var (
 		flags  CliCmdFlags
 		images clientImages
