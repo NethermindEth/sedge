@@ -4,7 +4,7 @@
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{if or .Mev .CcCustomCfgDownload}}
+    image: ${CC_IMAGE_VERSION}{{if or .Mev .CustomCfgDownload}}
     depends_on:{{if .Mev}}
       mevboost:
         condition: service_started{{end}}{{if .CustomConsensusConfigs}}

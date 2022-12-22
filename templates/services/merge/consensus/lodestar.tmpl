@@ -4,7 +4,7 @@
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{with .CcCustomCfgDownload}}
+    image: ${CC_IMAGE_VERSION}{{with .CustomCfgDownload}}
     depends_on:
       config_consensus:
         condition: service_completed_successfully{{end}}
