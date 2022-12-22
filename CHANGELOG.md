@@ -9,11 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add search functionality to documentation using Algolia
 - Support for Erigon as Execution Client
 - Support for Besu as Execution Client
 
 ### Fixed
 
+- Fix bad `{{end}}` tag on docker-compose_base template
 - Fix inconsistent behavior of `AssignPorts` function test.
 - When generating new mnemonic, show it without a trace (linux, MacOS).
 

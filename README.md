@@ -50,7 +50,7 @@ Check our [installation guide](https://docs.sedge.nethermind.io/docs/quickstart/
 
 - Download binary from release page
 - Using the Homebrew package manager
-- Using the Go programmning language
+- Using the Go programming language
 - Build from source
 
 ### **Disclaimer**
