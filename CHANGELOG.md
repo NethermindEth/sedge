@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add search functionality to documentation using Algolia
 - Support for Erigon as Execution Client
 - Support for Besu as Execution Client
+- Support import/export slashing protection interchange data [EIP-3076](https://eips.ethereum.org/EIPS/eip-3076)
 
 ### Fixed
 
