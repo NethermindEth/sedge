@@ -435,12 +435,17 @@ func preRunTeku(flags *CliCmdFlags) error {
 }
 
 func LoadCustomNetworksConfig(flags *CliCmdFlags) (string, string, string, string, error) {
-	destFolder := filepath.Join(flags.generationPath, configs.CustomNetworkConfigsFolder)
 	var chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath string
+
+	destFolder := filepath.Join(flags.generationPath, configs.CustomNetworkConfigsFolder)
 
 	if flags.customChainSpec != "" {
 		chainSpecPath = filepath.Join(destFolder, configs.ExecutionNetworkConfigFileName)
 		err := utils.DownloadOrCopy(flags.customChainSpec, chainSpecPath, true)
+		if err != nil {
+			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+		}
+		chainSpecPath, err = filepath.Abs(chainSpecPath)
 		if err != nil {
 			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
 		}
@@ -452,11 +457,19 @@ func LoadCustomNetworksConfig(flags *CliCmdFlags) (string, string, string, strin
 		if err != nil {
 			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
 		}
+		networkConfigPath, err = filepath.Abs(networkConfigPath)
+		if err != nil {
+			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+		}
 	}
 
 	if flags.customGenesis != "" {
 		networkGenesisPath = filepath.Join(destFolder, configs.ConsensusNetworkGenesisFileName)
 		err := utils.DownloadOrCopy(flags.customGenesis, networkGenesisPath, true)
+		if err != nil {
+			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+		}
+		networkGenesisPath, err = filepath.Abs(networkGenesisPath)
 		if err != nil {
 			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
 		}
@@ -467,6 +480,10 @@ func LoadCustomNetworksConfig(flags *CliCmdFlags) (string, string, string, strin
 		err := os.WriteFile(networkDeployBlockPath, []byte(fmt.Sprintf("%d", flags.customDeployBlock)), os.ModePerm)
 		if err != nil {
 			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, fmt.Errorf(configs.ErrorWritingDeployBlockFile, networkDeployBlockPath, err)
+		}
+		networkDeployBlockPath, err = filepath.Abs(networkDeployBlockPath)
+		if err != nil {
+			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
 		}
 	}
 

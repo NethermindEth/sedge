@@ -2,7 +2,7 @@ package configs
 
 const (
 	ConfigFileName                      = ".sedge"
-	CustomNetworkConfigsFolder          = "."
+	CustomNetworkConfigsFolder          = "./custom_configs"
 	DefaultDockerComposeScriptsPath     = "./docker-compose-scripts"
 	DefaultDockerComposeScriptName      = "docker-compose.yml"
 	ExecutionDefaultDataDir             = "./execution-data"
