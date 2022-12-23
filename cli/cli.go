@@ -269,6 +269,9 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 		flags.customGenesis,
 	}
 	for _, value := range urlOrPaths {
+		if value == "" {
+			continue
+		}
 		if err := utils.CheckUrlOrPath(value); err != nil {
 			return nil, err
 		}

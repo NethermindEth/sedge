@@ -45,6 +45,9 @@ func GetECBootnodes(envFilePath string) ([]string, error) {
 	if m := ReElBOOTNODES.FindStringSubmatch(string(content)); m != nil {
 		m[1] = strings.ReplaceAll(m[1], "\"", "")
 		enodes := strings.Split(m[1], ",")
+		for i, enode := range enodes {
+			enodes[i] = strings.Trim(enode, "\r\n ")
+		}
 		return enodes, nil
 	}
 
@@ -74,6 +77,9 @@ func GetCCBootnodes(envFilePath string) ([]string, error) {
 	if m := ReClBOOTNODES.FindStringSubmatch(string(content)); m != nil {
 		m[1] = strings.ReplaceAll(m[1], "\"", "")
 		enodes := strings.Split(m[1], ",")
+		for i, enode := range enodes {
+			enodes[i] = strings.Trim(enode, "\r\n ")
+		}
 		return enodes, nil
 	}
 
@@ -102,7 +108,7 @@ func GetTTD(envFilePath string) (string, error) {
 
 	if m := ReTTD.FindStringSubmatch(string(content)); m != nil {
 		m[1] = strings.ReplaceAll(m[1], "\"", "")
-		return m[1], nil
+		return strings.Trim(m[1], "\r\n "), nil
 	}
 
 	log.Warnf(configs.NoBootnodesFound, envFilePath)
