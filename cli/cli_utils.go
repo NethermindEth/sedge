@@ -438,6 +438,16 @@ func LoadCustomNetworksConfig(flags *CliCmdFlags) (string, string, string, strin
 	var chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath string
 
 	destFolder := filepath.Join(flags.generationPath, configs.CustomNetworkConfigsFolder)
+	if _, err := os.Stat(destFolder); err != nil {
+		if os.IsNotExist(err) {
+			err = os.Mkdir(destFolder, os.ModePerm)
+			if err != nil {
+				return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+			}
+		} else {
+			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+		}
+	}
 
 	if flags.customChainSpec != "" {
 		chainSpecPath = filepath.Join(destFolder, configs.ExecutionNetworkConfigFileName)
