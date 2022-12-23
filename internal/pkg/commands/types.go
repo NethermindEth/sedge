@@ -25,6 +25,8 @@ type Command struct {
 	GetOutput bool
 	// ForceNoSudo : force the command to not be run with sudo
 	ForceNoSudo bool
+	// IgnoreTerminal : command can be executed without using a terminal, useful for windows
+	IgnoreTerminal bool
 }
 
 // ScriptFile : Represents a bash or bat script to be executed
