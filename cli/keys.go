@@ -17,7 +17,6 @@ package cli
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -158,7 +157,7 @@ func KeysCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Com
 }
 
 func saveMnemonic(cmdRunner commands.CommandRunner, mnemonic string) error {
-	file, err := ioutil.TempFile(os.TempDir(), "sedge_mnemonic")
+	file, err := os.CreateTemp(os.TempDir(), "sedge_mnemonic")
 	if err != nil {
 		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
