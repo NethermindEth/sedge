@@ -42,7 +42,7 @@ type KeysCmdFlags struct {
 	install               bool
 }
 
-func KeysCmd(prompt prompts.Prompt) *cobra.Command {
+func KeysCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Command {
 	var (
 		flags      KeysCmdFlags
 		passphrase string
@@ -99,7 +99,7 @@ func KeysCmd(prompt prompts.Prompt) *cobra.Command {
 					log.Fatal(err)
 				}
 				mnemonic = candidate
-				if err := saveMnemonic(mnemonic); err != nil {
+				if err := saveMnemonic(cmdRunner, mnemonic); err != nil {
 					log.Fatal(err)
 				}
 			}
@@ -157,7 +157,7 @@ func KeysCmd(prompt prompts.Prompt) *cobra.Command {
 	return cmd
 }
 
-func saveMnemonic(mnemonic string) error {
+func saveMnemonic(cmdRunner commands.CommandRunner, mnemonic string) error {
 	file, err := ioutil.TempFile(os.TempDir(), "sedge_mnemonic")
 	if err != nil {
 		return fmt.Errorf(configs.ShowMnemonicError, err)
@@ -172,12 +172,12 @@ func saveMnemonic(mnemonic string) error {
 		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
 
-	openTextEditorCmd := commands.Runner.BuildOpenTextEditor(commands.OpenTextEditorOptions{
+	openTextEditorCmd := cmdRunner.BuildOpenTextEditor(commands.OpenTextEditorOptions{
 		FilePath: file.Name(),
 	})
 	openTextEditorCmd.ForceNoSudo = true
 
-	_, err = commands.Runner.RunCMD(openTextEditorCmd)
+	_, err = cmdRunner.RunCMD(openTextEditorCmd)
 	if err != nil {
 		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
