@@ -15,8 +15,6 @@ limitations under the License.
 */
 package commands
 
-import "runtime"
-
 type CommandRunner interface {
 	BuildDockerComposeUpCMD(options DockerComposeUpOptions) Command
 
@@ -42,19 +40,5 @@ type CommandRunner interface {
 
 	RunCMD(cmd Command) (string, error)
 
-	RunBash(script BashScript) (string, error)
-}
-
-var Runner CommandRunner
-
-func init() {
-	InitRunner(func() CommandRunner {
-		return NewCMDRunner(CMDRunnerOptions{
-			RunAsAdmin: runtime.GOOS != "windows",
-		})
-	})
-}
-
-func InitRunner(builder func() CommandRunner) {
-	Runner = builder()
+	RunScript(script ScriptFile) (string, error)
 }

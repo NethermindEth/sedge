@@ -9,11 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support for Erigon as Execution Client
-- Support for Besu as Execution Client
+- Support for Erigon as Execution Client.
+- Support for Besu as Execution Client.
+- Support for Windows.
+- Add search functionality to documentation using Algolia.
+
+### Changed
+
+- Completely replace keystore generation mechanism for Ethereum mainnet.
 
 ### Fixed
 
+- Fix bad `{{end}}` tag on docker-compose_base template.
 - Fix inconsistent behavior of `AssignPorts` function test.
 
 ## [v0.5.1] - 2022-12-2

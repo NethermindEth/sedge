@@ -16,8 +16,8 @@ limitations under the License.
 package env
 
 import (
-	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/NethermindEth/sedge/templates"
 )
@@ -44,7 +44,7 @@ Error if any
 */
 func CheckVariable(re *regexp.Regexp, network, clientType, client string) (bool, error) {
 	//TODO: change usage to check variables from generated config instead of template
-	content, err := templates.Envs.ReadFile(filepath.Join("envs", network, clientType, client+".tmpl"))
+	content, err := templates.Envs.ReadFile(strings.Join([]string{"envs", network, clientType, client + ".tmpl"}, "/"))
 	if err != nil {
 		return false, err
 	}
@@ -74,7 +74,7 @@ Error if any
 */
 func CheckVariableBase(re *regexp.Regexp, network string) (bool, error) {
 	//TODO: change usage to check variables from generated config instead of template
-	content, err := templates.Envs.ReadFile(filepath.Join("envs", network, "env_base.tmpl"))
+	content, err := templates.Envs.ReadFile(strings.Join([]string{"envs", network, "env_base.tmpl"}, "/"))
 	if err != nil {
 		return false, err
 	}
