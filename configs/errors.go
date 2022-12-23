@@ -105,6 +105,6 @@ const (
 	ErrorDownloadingFile              = "error downloading file from %s: %v"
 	ErrorCopyingFile                  = "error copying file from %s: %v"
 	ErrorWritingDeployBlockFile       = "error writing custom deploy block file %s: %v"
-	MissingCustomConfigs              = "missing custom configs flags required when running a custom network."
+	MissingCustomConfigs              = "missing custom configs flags required when running a custom network"
 	InvalidTTD                        = "invalid terminal total difficulty"
 )

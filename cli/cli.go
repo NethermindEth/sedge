@@ -221,7 +221,7 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 		return nil, fmt.Errorf(configs.UnknownNetworkError, flags.network)
 	}
 	if flags.network == configs.CustomNetwork.Name {
-		if flags.customChainSpec == "" || flags.customNetworkConfig == "" || flags.customGenesis != "" || flags.customTTD == "" || flags.customDeployBlock == -1 {
+		if flags.customChainSpec == "" || flags.customNetworkConfig == "" || flags.customGenesis == "" || flags.customTTD == "" || flags.customDeployBlock == -1 {
 			return nil, fmt.Errorf(configs.MissingCustomConfigs)
 		}
 	}
