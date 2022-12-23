@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -69,7 +70,7 @@ func GenerateScripts(gd GenerationData) (result GenerationResults, err error) {
 		"VLMetrics":       configs.DefaultMetricsPortVL,
 		"MevPort":         configs.DefaultMevPort,
 	}
-	ports, err := utils.AssingPorts("localhost", defaultsPorts)
+	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
 		return GenerationResults{}, fmt.Errorf(configs.PortOccupationError, err)
 	}
@@ -118,7 +119,7 @@ a. error
 Error if any
 */
 func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, err error) {
-	rawBaseTmp, err := templates.Services.ReadFile(filepath.Join("services", "docker-compose_base.tmpl"))
+	rawBaseTmp, err := templates.Services.ReadFile(strings.Join([]string{"services", "docker-compose_base.tmpl"}, "/"))
 	if err != nil {
 		return
 	}
@@ -138,11 +139,12 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 		if client.Omited {
 			name = "empty"
 		}
-		tmp, err := templates.Services.ReadFile(filepath.Join("services",
+		tmp, err := templates.Services.ReadFile(strings.Join([]string{
+			"services",
 			configs.NetworksConfigs[gd.Network].NetworkService,
 			tmpKind,
-			name+".tmpl",
-		))
+			name + ".tmpl",
+		}, "/"))
 		if err != nil {
 			return "", err
 		}
@@ -282,7 +284,7 @@ a. error
 Error if any
 */
 func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
-	rawBaseTmp, err := templates.Envs.ReadFile(filepath.Join("envs", gd.Network, "env_base.tmpl"))
+	rawBaseTmp, err := templates.Envs.ReadFile(strings.Join([]string{"envs", gd.Network, "env_base.tmpl"}, "/"))
 	if err != nil {
 		return
 	}
@@ -300,17 +302,17 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 	for tmpKind, client := range clients {
 		var tmp []byte
 		if client.Omited {
-			tmp, err = templates.Services.ReadFile(filepath.Join(
+			tmp, err = templates.Services.ReadFile(strings.Join([]string{
 				"services",
 				configs.NetworksConfigs[gd.Network].NetworkService,
 				tmpKind,
 				"empty.tmpl",
-			))
+			}, "/"))
 			if err != nil {
 				return "", err
 			}
 		} else {
-			tmp, err = templates.Envs.ReadFile(filepath.Join("envs", gd.Network, tmpKind, client.Name+".tmpl"))
+			tmp, err = templates.Envs.ReadFile(strings.Join([]string{"envs", gd.Network, tmpKind, client.Name + ".tmpl"}, "/"))
 			if err != nil {
 				return "", err
 			}

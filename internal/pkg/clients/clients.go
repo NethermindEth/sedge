@@ -17,7 +17,6 @@ package clients
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -48,7 +47,7 @@ b. error
 Error if any
 */
 func (c ClientInfo) SupportedClients(clientType string) (clientsNames []string, err error) {
-	files, err := templates.Envs.ReadDir(filepath.Join("envs", c.Network, clientType))
+	files, err := templates.Envs.ReadDir(strings.Join([]string{"envs", c.Network, clientType}, "/"))
 	if err != nil {
 		return
 	}

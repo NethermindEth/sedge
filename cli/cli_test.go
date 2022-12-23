@@ -172,9 +172,6 @@ func prepareCliCmd(tc cliCmdTestCase) {
 	// Set config file path
 	cfgFile = tc.configPath
 	initConfig()
-	commands.InitRunner(func() commands.CommandRunner {
-		return tc.runner
-	})
 	initMonitor(func() MonitoringTool {
 		return tc.monitor
 	})
@@ -212,7 +209,7 @@ func buildCliTestCase(
 			}
 			return "", nil
 		},
-		SRunBash: func(bs commands.BashScript) (string, error) {
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
 		},
 	}
@@ -222,7 +219,7 @@ func buildCliTestCase(
 		"ELApi": configs.DefaultApiPortEL,
 		"CLApi": configs.DefaultApiPortCL,
 	}
-	ports, err := utils.AssingPorts("localhost", defaultsPorts)
+	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
 		t.Fatalf(configs.PortOccupationError, err)
 	}
@@ -403,7 +400,7 @@ func TestCliCmd(t *testing.T) {
 			defer ctrl.Finish()
 
 			rootCmd := RootCmd()
-			rootCmd.AddCommand(CliCmd(prompt))
+			rootCmd.AddCommand(CliCmd(tc.runner, prompt))
 			argsL := append([]string{"cli"}, tc.args.argsList()...)
 			rootCmd.SetArgs(argsL)
 
@@ -456,6 +453,7 @@ func TestTrackSync(t *testing.T) {
 	tcs := []struct {
 		name    string
 		data    []posmoni.EndpointSyncStatus
+		runner  commands.CommandRunner
 		flags   CliCmdFlags
 		isError bool
 	}{
@@ -464,6 +462,7 @@ func TestTrackSync(t *testing.T) {
 			[]posmoni.EndpointSyncStatus{
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
 			},
+			&test.SimpleCMDRunner{},
 			CliCmdFlags{
 				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
@@ -475,6 +474,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
 			},
+			&test.SimpleCMDRunner{},
 			CliCmdFlags{
 				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
@@ -486,6 +486,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
+			&test.SimpleCMDRunner{},
 			CliCmdFlags{
 				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
@@ -497,6 +498,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true, Error: errors.New("")},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
+			&test.SimpleCMDRunner{},
 			CliCmdFlags{
 				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
@@ -508,6 +510,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
 			},
+			&test.SimpleCMDRunner{},
 			CliCmdFlags{
 				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
@@ -519,6 +522,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 			},
+			&test.SimpleCMDRunner{},
 			CliCmdFlags{
 				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
@@ -533,6 +537,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
 			},
+			&test.SimpleCMDRunner{},
 			CliCmdFlags{
 				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
@@ -550,6 +555,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 			},
+			&test.SimpleCMDRunner{},
 			CliCmdFlags{
 				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
@@ -564,6 +570,7 @@ func TestTrackSync(t *testing.T) {
 				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
 				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
 			},
+			&test.SimpleCMDRunner{},
 			CliCmdFlags{
 				generationPath: configs.DefaultDockerComposeScriptsPath,
 			},
@@ -576,7 +583,7 @@ func TestTrackSync(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			ms := monitorStub{data: tc.data}
 
-			err := trackSync(&ms, "", "", time.Millisecond*100, &tc.flags)
+			err := trackSync(tc.runner, &ms, "", "", time.Millisecond*100, &tc.flags)
 			utils.CheckErr("trackSync(...) failed", tc.isError, err)
 		})
 	}

@@ -15,8 +15,8 @@ The project **is still on beta** and although it should be stable enough, it sti
     - [**Disclaimer**](#disclaimer)
   - [📜 Documentation](#-documentation)
   - [⚡️ Quick start](#️-quick-start)
-  - [💥 How this all started?](#-how-this-all-started)
-  - [🔥 What can you do with sedge today?](#-what-can-you-do-with-sedge-today)
+  - [💥 Why did we start Sedge?](#-why-did-we-start-sedge)
+  - [🔥 What can you do with Sedge today?](#-what-can-you-do-with-sedge-today)
     - [**Disclaimer**](#disclaimer-1)
   - [Supported networks and clients](#supported-networks-and-clients)
     - [Mainnet](#mainnet)
@@ -31,7 +31,8 @@ The project **is still on beta** and although it should be stable enough, it sti
     - [Version 0.2](#version-02)
     - [Version 0.3](#version-03)
     - [Version 0.4](#version-04)
-    - [Version 0.5 (Actual)](#version-05-actual)
+    - [Version 0.5](#version-05)
+    - [Version 0.6 (Actual)](#version-06-actual)
     - [Version 0.X](#version-0x)
     - [Version 1.0](#version-10)
   - [Version X.0](#version-x0)
@@ -50,7 +51,7 @@ Check our [installation guide](https://docs.sedge.nethermind.io/docs/quickstart/
 
 - Download binary from release page
 - Using the Homebrew package manager
-- Using the Go programmning language
+- Using the Go programming language
 - Build from source
 
 ### **Disclaimer**
@@ -81,7 +82,7 @@ Check all the options and flags with `sedge cli --help`. More instructions or gu
 
 As people who actively deployed validators way before The Merge, we know how hard it is to set up an Ethereum validator:
 
-- You need to procure at least three (compatible) nodes: an execution node (geth, nethermind, etc), a consensus node, and a validator node (lighthouse, prysm, etc)
+- You need to procure at least three (compatible) nodes: an execution node (geth, nethermind, erigon, etc), a consensus node, and a validator node (lighthouse, prysm, etc)
 - You then need to execute them, connect them, monitor them, and secure the validator keys (which includes staking 32 ETH).
 - There may be several valid combinations of clients to choose for your setup, so you need to go through each of the client's docs, evaluate it, get instructions for it and test it. You also need to feel comfortable executing commands in the cli, know docker, and understand basics of networking. On top of this, there are many different settings you must read up on and consider for your client node.
 - In the case of working with the Ethereum Mainnet, you are working with real money that can potentially be lost in the event of having downtime or being slashed. To avoid losing real value, you must be aware of and follow best practices on the validator setup, and correctly monitor your nodes.
@@ -125,8 +126,8 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | ---------- | ---------- | ---------- |
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
-|            | Prysm      | Prysm      |
-|            | Teku       | Teku       |
+| Erigon     | Prysm      | Prysm      |
+| Besu       | Teku       | Teku       |
 
 ### Sepolia
 
@@ -134,8 +135,8 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | ---------- | ---------- | ---------- |
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
-|            | Prysm      | Prysm      |
-|            | Teku       | Teku       |
+| Erigon     | Prysm      | Prysm      |
+| Besu       | Teku       | Teku       |
 
 ### Goerli
 
@@ -143,8 +144,8 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | ---------- | ---------- | ---------- |
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
-|            | Prysm      | Prysm      |
-|            | Teku       | Teku       |
+| Erigon     | Prysm      | Prysm      |
+| Besu       | Teku       | Teku       |
 
 ### Gnosis
 
@@ -216,18 +217,21 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Deprecate Kiln, Ropsten, Denver networks
 - [x] Improve support for chiado network (Gnosis testnet)
 
-### Version 0.5 (Actual)
+### Version 0.5
 
 - [x] Support for Gnosis Merge
+- [x] Bug fixes
+
+### Version 0.6 (Actual)
+
+- [x] Besu and Erigon support
+- [x] Windows support
 - [x] Bug fixes
 
 ### Version 0.X
 
 - [ ] Set up and run only one node (execution/consensus/validator)
-- [ ] Grafana and Prometheus support for the clients
-- [ ] Besu and Erigon support
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
-- [ ] Cross platform support and documentation
 - [ ] More tests!!!
 - [ ] Support for Nimbus client
 
@@ -240,6 +244,7 @@ Full Ethereum PoS support with MEV-Boost
 - [ ] Integrate other PoS networks
 - [ ] TUI for guided and more interactive setup (better UX)
 - [ ] Off-premise setup support
+
 ## 💪 Want to contribute?
 
 Please check our Contributing Guidelines, Code of Conduct and our issues. In case you want to report or suggest something (any help is welcome), please file an issue first so that the main team is aware and can discuss it.
