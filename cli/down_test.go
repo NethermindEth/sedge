@@ -62,7 +62,7 @@ func buildDownTestCase(t *testing.T, caseName string, isErr bool) *downCmdTestCa
 		SRunCMD: func(c commands.Command) (string, error) {
 			return "", nil
 		},
-		SRunBash: func(bs commands.BashScript) (string, error) {
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
 		},
 	}
@@ -85,14 +85,10 @@ func TestDownCmd(t *testing.T) {
 	for _, tc := range tcs {
 		resetDownCmd()
 		rootCmd := RootCmd()
-		rootCmd.AddCommand(DownCmd())
+		rootCmd.AddCommand(DownCmd(tc.runner))
 		rootCmd.SetArgs([]string{"down", "--config", tc.configPath, "--path", tc.generationPath})
 		rootCmd.SetOut(tc.fdOut)
 		log.SetOutput(tc.fdOut)
-
-		commands.InitRunner(func() commands.CommandRunner {
-			return tc.runner
-		})
 
 		descr := "sedge down"
 		err := rootCmd.Execute()

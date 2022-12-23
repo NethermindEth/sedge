@@ -28,6 +28,7 @@ import (
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
@@ -69,7 +70,7 @@ type clientImages struct {
 	validator string
 }
 
-func CliCmd(prompt prompts.Prompt) *cobra.Command {
+func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Command {
 	var (
 		flags  CliCmdFlags
 		images clientImages
@@ -99,7 +100,7 @@ func CliCmd(prompt prompts.Prompt) *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			// notest
-			if errs := runCliCmd(cmd, args, &flags, &images, prompt); len(errs) > 0 {
+			if errs := runCliCmd(cmd, args, &flags, &images, cmdRunner, prompt); len(errs) > 0 {
 				for _, err := range errs {
 					log.Error(err)
 				}
@@ -214,7 +215,7 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 	return &clientImages, nil
 }
 
-func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, prompt prompts.Prompt) []error {
+func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, cmdRunner commands.CommandRunner, prompt prompts.Prompt) []error {
 	// Warnings
 	// Warn if custom images are used
 	if clientImages.execution != "" || clientImages.consensus != "" || clientImages.validator != "" {
@@ -251,12 +252,12 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
 		if flags.install {
 			// Install dependencies directly
-			if err := installDependencies(pending); err != nil {
+			if err := installDependencies(cmdRunner, pending); err != nil {
 				return []error{err}
 			}
 		} else {
 			// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
-			if err := installOrShowInstructions(pending); err != nil {
+			if err := installOrShowInstructions(cmdRunner, pending); err != nil {
 				return []error{err}
 			}
 		}
@@ -353,12 +354,12 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	if flags.run {
-		if err = runAndShowContainers(*flags.services, flags); err != nil {
+		if err = runAndShowContainers(cmdRunner, *flags.services, flags); err != nil {
 			return []error{err}
 		}
 	} else {
 		// Let the user decide to see the instructions for executing the scripts and exit or let the tool execute them
-		if err = runScriptOrExit(flags); err != nil {
+		if err = runScriptOrExit(cmdRunner, flags); err != nil {
 			return []error{err}
 		}
 	}
@@ -370,12 +371,12 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		if !utils.Contains(*flags.services, validator) {
 			// TODO: Prompt for waiting for keystore and validator registration to run the validator
 			if flags.run {
-				if err = runAndShowContainers([]string{validator}, flags); err != nil {
+				if err = runAndShowContainers(cmdRunner, []string{validator}, flags); err != nil {
 					return []error{err}
 				}
 			} else {
 				// Let the user decide to see the instructions for executing the validator and exit or let the tool execute it
-				if err = RunValidatorOrExit(flags); err != nil {
+				if err = RunValidatorOrExit(cmdRunner, flags); err != nil {
 					return []error{err}
 				}
 			}

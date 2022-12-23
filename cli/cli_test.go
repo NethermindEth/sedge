@@ -161,9 +161,6 @@ func prepareCliCmd(tc cliCmdTestCase) {
 	// Set config file path
 	cfgFile = tc.configPath
 	initConfig()
-	commands.InitRunner(func() commands.CommandRunner {
-		return tc.runner
-	})
 }
 
 func buildCliTestCase(
@@ -198,7 +195,7 @@ func buildCliTestCase(
 			}
 			return "", nil
 		},
-		SRunBash: func(bs commands.BashScript) (string, error) {
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
 		},
 	}
@@ -370,7 +367,7 @@ func TestCliCmd(t *testing.T) {
 			defer ctrl.Finish()
 
 			rootCmd := RootCmd()
-			rootCmd.AddCommand(CliCmd(prompt))
+			rootCmd.AddCommand(CliCmd(tc.runner, prompt))
 			argsL := append([]string{"cli"}, tc.args.argsList()...)
 			rootCmd.SetArgs(argsL)
 
