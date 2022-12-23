@@ -139,7 +139,8 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 		if client.Omited {
 			name = "empty"
 		}
-		tmp, err := templates.Services.ReadFile(strings.Join([]string{"services",
+		tmp, err := templates.Services.ReadFile(strings.Join([]string{
+			"services",
 			configs.NetworksConfigs[gd.Network].NetworkService,
 			tmpKind,
 			name + ".tmpl",
