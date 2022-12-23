@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Revert Erigon Image from `v2.32.0` to `v2.29.0`.
 - Fix bad `{{end}}` tag on docker-compose_base template.
 - Fix inconsistent behavior of `AssignPorts` function test.
 
