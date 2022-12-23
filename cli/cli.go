@@ -16,7 +16,6 @@ limitations under the License.
 package cli
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -234,7 +233,7 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 
 	// Validate fee recipient
 	if flags.feeRecipient != "" && !utils.IsAddress(flags.feeRecipient) {
-		return nil, errors.New(configs.InvalidFeeRecipientError)
+		return nil, fmt.Errorf(configs.InvalidFeeRecipientError)
 	}
 
 	var clientImages clientImages
@@ -273,6 +272,15 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 		if err := utils.CheckUrlOrPath(value); err != nil {
 			return nil, err
 		}
+	}
+
+	// ensure generation path exists
+	_, err = os.Stat(flags.generationPath)
+	if os.IsNotExist(err) {
+		err = os.MkdirAll(flags.generationPath, os.ModePerm)
+	}
+	if err != nil {
+		return nil, fmt.Errorf(configs.InvalidGenerationPath, flags.generationPath, err)
 	}
 
 	return &clientImages, nil
