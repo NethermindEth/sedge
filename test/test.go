@@ -53,7 +53,7 @@ func DeleteFakeDep(depPath string) {
 // Struct for creating a commands.CommandRunner mocks
 type SimpleCMDRunner struct {
 	SRunCMD  func(commands.Command) (string, error)
-	SRunBash func(commands.BashScript) (string, error)
+	SRunBash func(commands.ScriptFile) (string, error)
 }
 
 func (cr *SimpleCMDRunner) BuildDockerComposeUpCMD(options commands.DockerComposeUpOptions) commands.Command {
@@ -141,9 +141,15 @@ func (cr *SimpleCMDRunner) BuildOpenTextEditor(options commands.OpenTextEditorOp
 }
 
 func (cr *SimpleCMDRunner) RunCMD(cmd commands.Command) (string, error) {
+	if cr.SRunCMD == nil {
+		return "", nil
+	}
 	return cr.SRunCMD(cmd)
 }
 
-func (cr *SimpleCMDRunner) RunBash(script commands.BashScript) (string, error) {
+func (cr *SimpleCMDRunner) RunScript(script commands.ScriptFile) (string, error) {
+	if cr.SRunBash == nil {
+		return "", nil
+	}
 	return cr.SRunBash(script)
 }
