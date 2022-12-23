@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v0.6.0] - 2022-12-23
 
 ### Added
 
@@ -24,8 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix bad `{{end}}` tag on docker-compose_base template.
-- Fix inconsistent behavior of `AssignPorts` function test.
+- Revert Erigon Image from `v2.32.0` to `v2.29.0`.
+- Bad `{{end}}` tag on docker-compose_base template.
+- Inconsistent behavior of `AssignPorts` function test.
+- Dependencies install script bug for Ubuntu 22.04.
+
+## [Unreleased]
 
 ## [v0.5.1] - 2022-12-2
 
