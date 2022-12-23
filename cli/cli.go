@@ -25,9 +25,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
-	posmonidb "github.com/NethermindEth/posmoni/pkg/eth2/db"
-	posmoninet "github.com/NethermindEth/posmoni/pkg/eth2/networking"
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
@@ -74,28 +71,6 @@ type clientImages struct {
 }
 
 func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Command {
-	// Initialize monitoring tool
-	initMonitor(func() MonitoringTool {
-		// Initialize Eth2 Monitoring tool
-		moniCfg := posmoni.ConfigOpts{
-			Checkers: []posmoni.CfgChecker{
-				{Key: posmoni.Execution, ErrMsg: posmoni.NoExecutionFoundError, Data: []string{configs.OnPremiseExecutionURL}},
-				{Key: posmoni.Consensus, ErrMsg: posmoni.NoConsensusFoundError, Data: []string{configs.OnPremiseConsensusURL}},
-			},
-		}
-		m, err := posmoni.NewEth2Monitor(
-			posmonidb.EmptyRepository{},
-			&posmoninet.BeaconClient{RetryDuration: time.Minute * 10},
-			&posmoninet.ExecutionClient{RetryDuration: time.Minute * 10},
-			posmoninet.SubscribeOpts{},
-			moniCfg,
-		)
-		if err != nil {
-			log.Fatalf(configs.MonitoringToolInitError, err)
-		}
-
-		return m
-	})
 	var (
 		flags  CliCmdFlags
 		images clientImages
@@ -315,25 +290,37 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	combinedClients.Validator.Image = clientImages.validator
 	combinedClients.Validator.Omited = flags.noValidator
 
+	var vlStartGracePeriod time.Duration
+	switch flags.network {
+	case "mainnet", "goerli", "sepolia":
+		vlStartGracePeriod = 2 * configs.EpochTimeETH
+	case "gnosis", "chiado":
+		vlStartGracePeriod = 2 * configs.EpochTimeGNO
+	default:
+		vlStartGracePeriod = 2 * configs.EpochTimeETH
+	}
+
 	// Generate docker-compose scripts
 	gd := generate.GenerationData{
-		ExecutionClient:   combinedClients.Execution,
-		ConsensusClient:   combinedClients.Consensus,
-		ValidatorClient:   combinedClients.Validator,
-		GenerationPath:    flags.generationPath,
-		Network:           flags.network,
-		CheckpointSyncUrl: flags.checkpointSyncUrl,
-		FeeRecipient:      flags.feeRecipient,
-		JWTSecretPath:     flags.jwtPath,
-		Graffiti:          flags.graffiti,
-		FallbackELUrls:    *flags.fallbackEL,
-		ElExtraFlags:      *flags.elExtraFlags,
-		ClExtraFlags:      *flags.clExtraFlags,
-		VlExtraFlags:      *flags.vlExtraFlags,
-		MapAllPorts:       flags.mapAllPorts,
-		Mev:               !flags.noMev && !flags.noValidator,
-		MevImage:          flags.mevImage,
-		LoggingDriver:     configs.GetLoggingDriver(flags.logging),
+		Services:           *flags.services,
+		ExecutionClient:    combinedClients.Execution,
+		ConsensusClient:    combinedClients.Consensus,
+		ValidatorClient:    combinedClients.Validator,
+		GenerationPath:     flags.generationPath,
+		Network:            flags.network,
+		CheckpointSyncUrl:  flags.checkpointSyncUrl,
+		FeeRecipient:       flags.feeRecipient,
+		JWTSecretPath:      flags.jwtPath,
+		Graffiti:           flags.graffiti,
+		FallbackELUrls:     *flags.fallbackEL,
+		ElExtraFlags:       *flags.elExtraFlags,
+		ClExtraFlags:       *flags.clExtraFlags,
+		VlExtraFlags:       *flags.vlExtraFlags,
+		MapAllPorts:        flags.mapAllPorts,
+		Mev:                !flags.noMev && !flags.noValidator,
+		MevImage:           flags.mevImage,
+		LoggingDriver:      configs.GetLoggingDriver(flags.logging),
+		VLStartGracePeriod: uint(vlStartGracePeriod.Seconds()),
 	}
 	results, err := generate.GenerateScripts(gd)
 	if err != nil {
@@ -380,17 +367,8 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	if !flags.noValidator {
 		log.Info(configs.ValidatorTips)
 
-		// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service in the previous step
+		// Run validator after execution and consensus clients are synced, unless the user intentionally wants to run the validator service in the previous step
 		if !utils.Contains(*flags.services, validator) {
-			// Wait for clients to start
-			// log.Info(configs.WaitingForNodesToStart)
-			// time.Sleep(waitingTime)
-			// Track sync of execution and consensus clients
-			// TODO: Parameterize wait arg of trackSync
-			if err = trackSync(cmdRunner, monitor, results.ELPort, results.CLPort, time.Minute*5, flags); err != nil {
-				return []error{err}
-			}
-
 			// TODO: Prompt for waiting for keystore and validator registration to run the validator
 			if flags.run {
 				if err = runAndShowContainers(cmdRunner, []string{validator}, flags); err != nil {

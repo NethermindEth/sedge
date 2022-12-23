@@ -16,20 +16,15 @@ limitations under the License.
 package cli
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
-	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/crypto"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
@@ -37,17 +32,6 @@ import (
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/manifoldco/promptui"
 )
-
-// Interface for Posmoni Eth2 monitor
-type MonitoringTool interface {
-	TrackSync(done <-chan struct{}, beaconEndpoints, executionEndpoints []string, wait time.Duration) <-chan posmoni.EndpointSyncStatus
-}
-
-var monitor MonitoringTool
-
-func initMonitor(builder func() MonitoringTool) {
-	monitor = builder()
-}
 
 func installOrShowInstructions(cmdRunner commands.CommandRunner, pending []string) (err error) {
 	// notest
@@ -249,114 +233,6 @@ func runAndShowContainers(cmdRunner commands.CommandRunner, services []string, f
 	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
 	if _, err := cmdRunner.RunCMD(dcpsCMD); err != nil {
 		return fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
-	}
-
-	return nil
-}
-
-type container struct {
-	NetworkSettings networkSettings
-}
-type networkSettings struct {
-	Networks map[string]networks
-}
-type networks struct {
-	IPAddress string
-}
-
-func parseNetwork(js string) (string, error) {
-	var c []container
-	if err := json.NewDecoder(bytes.NewReader([]byte(js))).Decode(&c); err != nil {
-		return "", err
-	}
-	if len(c) == 0 {
-		return "", errors.New(configs.NoOutputDockerInspectError)
-	}
-	if ip := c[0].NetworkSettings.Networks["sedge_network"].IPAddress; ip != "" {
-		return ip, nil
-	}
-	return "", errors.New(configs.IPNotFoundError)
-}
-
-func getContainerIP(cmdRunner commands.CommandRunner, service string, flags *CliCmdFlags) (ip string, err error) {
-	// Run docker compose ps --quiet <service> to show service's ID
-	dcpsCMD := cmdRunner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path:        filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
-		Quiet:       true,
-		ServiceName: service,
-	})
-	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
-	dcpsCMD.GetOutput = true
-	id, err := cmdRunner.RunCMD(dcpsCMD)
-	if err != nil {
-		return ip, fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
-	}
-
-	// Run docker inspect <id> to get IP address
-	inspectCmd := cmdRunner.BuildDockerInspectCMD(commands.DockerInspectOptions{
-		Name: id,
-	})
-	log.Infof(configs.RunningCommand, inspectCmd.Cmd)
-	inspectCmd.GetOutput = true
-	data, err := cmdRunner.RunCMD(inspectCmd)
-	if err != nil {
-		return
-	}
-
-	ip, err = parseNetwork(data)
-	return
-}
-
-func trackSync(cmdRunner commands.CommandRunner, m MonitoringTool, elPort, clPort string, wait time.Duration, flags *CliCmdFlags) error {
-	done := make(chan struct{})
-	defer close(done)
-
-	log.Info(configs.GettingContainersIP)
-	executionIP, errE := getContainerIP(cmdRunner, execution, flags)
-	if errE != nil {
-		log.Errorf(configs.GetContainerIPError, execution, errE)
-	}
-	consensusIP, errC := getContainerIP(cmdRunner, consensus, flags)
-	if errC != nil {
-		log.Errorf(configs.GetContainerIPError, consensus, errC)
-		if errE != nil {
-			// Both IP were not detected, both containers probably failed
-			return errors.New(configs.UnableToTrackSyncError)
-		}
-	}
-
-	consensusUrl := fmt.Sprintf("http://%s:%s", consensusIP, clPort)
-	executionUrl := fmt.Sprintf("http://%s:%s", executionIP, elPort)
-
-	statuses := m.TrackSync(done, []string{consensusUrl}, []string{executionUrl}, wait)
-
-	var esynced, csynced bool
-	// Threshold to stop tracking, to avoid false responses
-	times := 0
-	for s := range statuses {
-		if s.Error != nil {
-			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
-		}
-
-		if s.Endpoint == executionUrl {
-			esynced = s.Synced
-		} else if s.Endpoint == consensusUrl {
-			csynced = s.Synced
-		}
-
-		if esynced && csynced {
-			times++
-			// Stop tracking after consecutive synced reports
-			if times == 3 {
-				// Stop tracking
-				done <- struct{}{}
-				log.Info(configs.NodesSynced)
-				break // statuses channel might still have data before closing done channel
-			}
-		} else {
-			// Restart threshold
-			times = 0
-		}
 	}
 
 	return nil

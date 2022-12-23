@@ -154,6 +154,15 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 		}
 	}
 
+	// Parse validator-blocker template
+	tmp, err := templates.Services.ReadFile(filepath.Join("services", "validator-blocker.tmpl"))
+	if err != nil {
+		return "", err
+	}
+	if _, err := baseTmp.Parse(string(tmp)); err != nil {
+		return "", err
+	}
+
 	// Check for TTD in env base template
 	TTD, err := env.CheckVariableBase(env.ReTTD, gd.Network)
 	if err != nil {
@@ -217,6 +226,7 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 	}
 
 	data := DockerComposeData{
+		Services:            gd.Services,
 		TTD:                 TTD,
 		CcCustomCfg:         ccRemoteCfg || ccRemoteGen || ccRemoteDpl,
 		CcRemoteCfg:         ccRemoteCfg,
@@ -251,6 +261,7 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
 		LoggingDriver:       gd.LoggingDriver,
+		VLStartGracePeriod:  gd.VLStartGracePeriod,
 	}
 
 	dockerComposePath = filepath.Join(gd.GenerationPath, configs.DefaultDockerComposeScriptName)

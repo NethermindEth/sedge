@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Fixed validator restart failure:
+  - Validator waits a grace period (2 epochs) before starting.
+  - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint returns with the HTTP code 200 in its docker-compose `healthcheck` condition so that the validator waits for the consensus be healthy. This replace the older track sync method.
+  - Validator service now always restarts unless stopped.
+
 ## [v0.6.0] - 2022-12-23
 
 ### Added
@@ -24,8 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bad `{{end}}` tag on docker-compose_base template.
 - Inconsistent behavior of `AssignPorts` function test.
 - Dependencies install script bug for Ubuntu 22.04.
-
-## [Unreleased]
 
 ## [v0.5.1] - 2022-12-2
 
