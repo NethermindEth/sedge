@@ -38,6 +38,7 @@ type EnvData struct {
 	ECBootnodes               []string
 	CCBootnodes               []string
 	CustomTTD                 string
+	CustomDeployBlock         string
 }
 
 // GenerationData : Struct Data object for script's generation
@@ -66,6 +67,7 @@ type GenerationData struct {
 	CustomChainSpecPath     string
 	CustomNetworkConfigPath string
 	CustomGenesisPath       string
+	CustomDeployBlock       string
 	CustomDeployBlockPath   string
 }
 

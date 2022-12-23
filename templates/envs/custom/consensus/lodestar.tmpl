@@ -11,5 +11,6 @@ CC_DATA_DIR={{.CcDataDir}}
 CC_LODESTAR_PRESET=mainnet
 CC_JWT_SECRET_PATH={{.JWTSecretPath}}
 CC_FEE_RECIPIENT={{.FeeRecipient}}
-{{if .CCBootnodes}}CC_BOOTNODES="{{ range $index, $enr := .CCBootnodes}}{{if $index}},{{end}}{{$enr}}{{end}}"{{end}}
+{{if .CCBootnodes}}CC_BOOTNODES="{{ range $index, $enr := .CCBootnodes}}{{if $index}},{{end}}{{$enr}}{{end}}"{{end}}{{if .CustomDeployBlock}}
+DEPLOY_BLOCK={{.CustomDeployBlock}}{{end}}
 {{ end }}

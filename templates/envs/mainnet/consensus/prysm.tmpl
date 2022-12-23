@@ -10,6 +10,7 @@ CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}gcr.io/prysmaticlabs/prysm/b
 CC_DATA_DIR={{.CcDataDir}}
 CC_JWT_SECRET_PATH={{.JWTSecretPath}}
 CC_FEE_RECIPIENT={{.FeeRecipient}}
-{{if .CCBootnodes}}CC_BOOTNODES="{{ range $index, $enr := .CCBootnodes}}{{if $index}},{{end}}{{$enr}}{{end}}"{{end}}
+{{if .CCBootnodes}}CC_BOOTNODES="{{ range $index, $enr := .CCBootnodes}}{{if $index}},{{end}}{{$enr}}{{end}}"{{end}}{{if .CustomDeployBlock}}
+DEPLOY_BLOCK={{.CustomDeployBlock}}{{end}}
 CHECKPOINT_SYNC_URL=https://beaconstate.ethstaker.cc
 {{ end }}

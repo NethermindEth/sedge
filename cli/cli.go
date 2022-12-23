@@ -396,6 +396,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		CustomChainSpecPath:     chainSpecPath,
 		CustomNetworkConfigPath: networkConfigPath,
 		CustomGenesisPath:       networkGenesisPath,
+		CustomDeployBlock:       fmt.Sprintf("%d", flags.customDeployBlock),
 		CustomDeployBlockPath:   networkDeployBlockPath,
 	}
 	results, err := generate.GenerateScripts(gd)

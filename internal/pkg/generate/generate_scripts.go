@@ -407,6 +407,7 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 		ECBootnodes:               gd.ECBootnodes,
 		CCBootnodes:               gd.CCBootnodes,
 		CustomTTD:                 gd.CustomTTD,
+		CustomDeployBlock:         gd.CustomDeployBlock,
 	}
 
 	// Fix prysm rpc url

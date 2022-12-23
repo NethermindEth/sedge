@@ -10,5 +10,6 @@ CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}consensys/teku:22.9.0{{end}}
 CC_DATA_DIR={{.CcDataDir}}
 CC_JWT_SECRET_PATH={{.JWTSecretPath}}
 CC_FEE_RECIPIENT={{.FeeRecipient}}
-{{if .CCBootnodes}}CC_BOOTNODES="{{ range $index, $enr := .CCBootnodes}}{{if $index}},{{end}}{{$enr}}{{end}}"{{end}}
+{{if .CCBootnodes}}CC_BOOTNODES="{{ range $index, $enr := .CCBootnodes}}{{if $index}},{{end}}{{$enr}}{{end}}"{{end}}{{if .CustomDeployBlock}}
+DEPLOY_BLOCK={{.CustomDeployBlock}}{{end}}
 {{ end }}
