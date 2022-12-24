@@ -59,13 +59,19 @@ type DockerComposePullOptions struct {
 	Services []string
 }
 
+// DockerComposeCreateOptions represents `docker compose create` command options
 type DockerComposeCreateOptions struct {
-	Path     string
+	// Path to the docker-compose.yaml
+	Path string
+	// Services names
 	Services []string
 }
 
+// DockerComposeBuildOptions represents `docker compose build` command options
 type DockerComposeBuildOptions struct {
-	Path     string
+	// Path to the docker-compose.yaml
+	Path string
+	// Services names
 	Services []string
 }
 
