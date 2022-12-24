@@ -39,64 +39,62 @@ type EnvData struct {
 
 // GenerationData : Struct Data object for script's generation
 type GenerationData struct {
-	ExecutionClient          clients.Client
-	ConsensusClient          clients.Client
-	ValidatorClient          clients.Client
-	GenerationPath           string
-	Network                  string
-	CheckpointSyncUrl        string
-	FeeRecipient             string
-	JWTSecretPath            string
-	FallbackELUrls           []string
-	ElExtraFlags             []string
-	ClExtraFlags             []string
-	VlExtraFlags             []string
-	MapAllPorts              bool
-	Mev                      bool
-	MevImage                 string
-	Ports                    map[string]string
-	Graffiti                 string
-	LoggingDriver            string
-	ImportSlashingProtection bool
+	ExecutionClient   clients.Client
+	ConsensusClient   clients.Client
+	ValidatorClient   clients.Client
+	GenerationPath    string
+	Network           string
+	CheckpointSyncUrl string
+	FeeRecipient      string
+	JWTSecretPath     string
+	FallbackELUrls    []string
+	ElExtraFlags      []string
+	ClExtraFlags      []string
+	VlExtraFlags      []string
+	MapAllPorts       bool
+	Mev               bool
+	MevImage          string
+	Ports             map[string]string
+	Graffiti          string
+	LoggingDriver     string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
-	TTD                      bool
-	CcCustomCfg              bool
-	CcRemoteCfg              bool
-	CcRemoteGen              bool
-	CcRemoteDpl              bool
-	VlCustomCfg              bool
-	VlRemoteCfg              bool
-	VlRemoteGen              bool
-	VlRemoteDpl              bool
-	XeeVersion               bool
-	Mev                      bool
-	MevPort                  string
-	MevImage                 string
-	CheckpointSyncUrl        string
-	FeeRecipient             string
-	ElDiscoveryPort          string
-	ElMetricsPort            string
-	ElApiPort                string
-	ElAuthPort               string
-	ElWsPort                 string
-	ClDiscoveryPort          string
-	ClMetricsPort            string
-	ClApiPort                string
-	ClAdditionalApiPort      string
-	VlMetricsPort            string
-	FallbackELUrls           []string
-	ElExtraFlags             []string
-	ClExtraFlags             []string
-	VlExtraFlags             []string
-	Bootnodes                []string
-	MapAllPorts              bool
-	SplittedNetwork          bool
-	ClCheckpointSyncUrl      bool
-	LoggingDriver            string
-	ImportSlashingProtection bool
+	TTD                 bool
+	CcCustomCfg         bool
+	CcRemoteCfg         bool
+	CcRemoteGen         bool
+	CcRemoteDpl         bool
+	VlCustomCfg         bool
+	VlRemoteCfg         bool
+	VlRemoteGen         bool
+	VlRemoteDpl         bool
+	XeeVersion          bool
+	Mev                 bool
+	MevPort             string
+	MevImage            string
+	CheckpointSyncUrl   string
+	FeeRecipient        string
+	ElDiscoveryPort     string
+	ElMetricsPort       string
+	ElApiPort           string
+	ElAuthPort          string
+	ElWsPort            string
+	ClDiscoveryPort     string
+	ClMetricsPort       string
+	ClApiPort           string
+	ClAdditionalApiPort string
+	VlMetricsPort       string
+	FallbackELUrls      []string
+	ElExtraFlags        []string
+	ClExtraFlags        []string
+	VlExtraFlags        []string
+	Bootnodes           []string
+	MapAllPorts         bool
+	SplittedNetwork     bool
+	ClCheckpointSyncUrl bool
+	LoggingDriver       string
 }
 
 // GenerationResults: Struct for storing results of the generation process
