@@ -183,6 +183,7 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 	if err != nil {
 		return err
 	}
+	log.Debugf("Creating %s container", services.ServiceCtSlashingData)
 	ct, err := dockerClient.ContainerCreate(context.Background(),
 		&container.Config{
 			Image: validatorImage,
@@ -198,7 +199,7 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 	if err != nil {
 		return err
 	}
-	log.Infof("slashing container id: %s", ct.ID)
+	log.Debugf("slashing container id: %s", ct.ID)
 	ctExit, errChan := serviceManager.Wait(services.ServiceCtSlashingData, container.WaitConditionNextExit)
 	if err := dockerClient.ContainerStart(context.Background(), ct.ID, types.ContainerStartOptions{}); err != nil {
 		return err
