@@ -26,11 +26,9 @@ import (
 	"strings"
 	"syscall"
 	"text/template"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
-	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
@@ -38,11 +36,6 @@ import (
 	"github.com/NethermindEth/sedge/templates"
 	"github.com/manifoldco/promptui"
 )
-
-// Interface for Posmoni Eth2 monitor
-type MonitoringTool interface {
-	TrackSync(done <-chan struct{}, beaconEndpoints, executionEndpoints []string, wait time.Duration) <-chan posmoni.EndpointSyncStatus
-}
 
 func installOrShowInstructions(pending []string) (err error) {
 	// notest
