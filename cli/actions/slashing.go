@@ -39,6 +39,7 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 		return err
 	}
 	// Stop validator
+	log.Info("Stopping validator client")
 	if err := s.serviceManager.Stop(services.ServiceCtValidator); err != nil {
 		return err
 	}
@@ -119,6 +120,7 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 		return err
 	}
 	// Stop validator client
+	log.Info("Stopping validator client")
 	if err := s.serviceManager.Stop(services.ServiceCtValidator); err != nil {
 		return err
 	}
