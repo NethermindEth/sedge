@@ -170,6 +170,7 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
+		log.Info("Starting validator client")
 		if err := s.serviceManager.Start(services.ServiceCtValidator); err != nil {
 			return err
 		}
