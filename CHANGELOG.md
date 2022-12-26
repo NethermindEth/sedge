@@ -10,11 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Fixed validator restart failure:
-- Validator waits a grace period (2 epochs) before starting.
-- Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint returns with the HTTP code 200 in its docker-compose `healthcheck` condition so that the validator waits for the consensus be healthy. This replace the older track sync method.
-- Validator service now always restarts unless stopped.
 
 ### Fixed
+
 - When generating new mnemonic, show it without a trace.
 
 ## [v0.6.0] - 2022-12-23
@@ -31,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Completely replace keystore generation mechanism for Ethereum mainnet.
 
 ### Fixed
+
 - Revert Erigon Image from `v2.32.0` to `v2.29.0`.
 - Bad `{{end}}` tag on docker-compose_base template.
 - Inconsistent behavior of `AssignPorts` function test.
