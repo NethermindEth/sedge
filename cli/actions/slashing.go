@@ -204,6 +204,7 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 	}
 	log.Debugf("slashing container id: %s", ct.ID)
 	ctExit, errChan := serviceManager.Wait(services.ServiceCtSlashingData, container.WaitConditionNextExit)
+	log.Info("The slashing data container is starting")
 	if err := dockerClient.ContainerStart(context.Background(), ct.ID, types.ContainerStartOptions{}); err != nil {
 		return err
 	}
