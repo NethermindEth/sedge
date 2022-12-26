@@ -133,6 +133,13 @@ func (cr *SimpleCMDRunner) BuildEchoToFileCMD(options commands.EchoToFileOptions
 	return r.BuildEchoToFileCMD(options)
 }
 
+func (cr *SimpleCMDRunner) BuildOpenTextEditor(options commands.OpenTextEditorOptions) commands.Command {
+	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
+		RunAsAdmin: false,
+	})
+	return r.BuildOpenTextEditor(options)
+}
+
 func (cr *SimpleCMDRunner) RunCMD(cmd commands.Command) (string, error) {
 	if cr.SRunCMD == nil {
 		return "", nil

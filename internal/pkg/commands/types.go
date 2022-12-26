@@ -23,6 +23,10 @@ type Command struct {
 	Cmd string
 	// GetOutput : get output of command
 	GetOutput bool
+	// ForceNoSudo : force the command to not be run with sudo
+	ForceNoSudo bool
+	// IgnoreTerminal : command can be executed without using a terminal, useful for windows
+	IgnoreTerminal bool
 }
 
 // ScriptFile : Represents a bash or bat script to be executed
@@ -123,4 +127,10 @@ type EchoToFileOptions struct {
 	FileName string
 	// Content : content to be written to file
 	Content string
+}
+
+// OpenTextEditorOptions represents options to open file in a text editor
+type OpenTextEditorOptions struct {
+	// FilePath path to the file to open
+	FilePath string
 }

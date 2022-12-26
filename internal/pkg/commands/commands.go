@@ -38,6 +38,8 @@ type CommandRunner interface {
 
 	BuildEchoToFileCMD(options EchoToFileOptions) Command
 
+	BuildOpenTextEditor(options OpenTextEditorOptions) Command
+
 	RunCMD(cmd Command) (string, error)
 
 	RunScript(script ScriptFile) (string, error)
