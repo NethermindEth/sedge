@@ -93,6 +93,7 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
+		log.Info("the validator container is being restarted")
 		if err := s.serviceManager.Start(services.ServiceCtValidator); err != nil {
 			return err
 		}
@@ -170,7 +171,7 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
-		log.Info("Starting validator client")
+		log.Info("the validator container is being restarted")
 		if err := s.serviceManager.Start(services.ServiceCtValidator); err != nil {
 			return err
 		}
