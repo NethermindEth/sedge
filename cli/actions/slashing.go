@@ -52,7 +52,6 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 	}
 
 	log.Infof("Importing slashing data to client %s from %s", options.ValidatorClient, options.From)
-	utils.CopyFile(options.From, filepath.Join(options.GenerationPath, configs.ValidatorDir))
 	var cmd []string
 	switch options.ValidatorClient {
 	case "prysm":
