@@ -165,7 +165,9 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd); err != nil {
 		return err
 	}
-	if err := utils.CopyFile(filepath.Join(options.GenerationPath, "validator-data", "slashing_protection.json"), options.Out); err != nil {
+	copyFrom := filepath.Join(options.GenerationPath, configs.ValidatorDir, "slashing_protection.json")
+	log.Debug("copying slashing data file from %s to %s", copyFrom, options.Out)
+	if err := utils.CopyFile(copyFrom, options.Out); err != nil {
 		return err
 	}
 
