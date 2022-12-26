@@ -166,7 +166,7 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 		return err
 	}
 	copyFrom := filepath.Join(options.GenerationPath, configs.ValidatorDir, "slashing_protection.json")
-	log.Debug("copying slashing data file from %s to %s", copyFrom, options.Out)
+	log.Debugf("copying slashing data file from %s to %s", copyFrom, options.Out)
 	if err := utils.CopyFile(copyFrom, options.Out); err != nil {
 		return err
 	}
@@ -222,6 +222,7 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 }
 
 func deleteContainer(dockerClient client.APIClient, container string) error {
+	log.Debugf("removing container %s", container)
 	if err := dockerClient.ContainerRemove(context.Background(), container, types.ContainerRemoveOptions{}); err != nil {
 		return fmt.Errorf("error removing slashing container %s: %w", container, err)
 	}
