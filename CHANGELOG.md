@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Validator service now always restarts unless stopped.
 
 ### Fixed
-- When generating new mnemonic, show it without a trace (linux, MacOS).
+- When generating new mnemonic, show it without a trace.
 
 ## [v0.6.0] - 2022-12-23
 
