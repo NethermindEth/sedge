@@ -45,8 +45,9 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 	}
 
 	// Copy slashing data to generation path
-
-	if err := utils.CopyFile(options.From, path.Join(options.GenerationPath, configs.ValidatorDir, SlashingImportFile)); err != nil {
+	slashingDataPath := path.Join(options.GenerationPath, configs.ValidatorDir, SlashingImportFile)
+	log.Debugf("Copying slashing data file from %s to %s", options.From, slashingDataPath)
+	if err := utils.CopyFile(options.From, slashingDataPath); err != nil {
 		return err
 	}
 
