@@ -7,13 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- When generating new mnemonic, show it without a trace.
+
 ### Changed
 
 - Fixed validator restart failure:
-
-### Fixed
-
-- When generating new mnemonic, show it without a trace.
+  - Validator waits a grace period (2 epochs) before starting.
+  - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint returns with the HTTP code 200 in its docker-compose `healthcheck` condition so that the validator waits for the consensus be healthy. This replace the older track sync method.
+  - Validator service now always restarts unless stopped.
 
 ## [v0.6.0] - 2022-12-23
 

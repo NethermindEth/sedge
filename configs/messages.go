@@ -115,15 +115,5 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 		"https://github.com/NethermindEth/sedge/releases, with error:"
 	NeedVersionUpdate = "A new Version of sedge is available. Please update to the latest Version. See " +
 		"https://github.com/NethermindEth/sedge/releases for more information. Latest detected tag:"
-	VersionUpdated       = "You are running the latest version of sedge. Version: "
-	MnemonicPresentation = `
-This is your mnemonic:
-
-%s
-
-The mnemonic is the only way to get your deposit back, write it down now and keep it in a safe place.
-
-Press the <q> key or click exit when you have written down your mnemonic.
-
-`
+	VersionUpdated = "You are running the latest version of sedge. Version: "
 )
