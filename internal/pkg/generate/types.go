@@ -35,14 +35,15 @@ type EnvData struct {
 	ConsensusClientName       string
 	KeystoreDir               string
 	Graffiti                  string
+	RelayURL                  string
 }
 
-// GenerationData : Struct Data object for script's generation
-type GenerationData struct {
-	ExecutionClient   clients.Client
-	ConsensusClient   clients.Client
-	ValidatorClient   clients.Client
-	GenerationPath    string
+// GenData : Struct Data object for script's generation
+type GenData struct {
+	ExecutionClient   *clients.Client
+	ConsensusClient   *clients.Client
+	ValidatorClient   *clients.Client
+	MevBoostService   bool
 	Network           string
 	CheckpointSyncUrl string
 	FeeRecipient      string
@@ -57,6 +58,8 @@ type GenerationData struct {
 	Ports             map[string]string
 	Graffiti          string
 	LoggingDriver     string
+	RelayURL          string
+	MevBoostEndpoint  string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -95,12 +98,95 @@ type DockerComposeData struct {
 	SplittedNetwork     bool
 	ClCheckpointSyncUrl bool
 	LoggingDriver       string
+	MevBoostEndpoint    string
 }
 
-// GenerationResults: Struct for storing results of the generation process
-type GenerationResults struct {
-	DockerComposePath string
-	EnvFilePath       string
-	ELPort            string
-	CLPort            string
+type ComposeData struct {
+	Version  string    `yaml:"version"`
+	Services *Services `yaml:"services"`
+	Networks *Networks `yaml:"networks"`
+}
+type Options struct {
+	MaxSize string `yaml:"max-size"`
+	MaxFile string `yaml:"max-file"`
+}
+type Logging struct {
+	Driver  string   `yaml:"driver"`
+	Options *Options `yaml:"options"`
+}
+type Execution struct {
+	StopGracePeriod string   `yaml:"stop_grace_period"`
+	ContainerName   string   `yaml:"container_name"`
+	Restart         string   `yaml:"restart"`
+	Image           string   `yaml:"image"`
+	Networks        []string `yaml:"networks"`
+	Volumes         []string `yaml:"volumes"`
+	Ports           []string `yaml:"ports"`
+	Expose          []int    `yaml:"expose"`
+	Command         []string `yaml:"command"`
+	Logging         *Logging `yaml:"logging"`
+}
+type Mevboost struct {
+	Image         string   `yaml:"image"`
+	Networks      []string `yaml:"networks"`
+	ContainerName string   `yaml:"container_name"`
+	Restart       string   `yaml:"restart"`
+	Entrypoint    []string `yaml:"entrypoint"`
+}
+type Consensus struct {
+	StopGracePeriod string   `yaml:"stop_grace_period"`
+	ContainerName   string   `yaml:"container_name"`
+	Restart         string   `yaml:"restart"`
+	Image           string   `yaml:"image"`
+	Networks        []string `yaml:"networks"`
+	Volumes         []string `yaml:"volumes"`
+	Ports           []string `yaml:"ports"`
+	Expose          []int    `yaml:"expose"`
+	Command         []string `yaml:"command"`
+	Logging         *Logging `yaml:"logging"`
+}
+type ValidatorImport struct {
+	ContainerName string   `yaml:"container_name"`
+	Image         string   `yaml:"image"`
+	Networks      []string `yaml:"networks"`
+	Volumes       []string `yaml:"volumes"`
+	Command       string   `yaml:"command"`
+	Logging       *Logging `yaml:"logging"`
+}
+type ValidatorImportDependsOn struct {
+	Condition string `yaml:"condition"`
+}
+type DependsOn struct {
+	ValidatorImport *ValidatorImportDependsOn `yaml:"validator-import"`
+}
+type Validator struct {
+	ContainerName string     `yaml:"container_name"`
+	Image         string     `yaml:"image"`
+	DependsOn     *DependsOn `yaml:"depends_on"`
+	Networks      []string   `yaml:"networks"`
+	Ports         []string   `yaml:"ports"`
+	Volumes       []string   `yaml:"volumes"`
+	Command       []string   `yaml:"command"`
+	Logging       *Logging   `yaml:"logging"`
+}
+type ConfigConsensus struct {
+	ContainerName string   `yaml:"container_name"`
+	Image         string   `yaml:"image"`
+	Volumes       []string `yaml:"volumes"`
+	Command       []string `yaml:"command"`
+	Logging       *Logging `yaml:"logging"`
+}
+type Services struct {
+	Execution       *Execution       `yaml:"execution"`
+	Mevboost        *Mevboost        `yaml:"mevboost"`
+	Consensus       *Consensus       `yaml:"consensus"`
+	ValidatorImport *ValidatorImport `yaml:"validator-import"`
+	Validator       *Validator       `yaml:"validator"`
+	ConfigConsensus *ConfigConsensus `yaml:"config_consensus"`
+}
+type Sedge struct {
+	Name string `yaml:"name"`
+}
+type Networks struct {
+	Sedge *Sedge `yaml:"sedge"`
 }

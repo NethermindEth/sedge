@@ -18,7 +18,7 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"github.com/NethermindEth/sedge/internal/pkg/generation"
+	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"os"
 	"path/filepath"
 	"strings"
@@ -315,7 +315,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	combinedClients.Validator.Omited = flags.noValidator
 
 	// Generate docker-compose scripts
-	gd := &generation.GenData{
+	gd := &generate.GenData{
 		ExecutionClient:   &combinedClients.Execution,
 		ConsensusClient:   &combinedClients.Consensus,
 		ValidatorClient:   &combinedClients.Validator,
@@ -333,13 +333,13 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		MevImage:          flags.mevImage,
 		LoggingDriver:     configs.GetLoggingDriver(flags.logging),
 	}
-	err = generation.GenerateDockerComposeAndEnvFile(gd, flags.generationPath)
+	err = generate.GenerateDockerComposeAndEnvFile(gd, flags.generationPath)
 	if err != nil {
 		return []error{err}
 	}
 
 	// Clean generated .env and docker compose files
-	err = generation.CleanGenerated(flags.generationPath)
+	err = generate.CleanGenerated(flags.generationPath)
 	if err != nil {
 		return []error{err}
 	}

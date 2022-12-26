@@ -17,7 +17,7 @@ package cli
 
 import (
 	"fmt"
-	"github.com/NethermindEth/sedge/internal/pkg/generation"
+	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"path/filepath"
@@ -155,7 +155,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, service
 	}
 
 	// Generate docker-compose scripts
-	gd := generation.GenData{
+	gd := generate.GenData{
 		ExecutionClient:   &combinedClients.Execution,
 		ConsensusClient:   &combinedClients.Consensus,
 		ValidatorClient:   &combinedClients.Validator,
@@ -176,13 +176,13 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, service
 		MevBoostService:   utils.Contains(services, mevBoost),
 		MevBoostEndpoint:  flags.mevBoostUrl,
 	}
-	err = generation.GenerateDockerComposeAndEnvFile(&gd, generationPath)
+	err = generate.GenerateDockerComposeAndEnvFile(&gd, generationPath)
 	if err != nil {
 		return err
 	}
 
 	// Clean generated .env and docker compose files
-	err = generation.CleanGenerated(generationPath)
+	err = generate.CleanGenerated(generationPath)
 	if err != nil {
 		return err
 	}

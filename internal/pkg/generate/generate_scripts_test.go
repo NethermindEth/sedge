@@ -16,25 +16,69 @@ limitations under the License.
 package generate
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
-	"testing"
-
+	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/utils"
+	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
+	"io"
+	"io/ioutil"
+	"path/filepath"
+	"testing"
 )
 
 const (
 	wrongDep = "wrong_dep"
 )
 
-type generateTestCase struct {
-	execution, consensus, validator clients.Client
-	path, network                   string
-	isErr                           bool
+type genTestData struct {
+	Description    string
+	GenerationData *GenData
+	Services       []string
+	Error          error
+	CheckFunc      func(t *testing.T, data *GenData, services []string, compose, env io.Reader) error
 }
 
-func generateTestCases(t *testing.T) (tests []generateTestCase) {
-	tests = []generateTestCase{{isErr: true}}
+var defaultFunc = func(t *testing.T, data *GenData, services []string, compose, env io.Reader) error {
+
+	// load compose file
+	composeBytes, err := ioutil.ReadAll(compose)
+	if err != nil {
+		return err
+	}
+	var composeData ComposeData
+	err = yaml.Unmarshal(composeBytes, &composeData)
+	if err != nil {
+		return err
+	}
+
+	if utils.Contains(services, execution) && composeData.Services.Execution == nil {
+		return errors.New("execution service should not be omitted")
+	}
+	if utils.Contains(services, consensus) && composeData.Services.Consensus == nil {
+		return errors.New("consensus service should not be omitted")
+	}
+	if utils.Contains(services, validator) && composeData.Services.Validator == nil {
+		return errors.New("validator service should not be omitted")
+	}
+	if utils.Contains(services, mevBoost) && composeData.Services.Mevboost == nil {
+		return errors.New("mev boost service should not be omitted")
+	}
+	if utils.Contains(services, validatorImport) && composeData.Services.ValidatorImport == nil {
+		return errors.New("validator import service should not be omitted")
+	}
+	if utils.Contains(services, configConsensus) && composeData.Services.ConfigConsensus == nil {
+		return errors.New("validator export service should not be omitted")
+	}
+	return nil
+}
+
+func generateTestCases(t *testing.T) (tests []genTestData) {
+	baseDescription := "Test generation of compose services "
+	tests = []genTestData{{Description: baseDescription + " NilData", Error: EmptyDataError, CheckFunc: defaultFunc}}
 
 	networks, err := utils.SupportedNetworks()
 	if err != nil {
@@ -58,16 +102,46 @@ func generateTestCases(t *testing.T) (tests []generateTestCase) {
 		}
 
 		// TODO: Add CheckpointSyncUrl, FallbackELUrls and FeeRecipient to test data
-		for _, execution := range executionClients {
-			path := t.TempDir()
-			tests = append(tests, generateTestCase{clients.Client{Name: execution}, clients.Client{Name: wrongDep}, clients.Client{Name: wrongDep}, path, network, true})
-			for _, consensus := range consensusClients {
-				if utils.Contains(validatorClients, consensus) {
-					path := t.TempDir()
+		for _, executionCl := range executionClients {
+			for _, consensusCl := range consensusClients {
+				if utils.Contains(validatorClients, consensusCl) {
 					tests = append(tests,
-						generateTestCase{clients.Client{Name: execution}, clients.Client{Name: consensus}, clients.Client{Name: consensus}, path, network, false},
-						generateTestCase{clients.Client{Name: execution}, clients.Client{Name: consensus}, clients.Client{Name: consensus}, "", network, true},
-						generateTestCase{clients.Client{Name: execution}, clients.Client{Name: consensus}, clients.Client{Name: consensus, Omited: true}, path, network, false})
+						genTestData{
+							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s", executionCl, consensusCl, consensusCl, network),
+							GenerationData: &GenData{
+								ExecutionClient: &clients.Client{Name: executionCl},
+								ConsensusClient: &clients.Client{Name: consensusCl},
+								ValidatorClient: &clients.Client{Name: consensusCl},
+								Network:         "sepolia",
+							},
+							Services:  []string{execution, consensus, validator},
+							Error:     nil,
+							CheckFunc: defaultFunc,
+						},
+						genTestData{
+							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s", executionCl, consensusCl, consensusCl, network),
+							GenerationData: &GenData{
+								ExecutionClient: &clients.Client{Name: executionCl},
+								ConsensusClient: &clients.Client{Name: consensusCl},
+								ValidatorClient: &clients.Client{Name: consensusCl, Omited: true},
+								Network:         "sepolia",
+							},
+							Services:  []string{execution, consensus},
+							Error:     nil,
+							CheckFunc: defaultFunc,
+						},
+						genTestData{
+							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s", executionCl, consensusCl, consensusCl, network),
+							GenerationData: &GenData{
+								ExecutionClient: &clients.Client{Name: executionCl},
+								ConsensusClient: &clients.Client{Name: wrongDep},
+								ValidatorClient: &clients.Client{Name: consensusCl, Omited: true},
+								Network:         "sepolia",
+							},
+							Services:  []string{execution, consensus},
+							Error:     ConsensusClientNotValidError,
+							CheckFunc: defaultFunc,
+						})
 				}
 			}
 		}
@@ -76,31 +150,85 @@ func generateTestCases(t *testing.T) (tests []generateTestCase) {
 	return
 }
 
-func validateGeneratedFiles(t *testing.T, testCase generateTestCase) {
-	// TODO: validate generated files
-}
+func TestGenerateComposeServices(t *testing.T) {
+	tests := []genTestData{
+		{
+			Description: "Test generation of compose services",
+			GenerationData: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				ConsensusClient: &clients.Client{Name: "teku"},
+				ValidatorClient: &clients.Client{Name: "teku"},
+				Network:         "mainnet",
+				Mev:             true,
+			},
+			Services:  []string{execution, consensus, validator, validatorImport, mevBoost},
+			Error:     nil,
+			CheckFunc: defaultFunc,
+		},
+	}
 
-func TestGenerateScripts(t *testing.T) {
-	t.Parallel()
-	inputs := generateTestCases(t)
+	tests = append(tests, generateTestCases(t)...)
 
-	for i, input := range inputs {
-		t.Run(fmt.Sprintf("Test case %d", i), func(t *testing.T) {
-			gd := GenerationData{
-				ExecutionClient: input.execution,
-				ConsensusClient: input.consensus,
-				ValidatorClient: input.validator,
-				GenerationPath:  input.path,
-				Network:         input.network,
+	for _, tt := range tests {
+		t.Run(tt.Description, func(t *testing.T) {
+
+			var buffer bytes.Buffer
+			if tt.GenerationData != nil && tt.GenerationData.Network == "chiado" {
+				t.Logf("GenerationData: %+v", tt.GenerationData)
 			}
-			descr := fmt.Sprintf("GenerateScripts(%+v)", gd)
-
-			if _, err := GenerateScripts(gd); input.isErr && err == nil {
-				t.Errorf("%s expected to fail", descr)
-			} else if !input.isErr && err != nil {
-				t.Errorf("%s failed: %v", descr, err)
+			err := genComposeFile(tt.GenerationData, io.Writer(&buffer))
+			if err != nil {
+				assert.ErrorIs(t, err, tt.Error)
+				return
 			}
-			validateGeneratedFiles(t, input)
+
+			err = tt.CheckFunc(t, tt.GenerationData, tt.Services, bytes.NewReader(buffer.Bytes()), nil)
+			if err != nil {
+				assert.ErrorIs(t, err, tt.Error)
+			}
 		})
 	}
+}
+
+// Test that the generated compose file with dump data is generated correctly
+func TestGenerateDockerCompose(t *testing.T) {
+	samplePath := t.TempDir()
+	sampleData := &GenData{
+		ExecutionClient: &clients.Client{Name: "nethermind", Omited: false},
+		Network:         "mainnet",
+	}
+
+	err := GenerateDockerComposeAndEnvFile(sampleData, samplePath)
+	if err != nil {
+		t.Error("GenerateDockerComposeAndEnvFile() failed", err)
+		return
+	}
+
+	// Check that docker-compose file exists
+	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
+	// Check that .env file doesn't exist
+	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultEnvFileName))
+
+	// Validate that Execution Client info matches the sample data
+	// load the docker-compose file
+	composeFile, err := ioutil.ReadFile(filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
+	if err != nil {
+		t.Error("unable to read docker-compose.yml")
+	}
+	var composeData ComposeData
+	err = yaml.Unmarshal(composeFile, &composeData)
+	if err != nil {
+		t.Error("unable to parse docker-compose.yml")
+	}
+
+	// Check that the execution client is nethermind
+	if composeData.Services.Execution.ContainerName != "execution-client" {
+		t.Error("execution client image does not match")
+	}
+
+	// Check other services are nil
+	if composeData.Services.Consensus != nil {
+		t.Error("consensus client should be nil")
+	}
+
 }

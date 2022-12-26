@@ -17,7 +17,7 @@ package cli
 
 import (
 	"fmt"
-	"github.com/NethermindEth/sedge/internal/pkg/generation"
+	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"os"
 	"strings"
 
@@ -82,7 +82,7 @@ func initConfig() {
 		cobra.CheckErr(err)
 		fmt.Printf("Generating config file in the %s directory\n", home)
 
-		err = generation.GenerateConfig(home)
+		err = generate.GenerateConfig(home)
 		cobra.CheckErr(err)
 
 		viper.ReadInConfig()
