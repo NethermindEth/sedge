@@ -18,6 +18,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"github.com/NethermindEth/sedge/internal/pkg/generation"
 	"os"
 	"path/filepath"
 	"strings"
@@ -31,14 +32,13 @@ import (
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
-	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/spf13/cobra"
 )
 
 const (
-	execution, consensus, validator = "execution", "consensus", "validator"
+	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mevboost"
 )
 
 type CliCmdFlags struct {
@@ -290,7 +290,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 
 	// Generate JWT secret if necessary
 	if flags.jwtPath == "" && configs.NetworksConfigs[flags.network].RequireJWT {
-		if err = handleJWTSecret(flags); err != nil {
+		if flags.jwtPath, err = handleJWTSecret(flags.generationPath); err != nil {
 			return []error{err}
 		}
 	} else if filepath.IsAbs(flags.jwtPath) { // Ensure jwtPath is absolute
@@ -315,11 +315,10 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	combinedClients.Validator.Omited = flags.noValidator
 
 	// Generate docker-compose scripts
-	gd := generate.GenerationData{
-		ExecutionClient:   combinedClients.Execution,
-		ConsensusClient:   combinedClients.Consensus,
-		ValidatorClient:   combinedClients.Validator,
-		GenerationPath:    flags.generationPath,
+	gd := &generation.GenData{
+		ExecutionClient:   &combinedClients.Execution,
+		ConsensusClient:   &combinedClients.Consensus,
+		ValidatorClient:   &combinedClients.Validator,
 		Network:           flags.network,
 		CheckpointSyncUrl: flags.checkpointSyncUrl,
 		FeeRecipient:      flags.feeRecipient,
@@ -334,23 +333,23 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		MevImage:          flags.mevImage,
 		LoggingDriver:     configs.GetLoggingDriver(flags.logging),
 	}
-	results, err := generate.GenerateScripts(gd)
+	err = generation.GenerateDockerComposeAndEnvFile(gd, flags.generationPath)
 	if err != nil {
 		return []error{err}
 	}
 
 	// Clean generated .env and docker compose files
-	err = generate.CleanGenerated(results)
+	err = generation.CleanGenerated(flags.generationPath)
 	if err != nil {
 		return []error{err}
 	}
 
 	// Print final files
-	log.Infof(configs.CreatedFile, results.EnvFilePath)
-	ui.PrintFileContent(cmd.OutOrStdout(), results.EnvFilePath)
+	log.Infof(configs.CreatedFile, filepath.Join(generationPath, configs.DefaultEnvFileName))
+	ui.PrintFileContent(cmd.OutOrStdout(), filepath.Join(generationPath, configs.DefaultEnvFileName))
 
-	log.Infof(configs.CreatedFile, results.DockerComposePath)
-	ui.PrintFileContent(cmd.OutOrStdout(), results.DockerComposePath)
+	log.Infof(configs.CreatedFile, filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
+	ui.PrintFileContent(cmd.OutOrStdout(), filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
 
 	// If --run-clients=none was set then exit and don't run anything
 	if len(*flags.services) == 0 {
@@ -360,7 +359,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 
 	// If teku is chosen, then prepare datadir with 777 permissions
 	if combinedClients.Consensus.Name == "teku" {
-		if err = preRunTeku(flags); err != nil {
+		if err = preRunTeku(*flags.services, flags.generationPath); err != nil {
 			return []error{err}
 		}
 	}
@@ -375,35 +374,35 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 			return []error{err}
 		}
 	}
-
-	if !flags.noValidator {
-		log.Info(configs.ValidatorTips)
-
-		// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service in the previous step
-		if !utils.Contains(*flags.services, validator) {
-			// Wait for clients to start
-			// log.Info(configs.WaitingForNodesToStart)
-			// time.Sleep(waitingTime)
-			// Track sync of execution and consensus clients
-			// TODO: Parameterize wait arg of trackSync
-			if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*5, flags); err != nil {
-				return []error{err}
-			}
-
-			// TODO: Prompt for waiting for keystore and validator registration to run the validator
-			if flags.run {
-				if err = runAndShowContainers([]string{validator}, flags); err != nil {
-					return []error{err}
-				}
-			} else {
-				// Let the user decide to see the instructions for executing the validator and exit or let the tool execute it
-				if err = RunValidatorOrExit(flags); err != nil {
-					return []error{err}
-				}
-			}
-		}
-		log.Info(configs.HappyStaking)
-	}
+	//
+	//if !flags.noValidator {
+	//	log.Info(configs.ValidatorTips)
+	//
+	//	// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service in the previous step
+	//	if !utils.Contains(*flags.services, validator) {
+	//		// Wait for clients to start
+	//		// log.Info(configs.WaitingForNodesToStart)
+	//		// time.Sleep(waitingTime)
+	//		// Track sync of execution and consensus clients
+	//		// TODO: Parameterize wait arg of trackSync
+	//		if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*5, flags); err != nil {
+	//			return []error{err}
+	//		}
+	//
+	//		// TODO: Prompt for waiting for keystore and validator registration to run the validator
+	//		if flags.run {
+	//			if err = runAndShowContainers([]string{validator}, flags); err != nil {
+	//				return []error{err}
+	//			}
+	//		} else {
+	//			// Let the user decide to see the instructions for executing the validator and exit or let the tool execute it
+	//			if err = RunValidatorOrExit(flags); err != nil {
+	//				return []error{err}
+	//			}
+	//		}
+	//	}
+	//	log.Info(configs.HappyStaking)
+	//}
 
 	return nil
 }

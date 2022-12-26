@@ -51,9 +51,9 @@
       - --metrics.port={{.ClMetricsPort}}
       - --jwt-secret=/tmp/jwt/jwtsecret{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
       - --checkpointSyncUrl={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{end}}{{range $flag := .ClExtraFlags}}
-      - --{{$flag}}{{end}}{{if .Mev}}
+      - --{{$flag}}{{end}}{{if .MevBoostEndpoint}}
       - --builder=true
-      - --builder.urls http://mevboost:{{.MevPort}}{{end}}{{if .LoggingDriver}}
+      - --builder.urls {{.MevBoostEndpoint}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:

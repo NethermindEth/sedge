@@ -49,8 +49,8 @@
       - --monitoring-port={{.ClMetricsPort}}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
       - --checkpoint-sync-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}
       - --genesis-beacon-api-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{end}}{{range $flag := .ClExtraFlags}}
-      - --{{$flag}}{{end}}{{if .Mev}}
-      - --http-mev-relay=http://mevboost:{{.MevPort}}{{end}}{{if .LoggingDriver}}
+      - --{{$flag}}{{end}}{{if .MevBoostEndpoint}}
+      - --http-mev-relay={{.MevBoostEndpoint}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:

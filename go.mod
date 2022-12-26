@@ -13,12 +13,14 @@ require (
 	github.com/herumi/bls-eth-go-binary v1.28.1
 	github.com/jarcoal/httpmock v1.2.0
 	github.com/manifoldco/promptui v0.9.0
+	github.com/pkg/errors v0.9.1
 	github.com/protolambda/go-keystorev4 v0.0.0-20211007151826-f20444f6d564
 	github.com/protolambda/zrnt v0.14.0
 	github.com/protolambda/ztyp v0.2.2
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.13.0
+	github.com/stretchr/testify v1.8.0
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/wealdtech/go-eth2-types/v2 v2.7.0
 	github.com/wealdtech/go-eth2-util v1.7.0
@@ -30,6 +32,7 @@ require (
 require (
 	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/ferranbt/fastssz v0.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -46,7 +49,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/r3labs/sse/v2 v2.7.7 // indirect
 	github.com/rivo/uniseg v0.1.0 // indirect
 	github.com/spf13/afero v1.8.2 // indirect

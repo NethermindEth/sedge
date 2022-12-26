@@ -30,6 +30,7 @@ const (
 	DefaultDockerComposeScriptsPath = "./docker-compose-scripts"
 	OnPremiseExecutionURL           = "http://execution"
 	OnPremiseConsensusURL           = "http://consensus"
+	DefaultMevBoostEndpoint         = "http://mevboost"
 	ClientNotSupported              = "client %s is not supported. Please use 'clients' command to see the list of supported clients"
 	PrintingFile                    = "File %s:"
 	SupportedClients                = "Supported clients of type %s: %v"
@@ -40,6 +41,7 @@ const (
 	ConfigFileName                  = ".sedge"
 	UnableToProceed                 = "Unable to proceed. Please check the logs for more details"
 	DefaultDockerComposeScriptName  = "docker-compose.yml"
+	DefaultEnvFileName              = ".env"
 	CheckingDockerEngine            = "Checking if docker engine is on"
 	DepositCLIDockerImageUrl        = "nethermindeth/staking-deposit-cli" //"github.com/ethereum/staking-deposit-cli"
 	DepositCLIDockerImageName       = "nethermindeth/staking-deposit-cli" //"deposit-cli:local"
@@ -55,6 +57,7 @@ const (
 	ConsensusDefaultDataDir         = "./consensus-data"
 	ValidatorDefaultDataDir         = "./validator-data"
 	KeystoreDefaultDataDir          = "./keystore"
+	PossibleClients                 = "Options:\n1. Standalone client, (one of execution, consensus and validator)\n2. Full node without validator(execution and consensus)\n3. Full node(execution, consensus and validator)"
 	ReviewKeystorePath              = "In case you used custom paths for the 'cli' or the 'keys' commands, please review if the keystore path in the generated .env file points to the generated keystore folder (the .env key should be KEYSTORE_DIR). If not, change the path in the .env file to the correct one."
 	NodesSynced                     = "Execution and Consensus clients are synced, proceeding to start validator node"
 	RemoteNodeNeeded                = `

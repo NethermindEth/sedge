@@ -54,8 +54,8 @@
       - --metrics-interface=0.0.0.0
       - --metrics-port={{.ClMetricsPort}}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
       - --initial-state={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}/eth/v2/debug/beacon/states/finalized{{end}}{{range $flag := .ClExtraFlags}}
-      - --{{$flag}}{{end}}{{if .Mev}}
-      - --builder-endpoint=http://mevboost:{{.MevPort}}{{end}}{{if .XeeVersion}}
+      - --{{$flag}}{{end}}{{if .MevBoostEndpoint}}
+      - --builder-endpoint={{.MevBoostEndpoint}}{{end}}{{if .XeeVersion}}
       - --Xee-version=${XEE_VERSION}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}

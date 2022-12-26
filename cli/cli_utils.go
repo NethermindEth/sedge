@@ -105,6 +105,72 @@ func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error
 	return combinedClients, nil
 }
 
+func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
+	var executionClient, consensusClient, validatorClient clients.Client
+	var err error
+
+	// execution client
+	if utils.Contains(services, execution) {
+		executionParts := strings.Split(flags.executionName, ":")
+		executionClient, err = clients.RandomChoice(allClients[execution])
+		if err != nil {
+			return nil, err
+		}
+		if flags.executionName != "" {
+			log.Warn(configs.CustomImagesWarning)
+			executionClient.Name = executionParts[0]
+			executionClient.Image = strings.Join(executionParts[1:], ":")
+		}
+		if err = clients.ValidateClient(executionClient, execution); err != nil {
+			return nil, err
+		}
+	} else {
+		executionClient.Omited = true
+	}
+	// consensus client
+	if utils.Contains(services, consensus) {
+		consensusParts := strings.Split(flags.consensusName, ":")
+		consensusClient, err = clients.RandomChoice(allClients[consensus])
+		if err != nil {
+			return nil, err
+		}
+		if flags.consensusName != "" {
+			log.Warn(configs.CustomImagesWarning)
+			consensusClient.Name = consensusParts[0]
+			consensusClient.Image = strings.Join(consensusParts[1:], ":")
+		}
+		if err = clients.ValidateClient(consensusClient, consensus); err != nil {
+			return nil, err
+		}
+	} else {
+		consensusClient.Omited = true
+	}
+	// validator client
+	if utils.Contains(services, validator) && !flags.noValidator {
+		validatorParts := strings.Split(flags.validatorName, ":")
+		validatorClient, err = clients.RandomChoice(allClients[validator])
+		if err != nil {
+			return nil, err
+		}
+		if flags.validatorName != "" {
+			log.Warn(configs.CustomImagesWarning)
+			validatorClient.Name = validatorParts[0]
+			validatorClient.Image = strings.Join(validatorParts[1:], ":")
+		}
+		if err = clients.ValidateClient(validatorClient, validator); err != nil {
+			return nil, err
+		}
+	} else {
+		validatorClient.Omited = true
+	}
+
+	return &clients.Clients{
+		Execution: executionClient,
+		Consensus: consensusClient,
+		Validator: validatorClient,
+	}, err
+}
+
 func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliCmdFlags) (clients.Clients, error) {
 	var combinedClients clients.Clients
 	var err error
@@ -147,6 +213,16 @@ func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliC
 	val, ok := allClients[validator][flags.validatorName]
 	if !ok {
 		val.Name = flags.validatorName
+	}
+	if !utils.Contains(*flags.services, execution) && len(*flags.services) > 0 && (*flags.services)[0] != "all" {
+		exec.Omited = true
+	}
+	if !utils.Contains(*flags.services, consensus) && len(*flags.services) > 0 && (*flags.services)[0] != "all" {
+		cons.Omited = true
+	}
+	if !utils.Contains(*flags.services, validator) && len(*flags.services) > 0 && (*flags.services)[0] != "all" ||
+		flags.noValidator {
+		val.Omited = true
 	}
 
 	combinedClients = clients.Clients{
@@ -388,64 +464,63 @@ func RunValidatorOrExit(flags *CliCmdFlags) error {
 	return nil
 }
 
-func handleJWTSecret(flags *CliCmdFlags) error {
+func handleJWTSecret(generationPath string) (string, error) {
 	log.Info(configs.GeneratingJWTSecret)
 
 	// Create scripts directory if not exists
-	if _, err := os.Stat(flags.generationPath); os.IsNotExist(err) {
-		err = os.MkdirAll(flags.generationPath, 0o755)
+	if _, err := os.Stat(generationPath); os.IsNotExist(err) {
+		err = os.MkdirAll(generationPath, 0o755)
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 
 	rawScript, err := templates.Scripts.ReadFile(filepath.Join("scripts", "jwt_secret.sh"))
 	if err != nil {
-		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
 	tmp, err := template.New("script").Parse(string(rawScript))
 	if err != nil {
-		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
 	script := commands.BashScript{
 		Tmp:       tmp,
 		GetOutput: false,
 		Data: map[string]string{
-			"Path": flags.generationPath,
+			"Path": generationPath,
 		},
 	}
 
 	if _, err = commands.Runner.RunBash(script); err != nil {
-		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	// TODO: avoid flag edition
-	flags.jwtPath, err = filepath.Abs(filepath.Join(flags.generationPath, "jwtsecret"))
+	jwtPath, err := filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
 	if err != nil {
-		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
 	log.Info(configs.JWTSecretGenerated)
-	return nil
+	return jwtPath, nil
 }
 
-func preRunTeku(flags *CliCmdFlags) error {
+func preRunTeku(services []string, generationPath string) error {
 	log.Info(configs.PreparingTekuDatadir)
 	// Change umask to avoid OS from changing the permissions
 	syscall.Umask(0)
-	for _, s := range *flags.services {
+	for _, s := range services {
 		if s == "all" || s == consensus {
 			// Prepare consensus datadir
-			path := filepath.Join(flags.generationPath, configs.ConsensusDefaultDataDir)
+			path := filepath.Join(generationPath, configs.ConsensusDefaultDataDir)
 			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, consensus, err)
 			}
 		}
 		if s == "all" || s == validator {
 			// Prepare validator datadir
-			path := filepath.Join(flags.generationPath, configs.ValidatorDefaultDataDir)
+			path := filepath.Join(generationPath, configs.ValidatorDefaultDataDir)
 			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, validator, err)
 			}

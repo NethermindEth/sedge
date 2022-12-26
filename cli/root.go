@@ -17,11 +17,11 @@ package cli
 
 import (
 	"fmt"
+	"github.com/NethermindEth/sedge/internal/pkg/generation"
 	"os"
 	"strings"
 
 	"github.com/NethermindEth/sedge/configs"
-	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/utils"
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	log "github.com/sirupsen/logrus"
@@ -82,7 +82,7 @@ func initConfig() {
 		cobra.CheckErr(err)
 		fmt.Printf("Generating config file in the %s directory\n", home)
 
-		err = generate.GenerateConfig(home)
+		err = generation.GenerateConfig(home)
 		cobra.CheckErr(err)
 
 		viper.ReadInConfig()

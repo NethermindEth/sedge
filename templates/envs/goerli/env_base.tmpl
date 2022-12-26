@@ -3,7 +3,7 @@
 # --- Global configuration ---
 NETWORK=goerli
 TTD=10790000
-RELAY_URL=https://0xafa4c6985aa049fb79dd37010438cfebeb0f2bd42b115b89dd678dab0670c1de38da0c4e9138c9290a398ecd9a0b3110@builder-relay-goerli.flashbots.net
+RELAY_URL={{if .RelayURL}}{{.RelayURL}}{{else}}https://0xafa4c6985aa049fb79dd37010438cfebeb0f2bd42b115b89dd678dab0670c1de38da0c4e9138c9290a398ecd9a0b3110@builder-relay-goerli.flashbots.net{{end}}
 {{template "execution" .}}
 {{template "consensus" .}}
 {{template "validator" .}}
