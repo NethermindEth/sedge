@@ -8,7 +8,7 @@ This is your mnemonic:
 
 The mnemonic is the only way to get your deposit back, write it down now and keep it in a safe place.
 
-Press the <q> key or click exit when you have written down your mnemonic.
+Close this when you have written down your mnemonic.
 
 `
 )
