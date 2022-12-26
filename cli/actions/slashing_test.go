@@ -208,6 +208,9 @@ func TestSlashingExport_ValidatorRunning(t *testing.T) {
 	}
 }
 
+// slashingGoldenPath returns a SedgeActions interface with a mocked docker client
+// with all the required responses for a correct slashing container execution.
+// This setup is valid for the export and import process.
 func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
 	dockerClient := mock_client.NewMockAPIClient(ctrl)
 
