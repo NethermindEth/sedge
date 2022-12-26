@@ -43,6 +43,7 @@ type EnvData struct {
 
 // GenerationData : Struct Data object for script's generation
 type GenerationData struct {
+	Services                []string
 	ExecutionClient         clients.Client
 	ConsensusClient         clients.Client
 	ValidatorClient         clients.Client
@@ -69,10 +70,12 @@ type GenerationData struct {
 	CustomGenesisPath       string
 	CustomDeployBlock       string
 	CustomDeployBlockPath   string
+	VLStartGracePeriod      uint
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
+	Services                []string
 	TTD                     bool
 	XeeVersion              bool
 	Mev                     bool
@@ -114,6 +117,18 @@ type DockerComposeData struct {
 	CustomNetworkConfigPath string
 	CustomGenesisPath       string
 	CustomDeployBlockPath   string
+	VLStartGracePeriod      uint
+}
+
+// WithConsensusClient returns true if the consensus client is explicitly required
+// by the user, with the --run-clients flag.
+func (d DockerComposeData) WithConsensusClient() bool {
+	for _, service := range d.Services {
+		if service == "consensus" {
+			return true
+		}
+	}
+	return false
 }
 
 // GenerationResults: Struct for storing results of the generation process

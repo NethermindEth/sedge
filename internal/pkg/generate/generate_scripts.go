@@ -162,6 +162,15 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 		}
 	}
 
+	// Parse validator-blocker template
+	tmp, err := templates.Services.ReadFile(filepath.Join("services", "validator-blocker.tmpl"))
+	if err != nil {
+		return "", err
+	}
+	if _, err := baseTmp.Parse(string(tmp)); err != nil {
+		return "", err
+	}
+
 	// Check for TTD in generated env file
 	TTD, err := env.GetTTD(envFilePath)
 	if err != nil {
@@ -273,6 +282,7 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 	}
 
 	data := DockerComposeData{
+	    Services:            gd.Services,
 		TTD:                 TTD != "",
 		XeeVersion:          xeeVersion,
 		Mev:                 mev && gd.Mev,
@@ -300,6 +310,7 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
 		LoggingDriver:       gd.LoggingDriver,
+		VLStartGracePeriod:  gd.VLStartGracePeriod,
 		// Custom configs data
 		CustomCfgDownload: ccRemoteCfg || ccRemoteGen || ccRemoteDpl ||
 			vlRemoteCfg || vlRemoteGen || vlRemoteDpl, // Need to download something for consensus node

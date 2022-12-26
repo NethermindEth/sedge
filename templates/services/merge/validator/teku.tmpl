@@ -19,11 +19,16 @@
   validator:
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
+    restart: unless-stopped
     depends_on:
       validator-import:
+        condition: service_completed_successfully
+      validator-blocker:
         condition: service_completed_successfully{{if .VlCustomCfgDownload}}
       config_consensus:
-        condition: service_completed_successfully{{end}}
+        condition: service_completed_successfully{{end}}{{if .WithConsensusClient}}
+      consensus:
+        condition: service_healthy{{end}}
     networks:
       - sedge
     ports:

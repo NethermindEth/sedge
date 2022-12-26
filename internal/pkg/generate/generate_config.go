@@ -16,6 +16,7 @@ limitations under the License.
 package generate
 
 import (
+	"path/filepath"
 	"text/template"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -58,7 +59,7 @@ func GenerateConfig(path string) (err error) {
 		clientsMap[clientType] = supportedClients
 	}
 
-	if err = writeTemplateToFile(tmp, path+"/"+configs.ConfigFileName+".yaml", clientsMap, false); err != nil {
+	if err = writeTemplateToFile(tmp, filepath.Join(path, configs.ConfigFileName+".yaml"), clientsMap, false); err != nil {
 		return
 	}
 
