@@ -17,18 +17,16 @@ package cli
 
 import (
 	"fmt"
-	"github.com/NethermindEth/sedge/internal/pkg/generate"
-	log "github.com/sirupsen/logrus"
-	"io"
-	"path/filepath"
-	"strings"
-
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"io"
+	"path/filepath"
 )
 
 // Global vars
@@ -138,10 +136,6 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, service
 		return err
 	}
 
-	if err = checkDependencies(DependenciesOptions{Install: install}); err != nil {
-		return err
-	}
-
 	if flags.jwtPath, err = generateJWTSecret(flags.jwtPath); err != nil {
 		return err
 	}
@@ -222,31 +216,4 @@ func generateJWTSecret(jwtPath string) (string, error) {
 		}
 	}
 	return jwtPath, nil
-}
-
-type DependenciesOptions struct {
-	Install bool
-}
-
-func checkDependencies(options DependenciesOptions) error {
-	dependencies := configs.GetDependencies()
-	log.Infof(configs.CheckingDependencies, strings.Join(dependencies, ", "))
-
-	// Check if dependencies are installed. Keep checking dependencies until they are all installed
-	for pending := utils.CheckDependencies(dependencies); len(pending) > 0; pending = utils.CheckDependencies(dependencies) {
-		log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
-		if options.Install {
-			// Install dependencies directly
-			if err := installDependencies(pending); err != nil {
-				return err
-			}
-		} else {
-			// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
-			if err := installOrShowInstructions(pending); err != nil {
-				return err
-			}
-		}
-	}
-	log.Info(configs.DependenciesOK)
-	return nil
 }

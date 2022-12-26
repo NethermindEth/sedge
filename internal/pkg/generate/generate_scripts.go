@@ -30,9 +30,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"io"
-	"os"
-	"path/filepath"
-	"text/template"
 )
 
 const (
@@ -217,10 +214,10 @@ func genComposeFile(gd *GenData, at io.Writer) error {
 	// Parse validator-blocker template
 	tmp, err := templates.Services.ReadFile(filepath.Join("services", "validator-blocker.tmpl"))
 	if err != nil {
-		return "", err
+		return err
 	}
-	if _, err := baseTmp.Parse(string(tmp)); err != nil {
-		return "", err
+	if _, err = baseTmp.Parse(string(tmp)); err != nil {
+		return err
 	}
 
 	// Check for TTD in env base template
