@@ -215,7 +215,6 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 			}
 			return deleteContainer(dockerClient, ct.ID)
 		case exitErr := <-errChan:
-			fmt.Printf("Exit err: %v\n", exitErr)
 			return exitErr
 		}
 	}
