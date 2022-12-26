@@ -7,6 +7,15 @@ import (
 	"path"
 )
 
+// CopyFile:
+// Copies the file from src to dst, if the directory of the dst doesn't
+// exist then is created before the copy.
+//
+// params :-
+// a. src string
+// Source path
+// b. dst string
+// Destination path
 func CopyFile(src, dst string) error {
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
