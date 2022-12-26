@@ -16,7 +16,6 @@ limitations under the License.
 package env
 
 import (
-	"path/filepath"
 	"strings"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -41,7 +40,7 @@ b. error
 Error if any
 */
 func GetBootnodes(network, client string) ([]string, error) {
-	content, err := templates.Envs.ReadFile(filepath.Join("envs", network, "consensus", client+".tmpl"))
+	content, err := templates.Envs.ReadFile(strings.Join([]string{"envs", network, "consensus", client + ".tmpl"}, "/"))
 	if err != nil {
 		return nil, err
 	}

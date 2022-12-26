@@ -17,6 +17,11 @@ package generate
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"text/template"
+
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/env"
@@ -177,7 +182,7 @@ func genComposeFile(gd *GenData, at io.Writer) error {
 	}
 	gd.Ports = ports
 
-	rawBaseTmp, err := templates.Services.ReadFile(filepath.Join("services", "docker-compose_base.tmpl"))
+	rawBaseTmp, err := templates.Services.ReadFile(strings.Join([]string{"services", "docker-compose_base.tmpl"}, "/"))
 	if err != nil {
 		return TemplateNotFoundError
 	}
@@ -194,11 +199,12 @@ func genComposeFile(gd *GenData, at io.Writer) error {
 		if client.Omited {
 			name = empty
 		}
-		tmp, err := templates.Services.ReadFile(filepath.Join("services",
+		tmp, err := templates.Services.ReadFile(strings.Join([]string{
+			"services",
 			configs.NetworksConfigs[gd.Network].NetworkService,
 			tmpKind,
-			name+".tmpl",
-		))
+			name + ".tmpl",
+		}, "/"))
 		if err != nil {
 			return TemplateNotFoundError
 		}
@@ -206,6 +212,15 @@ func genComposeFile(gd *GenData, at io.Writer) error {
 		if err != nil {
 			return TemplateParseError
 		}
+	}
+
+	// Parse validator-blocker template
+	tmp, err := templates.Services.ReadFile(filepath.Join("services", "validator-blocker.tmpl"))
+	if err != nil {
+		return "", err
+	}
+	if _, err := baseTmp.Parse(string(tmp)); err != nil {
+		return "", err
 	}
 
 	// Check for TTD in env base template
@@ -297,6 +312,7 @@ func genComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	data := DockerComposeData{
+		Services:            gd.Services,
 		TTD:                 TTD,
 		CcCustomCfg:         ccRemoteCfg || ccRemoteGen || ccRemoteDpl,
 		CcRemoteCfg:         ccRemoteCfg,
@@ -332,6 +348,7 @@ func genComposeFile(gd *GenData, at io.Writer) error {
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
 		LoggingDriver:       gd.LoggingDriver,
+		VLStartGracePeriod:  gd.VLStartGracePeriod,
 	}
 
 	// Save to writer
@@ -344,7 +361,7 @@ func genComposeFile(gd *GenData, at io.Writer) error {
 }
 
 func genEnv(gd *GenData, at io.Writer) error {
-	rawBaseTmp, err := templates.Envs.ReadFile(filepath.Join("envs", gd.Network, "env_base.tmpl"))
+	rawBaseTmp, err := templates.Envs.ReadFile(strings.Join([]string{"envs", gd.Network, "env_base.tmpl"}, "/"))
 	if err != nil {
 		return TemplateNotFoundError
 	}
@@ -359,17 +376,17 @@ func genEnv(gd *GenData, at io.Writer) error {
 	for tmpKind, client := range cls {
 		var tmp []byte
 		if client.Omited {
-			tmp, err = templates.Services.ReadFile(filepath.Join(
+			tmp, err = templates.Services.ReadFile(strings.Join([]string{
 				"services",
 				configs.NetworksConfigs[gd.Network].NetworkService,
 				tmpKind,
 				"empty.tmpl",
-			))
+			}, "/"))
 			if err != nil {
 				return TemplateNotFoundError
 			}
 		} else {
-			tmp, err = templates.Envs.ReadFile(filepath.Join("envs", gd.Network, tmpKind, client.Name+".tmpl"))
+			tmp, err = templates.Envs.ReadFile(strings.Join([]string{"envs", gd.Network, tmpKind, client.Name + ".tmpl"}, "/"))
 			if err != nil {
 				return TemplateNotFoundError
 			}

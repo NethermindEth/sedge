@@ -40,30 +40,33 @@ type EnvData struct {
 
 // GenData : Struct Data object for script's generation
 type GenData struct {
-	ExecutionClient   *clients.Client
-	ConsensusClient   *clients.Client
-	ValidatorClient   *clients.Client
-	MevBoostService   bool
-	Network           string
-	CheckpointSyncUrl string
-	FeeRecipient      string
-	JWTSecretPath     string
-	FallbackELUrls    []string
-	ElExtraFlags      []string
-	ClExtraFlags      []string
-	VlExtraFlags      []string
-	MapAllPorts       bool
-	Mev               bool
-	MevImage          string
-	Ports             map[string]string
-	Graffiti          string
-	LoggingDriver     string
-	RelayURL          string
-	MevBoostEndpoint  string
+	Services           []string
+	ExecutionClient    *clients.Client
+	ConsensusClient    *clients.Client
+	ValidatorClient    *clients.Client
+	Network            string
+	CheckpointSyncUrl  string
+	FeeRecipient       string
+	JWTSecretPath      string
+	FallbackELUrls     []string
+	ElExtraFlags       []string
+	ClExtraFlags       []string
+	VlExtraFlags       []string
+	MapAllPorts        bool
+	Mev                bool
+	RelayURL           string
+	MevImage           string
+	MevBoostService    bool
+	MevBoostEndpoint   string
+	Ports              map[string]string
+	Graffiti           string
+	LoggingDriver      string
+	VLStartGracePeriod uint
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
+	Services            []string
 	TTD                 bool
 	CcCustomCfg         bool
 	CcRemoteCfg         bool
@@ -98,7 +101,19 @@ type DockerComposeData struct {
 	SplittedNetwork     bool
 	ClCheckpointSyncUrl bool
 	LoggingDriver       string
+	VLStartGracePeriod  uint
 	MevBoostEndpoint    string
+}
+
+// WithConsensusClient returns true if the consensus client is explicitly required
+// by the user, with the --run-clients flag.
+func (d DockerComposeData) WithConsensusClient() bool {
+	for _, service := range d.Services {
+		if service == "consensus" {
+			return true
+		}
+	}
+	return false
 }
 
 type ComposeData struct {

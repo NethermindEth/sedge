@@ -17,22 +17,28 @@ package main
 
 import (
 	"os"
+	"runtime"
 
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/prompts"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 )
 
 func main() {
+	// Commands Runner
+	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{
+		RunAsAdmin: runtime.GOOS == "linux",
+	})
 	// Prompt used to interact with the user input
 	prompt := prompts.NewPromptCli()
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
-		cli.CliCmd(prompt),
+		cli.CliCmd(cmdRunner, prompt),
 		cli.KeysCmd(prompt),
-		cli.DownCmd(),
+		cli.DownCmd(cmdRunner),
 		cli.ClientsCmd(),
 		cli.NetworksCmd(),
-		cli.LogsCmd(),
+		cli.LogsCmd(cmdRunner),
 		cli.VersionCmd(),
 		cli.GenerateCmd(prompt),
 	)

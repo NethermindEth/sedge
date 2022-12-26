@@ -38,7 +38,7 @@ a. error
 Error if any
 */
 func GenerateConfig(path string) (err error) {
-	rawTmp, err := templates.Config.ReadFile(filepath.Join("config", "config.tmpl"))
+	rawTmp, err := templates.Config.ReadFile("config/config.tmpl")
 	if err != nil {
 		return
 	}

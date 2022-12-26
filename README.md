@@ -15,8 +15,8 @@ The project **is still on beta** and although it should be stable enough, it sti
     - [**Disclaimer**](#disclaimer)
   - [📜 Documentation](#-documentation)
   - [⚡️ Quick start](#️-quick-start)
-  - [💥 How this all started?](#-how-this-all-started)
-  - [🔥 What can you do with sedge today?](#-what-can-you-do-with-sedge-today)
+  - [💥 Why did we start Sedge?](#-why-did-we-start-sedge)
+  - [🔥 What can you do with Sedge today?](#-what-can-you-do-with-sedge-today)
     - [**Disclaimer**](#disclaimer-1)
   - [Supported networks and clients](#supported-networks-and-clients)
     - [Mainnet](#mainnet)
@@ -31,7 +31,8 @@ The project **is still on beta** and although it should be stable enough, it sti
     - [Version 0.2](#version-02)
     - [Version 0.3](#version-03)
     - [Version 0.4](#version-04)
-    - [Version 0.5 (Actual)](#version-05-actual)
+    - [Version 0.5](#version-05)
+    - [Version 0.6 (Actual)](#version-06-actual)
     - [Version 0.X](#version-0x)
     - [Version 1.0](#version-10)
   - [Version X.0](#version-x0)
@@ -216,21 +217,21 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Deprecate Kiln, Ropsten, Denver networks
 - [x] Improve support for chiado network (Gnosis testnet)
 
-### Version 0.5 (Actual)
+### Version 0.5
 
 - [x] Support for Gnosis Merge
 - [x] Bug fixes
 
-### Version 0.6
+### Version 0.6 (Actual)
 
 - [x] Besu and Erigon support
-- [x] Set up and run only one node (execution/consensus/validator)
+- [x] Windows support
+- [x] Bug fixes
 
 ### Version 0.X
 
-- [ ] Grafana and Prometheus support for the clients
+- [ ] Set up and run only one node (execution/consensus/validator)
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
-- [ ] Cross platform support and documentation
 - [ ] More tests!!!
 - [ ] Support for Nimbus client
 

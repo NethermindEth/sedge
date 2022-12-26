@@ -32,7 +32,7 @@ type LogsCmdFlags struct {
 	tail int
 }
 
-func LogsCmd() *cobra.Command {
+func LogsCmd(cmdRunner commands.CommandRunner) *cobra.Command {
 	// Flags
 	var flags LogsCmdFlags
 	// Build command
@@ -44,12 +44,12 @@ func LogsCmd() *cobra.Command {
 	By default will run 'docker compose -f <script> logs --follow <service>'`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
-			if err = utils.PreCheck(flags.path); err != nil {
+			if err = utils.PreCheck(cmdRunner, flags.path); err != nil {
 				log.Fatal(err)
 			}
 
 			var rawServices string
-			if rawServices, err = utils.CheckContainers(flags.path); err != nil {
+			if rawServices, err = utils.CheckContainers(cmdRunner, flags.path); err != nil {
 				log.Fatal(err)
 			}
 
@@ -62,7 +62,7 @@ func LogsCmd() *cobra.Command {
 				services = args
 			}
 
-			logsCMD := commands.Runner.BuildDockerComposeLogsCMD(commands.DockerComposeLogsOptions{
+			logsCMD := cmdRunner.BuildDockerComposeLogsCMD(commands.DockerComposeLogsOptions{
 				Path:     file,
 				Services: services,
 				Follow:   flags.tail == 0,
@@ -70,7 +70,7 @@ func LogsCmd() *cobra.Command {
 			})
 
 			log.Debugf(configs.RunningCommand, logsCMD.Cmd)
-			if _, err := commands.Runner.RunCMD(logsCMD); err != nil {
+			if _, err := cmdRunner.RunCMD(logsCMD); err != nil {
 				log.Fatalf(configs.GettingLogsError, strings.Join(services, " "), err)
 			}
 		},

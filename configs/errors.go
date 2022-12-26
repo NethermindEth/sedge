@@ -45,7 +45,6 @@ const (
 	DockerComposePsReturnedEmptyError = "'docker compose ps --services' returned empty string"
 	PromptFailedError                 = "prompt failed %v"
 	GeneratingKeystoreError           = "failed to generate keystore folder. Error: %v"
-	ResizingPtyError                  = "error resizing pty: %v"
 	InvalidVolumePathError            = "invalid path provided: %s. If you intended to pass a host directory, use absolute path"
 	ZipError                          = "all lists must have the same size"
 	CommandError                      = "command '%s' throws error: %v"
@@ -97,4 +96,5 @@ const (
 	InvalidNumberOfValidatorsError    = "invalid number of validators: %v"
 	NumberOfValidatorsRetryError      = "provided numbers do not match"
 	InvalidLoggingFlag                = "bad logging flag: %v"
+	CannotGenerateSecret              = "cannot generate 32 bytes long secret"
 )

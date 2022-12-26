@@ -65,12 +65,6 @@ func KeysCmd(prompt prompts.Prompt) *cobra.Command {
 			flags.path = absPath
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			// Handle mainnet case
-			if flags.network == "mainnet" {
-				runKeysWithStakingDeposit(cmd, args, &flags, prompt)
-				return
-			}
-
 			// TODO: allow usage of withdrawal address
 			// Get keystore passphrase
 			if !flags.randomPassphrase && flags.passphrasePath != "" {
