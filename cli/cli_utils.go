@@ -16,9 +16,6 @@ limitations under the License.
 package cli
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -284,59 +281,6 @@ func runAndShowContainers(services []string, flags *CliCmdFlags) error {
 		return fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
 	}
 	return nil
-}
-
-type container struct {
-	NetworkSettings networkSettings
-}
-type networkSettings struct {
-	Networks map[string]networks
-}
-type networks struct {
-	IPAddress string
-}
-
-func parseNetwork(js string) (string, error) {
-	var c []container
-	if err := json.NewDecoder(bytes.NewReader([]byte(js))).Decode(&c); err != nil {
-		return "", err
-	}
-	if len(c) == 0 {
-		return "", errors.New(configs.NoOutputDockerInspectError)
-	}
-	if ip := c[0].NetworkSettings.Networks["sedge_network"].IPAddress; ip != "" {
-		return ip, nil
-	}
-	return "", errors.New(configs.IPNotFoundError)
-}
-
-func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
-	// Run docker compose ps --quiet <service> to show service's ID
-	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path:        filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
-		Quiet:       true,
-		ServiceName: service,
-	})
-	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
-	dcpsCMD.GetOutput = true
-	id, err := commands.Runner.RunCMD(dcpsCMD)
-	if err != nil {
-		return ip, fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
-	}
-
-	// Run docker inspect <id> to get IP address
-	inspectCmd := commands.Runner.BuildDockerInspectCMD(commands.DockerInspectOptions{
-		Name: id,
-	})
-	log.Infof(configs.RunningCommand, inspectCmd.Cmd)
-	inspectCmd.GetOutput = true
-	data, err := commands.Runner.RunCMD(inspectCmd)
-	if err != nil {
-		return
-	}
-
-	ip, err = parseNetwork(data)
-	return
 }
 
 func RunValidatorOrExit(flags *CliCmdFlags) error {
