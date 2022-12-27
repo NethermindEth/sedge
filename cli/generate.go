@@ -26,6 +26,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
+	"os"
 	"path/filepath"
 	"time"
 )
@@ -140,6 +141,11 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, service
 		return err
 	}
 
+	err = initGenPath()
+	if err != nil {
+		return err
+	}
+
 	if flags.jwtPath, err = generateJWTSecret(flags.jwtPath); err != nil {
 		return err
 	}
@@ -217,6 +223,17 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, service
 		}
 	}
 
+	return nil
+}
+
+func initGenPath() error {
+	// Create scripts directory if not exists
+	if _, err := os.Stat(generationPath); os.IsNotExist(err) {
+		err = os.MkdirAll(generationPath, 0o755)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
