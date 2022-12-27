@@ -337,7 +337,7 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 		JWTSecretPath:             gd.JWTSecretPath,
 		ExecutionEngineName:       gd.ExecutionClient.Name,
 		ConsensusClientName:       gd.ConsensusClient.Name,
-		KeystoreDir:               configs.KeystoreDefaultDataDir,
+		KeystoreDir:               "./" + configs.KeystoreDir,
 		Graffiti:                  gd.Graffiti,
 	}
 
