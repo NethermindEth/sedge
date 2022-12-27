@@ -324,7 +324,7 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 	// TODO: Use OS wise delimiter for these data structs
 	data := EnvData{
 		ElImage:                   gd.ExecutionClient.Image,
-		ElDataDir:                 configs.ExecutionDefaultDataDir,
+		ElDataDir:                 "./" + configs.ExecutionDir,
 		CcImage:                   gd.ConsensusClient.Image,
 		CcDataDir:                 "./" + configs.ConsensusDir,
 		VlImage:                   gd.ValidatorClient.Image,
