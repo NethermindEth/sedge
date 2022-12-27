@@ -423,7 +423,7 @@ func preRunTeku(flags *CliCmdFlags) error {
 		}
 		if s == "all" || s == validator {
 			// Prepare validator datadir
-			path := filepath.Join(flags.generationPath, configs.ValidatorDefaultDataDir)
+			path := filepath.Join(flags.generationPath, configs.ValidatorDir)
 			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, validator, err)
 			}

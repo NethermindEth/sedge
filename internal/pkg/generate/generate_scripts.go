@@ -328,7 +328,7 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 		CcImage:                   gd.ConsensusClient.Image,
 		CcDataDir:                 configs.ConsensusDefaultDataDir,
 		VlImage:                   gd.ValidatorClient.Image,
-		VlDataDir:                 configs.ValidatorDefaultDataDir,
+		VlDataDir:                 "./" + configs.ValidatorDir,
 		ExecutionApiURL:           gd.ExecutionClient.Endpoint + ":" + gd.Ports["ELApi"],
 		ExecutionAuthURL:          gd.ExecutionClient.Endpoint + ":" + gd.Ports["ELAuth"],
 		ConsensusApiURL:           gd.ConsensusClient.Endpoint + ":" + gd.Ports["CLApi"],
