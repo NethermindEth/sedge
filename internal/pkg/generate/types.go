@@ -62,6 +62,9 @@ type GenData struct {
 	Graffiti           string
 	LoggingDriver      string
 	VLStartGracePeriod uint
+	ExecutionApiUrl    string
+	ExecutionAuthUrl   string
+	ConsensusApiUrl    string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -80,6 +83,7 @@ type DockerComposeData struct {
 	Mev                 bool
 	MevPort             string
 	MevImage            string
+	MevBoostEndpoint    string
 	CheckpointSyncUrl   string
 	FeeRecipient        string
 	ElDiscoveryPort     string
@@ -102,14 +106,13 @@ type DockerComposeData struct {
 	ClCheckpointSyncUrl bool
 	LoggingDriver       string
 	VLStartGracePeriod  uint
-	MevBoostEndpoint    string
 }
 
 // WithConsensusClient returns true if the consensus client is explicitly required
 // by the user, with the --run-clients flag.
 func (d DockerComposeData) WithConsensusClient() bool {
 	for _, service := range d.Services {
-		if service == "consensus" {
+		if service == consensus {
 			return true
 		}
 	}

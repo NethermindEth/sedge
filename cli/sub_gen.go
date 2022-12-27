@@ -18,7 +18,7 @@ func FullNodeSubCmd(prompt prompts.Prompt) *cobra.Command {
 			return preValidationGenerateCmd(&flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runGenCmd(cmd.OutOrStdout(), &flags, prompt, []string{execution, consensus, validator, mevBoost})
+			return runGenCmd(cmd.OutOrStdout(), &flags, prompt, []string{execution, consensus, validator})
 		},
 	}
 	// Bind flags
@@ -106,6 +106,16 @@ func ConsensusSubCmd(prompt prompts.Prompt) *cobra.Command {
 	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
 	flags.fallbackEL = *cmd.Flags().StringSlice("fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge cli -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
 	flags.clExtraFlags = *cmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge cli --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringVar(&flags.executionApiUrl, "execution-api-url", "", "Execution API endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-api-url=https://mainnet.infura.io/v3/YOUR-PROJECT-ID'")
+	cmd.Flags().StringVar(&flags.executionAuthUrl, "execution-auth-url", "", "Execution AUTH endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-auth-url=https://mainnet .infura.io/v3/YOUR-PROJECT-ID'")
+	err := cmd.MarkFlagRequired("execution-api-url")
+	if err != nil {
+		return nil
+	}
+	err = cmd.MarkFlagRequired("execution-auth-url")
+	if err != nil {
+		return nil
+	}
 	cmd.Flags().SortFlags = false
 	return cmd
 }
@@ -137,6 +147,11 @@ func ValidatorSubCmd(prompt prompts.Prompt) *cobra.Command {
 	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 	cmd.Flags().StringVar(&flags.graffiti, "graffiti", "", "Graffiti to be used by the validator")
 	flags.vlExtraFlags = *cmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringVar(&flags.consensusApiUrl, "consensus-url", "", "Consensus endpoint for the validator client to connect to. Example: 'sedge generate validator --consensus-url http://localhost:8545'")
+	err := cmd.MarkFlagRequired("consensus-url")
+	if err != nil {
+		return nil
+	}
 	cmd.Flags().SortFlags = false
 	return cmd
 }

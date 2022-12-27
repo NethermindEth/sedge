@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"text/template"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -179,7 +178,7 @@ func genComposeFile(gd *GenData, at io.Writer) error {
 	}
 	gd.Ports = ports
 
-	rawBaseTmp, err := templates.Services.ReadFile(strings.Join([]string{"services", "docker-compose_base.tmpl"}, "/"))
+	rawBaseTmp, err := templates.Services.ReadFile(filepath.Join("services", "docker-compose_base.tmpl"))
 	if err != nil {
 		return TemplateNotFoundError
 	}
@@ -196,12 +195,10 @@ func genComposeFile(gd *GenData, at io.Writer) error {
 		if client.Omited {
 			name = empty
 		}
-		tmp, err := templates.Services.ReadFile(strings.Join([]string{
-			"services",
+		tmp, err := templates.Services.ReadFile(filepath.Join("services",
 			configs.NetworksConfigs[gd.Network].NetworkService,
 			tmpKind,
-			name + ".tmpl",
-		}, "/"))
+			name+".tmpl"))
 		if err != nil {
 			return TemplateNotFoundError
 		}
@@ -210,9 +207,15 @@ func genComposeFile(gd *GenData, at io.Writer) error {
 			return TemplateParseError
 		}
 	}
+	validatorBlockerTemplate := ""
+	if !cls[validator].Omited {
+		validatorBlockerTemplate = "validator-blocker"
+	} else {
+		validatorBlockerTemplate = "empty-validator-blocker"
+	}
 
 	// Parse validator-blocker template
-	tmp, err := templates.Services.ReadFile(filepath.Join("services", "validator-blocker.tmpl"))
+	tmp, err := templates.Services.ReadFile(filepath.Join("services", validatorBlockerTemplate+".tmpl"))
 	if err != nil {
 		return err
 	}
@@ -358,7 +361,7 @@ func genComposeFile(gd *GenData, at io.Writer) error {
 }
 
 func genEnv(gd *GenData, at io.Writer) error {
-	rawBaseTmp, err := templates.Envs.ReadFile(strings.Join([]string{"envs", gd.Network, "env_base.tmpl"}, "/"))
+	rawBaseTmp, err := templates.Envs.ReadFile(filepath.Join("envs", gd.Network, "env_base.tmpl"))
 	if err != nil {
 		return TemplateNotFoundError
 	}
@@ -373,17 +376,16 @@ func genEnv(gd *GenData, at io.Writer) error {
 	for tmpKind, client := range cls {
 		var tmp []byte
 		if client.Omited {
-			tmp, err = templates.Services.ReadFile(strings.Join([]string{
+			tmp, err = templates.Services.ReadFile(filepath.Join(
 				"services",
 				configs.NetworksConfigs[gd.Network].NetworkService,
 				tmpKind,
-				"empty.tmpl",
-			}, "/"))
+				"empty.tmpl"))
 			if err != nil {
 				return TemplateNotFoundError
 			}
 		} else {
-			tmp, err = templates.Envs.ReadFile(strings.Join([]string{"envs", gd.Network, tmpKind, client.Name + ".tmpl"}, "/"))
+			tmp, err = templates.Envs.ReadFile(filepath.Join("envs", gd.Network, tmpKind, client.Name+".tmpl"))
 			if err != nil {
 				return TemplateNotFoundError
 			}
@@ -391,6 +393,26 @@ func genEnv(gd *GenData, at io.Writer) error {
 		_, err = baseTmp.Parse(string(tmp))
 		if err != nil {
 			return TemplateParseError
+		}
+	}
+	executionApiUrl := gd.ExecutionApiUrl
+	if executionApiUrl == "" {
+		executionApiUrl = cls[execution].Endpoint + ":" + gd.Ports["ELApi"]
+	}
+	executionAuthUrl := gd.ExecutionAuthUrl
+	if executionAuthUrl == "" {
+		executionAuthUrl = cls[execution].Endpoint + ":" + gd.Ports["ELAuth"]
+	}
+	consensusApiUrl := gd.ConsensusApiUrl
+	var consensusAdditionalApiUrl string
+	if consensusApiUrl == "" {
+		consensusAdditionalApiUrl = cls[consensus].Endpoint + ":" + gd.Ports["CLAdditionalApi"]
+		consensusApiUrl = cls[consensus].Endpoint + ":" + gd.Ports["CLApi"]
+	} else {
+		if cls[consensus].Name == "prysm" {
+			consensusAdditionalApiUrl = fmt.Sprintf("%s:%s", "consensus", gd.Ports["CLAdditionalApi"])
+		} else {
+			consensusAdditionalApiUrl = consensusApiUrl
 		}
 	}
 
@@ -402,10 +424,10 @@ func genEnv(gd *GenData, at io.Writer) error {
 		CcDataDir:                 configs.ConsensusDefaultDataDir,
 		VlImage:                   cls[validator].Image,
 		VlDataDir:                 configs.ValidatorDefaultDataDir,
-		ExecutionApiURL:           cls[execution].Endpoint + ":" + gd.Ports["ELApi"],
-		ExecutionAuthURL:          cls[execution].Endpoint + ":" + gd.Ports["ELAuth"],
-		ConsensusApiURL:           cls[consensus].Endpoint + ":" + gd.Ports["CLApi"],
-		ConsensusAdditionalApiURL: cls[consensus].Endpoint + ":" + gd.Ports["CLAdditionalApi"],
+		ExecutionApiURL:           executionApiUrl,
+		ExecutionAuthURL:          executionAuthUrl,
+		ConsensusApiURL:           consensusApiUrl,
+		ConsensusAdditionalApiURL: consensusAdditionalApiUrl,
 		FeeRecipient:              gd.FeeRecipient,
 		JWTSecretPath:             gd.JWTSecretPath,
 		ExecutionEngineName:       cls[execution].Name,
@@ -413,11 +435,6 @@ func genEnv(gd *GenData, at io.Writer) error {
 		KeystoreDir:               configs.KeystoreDefaultDataDir,
 		Graffiti:                  gd.Graffiti,
 		RelayURL:                  gd.RelayURL,
-	}
-
-	// Fix prysm rpc url
-	if cls[consensus].Name == "prysm" {
-		data.ConsensusAdditionalApiURL = fmt.Sprintf("%s:%s", "consensus", gd.Ports["CLAdditionalApi"])
 	}
 
 	// Save to writer

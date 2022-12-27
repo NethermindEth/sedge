@@ -27,6 +27,7 @@ import (
 	"github.com/spf13/cobra"
 	"io"
 	"path/filepath"
+	"time"
 )
 
 // Global vars
@@ -56,6 +57,9 @@ type GenCmdFlags struct {
 	vlExtraFlags      []string
 	relayURL          string
 	mevBoostUrl       string
+	executionApiUrl   string
+	executionAuthUrl  string
+	consensusApiUrl   string
 }
 
 func GenerateCmd(prompt prompts.Prompt) *cobra.Command {
@@ -147,28 +151,41 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, service
 			return err
 		}
 	}
-
+	var vlStartGracePeriod time.Duration
+	switch network {
+	case "mainnet", "goerli", "sepolia":
+		vlStartGracePeriod = 2 * configs.EpochTimeETH
+	case "gnosis", "chiado":
+		vlStartGracePeriod = 2 * configs.EpochTimeGNO
+	default:
+		vlStartGracePeriod = 2 * configs.EpochTimeETH
+	}
 	// Generate docker-compose scripts
 	gd := generate.GenData{
-		ExecutionClient:   &combinedClients.Execution,
-		ConsensusClient:   &combinedClients.Consensus,
-		ValidatorClient:   &combinedClients.Validator,
-		Network:           network,
-		CheckpointSyncUrl: flags.checkpointSyncUrl,
-		FeeRecipient:      feeRecipient,
-		JWTSecretPath:     flags.jwtPath,
-		Graffiti:          flags.graffiti,
-		FallbackELUrls:    flags.fallbackEL,
-		ElExtraFlags:      flags.elExtraFlags,
-		ClExtraFlags:      flags.clExtraFlags,
-		VlExtraFlags:      flags.vlExtraFlags,
-		MapAllPorts:       flags.mapAllPorts,
-		Mev:               !flags.noMev && utils.Contains(services, validator) && !flags.noValidator,
-		MevImage:          flags.mevImage,
-		LoggingDriver:     configs.GetLoggingDriver(logging),
-		RelayURL:          flags.relayURL,
-		MevBoostService:   utils.Contains(services, mevBoost),
-		MevBoostEndpoint:  flags.mevBoostUrl,
+		ExecutionClient:    &combinedClients.Execution,
+		ConsensusClient:    &combinedClients.Consensus,
+		ValidatorClient:    &combinedClients.Validator,
+		Network:            network,
+		CheckpointSyncUrl:  flags.checkpointSyncUrl,
+		FeeRecipient:       feeRecipient,
+		JWTSecretPath:      flags.jwtPath,
+		Graffiti:           flags.graffiti,
+		FallbackELUrls:     flags.fallbackEL,
+		ElExtraFlags:       flags.elExtraFlags,
+		ClExtraFlags:       flags.clExtraFlags,
+		VlExtraFlags:       flags.vlExtraFlags,
+		MapAllPorts:        flags.mapAllPorts,
+		Mev:                !flags.noMev && utils.Contains(services, validator) && !flags.noValidator,
+		MevImage:           flags.mevImage,
+		LoggingDriver:      configs.GetLoggingDriver(logging),
+		RelayURL:           flags.relayURL,
+		MevBoostService:    utils.Contains(services, mevBoost),
+		MevBoostEndpoint:   flags.mevBoostUrl,
+		Services:           services,
+		VLStartGracePeriod: uint(vlStartGracePeriod.Seconds()),
+		ExecutionApiUrl:    flags.executionApiUrl,
+		ExecutionAuthUrl:   flags.executionAuthUrl,
+		ConsensusApiUrl:    flags.consensusApiUrl,
 	}
 	err = generate.GenerateDockerComposeAndEnvFile(&gd, generationPath)
 	if err != nil {
