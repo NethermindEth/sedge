@@ -5,7 +5,6 @@ go 1.18
 require (
 	github.com/alexeyco/simpletable v1.0.0
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
-	github.com/creack/pty v1.1.18
 	github.com/docker/docker v20.10.21+incompatible
 	github.com/golang/mock v1.4.4
 	github.com/google/go-github/v47 v47.1.0
@@ -25,8 +24,8 @@ require (
 	github.com/wealdtech/go-eth2-types/v2 v2.7.0
 	github.com/wealdtech/go-eth2-util v1.7.0
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
-	golang.org/x/term v0.0.0-20220919170432-7a66f970e087
 	gopkg.in/yaml.v2 v2.4.0
+	gotest.tools/v3 v3.4.0
 )
 
 require (
@@ -39,6 +38,7 @@ require (
 	github.com/ferranbt/fastssz v0.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/holiman/uint256 v1.2.0 // indirect
@@ -70,5 +70,4 @@ require (
 	golang.org/x/tools v0.1.12 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gotest.tools/v3 v3.4.0 // indirect
 )

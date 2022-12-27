@@ -31,6 +31,3 @@ var Config embed.FS
 
 //go:embed deposit-cli
 var DepositCLI embed.FS
-
-//go:embed scripts
-var Scripts embed.FS

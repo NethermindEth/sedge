@@ -164,9 +164,6 @@ func prepareCliCmd(tc cliCmdTestCase) {
 	// Set config file path
 	cfgFile = tc.configPath
 	initConfig()
-	commands.InitRunner(func() commands.CommandRunner {
-		return tc.runner
-	})
 }
 
 func buildCliTestCase(
@@ -201,7 +198,7 @@ func buildCliTestCase(
 			}
 			return "", nil
 		},
-		SRunBash: func(bs commands.BashScript) (string, error) {
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
 		},
 	}
@@ -381,7 +378,7 @@ func TestCliCmd(t *testing.T) {
 			sedgeActions := actions.NewSedgeActions(dockerClient, serviceManager)
 
 			rootCmd := RootCmd()
-			rootCmd.AddCommand(CliCmd(prompt, serviceManager, sedgeActions))
+			rootCmd.AddCommand(CliCmd(tc.runner, prompt, serviceManager, sedgeActions))
 			argsL := append([]string{"cli"}, tc.args.argsList()...)
 			rootCmd.SetArgs(argsL)
 

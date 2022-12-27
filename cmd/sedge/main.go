@@ -18,15 +18,21 @@ package main
 import (
 	"log"
 	"os"
+	"runtime"
 
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/cli/prompts"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/docker/docker/client"
 )
 
 func main() {
+	// Commands Runner
+	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{
+		RunAsAdmin: runtime.GOOS == "linux",
+	})
 	// Prompt used to interact with the user input
 	prompt := prompts.NewPromptCli()
 	dockerClient, err := client.NewClientWithOpts(client.FromEnv)
@@ -38,12 +44,12 @@ func main() {
 	sedgeActions := actions.NewSedgeActions(dockerClient, serviceManager)
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
-		cli.CliCmd(prompt, serviceManager, sedgeActions),
-		cli.KeysCmd(prompt),
-		cli.DownCmd(),
+		cli.CliCmd(cmdRunner, prompt, serviceManager, sedgeActions),
+		cli.KeysCmd(cmdRunner, prompt),
+		cli.DownCmd(cmdRunner),
 		cli.ClientsCmd(),
 		cli.NetworksCmd(),
-		cli.LogsCmd(),
+		cli.LogsCmd(cmdRunner),
 		cli.VersionCmd(),
 		cli.SlashingExportCmd(sedgeActions),
 	)
