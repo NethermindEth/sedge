@@ -416,7 +416,7 @@ func preRunTeku(flags *CliCmdFlags) error {
 	for _, s := range *flags.services {
 		if s == "all" || s == consensus {
 			// Prepare consensus datadir
-			path := filepath.Join(flags.generationPath, configs.ConsensusDefaultDataDir)
+			path := filepath.Join(flags.generationPath, configs.ConsensusDir)
 			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, consensus, err)
 			}
