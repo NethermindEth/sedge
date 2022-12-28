@@ -7,24 +7,28 @@ import (
 
 type SetupContainersOptions struct {
 	GenerationPath string
+	Services       []string
 }
 
 func (s *sedgeActions) SetupContainers(options SetupContainersOptions) error {
 	log.Info("Setting up containers")
 	buildCmd := s.commandRunner.BuildDockerComposeBuildCMD(commands.DockerComposeBuildOptions{
-		Path: options.GenerationPath,
+		Path:     options.GenerationPath,
+		Services: options.Services,
 	})
 	if _, err := s.commandRunner.RunCMD(buildCmd); err != nil {
 		return err
 	}
 	pullCmd := s.commandRunner.BuildDockerComposePullCMD(commands.DockerComposePullOptions{
-		Path: options.GenerationPath,
+		Path:     options.GenerationPath,
+		Services: options.Services,
 	})
 	if _, err := s.commandRunner.RunCMD(pullCmd); err != nil {
 		return err
 	}
 	createCmd := s.commandRunner.BuildDockerComposeCreateCMD(commands.DockerComposeCreateOptions{
-		Path: options.GenerationPath,
+		Path:     options.GenerationPath,
+		Services: options.Services,
 	})
 	if _, err := s.commandRunner.RunCMD(createCmd); err != nil {
 		return err
