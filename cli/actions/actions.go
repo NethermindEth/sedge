@@ -10,6 +10,7 @@ type SedgeActions interface {
 	ImportSlashingInterchangeData(SlashingImportOptions) error
 	ExportSlashingInterchangeData(SlashingExportOptions) error
 	SetupContainers(SetupContainersOptions) error
+	RunContainers(RunContainersOptions) error
 }
 
 type sedgeActions struct {
