@@ -30,7 +30,7 @@ type DownCmdFlags struct {
 	path string
 }
 
-func DownCmd() *cobra.Command {
+func DownCmd(cmdRunner commands.CommandRunner) *cobra.Command {
 	// Flags
 	var flags DownCmdFlags
 	// Build command
@@ -39,20 +39,20 @@ func DownCmd() *cobra.Command {
 		Short: "Shutdown sedge running containers",
 		Long:  `Shutdown sedge running containers using docker compose CLI. Shortcut for 'docker compose -f <script> down'`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if err := utils.PreCheck(flags.path); err != nil {
+			if err := utils.PreCheck(cmdRunner, flags.path); err != nil {
 				log.Fatal(err)
 			}
 
-			if _, err := utils.CheckContainers(flags.path); err != nil {
+			if _, err := utils.CheckContainers(cmdRunner, flags.path); err != nil {
 				log.Fatal(err)
 			}
 
-			downCMD := commands.Runner.BuildDockerComposeDownCMD(commands.DockerComposeDownOptions{
+			downCMD := cmdRunner.BuildDockerComposeDownCMD(commands.DockerComposeDownOptions{
 				Path: filepath.Join(flags.path, configs.DefaultDockerComposeScriptName),
 			})
 
 			log.Debugf(configs.RunningCommand, downCMD.Cmd)
-			if _, err := commands.Runner.RunCMD(downCMD); err != nil {
+			if _, err := cmdRunner.RunCMD(downCMD); err != nil {
 				log.Fatalf(configs.CommandError, downCMD.Cmd, err)
 			}
 		},

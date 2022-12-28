@@ -12,7 +12,7 @@ compile: ## compile:
 
 compile-linux: ## compile:
 	@mkdir -p build
-	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/sedge cmd/main.go
+	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/sedge cmd/sedge/main.go
 
 install: compile ## compile the binary and copy it to PATH
 	@sudo cp build/sedge /usr/local/bin
