@@ -51,7 +51,6 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 		return err
 	}
 
-	log.Infof("Importing slashing data to client %s from %s", options.ValidatorClient, options.From)
 	var cmd []string
 	switch options.ValidatorClient {
 	case "prysm":
@@ -87,6 +86,7 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 	default:
 		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
+	log.Infof("Importing slashing data to client %s from %s", options.ValidatorClient, options.From)
 	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd); err != nil {
 		return err
 	}
@@ -126,7 +126,6 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 		return err
 	}
 
-	log.Infof("Exporting slashing data from client %s", options.ValidatorClient)
 	var cmd []string
 	switch options.ValidatorClient {
 	case "prysm":
@@ -162,6 +161,7 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 	default:
 		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
+	log.Infof("Exporting slashing data from client %s", options.ValidatorClient)
 	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd); err != nil {
 		return err
 	}
