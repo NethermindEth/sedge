@@ -171,6 +171,10 @@ type ValidatorImport struct {
 	Command       string   `yaml:"command"`
 	Logging       *Logging `yaml:"logging"`
 }
+type ValidatorBlocker struct {
+	Image   string `yaml:"image"`
+	Command string `yaml:"command"`
+}
 type ValidatorImportDependsOn struct {
 	Condition string `yaml:"condition"`
 }
@@ -195,12 +199,13 @@ type ConfigConsensus struct {
 	Logging       *Logging `yaml:"logging"`
 }
 type Services struct {
-	Execution       *Execution       `yaml:"execution"`
-	Mevboost        *Mevboost        `yaml:"mevboost"`
-	Consensus       *Consensus       `yaml:"consensus"`
-	ValidatorImport *ValidatorImport `yaml:"validator-import"`
-	Validator       *Validator       `yaml:"validator"`
-	ConfigConsensus *ConfigConsensus `yaml:"config_consensus"`
+	Execution        *Execution        `yaml:"execution"`
+	Mevboost         *Mevboost         `yaml:"mevboost"`
+	Consensus        *Consensus        `yaml:"consensus"`
+	ValidatorImport  *ValidatorImport  `yaml:"validator-import"`
+	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker"`
+	Validator        *Validator        `yaml:"validator"`
+	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus"`
 }
 type Sedge struct {
 	Name string `yaml:"name"`
