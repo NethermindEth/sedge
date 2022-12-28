@@ -419,11 +419,11 @@ func genEnv(gd *GenData, at io.Writer) error {
 	// TODO: Use OS wise delimiter for these data structs
 	data := EnvData{
 		ElImage:                   cls[execution].Image,
-		ElDataDir:                 configs.ExecutionDefaultDataDir,
+		ElDataDir:                 "./" + configs.ExecutionDir,
 		CcImage:                   cls[consensus].Image,
-		CcDataDir:                 configs.ConsensusDefaultDataDir,
+		CcDataDir:                 "./" + configs.ConsensusDir,
 		VlImage:                   cls[validator].Image,
-		VlDataDir:                 configs.ValidatorDefaultDataDir,
+		VlDataDir:                 "./" + configs.ValidatorDir,
 		ExecutionApiURL:           executionApiUrl,
 		ExecutionAuthURL:          executionAuthUrl,
 		ConsensusApiURL:           consensusApiUrl,
@@ -432,7 +432,7 @@ func genEnv(gd *GenData, at io.Writer) error {
 		JWTSecretPath:             gd.JWTSecretPath,
 		ExecutionEngineName:       cls[execution].Name,
 		ConsensusClientName:       cls[consensus].Name,
-		KeystoreDir:               configs.KeystoreDefaultDataDir,
+		KeystoreDir:               "./" + configs.KeystoreDir,
 		Graffiti:                  gd.Graffiti,
 		RelayURL:                  gd.RelayURL,
 	}

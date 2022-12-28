@@ -128,11 +128,21 @@ func (cr *WindowsCMDRunner) BuildEchoToFileCMD(options EchoToFileOptions) Comman
 	return Command{Cmd: fmt.Sprintf("echo %s > %s", options.Content, options.FileName)}
 }
 
+func (cr *WindowsCMDRunner) BuildOpenTextEditor(options OpenTextEditorOptions) Command {
+	return Command{Cmd: fmt.Sprintf("notepad %s", options.FilePath), IgnoreTerminal: true}
+}
+
 func (cr *WindowsCMDRunner) RunCMD(cmd Command) (string, error) {
 	var out string
 	r := strings.ReplaceAll(cmd.Cmd, "\n", "")
 
-	exc := exec.Command(cr.terminal, r)
+	var exc *exec.Cmd
+	if !cmd.IgnoreTerminal {
+		exc = exec.Command(cr.terminal, r)
+	} else {
+		s := strings.Split(r, " ")
+		exc = exec.Command(s[0], s[1:]...)
+	}
 
 	var combinedOut bytes.Buffer
 	exc.Stdin = os.Stdin
