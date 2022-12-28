@@ -337,11 +337,11 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 	// TODO: Use OS wise delimiter for these data structs
 	data := EnvData{
 		ElImage:                   gd.ExecutionClient.Image,
-		ElDataDir:                 configs.ExecutionDefaultDataDir,
+		ElDataDir:                 "./" + configs.ExecutionDir,
 		CcImage:                   gd.ConsensusClient.Image,
-		CcDataDir:                 configs.ConsensusDefaultDataDir,
+		CcDataDir:                 "./" + configs.ConsensusDir,
 		VlImage:                   gd.ValidatorClient.Image,
-		VlDataDir:                 configs.ValidatorDefaultDataDir,
+		VlDataDir:                 "./" + configs.ValidatorDir,
 		ExecutionApiURL:           gd.ExecutionClient.Endpoint + ":" + gd.Ports["ELApi"],
 		ExecutionAuthURL:          gd.ExecutionClient.Endpoint + ":" + gd.Ports["ELAuth"],
 		ConsensusApiURL:           gd.ConsensusClient.Endpoint + ":" + gd.Ports["CLApi"],
@@ -350,7 +350,7 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 		JWTSecretPath:             gd.JWTSecretPath,
 		ExecutionEngineName:       gd.ExecutionClient.Name,
 		ConsensusClientName:       gd.ConsensusClient.Name,
-		KeystoreDir:               configs.KeystoreDefaultDataDir,
+		KeystoreDir:               "./" + configs.KeystoreDir,
 		Graffiti:                  gd.Graffiti,
 	}
 

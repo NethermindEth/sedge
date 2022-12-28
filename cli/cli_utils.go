@@ -173,6 +173,9 @@ func runScriptOrExit(cmdRunner commands.CommandRunner, flags *CliCmdFlags) (err 
 		os.Exit(0)
 	}
 
+	if err := buildContainers(cmdRunner, *flags.services, flags.generationPath); err != nil {
+		return err
+	}
 	if err = runAndShowContainers(cmdRunner, *flags.services, flags); err != nil {
 		return err
 	}
@@ -180,8 +183,7 @@ func runScriptOrExit(cmdRunner commands.CommandRunner, flags *CliCmdFlags) (err 
 	return nil
 }
 
-// TODO: use flags.services instead a separated arg
-func runAndShowContainers(cmdRunner commands.CommandRunner, services []string, flags *CliCmdFlags) error {
+func checkRunDependencies(cmdRunner commands.CommandRunner, generationPath string) error {
 	// TODO: (refac) Put this check to checks.go and call it from there
 	// Check if docker engine is on
 	log.Info(configs.CheckingDockerEngine)
@@ -193,10 +195,9 @@ func runAndShowContainers(cmdRunner commands.CommandRunner, services []string, f
 	if _, err := cmdRunner.RunCMD(psCMD); err != nil {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
 	}
-
 	// Check that compose plugin is installed with docker running 'docker compose ps'
 	dockerComposePsCMD := cmdRunner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path: filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
+		Path: filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 	})
 	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
 	dockerComposePsCMD.GetOutput = true
@@ -204,17 +205,63 @@ func runAndShowContainers(cmdRunner commands.CommandRunner, services []string, f
 	if err != nil {
 		return fmt.Errorf(configs.DockerComposeOffError, err)
 	}
+	return nil
+}
 
+func buildImages(cmdRunner commands.CommandRunner, services []string, generationPath string) error {
+	// Build images
+	buildCmd := cmdRunner.BuildDockerComposeBuildCMD(commands.DockerComposeBuildOptions{
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Services: services,
+	})
+	log.Infof(configs.RunningCommand, buildCmd.Cmd)
+	if _, err := cmdRunner.RunCMD(buildCmd); err != nil {
+		return fmt.Errorf(configs.CommandError, buildCmd.Cmd, err)
+	}
+	return nil
+}
+
+func downloadImages(cmdRunner commands.CommandRunner, services []string, generationPath string) error {
 	// Download images
 	pullCmd := cmdRunner.BuildDockerComposePullCMD(commands.DockerComposePullOptions{
-		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 		Services: services,
 	})
 	log.Infof(configs.RunningCommand, pullCmd.Cmd)
 	if _, err := cmdRunner.RunCMD(pullCmd); err != nil {
 		return fmt.Errorf(configs.CommandError, pullCmd.Cmd, err)
 	}
+	return nil
+}
 
+func createContainers(cmdRunner commands.CommandRunner, services []string, generationPath string) error {
+	if _, err := cmdRunner.RunCMD(cmdRunner.BuildDockerComposeCreateCMD(commands.DockerComposeCreateOptions{
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Services: services,
+	})); err != nil {
+		return fmt.Errorf("error creating containers: %w", err)
+	}
+	return nil
+}
+
+func buildContainers(cmdRunner commands.CommandRunner, services []string, generationPath string) error {
+	if err := checkRunDependencies(cmdRunner, generationPath); err != nil {
+		return err
+	}
+	if err := buildImages(cmdRunner, services, generationPath); err != nil {
+		return err
+	}
+	if err := downloadImages(cmdRunner, services, generationPath); err != nil {
+		return err
+	}
+	if err := createContainers(cmdRunner, services, generationPath); err != nil {
+		return err
+	}
+	return nil
+}
+
+// TODO: use flags.services instead a separated arg
+func runAndShowContainers(cmdRunner commands.CommandRunner, services []string, flags *CliCmdFlags) error {
 	// Run docker-compose script
 	upCMD := cmdRunner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
 		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
@@ -294,14 +341,14 @@ func preRunTeku(flags *CliCmdFlags) error {
 	for _, s := range *flags.services {
 		if s == "all" || s == consensus {
 			// Prepare consensus datadir
-			path := filepath.Join(flags.generationPath, configs.ConsensusDefaultDataDir)
+			path := filepath.Join(flags.generationPath, configs.ConsensusDir)
 			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, consensus, err)
 			}
 		}
 		if s == "all" || s == validator {
 			// Prepare validator datadir
-			path := filepath.Join(flags.generationPath, configs.ValidatorDefaultDataDir)
+			path := filepath.Join(flags.generationPath, configs.ValidatorDir)
 			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, validator, err)
 			}

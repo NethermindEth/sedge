@@ -70,6 +70,20 @@ func (cr *SimpleCMDRunner) BuildDockerComposePullCMD(options commands.DockerComp
 	return r.BuildDockerComposePullCMD(options)
 }
 
+func (cr *SimpleCMDRunner) BuildDockerComposeCreateCMD(options commands.DockerComposeCreateOptions) commands.Command {
+	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
+		RunAsAdmin: false,
+	})
+	return r.BuildDockerComposeCreateCMD(options)
+}
+
+func (cr *SimpleCMDRunner) BuildDockerComposeBuildCMD(options commands.DockerComposeBuildOptions) commands.Command {
+	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
+		RunAsAdmin: false,
+	})
+	return r.BuildDockerComposeBuildCMD(options)
+}
+
 func (cr *SimpleCMDRunner) BuildDockerPSCMD(options commands.DockerPSOptions) commands.Command {
 	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
 		RunAsAdmin: false,

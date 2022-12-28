@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - When generating new mnemonic, show it without a trace.
+- Support import/export slashing protection interchange data [EIP-3076](https://eips.ethereum.org/EIPS/eip-3076)
 
 ### Changed
 
