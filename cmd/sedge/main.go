@@ -41,7 +41,7 @@ func main() {
 	}
 	defer dockerClient.Close()
 	serviceManager := services.NewServiceManager(dockerClient)
-	sedgeActions := actions.NewSedgeActions(dockerClient, serviceManager)
+	sedgeActions := actions.NewSedgeActions(dockerClient, serviceManager, cmdRunner)
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
 		cli.CliCmd(cmdRunner, prompt, serviceManager, sedgeActions),
