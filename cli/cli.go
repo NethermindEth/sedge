@@ -39,7 +39,7 @@ import (
 )
 
 const (
-	slashingImportFile              = "slashing-import.json"
+	slashingImportFile                        = "slashing-import.json"
 	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mevboost"
 )
 
@@ -326,13 +326,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		LoggingDriver:      configs.GetLoggingDriver(flags.logging),
 		VLStartGracePeriod: uint(vlStartGracePeriod.Seconds()),
 	}
-	err = generate.GenerateDockerComposeAndEnvFile(gd, flags.generationPath)
-	if err != nil {
-		return []error{err}
-	}
-
-	// Clean generated .env and docker compose files
-	err = generate.CleanGenerated(flags.generationPath)
+	err = sedgeActions.GenerateCompose(actions.GenerateComposeOptions{GenerationData: gd, GenerationPath: flags.generationPath})
 	if err != nil {
 		return []error{err}
 	}

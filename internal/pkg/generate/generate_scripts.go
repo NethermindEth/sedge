@@ -17,7 +17,6 @@ package generate
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"text/template"
 
@@ -27,7 +26,6 @@ import (
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/templates"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 	"io"
 )
 
@@ -98,37 +96,6 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 	return nil
 }
 
-func GenerateDockerComposeAndEnvFile(gd *GenData, genPath string) error {
-	// Create scripts directory if not exists
-	if _, err := os.Stat(genPath); os.IsNotExist(err) {
-		err = os.MkdirAll(genPath, 0o755)
-		if err != nil {
-			return err
-		}
-	}
-
-	log.Info(configs.GeneratingDockerComposeScript)
-	// open output file
-	out, err := os.Create(filepath.Join(genPath, configs.DefaultDockerComposeScriptName))
-	if err != nil {
-		return CanNotCreateComposeFileError
-	}
-	err = genComposeFile(gd, out)
-	if err != nil {
-		return err
-	}
-
-	log.Info(configs.GeneratingEnvFile)
-	// open output file
-	out, err = os.Create(filepath.Join(genPath, configs.DefaultEnvFileName))
-	err = genEnv(gd, out)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // getClients convert genData clients to clients.Clients
 func getClients(gd *GenData) map[string]*clients.Client {
 	cls := map[string]*clients.Client{
@@ -146,7 +113,7 @@ func getClients(gd *GenData) map[string]*clients.Client {
 	return cls
 }
 
-func genComposeFile(gd *GenData, at io.Writer) error {
+func ComposeFile(gd *GenData, at io.Writer) error {
 	// Check empty data
 	if gd == nil {
 		return EmptyDataError
@@ -360,7 +327,7 @@ func genComposeFile(gd *GenData, at io.Writer) error {
 	return nil
 }
 
-func genEnv(gd *GenData, at io.Writer) error {
+func EnvFile(gd *GenData, at io.Writer) error {
 	rawBaseTmp, err := templates.Envs.ReadFile(filepath.Join("envs", gd.Network, "env_base.tmpl"))
 	if err != nil {
 		return TemplateNotFoundError

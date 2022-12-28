@@ -2,11 +2,12 @@ package cli
 
 import (
 	"errors"
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/spf13/cobra"
 )
 
-func FullNodeSubCmd(prompt prompts.Prompt) *cobra.Command {
+func FullNodeSubCmd(prompt prompts.Prompt, sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 
 	cmd := &cobra.Command{
@@ -18,7 +19,7 @@ func FullNodeSubCmd(prompt prompts.Prompt) *cobra.Command {
 			return preValidationGenerateCmd(&flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runGenCmd(cmd.OutOrStdout(), &flags, prompt, []string{execution, consensus, validator})
+			return runGenCmd(cmd.OutOrStdout(), &flags, prompt, sedgeAction, []string{execution, consensus, validator})
 		},
 	}
 	// Bind flags
@@ -41,7 +42,7 @@ func FullNodeSubCmd(prompt prompts.Prompt) *cobra.Command {
 	return cmd
 }
 
-func ExecutionSubCmd(prompt prompts.Prompt) *cobra.Command {
+func ExecutionSubCmd(prompt prompts.Prompt, sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 
 	cmd := &cobra.Command{
@@ -64,7 +65,7 @@ func ExecutionSubCmd(prompt prompts.Prompt) *cobra.Command {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runGenCmd(cmd.OutOrStdout(), &flags, prompt, []string{execution})
+			return runGenCmd(cmd.OutOrStdout(), &flags, prompt, sedgeAction, []string{execution})
 		},
 	}
 
@@ -76,7 +77,7 @@ func ExecutionSubCmd(prompt prompts.Prompt) *cobra.Command {
 	return cmd
 }
 
-func ConsensusSubCmd(prompt prompts.Prompt) *cobra.Command {
+func ConsensusSubCmd(prompt prompts.Prompt, sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 
 	cmd := &cobra.Command{
@@ -95,7 +96,7 @@ func ConsensusSubCmd(prompt prompts.Prompt) *cobra.Command {
 			return preValidationGenerateCmd(&flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runGenCmd(cmd.OutOrStdout(), &flags, prompt, []string{consensus})
+			return runGenCmd(cmd.OutOrStdout(), &flags, prompt, sedgeAction, []string{consensus})
 		},
 	}
 	// Bind flags
@@ -120,7 +121,7 @@ func ConsensusSubCmd(prompt prompts.Prompt) *cobra.Command {
 	return cmd
 }
 
-func ValidatorSubCmd(prompt prompts.Prompt) *cobra.Command {
+func ValidatorSubCmd(prompt prompts.Prompt, sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 
 	cmd := &cobra.Command{
@@ -139,7 +140,7 @@ func ValidatorSubCmd(prompt prompts.Prompt) *cobra.Command {
 			return preValidationGenerateCmd(&flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runGenCmd(cmd.OutOrStdout(), &flags, prompt, []string{validator})
+			return runGenCmd(cmd.OutOrStdout(), &flags, prompt, sedgeAction, []string{validator})
 		},
 	}
 	// Bind flags
@@ -156,7 +157,7 @@ func ValidatorSubCmd(prompt prompts.Prompt) *cobra.Command {
 	return cmd
 }
 
-func MevBoostSubCmd(prompt prompts.Prompt) *cobra.Command {
+func MevBoostSubCmd(prompt prompts.Prompt, sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 
 	cmd := &cobra.Command{
@@ -167,7 +168,7 @@ func MevBoostSubCmd(prompt prompts.Prompt) *cobra.Command {
 			return preValidationGenerateCmd(&flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runGenCmd(cmd.OutOrStdout(), &flags, prompt, []string{mevBoost})
+			return runGenCmd(cmd.OutOrStdout(), &flags, prompt, sedgeAction, []string{mevBoost})
 		},
 	}
 	// Bind flags

@@ -17,6 +17,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
@@ -63,7 +64,7 @@ type GenCmdFlags struct {
 	consensusApiUrl   string
 }
 
-func GenerateCmd(prompt prompts.Prompt) *cobra.Command {
+func GenerateCmd(prompt prompts.Prompt, sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "generate [flags]",
 		Short: "Generate new setups according to selected options",
@@ -77,11 +78,11 @@ func GenerateCmd(prompt prompts.Prompt) *cobra.Command {
 		Args: cobra.NoArgs,
 	}
 
-	cmd.AddCommand(FullNodeSubCmd(prompt))
-	cmd.AddCommand(ExecutionSubCmd(prompt))
-	cmd.AddCommand(ConsensusSubCmd(prompt))
-	cmd.AddCommand(ValidatorSubCmd(prompt))
-	cmd.AddCommand(MevBoostSubCmd(prompt))
+	cmd.AddCommand(FullNodeSubCmd(prompt, sedgeAction))
+	cmd.AddCommand(ExecutionSubCmd(prompt, sedgeAction))
+	cmd.AddCommand(ConsensusSubCmd(prompt, sedgeAction))
+	cmd.AddCommand(ValidatorSubCmd(prompt, sedgeAction))
+	cmd.AddCommand(MevBoostSubCmd(prompt, sedgeAction))
 
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
 	cmd.PersistentFlags().BoolVarP(&install, "install", "i", false, "Install dependencies if not installed without asking")
@@ -116,7 +117,7 @@ func preValidationGenerateCmd(flags *GenCmdFlags) error {
 	return nil
 }
 
-func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, services []string) error {
+func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, sedgeAction actions.SedgeActions, services []string) error {
 
 	// Warn if exposed ports are used
 	if flags.mapAllPorts {
@@ -193,13 +194,10 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, service
 		ExecutionAuthUrl:   flags.executionAuthUrl,
 		ConsensusApiUrl:    flags.consensusApiUrl,
 	}
-	err = generate.GenerateDockerComposeAndEnvFile(&gd, generationPath)
-	if err != nil {
-		return err
-	}
-
-	// Clean generated .env and docker compose files
-	err = generate.CleanGenerated(generationPath)
+	err = sedgeAction.GenerateCompose(actions.GenerateComposeOptions{
+		GenerationData: &gd,
+		GenerationPath: generationPath,
+	})
 	if err != nil {
 		return err
 	}

@@ -19,14 +19,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
-	"path/filepath"
 	"testing"
 )
 
@@ -217,7 +215,7 @@ func TestGenerateComposeServices(t *testing.T) {
 			if tt.GenerationData != nil && tt.GenerationData.Network == "chiado" {
 				t.Logf("GenerationData: %+v", tt.GenerationData)
 			}
-			err := genComposeFile(tt.GenerationData, io.Writer(&buffer))
+			err := ComposeFile(tt.GenerationData, io.Writer(&buffer))
 			if err != nil {
 				assert.ErrorIs(t, err, tt.Error)
 				return
@@ -229,47 +227,4 @@ func TestGenerateComposeServices(t *testing.T) {
 			}
 		})
 	}
-}
-
-// Test that the generated compose file with dump data is generated correctly
-func TestGenerateDockerCompose(t *testing.T) {
-	samplePath := t.TempDir()
-	sampleData := &GenData{
-		ExecutionClient: &clients.Client{Name: "nethermind", Omited: false},
-		Network:         "mainnet",
-	}
-
-	err := GenerateDockerComposeAndEnvFile(sampleData, samplePath)
-	if err != nil {
-		t.Error("GenerateDockerComposeAndEnvFile() failed", err)
-		return
-	}
-
-	// Check that docker-compose file exists
-	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
-	// Check that .env file doesn't exist
-	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultEnvFileName))
-
-	// Validate that Execution Client info matches the sample data
-	// load the docker-compose file
-	composeFile, err := ioutil.ReadFile(filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
-	if err != nil {
-		t.Error("unable to read docker-compose.yml")
-	}
-	var composeData ComposeData
-	err = yaml.Unmarshal(composeFile, &composeData)
-	if err != nil {
-		t.Error("unable to parse docker-compose.yml")
-	}
-
-	// Check that the execution client is nethermind
-	if composeData.Services.Execution.ContainerName != "execution-client" {
-		t.Error("execution client image does not match")
-	}
-
-	// Check other services are nil
-	if composeData.Services.Consensus != nil {
-		t.Error("consensus client should be nil")
-	}
-
 }

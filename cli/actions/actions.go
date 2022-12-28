@@ -8,6 +8,7 @@ import (
 type SedgeActions interface {
 	ImportSlashingInterchangeData(SlashingImportOptions) error
 	ExportSlashingInterchangeData(SlashingExportOptions) error
+	GenerateCompose(GenerateComposeOptions) error
 }
 
 type sedgeActions struct {
