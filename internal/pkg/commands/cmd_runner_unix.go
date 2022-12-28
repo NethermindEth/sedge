@@ -47,6 +47,18 @@ func (cr *UnixCMDRunner) BuildDockerComposePullCMD(options DockerComposePullOpti
 	return Command{Cmd: command}
 }
 
+func (cr *UnixCMDRunner) BuildDockerComposeCreateCMD(options DockerComposeCreateOptions) Command {
+	services := strings.Join(options.Services, " ")
+	command := fmt.Sprintf("docker compose -f %s create %s", options.Path, services)
+	return Command{Cmd: command}
+}
+
+func (cr *UnixCMDRunner) BuildDockerComposeBuildCMD(options DockerComposeBuildOptions) Command {
+	services := strings.Join(options.Services, " ")
+	command := fmt.Sprintf("docker compose -f %s build %s", options.Path, services)
+	return Command{Cmd: command}
+}
+
 func (cr *UnixCMDRunner) BuildDockerPSCMD(options DockerPSOptions) Command {
 	command := "docker ps"
 	if options.All {
@@ -140,8 +152,12 @@ func (cr *UnixCMDRunner) BuildEchoToFileCMD(options EchoToFileOptions) Command {
 	return Command{Cmd: fmt.Sprintf("echo %s > %s", options.Content, options.FileName)}
 }
 
+func (cr *UnixCMDRunner) BuildOpenTextEditor(options OpenTextEditorOptions) Command {
+	return Command{Cmd: fmt.Sprintf("less %s", options.FilePath)}
+}
+
 func (cr *UnixCMDRunner) RunCMD(cmd Command) (string, error) {
-	if cr.RunWithSudo {
+	if cr.RunWithSudo && !cmd.ForceNoSudo {
 		log.Debug(`Running command with sudo.`)
 		cmd.Cmd = fmt.Sprintf("sudo %s", cmd.Cmd)
 	} else {

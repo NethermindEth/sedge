@@ -25,18 +25,22 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
+	dockerct "github.com/docker/docker/api/types/container"
 	"github.com/spf13/cobra"
 )
 
 const (
 	execution, consensus, validator = "execution", "consensus", "validator"
+	slashingImportFile              = "slashing-import.json"
 )
 
 type CliCmdFlags struct {
@@ -69,6 +73,7 @@ type CliCmdFlags struct {
 	customDeployBlock   int
 	customEnodes        *[]string
 	customEnrs          *[]string
+	slashingProtection  string
 }
 
 type clientImages struct {
@@ -77,7 +82,7 @@ type clientImages struct {
 	validator string
 }
 
-func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Command {
+func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceManager services.ServiceManager, sedgeActions actions.SedgeActions) *cobra.Command {
 	var (
 		flags  CliCmdFlags
 		images clientImages
@@ -107,7 +112,7 @@ func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Comm
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			// notest
-			if errs := runCliCmd(cmd, args, &flags, &images, cmdRunner, prompt); len(errs) > 0 {
+			if errs := runCliCmd(cmd, args, &flags, &images, cmdRunner, prompt, serviceManager, sedgeActions); len(errs) > 0 {
 				for _, err := range errs {
 					log.Error(err)
 				}
@@ -146,6 +151,7 @@ func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Comm
 	flags.customEnodes = cmd.Flags().StringSlice("execution-bootnodes", []string{}, "List of comma separeted enodes to use as custom network peers for execution client.")
 	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separeted enrs to use as custom network peers for consensus client.")
 	// TODO: check if this condition is still necessary
+	cmd.Flags().StringVar(&flags.slashingProtection, "slashing-protection", "", "Path to the file with slashing protection interchange data (EIP-3076)")
 	cmd.Flags().SortFlags = false
 	return cmd
 }
@@ -264,7 +270,7 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 	return &clientImages, nil
 }
 
-func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, cmdRunner commands.CommandRunner, prompt prompts.Prompt) []error {
+func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceManager services.ServiceManager, sedgeActions actions.SedgeActions) []error {
 	// Warnings
 	// Warn if custom images are used
 	if clientImages.execution != "" || clientImages.consensus != "" || clientImages.validator != "" {
@@ -282,9 +288,9 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 
 	// Get all clients: supported + configured
 	c := clients.ClientInfo{Network: flags.network}
-	clientsMap, errors := c.Clients([]string{execution, consensus, validator})
-	if len(errors) > 0 {
-		return errors
+	clientsMap, clientsErrors := c.Clients([]string{execution, consensus, validator})
+	if len(clientsErrors) > 0 {
+		return clientsErrors
 	}
 
 	// Handle selection and validation of clients
@@ -415,6 +421,46 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	if flags.run {
+		if utils.Contains(*flags.services, "validator") {
+			*flags.services = append(*flags.services, "validator-import")
+		}
+		if err := buildContainers(cmdRunner, *flags.services, flags.generationPath); err != nil {
+			return []error{err}
+		}
+		if flags.slashingProtection != "" {
+			// Setup wait for validator import
+			exitCh, errCh := serviceManager.Wait(services.ServiceCtValidatorImport, dockerct.WaitConditionNextExit)
+			// Run validator-import
+			if err := runAndShowContainers(cmdRunner, []string{"validator-import"}, flags); err != nil {
+				return []error{err}
+			}
+			exitCode, err := func(exitCh <-chan dockerct.ContainerWaitOKBody, errCh <-chan error) (int64, error) {
+				for {
+					select {
+					case exitOk := <-exitCh:
+						return exitOk.StatusCode, nil
+					case err := <-errCh:
+						return -1, err
+					}
+				}
+			}(exitCh, errCh)
+			if err != nil {
+				return []error{err}
+			}
+			if exitCode != 0 {
+				return []error{fmt.Errorf("%s ends with unexpected status code %d", services.ServiceCtValidatorImport, exitCode)}
+			}
+			if err := sedgeActions.ImportSlashingInterchangeData(actions.SlashingImportOptions{
+				ValidatorClient: flags.validatorName,
+				Network:         flags.network,
+				StopValidator:   false,
+				StartValidator:  false,
+				GenerationPath:  flags.generationPath,
+				From:            flags.slashingProtection,
+			}); err != nil {
+				return []error{err}
+			}
+		}
 		if err = runAndShowContainers(cmdRunner, *flags.services, flags); err != nil {
 			return []error{err}
 		}
@@ -423,26 +469,6 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		if err = runScriptOrExit(cmdRunner, flags); err != nil {
 			return []error{err}
 		}
-	}
-
-	if !flags.noValidator {
-		log.Info(configs.ValidatorTips)
-
-		// Run validator after execution and consensus clients are synced, unless the user intentionally wants to run the validator service in the previous step
-		if !utils.Contains(*flags.services, validator) {
-			// TODO: Prompt for waiting for keystore and validator registration to run the validator
-			if flags.run {
-				if err = runAndShowContainers(cmdRunner, []string{validator}, flags); err != nil {
-					return []error{err}
-				}
-			} else {
-				// Let the user decide to see the instructions for executing the validator and exit or let the tool execute it
-				if err = RunValidatorOrExit(cmdRunner, flags); err != nil {
-					return []error{err}
-				}
-			}
-		}
-		log.Info(configs.HappyStaking)
 	}
 
 	return nil

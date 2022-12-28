@@ -96,6 +96,7 @@ const (
 	NumberOfValidatorsRetryError      = "provided numbers do not match"
 	InvalidLoggingFlag                = "bad logging flag: %v"
 	CannotGenerateSecret              = "cannot generate 32 bytes long secret"
+	ShowMnemonicError                 = "error displaying mnemonic: %v"
 	InvalidFilePathOrUrl              = "invalid filepath or url: %s"
 	CannotGetUrlContent               = "cannot get url %s content: %v"
 	CannotReadFileContent             = "cannot read file %s content: %v"

@@ -16,12 +16,16 @@ limitations under the License.
 package main
 
 import (
+	"log"
 	"os"
 	"runtime"
 
 	"github.com/NethermindEth/sedge/cli"
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/services"
+	"github.com/docker/docker/client"
 )
 
 func main() {
@@ -31,15 +35,23 @@ func main() {
 	})
 	// Prompt used to interact with the user input
 	prompt := prompts.NewPromptCli()
+	dockerClient, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer dockerClient.Close()
+	serviceManager := services.NewServiceManager(dockerClient)
+	sedgeActions := actions.NewSedgeActions(dockerClient, serviceManager)
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
-		cli.CliCmd(cmdRunner, prompt),
-		cli.KeysCmd(prompt),
+		cli.CliCmd(cmdRunner, prompt, serviceManager, sedgeActions),
+		cli.KeysCmd(cmdRunner, prompt),
 		cli.DownCmd(cmdRunner),
 		cli.ClientsCmd(),
 		cli.NetworksCmd(),
 		cli.LogsCmd(cmdRunner),
 		cli.VersionCmd(),
+		cli.SlashingExportCmd(sedgeActions),
 	)
 	if err := sedgeCmd.Execute(); err != nil {
 		os.Exit(1)
