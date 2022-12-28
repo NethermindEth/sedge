@@ -218,7 +218,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, service
 
 	// If teku is chosen, then prepare datadir with 777 permissions
 	if combinedClients.Consensus.Name == "teku" {
-		if err = preRunTeku([]string{}, generationPath); err != nil {
+		if err = preRunTeku(services, generationPath); err != nil {
 			return err
 		}
 	}
