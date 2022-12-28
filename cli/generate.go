@@ -141,7 +141,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, service
 		return err
 	}
 
-	err = initGenPath()
+	err = initGenPath(generationPath)
 	if err != nil {
 		return err
 	}
@@ -226,10 +226,10 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, service
 	return nil
 }
 
-func initGenPath() error {
-	// Create scripts directory if not exists
-	if _, err := os.Stat(generationPath); os.IsNotExist(err) {
-		err = os.MkdirAll(generationPath, 0o755)
+func initGenPath(path string) error {
+	// Create directory if not exists
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		err = os.MkdirAll(path, 0o755)
 		if err != nil {
 			return err
 		}
