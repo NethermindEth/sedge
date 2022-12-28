@@ -35,4 +35,149 @@ Global Flags:
 
 ## Execution Example
 
-If you want to see more examples about `sedge keys`, you can see [here in our documentation](/docs/quickstart/complete-guide#5-generate-validator-keystore).
+
+Sedge uses the [staking-deposit-cli](https://github.com/ethereum/staking-deposit-cli) tool docker image for mainnet to generate the [validator keystore](/docs/concepts/keystore), and uses our own experimental code for the rest of the supported networks.
+
+:::caution Disclaimer
+
+Users acknowledge that staking-deposit-cli is an external tool, which means that Nethermind exercises no control over its functioning and does not accept any liability for any issues that may arise from using the tool.
+
+:::
+
+:::caution Disclaimer
+
+Users acknowledge that generating the keystore for any network other than the mainnet is an experimental and unaudited feature of Sedge. Nethermind provides this feature on an ‘as is’ basis and makes no warranties regarding its proper functioning. The use of this feature is at the user’s own risk - Nethermind excludes all liability for any malfunction or loss of money that may occur as the result of an unexpected behavior during the keystore generation.
+
+:::
+
+To get started, first open another Terminal on the same working directory we used before (where the binary is located). Then run the following command to quickly generate the keystore:
+
+```
+./sedge keys
+```
+
+The `keys` command will first check if Docker is installed (because use docker to run the staking-deposit-cli docker image). As we already installed Docker in the previous steps, Sedge will continue the process.
+
+The next step involves a prompt for an Eth1 address to be used to create the [withdrawal credentials](/docs/concepts/keystore). If you don't provide one, then the tool will generate withdrawal credentials with the mnemonic-derived withdrawal public key.
+
+```logs
+Initializing configuration
+Using config file: /Users/teno/.sedge.yaml
+2022-XX-XX 00:00:00 -- [INFO] [Logger Init] Logging configuration: {Level:info}
+2022-XX-XX 00:00:00 -- [INFO] All dependencies are installed on host machine
+# highlight-next-line
+✔ Please enter a Eth1 address to be used to create the withdrawal credentials. You can leave it blank and press enter:
+```
+
+The keystore must be secured with a password with a minimum length of 8. Sedge will ask you to provide this password so it can be used by the staking-deposit-cli to secure the generated keystore and then create a `keystore_password.txt` for the validator node. The password input will be hidden so you don't need to worry about your password getting registered in the Terminal logs or history.
+
+```
+✔ Please enter the password you will use for the validator keystore: ********█
+Please enter the password you will use for the validator keystore: ********
+✔ Please re-enter the password. Press Ctrl+C to retry: ********
+```
+
+:::info
+
+A **password prompt** may show up again because Sedge uses docker commands to run the staking-deposit-cli docker image, and these commands need to be executed with `sudo` by default. The required password is your **machine password**, not the keystore password.
+
+:::
+
+From here, the rest of the flow belongs to the staking-deposit-cli tool:
+
+```
+2022-XX-XX 00:00:00 -- [INFO] Generating keystore folder
+2022-XX-XX 00:00:00 -- [INFO] Running command:
+docker run -it --rm -v /home/sedge/docker-compose-scripts/keystore/validator_keys:/app/validator_keys nethermindeth/staking-deposit-cli new-mnemonic --chain mainnet --keystore_password ********
+Please choose your language ['1. العربية', '2. ελληνικά', '3. English', '4. Français', '5. Bahasa melayu', '6. Italiano', '7. 日本語', '8. 한국어', '9. Português do Brasil', '10. român', '11. 简体中文']:  [English]:
+Repeat your keystore password for confirmation:
+```
+
+:::caution
+
+Be sure to type correctly the keystore password previously provided to Sedge. If you don't insert the same password, then staking-deposit-cli will ask you to create a new password. If this happens, you have two options:
+
+1. Exit the program and try again.
+2. Finish the execution flow, generating the keystore successfully in the process. Then you need to update the `keystore_password.txt` file inside the `keystore` folder with the password you provided to the staking-deposit-cli tool.
+
+:::
+
+The staking-deposit-cli tool lets you create a keystore using an existing mnemonic or by creating a new one. By default, Sedge's `keys` command goes with creating a new mnemonic.
+
+```
+Please choose your mnemonic language ['1. 简体中文', '2. 繁體中文', '3. čeština', '4. English', '5. Italiano', '6. 한국어', '7. Português', '8. Español']:  [english]:
+Please choose how many new validators you wish to run:
+```
+
+:::tip
+
+One validator node can handle hundreds of validators (validator keys). We recommend to run at most 500 validators within a single validator node. We will go with 1 validator this time.
+
+:::
+
+After you choose how many new validators you wish to run, a newly generated mnemonic will be displayed. You must copy it using safe methods such as pen and paper. Then you will be asked to insert the mnemonic for validation. This is the final step, after which the keystore will be generated:
+
+```
+                  #####     #####
+                ##     #####     ##
+    ###         ##   #######     #########################
+    ##  ##      #####               ##                   ##
+    ##     #####                 ##                       ##
+    ##     ##                     ##                      ###
+   ########                        ##                     ####
+   ##        ##   ###         #####                       #####
+   #                          ##                         # #####
+   #                            #                        #  #####
+   ##                             ##                    ##
+   ##                              ##                   ##
+   ##             ###              ##                   ##
+   ###############                 ##                   ##
+   ###               ##                                 ##
+      #############################                    ##
+                     ##                             ###
+                     #######     #################     ###
+                     ##   ## ##        ##   ##    ###
+                     ##############          #############
+
+Creating your keys.
+Creating your keys:		      [####################################]  1/1
+Creating your keystores:	  [####################################]  1/1
+Creating your depositdata:	[####################################]  1/1
+Verifying your keystores:	  [####################################]  1/1
+Verifying your deposits:	  [####################################]  1/1
+
+Success!
+Your keys can be found at: /app/validator_keys
+
+
+Press any key.
+```
+
+The above logs mark the end of the staking-deposit-cli execution and Sedge retakes control of the flow:
+
+```logs
+2022-XX-XX 00:00:00 -- [INFO] deposit-cli tool exited
+# highlight-next-line
+2022-XX-XX 00:00:00 -- [INFO] If everything went well, your keys can be found at: /home/sedge/docker-compose-scripts/keystore/validator_keys
+2022-XX-XX 00:00:00 -- [INFO] keystore_password.txt on keystore folder created with provided password
+2022-XX-XX 00:00:00 -- [WARN] In case you used custom paths for the 'cli' or the 'keys' commands, please review if the keystore path in the generated .env file points to the generated keystore folder (the .env key should be KEYSTORE_DIR). If not, change the path in the .env file to the correct one.
+```
+
+As we stick to default configuration values all the time, we can ignore the final log.
+
+Your keystore folder should look similar to this:
+
+```
+docker-compose-scripts
+    └── keystore
+        ├── keystore_password.txt
+        └── validator_keys
+            ├── deposit_data-1659326409.json
+            └── keystore-m_12381_3600_0_0_0-1659326408.json
+```
+
+:::note
+
+A guide for using our own experimental code for keystore generation is coming soon!
+
+:::
