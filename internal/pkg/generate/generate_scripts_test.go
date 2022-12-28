@@ -42,6 +42,32 @@ type genTestData struct {
 	CheckFunc      func(t *testing.T, data *GenData, services []string, compose, env io.Reader) error
 }
 
+var checkMevServices = func(t *testing.T, data *GenData, services []string, compose, env io.Reader) error {
+	// load compose file
+	composeBytes, err := ioutil.ReadAll(compose)
+	if err != nil {
+		return err
+	}
+	var composeData ComposeData
+	err = yaml.Unmarshal(composeBytes, &composeData)
+	if err != nil {
+		return err
+	}
+
+	if utils.Contains(services, mevBoost) {
+
+		if composeData.Services.Mevboost != nil {
+			assert.Equal(t, composeData.Services.Mevboost.Image, "flashbots/mev-boost:latest")
+			assert.Equal(t, composeData.Services.Mevboost.ContainerName, "mev-boost")
+			assert.Equal(t, composeData.Services.Mevboost.Restart, "on-failure")
+		} else {
+			return errors.New("mevboost service is not present")
+		}
+	}
+
+	return nil
+}
+
 var defaultFunc = func(t *testing.T, data *GenData, services []string, compose, env io.Reader) error {
 
 	// load compose file
@@ -164,6 +190,21 @@ func TestGenerateComposeServices(t *testing.T) {
 			Services:  []string{execution, consensus, validator, validatorImport, mevBoost},
 			Error:     nil,
 			CheckFunc: defaultFunc,
+		},
+		{
+			Description: "Test generation import",
+			GenerationData: &GenData{
+				Services:        []string{mevBoost},
+				ExecutionClient: &clients.Client{Name: "nethermind", Omited: true},
+				ConsensusClient: &clients.Client{Name: "teku", Omited: true},
+				ValidatorClient: &clients.Client{Name: "teku", Omited: true},
+				Network:         "mainnet",
+				Mev:             true,
+				MevBoostService: true,
+			},
+			Services:  []string{mevBoost},
+			Error:     nil,
+			CheckFunc: checkMevServices,
 		},
 	}
 
