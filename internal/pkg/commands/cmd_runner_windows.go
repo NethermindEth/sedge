@@ -3,7 +3,7 @@ package commands
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -32,6 +32,18 @@ func (cr *WindowsCMDRunner) BuildDockerComposeUpCMD(options DockerComposeUpOptio
 func (cr *WindowsCMDRunner) BuildDockerComposePullCMD(options DockerComposePullOptions) Command {
 	services := strings.Join(options.Services, " ")
 	command := fmt.Sprintf("docker compose -f %s pull %s", options.Path, services)
+	return Command{Cmd: command}
+}
+
+func (cr *WindowsCMDRunner) BuildDockerComposeCreateCMD(options DockerComposeCreateOptions) Command {
+	services := strings.Join(options.Services, " ")
+	command := fmt.Sprintf("docker compose -f %s create %s", options.Path, services)
+	return Command{Cmd: command}
+}
+
+func (cr *WindowsCMDRunner) BuildDockerComposeBuildCMD(options DockerComposeBuildOptions) Command {
+	services := strings.Join(options.Services, " ")
+	command := fmt.Sprintf("docker compose -f %s build %s", options.Path, services)
 	return Command{Cmd: command}
 }
 
@@ -176,7 +188,7 @@ func (cr *WindowsCMDRunner) RunScript(script ScriptFile) (string, error) {
 	}
 
 	tempFileDir := os.TempDir()
-	rawScript, err := ioutil.ReadAll(&scriptBuffer)
+	rawScript, err := io.ReadAll(&scriptBuffer)
 	if err != nil {
 		return out, err
 	}
