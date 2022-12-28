@@ -1,0 +1,90 @@
+---
+sidebar_position: 1
+id: clients
+---
+
+# Clients
+
+Running `sedge clients` will give you a list of supported clients for consensus, execution and validators.
+
+## Help
+
+```
+$ sedge clients -h
+Initializing configuration
+List supported clients for execution and consensus engines
+
+Usage:
+  sedge clients [flags]
+
+Flags:
+  -h, --help   help for clients
+
+Global Flags:
+      --config string   config file (default is $HOME/.sedge.yaml)
+```
+
+## Execution Example
+
+The execution of `sedge clients` will result in an output like this, that will show an accurate list of supported clients:
+
+```
+$ sedge clients
+Initializing configuration
+Using config file: /Users/maceo/.sedge.yaml
+2022-12-08 08:57:47 -- [INFO] [Logger Init] Logging configuration: {Level:info}
+2022-12-08 08:57:48 -- [INFO] You are running the latest version of sedge. Version:  v0.5.1
+2022-12-08 08:57:48 -- [INFO] Listing supported clients for network chiado
+
+ #   Execution Clients   Consensus Clients   Validator Clients
+=== =================== =================== ===================
+ 1   nethermind          lighthouse          lighthouse
+ 2   -                   lodestar            lodestar
+ 3   -                   teku                teku
+
+2022-12-08 08:57:48 -- [INFO] Listing supported clients for network gnosis
+
+ #   Execution Clients   Consensus Clients   Validator Clients
+=== =================== =================== ===================
+ 1   nethermind          lighthouse          lighthouse
+ 2   -                   lodestar            lodestar
+ 3   -                   prysm               teku
+ 4   -                   teku                -
+
+2022-12-08 08:57:48 -- [INFO] Listing supported clients for network goerli
+
+ #   Execution Clients   Consensus Clients   Validator Clients
+=== =================== =================== ===================
+ 1   besu                lighthouse          lighthouse
+ 2   erigon              lodestar            lodestar
+ 3   geth                prysm               prysm
+ 4   nethermind          teku                teku
+
+2022-12-08 08:57:48 -- [INFO] Listing supported clients for network mainnet
+
+ #   Execution Clients   Consensus Clients   Validator Clients
+=== =================== =================== ===================
+ 1   besu                lighthouse          lighthouse
+ 2   erigon              lodestar            lodestar
+ 3   geth                prysm               prysm
+ 4   nethermind          teku                teku
+
+2022-12-08 08:57:48 -- [INFO] Listing supported clients for network sepolia
+
+ #   Execution Clients   Consensus Clients   Validator Clients
+=== =================== =================== ===================
+ 1   besu                lighthouse          lighthouse
+ 2   erigon              lodestar            lodestar
+ 3   geth                prysm               prysm
+ 4   nethermind          teku                teku
+
+2022-12-08 08:57:48 -- [INFO] Listing clients provided in configuration file
+
+ #   Execution Clients   Consensus Clients   Validator Clients
+=== =================== =================== ===================
+ 1   besu                lighthouse          lighthouse
+ 2   erigon              lodestar            lodestar
+ 3   geth                prysm               prysm
+ 4   nethermind          teku                teku
+
+```
