@@ -3,10 +3,10 @@ package utils
 import (
 	"fmt"
 	"io"
-	"net/http"
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/NethermindEth/sedge/configs"
 )
@@ -16,11 +16,17 @@ func HandleUrlOrPath(
 	handleUrl func(url string) error,
 	handlePath func(path string) error,
 ) error {
-	if _, err := url.ParseRequestURI(src); err == nil {
+	uri, err := url.ParseRequestURI(src)
+	if err != nil {
+		return fmt.Errorf(configs.InvalidFilePathOrUrl, src)
+	}
+
+	if uri.Scheme == "http" || uri.Scheme == "https" {
 		return handleUrl(src)
 	} else if _, err := os.Stat(src); err == nil {
 		return handlePath(src)
 	}
+
 	return fmt.Errorf(configs.InvalidFilePathOrUrl, src)
 }
 
@@ -39,8 +45,8 @@ func GetUrlOrPathContent(src string) (string, error) {
 	err := HandleUrlOrPath(
 		src,
 		func(url string) error {
-			resp, err := http.Get(url)
-			if err != nil {
+			resp, err := GetRequest(url, time.Minute)
+			if err != nil || resp.StatusCode != 200 {
 				return fmt.Errorf(configs.CannotGetUrlContent, src, err)
 			}
 			defer resp.Body.Close()
@@ -71,15 +77,8 @@ func DownloadOrCopy(src, dest string, autoremove bool) error {
 	_, err := os.Stat(dest)
 	if err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf(configs.ErrorCheckingFile, dest, err)
-	} else if err == nil {
-		if autoremove {
-			err := os.Remove(dest)
-			if err != nil {
-				return err
-			}
-		} else {
-			return fmt.Errorf(configs.DestFileAlreadyExist, src)
-		}
+	} else if err == nil && !autoremove {
+		return fmt.Errorf(configs.DestFileAlreadyExist, src)
 	}
 
 	destFile, err := os.Create(dest)
@@ -91,8 +90,8 @@ func DownloadOrCopy(src, dest string, autoremove bool) error {
 	return HandleUrlOrPath(
 		src,
 		func(url string) error {
-			resp, err := http.Get(url)
-			if err != nil {
+			resp, err := GetRequest(url, time.Minute)
+			if err != nil || resp.StatusCode != 200 {
 				return fmt.Errorf(configs.ErrorDownloadingFile, url, err)
 			}
 			defer resp.Body.Close()

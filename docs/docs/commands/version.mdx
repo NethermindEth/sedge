@@ -1,0 +1,37 @@
+---
+sidebar_position: 7
+id: version
+---
+
+# Version
+
+Running `sedge version` will give you the version you are running while using sedge.
+
+## Help
+
+```
+$ sedge version -h
+Initializing configuration
+Print sedge version
+
+Usage:
+  sedge version [flags]
+
+Flags:
+  -h, --help   help for version
+
+Global Flags:
+      --config string   config file (default is $HOME/.sedge.yaml)
+
+```
+
+## Execution Example
+
+```
+$ sedge version
+Initializing configuration
+Using config file: /Users/maceo/.sedge.yaml
+2022-12-13 10:15:30 -- [INFO] [Logger Init] Logging configuration: {Level:info}
+2022-12-13 10:15:31 -- [INFO] You are running the latest version of sedge. Version:  v0.5.1
+sedge v0.5.1
+```

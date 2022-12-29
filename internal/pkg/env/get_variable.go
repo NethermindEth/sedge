@@ -25,7 +25,7 @@ import (
 
 /*
 GetECBootnodes :
-Get the execution bootnodes (list of enodes addresses) from the environment variables.
+Get the execution bootnodes (list of enodes addresses) from the environment variables in .env.
 
 params :-
 a. path to generated env file
@@ -57,7 +57,7 @@ func GetECBootnodes(envFilePath string) ([]string, error) {
 
 /*
 GetCCBootnodes :
-Get the consensus bootnodes (list of enr addresses) from the environment variables.
+Get the consensus bootnodes (list of enr addresses) from the environment variables in .env.
 
 params :-
 a. path to generated env file
@@ -76,11 +76,11 @@ func GetCCBootnodes(envFilePath string) ([]string, error) {
 
 	if m := ReClBOOTNODES.FindStringSubmatch(string(content)); m != nil {
 		m[1] = strings.ReplaceAll(m[1], "\"", "")
-		enodes := strings.Split(m[1], ",")
-		for i, enode := range enodes {
-			enodes[i] = strings.Trim(enode, "\r\n ")
+		enrs := strings.Split(m[1], ",")
+		for i, enr := range enrs {
+			enrs[i] = strings.Trim(enr, "\r\n ")
 		}
-		return enodes, nil
+		return enrs, nil
 	}
 
 	log.Warnf(configs.NoBootnodesFound, envFilePath)
@@ -89,7 +89,7 @@ func GetCCBootnodes(envFilePath string) ([]string, error) {
 
 /*
 GetTTD :
-Get TTD from the environment variables.
+Get TTD from the environment variables in .env.
 
 params :-
 a. path to generated env file

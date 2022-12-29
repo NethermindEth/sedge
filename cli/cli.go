@@ -143,7 +143,7 @@ func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceMana
 	flags.clExtraFlags = cmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge cli --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	flags.vlExtraFlags = cmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringVar(&flags.logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
-	cmd.Flags().StringVar(&flags.customTTD, "custom-ttd", "", "Custom Terminal Total Difficulty to use for execution and consensus clients")
+	cmd.Flags().StringVar(&flags.customTTD, "custom-ttd", "", "Custom Terminal Total Difficulty to use for the execution client")
 	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
 	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
@@ -366,25 +366,25 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 
 	// Generate docker-compose scripts
 	gd := generate.GenerationData{
-		Services:           *flags.services,
-		ExecutionClient:    combinedClients.Execution,
-		ConsensusClient:    combinedClients.Consensus,
-		ValidatorClient:    combinedClients.Validator,
-		GenerationPath:     flags.generationPath,
-		Network:            flags.network,
-		CheckpointSyncUrl:  flags.checkpointSyncUrl,
-		FeeRecipient:       flags.feeRecipient,
-		JWTSecretPath:      flags.jwtPath,
-		Graffiti:           flags.graffiti,
-		FallbackELUrls:     *flags.fallbackEL,
-		ElExtraFlags:       *flags.elExtraFlags,
-		ClExtraFlags:       *flags.clExtraFlags,
-		VlExtraFlags:       *flags.vlExtraFlags,
-		MapAllPorts:        flags.mapAllPorts,
-		Mev:                !flags.noMev && !flags.noValidator,
-		MevImage:           flags.mevImage,
-		LoggingDriver:      configs.GetLoggingDriver(flags.logging),
-		VLStartGracePeriod: uint(vlStartGracePeriod.Seconds()),
+		Services:                *flags.services,
+		ExecutionClient:         combinedClients.Execution,
+		ConsensusClient:         combinedClients.Consensus,
+		ValidatorClient:         combinedClients.Validator,
+		GenerationPath:          flags.generationPath,
+		Network:                 flags.network,
+		CheckpointSyncUrl:       flags.checkpointSyncUrl,
+		FeeRecipient:            flags.feeRecipient,
+		JWTSecretPath:           flags.jwtPath,
+		Graffiti:                flags.graffiti,
+		FallbackELUrls:          *flags.fallbackEL,
+		ElExtraFlags:            *flags.elExtraFlags,
+		ClExtraFlags:            *flags.clExtraFlags,
+		VlExtraFlags:            *flags.vlExtraFlags,
+		MapAllPorts:             flags.mapAllPorts,
+		Mev:                     !flags.noMev && !flags.noValidator,
+		MevImage:                flags.mevImage,
+		LoggingDriver:           configs.GetLoggingDriver(flags.logging),
+		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
 		ECBootnodes:             *flags.customEnodes,
 		CCBootnodes:             *flags.customEnrs,
 		CustomTTD:               flags.customTTD,
