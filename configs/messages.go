@@ -95,5 +95,11 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 		"https://github.com/NethermindEth/sedge/releases, with error:"
 	NeedVersionUpdate = "A new Version of sedge is available. Please update to the latest Version. See " +
 		"https://github.com/NethermindEth/sedge/releases for more information. Latest detected tag:"
-	VersionUpdated = "You are running the latest version of sedge. Version: "
+	VersionUpdated             = "You are running the latest version of sedge. Version: "
+	Downloading                = "Downloading %s..."
+	Copying                    = "Copying %s..."
+	GettingCustomChainSpec     = "Getting custom chain spec..."
+	GettingCustomGenesis       = "Getting custom genesis..."
+	GettingCustomNetworkConfig = "Getting custom network config..."
+	WritingCustomDeployBlock   = "Writing custom deploy block..."
 )
