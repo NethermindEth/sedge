@@ -1,0 +1,181 @@
+---
+sidebar_position: 4
+id: run 
+---
+
+# Run
+
+Running `sedge run` will run all the services in the docker-compose.yml file under
+the generation folder. To run the services this sequence of actions are made:
+
+- Build the necessary images (`docker compose build`)
+- Pull the necessary images (`docker compose pull`)
+- Create containers (`docker compose create`)
+- Start containers (`docker compose up`)
+
+## Help
+
+```shell
+$ sedge run --help
+Run all the generated services
+
+Usage:
+  sedge run [flags]
+
+Flags:
+  -h, --help                   help for run
+  -p, --path string            docker-compose scripts generation path (default "./docker-compose-scripts")
+      --services stringArray   List of services to run. If this flag is not provided, all services will run.
+
+Global Flags:
+      --config string   config file (default is $HOME/.sedge.yaml)
+```
+
+## Execution Example
+
+:::info Docker dependency
+The `run` command will first check if Docker is installed, if it is not installed
+then Sedge tries to install it.
+:::
+
+Once the generated data is ready, services inside the docker-compose.yml file could
+be run using the `sedge run` command.
+
+:::caution Generate files first
+The `run` command assumes that the generated files are ready to run.
+:::
+
+First, open a Terminal with access to the sedge binary to get started. Then run
+the following command to start all services in the default generation path
+`./docker-compose-scripts`.
+
+```shell
+$ sedge run
+Using config file: /root/.sedge.yaml
+2022-12-29 19:55:55 -- [INFO] [Logger Init] Logging configuration: {Level:debug}
+2022-12-29 19:55:55 -- [INFO] You are running the latest version of sedge. Version:  v0.6.0
+2022-12-29 20:40:24 -- [INFO] Checking dependencies: docker
+2022-12-29 20:40:24 -- [INFO] All dependencies are installed on host machine
+2022-12-29 19:55:55 -- [INFO] Setting up containers
+# highlight-next-line
+2022-12-29 19:55:55 -- [DEBU] Running command: docker compose -f docker-compose-scripts/docker-compose.yml build
+2022-12-29 19:55:55 -- [DEBU] Running command with sudo.
+# highlight-next-line
+2022-12-29 19:55:55 -- [DEBU] Running command: docker compose -f docker-compose-scripts/docker-compose.yml pull
+2022-12-29 19:55:55 -- [DEBU] Running command with sudo.
+[+] Running 5/5
+ ⠿ validator-import Pulled  0.3s
+ ⠿ validator Pulled         0.2s
+ ⠿ execution Pulled         0.3s
+ ⠿ consensus Pulled         0.2s
+ ⠿ validator-blocker Pulled 0.2s
+# highlight-next-line
+2022-12-29 19:55:56 -- [DEBU] Running command: docker compose -f docker-compose-scripts/docker-compose.yml create
+2022-12-29 19:55:56 -- [DEBU] Running command with sudo.
+[+] Running 7/7
+ ⠿ Network sedge_network                                 Created  0.1s
+ ⠿ Network docker-compose-scripts_default                Created  0.1s
+ ⠿ Container execution-client                            Created  0.1s
+ ⠿ Container docker-compose-scripts-validator-blocker-1  Created  0.0s
+ ⠿ Container consensus-client                            Created  0.0s
+ ⠿ Container validator-import-client                     Created  0.0s
+ ⠿ Container validator-client                            Created  0.0s
+# highlight-next-line
+2022-12-29 19:55:56 -- [DEBU] Running command: docker compose -f docker-compose-scripts/docker-compose.yml up -d
+2022-12-29 19:55:56 -- [DEBU] Running command with sudo.
+[+] Running 2/4
+ ⠿ Container validator-import-client                     Exited   1.2s
+ ⠿ Container consensus-client                            Waiting  14.4s
+ ⠿ Container execution-client                            Started  0.9s
+ ⠿ Container docker-compose-scripts-validator-blocker-1  Waiting
+```
+
+In the logs above, the commands logs are highlighted to better understand the sequence
+of actions performed.
+
+### Running a set of services
+
+If it is no necessary to run all the services, then a set of services could be specified
+using the `--services` flag. A good example will be running the execution and consensus
+client initially without the validator to sync the nodes and after the synchronization
+start the validator.
+
+```shell
+$ sedge run --services execution,consensus
+Using config file: /root/.sedge.yaml
+2022-12-29 21:03:29 -- [INFO] [Logger Init] Logging configuration: {Level:debug}
+2022-12-29 21:03:29 -- [INFO] You are running the latest version of sedge. Version:  v0.6.0
+2022-12-29 21:03:29 -- [INFO] Checking dependencies: docker
+2022-12-29 21:03:29 -- [INFO] All dependencies are installed on host machine
+2022-12-29 21:03:29 -- [INFO] Setting up containers
+# highlight-next-line
+2022-12-29 21:03:29 -- [DEBU] Running command: docker compose -f docker-compose-scripts/docker-compose.yml build execution consensus
+2022-12-29 21:03:29 -- [DEBU] Running command with sudo.
+# highlight-next-line
+2022-12-29 21:03:29 -- [DEBU] Running command: docker compose -f docker-compose-scripts/docker-compose.yml pull execution consensus
+2022-12-29 21:03:29 -- [DEBU] Running command with sudo.
+[+] Running 2/2
+ ⠿ execution Pulled 0.2s
+ ⠿ consensus Pulled 0.4s
+# highlight-next-line
+2022-12-29 21:03:30 -- [DEBU] Running command: docker compose -f docker-compose-scripts/docker-compose.yml create execution consensus
+2022-12-29 21:03:30 -- [DEBU] Running command with sudo.
+[+] Running 4/2
+ ⠿ Network docker-compose-scripts_default  Created  0.1s
+ ⠿ Network sedge_network                   Created  0.1s
+ ⠿ Container consensus-client              Created  0.0s
+ ⠿ Container execution-client              Created  0.1s
+# highlight-next-line
+2022-12-29 21:03:30 -- [DEBU] Running command: docker compose -f docker-compose-scripts/docker-compose.yml up -d execution consensus
+2022-12-29 21:03:30 -- [DEBU] Running command with sudo.
+[+] Running 2/2
+ ⠿ Container consensus-client  Started  0.6s
+ ⠿ Container execution-client  Started  0.6s
+```
+
+Now, if you go to the folder with the generated docker compose and run
+`docker compose ps` you can check the status of the execution and consensus services:
+
+```logs
+NAME                COMMAND                  SERVICE             STATUS               PORTS
+consensus-client    "/app/cmd/beacon-cha…"   consensus           running (starting)   0.0.0.0:5054->5054/tcp, :::5054->5054/tcp, 4000-4001/tcp, 0.0.0.0:9000->9000/tcp, :::9000->9000/tcp, 0.0.0.0:9000->9000/udp, :::9000->9000/udp
+execution-client    "./Nethermind.Runner…"   execution           running              8545/tcp, 0.0.0.0:8008->8008/tcp, :::8008->8008/tcp, 0.0.0.0:30303->30303/tcp, :::30303->30303/tcp, 8551/tcp, 0.0.0.0:30303->30303/udp, :::30303->30303/udp
+```
+
+Notice in this case consensus service is starting, that means is still syncing.
+Now you can start the validator client like follow:
+
+```shell
+$ sedge run --services validator
+Using config file: /root/.sedge.yaml
+2022-12-29 21:24:12 -- [INFO] [Logger Init] Logging configuration: {Level:debug}
+2022-12-29 21:24:12 -- [INFO] You are running the latest version of sedge. Version:  v0.6.0
+2022-12-29 21:24:12 -- [INFO] Checking dependencies: docker
+2022-12-29 21:24:12 -- [INFO] All dependencies are installed on host machine
+2022-12-29 21:24:12 -- [INFO] Setting up containers
+# highlight-next-line
+2022-12-29 21:24:12 -- [DEBU] Running command: docker compose -f docker-compose-scripts/docker-compose.yml build validator
+2022-12-29 21:24:12 -- [DEBU] Running command with sudo.
+# highlight-next-line
+2022-12-29 21:24:12 -- [DEBU] Running command: docker compose -f docker-compose-scripts/docker-compose.yml pull validator
+2022-12-29 21:24:12 -- [DEBU] Running command with sudo.
+[+] Running 1/1
+ ⠿ validator Pulled 0.2s
+# highlight-next-line
+2022-12-29 21:24:12 -- [DEBU] Running command: docker compose -f docker-compose-scripts/docker-compose.yml create validator
+2022-12-29 21:24:12 -- [DEBU] Running command with sudo.
+[+] Running 4/3
+ ⠿ Container docker-compose-scripts-validator-blocker-1  Created  0.1s
+ ⠿ Container validator-import-client                     Created  0.1s
+ ⠿ Container consensus-client                            Running  0.0s
+ ⠿ Container validator-client                            Created  0.0s
+# highlight-next-line
+2022-12-29 21:24:13 -- [DEBU] Running command: docker compose -f docker-compose-scripts/docker-compose.yml up -d validator
+2022-12-29 21:24:13 -- [DEBU] Running command with sudo.
+[+] Running 1/3
+ ⠿ Container consensus-client                            Waiting  6.5s
+ ⠿ Container validator-import-client                     Exited   1.1s
+ ⠿ Container docker-compose-scripts-validator-blocker-1  Waiting  6.5s
+```
+
+After this, the validator service will wait until consensus syncs to start.
