@@ -18,11 +18,12 @@ package cli
 import (
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-func RunCmd(sedgeActions actions.SedgeActions) *cobra.Command {
+func RunCmd(cmdRunner commands.CommandRunner, sedgeActions actions.SedgeActions) *cobra.Command {
 	// Flags
 	var (
 		generationPath string
@@ -34,6 +35,9 @@ func RunCmd(sedgeActions actions.SedgeActions) *cobra.Command {
 		Short: "Run services",
 		Long:  "Run all the generated services",
 		Run: func(cmd *cobra.Command, args []string) {
+			if err := installDependencies(cmdRunner, []string{"docker"}); err != nil {
+				log.Fatalf("error installing dependencies: %s", err.Error())
+			}
 			err := sedgeActions.SetupContainers(actions.SetupContainersOptions{
 				GenerationPath: generationPath,
 				Services:       *services,
