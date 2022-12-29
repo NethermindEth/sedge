@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package utils
 
 import (
@@ -11,6 +26,21 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 )
 
+/*
+HandleUrlOrPath :
+Get a source string and call related handler if the source
+
+params :-
+a. string
+Source that will be tried to convert to url or path
+b. func(url string) error
+Handler function to call if source is an url
+c. func(path string) error
+Handler function to call if source is a filepath
+
+returns :-
+a. error occurred during any of the handlers if any or if provided source is neither file or url.
+*/
 func HandleUrlOrPath(
 	src string,
 	handleUrl func(url string) error,
@@ -30,6 +60,17 @@ func HandleUrlOrPath(
 	return fmt.Errorf(configs.InvalidFilePathOrUrl, src)
 }
 
+/*
+CheckUrlOrPath :
+Verifies if provided source string is an url or filepath returning relevant error if neither
+
+params :-
+a. string
+Source that will be tried to convert to url or path
+
+returns :-
+a. error if provided source is neither file or url.
+*/
 func CheckUrlOrPath(src string) error {
 	return HandleUrlOrPath(
 		src,
@@ -38,6 +79,17 @@ func CheckUrlOrPath(src string) error {
 	)
 }
 
+/*
+GetUrlOrPathContent :
+Get content of the source url or filepath provided
+
+params :-
+a. string
+Source that will be used as url or filepath
+
+returns :-
+a. error if any
+*/
 func GetUrlOrPathContent(src string) (string, error) {
 	urlContent := ""
 	fileContent := ""
@@ -73,6 +125,21 @@ func GetUrlOrPathContent(src string) (string, error) {
 	return strings.ReplaceAll(strings.TrimSpace(urlContent+fileContent), "\r", ""), err
 }
 
+/*
+DownloadOrCopy :
+Get content of the source url or filepath provided
+
+params :-
+a. string
+Source that will be used as url or filepath
+b. string
+Destination filepath to downloaded or copied file
+c. bool
+Delete existing file in the destination filepath
+
+returns :-
+a. error if any
+*/
 func DownloadOrCopy(src, dest string, autoremove bool) error {
 	_, err := os.Stat(dest)
 	if err != nil && !os.IsNotExist(err) {
