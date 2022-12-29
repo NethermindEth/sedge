@@ -374,6 +374,7 @@ func LoadCustomNetworksConfig(flags *CliCmdFlags) (string, string, string, strin
 
 	if flags.customChainSpec != "" {
 		chainSpecPath = filepath.Join(destFolder, configs.ExecutionNetworkConfigFileName)
+		log.Info(configs.GettingCustomChainSpec)
 		err := utils.DownloadOrCopy(flags.customChainSpec, chainSpecPath, true)
 		if err != nil {
 			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
@@ -386,6 +387,7 @@ func LoadCustomNetworksConfig(flags *CliCmdFlags) (string, string, string, strin
 
 	if flags.customNetworkConfig != "" {
 		networkConfigPath = filepath.Join(destFolder, configs.ConsensusNetworkConfigFileName)
+		log.Info(configs.GettingCustomNetworkConfig)
 		err := utils.DownloadOrCopy(flags.customNetworkConfig, networkConfigPath, true)
 		if err != nil {
 			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
@@ -398,6 +400,7 @@ func LoadCustomNetworksConfig(flags *CliCmdFlags) (string, string, string, strin
 
 	if flags.customGenesis != "" {
 		networkGenesisPath = filepath.Join(destFolder, configs.ConsensusNetworkGenesisFileName)
+		log.Info(configs.GettingCustomGenesis)
 		err := utils.DownloadOrCopy(flags.customGenesis, networkGenesisPath, true)
 		if err != nil {
 			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
@@ -410,6 +413,7 @@ func LoadCustomNetworksConfig(flags *CliCmdFlags) (string, string, string, strin
 
 	if flags.customDeployBlock >= 0 {
 		networkDeployBlockPath = filepath.Join(destFolder, configs.ConsensusNetworkDeployBlockFileName)
+		log.Info(configs.WritingCustomDeployBlock)
 		err := os.WriteFile(networkDeployBlockPath, []byte(fmt.Sprintf("%d", flags.customDeployBlock)), os.ModePerm)
 		if err != nil {
 			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, fmt.Errorf(configs.ErrorWritingDeployBlockFile, networkDeployBlockPath, err)

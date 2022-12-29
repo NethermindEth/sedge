@@ -243,17 +243,17 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 	}
 
 	// validate custom network flags
-	urlOrPaths := []string{
-		flags.customChainSpec,
-		flags.customNetworkConfig,
-		flags.customGenesis,
+	urlOrPaths := map[string]string{
+		"ChainSpec":      flags.customChainSpec,
+		"Network config": flags.customNetworkConfig,
+		"Genesis":        flags.customGenesis,
 	}
-	for _, value := range urlOrPaths {
+	for kind, value := range urlOrPaths {
 		if value == "" {
 			continue
 		}
 		if err := utils.CheckUrlOrPath(value); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("invalid %s: %w", kind, err)
 		}
 	}
 
@@ -342,7 +342,6 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	// Get custom networks configs
 	var chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath string
 	if flags.customChainSpec != "" || flags.customDeployBlock >= 0 || flags.customGenesis != "" || flags.customNetworkConfig != "" {
-		// TODO: add results to generation data
 		chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err = LoadCustomNetworksConfig(flags)
 		if err != nil {
 			return []error{err}

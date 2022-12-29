@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/NethermindEth/sedge/configs"
+	log "github.com/sirupsen/logrus"
 )
 
 /*
@@ -157,6 +158,7 @@ func DownloadOrCopy(src, dest string, autoremove bool) error {
 	return HandleUrlOrPath(
 		src,
 		func(url string) error {
+			log.Debugf(configs.Downloading, url)
 			resp, err := GetRequest(url, time.Minute)
 			if err != nil || resp.StatusCode != 200 {
 				return fmt.Errorf(configs.ErrorDownloadingFile, url, err)
@@ -171,6 +173,7 @@ func DownloadOrCopy(src, dest string, autoremove bool) error {
 			return nil
 		},
 		func(path string) error {
+			log.Debugf(configs.Copying, path)
 			srcFile, err := os.Open(path)
 			if err != nil {
 				return fmt.Errorf(configs.ErrorCopyingFile, path, err)
