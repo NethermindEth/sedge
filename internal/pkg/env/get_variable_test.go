@@ -115,13 +115,13 @@ func TestGetTTD(t *testing.T) {
 		isErr        bool
 	}{
 		{
-			name:         "Test case 1, no bootnodes",
+			name:         "Test case 1, no TTD",
 			testdataCase: "case_1",
 			want:         "",
 			isErr:        false,
 		},
 		{
-			name:         "Test case 2, bootnodes",
+			name:         "Test case 2, TTD",
 			testdataCase: "case_2",
 			want:         "8000000000000000000000001000000000000",
 			isErr:        false,
