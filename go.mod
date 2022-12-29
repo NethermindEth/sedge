@@ -13,7 +13,6 @@ require (
 	github.com/jarcoal/httpmock v1.2.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/opencontainers/image-spec v1.0.2
-	github.com/pkg/errors v0.9.1
 	github.com/protolambda/go-keystorev4 v0.0.0-20211007151826-f20444f6d564
 	github.com/protolambda/zrnt v0.14.0
 	github.com/protolambda/ztyp v0.2.2
@@ -54,6 +53,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.1.0 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
