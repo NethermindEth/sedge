@@ -264,13 +264,13 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 		return "", err
 	}
 
-	// Check for CC Bootstrap nodes
+	// Check for CC Bootnode nodes
 	ccBootnodes, err := env.GetCCBootnodes(envFilePath)
 	if err != nil {
 		return "", err
 	}
 
-	// Check for Bootstrap nodes
+	// Check for Bootnode nodes
 	ecBootnodes, err := env.GetECBootnodes(envFilePath)
 	if err != nil {
 		return "", err
@@ -282,7 +282,7 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 	}
 
 	data := DockerComposeData{
-	    Services:            gd.Services,
+		Services:            gd.Services,
 		TTD:                 TTD != "",
 		XeeVersion:          xeeVersion,
 		Mev:                 mev && gd.Mev,
