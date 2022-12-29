@@ -56,6 +56,6 @@ func RunCmd(cmdRunner commands.CommandRunner, sedgeActions actions.SedgeActions)
 	}
 
 	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
-	services = cmd.Flags().StringArray("services", []string{}, "List of services to run. If this flag is not provided, all services will run.")
+	services = cmd.Flags().StringSlice("services", []string{}, "List of services to run. If this flag is not provided, all services will run.")
 	return cmd
 }
