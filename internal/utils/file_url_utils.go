@@ -3,10 +3,10 @@ package utils
 import (
 	"fmt"
 	"io"
-	"net/http"
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/NethermindEth/sedge/configs"
 )
@@ -39,7 +39,7 @@ func GetUrlOrPathContent(src string) (string, error) {
 	err := HandleUrlOrPath(
 		src,
 		func(url string) error {
-			resp, err := http.Get(url)
+			resp, err := GetRequest(url, time.Minute)
 			if err != nil {
 				return fmt.Errorf(configs.CannotGetUrlContent, src, err)
 			}
@@ -91,7 +91,7 @@ func DownloadOrCopy(src, dest string, autoremove bool) error {
 	return HandleUrlOrPath(
 		src,
 		func(url string) error {
-			resp, err := http.Get(url)
+			resp, err := GetRequest(url, time.Minute)
 			if err != nil {
 				return fmt.Errorf(configs.ErrorDownloadingFile, url, err)
 			}
