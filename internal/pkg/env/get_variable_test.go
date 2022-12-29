@@ -25,7 +25,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/utils"
 )
 
-func TestGetClBootnodes(t *testing.T) {
+func TestGetCCBootnodes(t *testing.T) {
 	t.Parallel()
 
 	tcs := []struct {
@@ -65,7 +65,7 @@ func TestGetClBootnodes(t *testing.T) {
 	}
 }
 
-func TestGetElBootnodes(t *testing.T) {
+func TestGetECBootnodes(t *testing.T) {
 	t.Parallel()
 
 	tcs := []struct {

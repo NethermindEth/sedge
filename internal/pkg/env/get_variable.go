@@ -76,11 +76,11 @@ func GetCCBootnodes(envFilePath string) ([]string, error) {
 
 	if m := ReClBOOTNODES.FindStringSubmatch(string(content)); m != nil {
 		m[1] = strings.ReplaceAll(m[1], "\"", "")
-		enodes := strings.Split(m[1], ",")
-		for i, enode := range enodes {
-			enodes[i] = strings.Trim(enode, "\r\n ")
+		enrs := strings.Split(m[1], ",")
+		for i, enr := range enrs {
+			enrs[i] = strings.Trim(enr, "\r\n ")
 		}
-		return enodes, nil
+		return enrs, nil
 	}
 
 	log.Warnf(configs.NoBootnodesFound, envFilePath)
