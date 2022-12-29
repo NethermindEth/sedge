@@ -199,10 +199,10 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 	if err != nil {
 		return "", err
 	}
-	if ccRemoteGen { // Have to download custom configs
-		if gd.CustomGenesisPath == "" { // Setup paths to use downloaded configs
+	if ccRemoteGen { // Have to download custom genesis
+		if gd.CustomGenesisPath == "" { // Setup paths to use downloaded genesis
 			gd.CustomGenesisPath = "./genesis.ssz"
-		} else { // Overriding custom configs, no need to download
+		} else { // Overriding custom genesis, no need to download
 			ccRemoteGen = false
 		}
 	}
@@ -210,10 +210,10 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 	if err != nil {
 		return "", err
 	}
-	if ccRemoteDpl { // Have to download custom configs
-		if gd.CustomDeployBlockPath == "" { // Setup paths to use downloaded configs
+	if ccRemoteDpl { // Have to download custom deploy_block
+		if gd.CustomDeployBlockPath == "" { // Setup paths to use downloaded deploy_block
 			gd.CustomDeployBlockPath = "./deploy_block.txt"
-		} else { // Overriding custom configs, no need to download
+		} else { // Overriding custom deploy_block, no need to download
 			ccRemoteDpl = false
 		}
 	}
@@ -233,10 +233,10 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 	if err != nil {
 		return "", err
 	}
-	if vlRemoteGen { // Have to download custom configs
-		if gd.CustomGenesisPath == "" { // Setup paths to use downloaded configs
+	if vlRemoteGen { // Have to download custom genesis
+		if gd.CustomGenesisPath == "" { // Setup paths to use downloaded genesis
 			gd.CustomGenesisPath = "./genesis.ssz"
-		} else { // Overriding custom configs, no need to download
+		} else { // Overriding custom genesis, no need to download
 			vlRemoteGen = false
 		}
 	}
@@ -244,10 +244,10 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 	if err != nil {
 		return "", err
 	}
-	if vlRemoteDpl { // Have to download custom configs
-		if gd.CustomDeployBlockPath == "" { // Setup paths to use downloaded configs
+	if vlRemoteDpl { // Have to download custom deploy_block
+		if gd.CustomDeployBlockPath == "" { // Setup paths to use downloaded deploy_block
 			gd.CustomDeployBlockPath = "./deploy_block.txt"
-		} else { // Overriding custom configs, no need to download
+		} else { // Overriding custom deploy_block, no need to download
 			vlRemoteDpl = false
 		}
 	}
