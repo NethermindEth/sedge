@@ -26,6 +26,7 @@ type SedgeActions interface {
 	ExportSlashingInterchangeData(SlashingExportOptions) error
 	SetupContainers(SetupContainersOptions) error
 	RunContainers(RunContainersOptions) error
+	InstallDependencies(InstallDependenciesOptions) error
 }
 
 type sedgeActions struct {
