@@ -25,7 +25,6 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/env"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/templates"
-	"github.com/pkg/errors"
 	"io"
 )
 
@@ -141,18 +140,19 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
+		// notest
 		return fmt.Errorf(configs.PortOccupationError, err)
 	}
 	gd.Ports = ports
 
 	rawBaseTmp, err := templates.Services.ReadFile(filepath.Join("services", "docker-compose_base.tmpl"))
 	if err != nil {
-		return TemplateNotFoundError
+		return err
 	}
 
 	baseTmp, err := template.New("docker-compose").Parse(string(rawBaseTmp))
 	if err != nil {
-		return TemplateParseError
+		return err
 	}
 
 	cls := getClients(gd)
@@ -167,11 +167,11 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 			tmpKind,
 			name+".tmpl"))
 		if err != nil {
-			return TemplateNotFoundError
+			return err
 		}
 		_, err = baseTmp.Parse(string(tmp))
 		if err != nil {
-			return TemplateParseError
+			return err
 		}
 	}
 	validatorBlockerTemplate := ""
@@ -193,13 +193,13 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	// Check for TTD in env base template
 	TTD, err := env.CheckVariableBase(env.ReTTD, gd.Network)
 	if err != nil {
-		return VariableNotFoundError
+		return err
 	}
 
 	// Check for splitted network flags
 	splittedNetwork, err := env.CheckVariableBase(env.ReSPLITTED, gd.Network)
 	if err != nil {
-		return VariableNotFoundError
+		return err
 	}
 
 	// Check vars related to Consensus service
@@ -215,31 +215,31 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		// Check for custom network config
 		ccRemoteCfg, err = env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient.Name)
 		if err != nil {
-			return VariableNotFoundError
+			return err
 		}
 		ccRemoteGen, err = env.CheckVariable(env.ReGENESIS, gd.Network, "consensus", gd.ConsensusClient.Name)
 		if err != nil {
-			return VariableNotFoundError
+			return err
 		}
 		ccRemoteDpl, err = env.CheckVariable(env.ReDEPLOY, gd.Network, "consensus", gd.ConsensusClient.Name)
 		if err != nil {
-			return VariableNotFoundError
+			return err
 		}
 		// Check for XEE_VERSION in teku
 		xeeVersion, err = env.CheckVariable(env.ReXEEV, gd.Network, "consensus", gd.ConsensusClient.Name)
 		if err != nil {
-			return VariableNotFoundError
+			return err
 		}
 
 		clCheckpointSyncUrl, err = env.CheckVariable(env.ReCHECKPOINT, gd.Network, "consensus", gd.ConsensusClient.Name)
 		if err != nil {
-			return VariableNotFoundError
+			return err
 		}
 
 		// Check for Bootstrap nodes
 		bootnodes, err = env.GetBootnodes(gd.Network, gd.ConsensusClient.Name)
 		if err != nil {
-			return VariableNotFoundError
+			return err
 		}
 	}
 
@@ -249,21 +249,21 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	if !cls[validator].Omited {
 		vlRemoteCfg, err = env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient.Name)
 		if err != nil {
-			return VariableNotFoundError
+			return err
 		}
 		vlRemoteGen, err = env.CheckVariable(env.ReGENESIS, gd.Network, "validator", gd.ValidatorClient.Name)
 		if err != nil {
-			return VariableNotFoundError
+			return err
 		}
 		vlRemoteDpl, err = env.CheckVariable(env.ReDEPLOY, gd.Network, "validator", gd.ValidatorClient.Name)
 		if err != nil {
-			return VariableNotFoundError
+			return err
 		}
 
 		// Check for Mev
 		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient.Name)
 		if err != nil {
-			return VariableNotFoundError
+			return err
 		}
 	}
 
@@ -271,7 +271,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	if !cls[consensus].Omited && (!cls[execution].Omited || !cls[validator].Omited) && gd.MevBoostEndpoint == "" && gd.Mev {
 		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ConsensusClient.Name)
 		if err != nil {
-			return VariableNotFoundError
+			return err
 		}
 		if mevSupported {
 			gd.MevBoostEndpoint = configs.DefaultMevBoostEndpoint + ":" + gd.Ports["MevPort"]
@@ -321,13 +321,16 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	// Save to writer
 	err = baseTmp.Execute(at, data)
 	if err != nil {
-		return errors.Wrap(TemplateExecuteError, err.Error())
+		return err
 	}
 
 	return nil
 }
 
 func EnvFile(gd *GenData, at io.Writer) error {
+	if gd.ExecutionClient == nil && gd.ConsensusClient == nil && gd.ValidatorClient == nil {
+		return EmptyDataError
+	}
 	rawBaseTmp, err := templates.Envs.ReadFile(filepath.Join("envs", gd.Network, "env_base.tmpl"))
 	if err != nil {
 		return TemplateNotFoundError
@@ -335,7 +338,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 
 	baseTmp, err := template.New("env").Parse(string(rawBaseTmp))
 	if err != nil {
-		return TemplateParseError
+		return err
 	}
 
 	cls := getClients(gd)
@@ -349,17 +352,17 @@ func EnvFile(gd *GenData, at io.Writer) error {
 				tmpKind,
 				"empty.tmpl"))
 			if err != nil {
-				return TemplateNotFoundError
+				return err
 			}
 		} else {
 			tmp, err = templates.Envs.ReadFile(filepath.Join("envs", gd.Network, tmpKind, client.Name+".tmpl"))
 			if err != nil {
-				return TemplateNotFoundError
+				return err
 			}
 		}
 		_, err = baseTmp.Parse(string(tmp))
 		if err != nil {
-			return TemplateParseError
+			return err
 		}
 	}
 	executionApiUrl := gd.ExecutionApiUrl
@@ -407,7 +410,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	// Save to writer
 	err = baseTmp.Execute(at, data)
 	if err != nil {
-		return TemplateExecuteError
+		return err
 	}
 
 	return nil

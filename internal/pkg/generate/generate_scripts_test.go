@@ -19,12 +19,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -224,6 +227,278 @@ func TestGenerateComposeServices(t *testing.T) {
 			err = tt.CheckFunc(t, tt.GenerationData, tt.Services, bytes.NewReader(buffer.Bytes()), nil)
 			if err != nil {
 				assert.ErrorIs(t, err, tt.Error)
+			}
+		})
+	}
+}
+
+// TestValidateClients tests the validation of clients
+func TestValidateClients(t *testing.T) {
+	tests := []struct {
+		Description string
+		Data        *GenData
+		Error       error
+	}{
+		{
+			Description: "Wrong execution client",
+			Data: &GenData{
+				ExecutionClient: &clients.Client{Name: "wrong"},
+				Network:         "mainnet",
+			},
+			Error: ExecutionClientNotValidError,
+		},
+		{
+			Description: "Wrong consensus client",
+			Data: &GenData{
+				ConsensusClient: &clients.Client{Name: "wrong"},
+				Network:         "mainnet",
+			},
+			Error: ConsensusClientNotValidError,
+		},
+		{
+			Description: "Wrong validator client",
+			Data: &GenData{
+				ValidatorClient: &clients.Client{Name: "wrong"},
+				Network:         "mainnet",
+			},
+			Error: ValidatorClientNotValidError,
+		},
+		{
+			Description: "Wrong network, empty clients",
+			Data: &GenData{
+				Network: wrongDep,
+			},
+			Error: nil,
+		},
+		{
+			Description: "Wrong network, good consensus",
+			Data: &GenData{
+				ConsensusClient: &clients.Client{Name: "teku"},
+				Network:         wrongDep,
+			},
+			Error: UnableToGetClientsInfoError,
+		},
+		{
+			Description: "Wrong network, good execution",
+			Data: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				Network:         wrongDep,
+			},
+			Error: UnableToGetClientsInfoError,
+		},
+		{
+			Description: "Wrong network, good validator",
+			Data: &GenData{
+				ValidatorClient: &clients.Client{Name: "teku"},
+				Network:         wrongDep,
+			},
+			Error: UnableToGetClientsInfoError,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.Description, func(t *testing.T) {
+			err := validateClients(tt.Data)
+			assert.ErrorIs(t, err, tt.Error)
+		})
+	}
+}
+
+func TestComposeFileSimple(t *testing.T) {
+	tests := []struct {
+		Description string
+		Data        *GenData
+		Error       error
+	}{
+		{
+			Description: "Test generation of compose services",
+			Data: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				ConsensusClient: &clients.Client{Name: "teku"},
+				ValidatorClient: &clients.Client{Name: "teku"},
+				Network:         "mainnet",
+				Mev:             true,
+			},
+			Error: nil,
+		},
+		{
+			Description: "Test generation of compose services",
+			Data: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				ConsensusClient: &clients.Client{Name: "teku"},
+				ValidatorClient: &clients.Client{Name: "teku"},
+				Network:         "mainnet",
+				Mev:             true,
+			},
+			Error: nil,
+		},
+		{
+			Description: "Empty data",
+			Data: &GenData{
+				Network: "mainnet",
+			},
+			Error: EmptyDataError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Description, func(t *testing.T) {
+			var buffer bytes.Buffer
+			err := ComposeFile(tt.Data, io.Writer(&buffer))
+			if err != nil {
+				assert.ErrorIs(t, err, tt.Error)
+				return
+			}
+		})
+	}
+}
+
+func TestEnvFile(t *testing.T) {
+	tests := []struct {
+		Description string
+		Data        *GenData
+		Error       error
+	}{
+		{
+			Description: "Test generation of compose services",
+			Data: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				ConsensusClient: &clients.Client{Name: "teku"},
+				ValidatorClient: &clients.Client{Name: "teku"},
+				Network:         "mainnet",
+				Mev:             true,
+			},
+			Error: nil,
+		},
+		{
+			Description: "Test generation of compose services",
+			Data: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				ConsensusClient: &clients.Client{Name: "teku", Endpoint: "http://localhost"},
+				ValidatorClient: &clients.Client{Name: "teku"},
+				Network:         "mainnet",
+				Mev:             true,
+			},
+			Error: nil,
+		},
+		{
+			Description: "Empty data",
+			Data: &GenData{
+				Network: "mainnet",
+			},
+			Error: EmptyDataError,
+		},
+		{
+			Description: "Wrong network",
+			Data: &GenData{
+				ConsensusClient: &clients.Client{Name: "teku"},
+				Network:         wrongDep,
+			},
+			Error: TemplateNotFoundError,
+		},
+		{
+			Description: "Prysm consensus with ConsensusAdditionalUrl",
+			Data: &GenData{
+				ConsensusClient: &clients.Client{Name: "prysm"},
+				ValidatorClient: &clients.Client{Name: "prysm"},
+				Network:         "mainnet",
+				ConsensusApiUrl: "http://localhost:8080",
+			},
+			Error: nil,
+		},
+		{
+			Description: "Teku consensus with ConsensusAdditionalUrl",
+			Data: &GenData{
+				ConsensusClient: &clients.Client{Name: "teku"},
+				ValidatorClient: &clients.Client{Name: "teku"},
+				Network:         "mainnet",
+				ConsensusApiUrl: "http://localhost:8080",
+			},
+			Error: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Description, func(t *testing.T) {
+			var buffer bytes.Buffer
+			err := EnvFile(tt.Data, io.Writer(&buffer))
+			if err != nil {
+				assert.ErrorIs(t, err, tt.Error)
+				return
+			}
+			if tt.Data.ConsensusApiUrl == "" {
+				str := buffer.String()
+				assert.Contains(t, str, "CC_API_URL="+tt.Data.ConsensusClient.Endpoint+":")
+			} else {
+				if tt.Data.ConsensusClient.Name == "prysm" && !tt.Data.ValidatorClient.Omited {
+					assert.Contains(t, buffer.String(), "CC_API_URL=consensus:")
+				} else {
+					assert.Contains(t, buffer.String(), "CC_API_URL="+tt.Data.ConsensusApiUrl)
+				}
+			}
+		})
+	}
+}
+
+func TestCleanGenerated(t *testing.T) {
+	tests := []struct {
+		Description string
+		Data        *GenData
+		Error       error
+	}{
+		{
+			Description: "Test generation of compose services",
+			Data: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				ConsensusClient: &clients.Client{Name: "teku"},
+				ValidatorClient: &clients.Client{Name: "teku"},
+				Network:         "mainnet",
+				Mev:             true,
+			},
+			Error: nil,
+		},
+		{
+			Description: "Test generation of compose services",
+			Data: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				ConsensusClient: &clients.Client{Name: "teku"},
+				ValidatorClient: &clients.Client{Name: "teku"},
+				Network:         "mainnet",
+				Mev:             true,
+			},
+			Error: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Description, func(t *testing.T) {
+			path := t.TempDir()
+
+			// generate files
+			out, err := os.Create(filepath.Join(path, configs.DefaultDockerComposeScriptName))
+			if err != nil {
+				assert.ErrorIs(t, err, tt.Error)
+				return
+			}
+			err = ComposeFile(tt.Data, out)
+			if err != nil {
+				assert.ErrorIs(t, err, tt.Error)
+				return
+			}
+			assert.FileExists(t, filepath.Join(path, configs.DefaultDockerComposeScriptName))
+
+			// open output file
+			out, err = os.Create(filepath.Join(path, configs.DefaultEnvFileName))
+			err = EnvFile(tt.Data, out)
+			if err != nil {
+				assert.ErrorIs(t, err, tt.Error)
+				return
+			}
+			assert.FileExists(t, filepath.Join(path, configs.DefaultEnvFileName))
+
+			err = CleanGenerated(path)
+			if err != nil {
+				assert.ErrorIs(t, err, tt.Error)
+				return
 			}
 		})
 	}

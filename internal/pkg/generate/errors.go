@@ -5,18 +5,6 @@ import "errors"
 // TemplateNotFoundError is returned when the template is not found
 var TemplateNotFoundError = errors.New("template not found")
 
-// TemplateParseError is returned when the template cannot be parsed
-var TemplateParseError = errors.New("template parse error")
-
-// VariableNotFoundError is returned when the variable is not found
-var VariableNotFoundError = errors.New("variable not found")
-
-// TemplateExecuteError is returned when the template cannot be executed
-var TemplateExecuteError = errors.New("template execute error")
-
-// CanNotCreateComposeFileError is returned when the compose file cannot be created
-var CanNotCreateComposeFileError = errors.New("cannot create compose file")
-
 // EmptyDataError is returned when the data is nil
 var EmptyDataError = errors.New("data is nil")
 

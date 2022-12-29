@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -67,4 +68,36 @@ func TestGenerateDockerCompose(t *testing.T) {
 		t.Error("consensus client should be nil")
 	}
 
+}
+
+func TestFolderCreationOnCompose(t *testing.T) {
+	samplePath := t.TempDir() + "test"
+	sampleData := &generate.GenData{
+		ExecutionClient: &clients.Client{Name: "nethermind", Omited: false},
+		Network:         "mainnet",
+	}
+	sedgeAction := newAction(t, nil)
+
+	err := sedgeAction.GenerateCompose(actions.GenerateComposeOptions{
+		GenerationData: sampleData,
+		GenerationPath: samplePath,
+	})
+	if err != nil {
+		t.Error("GenerateDockerComposeAndEnvFile() failed", err)
+		return
+	}
+
+	// Check that the folder was created
+	assert.DirExists(t, samplePath)
+	// Check that docker-compose file exists
+	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
+	// Check that .env file doesn't exist
+	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultEnvFileName))
+	// Remove the folder
+	err = os.RemoveAll(samplePath)
+	if err != nil {
+		t.Error("unable to remove sample folder")
+		return
+	}
+	assert.NoDirExists(t, samplePath)
 }

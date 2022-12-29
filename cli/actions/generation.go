@@ -26,7 +26,7 @@ func (s *sedgeActions) GenerateCompose(options GenerateComposeOptions) error {
 	// open output file
 	out, err := os.Create(filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName))
 	if err != nil {
-		return generate.CanNotCreateComposeFileError
+		return err
 	}
 	err = generate.ComposeFile(options.GenerationData, out)
 	if err != nil {
