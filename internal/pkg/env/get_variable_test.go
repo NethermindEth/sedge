@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"testing"
 
 	"github.com/NethermindEth/sedge/internal/utils"
@@ -138,6 +139,55 @@ func TestGetTTD(t *testing.T) {
 			}
 
 			if got != tc.want {
+				t.Errorf("Expected %v, got %v. Function call: %s", tc.want, got, descr)
+			}
+		})
+	}
+}
+
+func TestCheckVariableBase(t *testing.T) {
+	t.Parallel()
+
+	tcs := []struct {
+		name    string
+		regex   *regexp.Regexp
+		network string
+		want    bool
+		isErr   bool
+	}{
+		{
+			"Test case 1, gnosis, EL_NETWORK",
+			ReSPLITTED,
+			"gnosis",
+			true,
+			false,
+		},
+		{
+			"Test case 2, invalid network, error",
+			ReSPLITTED,
+			"testnet",
+			false,
+			true,
+		},
+		{
+			"Test case 3, mainnet, no EL_NETWORK",
+			ReSPLITTED,
+			"mainnet",
+			false,
+			false,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := CheckVariableBase(tc.regex, tc.network)
+
+			descr := fmt.Sprintf("CheckVariableBase(re, %s) with regex %v", tc.network, tc.regex)
+			if err = utils.CheckErr(descr, tc.isErr, err); err != nil {
+				t.Error(err)
+			}
+
+			if tc.want != got {
 				t.Errorf("Expected %v, got %v. Function call: %s", tc.want, got, descr)
 			}
 		})
