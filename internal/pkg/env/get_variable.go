@@ -57,7 +57,7 @@ func GetECBootnodes(envFilePath string) ([]string, error) {
 
 /*
 GetCCBootnodes :
-Get the consensus bootnodes (list of enr addresses) from the environment variables.
+Get the consensus bootnodes (list of enr addresses) from the environment variables in .env.
 
 params :-
 a. path to generated env file
