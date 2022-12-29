@@ -1,0 +1,10 @@
+{
+  "label": "Commands",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Overview of Sedge Command Line Interface",
+    "slug": "commands"
+  }
+}
+
