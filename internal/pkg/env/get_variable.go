@@ -89,7 +89,7 @@ func GetCCBootnodes(envFilePath string) ([]string, error) {
 
 /*
 GetTTD :
-Get TTD from the environment variables.
+Get TTD from the environment variables in .env.
 
 params :-
 a. path to generated env file
