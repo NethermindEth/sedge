@@ -145,7 +145,7 @@ func TestHandleInstructions(t *testing.T) {
 	for _, input := range inputs {
 		t.Run(input.caseName, func(t *testing.T) {
 			descr := fmt.Sprintf("HandlerInstruction(%s,...)", input.dependencies)
-			err := HandleInstructions(input.dependencies, func(dependency string) error {
+			err := HandleInstructions(&test.SimpleCMDRunner{}, input.dependencies, func(_ commands.CommandRunner, dependency string) error {
 				contained := false
 				for _, expected := range input.dependencies {
 					if dependency == expected {
@@ -194,7 +194,7 @@ func TestShowInstructions(t *testing.T) {
 	for _, input := range inputs {
 		descr := fmt.Sprintf("ShowInstructions(%s)", input.dependency)
 
-		if err := ShowInstructions(input.dependency); input.isErr && err == nil {
+		if err := ShowInstructions(&test.SimpleCMDRunner{}, input.dependency); input.isErr && err == nil {
 			t.Errorf("%s expected to fail.", descr)
 		} else if !input.isErr && err != nil {
 			t.Errorf("%s failed: %v", descr, err)
@@ -218,7 +218,7 @@ func TestInstallDependency(t *testing.T) {
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", nil
 				},
-				SRunBash: func(bs commands.BashScript) (string, error) {
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
 				},
 			},
@@ -230,7 +230,7 @@ func TestInstallDependency(t *testing.T) {
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", nil
 				},
-				SRunBash: func(bs commands.BashScript) (string, error) {
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", fmt.Errorf("test unexpected error")
 				},
 			},
@@ -242,7 +242,7 @@ func TestInstallDependency(t *testing.T) {
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", nil
 				},
-				SRunBash: func(bs commands.BashScript) (string, error) {
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
 				},
 			},
@@ -251,13 +251,9 @@ func TestInstallDependency(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		commands.InitRunner(func() commands.CommandRunner {
-			return tc.runner
-		})
-
 		descr := fmt.Sprintf("InstallDependency(%s)", tc.dependency)
 
-		err := InstallDependency(tc.dependency)
+		err := InstallDependency(tc.runner, tc.dependency)
 		if tc.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
 		} else if !tc.isErr && err != nil {

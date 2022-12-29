@@ -16,41 +16,24 @@ limitations under the License.
 package cli
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
-	"syscall"
-	"text/template"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
-	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/crypto"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/utils"
-	"github.com/NethermindEth/sedge/templates"
 	"github.com/manifoldco/promptui"
 )
 
-// Interface for Posmoni Eth2 monitor
-type MonitoringTool interface {
-	TrackSync(done <-chan struct{}, beaconEndpoints, executionEndpoints []string, wait time.Duration) <-chan posmoni.EndpointSyncStatus
-}
-
-var monitor MonitoringTool
-
-func initMonitor(builder func() MonitoringTool) {
-	monitor = builder()
-}
-
-func installOrShowInstructions(pending []string) (err error) {
+func installOrShowInstructions(cmdRunner commands.CommandRunner, pending []string) (err error) {
 	// notest
 	optInstall, optExit := "Install dependencies", "Exit. You will manage this dependencies on your own"
 	prompt := promptui.Select{
@@ -58,7 +41,7 @@ func installOrShowInstructions(pending []string) (err error) {
 		Items: []string{optInstall, optExit},
 	}
 
-	if err = utils.HandleInstructions(pending, utils.ShowInstructions); err != nil {
+	if err = utils.HandleInstructions(cmdRunner, pending, utils.ShowInstructions); err != nil {
 		return fmt.Errorf(configs.ShowingInstructionsError, err)
 	}
 	_, result, err := prompt.Run()
@@ -68,7 +51,7 @@ func installOrShowInstructions(pending []string) (err error) {
 
 	switch result {
 	case optInstall:
-		return installDependencies(pending)
+		return installDependencies(cmdRunner, pending)
 	default:
 		log.Info(configs.Exiting)
 		os.Exit(0)
@@ -77,9 +60,11 @@ func installOrShowInstructions(pending []string) (err error) {
 	return nil
 }
 
-func installDependencies(pending []string) error {
-	if err := utils.HandleInstructions(pending, utils.InstallDependency); err != nil {
-		return fmt.Errorf(configs.InstallingDependenciesError, err)
+func installDependencies(cmdRunner commands.CommandRunner, pending []string) error {
+	if runtime.GOOS != "windows" { // Windows doesn't support docker installation through scripts
+		if err := utils.HandleInstructions(cmdRunner, pending, utils.InstallDependency); err != nil {
+			return fmt.Errorf(configs.InstallingDependenciesError, err)
+		}
 	}
 	return nil
 }
@@ -168,10 +153,10 @@ func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliC
 	return combinedClients, nil
 }
 
-func runScriptOrExit(flags *CliCmdFlags) (err error) {
+func runScriptOrExit(cmdRunner commands.CommandRunner, flags *CliCmdFlags) (err error) {
 	// notest
 	log.Infof(configs.InstructionsFor, "running docker-compose script")
-	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
+	upCMD := cmdRunner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
 		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		Services: *flags.services,
 	})
@@ -188,183 +173,122 @@ func runScriptOrExit(flags *CliCmdFlags) (err error) {
 		os.Exit(0)
 	}
 
-	if err = runAndShowContainers(*flags.services, flags); err != nil {
+	if err := buildContainers(cmdRunner, *flags.services, flags.generationPath); err != nil {
+		return err
+	}
+	if err = runAndShowContainers(cmdRunner, *flags.services, flags); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// TODO: use flags.services instead a separated arg
-func runAndShowContainers(services []string, flags *CliCmdFlags) error {
+func checkRunDependencies(cmdRunner commands.CommandRunner, generationPath string) error {
 	// TODO: (refac) Put this check to checks.go and call it from there
 	// Check if docker engine is on
 	log.Info(configs.CheckingDockerEngine)
-	psCMD := commands.Runner.BuildDockerPSCMD(commands.DockerPSOptions{
+	psCMD := cmdRunner.BuildDockerPSCMD(commands.DockerPSOptions{
 		All: true,
 	})
 	psCMD.GetOutput = true
 	log.Infof(configs.RunningCommand, psCMD.Cmd)
-	if _, err := commands.Runner.RunCMD(psCMD); err != nil {
+	if _, err := cmdRunner.RunCMD(psCMD); err != nil {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
 	}
-
 	// Check that compose plugin is installed with docker running 'docker compose ps'
-	dockerComposePsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path: filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
+	dockerComposePsCMD := cmdRunner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+		Path: filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 	})
 	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
 	dockerComposePsCMD.GetOutput = true
-	_, err := commands.Runner.RunCMD(dockerComposePsCMD)
+	_, err := cmdRunner.RunCMD(dockerComposePsCMD)
 	if err != nil {
 		return fmt.Errorf(configs.DockerComposeOffError, err)
 	}
+	return nil
+}
 
+func buildImages(cmdRunner commands.CommandRunner, services []string, generationPath string) error {
+	// Build images
+	buildCmd := cmdRunner.BuildDockerComposeBuildCMD(commands.DockerComposeBuildOptions{
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Services: services,
+	})
+	log.Infof(configs.RunningCommand, buildCmd.Cmd)
+	if _, err := cmdRunner.RunCMD(buildCmd); err != nil {
+		return fmt.Errorf(configs.CommandError, buildCmd.Cmd, err)
+	}
+	return nil
+}
+
+func downloadImages(cmdRunner commands.CommandRunner, services []string, generationPath string) error {
 	// Download images
-	pullCmd := commands.Runner.BuildDockerComposePullCMD(commands.DockerComposePullOptions{
-		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
+	pullCmd := cmdRunner.BuildDockerComposePullCMD(commands.DockerComposePullOptions{
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 		Services: services,
 	})
 	log.Infof(configs.RunningCommand, pullCmd.Cmd)
-	if _, err := commands.Runner.RunCMD(pullCmd); err != nil {
+	if _, err := cmdRunner.RunCMD(pullCmd); err != nil {
 		return fmt.Errorf(configs.CommandError, pullCmd.Cmd, err)
 	}
+	return nil
+}
 
+func createContainers(cmdRunner commands.CommandRunner, services []string, generationPath string) error {
+	if _, err := cmdRunner.RunCMD(cmdRunner.BuildDockerComposeCreateCMD(commands.DockerComposeCreateOptions{
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Services: services,
+	})); err != nil {
+		return fmt.Errorf("error creating containers: %w", err)
+	}
+	return nil
+}
+
+func buildContainers(cmdRunner commands.CommandRunner, services []string, generationPath string) error {
+	if err := checkRunDependencies(cmdRunner, generationPath); err != nil {
+		return err
+	}
+	if err := buildImages(cmdRunner, services, generationPath); err != nil {
+		return err
+	}
+	if err := downloadImages(cmdRunner, services, generationPath); err != nil {
+		return err
+	}
+	if err := createContainers(cmdRunner, services, generationPath); err != nil {
+		return err
+	}
+	return nil
+}
+
+// TODO: use flags.services instead a separated arg
+func runAndShowContainers(cmdRunner commands.CommandRunner, services []string, flags *CliCmdFlags) error {
 	// Run docker-compose script
-	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
+	upCMD := cmdRunner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
 		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		Services: services,
 	})
 	log.Infof(configs.RunningCommand, upCMD.Cmd)
-	if _, err := commands.Runner.RunCMD(upCMD); err != nil {
+	if _, err := cmdRunner.RunCMD(upCMD); err != nil {
 		return fmt.Errorf(configs.CommandError, upCMD.Cmd, err)
 	}
 
 	// Run docker compose ps --filter status=running to show script running containers
-	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+	dcpsCMD := cmdRunner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
 		Path:          filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		FilterRunning: true,
 	})
 	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
-	if _, err := commands.Runner.RunCMD(dcpsCMD); err != nil {
+	if _, err := cmdRunner.RunCMD(dcpsCMD); err != nil {
 		return fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
 	}
 
 	return nil
 }
 
-type container struct {
-	NetworkSettings networkSettings
-}
-type networkSettings struct {
-	Networks map[string]networks
-}
-type networks struct {
-	IPAddress string
-}
-
-func parseNetwork(js string) (string, error) {
-	var c []container
-	if err := json.NewDecoder(bytes.NewReader([]byte(js))).Decode(&c); err != nil {
-		return "", err
-	}
-	if len(c) == 0 {
-		return "", errors.New(configs.NoOutputDockerInspectError)
-	}
-	if ip := c[0].NetworkSettings.Networks["sedge_network"].IPAddress; ip != "" {
-		return ip, nil
-	}
-	return "", errors.New(configs.IPNotFoundError)
-}
-
-func getContainerIP(service string, flags *CliCmdFlags) (ip string, err error) {
-	// Run docker compose ps --quiet <service> to show service's ID
-	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path:        filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
-		Quiet:       true,
-		ServiceName: service,
-	})
-	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
-	dcpsCMD.GetOutput = true
-	id, err := commands.Runner.RunCMD(dcpsCMD)
-	if err != nil {
-		return ip, fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
-	}
-
-	// Run docker inspect <id> to get IP address
-	inspectCmd := commands.Runner.BuildDockerInspectCMD(commands.DockerInspectOptions{
-		Name: id,
-	})
-	log.Infof(configs.RunningCommand, inspectCmd.Cmd)
-	inspectCmd.GetOutput = true
-	data, err := commands.Runner.RunCMD(inspectCmd)
-	if err != nil {
-		return
-	}
-
-	ip, err = parseNetwork(data)
-	return
-}
-
-func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration, flags *CliCmdFlags) error {
-	done := make(chan struct{})
-	defer close(done)
-
-	log.Info(configs.GettingContainersIP)
-	executionIP, errE := getContainerIP(execution, flags)
-	if errE != nil {
-		log.Errorf(configs.GetContainerIPError, execution, errE)
-	}
-	consensusIP, errC := getContainerIP(consensus, flags)
-	if errC != nil {
-		log.Errorf(configs.GetContainerIPError, consensus, errC)
-		if errE != nil {
-			// Both IP were not detected, both containers probably failed
-			return errors.New(configs.UnableToTrackSyncError)
-		}
-	}
-
-	consensusUrl := fmt.Sprintf("http://%s:%s", consensusIP, clPort)
-	executionUrl := fmt.Sprintf("http://%s:%s", executionIP, elPort)
-
-	statuses := m.TrackSync(done, []string{consensusUrl}, []string{executionUrl}, wait)
-
-	var esynced, csynced bool
-	// Threshold to stop tracking, to avoid false responses
-	times := 0
-	for s := range statuses {
-		if s.Error != nil {
-			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
-		}
-
-		if s.Endpoint == executionUrl {
-			esynced = s.Synced
-		} else if s.Endpoint == consensusUrl {
-			csynced = s.Synced
-		}
-
-		if esynced && csynced {
-			times++
-			// Stop tracking after consecutive synced reports
-			if times == 3 {
-				// Stop tracking
-				done <- struct{}{}
-				log.Info(configs.NodesSynced)
-				break // statuses channel might still have data before closing done channel
-			}
-		} else {
-			// Restart threshold
-			times = 0
-		}
-	}
-
-	return nil
-}
-
-func RunValidatorOrExit(flags *CliCmdFlags) error {
+func RunValidatorOrExit(cmdRunner commands.CommandRunner, flags *CliCmdFlags) error {
 	// notest
 	log.Infof(configs.InstructionsFor, "running validator service of docker-compose script")
-	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
+	upCMD := cmdRunner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
 		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		Services: []string{validator},
 	})
@@ -381,7 +305,7 @@ func RunValidatorOrExit(flags *CliCmdFlags) error {
 		os.Exit(0)
 	}
 
-	if err = runAndShowContainers([]string{validator}, flags); err != nil {
+	if err = runAndShowContainers(cmdRunner, []string{validator}, flags); err != nil {
 		return err
 	}
 
@@ -391,38 +315,17 @@ func RunValidatorOrExit(flags *CliCmdFlags) error {
 func handleJWTSecret(flags *CliCmdFlags) error {
 	log.Info(configs.GeneratingJWTSecret)
 
-	// Create scripts directory if not exists
-	if _, err := os.Stat(flags.generationPath); os.IsNotExist(err) {
-		err = os.MkdirAll(flags.generationPath, 0o755)
-		if err != nil {
-			return err
-		}
-	}
-
-	rawScript, err := templates.Scripts.ReadFile(filepath.Join("scripts", "jwt_secret.sh"))
+	jwtscret, err := crypto.GenerateJWTSecret()
 	if err != nil {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	tmp, err := template.New("script").Parse(string(rawScript))
-	if err != nil {
-		return fmt.Errorf(configs.GenerateJWTSecretError, err)
-	}
-
-	script := commands.BashScript{
-		Tmp:       tmp,
-		GetOutput: false,
-		Data: map[string]string{
-			"Path": flags.generationPath,
-		},
-	}
-
-	if _, err = commands.Runner.RunBash(script); err != nil {
-		return fmt.Errorf(configs.GenerateJWTSecretError, err)
-	}
-
-	// TODO: avoid flag edition
 	flags.jwtPath, err = filepath.Abs(filepath.Join(flags.generationPath, "jwtsecret"))
+	if err != nil {
+		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	err = os.WriteFile(flags.jwtPath, []byte(jwtscret), os.ModePerm)
 	if err != nil {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
@@ -434,18 +337,18 @@ func handleJWTSecret(flags *CliCmdFlags) error {
 func preRunTeku(flags *CliCmdFlags) error {
 	log.Info(configs.PreparingTekuDatadir)
 	// Change umask to avoid OS from changing the permissions
-	syscall.Umask(0)
+	utils.SetUmask(0)
 	for _, s := range *flags.services {
 		if s == "all" || s == consensus {
 			// Prepare consensus datadir
-			path := filepath.Join(flags.generationPath, configs.ConsensusDefaultDataDir)
+			path := filepath.Join(flags.generationPath, configs.ConsensusDir)
 			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, consensus, err)
 			}
 		}
 		if s == "all" || s == validator {
 			// Prepare validator datadir
-			path := filepath.Join(flags.generationPath, configs.ValidatorDefaultDataDir)
+			path := filepath.Join(flags.generationPath, configs.ValidatorDir)
 			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, validator, err)
 			}
