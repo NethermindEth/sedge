@@ -50,7 +50,7 @@ func (s *sedgeActions) SetupContainers(options SetupContainersOptions) error {
 		Path:     filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName),
 		Services: options.Services,
 	})
-	log.Debugf(configs.RunningCommand, pullCmd.Cmd)
+	log.Debugf(configs.RunningCommand, createCmd.Cmd)
 	if _, err := s.commandRunner.RunCMD(createCmd); err != nil {
 		return err
 	}
