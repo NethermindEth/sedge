@@ -25,7 +25,7 @@ import (
 
 /*
 GetECBootnodes :
-Get the execution bootnodes (list of enodes addresses) from the environment variables.
+Get the execution bootnodes (list of enodes addresses) from the environment variables in .env.
 
 params :-
 a. path to generated env file
