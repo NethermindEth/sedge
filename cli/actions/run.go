@@ -20,6 +20,7 @@ import (
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	log "github.com/sirupsen/logrus"
 )
 
 type RunContainersOptions struct {
@@ -32,6 +33,7 @@ func (s *sedgeActions) RunContainers(options RunContainersOptions) error {
 		Path:     filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName),
 		Services: options.Services,
 	})
+	log.Debugf(configs.RunningCommand, upCmd.Cmd)
 	_, err := s.commandRunner.RunCMD(upCmd)
 	return err
 }
