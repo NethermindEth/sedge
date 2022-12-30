@@ -55,14 +55,18 @@ func (cr *WindowsCMDRunner) BuildDockerComposePullCMD(options DockerComposePullO
 }
 
 func (cr *WindowsCMDRunner) BuildDockerComposeCreateCMD(options DockerComposeCreateOptions) Command {
-	services := strings.Join(options.Services, " ")
-	command := fmt.Sprintf("docker compose -f %s create %s", options.Path, services)
+	command := fmt.Sprintf("docker compose -f %s create", options.Path)
+	if len(options.Services) > 0 {
+		command += " " + strings.Join(options.Services, " ")
+	}
 	return Command{Cmd: command}
 }
 
 func (cr *WindowsCMDRunner) BuildDockerComposeBuildCMD(options DockerComposeBuildOptions) Command {
-	services := strings.Join(options.Services, " ")
-	command := fmt.Sprintf("docker compose -f %s build %s", options.Path, services)
+	command := fmt.Sprintf("docker compose -f %s build", options.Path)
+	if len(options.Services) > 0 {
+		command += " " + strings.Join(options.Services, " ")
+	}
 	return Command{Cmd: command}
 }
 
