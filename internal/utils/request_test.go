@@ -17,7 +17,7 @@ package utils
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -84,7 +84,7 @@ func TestGetRequest(t *testing.T) {
 
 			if resp != nil {
 				defer resp.Body.Close()
-				contents, err := ioutil.ReadAll(resp.Body)
+				contents, err := io.ReadAll(resp.Body)
 				if err != nil {
 					t.Fatalf("Reading response body failed. Error: %v", err)
 				}
