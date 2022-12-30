@@ -11,9 +11,7 @@
     volumes:
       - ${KEYSTORE_DIR}:/keystore
       - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - {{.CustomNetworkConfigPath}}:/network_config/config.yaml{{end}}{{if .CustomGenesisPath}}
-      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{if .CustomDeployBlockPath}}
-      - {{.CustomDeployBlockPath}}:/network_config/deploy_block.txt{{end}}{{end}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yaml{{end}}{{end}}
     command: |
       validator import
       --preset=${VL_LODESTAR_PRESET}{{if not .CustomConsensusConfigs}}
@@ -44,8 +42,7 @@
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
       - ${VL_DATA_DIR}:/data/validator{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{if .CustomGenesisPath}}
-      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{end}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
     command: 
       - validator
       - --preset=${VL_LODESTAR_PRESET}{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
