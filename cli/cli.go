@@ -249,25 +249,12 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		return []error{err}
 	}
 
-	dependencies := configs.GetDependencies()
-	log.Infof(configs.CheckingDependencies, strings.Join(dependencies, ", "))
-
-	// Check if dependencies are installed. Keep checking dependencies until they are all installed
-	for pending := utils.CheckDependencies(dependencies); len(pending) > 0; pending = utils.CheckDependencies(dependencies) {
-		log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
-		if flags.install {
-			// Install dependencies directly
-			if err := installDependencies(cmdRunner, pending); err != nil {
-				return []error{err}
-			}
-		} else {
-			// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
-			if err := installOrShowInstructions(cmdRunner, pending); err != nil {
-				return []error{err}
-			}
-		}
+	if err := sedgeActions.InstallDependencies(actions.InstallDependenciesOptions{
+		Dependencies: configs.GetDependencies(),
+		Install:      flags.install,
+	}); err != nil {
+		return []error{err}
 	}
-	log.Info(configs.DependenciesOK)
 
 	// Generate JWT secret if necessary
 	if flags.jwtPath == "" && configs.NetworkConfigs()[flags.network].RequireJWT {

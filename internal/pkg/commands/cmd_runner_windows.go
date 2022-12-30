@@ -24,14 +24,34 @@ func NewCMDRunner(options CMDRunnerOptions) CommandRunner {
 }
 
 func (cr *WindowsCMDRunner) BuildDockerComposeUpCMD(options DockerComposeUpOptions) Command {
-	servs := strings.Join(options.Services, " ")
-	command := fmt.Sprintf("docker compose -f %s up -d %s", options.Path, servs)
+	command := fmt.Sprintf("docker compose -f %s up -d", options.Path)
+	if len(options.Services) > 0 {
+		command += " " + strings.Join(options.Services, " ")
+	}
 	return Command{Cmd: command}
 }
 
 func (cr *WindowsCMDRunner) BuildDockerComposePullCMD(options DockerComposePullOptions) Command {
-	services := strings.Join(options.Services, " ")
-	command := fmt.Sprintf("docker compose -f %s pull %s", options.Path, services)
+	command := fmt.Sprintf("docker compose -f %s pull", options.Path)
+	if len(options.Services) > 0 {
+		command += " " + strings.Join(options.Services, " ")
+	}
+	return Command{Cmd: command}
+}
+
+func (cr *UnixCMDRunner) BuildDockerComposeCreateCMD(options DockerComposeCreateOptions) Command {
+	command := fmt.Sprintf("docker compose -f %s create", options.Path)
+	if len(options.Services) > 0 {
+		command += " " + strings.Join(options.Services, " ")
+	}
+	return Command{Cmd: command}
+}
+
+func (cr *UnixCMDRunner) BuildDockerComposeBuildCMD(options DockerComposeBuildOptions) Command {
+	command := fmt.Sprintf("docker compose -f %s build", options.Path)
+	if len(options.Services) > 0 {
+		command += " " + strings.Join(options.Services, " ")
+	}
 	return Command{Cmd: command}
 }
 
