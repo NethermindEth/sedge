@@ -9,7 +9,7 @@ CC_INSTANCE_NAME=Prysm
 CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}gcr.io/prysmaticlabs/prysm/beacon-chain:v3.1.2{{end}}
 CC_DATA_DIR={{.CcDataDir}}
 CC_JWT_SECRET_PATH={{.JWTSecretPath}}
-CC_FEE_RECIPIENT={{.FeeRecipient}}
-{{if .CCBootnodes}}CC_BOOTNODES="{{ range $index, $enr := .CCBootnodes}}{{if $index}},{{end}}{{$enr}}{{end}}"{{end}}{{if .CustomDeployBlock}}
+CC_FEE_RECIPIENT={{.FeeRecipient}}{{if .CCBootnodes}}
+CC_BOOTNODES="{{ range $index, $enr := .CCBootnodes}}{{if $index}},{{end}}{{$enr}}{{end}}"{{end}}{{if .CustomDeployBlock}}
 DEPLOY_BLOCK={{.CustomDeployBlock}}{{end}}
 {{ end }}
