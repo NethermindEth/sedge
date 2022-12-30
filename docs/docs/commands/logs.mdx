@@ -25,7 +25,7 @@ Flags:
   -t, --tail int      Tail the number of desired logs. If not set, or set to 0, logs are followed.
 
 Global Flags:
-      --config string   config file (default is $HOME/.sedge.yaml)
+      --logLevel string   Set Log Level (default "info")
 ```
 
 ## Execution Example
@@ -34,8 +34,6 @@ The execution of `sedge down` will close and remove all the opened containers an
 
 ```
 $ sedge down
-Using config file: /home/maceo/.sedge.yaml
-2022-12-12 16:54:24 -- [INFO] [Logger Init] Logging configuration: {Level:info}
 2022-12-12 16:54:24 -- [INFO] You are running the latest version of sedge. Version:  v0.5.1
 [sudo] password for maceo:
 [+] Running 7/7

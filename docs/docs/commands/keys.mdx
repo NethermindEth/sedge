@@ -30,7 +30,7 @@ Flags:
       --random-passphrase                Usa a randomly generated passphrase to encrypt keystores.
 
 Global Flags:
-      --config string   config file (default is $HOME/.sedge.yaml)
+      --logLevel string   Set Log Level (default "info")
 ```
 
 ## Execution Example
@@ -61,9 +61,6 @@ The `keys` command will first check if Docker is installed (because use docker t
 The next step involves a prompt for an Eth1 address to be used to create the [withdrawal credentials](/docs/concepts/keystore). If you don't provide one, then the tool will generate withdrawal credentials with the mnemonic-derived withdrawal public key.
 
 ```logs
-Initializing configuration
-Using config file: /Users/teno/.sedge.yaml
-2022-XX-XX 00:00:00 -- [INFO] [Logger Init] Logging configuration: {Level:info}
 2022-XX-XX 00:00:00 -- [INFO] All dependencies are installed on host machine
 # highlight-next-line
 ✔ Please enter a Eth1 address to be used to create the withdrawal credentials. You can leave it blank and press enter:
