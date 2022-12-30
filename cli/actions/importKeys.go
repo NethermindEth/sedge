@@ -52,6 +52,24 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 			"--wallet-password-file=/keystore/keystore_password.txt",
 			"--account-password-file=/keystore/keystore_password.txt",
 		}
+	case "lodestar":
+		var preset string
+		switch options.Network {
+		case "mainnet", "goerli", "sepolia":
+			preset = "mainnet"
+		case "gnosis", "chiado":
+			preset = "gnosis"
+		default:
+			return fmt.Errorf("unknown lodestar preset for network %s", options.Network)
+		}
+		cmd = []string{
+			"validator", "import",
+			"--preset", preset,
+			"--network", options.Network,
+			"--dataDir", "/data",
+			"--importKeystores=/keystore/validator_keys",
+			"--importKeystoresPassword=/keystore/keystore_password.txt",
+		}
 	default:
 		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
