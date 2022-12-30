@@ -61,7 +61,8 @@ The `keys` command will first check if Docker is installed (because use docker t
 The next step involves a prompt for an Eth1 address to be used to create the [withdrawal credentials](/docs/concepts/keystore). If you don't provide one, then the tool will generate withdrawal credentials with the mnemonic-derived withdrawal public key.
 
 ```logs
-2022-XX-XX 00:00:00 -- [INFO] All dependencies are installed on host machine
+2022-00-00 00:00:00 -- [INFO] [Logger Init] Log level: info
+2022-00-00 00:00:00 -- [INFO] All dependencies are installed on host machine
 # highlight-next-line
 ✔ Please enter a Eth1 address to be used to create the withdrawal credentials. You can leave it blank and press enter:
 ```
@@ -83,8 +84,8 @@ A **password prompt** may show up again because Sedge uses docker commands to ru
 From here, the rest of the flow belongs to the staking-deposit-cli tool:
 
 ```
-2022-XX-XX 00:00:00 -- [INFO] Generating keystore folder
-2022-XX-XX 00:00:00 -- [INFO] Running command:
+2022-00-00 00:00:00 -- [INFO] Generating keystore folder
+2022-00-00 00:00:00 -- [INFO] Running command:
 docker run -it --rm -v /home/sedge/docker-compose-scripts/keystore/validator_keys:/app/validator_keys nethermindeth/staking-deposit-cli new-mnemonic --chain mainnet --keystore_password ********
 Please choose your language ['1. العربية', '2. ελληνικά', '3. English', '4. Français', '5. Bahasa melayu', '6. Italiano', '7. 日本語', '8. 한국어', '9. Português do Brasil', '10. român', '11. 简体中文']:  [English]:
 Repeat your keystore password for confirmation:
@@ -153,11 +154,11 @@ Press any key.
 The above logs mark the end of the staking-deposit-cli execution and Sedge retakes control of the flow:
 
 ```logs
-2022-XX-XX 00:00:00 -- [INFO] deposit-cli tool exited
+2022-00-00 00:00:00 -- [INFO] deposit-cli tool exited
 # highlight-next-line
-2022-XX-XX 00:00:00 -- [INFO] If everything went well, your keys can be found at: /home/sedge/docker-compose-scripts/keystore/validator_keys
-2022-XX-XX 00:00:00 -- [INFO] keystore_password.txt on keystore folder created with provided password
-2022-XX-XX 00:00:00 -- [WARN] In case you used custom paths for the 'cli' or the 'keys' commands, please review if the keystore path in the generated .env file points to the generated keystore folder (the .env key should be KEYSTORE_DIR). If not, change the path in the .env file to the correct one.
+2022-00-00 00:00:00 -- [INFO] If everything went well, your keys can be found at: /home/sedge/docker-compose-scripts/keystore/validator_keys
+2022-00-00 00:00:00 -- [INFO] keystore_password.txt on keystore folder created with provided password
+2022-00-00 00:00:00 -- [WARN] In case you used custom paths for the 'cli' or the 'keys' commands, please review if the keystore path in the generated .env file points to the generated keystore folder (the .env key should be KEYSTORE_DIR). If not, change the path in the .env file to the correct one.
 ```
 
 As we stick to default configuration values all the time, we can ignore the final log.

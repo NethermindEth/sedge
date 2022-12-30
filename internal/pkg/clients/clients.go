@@ -90,7 +90,6 @@ func (c ClientInfo) Clients(clientTypes []string) (clients OrderedClients, errs 
 		// Get the clients from the configuration file
 		for _, client := range supportedClients {
 			// Check if the client is supported
-			//supported := utils.Contains(supportedClients, client)
 			clients[clientType][client] = Client{Name: client, Type: clientType, Supported: true}
 		}
 	}

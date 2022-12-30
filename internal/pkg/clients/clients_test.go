@@ -89,7 +89,6 @@ Loop1:
 
 func TestClients(t *testing.T) {
 	inputs := [...]clientsTestCase{
-		{},
 		{
 			map[string][]string{
 				"consensus": {"lighthouse", "prysm", "teku", "lodestar"},
@@ -129,22 +128,34 @@ func TestClients(t *testing.T) {
 			"mainnet",
 			true,
 		},
+		{
+			map[string][]string{
+				"validator": {"lighthouse", "teku", "lodestar"},
+				"consensus": {"lighthouse", "prysm", "teku", "lodestar"},
+				"execution": {"nethermind"},
+			},
+			[]string{"consensus", "execution", "validator"},
+			"gnosis",
+			false,
+		},
 	}
 
-	for _, input := range inputs {
-		descr := fmt.Sprintf("Clients(%s)", input.query)
+	for i, input := range inputs {
+		t.Run(fmt.Sprintf("Network %s, testcase: %d", input.network, i), func(t *testing.T) {
+			descr := fmt.Sprintf("Clients(%s)", input.query)
 
-		c := ClientInfo{Network: input.network}
-		if res, err := c.Clients(input.query); input.isErr && err == nil {
-			t.Errorf("%s expected to fail", descr)
-		} else if !input.isErr {
-			if err != nil {
-				t.Errorf("%s failed: %v", descr, err)
-			} else if !validateClients(res, input) {
-				t.Errorf("%s got invalid result: %v", descr, res)
+			c := ClientInfo{Network: input.network}
+			if res, err := c.Clients(input.query); input.isErr && err == nil {
+				t.Errorf("%s expected to fail", descr)
+			} else if !input.isErr {
+				if err != nil {
+					t.Errorf("%s failed: %v", descr, err)
+				} else if !validateClients(res, input) {
+					t.Errorf("%s got invalid result: %v", descr, res)
+				}
 			}
-		}
 
+		})
 	}
 }
 

@@ -44,7 +44,7 @@ func RootCmd() *cobra.Command {
 	// Disable completion default cmd
 	cmd.CompletionOptions.DisableDefaultCmd = true
 	// Persistent flags
-	cmd.PersistentFlags().StringVar(&logLevel, "logLevel", "info", "Set Log Level")
+	cmd.PersistentFlags().StringVar(&logLevel, "logLevel", "info", "Set Log Level, e.gg panic, fatal, error, warn, warning, info, debug. trace")
 	return cmd
 }
 
@@ -72,13 +72,15 @@ none
 func initLogging() {
 	log.SetFormatter(&nested.Formatter{
 		HideKeys:        true,
+		FieldsOrder:     []string{configs.Component},
 		TimestampFormat: "2006-01-02 15:04:05 --",
 	})
 
 	level, err := log.ParseLevel(strings.ToLower(logLevel))
 	if err != nil {
-		log.Error(err)
+		log.WithField(configs.Component, "Logger Init").Error(err)
 		return
 	}
 	log.SetLevel(level)
+	log.WithField(configs.Component, "Logger Init").Infof("Log level: %+v", logLevel)
 }
