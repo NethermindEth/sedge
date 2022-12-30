@@ -61,8 +61,8 @@ Global Flags:
 
 ```logs
 $ ./sedge cli
-
 # highlight-start
+2022-XX-XX 00:00:00 -- [INFO] You are running the latest version of sedge. Version:  v0.5.1
 2022-XX-XX 00:00:00 -- [WARN] Execution client not provided. A random client will be selected. Random client: nethermind
 2022-XX-XX 00:00:00 -- [WARN] Consensus and validator clients not provided. Selecting same pair of clients for consensus and validator clients using a random client. Random client: lighthouse
 # highlight-end
@@ -84,60 +84,54 @@ As we didn't specify the clients to be used in the setup, they were randomly cho
 2022-XX-XX 00:00:00 -- [INFO] Checking dependencies: docker
 ```
 <Tabs groupId="dependency-check">
-    <TabItem value="linux" label="linux">
+  <TabItem value="linux" label="linux">
 
-        If a dependency is missing, Sedge will print instructions to install it and a prompt will be shown to let you
-        decide between letting Sedge install it for you or exit and installing it on your own. (Only for Linux)
+      If a dependency is missing, Sedge will print instructions to install it and a prompt will be shown to let you decide between letting Sedge install it for you or exit and installing it on your own. (Only for Linux)
 
-        ```logs
-        # highlight-start
-        2022-XX-XX 00:00:00 -- [ERRO] dependency docker is not installed on host machine
-        2022-XX-XX 00:00:00 -- [INFO] pending dependencies: docker
-        2022-XX-XX 00:00:00 -- [INFO] Instructions for docker
-        # highlight-end
+      ```logs
+      # highlight-start
+      2022-XX-XX 00:00:00 -- [ERRO] dependency docker is not installed on host machine
+      2022-XX-XX 00:00:00 -- [INFO] pending dependencies: docker
+      2022-XX-XX 00:00:00 -- [INFO] Instructions for docker
+      # highlight-end
 
-        sudo apt-get update
+      sudo apt-get update
 
-        sudo apt apt-get install -y \
-        apt-transport-https \
-        ca-certificates \
-        curl \
-        software-properties-common
+      sudo apt apt-get install -y \
+      apt-transport-https \
+      ca-certificates \
+      curl \
+      software-properties-common
 
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --batch --yes --dearmor -o
-        /usr/share/keyrings/docker-archive-keyring.gpg
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
-        echo \
-        "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg]
-        https://download.docker.com/linux/ubuntu \
-        $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+      $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-        sudo apt-get update
-        sudo apt-get install -y docker-ce
+      sudo apt-get update
+      sudo apt-get install -y docker-ce
 
-        DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
-        sudo mkdir -p $DOCKER_CONFIG/cli-plugins
-        sudo curl -SL "https://github.com/docker/compose/releases/download/v2.6.1/docker-compose-$(uname -s)-$(uname
-        -m)" -o $DOCKER_CONFIG/cli-plugins/docker-compose
-        sudo chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+      DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+      sudo mkdir -p $DOCKER_CONFIG/cli-plugins
+      sudo curl -SL "https://github.com/docker/compose/releases/download/v2.6.1/docker-compose-$(uname -s)-$(uname -m)" -o $DOCKER_CONFIG/cli-plugins/docker-compose
+      sudo chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
 
-        # highlight-start
-        Use the arrow keys to navigate: ↓ ↑ → ←
-        ? Select how to proceed with the pending dependencies:
-        ▸ Install dependencies
-        Exit. You will manage these dependencies on your own
-        # highlight-end
-        ```
+      # highlight-start
+      Use the arrow keys to navigate: ↓ ↑ → ←
+      ? Select how to proceed with the pending dependencies:
+      ▸ Install dependencies
+      Exit. You will manage these dependencies on your own
+      # highlight-end
+      ```
 
-        We will go with the `Install dependencies` option, but feel free to go with the `Exit` option, install
-        dependencies on your own and then run Sedge again.
+      We will go with the `Install dependencies` option, but feel free to go with the `Exit` option, install dependencies on your own and then run Sedge again.
 
-    </TabItem>
-    <TabItem value="macos" label="macos">
+  </TabItem>
+  <TabItem value="macos" label="macos">
 
-        If you have missing dependencies, then you need to install it first. Search for instructions in the
-        [dependencies guide](dependencies).
-    </TabItem>
+      If you have missing dependencies, then you need to install it first. Search for instructions in the [dependencies guide](dependencies).
+  </TabItem>
 </Tabs>
 
 
