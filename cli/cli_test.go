@@ -106,13 +106,12 @@ var inspectOut = `
 `
 
 type cliCmdTestCase struct {
-	name       string
-	configPath string
-	runner     commands.CommandRunner
-	fdOut      *bytes.Buffer
-	args       CliCmdFlags
-	isPreErr   bool
-	isErr      bool
+	name     string
+	runner   commands.CommandRunner
+	fdOut    *bytes.Buffer
+	args     CliCmdFlags
+	isPreErr bool
+	isErr    bool
 }
 
 func (flags *CliCmdFlags) argsList() []string {
@@ -162,8 +161,7 @@ func prepareCliCmd(tc cliCmdTestCase) {
 	// Set output buffers
 	log.SetOutput(tc.fdOut)
 	// Set config file path
-	cfgFile = tc.configPath
-	initConfig()
+	initLogging()
 }
 
 func buildCliTestCase(
@@ -206,7 +204,6 @@ func buildCliTestCase(
 	tc.name = name
 	tc.args = args
 	tc.args.generationPath = dcPath
-	tc.configPath = filepath.Join(configPath, "config.yaml")
 	tc.fdOut = new(bytes.Buffer)
 	tc.isPreErr = isPreErr
 	tc.isErr = isErr

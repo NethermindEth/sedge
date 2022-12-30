@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	"github.com/NethermindEth/sedge/configs"
-	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/templates"
 	log "github.com/sirupsen/logrus"
 )
@@ -89,17 +88,10 @@ func (c ClientInfo) Clients(clientTypes []string) (clients OrderedClients, errs 
 		log.Debugf(configs.SupportedClients, clientType, strings.ToLower(strings.Join(supportedClients, ", ")))
 
 		// Get the clients from the configuration file
-		configClients, err := configs.ConfigClients(clientType)
-		if err != nil {
-			errs = append(errs, err)
-			continue
-		}
-		log.Debugf(configs.ConfigClientsMsg, clientType, strings.ToLower(strings.Join(configClients, ", ")))
-
-		for _, client := range configClients {
+		for _, client := range supportedClients {
 			// Check if the client is supported
-			supported := utils.Contains(supportedClients, client)
-			clients[clientType][client] = Client{Name: client, Type: clientType, Supported: supported}
+			//supported := utils.Contains(supportedClients, client)
+			clients[clientType][client] = Client{Name: client, Type: clientType, Supported: true}
 		}
 	}
 
