@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package actions_test
 
 import (
@@ -49,7 +64,7 @@ func validatorNotFoundHelper(t *testing.T, ctrl *gomock.Controller) actions.Sedg
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager)
+	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
 }
 
 func TestSlashingImport_CheckValidatorFailure(t *testing.T) {
@@ -92,7 +107,7 @@ func checkValidatorFailureHelper(t *testing.T, ctrl *gomock.Controller, wantErro
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager)
+	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
 }
 
 func TestSlashingImport_ValidatorStopFailure(t *testing.T) {
@@ -146,7 +161,7 @@ func validatorStopFailureHelper(t *testing.T, ctrl *gomock.Controller) actions.S
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager)
+	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
 }
 
 func TestSlashingImport_ValidatorRunning(t *testing.T) {
@@ -275,7 +290,7 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller) actions.SedgeActi
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager)
+	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
 }
 
 func TestSlashingImport_UnsupportedClient(t *testing.T) {
@@ -366,7 +381,7 @@ func unsupportedClientsHelper(t *testing.T, ctrl *gomock.Controller) actions.Sed
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager)
+	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
 }
 
 const (
