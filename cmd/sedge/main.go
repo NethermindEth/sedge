@@ -52,6 +52,7 @@ func main() {
 		cli.LogsCmd(cmdRunner),
 		cli.VersionCmd(),
 		cli.SlashingExportCmd(sedgeActions),
+		cli.SlashingImportCmd(sedgeActions),
 	)
 	if err := sedgeCmd.Execute(); err != nil {
 		os.Exit(1)
