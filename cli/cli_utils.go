@@ -292,7 +292,7 @@ func handleJWTSecret(flags *CliCmdFlags) error {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	err = os.WriteFile(flags.jwtPath, []byte(jwtscret), os.ModePerm)
+	err = os.WriteFile(flags.jwtPath, []byte(jwtscret), 0o755)
 	if err != nil {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
