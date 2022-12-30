@@ -117,6 +117,9 @@ func (flags *GenCmdFlags) argsList() []string {
 	if flags.feeRecipient != "" {
 		s = append(s, "--fee-recipient", flags.feeRecipient)
 	}
+	if flags.mapAllPorts {
+		s = append(s, "--map-all")
+	}
 	return s
 }
 
@@ -189,9 +192,10 @@ func TestGenerateCmd(t *testing.T) {
 			t,
 			"Wrong sub command", "case_1",
 			GenCmdFlags{
-				executionName: "nethermind",
-				validatorName: "lighthouse",
-				feeRecipient:  "0x0000000000000000000000000000000000000000",
+				executionName:     "nethermind",
+				validatorName:     "lighthouse",
+				feeRecipient:      "0x0000000000000000000000000000000000000000",
+				checkpointSyncUrl: "http://localhost:8545",
 			},
 			globalFlags{
 				install: false,
@@ -431,7 +435,9 @@ func TestGenerateCmd(t *testing.T) {
 		*buildGenerateTestCase(
 			t,
 			"Execution ", "case_1",
-			GenCmdFlags{},
+			GenCmdFlags{
+				mapAllPorts: true,
+			},
 			globalFlags{
 				install:        false,
 				generationPath: "",
