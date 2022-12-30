@@ -33,7 +33,7 @@ func (s *sedgeActions) RunContainers(options RunContainersOptions) error {
 		Path:     filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName),
 		Services: options.Services,
 	})
-	log.Debugf(configs.RunningCommand, upCmd.Cmd)
+	log.Infof(configs.RunningCommand, upCmd.Cmd)
 	_, err := s.commandRunner.RunCMD(upCmd)
 	return err
 }

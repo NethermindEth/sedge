@@ -34,7 +34,7 @@ func (s *sedgeActions) SetupContainers(options SetupContainersOptions) error {
 		Path:     filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName),
 		Services: options.Services,
 	})
-	log.Debugf(configs.RunningCommand, buildCmd.Cmd)
+	log.Infof(configs.RunningCommand, buildCmd.Cmd)
 	if _, err := s.commandRunner.RunCMD(buildCmd); err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func (s *sedgeActions) SetupContainers(options SetupContainersOptions) error {
 		Path:     filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName),
 		Services: options.Services,
 	})
-	log.Debugf(configs.RunningCommand, pullCmd.Cmd)
+	log.Infof(configs.RunningCommand, pullCmd.Cmd)
 	if _, err := s.commandRunner.RunCMD(pullCmd); err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (s *sedgeActions) SetupContainers(options SetupContainersOptions) error {
 		Path:     filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName),
 		Services: options.Services,
 	})
-	log.Debugf(configs.RunningCommand, createCmd.Cmd)
+	log.Infof(configs.RunningCommand, createCmd.Cmd)
 	if _, err := s.commandRunner.RunCMD(createCmd); err != nil {
 		return err
 	}
