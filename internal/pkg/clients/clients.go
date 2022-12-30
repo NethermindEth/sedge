@@ -31,13 +31,11 @@ type ClientInfo struct {
 
 /*
 SupportedClients :
-Get supported client names of type <clientType> for network <network>. A client is supported if it has a docker-compose service template
+Get supported client names of type <clientType> for the ClientInfo's network. A client is supported if it has a docker-compose service template
 
 params :-
 a. clientType string
 Type of client to be returned
-b .network string
-Target network
 
 returns :-
 a. []string
@@ -60,13 +58,11 @@ func (c ClientInfo) SupportedClients(clientType string) (clientsNames []string, 
 
 /*
 Clients :
-Get all the supported and configured clients
+Get all the supported clients for the ClientInfo's network
 
 params :-
 a. clientTypes []string
 Types of client supported. E.g execution, consensus, validator
-b. network
-Target network
 
 returns :-
 a. OrderedClients
@@ -87,9 +83,7 @@ func (c ClientInfo) Clients(clientTypes []string) (clients OrderedClients, errs 
 		}
 		log.Debugf(configs.SupportedClients, clientType, strings.ToLower(strings.Join(supportedClients, ", ")))
 
-		// Get the clients from the configuration file
 		for _, client := range supportedClients {
-			// Check if the client is supported
 			clients[clientType][client] = Client{Name: client, Type: clientType, Supported: true}
 		}
 	}
