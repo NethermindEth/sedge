@@ -131,7 +131,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, sedgeAc
 
 	// Get all clients: supported + configured
 	c := clients.ClientInfo{Network: network}
-	clientsMap, errs := c.Clients(services)
+	clientsMap, errs := c.Clients(lessMevBoost(services))
 	if len(errs) > 0 {
 		return errs[0]
 	}
@@ -154,9 +154,13 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, sedgeAc
 	// Get fee recipient
 	feeRecipient := flags.feeRecipient
 	if feeRecipient == "" {
-		if feeRecipient, err = prompt.FeeRecipient(); err != nil {
-			return err
+		if utils.Contains(services, validator) || utils.Contains(services, consensus) {
+			feeRecipient, err = prompt.FeeRecipient()
+			if err != nil {
+				return err
+			}
 		}
+
 	}
 	var vlStartGracePeriod time.Duration
 	switch network {
@@ -222,6 +226,19 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, sedgeAc
 	}
 
 	return nil
+}
+
+func lessMevBoost(services []string) []string {
+	if !utils.Contains(services, mevBoost) {
+		return services
+	}
+	newServices := make([]string, 0)
+	for _, service := range services {
+		if service != mevBoost {
+			newServices = append(newServices, service)
+		}
+	}
+	return newServices
 }
 
 func initGenPath(path string) error {
