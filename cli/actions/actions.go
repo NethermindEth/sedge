@@ -27,6 +27,7 @@ type SedgeActions interface {
 	SetupContainers(SetupContainersOptions) error
 	RunContainers(RunContainersOptions) error
 	InstallDependencies(InstallDependenciesOptions) error
+	ImportValidatorKeys(ImportValidatorKeysOptions) error
 }
 
 type sedgeActions struct {
