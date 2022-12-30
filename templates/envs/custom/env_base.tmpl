@@ -1,8 +1,8 @@
 {{/* docker-compose_base.tmpl */}}
 {{ define "env" }}
 # --- Global configuration ---
-NETWORK=custom
-{{if .CustomTTD}}TTD={{.CustomTTD}}{{end}}
+NETWORK=custom{{if .CustomTTD}}
+TTD={{.CustomTTD}}{{end}}
 {{template "execution" .}}
 {{template "consensus" .}}
 {{template "validator" .}}
