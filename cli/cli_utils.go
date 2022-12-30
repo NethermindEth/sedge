@@ -20,7 +20,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -32,42 +31,6 @@ import (
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/manifoldco/promptui"
 )
-
-func installOrShowInstructions(cmdRunner commands.CommandRunner, pending []string) (err error) {
-	// notest
-	optInstall, optExit := "Install dependencies", "Exit. You will manage this dependencies on your own"
-	prompt := promptui.Select{
-		Label: "Select how to proceed with the pending dependencies",
-		Items: []string{optInstall, optExit},
-	}
-
-	if err = utils.HandleInstructions(cmdRunner, pending, utils.ShowInstructions); err != nil {
-		return fmt.Errorf(configs.ShowingInstructionsError, err)
-	}
-	_, result, err := prompt.Run()
-	if err != nil {
-		return fmt.Errorf(configs.PromptFailedError, err)
-	}
-
-	switch result {
-	case optInstall:
-		return installDependencies(cmdRunner, pending)
-	default:
-		log.Info(configs.Exiting)
-		os.Exit(0)
-	}
-
-	return nil
-}
-
-func installDependencies(cmdRunner commands.CommandRunner, pending []string) error {
-	if runtime.GOOS != "windows" { // Windows doesn't support docker installation through scripts
-		if err := utils.HandleInstructions(cmdRunner, pending, utils.InstallDependency); err != nil {
-			return fmt.Errorf(configs.InstallingDependenciesError, err)
-		}
-	}
-	return nil
-}
 
 func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error) {
 	var executionClient, consensusClient clients.Client
@@ -401,7 +364,11 @@ func handleJWTSecret(generationPath string) (string, error) {
 		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	err = os.WriteFile(jwtPath, []byte(jwtscret), os.ModePerm)
+	if err := os.MkdirAll(filepath.Dir(jwtPath), 0o755); err != nil {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	err = os.WriteFile(jwtPath, []byte(jwtscret), 0o755)
 	if err != nil {
 		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
