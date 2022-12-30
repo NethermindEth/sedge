@@ -340,9 +340,9 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	// Get custom networks configs
-	var chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath string
+	var customNetworkConfigsData CustomNetworkConfigsData
 	if flags.customChainSpec != "" || flags.customDeployBlock >= 0 || flags.customGenesis != "" || flags.customNetworkConfig != "" {
-		chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err = LoadCustomNetworksConfig(flags)
+		customNetworkConfigsData, err = LoadCustomNetworksConfig(flags)
 		if err != nil {
 			return []error{err}
 		}
@@ -387,11 +387,11 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		ECBootnodes:             *flags.customEnodes,
 		CCBootnodes:             *flags.customEnrs,
 		CustomTTD:               flags.customTTD,
-		CustomChainSpecPath:     chainSpecPath,
-		CustomNetworkConfigPath: networkConfigPath,
-		CustomGenesisPath:       networkGenesisPath,
+		CustomChainSpecPath:     customNetworkConfigsData.ChainSpecPath,
+		CustomNetworkConfigPath: customNetworkConfigsData.NetworkConfigPath,
+		CustomGenesisPath:       customNetworkConfigsData.NetworkGenesisPath,
 		CustomDeployBlock:       fmt.Sprintf("%d", flags.customDeployBlock),
-		CustomDeployBlockPath:   networkDeployBlockPath,
+		CustomDeployBlockPath:   customNetworkConfigsData.NetworkDeployBlockPath,
 	}
 	results, err := generate.GenerateScripts(gd)
 	if err != nil {

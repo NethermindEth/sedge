@@ -357,72 +357,79 @@ func preRunTeku(flags *CliCmdFlags) error {
 	return nil
 }
 
-func LoadCustomNetworksConfig(flags *CliCmdFlags) (string, string, string, string, error) {
-	var chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath string
+type CustomNetworkConfigsData struct {
+	ChainSpecPath          string
+	NetworkConfigPath      string
+	NetworkGenesisPath     string
+	NetworkDeployBlockPath string
+}
+
+func LoadCustomNetworksConfig(flags *CliCmdFlags) (CustomNetworkConfigsData, error) {
+	var customNetworkConfigsData CustomNetworkConfigsData
 
 	destFolder := filepath.Join(flags.generationPath, configs.CustomNetworkConfigsFolder)
 	if _, err := os.Stat(destFolder); err != nil {
 		if os.IsNotExist(err) {
 			err = os.Mkdir(destFolder, os.ModePerm)
 			if err != nil {
-				return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+				return customNetworkConfigsData, err
 			}
 		} else {
-			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+			return customNetworkConfigsData, err
 		}
 	}
 
 	if flags.customChainSpec != "" {
-		chainSpecPath = filepath.Join(destFolder, configs.ExecutionNetworkConfigFileName)
+		customNetworkConfigsData.ChainSpecPath = filepath.Join(destFolder, configs.ExecutionNetworkConfigFileName)
 		log.Info(configs.GettingCustomChainSpec)
-		err := utils.DownloadOrCopy(flags.customChainSpec, chainSpecPath, true)
+		err := utils.DownloadOrCopy(flags.customChainSpec, customNetworkConfigsData.ChainSpecPath, true)
 		if err != nil {
-			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+			return customNetworkConfigsData, err
 		}
-		chainSpecPath, err = filepath.Abs(chainSpecPath)
+		customNetworkConfigsData.ChainSpecPath, err = filepath.Abs(customNetworkConfigsData.ChainSpecPath)
 		if err != nil {
-			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+			return customNetworkConfigsData, err
 		}
 	}
 
 	if flags.customNetworkConfig != "" {
-		networkConfigPath = filepath.Join(destFolder, configs.ConsensusNetworkConfigFileName)
+		customNetworkConfigsData.NetworkConfigPath = filepath.Join(destFolder, configs.ConsensusNetworkConfigFileName)
 		log.Info(configs.GettingCustomNetworkConfig)
-		err := utils.DownloadOrCopy(flags.customNetworkConfig, networkConfigPath, true)
+		err := utils.DownloadOrCopy(flags.customNetworkConfig, customNetworkConfigsData.NetworkConfigPath, true)
 		if err != nil {
-			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+			return customNetworkConfigsData, err
 		}
-		networkConfigPath, err = filepath.Abs(networkConfigPath)
+		customNetworkConfigsData.NetworkConfigPath, err = filepath.Abs(customNetworkConfigsData.NetworkConfigPath)
 		if err != nil {
-			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+			return customNetworkConfigsData, err
 		}
 	}
 
 	if flags.customGenesis != "" {
-		networkGenesisPath = filepath.Join(destFolder, configs.ConsensusNetworkGenesisFileName)
+		customNetworkConfigsData.NetworkGenesisPath = filepath.Join(destFolder, configs.ConsensusNetworkGenesisFileName)
 		log.Info(configs.GettingCustomGenesis)
-		err := utils.DownloadOrCopy(flags.customGenesis, networkGenesisPath, true)
+		err := utils.DownloadOrCopy(flags.customGenesis, customNetworkConfigsData.NetworkGenesisPath, true)
 		if err != nil {
-			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+			return customNetworkConfigsData, err
 		}
-		networkGenesisPath, err = filepath.Abs(networkGenesisPath)
+		customNetworkConfigsData.NetworkGenesisPath, err = filepath.Abs(customNetworkConfigsData.NetworkGenesisPath)
 		if err != nil {
-			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+			return customNetworkConfigsData, err
 		}
 	}
 
 	if flags.customDeployBlock >= 0 {
-		networkDeployBlockPath = filepath.Join(destFolder, configs.ConsensusNetworkDeployBlockFileName)
+		customNetworkConfigsData.NetworkDeployBlockPath = filepath.Join(destFolder, configs.ConsensusNetworkDeployBlockFileName)
 		log.Info(configs.WritingCustomDeployBlock)
-		err := os.WriteFile(networkDeployBlockPath, []byte(fmt.Sprintf("%d", flags.customDeployBlock)), os.ModePerm)
+		err := os.WriteFile(customNetworkConfigsData.NetworkDeployBlockPath, []byte(fmt.Sprintf("%d", flags.customDeployBlock)), os.ModePerm)
 		if err != nil {
-			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, fmt.Errorf(configs.ErrorWritingDeployBlockFile, networkDeployBlockPath, err)
+			return customNetworkConfigsData, fmt.Errorf(configs.ErrorWritingDeployBlockFile, customNetworkConfigsData.NetworkDeployBlockPath, err)
 		}
-		networkDeployBlockPath, err = filepath.Abs(networkDeployBlockPath)
+		customNetworkConfigsData.NetworkDeployBlockPath, err = filepath.Abs(customNetworkConfigsData.NetworkDeployBlockPath)
 		if err != nil {
-			return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, err
+			return customNetworkConfigsData, err
 		}
 	}
 
-	return chainSpecPath, networkConfigPath, networkGenesisPath, networkDeployBlockPath, nil
+	return customNetworkConfigsData, nil
 }
