@@ -44,7 +44,7 @@ func RootCmd() *cobra.Command {
 	// Disable completion default cmd
 	cmd.CompletionOptions.DisableDefaultCmd = true
 	// Persistent flags
-	cmd.PersistentFlags().StringVar(&logLevel, "logLevel", "info", "Set Log Level, e.gg panic, fatal, error, warn, warning, info, debug. trace")
+	cmd.PersistentFlags().StringVar(&logLevel, "logLevel", "info", "Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace")
 	return cmd
 }
 
