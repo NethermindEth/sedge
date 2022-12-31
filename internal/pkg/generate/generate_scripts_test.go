@@ -67,7 +67,7 @@ func generateTestCases(t *testing.T) (tests []generateTestCase) {
 					tests = append(tests,
 						generateTestCase{clients.Client{Name: execution}, clients.Client{Name: consensus}, clients.Client{Name: consensus}, path, network, false},
 						generateTestCase{clients.Client{Name: execution}, clients.Client{Name: consensus}, clients.Client{Name: consensus}, "", network, true},
-						generateTestCase{clients.Client{Name: execution}, clients.Client{Name: consensus}, clients.Client{Name: consensus, Omited: true}, path, network, false})
+						generateTestCase{clients.Client{Name: execution}, clients.Client{Name: consensus}, clients.Client{Name: consensus, Omitted: true}, path, network, false})
 				}
 			}
 		}
