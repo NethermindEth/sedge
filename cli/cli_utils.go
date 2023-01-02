@@ -335,7 +335,7 @@ func LoadCustomNetworksConfig(flags *CliCmdFlags) (CustomNetworkConfigsData, err
 	var customNetworkConfigsData CustomNetworkConfigsData
 	var chainSpecSrc, networkConfigSrc, genesisSrc, deployBlock string
 
-	networkData, ok := configs.NetworksConfigs[flags.network]
+	networkData, ok := configs.NetworksConfigs()[flags.network]
 	if !ok {
 		return customNetworkConfigsData, fmt.Errorf(configs.UnknownNetworkError, flags.network)
 	}

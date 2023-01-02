@@ -312,7 +312,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	// Generate JWT secret if necessary
-	if flags.jwtPath == "" && configs.NetworksConfigs[flags.network].RequireJWT {
+	if flags.jwtPath == "" && configs.NetworksConfigs()[flags.network].RequireJWT {
 		if err = handleJWTSecret(flags); err != nil {
 			return []error{err}
 		}
@@ -341,7 +341,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	combinedClients.Execution.Image = clientImages.execution
 	combinedClients.Consensus.Image = clientImages.consensus
 	combinedClients.Validator.Image = clientImages.validator
-	combinedClients.Validator.Omited = flags.noValidator
+	combinedClients.Validator.Omitted = flags.noValidator
 
 	var vlStartGracePeriod time.Duration
 	switch flags.network {

@@ -144,12 +144,12 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 	}
 	for tmpKind, client := range clients {
 		name := client.Name
-		if client.Omited {
+		if client.Omitted {
 			name = "empty"
 		}
 		tmp, err := templates.Services.ReadFile(strings.Join([]string{
 			"services",
-			configs.NetworksConfigs[gd.Network].NetworkService,
+			configs.NetworksConfigs()[gd.Network].NetworkService,
 			tmpKind,
 			name + ".tmpl",
 		}, "/"))
@@ -300,10 +300,10 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 	}
 	for tmpKind, client := range clients {
 		var tmp []byte
-		if client.Omited {
+		if client.Omitted {
 			tmp, err = templates.Services.ReadFile(strings.Join([]string{
 				"services",
-				configs.NetworksConfigs[gd.Network].NetworkService,
+				configs.NetworksConfigs()[gd.Network].NetworkService,
 				tmpKind,
 				"empty.tmpl",
 			}, "/"))
