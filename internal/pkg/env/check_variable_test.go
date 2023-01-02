@@ -37,7 +37,7 @@ func TestCheckVariable(t *testing.T) {
 	}{
 		{
 			"Test case 1, mainnet, no TTD",
-			ReCONFIG,
+			ReMEV,
 			"mainnet",
 			"execution",
 			"nethermind",
@@ -46,7 +46,7 @@ func TestCheckVariable(t *testing.T) {
 		},
 		{
 			"Test case 2, invalid network, error",
-			ReCONFIG,
+			ReMEV,
 			"testnet",
 			"consensus",
 			"teku",
@@ -55,7 +55,7 @@ func TestCheckVariable(t *testing.T) {
 		},
 		{
 			"Test case 3, invalid clientType, error",
-			ReCONFIG,
+			ReMEV,
 			"mainnet",
 			"test",
 			"test",
@@ -64,7 +64,7 @@ func TestCheckVariable(t *testing.T) {
 		},
 		{
 			"Test case 4, invalid client, error",
-			ReCONFIG,
+			ReMEV,
 			"mainnet",
 			"consensus",
 			"test",
@@ -73,7 +73,7 @@ func TestCheckVariable(t *testing.T) {
 		},
 		{
 			"Test case 5, mainnet, no prysm config",
-			ReCONFIG,
+			ReMEV,
 			"mainnet",
 			"execution",
 			"nethermind",
@@ -82,7 +82,7 @@ func TestCheckVariable(t *testing.T) {
 		},
 		{
 			"Test case 6, goerli, no prysm config in nethermind",
-			ReCONFIG,
+			ReMEV,
 			"goerli",
 			"execution",
 			"nethermind",
@@ -91,7 +91,7 @@ func TestCheckVariable(t *testing.T) {
 		},
 		{
 			"Test case 7, chiado, prysm config, no consensus config",
-			ReCONFIG,
+			ReMEV,
 			"chiado",
 			"consensus",
 			"prysm",
@@ -100,7 +100,7 @@ func TestCheckVariable(t *testing.T) {
 		},
 		{
 			"Test case 8, chiado, prysm config, no validator config",
-			ReCONFIG,
+			ReMEV,
 			"chiado",
 			"validator",
 			"prysm",

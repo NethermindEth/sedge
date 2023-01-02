@@ -3,10 +3,7 @@
   validator-import:
     container_name: validator-import-client
     build:
-      context: github.com/NethermindEth/teku-init-validator{{with .VlCustomCfgDownload}}
-    depends_on:
-      config_consensus:
-        condition: service_completed_successfully{{end}}
+      context: github.com/NethermindEth/teku-init-validator
     volumes:
       - ${VL_DATA_DIR}:/data
       - ${KEYSTORE_DIR}:/keystore{{if .LoggingDriver}}{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
@@ -25,9 +22,7 @@
       validator-import:
         condition: service_completed_successfully
       validator-blocker:
-        condition: service_completed_successfully{{if .VlCustomCfgDownload}}
-      config_consensus:
-        condition: service_completed_successfully{{end}}{{if .WithConsensusClient}}
+        condition: service_completed_successfully{{if .WithConsensusClient}}
       consensus:
         condition: service_healthy{{end}}
     networks:

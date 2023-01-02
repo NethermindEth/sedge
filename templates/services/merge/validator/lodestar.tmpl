@@ -2,10 +2,7 @@
 {{ define "validator" }}
   validator-import:
     container_name: validator-import-client
-    image: ${VL_IMAGE_VERSION}{{with .VlCustomCfgDownload}}
-    depends_on:
-      config_consensus:
-        condition: service_completed_successfully{{end}}
+    image: ${VL_IMAGE_VERSION}
     networks:
       - sedge
     volumes:

@@ -108,5 +108,6 @@ const (
 	ErrorWritingDeployBlockFile       = "error writing custom deploy block file %s: %v"
 	MissingCustomConfigs              = "missing custom configs flags required when running a custom network"
 	InvalidTTD                        = "invalid terminal total difficulty"
+	InvalidDeployBLock                = "invalid deploy block"
 	InvalidGenerationPath             = "invalid generation path %s: %v"
 )

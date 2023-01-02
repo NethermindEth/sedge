@@ -11,7 +11,6 @@ CC_DATA_DIR={{.CcDataDir}}
 CC_LODESTAR_PRESET=mainnet
 CC_JWT_SECRET_PATH={{.JWTSecretPath}}
 CC_FEE_RECIPIENT={{.FeeRecipient}}{{if .CCBootnodes}}
-CC_BOOTNODES="{{ range $index, $enr := .CCBootnodes}}{{if $index}},{{end}}{{$enr}}{{end}}"{{end}}{{if .CustomDeployBlock}}
-DEPLOY_BLOCK={{.CustomDeployBlock}}{{end}}
+CC_BOOTNODES="{{ range $index, $enr := .CCBootnodes}}{{if $index}},{{end}}{{$enr}}{{end}}"{{end}}
 CHECKPOINT_SYNC_URL=https://beaconstate.ethstaker.cc
 {{ end }}

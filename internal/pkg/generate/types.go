@@ -38,7 +38,6 @@ type EnvData struct {
 	ECBootnodes               []string
 	CCBootnodes               []string
 	CustomTTD                 string
-	CustomDeployBlock         string
 }
 
 // GenerationData : Struct Data object for script's generation
@@ -103,20 +102,13 @@ type DockerComposeData struct {
 	SplittedNetwork         bool
 	ClCheckpointSyncUrl     bool
 	LoggingDriver           string
-	CustomCfgDownload       bool
-	RemoteCfg               bool
-	RemoteGen               bool
-	RemoteDpl               bool
-	VlCustomCfgDownload     bool
-	VlRemoteCfg             bool
-	VlRemoteGen             bool
-	VlRemoteDpl             bool
 	CustomConsensusConfigs  bool
 	CustomNetwork           bool
 	CustomChainSpecPath     string
 	CustomNetworkConfigPath string
 	CustomGenesisPath       string
-	CustomDeployBlockPath   string
+	CustomDeployBlock       bool
+	CustomDeployBlockPath   string // Needed for lighthouse
 	VLStartGracePeriod      uint
 }
 

@@ -70,7 +70,7 @@ type CliCmdFlags struct {
 	customChainSpec     string
 	customNetworkConfig string
 	customGenesis       string
-	customDeployBlock   int
+	customDeployBlock   string
 	customEnodes        *[]string
 	customEnrs          *[]string
 	slashingProtection  string
@@ -147,7 +147,7 @@ func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceMana
 	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
 	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
-	cmd.Flags().IntVar(&flags.customDeployBlock, "custom-deploy-block", -1, "Custom network deploy block to use for consensus client.")
+	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
 	flags.customEnodes = cmd.Flags().StringSlice("execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
 	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
 	cmd.Flags().StringVar(&flags.slashingProtection, "slashing-protection", "", "Path to the file with slashing protection interchange data (EIP-3076)")
@@ -200,7 +200,7 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 		return nil, fmt.Errorf(configs.UnknownNetworkError, flags.network)
 	}
 	if flags.network == configs.CustomNetwork.Name {
-		if flags.customChainSpec == "" || flags.customNetworkConfig == "" || flags.customGenesis == "" || flags.customTTD == "" || flags.customDeployBlock == -1 {
+		if flags.customChainSpec == "" || flags.customNetworkConfig == "" || flags.customGenesis == "" || flags.customTTD == "" || flags.customDeployBlock == "" {
 			return nil, fmt.Errorf(configs.MissingCustomConfigs)
 		}
 	}
@@ -209,6 +209,12 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 	if flags.customTTD != "" &&
 		!regexp.MustCompile(`^[1-9]\d*$`).Match([]byte(strings.TrimSpace(flags.customTTD))) {
 		return nil, fmt.Errorf(configs.InvalidTTD)
+	}
+
+	// Validate custom deploy block
+	if flags.customTTD != "" &&
+		!regexp.MustCompile(`^[1-9]\d*$`).Match([]byte(strings.TrimSpace(flags.customDeployBlock))) {
+		return nil, fmt.Errorf(configs.InvalidDeployBLock)
 	}
 
 	// Validate fee recipient
@@ -327,12 +333,9 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	// Get custom networks configs
-	var customNetworkConfigsData CustomNetworkConfigsData
-	if flags.customChainSpec != "" || flags.customDeployBlock >= 0 || flags.customGenesis != "" || flags.customNetworkConfig != "" {
-		customNetworkConfigsData, err = LoadCustomNetworksConfig(flags)
-		if err != nil {
-			return []error{err}
-		}
+	customNetworkConfigsData, err := LoadCustomNetworksConfig(flags)
+	if err != nil {
+		return []error{err}
 	}
 
 	combinedClients.Execution.Image = clientImages.execution
@@ -377,7 +380,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		CustomChainSpecPath:     customNetworkConfigsData.ChainSpecPath,
 		CustomNetworkConfigPath: customNetworkConfigsData.NetworkConfigPath,
 		CustomGenesisPath:       customNetworkConfigsData.NetworkGenesisPath,
-		CustomDeployBlock:       fmt.Sprintf("%d", flags.customDeployBlock),
+		CustomDeployBlock:       flags.customDeployBlock,
 		CustomDeployBlockPath:   customNetworkConfigsData.NetworkDeployBlockPath,
 	}
 	results, err := generate.GenerateScripts(gd)

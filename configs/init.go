@@ -52,10 +52,13 @@ var SepoliaEthereumTestnet NetworkConfig = NetworkConfig{
 }
 
 var ChiadoGnosisTestnet NetworkConfig = NetworkConfig{
-	Name:               "chiado",
-	RequireJWT:         true,
-	NetworkService:     "merge",
-	GenesisForkVersion: "0x0000006f",
+	Name:                     "chiado",
+	RequireJWT:               true,
+	NetworkService:           "merge",
+	GenesisForkVersion:       "0x0000006f",
+	DefaultCustomConfig:      "https://github.com/gnosischain/configs/raw/main/chiado/config.yaml",
+	DefaultCustomGenesis:     "https://github.com/gnosischain/configs/raw/main/chiado/genesis.ssz",
+	DefaultCustomDeployBlock: "0",
 }
 
 var GnosisMainnet NetworkConfig = NetworkConfig{

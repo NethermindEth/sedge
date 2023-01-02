@@ -19,9 +19,6 @@ import "regexp"
 
 var (
 	ReTTD         = regexp.MustCompile(`TTD=(.*)`)
-	ReCONFIG      = regexp.MustCompile(`CONFIG_URL=(.*)`)
-	ReGENESIS     = regexp.MustCompile(`GENESIS_URL=(.*)`)
-	ReDEPLOY      = regexp.MustCompile(`DEPLOY_BLOCK=(.*)`)
 	ReMEV         = regexp.MustCompile(`MEV=(.*)`)
 	ReXEEV        = regexp.MustCompile(`XEE_VERSION=(.*)`)
 	ReClBOOTNODES = regexp.MustCompile(`CC_BOOTNODES=(.*)`)

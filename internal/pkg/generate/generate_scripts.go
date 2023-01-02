@@ -183,75 +183,6 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 		return "", err
 	}
 
-	// Check for custom network config
-	ccRemoteCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient.Name)
-	if err != nil {
-		return "", err
-	}
-	if ccRemoteCfg { // Have to download custom configs
-		if gd.CustomNetworkConfigPath == "" { // Setup paths to use downloaded configs
-			gd.CustomNetworkConfigPath = "./config.yaml"
-		} else { // Overriding custom configs, no need to download
-			ccRemoteCfg = false
-		}
-	}
-	ccRemoteGen, err := env.CheckVariable(env.ReGENESIS, gd.Network, "consensus", gd.ConsensusClient.Name)
-	if err != nil {
-		return "", err
-	}
-	if ccRemoteGen { // Have to download custom genesis
-		if gd.CustomGenesisPath == "" { // Setup paths to use downloaded genesis
-			gd.CustomGenesisPath = "./genesis.ssz"
-		} else { // Overriding custom genesis, no need to download
-			ccRemoteGen = false
-		}
-	}
-	ccRemoteDpl, err := env.CheckVariable(env.ReDEPLOY, gd.Network, "consensus", gd.ConsensusClient.Name)
-	if err != nil {
-		return "", err
-	}
-	if ccRemoteDpl { // Have to download custom deploy_block
-		if gd.CustomDeployBlockPath == "" { // Setup paths to use downloaded deploy_block
-			gd.CustomDeployBlockPath = "./deploy_block.txt"
-		} else { // Overriding custom deploy_block, no need to download
-			ccRemoteDpl = false
-		}
-	}
-
-	vlRemoteCfg, err := env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient.Name)
-	if err != nil {
-		return "", err
-	}
-	if vlRemoteCfg { // Have to download custom configs
-		if gd.CustomNetworkConfigPath == "" { // Setup paths to use downloaded configs
-			gd.CustomNetworkConfigPath = "config.yaml"
-		} else { // Overriding custom configs, no need to download
-			vlRemoteCfg = false
-		}
-	}
-	vlRemoteGen, err := env.CheckVariable(env.ReGENESIS, gd.Network, "validator", gd.ValidatorClient.Name)
-	if err != nil {
-		return "", err
-	}
-	if vlRemoteGen { // Have to download custom genesis
-		if gd.CustomGenesisPath == "" { // Setup paths to use downloaded genesis
-			gd.CustomGenesisPath = "./genesis.ssz"
-		} else { // Overriding custom genesis, no need to download
-			vlRemoteGen = false
-		}
-	}
-	vlRemoteDpl, err := env.CheckVariable(env.ReDEPLOY, gd.Network, "validator", gd.ValidatorClient.Name)
-	if err != nil {
-		return "", err
-	}
-	if vlRemoteDpl { // Have to download custom deploy_block
-		if gd.CustomDeployBlockPath == "" { // Setup paths to use downloaded deploy_block
-			gd.CustomDeployBlockPath = "./deploy_block.txt"
-		} else { // Overriding custom deploy_block, no need to download
-			vlRemoteDpl = false
-		}
-	}
-
 	// Check for XEE_VERSION in teku
 	xeeVersion, err := env.CheckVariable(env.ReXEEV, gd.Network, "consensus", gd.ConsensusClient.Name)
 	if err != nil {
@@ -311,13 +242,7 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
 		LoggingDriver:       gd.LoggingDriver,
 		VLStartGracePeriod:  gd.VLStartGracePeriod,
-		// Custom configs data
-		CustomCfgDownload: ccRemoteCfg || ccRemoteGen || ccRemoteDpl ||
-			vlRemoteCfg || vlRemoteGen || vlRemoteDpl, // Need to download something for consensus node
-		RemoteCfg:     ccRemoteCfg || vlRemoteCfg,               // Download config.yaml
-		RemoteGen:     ccRemoteGen || vlRemoteGen,               // Download genesis.ssz
-		RemoteDpl:     ccRemoteDpl || vlRemoteDpl,               // Download deploy_block.txt
-		CustomNetwork: gd.Network == configs.CustomNetwork.Name, // Used custom templates
+		CustomNetwork:       gd.Network == configs.CustomNetwork.Name, // Used custom templates
 		CustomConsensusConfigs: gd.CustomNetworkConfigPath != "" ||
 			gd.CustomGenesisPath != "" ||
 			gd.CustomDeployBlockPath != "", // Have custom configs paths
@@ -418,7 +343,6 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 		ECBootnodes:               gd.ECBootnodes,
 		CCBootnodes:               gd.CCBootnodes,
 		CustomTTD:                 gd.CustomTTD,
-		CustomDeployBlock:         gd.CustomDeployBlock,
 	}
 
 	// Fix prysm rpc url

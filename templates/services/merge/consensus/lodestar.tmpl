@@ -4,10 +4,7 @@
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{with .CustomCfgDownload}}
-    depends_on:
-      config_consensus:
-        condition: service_completed_successfully{{end}}
+    image: ${CC_IMAGE_VERSION}
     healthcheck:
       test: "(curl -s -o /dev/null -w \"%{http_code}\" -X GET http://127.0.0.1:4000/eth/v1/node/health | grep -q 200) || exit 1"
       interval: 5m
@@ -18,7 +15,7 @@
     volumes:
       - ${CC_DATA_DIR}:/var/lib/lodestar/consensus
       - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{if .CustomDeployBlockPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{if .CustomGenesisPath}}
       - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
@@ -34,8 +31,8 @@
       - --preset=${CC_LODESTAR_PRESET}
       - --dataDir=/var/lib/lodestar/consensus{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       - --paramsFile=/network_config/config.yml{{end}}{{if .CustomGenesisPath}}
-      - --genesisStateFile=/network_config/genesis.ssz{{end}}{{if .CustomDeployBlockPath}}
-      - --eth1.depositContractDeployBlock=${DEPLOY_BLOCK}{{end}}{{else}}
+      - --genesisStateFile=/network_config/genesis.ssz{{end}}{{if .CustomDeployBlock}}
+      - --eth1.depositContractDeployBlock={{.CustomDeployBlock}}{{end}}{{else}}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --eth1=true
       - --eth1.providerUrls=${EC_API_URL}{{range $url := .FallbackELUrls}},{{$url}}{{end}}

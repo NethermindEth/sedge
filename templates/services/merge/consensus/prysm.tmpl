@@ -4,10 +4,7 @@
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{with .CustomCfgDownload}}
-    depends_on:
-      config_consensus:
-        condition: service_completed_successfully{{end}}
+    image: ${CC_IMAGE_VERSION}
     healthcheck:
       test: "(curl -s -o /dev/null -w \"%{http_code}\" -X GET http://127.0.0.1:4000/eth/v1/node/health | grep -q 200) || exit 1"
       interval: 5m
@@ -30,8 +27,8 @@
       - {{.ClApiPort}}
       - {{.ClAdditionalApiPort}}
     command:{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - --chain-config-file=/network_config/config.yml{{end}}{{if .CustomDeployBlockPath}}
-      - --contract-deployment-block=${DEPLOY_BLOCK}{{end}}{{if .CustomGenesisPath}}
+      - --chain-config-file=/network_config/config.yml{{end}}{{if .CustomDeployBlock}}
+      - --contract-deployment-block={{.CustomDeployBlock}}{{end}}{{if .CustomGenesisPath}}
       - --genesis-state=/network_config/genesis.ssz{{end}}{{else}}
       - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}{{range $enr := .CCBootnodes}}
       - --bootstrap-node={{$enr}}{{end}}{{with .TTD}}
