@@ -1,6 +1,7 @@
 {{/* teku.tmpl */}}
 {{ define "consensus" }}
-  consensus:
+  consensus:{{if and (ge .UID 0) (ge .GID 0)}}
+    user: "{{.UID}}:{{.GID}}"{{end}}
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped

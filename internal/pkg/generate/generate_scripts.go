@@ -250,6 +250,8 @@ func generateDockerComposeScripts(gd GenerationData, envFilePath string) (docker
 		CustomNetworkConfigPath: gd.CustomNetworkConfigPath, // Path to config.yaml
 		CustomGenesisPath:       gd.CustomGenesisPath,       // Path to genesis.ssz
 		CustomDeployBlockPath:   gd.CustomDeployBlockPath,   // Path to deploy_block.txt
+		UID:                     os.Geteuid(),
+		GID:                     os.Getegid(),
 	}
 
 	dockerComposePath = filepath.Join(gd.GenerationPath, configs.DefaultDockerComposeScriptName)

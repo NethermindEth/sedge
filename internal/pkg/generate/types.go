@@ -110,6 +110,8 @@ type DockerComposeData struct {
 	CustomDeployBlock       bool
 	CustomDeployBlockPath   string // Needed for lighthouse
 	VLStartGracePeriod      uint
+	UID                     int // Needed for teku
+	GID                     int // Needed for teku
 }
 
 // WithConsensusClient returns true if the consensus client is explicitly required
