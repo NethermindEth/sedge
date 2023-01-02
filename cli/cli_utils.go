@@ -346,9 +346,9 @@ func LoadCustomNetworksConfig(flags *CliCmdFlags) (CustomNetworkConfigsData, err
 		}
 		return def
 	}
-	chainSpecSrc = eval(flags.customChainSpec, networkData.DefaultCustomChainSpec)
-	networkConfigSrc = eval(flags.customNetworkConfig, networkData.DefaultCustomChainSpec)
-	genesisSrc = eval(flags.customGenesis, networkData.DefaultCustomChainSpec)
+	chainSpecSrc = eval(flags.customChainSpec, networkData.DefaultCustomChainSpecSrc)
+	networkConfigSrc = eval(flags.customNetworkConfig, networkData.DefaultCustomConfigSrc)
+	genesisSrc = eval(flags.customGenesis, networkData.DefaultCustomGenesisSrc)
 	deployBlock = eval(flags.customDeployBlock, networkData.DefaultCustomDeployBlock)
 
 	// Check if any custom config is needed
