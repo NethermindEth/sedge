@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -257,14 +256,14 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	// Generate JWT secret if necessary
-	if flags.jwtPath == "" && configs.NetworkConfigs()[flags.network].RequireJWT {
-		if err = handleJWTSecret(flags); err != nil {
-			return []error{err}
-		}
-	} else if filepath.IsAbs(flags.jwtPath) { // Ensure jwtPath is absolute
-		if flags.jwtPath, err = filepath.Abs(flags.jwtPath); err != nil {
-			return []error{err}
-		}
+	jwtPath := flags.jwtPath
+	jwtPath, err = sedgeActions.CreateJwtSecrets(actions.CreateJwtSecretOptions{
+		JwtPath:        jwtPath,
+		Network:        flags.network,
+		GenerationPath: flags.generationPath,
+	})
+	if err != nil {
+		return nil
 	}
 
 	// Get fee recipient
@@ -302,7 +301,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		Network:            flags.network,
 		CheckpointSyncUrl:  flags.checkpointSyncUrl,
 		FeeRecipient:       flags.feeRecipient,
-		JWTSecretPath:      flags.jwtPath,
+		JWTSecretPath:      jwtPath,
 		Graffiti:           flags.graffiti,
 		FallbackELUrls:     *flags.fallbackEL,
 		ElExtraFlags:       *flags.elExtraFlags,
