@@ -346,11 +346,22 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	if flags.run {
-		if utils.Contains(*flags.services, "validator") {
-			*flags.services = append(*flags.services, "validator-import")
-		}
 		if err := buildContainers(cmdRunner, *flags.services, flags.generationPath); err != nil {
 			return []error{err}
+		}
+		// Import validator keys
+		if utils.Contains(*flags.services, "validator") {
+			keysPath, err := filepath.Abs(filepath.Join(flags.generationPath, "keystore"))
+			if err != nil {
+				return []error{err}
+			}
+			if err := sedgeActions.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+				ValidatorClient: flags.validatorName,
+				Network:         flags.network,
+				From:            keysPath,
+			}); err != nil {
+				return []error{err}
+			}
 		}
 		if flags.slashingProtection != "" {
 			// Setup wait for validator import
