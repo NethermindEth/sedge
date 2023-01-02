@@ -11,7 +11,6 @@ id: cli
 
 ```
 $ sedge cli -h
-Initializing configuration
 Run the setup tool on-premise in a quick way. Provide only the command line
         options and the tool will do all the work.
 
@@ -51,7 +50,7 @@ Flags:
   -h, --help                              help for cli
 
 Global Flags:
-      --config string   config file (default is $HOME/.sedge.yaml)
+      --logLevel string   Set Log Level (default "info")
 ```
 
 ## Execution Example
@@ -62,14 +61,9 @@ Global Flags:
 
 ```logs
 $ ./sedge cli
-
-Initializing configuration
-Config File ".sedge" Not Found in "[/home/sedge]"
-Config file not found on the path provided nor in the home directory
-# highlight-next-line
-Generating config file in the /home/sedge directory
-2022-XX-XX 00:00:00 -- [INFO] [Logger Init] Logging configuration: {Level:info}
 # highlight-start
+2022-XX-XX 00:00:00 -- [INFO] [Logger Init] Log level: info
+2022-XX-XX 00:00:00 -- [INFO] You are running the latest version of sedge. Version:  v0.5.1
 2022-XX-XX 00:00:00 -- [WARN] Execution client not provided. A random client will be selected. Random client: nethermind
 2022-XX-XX 00:00:00 -- [WARN] Consensus and validator clients not provided. Selecting same pair of clients for consensus and validator clients using a random client. Random client: lighthouse
 # highlight-end
