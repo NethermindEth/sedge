@@ -153,7 +153,6 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | ---------- | ---------- | ---------- |
 | Nethermind | Lighthouse | Lighthouse |
 |            | Lodestar   | Lodestar   |
-|            | Prysm      | Prysm      |
 |            | Teku       | Teku       |
 
 ### Chiado (Gnosis testnet)

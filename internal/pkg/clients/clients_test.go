@@ -18,8 +18,6 @@ package clients
 import (
 	"fmt"
 	"testing"
-
-	"github.com/spf13/viper"
 )
 
 // TODO: Add testcases for other networks
@@ -63,20 +61,6 @@ type clientsTestCase struct {
 	isErr              bool
 }
 
-func prepareGetConfigClientsTestCase(testCase clientsTestCase) {
-	for key, value := range testCase.configClientsTypes {
-		viper.Set(key+"Clients", value)
-	}
-}
-
-func cleanGetConfigClientsTestCase(_ clientsTestCase) {
-	viper.Reset()
-}
-
-func cleanAll() {
-	viper.Reset()
-}
-
 func validateClients(resultClients OrderedClients, tc clientsTestCase) bool {
 	// Check if all query clients types are in the result types
 Loop1:
@@ -105,12 +89,11 @@ Loop1:
 
 func TestClients(t *testing.T) {
 	inputs := [...]clientsTestCase{
-		{},
 		{
 			map[string][]string{
-				"consensus": {"lighthouse"},
-				"execution": {"nethermind"},
-				"validator": {"lighthouse"},
+				"consensus": {"lighthouse", "prysm", "teku", "lodestar"},
+				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
+				"execution": {"nethermind", "geth", "besu", "erigon"},
 			},
 			[]string{"consensus"},
 			"mainnet",
@@ -128,9 +111,8 @@ func TestClients(t *testing.T) {
 		},
 		{
 			map[string][]string{
-				"consensus": {"lighthouse"},
-				"execution": {"nethermind"},
-				"validator": {"lighthouse"},
+				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
+				"execution": {"nethermind", "geth", "besu", "erigon"},
 			},
 			[]string{"execution", "validator"},
 			"mainnet",
@@ -138,35 +120,42 @@ func TestClients(t *testing.T) {
 		},
 		{
 			map[string][]string{
-				"consensus": {"lighthouse"},
-				"execution": {"nethermind"},
-				"validator": {"lighthouse"},
+				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
+				"consensus": {"lighthouse", "prysm", "teku", "lodestar"},
+				"execution": {"nethermind", "geth", "besu", "erigon"},
 			},
 			[]string{"consensus", "other"},
 			"mainnet",
 			true,
 		},
+		{
+			map[string][]string{
+				"validator": {"lighthouse", "teku", "lodestar"},
+				"consensus": {"lighthouse", "teku", "lodestar"},
+				"execution": {"nethermind"},
+			},
+			[]string{"consensus", "execution", "validator"},
+			"gnosis",
+			false,
+		},
 	}
 
-	t.Cleanup(cleanAll)
+	for i, input := range inputs {
+		t.Run(fmt.Sprintf("Network %s, testcase: %d", input.network, i), func(t *testing.T) {
+			descr := fmt.Sprintf("Clients(%s)", input.query)
 
-	for _, input := range inputs {
-		descr := fmt.Sprintf("Clients(%s)", input.query)
-
-		prepareGetConfigClientsTestCase(input)
-
-		c := ClientInfo{Network: input.network}
-		if res, err := c.Clients(input.query); input.isErr && err == nil {
-			t.Errorf("%s expected to fail", descr)
-		} else if !input.isErr {
-			if err != nil {
-				t.Errorf("%s failed: %v", descr, err)
-			} else if !validateClients(res, input) {
-				t.Errorf("%s got invalid result: %v", descr, res)
+			c := ClientInfo{Network: input.network}
+			if res, err := c.Clients(input.query); input.isErr && err == nil {
+				t.Errorf("%s expected to fail", descr)
+			} else if !input.isErr {
+				if err != nil {
+					t.Errorf("%s failed: %v", descr, err)
+				} else if !validateClients(res, input) {
+					t.Errorf("%s got invalid result: %v", descr, res)
+				}
 			}
-		}
 
-		cleanGetConfigClientsTestCase(input)
+		})
 	}
 }
 
