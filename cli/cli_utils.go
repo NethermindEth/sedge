@@ -73,7 +73,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 	} else {
-		executionClient.Omited = true
+		executionClient.Omitted = true
 	}
 	// consensus client
 	if utils.Contains(services, consensus) {
@@ -91,7 +91,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 	} else {
-		consensusClient.Omited = true
+		consensusClient.Omitted = true
 	}
 	// validator client
 	if utils.Contains(services, validator) && !flags.noValidator {
@@ -109,7 +109,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 	} else {
-		validatorClient.Omited = true
+		validatorClient.Omitted = true
 	}
 
 	return &clients.Clients{
@@ -163,14 +163,14 @@ func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliC
 		val.Name = flags.validatorName
 	}
 	if !utils.Contains(*flags.services, execution) && len(*flags.services) > 0 && (*flags.services)[0] != "all" {
-		exec.Omited = true
+		exec.Omitted = true
 	}
 	if !utils.Contains(*flags.services, consensus) && len(*flags.services) > 0 && (*flags.services)[0] != "all" {
-		cons.Omited = true
+		cons.Omitted = true
 	}
 	if !utils.Contains(*flags.services, validator) && len(*flags.services) > 0 && (*flags.services)[0] != "all" ||
 		flags.noValidator {
-		val.Omited = true
+		val.Omitted = true
 	}
 
 	combinedClients = clients.Clients{

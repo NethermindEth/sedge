@@ -33,7 +33,6 @@ import (
 
 type keysCmdTestCase struct {
 	name           string
-	configPath     string
 	network        string
 	keystorePath   string
 	passphrasePath string
@@ -75,7 +74,6 @@ func buildKeysTestCase(t *testing.T, caseName, caseDataPath, caseNetwork string,
 	}
 
 	tc.name = caseName
-	tc.configPath = filepath.Join(configPath, "config.yaml")
 	tc.network = caseNetwork
 	tc.keystorePath = keystorePath
 	tc.mnemnonicPath = mnemonicPath
@@ -103,7 +101,6 @@ func TestKeysCmd(t *testing.T) {
 			rootCmd.AddCommand(KeysCmd(tc.runner, tc.prompt))
 			rootCmd.SetArgs([]string{
 				"keys",
-				"--config", tc.configPath,
 				"--network", tc.network,
 				"--path", tc.keystorePath,
 				"--mnemonic-path", tc.mnemnonicPath,
@@ -143,7 +140,6 @@ func TestKeysCmd_RandomPassphrase(t *testing.T) {
 		rootCmd.AddCommand(KeysCmd(&test.SimpleCMDRunner{}, prompt))
 		rootCmd.SetArgs([]string{
 			"keys",
-			"--config", tc.configPath,
 			"--network", tc.network,
 			"--path", tc.keystorePath,
 			"--mnemonic-path", tc.mnemnonicPath,

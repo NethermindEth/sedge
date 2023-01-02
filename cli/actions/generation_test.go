@@ -27,7 +27,7 @@ func newAction(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
 func TestGenerateDockerCompose(t *testing.T) {
 	samplePath := t.TempDir()
 	sampleData := &generate.GenData{
-		ExecutionClient: &clients.Client{Name: "nethermind", Omited: false},
+		ExecutionClient: &clients.Client{Name: "nethermind", Omitted: false},
 		Network:         "mainnet",
 	}
 	sedgeAction := newAction(t, nil)
@@ -73,7 +73,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 func TestFolderCreationOnCompose(t *testing.T) {
 	samplePath := t.TempDir() + "test"
 	sampleData := &generate.GenData{
-		ExecutionClient: &clients.Client{Name: "nethermind", Omited: false},
+		ExecutionClient: &clients.Client{Name: "nethermind", Omitted: false},
 		Network:         "mainnet",
 	}
 	sedgeAction := newAction(t, nil)

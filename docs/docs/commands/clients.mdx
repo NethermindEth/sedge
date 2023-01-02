@@ -11,7 +11,6 @@ Running `sedge clients` will give you a list of supported clients for consensus,
 
 ```
 $ sedge clients -h
-Initializing configuration
 List supported clients for execution and consensus engines
 
 Usage:
@@ -21,7 +20,8 @@ Flags:
   -h, --help   help for clients
 
 Global Flags:
-      --config string   config file (default is $HOME/.sedge.yaml)
+      --logLevel string   Set Log Level (default "info")
+
 ```
 
 ## Execution Example
@@ -30,11 +30,9 @@ The execution of `sedge clients` will result in an output like this, that will s
 
 ```
 $ sedge clients
-Initializing configuration
-Using config file: /Users/maceo/.sedge.yaml
-2022-12-08 08:57:47 -- [INFO] [Logger Init] Logging configuration: {Level:info}
-2022-12-08 08:57:48 -- [INFO] You are running the latest version of sedge. Version:  v0.5.1
-2022-12-08 08:57:48 -- [INFO] Listing supported clients for network chiado
+2022-00-00 00:00:00 -- [INFO] [Logger Init] Log level: info
+2022-00-00 00:00:00 -- [INFO] You are running the latest version of sedge. Version:  v0.5.1
+2022-00-00 00:00:00 -- [INFO] Listing supported clients for network chiado
 
  #   Execution Clients   Consensus Clients   Validator Clients
 === =================== =================== ===================
@@ -42,25 +40,15 @@ Using config file: /Users/maceo/.sedge.yaml
  2   -                   lodestar            lodestar
  3   -                   teku                teku
 
-2022-12-08 08:57:48 -- [INFO] Listing supported clients for network gnosis
+2022-00-00 00:00:00 -- [INFO] Listing supported clients for network gnosis
 
  #   Execution Clients   Consensus Clients   Validator Clients
 === =================== =================== ===================
  1   nethermind          lighthouse          lighthouse
  2   -                   lodestar            lodestar
- 3   -                   prysm               teku
- 4   -                   teku                -
+ 3   -                   teku                teku
 
-2022-12-08 08:57:48 -- [INFO] Listing supported clients for network goerli
-
- #   Execution Clients   Consensus Clients   Validator Clients
-=== =================== =================== ===================
- 1   besu                lighthouse          lighthouse
- 2   erigon              lodestar            lodestar
- 3   geth                prysm               prysm
- 4   nethermind          teku                teku
-
-2022-12-08 08:57:48 -- [INFO] Listing supported clients for network mainnet
+2022-00-00 00:00:00 -- [INFO] Listing supported clients for network goerli
 
  #   Execution Clients   Consensus Clients   Validator Clients
 === =================== =================== ===================
@@ -69,7 +57,7 @@ Using config file: /Users/maceo/.sedge.yaml
  3   geth                prysm               prysm
  4   nethermind          teku                teku
 
-2022-12-08 08:57:48 -- [INFO] Listing supported clients for network sepolia
+2022-00-00 00:00:00 -- [INFO] Listing supported clients for network mainnet
 
  #   Execution Clients   Consensus Clients   Validator Clients
 === =================== =================== ===================
@@ -78,7 +66,7 @@ Using config file: /Users/maceo/.sedge.yaml
  3   geth                prysm               prysm
  4   nethermind          teku                teku
 
-2022-12-08 08:57:48 -- [INFO] Listing clients provided in configuration file
+2022-00-00 00:00:00 -- [INFO] Listing supported clients for network sepolia
 
  #   Execution Clients   Consensus Clients   Validator Clients
 === =================== =================== ===================
@@ -86,5 +74,4 @@ Using config file: /Users/maceo/.sedge.yaml
  2   erigon              lodestar            lodestar
  3   geth                prysm               prysm
  4   nethermind          teku                teku
-
 ```

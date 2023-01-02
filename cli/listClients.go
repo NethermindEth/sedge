@@ -17,7 +17,6 @@ limitations under the License.
 package cli
 
 import (
-	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
@@ -56,13 +55,6 @@ func runListClientsCmd(cmd *cobra.Command, args []string) error {
 		}
 		ui.WriteListClientsTable(cmd.OutOrStdout(), data)
 	}
-
-	log.Infof("Listing clients provided in configuration file\n")
-	data, err := buildData(configs.ConfigClients)
-	if err != nil {
-		return err
-	}
-	ui.WriteListClientsTable(cmd.OutOrStdout(), data)
 
 	return nil
 }

@@ -53,7 +53,7 @@ func validateClients(gd *GenData) error {
 }
 
 func validateValidator(gd *GenData, c *clients.ClientInfo) error {
-	if gd.ValidatorClient == nil || gd.ValidatorClient.Omited {
+	if gd.ValidatorClient == nil || gd.ValidatorClient.Omitted {
 		return nil
 	}
 	validatorClients, err := c.SupportedClients(validator)
@@ -67,7 +67,7 @@ func validateValidator(gd *GenData, c *clients.ClientInfo) error {
 }
 
 func validateExecution(gd *GenData, c *clients.ClientInfo) error {
-	if gd.ExecutionClient == nil || gd.ExecutionClient.Omited {
+	if gd.ExecutionClient == nil || gd.ExecutionClient.Omitted {
 		return nil
 	}
 	executionClients, err := c.SupportedClients(execution)
@@ -81,7 +81,7 @@ func validateExecution(gd *GenData, c *clients.ClientInfo) error {
 }
 
 func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
-	if gd.ConsensusClient == nil || gd.ConsensusClient.Omited {
+	if gd.ConsensusClient == nil || gd.ConsensusClient.Omitted {
 		return nil
 	}
 
@@ -105,7 +105,7 @@ func getClients(gd *GenData) map[string]*clients.Client {
 
 	for i := range cls {
 		if cls[i] == nil {
-			cls[i] = &clients.Client{Omited: true}
+			cls[i] = &clients.Client{Omitted: true}
 		}
 	}
 
@@ -159,11 +159,11 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 
 	for tmpKind, client := range cls {
 		name := client.Name
-		if client.Omited {
+		if client.Omitted {
 			name = empty
 		}
 		tmp, err := templates.Services.ReadFile(filepath.Join("services",
-			configs.NetworksConfigs[gd.Network].NetworkService,
+			configs.NetworkConfigs()[gd.Network].NetworkService,
 			tmpKind,
 			name+".tmpl"))
 		if err != nil {
@@ -175,7 +175,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		}
 	}
 	validatorBlockerTemplate := ""
-	if !cls[validator].Omited {
+	if !cls[validator].Omitted {
 		validatorBlockerTemplate = "validator-blocker"
 	} else {
 		validatorBlockerTemplate = "empty-validator-blocker"
@@ -206,11 +206,11 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	var ccRemoteCfg, ccRemoteGen, ccRemoteDpl, xeeVersion, clCheckpointSyncUrl bool
 	var bootnodes []string
 
-	if !cls[execution].Omited {
+	if !cls[execution].Omitted {
 		gd.ExecutionClient.Endpoint = configs.OnPremiseExecutionURL
 	}
 
-	if !cls[consensus].Omited {
+	if !cls[consensus].Omitted {
 		gd.ConsensusClient.Endpoint = configs.OnPremiseConsensusURL
 		// Check for custom network config
 		ccRemoteCfg, err = env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient.Name)
@@ -246,7 +246,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	// Check vars related to Validator service
 	var vlRemoteCfg, vlRemoteGen, vlRemoteDpl, mevSupported bool
 
-	if !cls[validator].Omited {
+	if !cls[validator].Omitted {
 		vlRemoteCfg, err = env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient.Name)
 		if err != nil {
 			return err
@@ -268,7 +268,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	// If consensus is running with other services, and not set the MevBoostEndpoint, set it to the default
-	if !cls[consensus].Omited && (!cls[execution].Omited || !cls[validator].Omited) && gd.MevBoostEndpoint == "" && gd.Mev {
+	if !cls[consensus].Omitted && (!cls[execution].Omitted || !cls[validator].Omitted) && gd.MevBoostEndpoint == "" && gd.Mev {
 		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ConsensusClient.Name)
 		if err != nil {
 			return err
@@ -345,10 +345,10 @@ func EnvFile(gd *GenData, at io.Writer) error {
 
 	for tmpKind, client := range cls {
 		var tmp []byte
-		if client.Omited {
+		if client.Omitted {
 			tmp, err = templates.Services.ReadFile(filepath.Join(
 				"services",
-				configs.NetworksConfigs[gd.Network].NetworkService,
+				configs.NetworkConfigs()[gd.Network].NetworkService,
 				tmpKind,
 				"empty.tmpl"))
 			if err != nil {

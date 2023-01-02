@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Validator service now always restarts unless stopped.
   - Removed `v` from the tag on release scripts. Now we should use `Tag=v1.0.0` instead of `Tag=1.0.0`.
 
+### Removed
+
+- Removed config file dependency.
+- Removed `prysm` from consensus templates on Gnosis as supported client.
+
 ## [v0.6.0] - 2022-12-23
 
 ### Added

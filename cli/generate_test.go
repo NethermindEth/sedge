@@ -127,12 +127,6 @@ func (flags *GenCmdFlags) toString() string {
 	return strings.Join(flags.argsList(), " ")
 }
 
-func prepareGenerateCmd(tc generateCmdTestCase) {
-	// Set config file path
-	cfgFile = tc.configPath
-	initConfig()
-}
-
 func buildGenerateTestCase(
 	t *testing.T,
 	name,
@@ -491,9 +485,7 @@ func TestGenerateCmd(t *testing.T) {
 			argsL = append(argsL, tc.globalArgs.argsList()...)
 			rootCmd.SetArgs(argsL)
 
-			prepareGenerateCmd(tc)
-
-			if err := rootCmd.Execute(); !tc.isErr && err != nil {
+			if err = rootCmd.Execute(); !tc.isErr && err != nil {
 				t.Errorf("%s failed: %v", descr, err)
 			} else if tc.isErr && err == nil {
 				t.Errorf("%s expected to fail", descr)

@@ -22,10 +22,10 @@ type Client struct {
 	Image     string
 	Endpoint  string
 	Supported bool
-	Omited    bool
+	Omitted   bool
 }
 
-// Client : Struct Represent a combination of execution, consensus and validator clients
+// Clients : Struct Represent a combination of execution, consensus and validator clients
 type Clients struct {
 	Execution Client
 	Consensus Client

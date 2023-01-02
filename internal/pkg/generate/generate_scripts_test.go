@@ -150,7 +150,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 							GenerationData: &GenData{
 								ExecutionClient: &clients.Client{Name: executionCl},
 								ConsensusClient: &clients.Client{Name: consensusCl},
-								ValidatorClient: &clients.Client{Name: consensusCl, Omited: true},
+								ValidatorClient: &clients.Client{Name: consensusCl, Omitted: true},
 								Network:         "sepolia",
 							},
 							Services:  []string{execution, consensus},
@@ -162,7 +162,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 							GenerationData: &GenData{
 								ExecutionClient: &clients.Client{Name: executionCl},
 								ConsensusClient: &clients.Client{Name: wrongDep},
-								ValidatorClient: &clients.Client{Name: consensusCl, Omited: true},
+								ValidatorClient: &clients.Client{Name: consensusCl, Omitted: true},
 								Network:         "sepolia",
 							},
 							Services:  []string{execution, consensus},
@@ -196,9 +196,9 @@ func TestGenerateComposeServices(t *testing.T) {
 			Description: "Test generation import",
 			GenerationData: &GenData{
 				Services:        []string{mevBoost},
-				ExecutionClient: &clients.Client{Name: "nethermind", Omited: true},
-				ConsensusClient: &clients.Client{Name: "teku", Omited: true},
-				ValidatorClient: &clients.Client{Name: "teku", Omited: true},
+				ExecutionClient: &clients.Client{Name: "nethermind", Omitted: true},
+				ConsensusClient: &clients.Client{Name: "teku", Omitted: true},
+				ValidatorClient: &clients.Client{Name: "teku", Omitted: true},
 				Network:         "mainnet",
 				Mev:             true,
 				MevBoostService: true,
@@ -429,7 +429,7 @@ func TestEnvFile(t *testing.T) {
 				str := buffer.String()
 				assert.Contains(t, str, "CC_API_URL="+tt.Data.ConsensusClient.Endpoint+":")
 			} else {
-				if tt.Data.ConsensusClient.Name == "prysm" && !tt.Data.ValidatorClient.Omited {
+				if tt.Data.ConsensusClient.Name == "prysm" && !tt.Data.ValidatorClient.Omitted {
 					assert.Contains(t, buffer.String(), "CC_API_URL=consensus:")
 				} else {
 					assert.Contains(t, buffer.String(), "CC_API_URL="+tt.Data.ConsensusApiUrl)
