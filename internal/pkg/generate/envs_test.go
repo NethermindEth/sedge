@@ -35,6 +35,7 @@ func TestGenerateEnvFile(t *testing.T) {
 	tests := []struct {
 		name          string
 		data          *GenData
+		Error         error
 		fieldsToCheck map[string]string
 	}{
 		{
@@ -93,13 +94,44 @@ func TestGenerateEnvFile(t *testing.T) {
 				"KEYSTORE_DIR": "./keystore",
 			},
 		},
+		{
+			name: "Check wrong network",
+			data: &GenData{
+				ExecutionClient: &clients.Client{Name: "erigon"},
+				Network:         "wrong",
+			},
+			Error: TemplateNotFoundError,
+		},
+		{
+			name: "Check network",
+			data: &GenData{
+				Network:         "sepolia",
+				ConsensusClient: &clients.Client{Name: "teku"},
+			},
+			fieldsToCheck: map[string]string{
+				"NETWORK": "sepolia",
+			},
+		},
+		{
+			name: "Check gnosis network",
+			data: &GenData{
+				Network:         "gnosis",
+				ConsensusClient: &clients.Client{Name: "teku"},
+			},
+			fieldsToCheck: map[string]string{
+				"EL_NETWORK": "xdai",
+				"CL_NETWORK": "gnosis",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// generate buffer to write the .env file
 			var buffer bytes.Buffer
 			if err := EnvFile(tt.data, &buffer); err != nil {
-				t.Error("unable to generate .env file")
+				if err != tt.Error {
+					t.Error("unable to generate .env file")
+				}
 				return
 			}
 			// read the .env file

@@ -122,6 +122,31 @@ var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) erro
 	if utils.Contains(data.Services, configConsensus) && composeData.Services.ConfigConsensus == nil {
 		return errors.New("validator export service should not be omitted")
 	}
+
+	// load .env file
+	envData := envData(t, env)
+	if data.Network == "gnosis" {
+		// Check that the right network is set
+		elNetworkSet, ok := envData["EL_NETWORK"]
+		if !ok {
+			return errors.New("network is not set")
+		}
+		assert.Equal(t, elNetworkSet, "xdai")
+		clNetworkSet, ok := envData["CL_NETWORK"]
+		if !ok {
+			return errors.New("network is not set")
+		}
+		assert.Equal(t, clNetworkSet, "gnosis")
+
+	} else {
+		// Check that the right network is set
+		networkSet, ok := envData["NETWORK"]
+		if !ok {
+			return errors.New("network is not set")
+		}
+		assert.Equal(t, networkSet, data.Network)
+	}
+
 	return nil
 }
 
@@ -252,7 +277,14 @@ func TestGenerateComposeServices(t *testing.T) {
 				return
 			}
 
-			err = tt.CheckFunc(t, tt.GenerationData, bytes.NewReader(buffer.Bytes()), nil)
+			var envBuffer bytes.Buffer
+			err = EnvFile(tt.GenerationData, io.Writer(&envBuffer))
+			if err != nil {
+				assert.ErrorIs(t, err, tt.Error)
+				return
+			}
+
+			err = tt.CheckFunc(t, tt.GenerationData, bytes.NewReader(buffer.Bytes()), bytes.NewReader(envBuffer.Bytes()))
 			if err != nil {
 				assert.ErrorIs(t, err, tt.Error)
 			}
