@@ -56,10 +56,13 @@ func InitNetworksConfigs() {
 			GenesisForkVersion: "0x90000069",
 		},
 		{
-			Name:               "chiado",
-			RequireJWT:         true,
-			NetworkService:     "merge",
-			GenesisForkVersion: "0x0000006f",
+			Name:                     "chiado",
+			RequireJWT:               true,
+			NetworkService:           "merge",
+			GenesisForkVersion:       "0x0000006f",
+			DefaultCustomConfigSrc:   "https://github.com/gnosischain/configs/raw/main/chiado/config.yaml",
+			DefaultCustomGenesisSrc:  "https://github.com/gnosischain/configs/raw/main/chiado/genesis.ssz",
+			DefaultCustomDeployBlock: "0",
 		},
 		{
 			Name:               "gnosis",
