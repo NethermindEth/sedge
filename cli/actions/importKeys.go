@@ -129,11 +129,7 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		if err != nil {
 			return err
 		}
-		// Run container
-		if err := runAndWait(s.dockerClient, s.serviceManager, tekuCtID); err != nil {
-			return err
-		}
-		return nil
+		ctID = tekuCtID
 	default:
 		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
