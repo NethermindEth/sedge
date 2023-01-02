@@ -115,6 +115,7 @@ type DockerBuildOptions struct {
 	Path string
 	// Tag : docker build --tag tag
 	Tag  string
+	// Args : docker --build-arg tags
 	Args map[string]string
 }
 
