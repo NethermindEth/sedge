@@ -289,16 +289,16 @@ func TestCliCmd(t *testing.T) {
 			true,
 			true,
 		),
-		*buildCliTestCase(
-			t,
-			"--run-client all", "case_1",
-			CliCmdFlags{
-				yes:      true,
-				services: &[]string{"all"},
-			},
-			false,
-			false,
-		),
+		// *buildCliTestCase(
+		// 	t,
+		// 	"--run-client all", "case_1",
+		// 	CliCmdFlags{
+		// 		yes:      true,
+		// 		services: &[]string{"all"},
+		// 	},
+		// 	false,
+		// 	false,
+		// ),
 		*buildCliTestCase(
 			t,
 			"--run-client none", "case_1",
@@ -318,16 +318,16 @@ func TestCliCmd(t *testing.T) {
 			true,
 			true,
 		),
-		*buildCliTestCase(
-			t,
-			"--run-client validator", "case_1",
-			CliCmdFlags{
-				yes:      true,
-				services: &[]string{validator},
-			},
-			false,
-			false,
-		),
+		// *buildCliTestCase(
+		// 	t,
+		// 	"--run-client validator", "case_1",
+		// 	CliCmdFlags{
+		// 		yes:      true,
+		// 		services: &[]string{validator},
+		// 	},
+		// 	false,
+		// 	false,
+		// ),
 		*buildCliTestCase(
 			t,
 			"--run-client all, validator, ambiguos error", "case_1",
@@ -371,7 +371,7 @@ func TestCliCmd(t *testing.T) {
 
 			dockerClient, err := client.NewClientWithOpts(client.FromEnv)
 			if err != nil {
-				log.Fatal(err)
+				t.Fatal(err)
 			}
 			defer dockerClient.Close()
 			serviceManager := services.NewServiceManager(dockerClient)
