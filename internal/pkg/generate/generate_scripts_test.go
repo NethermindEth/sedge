@@ -28,6 +28,7 @@ const (
 )
 
 type generateTestCase struct {
+	name                            string
 	execution, consensus, validator clients.Client
 	path, network                   string
 	isErr                           bool
@@ -60,14 +61,46 @@ func generateTestCases(t *testing.T) (tests []generateTestCase) {
 		// TODO: Add CheckpointSyncUrl, FallbackELUrls and FeeRecipient to test data
 		for _, execution := range executionClients {
 			path := t.TempDir()
-			tests = append(tests, generateTestCase{clients.Client{Name: execution}, clients.Client{Name: wrongDep}, clients.Client{Name: wrongDep}, path, network, true})
+			tests = append(tests,
+				generateTestCase{
+					fmt.Sprintf("Test Network-%s Execution-%s Consensus-%s : wrong consensus error", network, execution, wrongDep),
+					clients.Client{Name: execution},
+					clients.Client{Name: wrongDep},
+					clients.Client{Name: wrongDep},
+					path,
+					network,
+					true,
+				})
 			for _, consensus := range consensusClients {
 				if utils.Contains(validatorClients, consensus) {
 					path := t.TempDir()
 					tests = append(tests,
-						generateTestCase{clients.Client{Name: execution}, clients.Client{Name: consensus}, clients.Client{Name: consensus}, path, network, false},
-						generateTestCase{clients.Client{Name: execution}, clients.Client{Name: consensus}, clients.Client{Name: consensus}, "", network, true},
-						generateTestCase{clients.Client{Name: execution}, clients.Client{Name: consensus}, clients.Client{Name: consensus, Omitted: true}, path, network, false})
+						generateTestCase{
+							fmt.Sprintf("Test Network-%s Execution-%s Consensus-%s : full node", network, execution, consensus),
+							clients.Client{Name: execution},
+							clients.Client{Name: consensus},
+							clients.Client{Name: consensus},
+							path,
+							network,
+							false,
+						},
+						generateTestCase{
+							fmt.Sprintf("Test Network-%s Execution-%s Consensus-%s : empty path error", network, execution, consensus),
+							clients.Client{Name: execution},
+							clients.Client{Name: consensus},
+							clients.Client{Name: consensus},
+							"",
+							network,
+							true},
+						generateTestCase{
+							fmt.Sprintf("Test Network-%s Execution-%s Consensus-%s : no validator node", network, execution, wrongDep),
+							clients.Client{Name: execution},
+							clients.Client{Name: consensus},
+							clients.Client{Name: consensus, Omitted: true},
+							path,
+							network,
+							false,
+						})
 				}
 			}
 		}
@@ -84,8 +117,8 @@ func TestGenerateScripts(t *testing.T) {
 	t.Parallel()
 	inputs := generateTestCases(t)
 
-	for i, input := range inputs {
-		t.Run(fmt.Sprintf("Test case %d", i), func(t *testing.T) {
+	for _, input := range inputs {
+		t.Run(input.name, func(t *testing.T) {
 			gd := GenerationData{
 				ExecutionClient: input.execution,
 				ConsensusClient: input.consensus,
