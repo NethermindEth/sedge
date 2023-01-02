@@ -189,48 +189,48 @@ func TestGetUrlOrPathContent(t *testing.T) {
 			want:  good,
 			isErr: false,
 		},
-		// {
-		// 	name:  "valid url, empty config",
-		// 	src:   server.URL + "?test=EMPTY",
-		// 	want:  empty,
-		// 	isErr: false,
-		// },
-		// {
-		// 	name:  "valid url, error",
-		// 	src:   server.URL + "?test=ERROR",
-		// 	want:  "",
-		// 	isErr: true,
-		// },
-		// {
-		// 	name:  "valid url, error",
-		// 	src:   server.URL + "?test=ERROR",
-		// 	want:  "",
-		// 	isErr: true,
-		// },
-		// {
-		// 	name:  "valid path, good config",
-		// 	src:   goodPath,
-		// 	want:  good,
-		// 	isErr: false,
-		// },
-		// {
-		// 	name:  "valid path, empty config",
-		// 	src:   emptyPath,
-		// 	want:  empty,
-		// 	isErr: false,
-		// },
-		// {
-		// 	name:  "invalid url",
-		// 	src:   "::/www.google.com/invalid",
-		// 	want:  "",
-		// 	isErr: true,
-		// },
-		// {
-		// 	name:  "invalid path, non existing",
-		// 	src:   filepath.Join(t.TempDir(), "invalid"),
-		// 	want:  "",
-		// 	isErr: true,
-		// },
+		{
+			name:  "valid url, empty config",
+			src:   server.URL + "?test=EMPTY",
+			want:  empty,
+			isErr: false,
+		},
+		{
+			name:  "valid url, error",
+			src:   server.URL + "?test=ERROR",
+			want:  "",
+			isErr: true,
+		},
+		{
+			name:  "valid url, error",
+			src:   server.URL + "?test=ERROR",
+			want:  "",
+			isErr: true,
+		},
+		{
+			name:  "valid path, good config",
+			src:   goodPath,
+			want:  good,
+			isErr: false,
+		},
+		{
+			name:  "valid path, empty config",
+			src:   emptyPath,
+			want:  empty,
+			isErr: false,
+		},
+		{
+			name:  "invalid url",
+			src:   "::/www.google.com/invalid",
+			want:  "",
+			isErr: true,
+		},
+		{
+			name:  "invalid path, non existing",
+			src:   filepath.Join(t.TempDir(), "invalid"),
+			want:  "",
+			isErr: true,
+		},
 	}
 
 	for _, tc := range tcs {

@@ -123,7 +123,7 @@ func GetUrlOrPathContent(src string) (string, error) {
 		},
 	)
 
-	return strings.ReplaceAll(strings.TrimSpace(urlContent+fileContent), "\r", ""), err
+	return strings.ReplaceAll(urlContent+fileContent, "\r", ""), err
 }
 
 /*
