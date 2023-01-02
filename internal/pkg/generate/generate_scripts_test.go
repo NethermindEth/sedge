@@ -38,12 +38,11 @@ const (
 type genTestData struct {
 	Description    string
 	GenerationData *GenData
-	Services       []string
 	Error          error
-	CheckFunc      func(t *testing.T, data *GenData, services []string, compose, env io.Reader) error
+	CheckFunc      func(t *testing.T, data *GenData, compose, env io.Reader) error
 }
 
-var checkMevServices = func(t *testing.T, data *GenData, services []string, compose, env io.Reader) error {
+var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader) error {
 	// load compose file
 	composeBytes, err := ioutil.ReadAll(compose)
 	if err != nil {
@@ -55,7 +54,7 @@ var checkMevServices = func(t *testing.T, data *GenData, services []string, comp
 		return err
 	}
 
-	if utils.Contains(services, mevBoost) {
+	if utils.Contains(data.Services, mevBoost) {
 
 		if composeData.Services.Mevboost != nil {
 			assert.Equal(t, composeData.Services.Mevboost.Image, "flashbots/mev-boost:latest")
@@ -69,7 +68,30 @@ var checkMevServices = func(t *testing.T, data *GenData, services []string, comp
 	return nil
 }
 
-var defaultFunc = func(t *testing.T, data *GenData, services []string, compose, env io.Reader) error {
+var checkExtraFlagsOnExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
+	// load compose file
+	composeBytes, err := ioutil.ReadAll(compose)
+	if err != nil {
+		return err
+	}
+	var composeData ComposeData
+	err = yaml.Unmarshal(composeBytes, &composeData)
+	if err != nil {
+		return err
+	}
+
+	if composeData.Services.Execution != nil {
+		for _, flag := range data.ElExtraFlags {
+			assert.True(t, utils.Contains(composeData.Services.Execution.Command, "--"+flag))
+		}
+	} else {
+		return errors.New("execution service is not present")
+	}
+
+	return nil
+}
+
+var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) error {
 
 	// load compose file
 	composeBytes, err := ioutil.ReadAll(compose)
@@ -82,22 +104,22 @@ var defaultFunc = func(t *testing.T, data *GenData, services []string, compose, 
 		return err
 	}
 
-	if utils.Contains(services, execution) && composeData.Services.Execution == nil {
+	if utils.Contains(data.Services, execution) && composeData.Services.Execution == nil {
 		return errors.New("execution service should not be omitted")
 	}
-	if utils.Contains(services, consensus) && composeData.Services.Consensus == nil {
+	if utils.Contains(data.Services, consensus) && composeData.Services.Consensus == nil {
 		return errors.New("consensus service should not be omitted")
 	}
-	if utils.Contains(services, validator) && composeData.Services.Validator == nil {
+	if utils.Contains(data.Services, validator) && composeData.Services.Validator == nil {
 		return errors.New("validator service should not be omitted")
 	}
-	if utils.Contains(services, mevBoost) && composeData.Services.Mevboost == nil {
+	if utils.Contains(data.Services, mevBoost) && composeData.Services.Mevboost == nil {
 		return errors.New("mev boost service should not be omitted")
 	}
-	if utils.Contains(services, validatorImport) && composeData.Services.ValidatorImport == nil {
+	if utils.Contains(data.Services, validatorImport) && composeData.Services.ValidatorImport == nil {
 		return errors.New("validator import service should not be omitted")
 	}
-	if utils.Contains(services, configConsensus) && composeData.Services.ConfigConsensus == nil {
+	if utils.Contains(data.Services, configConsensus) && composeData.Services.ConfigConsensus == nil {
 		return errors.New("validator export service should not be omitted")
 	}
 	return nil
@@ -134,38 +156,38 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 				if utils.Contains(validatorClients, consensusCl) {
 					tests = append(tests,
 						genTestData{
-							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s", executionCl, consensusCl, consensusCl, network),
+							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, all", executionCl, consensusCl, consensusCl, network),
 							GenerationData: &GenData{
 								ExecutionClient: &clients.Client{Name: executionCl},
 								ConsensusClient: &clients.Client{Name: consensusCl},
 								ValidatorClient: &clients.Client{Name: consensusCl},
-								Network:         "sepolia",
+								Network:         network,
+								Services:        []string{execution, consensus, validator},
 							},
-							Services:  []string{execution, consensus, validator},
 							Error:     nil,
 							CheckFunc: defaultFunc,
 						},
 						genTestData{
-							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s", executionCl, consensusCl, consensusCl, network),
+							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, network),
 							GenerationData: &GenData{
+								Services:        []string{execution, consensus},
 								ExecutionClient: &clients.Client{Name: executionCl},
 								ConsensusClient: &clients.Client{Name: consensusCl},
 								ValidatorClient: &clients.Client{Name: consensusCl, Omitted: true},
-								Network:         "sepolia",
+								Network:         network,
 							},
-							Services:  []string{execution, consensus},
 							Error:     nil,
 							CheckFunc: defaultFunc,
 						},
 						genTestData{
-							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s", executionCl, consensusCl, consensusCl, network),
+							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, Execution Client not Valid", executionCl, consensusCl, consensusCl, network),
 							GenerationData: &GenData{
+								Services:        []string{execution, consensus},
 								ExecutionClient: &clients.Client{Name: executionCl},
 								ConsensusClient: &clients.Client{Name: wrongDep},
 								ValidatorClient: &clients.Client{Name: consensusCl, Omitted: true},
-								Network:         "sepolia",
+								Network:         network,
 							},
-							Services:  []string{execution, consensus},
 							Error:     ConsensusClientNotValidError,
 							CheckFunc: defaultFunc,
 						})
@@ -182,13 +204,13 @@ func TestGenerateComposeServices(t *testing.T) {
 		{
 			Description: "Test generation of compose services",
 			GenerationData: &GenData{
+				Services:        []string{execution, consensus, validator, validatorImport, mevBoost},
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku"},
 				ValidatorClient: &clients.Client{Name: "teku"},
 				Network:         "mainnet",
 				Mev:             true,
 			},
-			Services:  []string{execution, consensus, validator, validatorImport, mevBoost},
 			Error:     nil,
 			CheckFunc: defaultFunc,
 		},
@@ -203,9 +225,18 @@ func TestGenerateComposeServices(t *testing.T) {
 				Mev:             true,
 				MevBoostService: true,
 			},
-			Services:  []string{mevBoost},
 			Error:     nil,
 			CheckFunc: checkMevServices,
+		},
+		{
+			Description: "Test EL extra flags",
+			GenerationData: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				Services:        []string{execution},
+				Network:         "mainnet",
+				ElExtraFlags:    []string{"extra", "flag"},
+			},
+			CheckFunc: checkExtraFlagsOnExecution,
 		},
 	}
 
@@ -215,16 +246,13 @@ func TestGenerateComposeServices(t *testing.T) {
 		t.Run(tt.Description, func(t *testing.T) {
 
 			var buffer bytes.Buffer
-			if tt.GenerationData != nil && tt.GenerationData.Network == "chiado" {
-				t.Logf("GenerationData: %+v", tt.GenerationData)
-			}
 			err := ComposeFile(tt.GenerationData, io.Writer(&buffer))
 			if err != nil {
 				assert.ErrorIs(t, err, tt.Error)
 				return
 			}
 
-			err = tt.CheckFunc(t, tt.GenerationData, tt.Services, bytes.NewReader(buffer.Bytes()), nil)
+			err = tt.CheckFunc(t, tt.GenerationData, bytes.NewReader(buffer.Bytes()), nil)
 			if err != nil {
 				assert.ErrorIs(t, err, tt.Error)
 			}
