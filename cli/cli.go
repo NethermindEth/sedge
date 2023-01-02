@@ -212,8 +212,8 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 	}
 
 	// Validate custom deploy block
-	if flags.customTTD != "" &&
-		!regexp.MustCompile(`^[1-9]\d*$`).Match([]byte(strings.TrimSpace(flags.customDeployBlock))) {
+	if flags.customDeployBlock != "" &&
+		!regexp.MustCompile(`^[0-9]\d*$`).Match([]byte(strings.TrimSpace(flags.customDeployBlock))) {
 		return nil, fmt.Errorf(configs.InvalidDeployBLock)
 	}
 
