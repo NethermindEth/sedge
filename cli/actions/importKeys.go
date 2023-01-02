@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/images/validator-import/lighthouse"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -39,10 +42,10 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		return err
 	}
 
-	var cmd []string
+	var ctID string
 	switch options.ValidatorClient {
 	case "prysm":
-		cmd = []string{
+		cmd := []string{
 			"--",
 			"accounts", "import",
 			"--accept-terms-of-use",
@@ -52,6 +55,11 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 			"--wallet-password-file=/keystore/keystore_password.txt",
 			"--account-password-file=/keystore/keystore_password.txt",
 		}
+		prysmCtID, err := setupValidatorImportContainer(s.dockerClient, s.serviceManager, cmd, options.From)
+		if err != nil {
+			return err
+		}
+		ctID = prysmCtID
 	case "lodestar":
 		var preset string
 		switch options.Network {
@@ -62,7 +70,7 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		default:
 			return fmt.Errorf("unknown lodestar preset for network %s", options.Network)
 		}
-		cmd = []string{
+		cmd := []string{
 			"validator", "import",
 			"--preset", preset,
 			"--network", options.Network,
@@ -70,11 +78,41 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 			"--importKeystores=/keystore/validator_keys",
 			"--importKeystoresPassword=/keystore/keystore_password.txt",
 		}
+		lodestarCtID, err := setupValidatorImportContainer(s.dockerClient, s.serviceManager, cmd, options.From)
+		if err != nil {
+			return err
+		}
+		ctID = lodestarCtID
+	case "lighthouse":
+		// Init build context
+		contextDir, err := lighthouse.InitContext()
+		if err != nil {
+			return fmt.Errorf("error creating context dir: %s", err.Error())
+		}
+		// Build image
+		buildCmd := s.commandRunner.BuildDockerBuildCMD(commands.DockerBuildOptions{
+			Path: contextDir,
+			Tag:  "sedge/validator-import-lighthouse",
+			Args: map[string]string{
+				"NETWORK":    options.Network,
+				"LH_VERSION": "sigp/lighthouse:v3.3.0",
+			},
+		})
+		log.Infof(configs.RunningCommand, buildCmd.Cmd)
+		if _, err = s.commandRunner.RunCMD(buildCmd); err != nil {
+			return err
+		}
+		// Setup container
+		lighthouseCtID, err := setupLighthouseValidatorImport(s.dockerClient, s.serviceManager, options.From)
+		if err != nil {
+			return err
+		}
+		ctID = lighthouseCtID
 	default:
 		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
 	log.Info("Importing validator keys")
-	if err := runValidatorImportContainer(s.dockerClient, s.serviceManager, cmd, options.From); err != nil {
+	if err := runAndWait(s.dockerClient, s.serviceManager, ctID); err != nil {
 		return err
 	}
 	// Run validator again
@@ -87,14 +125,14 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 	return nil
 }
 
-func runValidatorImportContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, cmd []string, from string) error {
+func setupValidatorImportContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, cmd []string, from string) (string, error) {
 	from, err := filepath.Abs(from)
 	if err != nil {
-		return err
+		return "", err
 	}
 	validatorImage, err := serviceManager.Image(services.ServiceCtValidator)
 	if err != nil {
-		return err
+		return "", err
 	}
 	log.Debugf("Creating %s container", services.ServiceCtValidatorImport)
 	ct, err := dockerClient.ContainerCreate(context.Background(),
@@ -117,21 +155,51 @@ func runValidatorImportContainer(dockerClient client.APIClient, serviceManager s
 		services.ServiceCtValidatorImport,
 	)
 	if err != nil {
-		return err
+		return "", err
 	}
-	log.Debugf("import keys container id: %s", ct.ID)
+	return ct.ID, nil
+}
+
+func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, from string) (string, error) {
+	log.Debugf("Creating %s container", services.ServiceCtValidatorImport)
+	ct, err := dockerClient.ContainerCreate(context.Background(),
+		&container.Config{
+			Image: "sedge/validator-import-lighthouse",
+		},
+		&container.HostConfig{
+			Mounts: []mount.Mount{
+				{
+					Type:   mount.TypeBind,
+					Source: from,
+					Target: "/keystore",
+				},
+			},
+			VolumesFrom: []string{services.ServiceCtValidator},
+		},
+		&network.NetworkingConfig{},
+		&v1.Platform{},
+		services.ServiceCtValidatorImport,
+	)
+	if err != nil {
+		return "", err
+	}
+	return ct.ID, nil
+}
+
+func runAndWait(dockerClient client.APIClient, serviceManager services.ServiceManager, ctID string) error {
+	log.Debugf("import keys container id: %s", ctID)
 	ctExit, errChan := serviceManager.Wait(services.ServiceCtValidatorImport, container.WaitConditionNextExit)
 	log.Info("The keys import container is starting")
-	if err := dockerClient.ContainerStart(context.Background(), ct.ID, types.ContainerStartOptions{}); err != nil {
+	if err := dockerClient.ContainerStart(context.Background(), ctID, types.ContainerStartOptions{}); err != nil {
 		return err
 	}
 	for {
 		select {
 		case exitResult := <-ctExit:
 			if exitResult.StatusCode != 0 {
-				return fmt.Errorf("validator-import service ends with status code %d, check container %s logs for more details", exitResult.StatusCode, ct.ID)
+				return fmt.Errorf("validator-import service ends with status code %d, check container %s logs for more details", exitResult.StatusCode, ctID)
 			}
-			return deleteContainer(dockerClient, ct.ID)
+			return deleteContainer(dockerClient, ctID)
 		case exitErr := <-errChan:
 			return exitErr
 		}

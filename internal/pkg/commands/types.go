@@ -114,7 +114,8 @@ type DockerBuildOptions struct {
 	// Path : path to dockerfile
 	Path string
 	// Tag : docker build --tag tag
-	Tag string
+	Tag  string
+	Args map[string]string
 }
 
 // DockerInspectOptions : Represents docker inspect command options
