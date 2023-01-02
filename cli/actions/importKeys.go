@@ -7,6 +7,7 @@ import (
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/images/validator-import/lighthouse"
+	"github.com/NethermindEth/sedge/internal/images/validator-import/teku"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/docker/docker/api/types"
@@ -108,6 +109,31 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 			return err
 		}
 		ctID = lighthouseCtID
+	case "teku":
+		// Init build context
+		contextDir, err := teku.InitContext()
+		if err != nil {
+			return err
+		}
+		// Build image
+		buildCmd := s.commandRunner.BuildDockerBuildCMD(commands.DockerBuildOptions{
+			Path: contextDir,
+			Tag:  "sedge/validator-import-teku",
+		})
+		log.Infof(configs.RunningCommand, buildCmd.Cmd)
+		if _, err := s.commandRunner.RunCMD(buildCmd); err != nil {
+			return err
+		}
+		// Setup container
+		tekuCtID, err := setupTekuValidatorImport(s.dockerClient, s.serviceManager, options.From)
+		if err != nil {
+			return err
+		}
+		// Run container
+		if err := runAndWait(s.dockerClient, s.serviceManager, tekuCtID); err != nil {
+			return err
+		}
+		return nil
 	default:
 		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
@@ -165,6 +191,32 @@ func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManage
 	ct, err := dockerClient.ContainerCreate(context.Background(),
 		&container.Config{
 			Image: "sedge/validator-import-lighthouse",
+		},
+		&container.HostConfig{
+			Mounts: []mount.Mount{
+				{
+					Type:   mount.TypeBind,
+					Source: from,
+					Target: "/keystore",
+				},
+			},
+			VolumesFrom: []string{services.ServiceCtValidator},
+		},
+		&network.NetworkingConfig{},
+		&v1.Platform{},
+		services.ServiceCtValidatorImport,
+	)
+	if err != nil {
+		return "", err
+	}
+	return ct.ID, nil
+}
+
+func setupTekuValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, from string) (string, error) {
+	log.Debugf("Creating %s container", services.ServiceCtValidatorImport)
+	ct, err := dockerClient.ContainerCreate(context.Background(),
+		&container.Config{
+			Image: "sedge/validator-import-teku",
 		},
 		&container.HostConfig{
 			Mounts: []mount.Mount{

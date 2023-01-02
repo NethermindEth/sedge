@@ -123,7 +123,7 @@ func (cr *UnixCMDRunner) BuildDockerComposeLogsCMD(options DockerComposeLogsOpti
 }
 
 func (cr *UnixCMDRunner) BuildDockerBuildCMD(options DockerBuildOptions) Command {
-	command := "docker build --quiet"
+	command := "docker build"
 	if len(options.Tag) > 0 {
 		log.Debug(`Command "docker build" built with "-t" flag.`)
 		command += " -t " + options.Tag
