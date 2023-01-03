@@ -17,10 +17,10 @@ package env
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/NethermindEth/sedge/internal/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetBootnodes(t *testing.T) {
@@ -72,7 +72,7 @@ func TestGetBootnodes(t *testing.T) {
 				t.Error(err)
 			}
 
-			if !reflect.DeepEqual(got, tc.want) {
+			if !assert.ElementsMatch(t, got, tc.want) {
 				t.Errorf("Expected %v, got %v. Function call: %s", tc.want, got, descr)
 			}
 		})

@@ -309,7 +309,7 @@ func TestBuildCommands(t *testing.T) {
 			t.Errorf("%s expected %q but got %q", input.descr, input.output, got)
 		} else if input.outputWindows != "" && runtime.GOOS == "windows" && got != input.outputWindows {
 			t.Errorf("%s expected %q but got %q", input.descr, input.outputWindows, got)
-		} else if input.outputUnix != "" && (runtime.GOOS == "linux" || runtime.GOOS == "darwin") && got != input.outputWindows {
+		} else if input.outputUnix != "" && (runtime.GOOS == "linux" || runtime.GOOS == "darwin") && got != input.outputUnix {
 			t.Errorf("%s expected %q but got %q", input.descr, input.outputUnix, got)
 		}
 	}
