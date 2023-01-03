@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/NethermindEth/sedge/configs"
-	"github.com/cakturk/go-netstat/netstat"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -180,19 +179,13 @@ func portAvailable(ip string, port uint16) bool {
 			return true
 		}
 	}
-
-	used := false
-	_, err := netstat.TCPSocks(func(ste *netstat.SockTabEntry) bool {
-		if ste.LocalAddr.IP.Equal(netIp) && ste.LocalAddr.Port == port && ste.State == netstat.Listen {
-			used = true
-		}
-		return true
-	})
+	sock, err := net.Listen("tcp", fmt.Sprintf("%s:%d", netIp.String(), port))
 	if err != nil {
 		log.Debugf("error checking  %s:%d occupation: %v", ip, port, err)
-		return !used
+		return false
 	}
-	return !used
+	sock.Close()
+	return true
 }
 
 /*
