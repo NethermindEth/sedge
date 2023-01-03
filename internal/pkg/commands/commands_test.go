@@ -16,6 +16,7 @@ limitations under the License.
 package commands
 
 import (
+	"runtime"
 	"testing"
 )
 
@@ -27,9 +28,11 @@ func TestBuildCommands(t *testing.T) {
 	})
 
 	inputs := [...]struct {
-		descr   string
-		builder func() string
-		output  string
+		descr         string
+		builder       func() string
+		output        string
+		outputUnix    string
+		outputWindows string
 	}{
 		{
 			descr: `BuildDockerBuildCMD(DockerBuildOptions{
@@ -282,7 +285,8 @@ func TestBuildCommands(t *testing.T) {
 					FileName: "./testdir/testfile",
 				}).Cmd
 			},
-			output: "touch ./testdir/testfile",
+			outputUnix:    "touch ./testdir/testfile",
+			outputWindows: "echo $null >> ./testdir/testfile",
 		},
 		{
 			descr: `BuildEchoToFileCMD(EchoToFileOptions{
@@ -301,8 +305,12 @@ func TestBuildCommands(t *testing.T) {
 
 	for _, input := range inputs {
 		got := input.builder()
-		if got != input.output {
+		if input.output != "" && got != input.output {
 			t.Errorf("%s expected %q but got %q", input.descr, input.output, got)
+		} else if input.outputWindows != "" && runtime.GOOS == "windows" && got != input.outputWindows {
+			t.Errorf("%s expected %q but got %q", input.descr, input.outputWindows, got)
+		} else if input.outputUnix != "" && (runtime.GOOS == "linux" || runtime.GOOS == "darwin") && got != input.outputWindows {
+			t.Errorf("%s expected %q but got %q", input.descr, input.outputUnix, got)
 		}
 	}
 }
