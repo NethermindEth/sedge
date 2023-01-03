@@ -25,6 +25,8 @@ import (
 )
 
 func TestGetRequest(t *testing.T) {
+	t.Parallel()
+
 	server := httptest.NewServer(
 		http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			if req.Method != "GET" {
@@ -65,7 +67,7 @@ func TestGetRequest(t *testing.T) {
 		},
 		{
 			"No response",
-			"http://127.0.0.1" + "/",
+			"http://127.0.0.1:8080" + "/",
 			"",
 			time.Second,
 			true,
