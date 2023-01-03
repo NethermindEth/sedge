@@ -57,7 +57,7 @@ func GenerateScripts(gd GenerationData) (result GenerationResults, err error) {
 	}
 
 	// Check for port occupation
-	defaultsPorts := map[string]string{
+	defaultsPorts := map[string]uint16{
 		"ELDiscovery":     configs.DefaultDiscoveryPortEL,
 		"ELMetrics":       configs.DefaultMetricsPortEL,
 		"ELApi":           configs.DefaultApiPortEL,
@@ -92,8 +92,8 @@ func GenerateScripts(gd GenerationData) (result GenerationResults, err error) {
 	}
 
 	return GenerationResults{
-		ELPort:            ports["ELApi"],
-		CLPort:            ports["CLApi"],
+		ELPort:            fmt.Sprintf("%d", ports["ELApi"]),
+		CLPort:            fmt.Sprintf("%d", ports["CLApi"]),
 		EnvFilePath:       envFilePath,
 		DockerComposePath: dockerComposePath,
 	}, nil
@@ -342,10 +342,10 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 		CcDataDir:                 "./" + configs.ConsensusDir,
 		VlImage:                   gd.ValidatorClient.Image,
 		VlDataDir:                 "./" + configs.ValidatorDir,
-		ExecutionApiURL:           gd.ExecutionClient.Endpoint + ":" + gd.Ports["ELApi"],
-		ExecutionAuthURL:          gd.ExecutionClient.Endpoint + ":" + gd.Ports["ELAuth"],
-		ConsensusApiURL:           gd.ConsensusClient.Endpoint + ":" + gd.Ports["CLApi"],
-		ConsensusAdditionalApiURL: gd.ConsensusClient.Endpoint + ":" + gd.Ports["CLAdditionalApi"],
+		ExecutionApiURL:           fmt.Sprintf("%s:%d", gd.ExecutionClient.Endpoint, gd.Ports["ELApi"]),
+		ExecutionAuthURL:          fmt.Sprintf("%s:%d", gd.ExecutionClient.Endpoint, gd.Ports["ELAuth"]),
+		ConsensusApiURL:           fmt.Sprintf("%s:%d", gd.ConsensusClient.Endpoint, gd.Ports["CLApi"]),
+		ConsensusAdditionalApiURL: fmt.Sprintf("%s:%d", gd.ConsensusClient.Endpoint, gd.Ports["CLAdditionalApi"]),
 		FeeRecipient:              gd.FeeRecipient,
 		JWTSecretPath:             gd.JWTSecretPath,
 		ExecutionEngineName:       gd.ExecutionClient.Name,
@@ -356,7 +356,7 @@ func generateEnvFile(gd GenerationData) (envFilePath string, err error) {
 
 	// Fix prysm rpc url
 	if gd.ValidatorClient.Name == "prysm" {
-		data.ConsensusAdditionalApiURL = fmt.Sprintf("%s:%s", "consensus", gd.Ports["CLAdditionalApi"])
+		data.ConsensusAdditionalApiURL = fmt.Sprintf("%s:%d", "consensus", gd.Ports["CLAdditionalApi"])
 	}
 
 	envFilePath = filepath.Join(gd.GenerationPath, ".env")
