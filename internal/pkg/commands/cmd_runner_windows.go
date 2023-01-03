@@ -3,7 +3,7 @@ package commands
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -196,7 +196,7 @@ func (cr *WindowsCMDRunner) RunScript(script ScriptFile) (string, error) {
 	}
 
 	tempFileDir := os.TempDir()
-	rawScript, err := ioutil.ReadAll(&scriptBuffer)
+	rawScript, err := io.ReadAll(&scriptBuffer)
 	if err != nil {
 		return out, err
 	}
