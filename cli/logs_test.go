@@ -31,7 +31,6 @@ import (
 type logsTestCase struct {
 	name          string
 	runner        commands.CommandRunner
-	configPath    string
 	generatedPath string
 	fdOut         *bytes.Buffer
 	services      []string
@@ -39,20 +38,6 @@ type logsTestCase struct {
 	dcPsRuns      int
 	dcLogsRuns    int
 	tail          int
-}
-
-func resetLogCmd() {
-	cfgFile = ""
-}
-
-func prepareLogsTestCaseConfigDir(name, dest string) (string, error) {
-	caseConfigPath := filepath.Join(".", "testdata", "logs_tests", name, "config")
-	configPath := filepath.Join(dest, "config")
-	if err := os.MkdirAll(configPath, os.ModePerm); err != nil {
-		return "", err
-	}
-	err := test.PrepareTestCaseDir(caseConfigPath, configPath)
-	return filepath.Join(configPath, "config.yaml"), err
 }
 
 func prepareLogsTestCaseDCScripts(name, dest string) (string, error) {
@@ -67,16 +52,11 @@ func prepareLogsTestCaseDCScripts(name, dest string) (string, error) {
 
 func prepareFiles(t *testing.T, tc *logsTestCase) {
 	tempDir := t.TempDir()
-	tcConfigPath, err := prepareLogsTestCaseConfigDir(tc.name, tempDir)
-	if err != nil {
-		t.Fatalf("Can't build test case: %v", err)
-	}
 	tcGeneratedPath, err := prepareLogsTestCaseDCScripts(tc.name, tempDir)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
 
-	tc.configPath = tcConfigPath
 	tc.generatedPath = tcGeneratedPath
 }
 
@@ -105,7 +85,7 @@ func buildLogsTestCase(t *testing.T, testName string, tail int, services []strin
 			}
 			return "", nil
 		},
-		SRunBash: func(bs commands.BashScript) (string, error) {
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
 		},
 	}
@@ -141,26 +121,19 @@ func TestLogsCmd(t *testing.T) {
 		tc2,
 	}
 
-	t.Cleanup(resetLogCmd)
-
 	for _, tc := range tcs {
-		resetLogCmd()
 		rootCmd := RootCmd()
-		rootCmd.AddCommand(LogsCmd())
+		rootCmd.AddCommand(LogsCmd(tc.runner))
 		var args []string
 		if tc.tail != 0 {
-			args = []string{"logs", "--config", tc.configPath, "--path", tc.generatedPath, "--tail", fmt.Sprintf("%d", tc.tail)}
+			args = []string{"logs", "--path", tc.generatedPath, "--tail", fmt.Sprintf("%d", tc.tail)}
 		} else {
-			args = []string{"logs", "--config", tc.configPath, "--path", tc.generatedPath}
+			args = []string{"logs", "--path", tc.generatedPath}
 		}
 		args = append(args, tc.services...)
 		rootCmd.SetArgs(args)
 		rootCmd.SetOut(tc.fdOut)
 		log.SetOutput(tc.fdOut)
-
-		commands.InitRunner(func() commands.CommandRunner {
-			return tc.runner
-		})
 
 		descr := fmt.Sprintf("sedge logs --tail %s", strings.Join(tc.services, " "))
 

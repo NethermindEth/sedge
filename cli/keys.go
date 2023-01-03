@@ -17,12 +17,13 @@ package cli
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
-	"github.com/manifoldco/promptui"
 	eth2 "github.com/protolambda/zrnt/eth2/configs"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -40,7 +41,7 @@ type KeysCmdFlags struct {
 	install               bool
 }
 
-func KeysCmd(prompt prompts.Prompt) *cobra.Command {
+func KeysCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Command {
 	var (
 		flags      KeysCmdFlags
 		passphrase string
@@ -65,12 +66,6 @@ func KeysCmd(prompt prompts.Prompt) *cobra.Command {
 			flags.path = absPath
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			// Handle mainnet case
-			if flags.network == "mainnet" {
-				runKeysWithStakingDeposit(cmd, args, &flags, prompt)
-				return
-			}
-
 			// TODO: allow usage of withdrawal address
 			// Get keystore passphrase
 			if !flags.randomPassphrase && flags.passphrasePath != "" {
@@ -103,13 +98,9 @@ func KeysCmd(prompt prompts.Prompt) *cobra.Command {
 					log.Fatal(err)
 				}
 				mnemonic = candidate
-				// TODO: improve prompts for the generated mnemonic. This should confirm user have copied the mnemonic by asking to input it again.
-				// TODO: clean screen after the generated mnemonic is printed.
-				fmt.Fprintf(cmd.OutOrStdout(), "Mnemonic:\n\n%s\n\n", mnemonic)
-				prompt := promptui.Prompt{
-					Label: configs.StoreMnemonic,
+				if err := saveMnemonic(cmdRunner, mnemonic); err != nil {
+					log.Fatal(err)
 				}
-				prompt.Run()
 			}
 
 			// Get indexes
@@ -132,7 +123,7 @@ func KeysCmd(prompt prompts.Prompt) *cobra.Command {
 				MinIndex:    uint64(flags.existingVal),
 				MaxIndex:    uint64(flags.existingVal) + uint64(flags.numberVal),
 				NetworkName: flags.network,
-				ForkVersion: configs.NetworksConfigs[flags.network].GenesisForkVersion,
+				ForkVersion: configs.NetworkConfigs()[flags.network].GenesisForkVersion,
 				// Constants
 				UseUniquePassphrase: true,
 				Insecure:            false,
@@ -163,4 +154,32 @@ func KeysCmd(prompt prompts.Prompt) *cobra.Command {
 	cmd.Flags().BoolVar(&flags.randomPassphrase, "random-passphrase", false, "Usa a randomly generated passphrase to encrypt keystores.")
 	cmd.Flags().BoolVarP(&flags.install, "install", "i", false, "Install dependencies if not installed without asking")
 	return cmd
+}
+
+func saveMnemonic(cmdRunner commands.CommandRunner, mnemonic string) error {
+	file, err := os.CreateTemp(os.TempDir(), "sedge_mnemonic")
+	if err != nil {
+		return fmt.Errorf(configs.ShowMnemonicError, err)
+	}
+	defer os.Remove(file.Name())
+
+	if _, err := file.WriteString(fmt.Sprintf(configs.MnemonicPresentation, mnemonic)); err != nil {
+		return fmt.Errorf(configs.ShowMnemonicError, err)
+	}
+
+	if err := file.Sync(); err != nil {
+		return fmt.Errorf(configs.ShowMnemonicError, err)
+	}
+
+	openTextEditorCmd := cmdRunner.BuildOpenTextEditor(commands.OpenTextEditorOptions{
+		FilePath: file.Name(),
+	})
+	openTextEditorCmd.ForceNoSudo = true
+
+	_, err = cmdRunner.RunCMD(openTextEditorCmd)
+	if err != nil {
+		return fmt.Errorf(configs.ShowMnemonicError, err)
+	}
+
+	return nil
 }

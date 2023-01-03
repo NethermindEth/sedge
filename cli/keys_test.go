@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli/prompts"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
 	"github.com/NethermindEth/sedge/test"
 	"github.com/NethermindEth/sedge/test/mock_prompts"
@@ -32,13 +33,14 @@ import (
 
 type keysCmdTestCase struct {
 	name           string
-	configPath     string
 	network        string
 	keystorePath   string
 	passphrasePath string
 	mnemnonicPath  string
 	existingVal    int64
 	numVal         int64
+	runner         commands.CommandRunner
+	prompt         prompts.Prompt
 	fdOut          *bytes.Buffer
 	isErr          bool
 }
@@ -72,13 +74,14 @@ func buildKeysTestCase(t *testing.T, caseName, caseDataPath, caseNetwork string,
 	}
 
 	tc.name = caseName
-	tc.configPath = filepath.Join(configPath, "config.yaml")
 	tc.network = caseNetwork
 	tc.keystorePath = keystorePath
 	tc.mnemnonicPath = mnemonicPath
 	tc.passphrasePath = filepath.Join(configPath, "pass.txt")
 	tc.existingVal = existing
 	tc.numVal = num
+	tc.runner = &test.SimpleCMDRunner{} // TODO: mock this
+	tc.prompt = prompts.NewPromptCli()
 	tc.fdOut = new(bytes.Buffer)
 	tc.isErr = isErr
 	return &tc
@@ -95,10 +98,9 @@ func TestKeysCmd(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			rootCmd := RootCmd()
-			rootCmd.AddCommand(KeysCmd(prompts.NewPromptCli()))
+			rootCmd.AddCommand(KeysCmd(tc.runner, tc.prompt))
 			rootCmd.SetArgs([]string{
 				"keys",
-				"--config", tc.configPath,
 				"--network", tc.network,
 				"--path", tc.keystorePath,
 				"--mnemonic-path", tc.mnemnonicPath,
@@ -135,10 +137,9 @@ func TestKeysCmd_RandomPassphrase(t *testing.T) {
 			Times(0)
 
 		rootCmd := RootCmd()
-		rootCmd.AddCommand(KeysCmd(prompt))
+		rootCmd.AddCommand(KeysCmd(&test.SimpleCMDRunner{}, prompt))
 		rootCmd.SetArgs([]string{
 			"keys",
-			"--config", tc.configPath,
 			"--network", tc.network,
 			"--path", tc.keystorePath,
 			"--mnemonic-path", tc.mnemnonicPath,

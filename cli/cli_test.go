@@ -17,27 +17,20 @@ package cli
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
-	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
-	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
-	"github.com/NethermindEth/sedge/internal/utils"
+	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/NethermindEth/sedge/test"
 	"github.com/NethermindEth/sedge/test/mock_prompts"
+	"github.com/docker/docker/client"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
-)
-
-var (
-	inspectExecutionUrl = "http://192.168.128.3"
-	inspectConsensusUrl = "http://192.168.128.3"
 )
 
 var inspectOut = `
@@ -113,14 +106,12 @@ var inspectOut = `
 `
 
 type cliCmdTestCase struct {
-	name       string
-	configPath string
-	runner     commands.CommandRunner
-	monitor    MonitoringTool
-	fdOut      *bytes.Buffer
-	args       CliCmdFlags
-	isPreErr   bool
-	isErr      bool
+	name     string
+	runner   commands.CommandRunner
+	fdOut    *bytes.Buffer
+	args     CliCmdFlags
+	isPreErr bool
+	isErr    bool
 }
 
 func (flags *CliCmdFlags) argsList() []string {
@@ -170,14 +161,7 @@ func prepareCliCmd(tc cliCmdTestCase) {
 	// Set output buffers
 	log.SetOutput(tc.fdOut)
 	// Set config file path
-	cfgFile = tc.configPath
-	initConfig()
-	commands.InitRunner(func() commands.CommandRunner {
-		return tc.runner
-	})
-	initMonitor(func() MonitoringTool {
-		return tc.monitor
-	})
+	initLogging()
 }
 
 func buildCliTestCase(
@@ -212,34 +196,14 @@ func buildCliTestCase(
 			}
 			return "", nil
 		},
-		SRunBash: func(bs commands.BashScript) (string, error) {
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
-		},
-	}
-
-	// Check for port occupation
-	defaultsPorts := map[string]string{
-		"ELApi": configs.DefaultApiPortEL,
-		"CLApi": configs.DefaultApiPortCL,
-	}
-	ports, err := utils.AssignPorts("localhost", defaultsPorts)
-	if err != nil {
-		t.Fatalf(configs.PortOccupationError, err)
-	}
-
-	tc.monitor = &monitorStub{
-		data: []posmoni.EndpointSyncStatus{
-			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
-			{Endpoint: inspectConsensusUrl + ":" + ports["CLApi"], Synced: true},
-			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
-			{Endpoint: inspectConsensusUrl + ":" + ports["CLApi"], Synced: true},
 		},
 	}
 
 	tc.name = name
 	tc.args = args
 	tc.args.generationPath = dcPath
-	tc.configPath = filepath.Join(configPath, "config.yaml")
 	tc.fdOut = new(bytes.Buffer)
 	tc.isPreErr = isPreErr
 	tc.isErr = isErr
@@ -402,8 +366,16 @@ func TestCliCmd(t *testing.T) {
 			prompt := mock_prompts.NewMockPrompt(ctrl)
 			defer ctrl.Finish()
 
+			dockerClient, err := client.NewClientWithOpts(client.FromEnv)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer dockerClient.Close()
+			serviceManager := services.NewServiceManager(dockerClient)
+			sedgeActions := actions.NewSedgeActions(dockerClient, serviceManager, nil)
+
 			rootCmd := RootCmd()
-			rootCmd.AddCommand(CliCmd(prompt))
+			rootCmd.AddCommand(CliCmd(tc.runner, prompt, serviceManager, sedgeActions))
 			argsL := append([]string{"cli"}, tc.args.argsList()...)
 			rootCmd.SetArgs(argsL)
 
@@ -414,170 +386,6 @@ func TestCliCmd(t *testing.T) {
 			} else if tc.isErr && err == nil {
 				t.Errorf("%s expected to fail", descr)
 			}
-		})
-	}
-}
-
-// Stub for MonitoringTool interface
-type monitorStub struct {
-	data  []posmoni.EndpointSyncStatus
-	calls int
-}
-
-func (ms *monitorStub) TrackSync(done <-chan struct{}, beaconEndpoints, executionEndpoints []string, wait time.Duration) <-chan posmoni.EndpointSyncStatus {
-	ms.calls++
-	c := make(chan posmoni.EndpointSyncStatus, len(ms.data))
-	var w time.Duration
-
-	go func() {
-		for {
-			select {
-			case <-done:
-				close(c)
-				return
-			case <-time.After(w):
-				if w == 0 {
-					// Don't wait the first time
-					w = wait
-				}
-				for _, d := range ms.data {
-					c <- d
-				}
-			}
-		}
-	}()
-
-	return c
-}
-
-func TestTrackSync(t *testing.T) {
-	t.Parallel()
-
-	tcs := []struct {
-		name    string
-		data    []posmoni.EndpointSyncStatus
-		flags   CliCmdFlags
-		isError bool
-	}{
-		{
-			"Test case 1, execution client got an error",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
-			},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			true,
-		},
-		{
-			"Test case 2, execution client got an error, consensus client not synced",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
-			},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			true,
-		},
-		{
-			"Test case 3, execution client got an error, consensus client synced",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			true,
-		},
-		{
-			"Test case 4, bad execution client response, good consensus client response",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true, Error: errors.New("")},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			true,
-		},
-		{
-			"Test case 5, consensus client got an error, consensus client not synced",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
-			},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			true,
-		},
-		{
-			"Test case 6, consensus client got an error, consensus client synced",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-			},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			true,
-		},
-		{
-			"Test case 7, mixed results",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			false,
-		},
-		{
-			"Test case 8, mixed results",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-			},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			false,
-		},
-		{
-			"Test case 9, mixed results, error",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
-			},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			true,
-		},
-	}
-	// TODO: Starvation bc a synced status from one of the clients is not tested
-
-	for _, tc := range tcs {
-		t.Run(tc.name, func(t *testing.T) {
-			ms := monitorStub{data: tc.data}
-
-			err := trackSync(&ms, "", "", time.Millisecond*100, &tc.flags)
-			utils.CheckErr("trackSync(...) failed", tc.isError, err)
 		})
 	}
 }

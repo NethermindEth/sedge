@@ -20,49 +20,65 @@ import (
 	"strings"
 )
 
-// TODO: Remove public level to this variable (NetworksConfigs), use getters to access instead
-var NetworksConfigs map[string]NetworkConfig
+var networkConfigs map[string]NetworkConfig
+
+func NetworkConfigs() map[string]NetworkConfig {
+	return networkConfigs
+}
+
+func InitNetworkConfigs() {
+	networkConfigs = make(map[string]NetworkConfig)
+}
+
+func AddNetwork(network NetworkConfig) {
+	if networkConfigs == nil {
+		networkConfigs = make(map[string]NetworkConfig)
+	}
+	networkConfigs[network.Name] = network
+}
 
 func init() {
-	// TODO: This initialization can be made in the variable declaration
-	NetworksConfigs = map[string]NetworkConfig{
-		"mainnet": {
+	InitNetworkConfigs()
+
+	configs := []NetworkConfig{
+		{
 			Name:               "mainnet",
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00000000",
 		},
-		"goerli": {
+		{
 			Name:               "goerli",
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00001020",
 		},
-		"sepolia": {
+		{
 			Name:               "sepolia",
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x90000069",
 		},
-		"chiado": {
+		{
 			Name:               "chiado",
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x0000006f",
 		},
-		"gnosis": {
+		{
 			Name:               "gnosis",
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00000064",
 		},
 	}
+	for _, config := range configs {
+		AddNetwork(config)
+	}
 }
 
-// TODO: add doc
-// TODO: test
 func CheckNetwork(networkName string) error {
-	if _, ok := NetworksConfigs[strings.ToLower(networkName)]; !ok {
+	if _, ok := networkConfigs[strings.ToLower(networkName)]; !ok {
 		return fmt.Errorf(UnknownNetworkError, networkName)
 	}
 	return nil

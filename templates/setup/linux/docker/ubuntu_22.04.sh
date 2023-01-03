@@ -3,7 +3,7 @@
 # Update and Install Dependencies
 sudo apt-get update
 
-sudo apt apt-get install -y \
+sudo apt-get install -y \
     apt-transport-https \
     ca-certificates \
     curl \

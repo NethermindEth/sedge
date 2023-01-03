@@ -53,7 +53,7 @@ func DeleteFakeDep(depPath string) {
 // Struct for creating a commands.CommandRunner mocks
 type SimpleCMDRunner struct {
 	SRunCMD  func(commands.Command) (string, error)
-	SRunBash func(commands.BashScript) (string, error)
+	SRunBash func(commands.ScriptFile) (string, error)
 }
 
 func (cr *SimpleCMDRunner) BuildDockerComposeUpCMD(options commands.DockerComposeUpOptions) commands.Command {
@@ -68,6 +68,20 @@ func (cr *SimpleCMDRunner) BuildDockerComposePullCMD(options commands.DockerComp
 		RunAsAdmin: false,
 	})
 	return r.BuildDockerComposePullCMD(options)
+}
+
+func (cr *SimpleCMDRunner) BuildDockerComposeCreateCMD(options commands.DockerComposeCreateOptions) commands.Command {
+	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
+		RunAsAdmin: false,
+	})
+	return r.BuildDockerComposeCreateCMD(options)
+}
+
+func (cr *SimpleCMDRunner) BuildDockerComposeBuildCMD(options commands.DockerComposeBuildOptions) commands.Command {
+	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
+		RunAsAdmin: false,
+	})
+	return r.BuildDockerComposeBuildCMD(options)
 }
 
 func (cr *SimpleCMDRunner) BuildDockerPSCMD(options commands.DockerPSOptions) commands.Command {
@@ -133,10 +147,23 @@ func (cr *SimpleCMDRunner) BuildEchoToFileCMD(options commands.EchoToFileOptions
 	return r.BuildEchoToFileCMD(options)
 }
 
+func (cr *SimpleCMDRunner) BuildOpenTextEditor(options commands.OpenTextEditorOptions) commands.Command {
+	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
+		RunAsAdmin: false,
+	})
+	return r.BuildOpenTextEditor(options)
+}
+
 func (cr *SimpleCMDRunner) RunCMD(cmd commands.Command) (string, error) {
+	if cr.SRunCMD == nil {
+		return "", nil
+	}
 	return cr.SRunCMD(cmd)
 }
 
-func (cr *SimpleCMDRunner) RunBash(script commands.BashScript) (string, error) {
+func (cr *SimpleCMDRunner) RunScript(script commands.ScriptFile) (string, error) {
+	if cr.SRunBash == nil {
+		return "", nil
+	}
 	return cr.SRunBash(script)
 }

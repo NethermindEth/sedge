@@ -17,11 +17,9 @@ package clients
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/NethermindEth/sedge/configs"
-	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/templates"
 	log "github.com/sirupsen/logrus"
 )
@@ -33,13 +31,11 @@ type ClientInfo struct {
 
 /*
 SupportedClients :
-Get supported client names of type <clientType> for network <network>. A client is supported if it has a docker-compose service template
+Get supported client names of type <clientType> for the ClientInfo's network. A client is supported if it has a docker-compose service template
 
 params :-
 a. clientType string
 Type of client to be returned
-b .network string
-Target network
 
 returns :-
 a. []string
@@ -48,7 +44,7 @@ b. error
 Error if any
 */
 func (c ClientInfo) SupportedClients(clientType string) (clientsNames []string, err error) {
-	files, err := templates.Envs.ReadDir(filepath.Join("envs", c.Network, clientType))
+	files, err := templates.Envs.ReadDir(strings.Join([]string{"envs", c.Network, clientType}, "/"))
 	if err != nil {
 		return
 	}
@@ -62,13 +58,11 @@ func (c ClientInfo) SupportedClients(clientType string) (clientsNames []string, 
 
 /*
 Clients :
-Get all the supported and configured clients
+Get all the supported clients for the ClientInfo's network
 
 params :-
 a. clientTypes []string
 Types of client supported. E.g execution, consensus, validator
-b. network
-Target network
 
 returns :-
 a. OrderedClients
@@ -89,18 +83,8 @@ func (c ClientInfo) Clients(clientTypes []string) (clients OrderedClients, errs 
 		}
 		log.Debugf(configs.SupportedClients, clientType, strings.ToLower(strings.Join(supportedClients, ", ")))
 
-		// Get the clients from the configuration file
-		configClients, err := configs.ConfigClients(clientType)
-		if err != nil {
-			errs = append(errs, err)
-			continue
-		}
-		log.Debugf(configs.ConfigClientsMsg, clientType, strings.ToLower(strings.Join(configClients, ", ")))
-
-		for _, client := range configClients {
-			// Check if the client is supported
-			supported := utils.Contains(supportedClients, client)
-			clients[clientType][client] = Client{Name: client, Type: clientType, Supported: supported}
+		for _, client := range supportedClients {
+			clients[clientType][client] = Client{Name: client, Type: clientType, Supported: true}
 		}
 	}
 

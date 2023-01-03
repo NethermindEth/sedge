@@ -27,15 +27,10 @@ import (
 )
 
 type downCmdTestCase struct {
-	configPath     string
 	generationPath string
 	runner         commands.CommandRunner
 	fdOut          *bytes.Buffer
 	isErr          bool
-}
-
-func resetDownCmd() {
-	cfgFile = ""
 }
 
 func buildDownTestCase(t *testing.T, caseName string, isErr bool) *downCmdTestCase {
@@ -62,13 +57,12 @@ func buildDownTestCase(t *testing.T, caseName string, isErr bool) *downCmdTestCa
 		SRunCMD: func(c commands.Command) (string, error) {
 			return "", nil
 		},
-		SRunBash: func(bs commands.BashScript) (string, error) {
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
 		},
 	}
 
 	tc.generationPath = dcPath
-	tc.configPath = filepath.Join(configPath, "config.yaml")
 	tc.fdOut = new(bytes.Buffer)
 	tc.isErr = isErr
 	return &tc
@@ -80,19 +74,12 @@ func TestDownCmd(t *testing.T) {
 		*buildDownTestCase(t, "case_1", false),
 	}
 
-	t.Cleanup(resetDownCmd)
-
 	for _, tc := range tcs {
-		resetDownCmd()
 		rootCmd := RootCmd()
-		rootCmd.AddCommand(DownCmd())
-		rootCmd.SetArgs([]string{"down", "--config", tc.configPath, "--path", tc.generationPath})
+		rootCmd.AddCommand(DownCmd(tc.runner))
+		rootCmd.SetArgs([]string{"down", "--path", tc.generationPath})
 		rootCmd.SetOut(tc.fdOut)
 		log.SetOutput(tc.fdOut)
-
-		commands.InitRunner(func() commands.CommandRunner {
-			return tc.runner
-		})
 
 		descr := "sedge down"
 		err := rootCmd.Execute()

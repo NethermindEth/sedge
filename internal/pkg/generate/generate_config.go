@@ -38,7 +38,7 @@ a. error
 Error if any
 */
 func GenerateConfig(path string) (err error) {
-	rawTmp, err := templates.Config.ReadFile(filepath.Join("config", "config.tmpl"))
+	rawTmp, err := templates.Config.ReadFile("config/config.tmpl")
 	if err != nil {
 		return
 	}
@@ -59,7 +59,7 @@ func GenerateConfig(path string) (err error) {
 		clientsMap[clientType] = supportedClients
 	}
 
-	if err = writeTemplateToFile(tmp, path+"/"+configs.ConfigFileName+".yaml", clientsMap, false); err != nil {
+	if err = writeTemplateToFile(tmp, filepath.Join(path, configs.ConfigFileName+".yaml"), clientsMap, false); err != nil {
 		return
 	}
 
