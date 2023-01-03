@@ -121,12 +121,12 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 	VersionUpdated = "You are running the latest version of sedge. Version: "
 )
 
-var DefaultSedgeDataPath string
+var DefaultAbsSedgeDataPath string
 
 func init() {
 	cwd, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
 	}
-	DefaultSedgeDataPath = path.Join(cwd, DefaultSedgeDataFolderName)
+	DefaultAbsSedgeDataPath = path.Join(cwd, DefaultSedgeDataFolderName)
 }

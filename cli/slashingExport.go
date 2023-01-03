@@ -48,7 +48,7 @@ func SlashingExportCmd(sedgeActions actions.SedgeActions) *cobra.Command {
 	cmd.Flags().StringVarP(&network, "network", "n", "", "network")
 	cmd.Flags().BoolVar(&startValidator, "start-validator", false, "if the validator client is currently stopped, then it is started after slashing export")
 	cmd.Flags().BoolVar(&stopValidator, "stop-validator", false, "if the validator client is currently running, then it is not started after slashing export")
-	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultSedgeDataPath, "docker-compose scripts generation path")
+	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data")
 	cmd.Flags().StringVarP(&out, "out", "o", "", `path to write slashing protection data (default "[GENERATION_PATH]/slashing_export.json")`)
 	return cmd
 }

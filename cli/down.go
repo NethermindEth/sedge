@@ -58,6 +58,6 @@ func DownCmd(cmdRunner commands.CommandRunner) *cobra.Command {
 		},
 	}
 	// Bind flags
-	cmd.Flags().StringVarP(&flags.path, "path", "p", configs.DefaultSedgeDataPath, "docker-compose script path")
+	cmd.Flags().StringVarP(&flags.path, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data")
 	return cmd
 }
