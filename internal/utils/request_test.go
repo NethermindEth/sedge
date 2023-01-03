@@ -25,8 +25,6 @@ import (
 )
 
 func TestGetRequest(t *testing.T) {
-	t.Parallel()
-
 	server := httptest.NewServer(
 		http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			if req.Method != "GET" {
