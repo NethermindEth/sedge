@@ -16,15 +16,15 @@ limitations under the License.
 package configs
 
 const (
-	DefaultDiscoveryPortEL     = "30303"
-	DefaultMetricsPortEL       = "8008"
-	DefaultApiPortEL           = "8545"
-	DefaultAuthPortEL          = "8551"
-	DefaultWSPortEL            = "8546"
-	DefaultDiscoveryPortCL     = "9000"
-	DefaultMetricsPortCL       = "5054"
-	DefaultApiPortCL           = "4000"
-	DefaultAdditionalApiPortCL = "4001"
-	DefaultMetricsPortVL       = "5056"
-	DefaultMevPort             = "18550"
+	DefaultDiscoveryPortEL     uint16 = 30303
+	DefaultMetricsPortEL       uint16 = 8008
+	DefaultApiPortEL           uint16 = 8545
+	DefaultAuthPortEL          uint16 = 8551
+	DefaultWSPortEL            uint16 = 8546
+	DefaultDiscoveryPortCL     uint16 = 9000
+	DefaultMetricsPortCL       uint16 = 5054
+	DefaultApiPortCL           uint16 = 4000
+	DefaultAdditionalApiPortCL uint16 = 4001
+	DefaultMetricsPortVL       uint16 = 5056
+	DefaultMevPort             uint16 = 18550
 )

@@ -58,7 +58,7 @@ type GenerationData struct {
 	MapAllPorts             bool
 	Mev                     bool
 	MevImage                string
-	Ports                   map[string]string
+	Ports                   map[string]uint16
 	Graffiti                string
 	LoggingDriver           string
 	ECBootnodes             []string
@@ -78,20 +78,20 @@ type DockerComposeData struct {
 	TTD                     bool
 	XeeVersion              bool
 	Mev                     bool
-	MevPort                 string
+	MevPort                 uint16
 	MevImage                string
 	CheckpointSyncUrl       string
 	FeeRecipient            string
-	ElDiscoveryPort         string
-	ElMetricsPort           string
-	ElApiPort               string
-	ElAuthPort              string
-	ElWsPort                string
-	ClDiscoveryPort         string
-	ClMetricsPort           string
-	ClApiPort               string
-	ClAdditionalApiPort     string
-	VlMetricsPort           string
+	ElDiscoveryPort         uint16
+	ElMetricsPort           uint16
+	ElApiPort               uint16
+	ElAuthPort              uint16
+	ElWsPort                uint16
+	ClDiscoveryPort         uint16
+	ClMetricsPort           uint16
+	ClApiPort               uint16
+	ClAdditionalApiPort     uint16
+	VlMetricsPort           uint16
 	FallbackELUrls          []string
 	ElExtraFlags            []string
 	ClExtraFlags            []string

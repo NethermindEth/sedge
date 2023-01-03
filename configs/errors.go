@@ -69,7 +69,7 @@ const (
 	NoOutputDockerInspectError        = "no output from docker inspect"
 	IPNotFoundError                   = "could not find IP address"
 	PortOccupationError               = "port occupation check failed. Error: %v"
-	DefaultPortEmptyError             = "default %s can not be empty"
+	DefaultPortInvalidError           = "default %s can not be zero"
 	PrintFileError                    = "error printing file content: %v"
 	CleaningEnvFileError              = "error cleaning env file: %v"
 	CleaningDCFileError               = "error cleaning docker compose file: %v"

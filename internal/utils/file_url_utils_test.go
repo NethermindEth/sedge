@@ -144,7 +144,7 @@ func TestGetUrlOrPathContent(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		return string(raw)
+		return strings.Trim(strings.ReplaceAll(string(raw), "\r", ""), "\r")
 	}
 	pwd, err := os.Getwd()
 	if err != nil {

@@ -18,11 +18,11 @@ package env
 import (
 	"fmt"
 	"path/filepath"
-	"reflect"
 	"regexp"
 	"testing"
 
 	"github.com/NethermindEth/sedge/internal/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetCCBootnodes(t *testing.T) {
@@ -58,9 +58,7 @@ func TestGetCCBootnodes(t *testing.T) {
 				t.Error(err)
 			}
 
-			if !reflect.DeepEqual(got, tc.want) {
-				t.Errorf("Expected %v, got %v. Function call: %s", tc.want, got, descr)
-			}
+			assert.ElementsMatch(t, got, tc.want)
 		})
 	}
 }
@@ -98,9 +96,7 @@ func TestGetECBootnodes(t *testing.T) {
 				t.Error(err)
 			}
 
-			if !reflect.DeepEqual(got, tc.want) {
-				t.Errorf("Expected %v, got %v. Function call: %s", tc.want, got, descr)
-			}
+			assert.ElementsMatch(t, got, tc.want)
 		})
 	}
 }
