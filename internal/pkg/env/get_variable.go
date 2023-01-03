@@ -48,6 +48,9 @@ func GetBootnodes(network, client string) ([]string, error) {
 	if m := ReBOOTNODES.FindStringSubmatch(string(content)); m != nil {
 		m[1] = strings.ReplaceAll(m[1], "\"", "")
 		enrs := strings.Split(m[1], ",")
+		for i, enr := range enrs {
+			enrs[i] = strings.Trim(enr, "\r\n ")
+		}
 		return enrs, nil
 	}
 

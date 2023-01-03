@@ -72,9 +72,7 @@ func TestGetBootnodes(t *testing.T) {
 				t.Error(err)
 			}
 
-			if !assert.ElementsMatch(t, got, tc.want) {
-				t.Errorf("Expected %v, got %v. Function call: %s", tc.want, got, descr)
-			}
+			assert.ElementsMatch(t, got, tc.want)
 		})
 	}
 }
