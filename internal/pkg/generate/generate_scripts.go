@@ -155,7 +155,7 @@ func generateDockerComposeScripts(gd GenerationData) (dockerComposePath string, 
 	}
 
 	// Parse validator-blocker template
-	tmp, err := templates.Services.ReadFile(filepath.Join("services", "validator-blocker.tmpl"))
+	tmp, err := templates.Services.ReadFile(strings.Join([]string{"services", "validator-blocker.tmpl"}, "/"))
 	if err != nil {
 		return "", err
 	}
