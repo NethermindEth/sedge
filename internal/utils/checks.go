@@ -61,7 +61,7 @@ returns :-
 a. error
 Error if any
 */
-func PreCheck(generationPath string) error {
+func PreCheck(cmdRunner commands.CommandRunner, generationPath string) error {
 	// Check docker is installed
 	pending := CheckDependencies([]string{"docker"})
 	for _, dependency := range pending {
@@ -72,26 +72,26 @@ func PreCheck(generationPath string) error {
 	}
 
 	// Check docker engine is on
-	dockerPsCMD := commands.Runner.BuildDockerPSCMD(commands.DockerPSOptions{All: true})
+	dockerPsCMD := cmdRunner.BuildDockerPSCMD(commands.DockerPSOptions{All: true})
 	log.Debugf(configs.RunningCommand, dockerPsCMD.Cmd)
 	dockerPsCMD.GetOutput = true
-	_, err := commands.Runner.RunCMD(dockerPsCMD)
+	_, err := cmdRunner.RunCMD(dockerPsCMD)
 	if err != nil {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
 	}
 
 	// Check if docker-compose script was generated
-	file := generationPath + "/" + configs.DefaultDockerComposeScriptName
+	file := filepath.Join(generationPath, configs.DefaultDockerComposeScriptName)
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		log.Errorf(configs.OpeningFileError, file, err)
 		return fmt.Errorf(configs.DockerComposeScriptNotFoundError, generationPath, configs.DefaultSedgeDataPath)
 	}
 
 	// Check that compose plugin is installed with docker running 'docker compose ps'
-	dockerComposePsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{Path: file})
+	dockerComposePsCMD := cmdRunner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{Path: file})
 	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
 	dockerComposePsCMD.GetOutput = true
-	_, err = commands.Runner.RunCMD(dockerComposePsCMD)
+	_, err = cmdRunner.RunCMD(dockerComposePsCMD)
 	if err != nil {
 		return fmt.Errorf(configs.DockerComposeOffError, err)
 	}
@@ -113,16 +113,16 @@ Output of 'docker ps --services --filter status=running'
 b. error
 Error if any
 */
-func CheckContainers(generationPath string) (string, error) {
+func CheckContainers(cmdRunner commands.CommandRunner, generationPath string) (string, error) {
 	// Check if docker-compose script is running
-	psCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+	psCMD := cmdRunner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
 		Path:          filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 		Services:      true,
 		FilterRunning: true,
 	})
 	log.Debugf(configs.RunningCommand, psCMD.Cmd)
 	psCMD.GetOutput = true
-	rawServices, err := commands.Runner.RunCMD(psCMD)
+	rawServices, err := cmdRunner.RunCMD(psCMD)
 	if err != nil || rawServices == "\n" {
 		if rawServices == "\n" && err == nil {
 			err = fmt.Errorf(configs.DockerComposePsReturnedEmptyError)
