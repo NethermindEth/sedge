@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/alexeyco/simpletable v1.0.0
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
+	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/docker/docker v20.10.21+incompatible
 	github.com/golang/mock v1.4.4
 	github.com/google/go-github/v47 v47.1.0

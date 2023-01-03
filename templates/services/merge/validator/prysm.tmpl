@@ -1,19 +1,16 @@
 {{/* prysm.tmpl */}}
 {{ define "validator" }}
   validator-import:
-    image: ${VL_IMAGE_VERSION}{{with .VlCustomCfg}}
-    depends_on:
-      config_consensus:
-        condition: service_completed_successfully{{end}}
+    image: ${VL_IMAGE_VERSION}
     networks:
       - sedge
     container_name: validator-import-client
     volumes:
       - ${VL_DATA_DIR}:/data
-      - ${KEYSTORE_DIR}:/keystore{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}{{end}}
+      - ${KEYSTORE_DIR}:/keystore{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
     command: |
-      accounts import{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      accounts import{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       --chain-config-file=/network_config/config.yml{{end}}{{else}}
       --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       --accept-terms-of-use
@@ -44,12 +41,12 @@
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
       - ${VL_DATA_DIR}:/data
-      - ${KEYSTORE_DIR}/keystore_password.txt:/keystore/keystore_password.txt{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}{{end}}
+      - ${KEYSTORE_DIR}/keystore_password.txt:/keystore/keystore_password.txt{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
     command:
       - --datadir=/data
       - --wallet-dir=/data/wallet
-      - --wallet-password-file=/keystore/keystore_password.txt{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - --wallet-password-file=/keystore/keystore_password.txt{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       - --chain-config-file=/network_config/config.yml{{end}}{{else}}
       - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --beacon-rpc-provider=${CC_API_URL}
@@ -59,7 +56,7 @@
       - --monitoring-host=0.0.0.0
       - --monitoring-port={{.VlMetricsPort}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{with .FeeRecipient}}
-      - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{if .Mev}}
+      - --suggested-fee-recipient=${CC_FEE_RECIPIENT}{{end}}{{if .Mev}}
       - --enable-builder
       - --enable-validator-registration{{end}}{{if .LoggingDriver}}
     logging:

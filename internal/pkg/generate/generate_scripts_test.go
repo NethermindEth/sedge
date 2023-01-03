@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/utils"
 )
@@ -114,6 +115,7 @@ func validateGeneratedFiles(t *testing.T, testCase generateTestCase) {
 }
 
 func TestGenerateScripts(t *testing.T) {
+	configs.InitNetworksConfigs()
 	inputs := generateTestCases(t)
 	for _, input := range inputs {
 		t.Run(input.name, func(t *testing.T) {
