@@ -351,7 +351,7 @@ func TestValidateClients(t *testing.T) {
 	}
 }
 
-func TestComposeFileSimple(t *testing.T) {
+func TestGenComposeFileSimpleExecution(t *testing.T) {
 	tests := []struct {
 		Description string
 		Data        *GenData
@@ -400,7 +400,7 @@ func TestComposeFileSimple(t *testing.T) {
 	}
 }
 
-func TestEnvFile(t *testing.T) {
+func TestEnvFileAndFlags(t *testing.T) {
 	tests := []struct {
 		Description string
 		Data        *GenData
@@ -487,7 +487,7 @@ func TestEnvFile(t *testing.T) {
 	}
 }
 
-func TestCleanGenerated(t *testing.T) {
+func TestCleanGeneratedFiles(t *testing.T) {
 	tests := []struct {
 		Description string
 		Data        *GenData
