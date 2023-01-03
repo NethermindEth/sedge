@@ -27,6 +27,7 @@ func PrintFileContent(w io.Writer, path string) error {
 	if err != nil {
 		return fmt.Errorf(configs.PrintFileError, err)
 	}
+	defer file.Close()
 
 	content, err := io.ReadAll(file)
 	if err != nil {

@@ -16,6 +16,8 @@ limitations under the License.
 package actions_test
 
 import (
+	"fmt"
+	"path/filepath"
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli/actions"
@@ -33,18 +35,18 @@ func TestRunContainers(t *testing.T) {
 		{
 			name: "with services",
 			options: actions.RunContainersOptions{
-				GenerationPath: "/a/b/c/d",
+				GenerationPath: filepath.Join("a", "b", "c", "d"),
 				Services:       []string{"validator", "consensus", "execution"},
 			},
-			expectedCommand: "docker compose -f /a/b/c/d/docker-compose.yml up -d validator consensus execution",
+			expectedCommand: fmt.Sprintf("docker compose -f %s up -d validator consensus execution", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
 		},
 		{
 			name: "without services",
 			options: actions.RunContainersOptions{
-				GenerationPath: "/a/b/c/d",
+				GenerationPath: filepath.Join("a", "b", "c", "d"),
 				Services:       []string{},
 			},
-			expectedCommand: "docker compose -f /a/b/c/d/docker-compose.yml up -d",
+			expectedCommand: fmt.Sprintf("docker compose -f %s up -d", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
 		},
 	}
 	for _, tc := range tests {
