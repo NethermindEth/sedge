@@ -3,6 +3,7 @@ package generate
 import (
 	"bytes"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -10,7 +11,7 @@ import (
 )
 
 // read the .env file
-func envData(t *testing.T, reader io.Reader) map[string]string {
+func retriveEnvData(t *testing.T, reader io.Reader) map[string]string {
 	envFile, err := ioutil.ReadAll(reader)
 	if err != nil {
 		t.Error("unable to read .env file")
@@ -135,11 +136,10 @@ func TestGenerateEnvFile(t *testing.T) {
 				return
 			}
 			// read the .env file
-			data := envData(t, &buffer)
+			data := retriveEnvData(t, &buffer)
 			for key, value := range tt.fieldsToCheck {
-				if valueStored, ok := data[key]; !ok || valueStored != value {
-					t.Errorf("EnvFile() = %v, want %v", data[key], value)
-				}
+				assert.Contains(t, data, key)
+				assert.Equal(t, value, data[key])
 			}
 		})
 	}

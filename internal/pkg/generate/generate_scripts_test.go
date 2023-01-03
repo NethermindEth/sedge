@@ -36,10 +36,12 @@ const (
 )
 
 type genTestData struct {
-	Description    string
-	GenerationData *GenData
-	Error          error
-	CheckFunc      func(t *testing.T, data *GenData, compose, env io.Reader) error
+	Description     string
+	GenerationData  *GenData
+	ErrorGenCompose error
+	ErrorGenEnvFile error
+	ErrorCheckFunc  error
+	CheckFunc       func(t *testing.T, data *GenData, compose, env io.Reader) error
 }
 
 var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader) error {
@@ -104,47 +106,39 @@ var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) erro
 		return err
 	}
 
-	if utils.Contains(data.Services, execution) && composeData.Services.Execution == nil {
-		return errors.New("execution service should not be omitted")
+	if utils.Contains(data.Services, execution) {
+		assert.NotNil(t, composeData.Services.Execution)
 	}
-	if utils.Contains(data.Services, consensus) && composeData.Services.Consensus == nil {
-		return errors.New("consensus service should not be omitted")
+	if utils.Contains(data.Services, consensus) {
+		assert.NotNil(t, composeData.Services.Consensus)
 	}
-	if utils.Contains(data.Services, validator) && composeData.Services.Validator == nil {
-		return errors.New("validator service should not be omitted")
+	if utils.Contains(data.Services, validator) {
+		assert.NotNil(t, composeData.Services.Validator)
 	}
-	if utils.Contains(data.Services, mevBoost) && composeData.Services.Mevboost == nil {
-		return errors.New("mev boost service should not be omitted")
+	if utils.Contains(data.Services, mevBoost) {
+		assert.NotNil(t, composeData.Services.Mevboost)
 	}
-	if utils.Contains(data.Services, validatorImport) && composeData.Services.ValidatorImport == nil {
-		return errors.New("validator import service should not be omitted")
+	if utils.Contains(data.Services, validatorImport) {
+		assert.NotNil(t, composeData.Services.ValidatorImport)
 	}
-	if utils.Contains(data.Services, configConsensus) && composeData.Services.ConfigConsensus == nil {
-		return errors.New("validator export service should not be omitted")
+	if utils.Contains(data.Services, configConsensus) {
+		assert.NotNil(t, composeData.Services.ConfigConsensus)
 	}
 
 	// load .env file
-	envData := envData(t, env)
+	envData := retriveEnvData(t, env)
 	if data.Network == "gnosis" {
 		// Check that the right network is set
-		elNetworkSet, ok := envData["EL_NETWORK"]
-		if !ok {
-			return errors.New("network is not set")
-		}
-		assert.Equal(t, elNetworkSet, "xdai")
-		clNetworkSet, ok := envData["CL_NETWORK"]
-		if !ok {
-			return errors.New("network is not set")
-		}
-		assert.Equal(t, clNetworkSet, "gnosis")
+		assert.Contains(t, envData, "EL_NETWORK")
+		assert.Equal(t, envData["EL_NETWORK"], "xdai")
+
+		assert.Contains(t, envData, "CL_NETWORK")
+		assert.Equal(t, envData["CL_NETWORK"], "gnosis")
 
 	} else {
 		// Check that the right network is set
-		networkSet, ok := envData["NETWORK"]
-		if !ok {
-			return errors.New("network is not set")
-		}
-		assert.Equal(t, networkSet, data.Network)
+		assert.Contains(t, envData, "NETWORK")
+		assert.Equal(t, envData["NETWORK"], data.Network)
 	}
 
 	return nil
@@ -152,7 +146,7 @@ var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) erro
 
 func generateTestCases(t *testing.T) (tests []genTestData) {
 	baseDescription := "Test generation of compose services "
-	tests = []genTestData{{Description: baseDescription + " NilData", Error: EmptyDataError, CheckFunc: defaultFunc}}
+	tests = []genTestData{{Description: baseDescription + " NilData", ErrorGenCompose: EmptyDataError, CheckFunc: defaultFunc}}
 
 	networks, err := utils.SupportedNetworks()
 	if err != nil {
@@ -189,7 +183,6 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 								Network:         network,
 								Services:        []string{execution, consensus, validator},
 							},
-							Error:     nil,
 							CheckFunc: defaultFunc,
 						},
 						genTestData{
@@ -201,7 +194,6 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 								ValidatorClient: &clients.Client{Name: consensusCl, Omitted: true},
 								Network:         network,
 							},
-							Error:     nil,
 							CheckFunc: defaultFunc,
 						},
 						genTestData{
@@ -213,8 +205,8 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 								ValidatorClient: &clients.Client{Name: consensusCl, Omitted: true},
 								Network:         network,
 							},
-							Error:     ConsensusClientNotValidError,
-							CheckFunc: defaultFunc,
+							ErrorGenCompose: ConsensusClientNotValidError,
+							CheckFunc:       defaultFunc,
 						})
 				}
 			}
@@ -236,7 +228,6 @@ func TestGenerateComposeServices(t *testing.T) {
 				Network:         "mainnet",
 				Mev:             true,
 			},
-			Error:     nil,
 			CheckFunc: defaultFunc,
 		},
 		{
@@ -250,7 +241,6 @@ func TestGenerateComposeServices(t *testing.T) {
 				Mev:             true,
 				MevBoostService: true,
 			},
-			Error:     nil,
 			CheckFunc: checkMevServices,
 		},
 		{
@@ -272,22 +262,20 @@ func TestGenerateComposeServices(t *testing.T) {
 
 			var buffer bytes.Buffer
 			err := ComposeFile(tt.GenerationData, io.Writer(&buffer))
-			if err != nil {
-				assert.ErrorIs(t, err, tt.Error)
+			assert.ErrorIs(t, err, tt.ErrorGenCompose)
+			if tt.ErrorGenCompose != nil {
 				return
 			}
 
 			var envBuffer bytes.Buffer
 			err = EnvFile(tt.GenerationData, io.Writer(&envBuffer))
-			if err != nil {
-				assert.ErrorIs(t, err, tt.Error)
+			assert.ErrorIs(t, err, tt.ErrorGenEnvFile)
+			if tt.ErrorGenEnvFile != nil {
 				return
 			}
 
 			err = tt.CheckFunc(t, tt.GenerationData, bytes.NewReader(buffer.Bytes()), bytes.NewReader(envBuffer.Bytes()))
-			if err != nil {
-				assert.ErrorIs(t, err, tt.Error)
-			}
+			assert.ErrorIs(t, err, tt.ErrorCheckFunc)
 		})
 	}
 }
@@ -404,8 +392,8 @@ func TestComposeFileSimple(t *testing.T) {
 		t.Run(tt.Description, func(t *testing.T) {
 			var buffer bytes.Buffer
 			err := ComposeFile(tt.Data, io.Writer(&buffer))
-			if err != nil {
-				assert.ErrorIs(t, err, tt.Error)
+			assert.ErrorIs(t, err, tt.Error)
+			if tt.Error != nil {
 				return
 			}
 		})
@@ -535,13 +523,13 @@ func TestCleanGenerated(t *testing.T) {
 
 			// generate files
 			out, err := os.Create(filepath.Join(path, configs.DefaultDockerComposeScriptName))
-			if err != nil {
-				assert.ErrorIs(t, err, tt.Error)
+			assert.ErrorIs(t, err, tt.Error)
+			if tt.Error != nil {
 				return
 			}
 			err = ComposeFile(tt.Data, out)
-			if err != nil {
-				assert.ErrorIs(t, err, tt.Error)
+			assert.ErrorIs(t, err, tt.Error)
+			if tt.Error != nil {
 				return
 			}
 			assert.FileExists(t, filepath.Join(path, configs.DefaultDockerComposeScriptName))
@@ -549,15 +537,15 @@ func TestCleanGenerated(t *testing.T) {
 			// open output file
 			out, err = os.Create(filepath.Join(path, configs.DefaultEnvFileName))
 			err = EnvFile(tt.Data, out)
-			if err != nil {
-				assert.ErrorIs(t, err, tt.Error)
+			assert.ErrorIs(t, err, tt.Error)
+			if tt.Error != nil {
 				return
 			}
 			assert.FileExists(t, filepath.Join(path, configs.DefaultEnvFileName))
 
 			err = CleanGenerated(path)
-			if err != nil {
-				assert.ErrorIs(t, err, tt.Error)
+			assert.ErrorIs(t, err, tt.Error)
+			if tt.Error != nil {
 				return
 			}
 		})

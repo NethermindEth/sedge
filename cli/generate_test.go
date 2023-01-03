@@ -18,12 +18,9 @@ package cli
 import (
 	"fmt"
 	"github.com/NethermindEth/sedge/cli/actions"
-	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/NethermindEth/sedge/test"
 	"github.com/NethermindEth/sedge/test/mock_prompts"
-	"github.com/docker/docker/client"
 	"github.com/golang/mock/gomock"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 	"strings"
@@ -464,19 +461,13 @@ func TestGenerateCmd(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			descr := fmt.Sprintf("sedge cli %s", tc.args.toString())
+			descr := fmt.Sprintf("sedge generate %s %s %s", tc.subCommand.argsList(), tc.args.toString(), tc.globalArgs.argsList())
 
 			ctrl := gomock.NewController(t)
 			prompt := mock_prompts.NewMockPrompt(ctrl)
 			defer ctrl.Finish()
 
-			dockerClient, err := client.NewClientWithOpts(client.FromEnv)
-			if err != nil {
-				log.Fatal(err)
-			}
-			defer dockerClient.Close()
-			serviceManager := services.NewServiceManager(dockerClient)
-			sedgeActions := actions.NewSedgeActions(dockerClient, serviceManager, nil)
+			sedgeActions := actions.NewSedgeActions(nil, nil, nil)
 
 			rootCmd := RootCmd()
 			rootCmd.AddCommand(GenerateCmd(prompt, sedgeActions))
@@ -485,7 +476,7 @@ func TestGenerateCmd(t *testing.T) {
 			argsL = append(argsL, tc.globalArgs.argsList()...)
 			rootCmd.SetArgs(argsL)
 
-			if err = rootCmd.Execute(); !tc.isErr && err != nil {
+			if err := rootCmd.Execute(); !tc.isErr && err != nil {
 				t.Errorf("%s failed: %v", descr, err)
 			} else if tc.isErr && err == nil {
 				t.Errorf("%s expected to fail", descr)
