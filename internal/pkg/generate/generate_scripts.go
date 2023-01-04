@@ -194,13 +194,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		return err
 	}
 
-	// Check for TTD in generated env file
-	//TTD, err := gd.CustomTTD
-	//env.CheckVariableBase(env.ReTTD, gd.Network)
-	//if err != nil {
-	//	return err
-	//}
-
 	// Check for splitted network flags
 	splittedNetwork, err := env.CheckVariableBase(env.ReSPLITTED, gd.Network)
 	if err != nil {
@@ -227,52 +220,30 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 			return err
 		}
 	}
-	//
-	//// Check vars related to Validator service
-	var vlRemoteCfg, vlRemoteGen, vlRemoteDpl, mevSupported bool
-	//
-	if !cls[validator].Omitted {
-		vlRemoteCfg, err = env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient.Name)
-		if err != nil {
-			return err
-		}
-		vlRemoteGen, err = env.CheckVariable(env.ReGENESIS, gd.Network, "validator", gd.ValidatorClient.Name)
-		if err != nil {
-			return err
-		}
-		vlRemoteDpl, err = env.CheckVariable(env.ReDEPLOY, gd.Network, "validator", gd.ValidatorClient.Name)
-		if err != nil {
-			return err
-		}
+
+	ttd := gd.CustomTTD
+	if len(ttd) == 0 {
+		ttd = configs.NetworksConfigs()[gd.Network].DefaultTTD
 	}
-	// Check for XEE_VERSION in teku
-	xeeVersion, err := env.CheckVariable(env.ReXEEV, gd.Network, "consensus", gd.ConsensusClient.Name)
-	if err != nil {
-		return err
-	}
-	//
-	//// Check for Mev
-	//mev, err := env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient.Name)
-	//if err != nil {
-	//	return err
-	//}
 
 	// Check for CC Bootnode nodes
-	ccBootnodes, err := env.GetCCBootnodes(envFilePath)
-	if err != nil {
-		return err
+	ccBootnodes := gd.CCBootnodes
+	if ccBootnodes == nil || len(ccBootnodes) == 0 {
+		ccBootnodes = configs.NetworksConfigs()[gd.Network].DefaultCCBootnodes
 	}
 
-	mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient.Name)
-	if err != nil {
-		return err
-	}
 	// Check for Bootnode nodes
-	ecBootnodes, err := env.GetECBootnodes(envFilePath)
-	if err != nil {
-		return err
+	ecBootnodes := gd.ECBootnodes
+	if ecBootnodes == nil || len(ecBootnodes) == 0 {
+		ecBootnodes = configs.NetworksConfigs()[gd.Network].DefaultECBootnodes
 	}
-
+	var mevSupported bool
+	if !cls[validator].Omitted {
+		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient.Name)
+		if err != nil {
+			return err
+		}
+	}
 	// If consensus is running with other services, and not set the MevBoostEndpoint, set it to the default
 	if !cls[consensus].Omitted && (!cls[execution].Omitted || !cls[validator].Omitted) && gd.MevBoostEndpoint == "" && gd.Mev {
 		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ConsensusClient.Name)
@@ -286,7 +257,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 
 	data := DockerComposeData{
 		Services:            gd.Services,
-		TTD:                 gd.CustomTTD != "",
+		TTD:                 ttd,
 		XeeVersion:          xeeVersion,
 		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev),
 		MevPort:             gd.Ports["MevPort"],
@@ -310,6 +281,8 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		VlExtraFlags:        gd.VlExtraFlags,
 		ECBootnodesList:     ecBootnodes,
 		CCBootnodesList:     ccBootnodes,
+		ECBootnodes:         strings.Join(ecBootnodes, ","),
+		CCBootnodes:         strings.Join(ccBootnodes, ","),
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
@@ -389,7 +362,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		consensusApiUrl = fmt.Sprintf("%s:%v", cls[consensus].Endpoint, gd.Ports["CLApi"])
 	} else {
 		if cls[consensus].Name == "prysm" {
-			consensusAdditionalApiUrl = fmt.Sprintf("%s:%s", "consensus", gd.Ports["CLAdditionalApi"])
+			consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", "consensus", gd.Ports["CLAdditionalApi"])
 		} else {
 			consensusAdditionalApiUrl = consensusApiUrl
 		}
@@ -413,14 +386,11 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ConsensusClientName:       cls[consensus].Name,
 		KeystoreDir:               "./" + configs.KeystoreDir,
 		Graffiti:                  gd.Graffiti,
-		ECBootnodes:               gd.ECBootnodes,
-		CCBootnodes:               gd.CCBootnodes,
-		CustomTTD:                 gd.CustomTTD,
 		RelayURL:                  gd.RelayURL,
 	}
 
 	// Fix prysm rpc url
-	if gd.ValidatorClient.Name == "prysm" {
+	if cls[validator].Name == "prysm" {
 		data.ConsensusAdditionalApiURL = fmt.Sprintf("%s:%d", "consensus", gd.Ports["CLAdditionalApi"])
 	}
 

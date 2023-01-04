@@ -25,6 +25,7 @@ func newAction(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
 
 // Test that the generated compose file with dump data is generated correctly
 func TestGenerateDockerCompose(t *testing.T) {
+	configs.InitNetworksConfigs()
 	samplePath := t.TempDir()
 	sampleData := &generate.GenData{
 		ExecutionClient: &clients.Client{Name: "nethermind", Omitted: false},
@@ -71,6 +72,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 }
 
 func TestFolderCreationOnCompose(t *testing.T) {
+	configs.InitNetworksConfigs()
 	samplePath := t.TempDir() + "test"
 	sampleData := &generate.GenData{
 		ExecutionClient: &clients.Client{Name: "nethermind", Omitted: false},

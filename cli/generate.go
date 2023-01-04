@@ -255,7 +255,7 @@ func initGenPath(path string) error {
 func generateJWTSecret(jwtPath string) (string, error) {
 	// Generate JWT secret if necessary
 	var err error
-	if jwtPath == "" && configs.NetworkConfigs()[network].RequireJWT {
+	if jwtPath == "" && configs.NetworksConfigs()[network].RequireJWT {
 		if jwtPath, err = handleJWTSecret(generationPath); err != nil {
 			return jwtPath, err
 		}

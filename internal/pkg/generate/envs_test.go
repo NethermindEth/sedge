@@ -2,6 +2,7 @@ package generate
 
 import (
 	"bytes"
+	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/stretchr/testify/assert"
 	"io"
@@ -33,6 +34,7 @@ func retriveEnvData(t *testing.T, reader io.Reader) map[string]string {
 
 // TestGenerateEnvFile tests the generation of the .env file
 func TestGenerateEnvFile(t *testing.T) {
+	configs.InitNetworksConfigs()
 	tests := []struct {
 		name          string
 		data          *GenData
