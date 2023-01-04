@@ -35,9 +35,6 @@ type EnvData struct {
 	ConsensusClientName       string
 	KeystoreDir               string
 	Graffiti                  string
-	ECBootnodes               []string
-	CCBootnodes               []string
-	CustomTTD                 string
 	RelayURL                  string
 }
 
@@ -103,8 +100,10 @@ type DockerComposeData struct {
 	ElExtraFlags            []string
 	ClExtraFlags            []string
 	VlExtraFlags            []string
-	ECBootnodes             []string
-	CCBootnodes             []string
+	ECBootnodes             string
+	ECBootnodesList         []string
+	CCBootnodes             string
+	CCBootnodesList         []string
 	MapAllPorts             bool
 	SplittedNetwork         bool
 	ClCheckpointSyncUrl     bool

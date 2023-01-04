@@ -17,17 +17,19 @@ package generate
 
 import (
 	"fmt"
-	"github.com/NethermindEth/sedge/internal/pkg/env"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
 
+	"github.com/NethermindEth/sedge/internal/pkg/env"
+
+	"io"
+
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/templates"
-	"io"
 )
 
 const (
@@ -306,8 +308,8 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ElExtraFlags:        gd.ElExtraFlags,
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
-		ECBootnodes:         ecBootnodes,
-		CCBootnodes:         ccBootnodes,
+		ECBootnodesList:     ecBootnodes,
+		CCBootnodesList:     ccBootnodes,
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,

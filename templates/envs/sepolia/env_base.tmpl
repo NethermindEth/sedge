@@ -2,7 +2,6 @@
 {{ define "env" }}
 # --- Global configuration ---
 NETWORK=sepolia
-TTD={{if .CustomTTD}}{{.CustomTTD}}{{else}}17000000000000000{{ end }}
 RELAY_URL={{if .RelayURL}}{{.RelayURL}}{{else}}https://0x845bd072b7cd566f02faeb0a4033ce9399e42839ced64e8b2adcfc859ed1e8e1a5a293336a49feac6d9a5edb779be53a@builder-relay-sepolia.flashbots.net{{end}}
 {{template "execution" .}}
 {{template "consensus" .}}
