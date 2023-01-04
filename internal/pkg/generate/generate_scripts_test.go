@@ -19,6 +19,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"testing"
+
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/utils"
@@ -28,7 +30,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"testing"
 )
 
 const (

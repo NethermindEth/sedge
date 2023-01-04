@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli/actions"
+	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/NethermindEth/sedge/test"
@@ -357,6 +358,8 @@ func TestCliCmd(t *testing.T) {
 			true,
 		),
 	}
+
+	configs.InitNetworksConfigs()
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {

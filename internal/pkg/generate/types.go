@@ -35,77 +35,90 @@ type EnvData struct {
 	ConsensusClientName       string
 	KeystoreDir               string
 	Graffiti                  string
+	ECBootnodes               []string
+	CCBootnodes               []string
+	CustomTTD                 string
 	RelayURL                  string
 }
 
 // GenData : Struct Data object for script's generation
 type GenData struct {
-	Services           []string
-	ExecutionClient    *clients.Client
-	ConsensusClient    *clients.Client
-	ValidatorClient    *clients.Client
-	Network            string
-	CheckpointSyncUrl  string
-	FeeRecipient       string
-	JWTSecretPath      string
-	FallbackELUrls     []string
-	ElExtraFlags       []string
-	ClExtraFlags       []string
-	VlExtraFlags       []string
-	MapAllPorts        bool
-	Mev                bool
-	RelayURL           string
-	MevImage           string
-	MevBoostService    bool
-	MevBoostEndpoint   string
-	Ports              map[string]string
-	Graffiti           string
-	LoggingDriver      string
-	VLStartGracePeriod uint
-	ExecutionApiUrl    string
-	ExecutionAuthUrl   string
-	ConsensusApiUrl    string
+	Services                []string
+	ExecutionClient         *clients.Client
+	ConsensusClient         *clients.Client
+	ValidatorClient         *clients.Client
+	Network                 string
+	CheckpointSyncUrl       string
+	FeeRecipient            string
+	JWTSecretPath           string
+	FallbackELUrls          []string
+	ElExtraFlags            []string
+	ClExtraFlags            []string
+	VlExtraFlags            []string
+	MapAllPorts             bool
+	Mev                     bool
+	RelayURL                string
+	MevImage                string
+	MevBoostService         bool
+	MevBoostEndpoint        string
+	Ports                   map[string]uint16
+	Graffiti                string
+	LoggingDriver           string
+	ECBootnodes             []string
+	CCBootnodes             []string
+	CustomTTD               string
+	CustomChainSpecPath     string
+	CustomNetworkConfigPath string
+	CustomGenesisPath       string
+	CustomDeployBlock       string
+	CustomDeployBlockPath   string
+	VLStartGracePeriod      uint
+	ExecutionApiUrl         string
+	ExecutionAuthUrl        string
+	ConsensusApiUrl         string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
-	Services            []string
-	TTD                 bool
-	CcCustomCfg         bool
-	CcRemoteCfg         bool
-	CcRemoteGen         bool
-	CcRemoteDpl         bool
-	VlCustomCfg         bool
-	VlRemoteCfg         bool
-	VlRemoteGen         bool
-	VlRemoteDpl         bool
-	XeeVersion          bool
-	Mev                 bool
-	MevPort             string
-	MevImage            string
-	MevBoostEndpoint    string
-	CheckpointSyncUrl   string
-	FeeRecipient        string
-	ElDiscoveryPort     string
-	ElMetricsPort       string
-	ElApiPort           string
-	ElAuthPort          string
-	ElWsPort            string
-	ClDiscoveryPort     string
-	ClMetricsPort       string
-	ClApiPort           string
-	ClAdditionalApiPort string
-	VlMetricsPort       string
-	FallbackELUrls      []string
-	ElExtraFlags        []string
-	ClExtraFlags        []string
-	VlExtraFlags        []string
-	Bootnodes           []string
-	MapAllPorts         bool
-	SplittedNetwork     bool
-	ClCheckpointSyncUrl bool
-	LoggingDriver       string
-	VLStartGracePeriod  uint
+	Services                []string
+	TTD                     bool
+	XeeVersion              bool
+	Mev                     bool
+	MevPort                 uint16
+	MevImage                string
+	MevBoostEndpoint        string
+	CheckpointSyncUrl       string
+	FeeRecipient            string
+	ElDiscoveryPort         uint16
+	ElMetricsPort           uint16
+	ElApiPort               uint16
+	ElAuthPort              uint16
+	ElWsPort                uint16
+	ClDiscoveryPort         uint16
+	ClMetricsPort           uint16
+	ClApiPort               uint16
+	ClAdditionalApiPort     uint16
+	VlMetricsPort           uint16
+	FallbackELUrls          []string
+	ElExtraFlags            []string
+	ClExtraFlags            []string
+	VlExtraFlags            []string
+	ECBootnodes             []string
+	CCBootnodes             []string
+	MapAllPorts             bool
+	SplittedNetwork         bool
+	ClCheckpointSyncUrl     bool
+	LoggingDriver           string
+	CustomConsensusConfigs  bool
+	CustomNetwork           bool
+	CustomChainSpecPath     string
+	CustomNetworkConfigPath string
+	CustomGenesisPath       string
+	CustomDeployBlock       bool
+	CustomDeployBlockPath   string // Needed for lighthouse
+	VLStartGracePeriod      uint
+	UID                     int // Needed for teku
+	GID                     int // Needed for teku
 }
 
 // WithConsensusClient returns true if the consensus client is explicitly required

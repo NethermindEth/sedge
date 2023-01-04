@@ -4,5 +4,6 @@
 EC_IMAGE_VERSION={{if .ElImage}}{{.ElImage}}{{else}}hyperledger/besu:22.10.3{{end}}
 EC_ENABLED_MODULES=ETH,NET,CLIQUE,DEBUG,MINER,NET,PERM,ADMIN,EEA,TXPOOL,PRIV,WEB3
 EC_DATA_DIR={{.ElDataDir}}
-EC_JWT_SECRET_PATH={{.JWTSecretPath}}
+EC_JWT_SECRET_PATH={{.JWTSecretPath}}{{if .ECBootnodes}}
+EC_BOOTNODES="{{ range $index, $enode := .ECBootnodes}}{{if $index}},{{end}}{{$enode}}{{end}}"{{end}}
 {{ end }}

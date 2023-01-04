@@ -17,12 +17,14 @@ package generate
 
 import (
 	"fmt"
+	"github.com/NethermindEth/sedge/internal/pkg/env"
+	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
-	"github.com/NethermindEth/sedge/internal/pkg/env"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/templates"
 	"io"
@@ -125,7 +127,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		return err
 	}
 	// Check for port occupation
-	defaultsPorts := map[string]string{
+	defaultsPorts := map[string]uint16{
 		"ELDiscovery":     configs.DefaultDiscoveryPortEL,
 		"ELMetrics":       configs.DefaultMetricsPortEL,
 		"ELApi":           configs.DefaultApiPortEL,
@@ -163,7 +165,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 			name = empty
 		}
 		tmp, err := templates.Services.ReadFile(filepath.Join("services",
-			configs.NetworkConfigs()[gd.Network].NetworkService,
+			configs.NetworksConfigs()[gd.Network].NetworkService,
 			tmpKind,
 			name+".tmpl"))
 		if err != nil {
@@ -182,7 +184,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	// Parse validator-blocker template
-	tmp, err := templates.Services.ReadFile(filepath.Join("services", validatorBlockerTemplate+".tmpl"))
+	tmp, err := templates.Services.ReadFile(strings.Join([]string{"services", validatorBlockerTemplate + ".tmpl"}, "/"))
 	if err != nil {
 		return err
 	}
@@ -190,11 +192,12 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		return err
 	}
 
-	// Check for TTD in env base template
-	TTD, err := env.CheckVariableBase(env.ReTTD, gd.Network)
-	if err != nil {
-		return err
-	}
+	// Check for TTD in generated env file
+	//TTD, err := gd.CustomTTD
+	//env.CheckVariableBase(env.ReTTD, gd.Network)
+	//if err != nil {
+	//	return err
+	//}
 
 	// Check for splitted network flags
 	splittedNetwork, err := env.CheckVariableBase(env.ReSPLITTED, gd.Network)
@@ -203,8 +206,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	// Check vars related to Consensus service
-	var ccRemoteCfg, ccRemoteGen, ccRemoteDpl, xeeVersion, clCheckpointSyncUrl bool
-	var bootnodes []string
+	var xeeVersion, clCheckpointSyncUrl bool
 
 	if !cls[execution].Omitted {
 		gd.ExecutionClient.Endpoint = configs.OnPremiseExecutionURL
@@ -212,19 +214,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 
 	if !cls[consensus].Omitted {
 		gd.ConsensusClient.Endpoint = configs.OnPremiseConsensusURL
-		// Check for custom network config
-		ccRemoteCfg, err = env.CheckVariable(env.ReCONFIG, gd.Network, "consensus", gd.ConsensusClient.Name)
-		if err != nil {
-			return err
-		}
-		ccRemoteGen, err = env.CheckVariable(env.ReGENESIS, gd.Network, "consensus", gd.ConsensusClient.Name)
-		if err != nil {
-			return err
-		}
-		ccRemoteDpl, err = env.CheckVariable(env.ReDEPLOY, gd.Network, "consensus", gd.ConsensusClient.Name)
-		if err != nil {
-			return err
-		}
 		// Check for XEE_VERSION in teku
 		xeeVersion, err = env.CheckVariable(env.ReXEEV, gd.Network, "consensus", gd.ConsensusClient.Name)
 		if err != nil {
@@ -235,17 +224,11 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		if err != nil {
 			return err
 		}
-
-		// Check for Bootstrap nodes
-		bootnodes, err = env.GetBootnodes(gd.Network, gd.ConsensusClient.Name)
-		if err != nil {
-			return err
-		}
 	}
-
-	// Check vars related to Validator service
+	//
+	//// Check vars related to Validator service
 	var vlRemoteCfg, vlRemoteGen, vlRemoteDpl, mevSupported bool
-
+	//
 	if !cls[validator].Omitted {
 		vlRemoteCfg, err = env.CheckVariable(env.ReCONFIG, gd.Network, "validator", gd.ValidatorClient.Name)
 		if err != nil {
@@ -259,12 +242,33 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		if err != nil {
 			return err
 		}
+	}
+	// Check for XEE_VERSION in teku
+	xeeVersion, err := env.CheckVariable(env.ReXEEV, gd.Network, "consensus", gd.ConsensusClient.Name)
+	if err != nil {
+		return err
+	}
+	//
+	//// Check for Mev
+	//mev, err := env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient.Name)
+	//if err != nil {
+	//	return err
+	//}
 
-		// Check for Mev
-		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient.Name)
-		if err != nil {
-			return err
-		}
+	// Check for CC Bootnode nodes
+	ccBootnodes, err := env.GetCCBootnodes(envFilePath)
+	if err != nil {
+		return err
+	}
+
+	mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient.Name)
+	if err != nil {
+		return err
+	}
+	// Check for Bootnode nodes
+	ecBootnodes, err := env.GetECBootnodes(envFilePath)
+	if err != nil {
+		return err
 	}
 
 	// If consensus is running with other services, and not set the MevBoostEndpoint, set it to the default
@@ -274,21 +278,13 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 			return err
 		}
 		if mevSupported {
-			gd.MevBoostEndpoint = configs.DefaultMevBoostEndpoint + ":" + gd.Ports["MevPort"]
+			gd.MevBoostEndpoint = fmt.Sprintf("%s:%v", configs.DefaultMevBoostEndpoint, gd.Ports["MevPort"])
 		}
 	}
 
 	data := DockerComposeData{
 		Services:            gd.Services,
-		TTD:                 TTD,
-		CcCustomCfg:         ccRemoteCfg || ccRemoteGen || ccRemoteDpl,
-		CcRemoteCfg:         ccRemoteCfg,
-		CcRemoteGen:         ccRemoteGen,
-		CcRemoteDpl:         ccRemoteDpl,
-		VlCustomCfg:         vlRemoteCfg || vlRemoteGen || vlRemoteDpl,
-		VlRemoteCfg:         vlRemoteCfg,
-		VlRemoteGen:         vlRemoteGen,
-		VlRemoteDpl:         vlRemoteDpl,
+		TTD:                 gd.CustomTTD != "",
 		XeeVersion:          xeeVersion,
 		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev),
 		MevPort:             gd.Ports["MevPort"],
@@ -310,12 +306,23 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ElExtraFlags:        gd.ElExtraFlags,
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
-		Bootnodes:           bootnodes,
+		ECBootnodes:         ecBootnodes,
+		CCBootnodes:         ccBootnodes,
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
 		LoggingDriver:       gd.LoggingDriver,
 		VLStartGracePeriod:  gd.VLStartGracePeriod,
+		CustomNetwork:       gd.Network == configs.CustomNetwork.Name, // Used custom templates
+		CustomConsensusConfigs: gd.CustomNetworkConfigPath != "" ||
+			gd.CustomGenesisPath != "" ||
+			gd.CustomDeployBlockPath != "", // Have custom configs paths
+		CustomChainSpecPath:     gd.CustomChainSpecPath,     // Path to chainspec.json
+		CustomNetworkConfigPath: gd.CustomNetworkConfigPath, // Path to config.yaml
+		CustomGenesisPath:       gd.CustomGenesisPath,       // Path to genesis.ssz
+		CustomDeployBlockPath:   gd.CustomDeployBlockPath,   // Path to deploy_block.txt
+		UID:                     os.Geteuid(),
+		GID:                     os.Getegid(),
 	}
 
 	// Save to writer
@@ -348,7 +355,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		if client.Omitted {
 			tmp, err = templates.Services.ReadFile(filepath.Join(
 				"services",
-				configs.NetworkConfigs()[gd.Network].NetworkService,
+				configs.NetworksConfigs()[gd.Network].NetworkService,
 				tmpKind,
 				"empty.tmpl"))
 			if err != nil {
@@ -367,17 +374,17 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	}
 	executionApiUrl := gd.ExecutionApiUrl
 	if executionApiUrl == "" {
-		executionApiUrl = cls[execution].Endpoint + ":" + gd.Ports["ELApi"]
+		executionApiUrl = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELApi"])
 	}
 	executionAuthUrl := gd.ExecutionAuthUrl
 	if executionAuthUrl == "" {
-		executionAuthUrl = cls[execution].Endpoint + ":" + gd.Ports["ELAuth"]
+		executionAuthUrl = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELAuth"])
 	}
 	consensusApiUrl := gd.ConsensusApiUrl
 	var consensusAdditionalApiUrl string
 	if consensusApiUrl == "" {
-		consensusAdditionalApiUrl = cls[consensus].Endpoint + ":" + gd.Ports["CLAdditionalApi"]
-		consensusApiUrl = cls[consensus].Endpoint + ":" + gd.Ports["CLApi"]
+		consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", cls[consensus].Endpoint, gd.Ports["CLAdditionalApi"])
+		consensusApiUrl = fmt.Sprintf("%s:%v", cls[consensus].Endpoint, gd.Ports["CLApi"])
 	} else {
 		if cls[consensus].Name == "prysm" {
 			consensusAdditionalApiUrl = fmt.Sprintf("%s:%s", "consensus", gd.Ports["CLAdditionalApi"])
@@ -404,7 +411,15 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ConsensusClientName:       cls[consensus].Name,
 		KeystoreDir:               "./" + configs.KeystoreDir,
 		Graffiti:                  gd.Graffiti,
+		ECBootnodes:               gd.ECBootnodes,
+		CCBootnodes:               gd.CCBootnodes,
+		CustomTTD:                 gd.CustomTTD,
 		RelayURL:                  gd.RelayURL,
+	}
+
+	// Fix prysm rpc url
+	if gd.ValidatorClient.Name == "prysm" {
+		data.ConsensusAdditionalApiURL = fmt.Sprintf("%s:%d", "consensus", gd.Ports["CLAdditionalApi"])
 	}
 
 	// Save to writer

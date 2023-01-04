@@ -36,6 +36,7 @@ func ensureResult(t *testing.T, fdOut *bytes.Buffer, outputDir string) {
 	if err != nil {
 		t.Fatalf("Can't read test case output: %v", err)
 	}
+	defer file.Close()
 	output, err := io.ReadAll(file)
 	if err != nil {
 		t.Fatalf("Can't read test case output: %v", err)

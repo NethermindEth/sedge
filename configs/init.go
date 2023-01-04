@@ -20,25 +20,21 @@ import (
 	"strings"
 )
 
-var networkConfigs map[string]NetworkConfig
+var networksConfigs map[string]NetworkConfig
 
-func NetworkConfigs() map[string]NetworkConfig {
-	return networkConfigs
+var CustomNetwork NetworkConfig = NetworkConfig{
+	Name:               "custom",
+	RequireJWT:         true,
+	NetworkService:     "merge",
+	GenesisForkVersion: "0x00000000", // TODO: only affects keystores generation, ensure the deposit method does not conflict over this.
 }
 
-func InitNetworkConfigs() {
-	networkConfigs = make(map[string]NetworkConfig)
+func NetworksConfigs() map[string]NetworkConfig {
+	return networksConfigs
 }
 
-func AddNetwork(network NetworkConfig) {
-	if networkConfigs == nil {
-		networkConfigs = make(map[string]NetworkConfig)
-	}
-	networkConfigs[network.Name] = network
-}
-
-func init() {
-	InitNetworkConfigs()
+func InitNetworksConfigs() {
+	networksConfigs = make(map[string]NetworkConfig)
 
 	configs := []NetworkConfig{
 		{
@@ -60,10 +56,13 @@ func init() {
 			GenesisForkVersion: "0x90000069",
 		},
 		{
-			Name:               "chiado",
-			RequireJWT:         true,
-			NetworkService:     "merge",
-			GenesisForkVersion: "0x0000006f",
+			Name:                     "chiado",
+			RequireJWT:               true,
+			NetworkService:           "merge",
+			GenesisForkVersion:       "0x0000006f",
+			DefaultCustomConfigSrc:   "https://github.com/gnosischain/configs/raw/main/chiado/config.yaml",
+			DefaultCustomGenesisSrc:  "https://github.com/gnosischain/configs/raw/main/chiado/genesis.ssz",
+			DefaultCustomDeployBlock: "0",
 		},
 		{
 			Name:               "gnosis",
@@ -71,14 +70,25 @@ func init() {
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00000064",
 		},
+		CustomNetwork,
 	}
 	for _, config := range configs {
 		AddNetwork(config)
 	}
 }
 
+func AddNetwork(network NetworkConfig) {
+	if networksConfigs == nil {
+		networksConfigs = make(map[string]NetworkConfig)
+	}
+	_, found := networksConfigs[network.Name]
+	if !found {
+		networksConfigs[network.Name] = network
+	}
+}
+
 func CheckNetwork(networkName string) error {
-	if _, ok := networkConfigs[strings.ToLower(networkName)]; !ok {
+	if _, ok := networksConfigs[strings.ToLower(networkName)]; !ok {
 		return fmt.Errorf(UnknownNetworkError, networkName)
 	}
 	return nil

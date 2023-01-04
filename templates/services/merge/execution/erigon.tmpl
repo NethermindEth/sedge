@@ -27,7 +27,8 @@
     - --http.addr=0.0.0.0
     - --http.port={{.ElApiPort}}
     - --txpool.disable
-    - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
+    - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}{{if .ECBootnodes}}
+    - --bootnodes=${EC_BOOTNODES}{{end}}
     - --authrpc.addr=0.0.0.0
     - --authrpc.port={{.ElAuthPort}}
     - --authrpc.vhosts=*
