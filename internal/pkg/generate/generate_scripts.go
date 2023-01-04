@@ -259,7 +259,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		Services:            gd.Services,
 		TTD:                 ttd,
 		XeeVersion:          xeeVersion,
-		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev),
+		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		MevPort:             gd.Ports["MevPort"],
 		MevBoostEndpoint:    gd.MevBoostEndpoint,
 		MevImage:            gd.MevImage,

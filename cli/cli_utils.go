@@ -407,13 +407,23 @@ type CustomNetworkConfigsData struct {
 	NetworkDeployBlockPath string
 }
 
-func LoadCustomNetworksConfig(flags *CliCmdFlags) (CustomNetworkConfigsData, error) {
+type CustomFlags struct {
+	customTTD           string
+	customChainSpec     string
+	customNetworkConfig string
+	customGenesis       string
+	customDeployBlock   string
+	customEnodes        []string
+	customEnrs          []string
+}
+
+func LoadCustomNetworksConfig(flags *CustomFlags, network, generationPath string) (CustomNetworkConfigsData, error) {
 	var customNetworkConfigsData CustomNetworkConfigsData
 	var chainSpecSrc, networkConfigSrc, genesisSrc, deployBlock string
 
-	networkData, ok := configs.NetworksConfigs()[flags.network]
+	networkData, ok := configs.NetworksConfigs()[network]
 	if !ok {
-		return customNetworkConfigsData, fmt.Errorf(configs.UnknownNetworkError, flags.network)
+		return customNetworkConfigsData, fmt.Errorf(configs.UnknownNetworkError, network)
 	}
 
 	eval := func(value, def string) string {
@@ -432,7 +442,7 @@ func LoadCustomNetworksConfig(flags *CliCmdFlags) (CustomNetworkConfigsData, err
 		return customNetworkConfigsData, nil
 	}
 
-	destFolder := filepath.Join(flags.generationPath, configs.CustomNetworkConfigsFolder)
+	destFolder := filepath.Join(generationPath, configs.CustomNetworkConfigsFolder)
 	if _, err := os.Stat(destFolder); err != nil {
 		if os.IsNotExist(err) {
 			err = os.Mkdir(destFolder, os.ModePerm)

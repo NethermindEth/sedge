@@ -44,36 +44,30 @@ const (
 )
 
 type CliCmdFlags struct {
-	executionName       string
-	consensusName       string
-	validatorName       string
-	generationPath      string
-	checkpointSyncUrl   string
-	network             string
-	feeRecipient        string
-	noMev               bool
-	mevImage            string
-	noValidator         bool
-	jwtPath             string
-	graffiti            string
-	install             bool
-	run                 bool
-	yes                 bool
-	mapAllPorts         bool
-	services            *[]string
-	fallbackEL          *[]string
-	elExtraFlags        *[]string
-	clExtraFlags        *[]string
-	vlExtraFlags        *[]string
-	logging             string
-	customTTD           string
-	customChainSpec     string
-	customNetworkConfig string
-	customGenesis       string
-	customDeployBlock   string
-	customEnodes        *[]string
-	customEnrs          *[]string
-	slashingProtection  string
+	CustomFlags
+	executionName      string
+	consensusName      string
+	validatorName      string
+	generationPath     string
+	checkpointSyncUrl  string
+	network            string
+	feeRecipient       string
+	noMev              bool
+	mevImage           string
+	noValidator        bool
+	jwtPath            string
+	graffiti           string
+	install            bool
+	run                bool
+	yes                bool
+	mapAllPorts        bool
+	services           *[]string
+	fallbackEL         *[]string
+	elExtraFlags       *[]string
+	clExtraFlags       *[]string
+	vlExtraFlags       *[]string
+	logging            string
+	slashingProtection string
 }
 
 type clientImages struct {
@@ -148,8 +142,8 @@ func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceMana
 	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
 	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
-	flags.customEnodes = cmd.Flags().StringSlice("execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
-	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
+	flags.customEnodes = *cmd.Flags().StringSlice("execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
+	flags.customEnrs = *cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
 	cmd.Flags().StringVar(&flags.slashingProtection, "slashing-protection", "", "Path to the file with slashing protection interchange data (EIP-3076)")
 	cmd.Flags().SortFlags = false
 	return cmd
@@ -333,7 +327,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	// Get custom networks configs
-	customNetworkConfigsData, err := LoadCustomNetworksConfig(flags)
+	customNetworkConfigsData, err := LoadCustomNetworksConfig(&flags.CustomFlags, flags.network, flags.generationPath)
 	if err != nil {
 		return []error{err}
 	}
@@ -373,8 +367,8 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		MevImage:                flags.mevImage,
 		LoggingDriver:           configs.GetLoggingDriver(flags.logging),
 		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
-		ECBootnodes:             *flags.customEnodes,
-		CCBootnodes:             *flags.customEnrs,
+		ECBootnodes:             flags.customEnodes,
+		CCBootnodes:             flags.customEnrs,
 		CustomTTD:               flags.customTTD,
 		CustomChainSpecPath:     customNetworkConfigsData.ChainSpecPath,
 		CustomNetworkConfigPath: customNetworkConfigsData.NetworkConfigPath,

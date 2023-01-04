@@ -58,6 +58,7 @@ type GenData struct {
 	MevImage                string
 	MevBoostService         bool
 	MevBoostEndpoint        string
+	MevBoostOnValidator     bool
 	Ports                   map[string]uint16
 	Graffiti                string
 	LoggingDriver           string
