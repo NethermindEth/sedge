@@ -16,9 +16,9 @@ limitations under the License.
 package cli
 
 import (
-	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -43,29 +43,36 @@ const (
 )
 
 type CliCmdFlags struct {
-	executionName      string
-	consensusName      string
-	validatorName      string
-	generationPath     string
-	checkpointSyncUrl  string
-	network            string
-	feeRecipient       string
-	noMev              bool
-	mevImage           string
-	noValidator        bool
-	jwtPath            string
-	graffiti           string
-	install            bool
-	run                bool
-	yes                bool
-	mapAllPorts        bool
-	services           *[]string
-	fallbackEL         *[]string
-	elExtraFlags       *[]string
-	clExtraFlags       *[]string
-	vlExtraFlags       *[]string
-	logging            string
-	slashingProtection string
+	executionName       string
+	consensusName       string
+	validatorName       string
+	generationPath      string
+	checkpointSyncUrl   string
+	network             string
+	feeRecipient        string
+	noMev               bool
+	mevImage            string
+	noValidator         bool
+	jwtPath             string
+	graffiti            string
+	install             bool
+	run                 bool
+	yes                 bool
+	mapAllPorts         bool
+	services            *[]string
+	fallbackEL          *[]string
+	elExtraFlags        *[]string
+	clExtraFlags        *[]string
+	vlExtraFlags        *[]string
+	logging             string
+	customTTD           string
+	customChainSpec     string
+	customNetworkConfig string
+	customGenesis       string
+	customDeployBlock   string
+	customEnodes        *[]string
+	customEnrs          *[]string
+	slashingProtection  string
 }
 
 type clientImages struct {
@@ -135,6 +142,13 @@ func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceMana
 	flags.clExtraFlags = cmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge cli --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	flags.vlExtraFlags = cmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringVar(&flags.logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
+	cmd.Flags().StringVar(&flags.customTTD, "custom-ttd", "", "Custom Terminal Total Difficulty to use for the execution client")
+	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
+	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
+	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
+	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
+	flags.customEnodes = cmd.Flags().StringSlice("execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
+	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
 	cmd.Flags().StringVar(&flags.slashingProtection, "slashing-protection", "", "Path to the file with slashing protection interchange data (EIP-3076)")
 	cmd.Flags().SortFlags = false
 	return cmd
@@ -184,10 +198,27 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 	if !utils.Contains(networks, flags.network) {
 		return nil, fmt.Errorf(configs.UnknownNetworkError, flags.network)
 	}
+	if flags.network == configs.CustomNetwork.Name {
+		if flags.customChainSpec == "" || flags.customNetworkConfig == "" || flags.customGenesis == "" || flags.customTTD == "" || flags.customDeployBlock == "" {
+			return nil, fmt.Errorf(configs.MissingCustomConfigs)
+		}
+	}
+
+	// Validate custom ttd
+	if flags.customTTD != "" &&
+		!regexp.MustCompile(`^[1-9]\d*$`).Match([]byte(strings.TrimSpace(flags.customTTD))) {
+		return nil, fmt.Errorf(configs.InvalidTTD)
+	}
+
+	// Validate custom deploy block
+	if flags.customDeployBlock != "" &&
+		!regexp.MustCompile(`^[0-9]\d*$`).Match([]byte(strings.TrimSpace(flags.customDeployBlock))) {
+		return nil, fmt.Errorf(configs.InvalidDeployBLock)
+	}
 
 	// Validate fee recipient
 	if flags.feeRecipient != "" && !utils.IsAddress(flags.feeRecipient) {
-		return nil, errors.New(configs.InvalidFeeRecipientError)
+		return nil, fmt.Errorf(configs.InvalidFeeRecipientError)
 	}
 
 	var clientImages clientImages
@@ -214,6 +245,30 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 
 	if err := configs.ValidateLoggingFlag(flags.logging); err != nil {
 		return nil, err
+	}
+
+	// validate custom network flags
+	urlOrPaths := map[string]string{
+		"ChainSpec":      flags.customChainSpec,
+		"Network config": flags.customNetworkConfig,
+		"Genesis":        flags.customGenesis,
+	}
+	for kind, value := range urlOrPaths {
+		if value == "" {
+			continue
+		}
+		if err := utils.CheckUrlOrPath(value); err != nil {
+			return nil, fmt.Errorf("invalid %s: %w", kind, err)
+		}
+	}
+
+	// ensure generation path exists
+	_, err = os.Stat(flags.generationPath)
+	if os.IsNotExist(err) {
+		err = os.MkdirAll(flags.generationPath, os.ModePerm)
+	}
+	if err != nil {
+		return nil, fmt.Errorf(configs.InvalidGenerationPath, flags.generationPath, err)
 	}
 
 	return &clientImages, nil
@@ -276,6 +331,12 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		flags.feeRecipient = feeRecipient
 	}
 
+	// Get custom networks configs
+	customNetworkConfigsData, err := LoadCustomNetworksConfig(flags)
+	if err != nil {
+		return []error{err}
+	}
+
 	combinedClients.Execution.Image = clientImages.execution
 	combinedClients.Consensus.Image = clientImages.consensus
 	combinedClients.Validator.Image = clientImages.validator
@@ -293,33 +354,35 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 
 	// Generate docker-compose scripts
 	gd := generate.GenerationData{
-		Services:           *flags.services,
-		ExecutionClient:    combinedClients.Execution,
-		ConsensusClient:    combinedClients.Consensus,
-		ValidatorClient:    combinedClients.Validator,
-		GenerationPath:     flags.generationPath,
-		Network:            flags.network,
-		CheckpointSyncUrl:  flags.checkpointSyncUrl,
-		FeeRecipient:       flags.feeRecipient,
-		JWTSecretPath:      jwtPath,
-		Graffiti:           flags.graffiti,
-		FallbackELUrls:     *flags.fallbackEL,
-		ElExtraFlags:       *flags.elExtraFlags,
-		ClExtraFlags:       *flags.clExtraFlags,
-		VlExtraFlags:       *flags.vlExtraFlags,
-		MapAllPorts:        flags.mapAllPorts,
-		Mev:                !flags.noMev && !flags.noValidator,
-		MevImage:           flags.mevImage,
-		LoggingDriver:      configs.GetLoggingDriver(flags.logging),
-		VLStartGracePeriod: uint(vlStartGracePeriod.Seconds()),
+		Services:                *flags.services,
+		ExecutionClient:         combinedClients.Execution,
+		ConsensusClient:         combinedClients.Consensus,
+		ValidatorClient:         combinedClients.Validator,
+		GenerationPath:          flags.generationPath,
+		Network:                 flags.network,
+		CheckpointSyncUrl:       flags.checkpointSyncUrl,
+		FeeRecipient:            flags.feeRecipient,
+		JWTSecretPath:           jwtPath,
+		Graffiti:                flags.graffiti,
+		FallbackELUrls:          *flags.fallbackEL,
+		ElExtraFlags:            *flags.elExtraFlags,
+		ClExtraFlags:            *flags.clExtraFlags,
+		VlExtraFlags:            *flags.vlExtraFlags,
+		MapAllPorts:             flags.mapAllPorts,
+		Mev:                     !flags.noMev && !flags.noValidator,
+		MevImage:                flags.mevImage,
+		LoggingDriver:           configs.GetLoggingDriver(flags.logging),
+		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
+		ECBootnodes:             *flags.customEnodes,
+		CCBootnodes:             *flags.customEnrs,
+		CustomTTD:               flags.customTTD,
+		CustomChainSpecPath:     customNetworkConfigsData.ChainSpecPath,
+		CustomNetworkConfigPath: customNetworkConfigsData.NetworkConfigPath,
+		CustomGenesisPath:       customNetworkConfigsData.NetworkGenesisPath,
+		CustomDeployBlock:       flags.customDeployBlock,
+		CustomDeployBlockPath:   customNetworkConfigsData.NetworkDeployBlockPath,
 	}
 	results, err := generate.GenerateScripts(gd)
-	if err != nil {
-		return []error{err}
-	}
-
-	// Clean generated .env and docker compose files
-	err = generate.CleanGenerated(results)
 	if err != nil {
 		return []error{err}
 	}
