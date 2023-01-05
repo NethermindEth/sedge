@@ -22,6 +22,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var CustomFlagsUsedWithoutCustomNetwork = errors.New("set custom flags with custom network")
+
+func validateCustomNetwork(flags *CustomFlags, net string) error {
+	if net != "custom" {
+		if len(flags.customTTD) != 0 || len(flags.customChainSpec) != 0 || len(flags.customNetworkConfig) != 0 ||
+			len(flags.customGenesis) != 0 || len(flags.customDeployBlock) != 0 || len(flags.customEnodes) != 0 ||
+			len(flags.customEnrs) != 0 {
+			// TODO add error on expected place
+			return CustomFlagsUsedWithoutCustomNetwork
+		}
+	}
+	return nil
+}
+
 func FullNodeSubCmd(prompt prompts.Prompt, sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 
@@ -30,7 +44,9 @@ func FullNodeSubCmd(prompt prompts.Prompt, sedgeAction actions.SedgeActions) *co
 		Short: "Generate a full node config, with or without a validator",
 		Args:  cobra.OnlyValidArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-
+			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
+				return err
+			}
 			return preValidationGenerateCmd(&flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -77,6 +93,9 @@ func ExecutionSubCmd(prompt prompts.Prompt, sedgeAction actions.SedgeActions) *c
 				}
 				flags.executionName = args[0]
 			}
+			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
+				return err
+			}
 			return nil
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -114,6 +133,9 @@ func ConsensusSubCmd(prompt prompts.Prompt, sedgeAction actions.SedgeActions) *c
 					return errors.New("requires one argument")
 				}
 				flags.consensusName = args[0]
+			}
+			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
+				return err
 			}
 			return nil
 		},
@@ -162,6 +184,9 @@ func ValidatorSubCmd(prompt prompts.Prompt, sedgeAction actions.SedgeActions) *c
 					return errors.New("requires one argument")
 				}
 				flags.validatorName = args[0]
+			}
+			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
+				return err
 			}
 			return nil
 		},
