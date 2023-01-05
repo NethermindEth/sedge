@@ -29,11 +29,12 @@ jobs:
 
       - name: Check Format
         run: make format-check
+        shell: bash
 
       - name: Check go mod status
         run: |
           make gomod_tidy
-          if [[ ! -z $(git status -s) ]]
+          if [[ ! -z $(git status -s) ]];
           then
             echo "Go mod - state is not clean:"
             git status -s
