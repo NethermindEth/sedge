@@ -269,11 +269,10 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 	baseDescription := "Test generation of compose services "
 	tests = []genTestData{{Description: baseDescription + " NilData", ErrorGenCompose: EmptyDataError, CheckFunctions: []CheckFunc{defaultFunc}}}
 
-	// networks, err := utils.SupportedNetworks()
-	// if err != nil {
-	// 	t.Error("SupportedNetworks() failed", err)
-	// }
-	networks := []string{"chiado"}
+	networks, err := utils.SupportedNetworks()
+	if err != nil {
+		t.Error("SupportedNetworks() failed", err)
+	}
 
 	for _, network := range networks {
 		c := clients.ClientInfo{Network: network}
@@ -296,28 +295,28 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 			for _, consensusCl := range consensusClients {
 				if utils.Contains(validatorClients, consensusCl) {
 					tests = append(tests,
-						// genTestData{
-						// 	Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, all", executionCl, consensusCl, consensusCl, network),
-						// 	GenerationData: &GenData{
-						// 		ExecutionClient: &clients.Client{Name: executionCl},
-						// 		ConsensusClient: &clients.Client{Name: consensusCl},
-						// 		ValidatorClient: &clients.Client{Name: consensusCl},
-						// 		Network:         network,
-						// 		Services:        []string{execution, consensus, validator},
-						// 	},
-						// 	CheckFunctions: []CheckFunc{defaultFunc},
-						// },
-						// genTestData{
-						// 	Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, network),
-						// 	GenerationData: &GenData{
-						// 		Services:        []string{execution, consensus},
-						// 		ExecutionClient: &clients.Client{Name: executionCl},
-						// 		ConsensusClient: &clients.Client{Name: consensusCl},
-						// 		ValidatorClient: &clients.Client{Name: consensusCl, Omitted: true},
-						// 		Network:         network,
-						// 	},
-						// 	CheckFunctions: []CheckFunc{defaultFunc},
-						// },
+						genTestData{
+							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, all", executionCl, consensusCl, consensusCl, network),
+							GenerationData: &GenData{
+								ExecutionClient: &clients.Client{Name: executionCl},
+								ConsensusClient: &clients.Client{Name: consensusCl},
+								ValidatorClient: &clients.Client{Name: consensusCl},
+								Network:         network,
+								Services:        []string{execution, consensus, validator},
+							},
+							CheckFunctions: []CheckFunc{defaultFunc},
+						},
+						genTestData{
+							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, network),
+							GenerationData: &GenData{
+								Services:        []string{execution, consensus},
+								ExecutionClient: &clients.Client{Name: executionCl},
+								ConsensusClient: &clients.Client{Name: consensusCl},
+								ValidatorClient: &clients.Client{Name: consensusCl, Omitted: true},
+								Network:         network,
+							},
+							CheckFunctions: []CheckFunc{defaultFunc},
+						},
 						genTestData{
 							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, Execution Client not Valid", executionCl, consensusCl, consensusCl, network),
 							GenerationData: &GenData{
@@ -327,7 +326,8 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 								ValidatorClient: &clients.Client{Name: consensusCl, Omitted: true},
 								Network:         network,
 							},
-							CheckFunctions: []CheckFunc{defaultFunc},
+							ErrorGenCompose: ConsensusClientNotValidError,
+							CheckFunctions:  []CheckFunc{defaultFunc},
 						})
 				}
 			}
@@ -340,67 +340,67 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 func TestGenerateComposeServices(t *testing.T) {
 	configs.InitNetworksConfigs()
 	tests := []genTestData{
-		// {
-		// 	Description: "Test generation of compose services",
-		// 	GenerationData: &GenData{
-		// 		Services:        []string{execution, consensus, validator, validatorImport, mevBoost},
-		// 		ExecutionClient: &clients.Client{Name: "nethermind"},
-		// 		ConsensusClient: &clients.Client{Name: "teku"},
-		// 		ValidatorClient: &clients.Client{Name: "teku"},
-		// 		Network:         "mainnet",
-		// 		Mev:             true,
-		// 	},
-		// 	CheckFunctions: []CheckFunc{defaultFunc},
-		// },
-		// {
-		// 	Description: "Test generation import",
-		// 	GenerationData: &GenData{
-		// 		Services:        []string{mevBoost},
-		// 		ExecutionClient: &clients.Client{Name: "nethermind", Omitted: true},
-		// 		ConsensusClient: &clients.Client{Name: "teku", Omitted: true},
-		// 		ValidatorClient: &clients.Client{Name: "teku", Omitted: true},
-		// 		Network:         "mainnet",
-		// 		Mev:             true,
-		// 		MevBoostService: true,
-		// 	},
-		// 	CheckFunctions: []CheckFunc{defaultFunc, checkMevServices},
-		// },
-		// {
-		// 	Description: "Test EL extra flags",
-		// 	GenerationData: &GenData{
-		// 		ExecutionClient: &clients.Client{Name: "nethermind"},
-		// 		Services:        []string{execution},
-		// 		Network:         "mainnet",
-		// 		ElExtraFlags:    []string{"extra", "flag"},
-		// 	},
-		// 	CheckFunctions: []CheckFunc{checkExtraFlagsOnExecution},
-		// },
+		{
+			Description: "Test generation of compose services",
+			GenerationData: &GenData{
+				Services:        []string{execution, consensus, validator, validatorImport, mevBoost},
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				ConsensusClient: &clients.Client{Name: "teku"},
+				ValidatorClient: &clients.Client{Name: "teku"},
+				Network:         "mainnet",
+				Mev:             true,
+			},
+			CheckFunctions: []CheckFunc{defaultFunc},
+		},
+		{
+			Description: "Test generation import",
+			GenerationData: &GenData{
+				Services:        []string{mevBoost},
+				ExecutionClient: &clients.Client{Name: "nethermind", Omitted: true},
+				ConsensusClient: &clients.Client{Name: "teku", Omitted: true},
+				ValidatorClient: &clients.Client{Name: "teku", Omitted: true},
+				Network:         "mainnet",
+				Mev:             true,
+				MevBoostService: true,
+			},
+			CheckFunctions: []CheckFunc{defaultFunc, checkMevServices},
+		},
+		{
+			Description: "Test EL extra flags",
+			GenerationData: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				Services:        []string{execution},
+				Network:         "mainnet",
+				ElExtraFlags:    []string{"extra", "flag"},
+			},
+			CheckFunctions: []CheckFunc{checkExtraFlagsOnExecution},
+		},
 	}
 
 	tests = append(tests, generateTestCases(t)...)
 
-	// tests = append(tests, customFlagsTestCases(t)...)
+	tests = append(tests, customFlagsTestCases(t)...)
 
 	for _, tt := range tests {
 		t.Run(tt.Description, func(t *testing.T) {
 
 			var buffer bytes.Buffer
 			err := ComposeFile(tt.GenerationData, io.Writer(&buffer))
-			assert.ErrorIs(t, tt.ErrorGenCompose, err)
+			assert.ErrorIs(t, err, tt.ErrorGenCompose)
 			if tt.ErrorGenCompose != nil {
 				return
 			}
 
 			var envBuffer bytes.Buffer
 			err = EnvFile(tt.GenerationData, io.Writer(&envBuffer))
-			assert.ErrorIs(t, tt.ErrorGenEnvFile, err)
+			assert.ErrorIs(t, err, tt.ErrorGenEnvFile)
 			if tt.ErrorGenEnvFile != nil {
 				return
 			}
 
 			for _, f := range tt.CheckFunctions {
 				err = f(t, tt.GenerationData, bytes.NewReader(buffer.Bytes()), bytes.NewReader(envBuffer.Bytes()))
-				assert.ErrorIs(t, tt.ErrorCheckFunc, err)
+				assert.ErrorIs(t, err, tt.ErrorCheckFunc)
 
 			}
 		})
@@ -722,12 +722,12 @@ func TestCleanGeneratedFiles(t *testing.T) {
 
 			// generate files
 			out, err := os.Create(filepath.Join(path, configs.DefaultDockerComposeScriptName))
-			assert.ErrorIs(t, tt.Error, err)
+			assert.ErrorIs(t, err, tt.Error)
 			if tt.Error != nil {
 				return
 			}
 			err = ComposeFile(tt.Data, out)
-			assert.ErrorIs(t, tt.Error, err)
+			assert.ErrorIs(t, err, tt.Error)
 			if tt.Error != nil {
 				return
 			}
@@ -735,7 +735,7 @@ func TestCleanGeneratedFiles(t *testing.T) {
 
 			// open output file
 			out, err = os.Create(filepath.Join(path, configs.DefaultEnvFileName))
-			assert.ErrorIs(t, nil, err)
+			assert.ErrorIs(t, err, nil)
 			err = EnvFile(tt.Data, out)
 			assert.ErrorIs(t, err, tt.Error)
 			if tt.Error != nil {
@@ -744,7 +744,7 @@ func TestCleanGeneratedFiles(t *testing.T) {
 			assert.FileExists(t, filepath.Join(path, configs.DefaultEnvFileName))
 
 			err = CleanGenerated(path)
-			assert.ErrorIs(t, tt.Error, err)
+			assert.ErrorIs(t, err, tt.Error)
 			if tt.Error != nil {
 				return
 			}
