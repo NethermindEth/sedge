@@ -16,11 +16,12 @@ limitations under the License.
 package actions
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	log "github.com/sirupsen/logrus"
-	"os"
-	"path/filepath"
 )
 
 type GenerateComposeOptions struct {
@@ -43,6 +44,7 @@ func (s *sedgeActions) GenerateCompose(options GenerateComposeOptions) error {
 	if err != nil {
 		return err
 	}
+	defer out.Close()
 	err = generate.ComposeFile(options.GenerationData, out)
 	if err != nil {
 		return err
@@ -50,8 +52,12 @@ func (s *sedgeActions) GenerateCompose(options GenerateComposeOptions) error {
 
 	log.Info(configs.GeneratingEnvFile)
 	// open output file
-	out, err = os.Create(filepath.Join(options.GenerationPath, configs.DefaultEnvFileName))
-	err = generate.EnvFile(options.GenerationData, out)
+	outEnv, err := os.Create(filepath.Join(options.GenerationPath, configs.DefaultEnvFileName))
+	if err != nil {
+		return err
+	}
+	defer outEnv.Close()
+	err = generate.EnvFile(options.GenerationData, outEnv)
 	if err != nil {
 		return err
 	}
