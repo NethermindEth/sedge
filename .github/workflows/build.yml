@@ -25,9 +25,11 @@ jobs:
           go-version: ${{ matrix.go }}
 
       - name: Install gofumpt
+        if: matrix.os == 'ubuntu-latest'
         run: make install-gofumpt
 
-      - name: Check Format
+      - name: Check Format Unix
+        if: matrix.os == 'ubuntu-latest'
         run: test -z "$(gofumpt -l . | tee >(cat 1>&2))"
 
       - name: Check go mod status
