@@ -334,44 +334,44 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 func TestGenerateComposeServices(t *testing.T) {
 	configs.InitNetworksConfigs()
 	tests := []genTestData{
-		//{
-		//	Description: "Test generation of compose services",
-		//	GenerationData: &GenData{
-		//		Services:        []string{execution, consensus, validator, validatorImport, mevBoost},
-		//		ExecutionClient: &clients.Client{Name: "nethermind"},
-		//		ConsensusClient: &clients.Client{Name: "teku"},
-		//		ValidatorClient: &clients.Client{Name: "teku"},
-		//		Network:         "mainnet",
-		//		Mev:             true,
-		//	},
-		//	CheckFunctions: []CheckFunc{defaultFunc},
-		//},
-		//{
-		//	Description: "Test generation import",
-		//	GenerationData: &GenData{
-		//		Services:        []string{mevBoost},
-		//		ExecutionClient: &clients.Client{Name: "nethermind", Omitted: true},
-		//		ConsensusClient: &clients.Client{Name: "teku", Omitted: true},
-		//		ValidatorClient: &clients.Client{Name: "teku", Omitted: true},
-		//		Network:         "mainnet",
-		//		Mev:             true,
-		//		MevBoostService: true,
-		//	},
-		//	CheckFunctions: []CheckFunc{defaultFunc, checkMevServices},
-		//},
-		//{
-		//	Description: "Test EL extra flags",
-		//	GenerationData: &GenData{
-		//		ExecutionClient: &clients.Client{Name: "nethermind"},
-		//		Services:        []string{execution},
-		//		Network:         "mainnet",
-		//		ElExtraFlags:    []string{"extra", "flag"},
-		//	},
-		//	CheckFunctions: []CheckFunc{checkExtraFlagsOnExecution},
-		//},
+		{
+			Description: "Test generation of compose services",
+			GenerationData: &GenData{
+				Services:        []string{execution, consensus, validator, validatorImport, mevBoost},
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				ConsensusClient: &clients.Client{Name: "teku"},
+				ValidatorClient: &clients.Client{Name: "teku"},
+				Network:         "mainnet",
+				Mev:             true,
+			},
+			CheckFunctions: []CheckFunc{defaultFunc},
+		},
+		{
+			Description: "Test generation import",
+			GenerationData: &GenData{
+				Services:        []string{mevBoost},
+				ExecutionClient: &clients.Client{Name: "nethermind", Omitted: true},
+				ConsensusClient: &clients.Client{Name: "teku", Omitted: true},
+				ValidatorClient: &clients.Client{Name: "teku", Omitted: true},
+				Network:         "mainnet",
+				Mev:             true,
+				MevBoostService: true,
+			},
+			CheckFunctions: []CheckFunc{defaultFunc, checkMevServices},
+		},
+		{
+			Description: "Test EL extra flags",
+			GenerationData: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				Services:        []string{execution},
+				Network:         "mainnet",
+				ElExtraFlags:    []string{"extra", "flag"},
+			},
+			CheckFunctions: []CheckFunc{checkExtraFlagsOnExecution},
+		},
 	}
 
-	//tests = append(tests, generateTestCases(t)...)
+	tests = append(tests, generateTestCases(t)...)
 
 	tests = append(tests, customFlagsTestCases(t)...)
 
