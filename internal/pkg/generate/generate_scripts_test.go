@@ -722,7 +722,8 @@ func TestCleanGeneratedFiles(t *testing.T) {
 
 			// generate files
 			out, err := os.Create(filepath.Join(path, configs.DefaultDockerComposeScriptName))
-			assert.ErrorIs(t, err, tt.Error)
+			defer out.Close()
+			assert.ErrorIs(t, err, nil)
 			if tt.Error != nil {
 				return
 			}
@@ -736,6 +737,7 @@ func TestCleanGeneratedFiles(t *testing.T) {
 			// open output file
 			out, err = os.Create(filepath.Join(path, configs.DefaultEnvFileName))
 			assert.ErrorIs(t, err, nil)
+			defer out.Close()
 			err = EnvFile(tt.Data, out)
 			assert.ErrorIs(t, err, tt.Error)
 			if tt.Error != nil {
