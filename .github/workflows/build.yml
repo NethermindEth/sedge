@@ -24,6 +24,9 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
 
+      - name: Install gofumpt
+        run: make install-gofumpt
+
       - name: Check Format
         run: make format-check
 
