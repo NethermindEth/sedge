@@ -17,12 +17,12 @@ type CreateJwtSecretOptions struct {
 
 func (s *sedgeActions) CreateJwtSecrets(options CreateJwtSecretOptions) (string, error) {
 	if options.Network == "" {
-		return "", fmt.Errorf("network not found")
+		return "", ErrorNetworkNotFound
 	}
 	// Generate JWT secret if necessary
 	var err error
 	jwtPath := options.JwtPath
-	if jwtPath == "" && configs.NetworkConfigs()[options.Network].RequireJWT {
+	if jwtPath == "" && configs.NetworksConfigs()[options.Network].RequireJWT {
 		return handleJWTSecret(options.GenerationPath)
 	} else if filepath.IsAbs(jwtPath) { // Ensure jwtPath is absolute
 		if jwtPath, err = filepath.Abs(jwtPath); err != nil {
