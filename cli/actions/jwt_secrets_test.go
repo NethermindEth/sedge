@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestSedgeActions_CreateJwtSecretsContainers(t *testing.T) {
+func TestCreateJwtSecrets(t *testing.T) {
 	tests := []struct {
 		name    string
 		options actions.CreateJwtSecretOptions
