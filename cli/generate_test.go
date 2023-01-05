@@ -118,6 +118,27 @@ func (flags *GenCmdFlags) argsList() []string {
 	if flags.mapAllPorts {
 		s = append(s, "--map-all")
 	}
+	if flags.customTTD != "" {
+		s = append(s, "--custom-ttd", flags.customTTD)
+	}
+	if flags.customChainSpec != "" {
+		s = append(s, "--custom-chainSpec", flags.customChainSpec)
+	}
+	if flags.customNetworkConfig != "" {
+		s = append(s, "--custom-config", flags.customNetworkConfig)
+	}
+	if flags.customGenesis != "" {
+		s = append(s, "--custom-genesis", flags.customGenesis)
+	}
+	if flags.customDeployBlock != "" {
+		s = append(s, "--custom-deploy-block", flags.customDeployBlock)
+	}
+	if len(flags.customEnodes) != 0 {
+		s = append(s, "--execution-bootnodes", strings.Join(flags.customEnodes, ","))
+	}
+	if len(flags.customEnrs) != 0 {
+		s = append(s, "--consensus-bootnodes", strings.Join(flags.customEnrs, ","))
+	}
 	return s
 }
 
@@ -458,6 +479,83 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			true,
 		),
+		*buildGenerateTestCase(
+			t,
+			"Mainnet Network, custom ttd, should fail", "case_1",
+			GenCmdFlags{
+				CustomFlags: CustomFlags{
+					customTTD: "some",
+				},
+			},
+			globalFlags{
+				network: "mainnet",
+			},
+			subCmd{
+				name: "full-node",
+			},
+			true),
+		*buildGenerateTestCase(
+			t,
+			"Custom Network and custom ttd, should work", "case_1",
+			GenCmdFlags{
+				feeRecipient: "0x0000000000000000000000000000000000000000",
+				CustomFlags: CustomFlags{
+					customTTD: "some",
+				},
+			},
+			globalFlags{
+				network: "custom",
+			},
+			subCmd{
+				name: "full-node",
+			},
+			false),
+		*buildGenerateTestCase(
+			t,
+			"Custom Network and custom ttd, execution node, should work", "case_1",
+			GenCmdFlags{
+				CustomFlags: CustomFlags{
+					customTTD: "some",
+				},
+			},
+			globalFlags{
+				network: "custom",
+			},
+			subCmd{
+				name: "execution",
+			},
+			false),
+		*buildGenerateTestCase(
+			t,
+			"Mainnet Network custom ChainSpec, execution node, shouldn't work", "case_1",
+			GenCmdFlags{
+				CustomFlags: CustomFlags{
+					customTTD: "some",
+				},
+			},
+			globalFlags{
+				network: "mainnet",
+			},
+			subCmd{
+				name: "execution",
+			},
+			true),
+		*buildGenerateTestCase(
+			t,
+			"Validator", "case_1",
+			GenCmdFlags{
+				feeRecipient: "0x0000000000000000000000000000000000000000",
+				CustomFlags: CustomFlags{
+					customTTD: "some",
+				},
+			},
+			globalFlags{
+				network: "custom",
+			},
+			subCmd{
+				name: "full-node",
+			},
+			false),
 	}
 
 	for _, tc := range tcs {
