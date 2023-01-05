@@ -318,7 +318,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		GenerationPath: flags.generationPath,
 	})
 	if err != nil {
-		return nil
+		return []error{err}
 	}
 
 	// Get fee recipient
