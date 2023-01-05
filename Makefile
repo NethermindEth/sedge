@@ -59,8 +59,9 @@ format: ## run code formatting
 	gofumpt -l -w .
 
 # assert `gofumpt -l` produces no output
+format-check: SHELL:=/bin/bash
 format-check: ## check formatting
-	test ! $$(gofumpt -l . | tee >(cat 1>&2))
+	test -z "$$(gofumpt -l . | tee >(cat 1>&2))"
 
 
 help: ## Show this help
