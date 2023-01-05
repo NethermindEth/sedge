@@ -18,7 +18,6 @@ package generate
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -149,7 +148,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 	gd.Ports = ports
 
-	rawBaseTmp, err := templates.Services.ReadFile(filepath.Join("services", "docker-compose_base.tmpl"))
+	rawBaseTmp, err := templates.Services.ReadFile(strings.Join([]string{"services", "docker-compose_base.tmpl"}, "/"))
 	if err != nil {
 		return err
 	}
@@ -166,10 +165,10 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		if client.Omitted {
 			name = empty
 		}
-		tmp, err := templates.Services.ReadFile(filepath.Join("services",
+		tmp, err := templates.Services.ReadFile(strings.Join([]string{"services",
 			configs.NetworksConfigs()[gd.Network].NetworkService,
 			tmpKind,
-			name+".tmpl"))
+			name + ".tmpl"}, "/"))
 		if err != nil {
 			return err
 		}
@@ -228,13 +227,13 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 
 	// Check for CC Bootnode nodes
 	ccBootnodes := gd.CCBootnodes
-	if ccBootnodes == nil || len(ccBootnodes) == 0 {
+	if len(ccBootnodes) == 0 {
 		ccBootnodes = configs.NetworksConfigs()[gd.Network].DefaultCCBootnodes
 	}
 
 	// Check for Bootnode nodes
 	ecBootnodes := gd.ECBootnodes
-	if ecBootnodes == nil || len(ecBootnodes) == 0 {
+	if len(ecBootnodes) == 0 {
 		ecBootnodes = configs.NetworksConfigs()[gd.Network].DefaultECBootnodes
 	}
 	var mevSupported bool
@@ -313,7 +312,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	if gd.ExecutionClient == nil && gd.ConsensusClient == nil && gd.ValidatorClient == nil {
 		return EmptyDataError
 	}
-	rawBaseTmp, err := templates.Envs.ReadFile(filepath.Join("envs", gd.Network, "env_base.tmpl"))
+	rawBaseTmp, err := templates.Envs.ReadFile(strings.Join([]string{"envs", gd.Network, "env_base.tmpl"}, "/"))
 	if err != nil {
 		return TemplateNotFoundError
 	}
@@ -328,16 +327,16 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	for tmpKind, client := range cls {
 		var tmp []byte
 		if client.Omitted {
-			tmp, err = templates.Services.ReadFile(filepath.Join(
+			tmp, err = templates.Services.ReadFile(strings.Join([]string{
 				"services",
 				configs.NetworksConfigs()[gd.Network].NetworkService,
 				tmpKind,
-				"empty.tmpl"))
+				"empty.tmpl"}, "/"))
 			if err != nil {
 				return err
 			}
 		} else {
-			tmp, err = templates.Envs.ReadFile(filepath.Join("envs", gd.Network, tmpKind, client.Name+".tmpl"))
+			tmp, err = templates.Envs.ReadFile(strings.Join([]string{"envs", gd.Network, tmpKind, client.Name + ".tmpl"}, "/"))
 			if err != nil {
 				return err
 			}

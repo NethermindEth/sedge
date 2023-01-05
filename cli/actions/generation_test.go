@@ -16,6 +16,10 @@ limitations under the License.
 package actions_test
 
 import (
+	"os"
+	"path/filepath"
+	"testing"
+
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
@@ -25,10 +29,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"testing"
 )
 
 func newAction(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
@@ -64,7 +64,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 
 	// Validate that Execution Client info matches the sample data
 	// load the docker-compose file
-	composeFile, err := ioutil.ReadFile(filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
+	composeFile, err := os.ReadFile(filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
 	if err != nil {
 		t.Error("unable to read docker-compose.yml")
 	}

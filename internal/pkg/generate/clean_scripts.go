@@ -128,6 +128,7 @@ func CleanDockerCompose(dockerComposePath string) error {
 	if err != nil {
 		return fmt.Errorf(configs.CleaningDCFileError, err)
 	}
+	defer file.Close()
 
 	raw, err := io.ReadAll(file)
 	if err != nil {
@@ -135,11 +136,6 @@ func CleanDockerCompose(dockerComposePath string) error {
 	}
 
 	info, err := file.Stat()
-	if err != nil {
-		return fmt.Errorf(configs.CleaningDCFileError, err)
-	}
-
-	err = file.Close()
 	if err != nil {
 		return fmt.Errorf(configs.CleaningDCFileError, err)
 	}
@@ -219,6 +215,7 @@ func CleanEnvFile(envFilePath string) error {
 	if err != nil {
 		return fmt.Errorf(configs.CleaningEnvFileError, err)
 	}
+	defer file.Close()
 
 	rawLines, err := io.ReadAll(file)
 	if err != nil {
@@ -227,7 +224,6 @@ func CleanEnvFile(envFilePath string) error {
 	lines := strings.Split(string(rawLines), "\n")
 
 	info, err := file.Stat()
-	file.Close()
 	if err != nil {
 		return fmt.Errorf(configs.CleaningEnvFileError, err)
 	}

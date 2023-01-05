@@ -22,15 +22,16 @@ import (
 	"strings"
 	"testing"
 
+	"io"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
-	"io"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 )
 
 const (
@@ -46,6 +47,10 @@ type genTestData struct {
 	ErrorGenEnvFile error
 	ErrorCheckFunc  error
 	CheckFunctions  []CheckFunc
+}
+
+func clean(s string) string {
+	return strings.ReplaceAll(s, "\r", "")
 }
 
 var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env io.Reader) error {
@@ -175,9 +180,9 @@ var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader)
 	if utils.Contains(data.Services, mevBoost) {
 
 		if composeData.Services.Mevboost != nil {
-			assert.Equal(t, composeData.Services.Mevboost.Image, "flashbots/mev-boost:latest")
-			assert.Equal(t, composeData.Services.Mevboost.ContainerName, "mev-boost")
-			assert.Equal(t, composeData.Services.Mevboost.Restart, "on-failure")
+			assert.Equal(t, "flashbots/mev-boost:latest", composeData.Services.Mevboost.Image)
+			assert.Equal(t, "mev-boost", composeData.Services.Mevboost.ContainerName)
+			assert.Equal(t, "on-failure", composeData.Services.Mevboost.Restart)
 		} else {
 			return errors.New("mevboost service is not present")
 		}
@@ -246,15 +251,15 @@ var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) erro
 	if data.Network == "gnosis" {
 		// Check that the right network is set
 		assert.Contains(t, envData, "EL_NETWORK")
-		assert.Equal(t, envData["EL_NETWORK"], "xdai")
+		assert.Equal(t, "xdai", clean(envData["EL_NETWORK"]))
 
 		assert.Contains(t, envData, "CL_NETWORK")
-		assert.Equal(t, envData["CL_NETWORK"], "gnosis")
+		assert.Equal(t, "gnosis", clean(envData["CL_NETWORK"]))
 
 	} else {
 		// Check that the right network is set
 		assert.Contains(t, envData, "NETWORK")
-		assert.Equal(t, envData["NETWORK"], data.Network)
+		assert.Equal(t, data.Network, clean(envData["NETWORK"]))
 	}
 
 	return nil
@@ -380,21 +385,21 @@ func TestGenerateComposeServices(t *testing.T) {
 
 			var buffer bytes.Buffer
 			err := ComposeFile(tt.GenerationData, io.Writer(&buffer))
-			assert.ErrorIs(t, err, tt.ErrorGenCompose)
+			assert.ErrorIs(t, tt.ErrorGenCompose, err)
 			if tt.ErrorGenCompose != nil {
 				return
 			}
 
 			var envBuffer bytes.Buffer
 			err = EnvFile(tt.GenerationData, io.Writer(&envBuffer))
-			assert.ErrorIs(t, err, tt.ErrorGenEnvFile)
+			assert.ErrorIs(t, tt.ErrorGenEnvFile, err)
 			if tt.ErrorGenEnvFile != nil {
 				return
 			}
 
 			for _, f := range tt.CheckFunctions {
 				err = f(t, tt.GenerationData, bytes.NewReader(buffer.Bytes()), bytes.NewReader(envBuffer.Bytes()))
-				assert.ErrorIs(t, err, tt.ErrorCheckFunc)
+				assert.ErrorIs(t, tt.ErrorCheckFunc, err)
 
 			}
 		})
@@ -716,12 +721,12 @@ func TestCleanGeneratedFiles(t *testing.T) {
 
 			// generate files
 			out, err := os.Create(filepath.Join(path, configs.DefaultDockerComposeScriptName))
-			assert.ErrorIs(t, err, tt.Error)
+			assert.ErrorIs(t, tt.Error, err)
 			if tt.Error != nil {
 				return
 			}
 			err = ComposeFile(tt.Data, out)
-			assert.ErrorIs(t, err, tt.Error)
+			assert.ErrorIs(t, tt.Error, err)
 			if tt.Error != nil {
 				return
 			}
@@ -729,6 +734,7 @@ func TestCleanGeneratedFiles(t *testing.T) {
 
 			// open output file
 			out, err = os.Create(filepath.Join(path, configs.DefaultEnvFileName))
+			assert.ErrorIs(t, nil, err)
 			err = EnvFile(tt.Data, out)
 			assert.ErrorIs(t, err, tt.Error)
 			if tt.Error != nil {
@@ -737,7 +743,7 @@ func TestCleanGeneratedFiles(t *testing.T) {
 			assert.FileExists(t, filepath.Join(path, configs.DefaultEnvFileName))
 
 			err = CleanGenerated(path)
-			assert.ErrorIs(t, err, tt.Error)
+			assert.ErrorIs(t, tt.Error, err)
 			if tt.Error != nil {
 				return
 			}

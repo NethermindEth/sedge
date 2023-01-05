@@ -17,13 +17,14 @@ package generate
 
 import (
 	"bytes"
-	"github.com/NethermindEth/sedge/configs"
-	"github.com/NethermindEth/sedge/internal/pkg/clients"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
 	"strings"
 	"testing"
+
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/stretchr/testify/assert"
 )
 
 // read the .env file
@@ -156,7 +157,7 @@ func TestGenerateEnvFile(t *testing.T) {
 			data := retriveEnvData(t, &buffer)
 			for key, value := range tt.fieldsToCheck {
 				assert.Contains(t, data, key)
-				assert.Equal(t, value, data[key])
+				assert.Equal(t, value, strings.ReplaceAll(data[key], "\r", ""))
 			}
 		})
 	}
