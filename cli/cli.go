@@ -21,7 +21,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -282,15 +281,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	combinedClients.Validator.Image = clientImages.validator
 	combinedClients.Validator.Omitted = flags.noValidator
 
-	var vlStartGracePeriod time.Duration
-	switch flags.network {
-	case "mainnet", "goerli", "sepolia":
-		vlStartGracePeriod = 2 * configs.EpochTimeETH
-	case "gnosis", "chiado":
-		vlStartGracePeriod = 2 * configs.EpochTimeGNO
-	default:
-		vlStartGracePeriod = 2 * configs.EpochTimeETH
-	}
+	vlStartGracePeriod := configs.NetworkEpochTime(flags.network)
 
 	// Generate docker-compose scripts
 	gd := generate.GenerationData{

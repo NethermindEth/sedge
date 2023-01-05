@@ -15,11 +15,6 @@ limitations under the License.
 */
 package configs
 
-import (
-	"fmt"
-	"strings"
-)
-
 var networkConfigs map[string]NetworkConfig
 
 func NetworkConfigs() map[string]NetworkConfig {
@@ -42,31 +37,31 @@ func init() {
 
 	configs := []NetworkConfig{
 		{
-			Name:               "mainnet",
+			Name:               NetworkMainnet,
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00000000",
 		},
 		{
-			Name:               "goerli",
+			Name:               NetworkGoerli,
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00001020",
 		},
 		{
-			Name:               "sepolia",
+			Name:               NetworkSepolia,
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x90000069",
 		},
 		{
-			Name:               "chiado",
+			Name:               NetworkChiado,
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x0000006f",
 		},
 		{
-			Name:               "gnosis",
+			Name:               NetworkGnosis,
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00000064",
@@ -75,11 +70,4 @@ func init() {
 	for _, config := range configs {
 		AddNetwork(config)
 	}
-}
-
-func CheckNetwork(networkName string) error {
-	if _, ok := networkConfigs[strings.ToLower(networkName)]; !ok {
-		return fmt.Errorf(UnknownNetworkError, networkName)
-	}
-	return nil
 }
