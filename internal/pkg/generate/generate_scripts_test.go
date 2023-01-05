@@ -23,7 +23,6 @@ import (
 	"testing"
 
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -141,7 +140,7 @@ var checkECBootnodesOnExecution = func(t *testing.T, data *GenData, compose, env
 
 func getComposeData(compose io.Reader) (*ComposeData, error) {
 	// load compose file
-	composeBytes, err := ioutil.ReadAll(compose)
+	composeBytes, err := io.ReadAll(compose)
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +166,7 @@ func checkFlagOnCommands(t *testing.T, commands []string, flag string) {
 
 var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader) error {
 	// load compose file
-	composeBytes, err := ioutil.ReadAll(compose)
+	composeBytes, err := io.ReadAll(compose)
 	if err != nil {
 		return err
 	}
@@ -193,7 +192,7 @@ var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader)
 
 var checkExtraFlagsOnExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
 	// load compose file
-	composeBytes, err := ioutil.ReadAll(compose)
+	composeBytes, err := io.ReadAll(compose)
 	if err != nil {
 		return err
 	}
@@ -215,9 +214,8 @@ var checkExtraFlagsOnExecution = func(t *testing.T, data *GenData, compose, env 
 }
 
 var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-
 	// load compose file
-	composeBytes, err := ioutil.ReadAll(compose)
+	composeBytes, err := io.ReadAll(compose)
 	if err != nil {
 		return err
 	}
@@ -267,7 +265,7 @@ var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) erro
 
 func generateTestCases(t *testing.T) (tests []genTestData) {
 	baseDescription := "Test generation of compose services "
-	tests = []genTestData{{Description: baseDescription + " NilData", ErrorGenCompose: EmptyDataError, CheckFunctions: []CheckFunc{defaultFunc}}}
+	tests = []genTestData{{Description: baseDescription + " NilData", ErrorGenCompose: ErrEmptyData, CheckFunctions: []CheckFunc{defaultFunc}}}
 
 	networks, err := utils.SupportedNetworks()
 	if err != nil {
@@ -326,7 +324,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 								ValidatorClient: &clients.Client{Name: consensusCl, Omitted: true},
 								Network:         network,
 							},
-							ErrorGenCompose: ConsensusClientNotValidError,
+							ErrorGenCompose: ErrConsensusClientNotValid,
 							CheckFunctions:  []CheckFunc{defaultFunc},
 						})
 				}
@@ -489,7 +487,7 @@ func TestValidateClients(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "wrong"},
 				Network:         "mainnet",
 			},
-			Error: ExecutionClientNotValidError,
+			Error: ErrExecutionClientNotValid,
 		},
 		{
 			Description: "Wrong consensus client",
@@ -497,7 +495,7 @@ func TestValidateClients(t *testing.T) {
 				ConsensusClient: &clients.Client{Name: "wrong"},
 				Network:         "mainnet",
 			},
-			Error: ConsensusClientNotValidError,
+			Error: ErrConsensusClientNotValid,
 		},
 		{
 			Description: "Wrong validator client",
@@ -505,7 +503,7 @@ func TestValidateClients(t *testing.T) {
 				ValidatorClient: &clients.Client{Name: "wrong"},
 				Network:         "mainnet",
 			},
-			Error: ValidatorClientNotValidError,
+			Error: ErrValidatorClientNotValid,
 		},
 		{
 			Description: "Wrong network, empty clients",
@@ -520,7 +518,7 @@ func TestValidateClients(t *testing.T) {
 				ConsensusClient: &clients.Client{Name: "teku"},
 				Network:         wrongDep,
 			},
-			Error: UnableToGetClientsInfoError,
+			Error: ErrUnableToGetClientsInfo,
 		},
 		{
 			Description: "Wrong network, good execution",
@@ -528,7 +526,7 @@ func TestValidateClients(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				Network:         wrongDep,
 			},
-			Error: UnableToGetClientsInfoError,
+			Error: ErrUnableToGetClientsInfo,
 		},
 		{
 			Description: "Wrong network, good validator",
@@ -536,7 +534,7 @@ func TestValidateClients(t *testing.T) {
 				ValidatorClient: &clients.Client{Name: "teku"},
 				Network:         wrongDep,
 			},
-			Error: UnableToGetClientsInfoError,
+			Error: ErrUnableToGetClientsInfo,
 		},
 	}
 	for _, tt := range tests {
@@ -581,7 +579,7 @@ func TestGenComposeFileSimpleExecution(t *testing.T) {
 			Data: &GenData{
 				Network: "mainnet",
 			},
-			Error: EmptyDataError,
+			Error: ErrEmptyData,
 		},
 	}
 
@@ -631,7 +629,7 @@ func TestEnvFileAndFlags(t *testing.T) {
 			Data: &GenData{
 				Network: "mainnet",
 			},
-			Error: EmptyDataError,
+			Error: ErrEmptyData,
 		},
 		{
 			Description: "Wrong network",
@@ -639,7 +637,7 @@ func TestEnvFileAndFlags(t *testing.T) {
 				ConsensusClient: &clients.Client{Name: "teku"},
 				Network:         wrongDep,
 			},
-			Error: TemplateNotFoundError,
+			Error: ErrTemplateNotFound,
 		},
 		{
 			Description: "Prysm consensus with ConsensusAdditionalUrl",
@@ -722,6 +720,9 @@ func TestCleanGeneratedFiles(t *testing.T) {
 
 			// generate files
 			out, err := os.Create(filepath.Join(path, configs.DefaultDockerComposeScriptName))
+			if err != nil {
+				return
+			}
 			defer out.Close()
 			assert.ErrorIs(t, err, nil)
 			if tt.Error != nil {
