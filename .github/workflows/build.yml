@@ -28,7 +28,7 @@ jobs:
         run: make install-gofumpt
 
       - name: Check Format
-        run: make format-check
+        run: test ! $(gofumpt -l . | tee >(cat 1>&2))
         shell: bash
 
       - name: Check go mod status
