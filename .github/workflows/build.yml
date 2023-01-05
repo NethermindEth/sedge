@@ -40,6 +40,7 @@ jobs:
             git diff "$GITHUB_SHA"
             exit 1
           fi
+        shell: bash
 
       - name: Check build
         run: make compile
