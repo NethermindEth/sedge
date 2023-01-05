@@ -2,37 +2,41 @@ name: sedge CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   build:
     name: Build sedge
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ["1.18.2"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Setup Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: '1.18.2'
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
 
-    - name: Check Format
-      run: make format-check
+      - name: Check Format
+        run: make format-check
 
-    - name: Check go mod status
-      run: |
-        make gomod_tidy
-        if [[ ! -z $(git status -s) ]]
-        then
-          echo "Go mod - state is not clean:"
-          git status -s
-          git diff "$GITHUB_SHA"
-          exit 1
-        fi
+      - name: Check go mod status
+        run: |
+          make gomod_tidy
+          if [[ ! -z $(git status -s) ]]
+          then
+            echo "Go mod - state is not clean:"
+            git status -s
+            git diff "$GITHUB_SHA"
+            exit 1
+          fi
 
-    - name: Check build
-      run: make compile
+      - name: Check build
+        run: make compile
