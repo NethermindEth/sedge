@@ -123,7 +123,7 @@ func KeysCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Com
 				MinIndex:    uint64(flags.existingVal),
 				MaxIndex:    uint64(flags.existingVal) + uint64(flags.numberVal),
 				NetworkName: flags.network,
-				ForkVersion: configs.NetworkConfigs()[flags.network].GenesisForkVersion,
+				ForkVersion: configs.NetworksConfigs()[flags.network].GenesisForkVersion,
 				// Constants
 				UseUniquePassphrase: true,
 				Insecure:            false,

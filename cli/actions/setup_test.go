@@ -16,6 +16,8 @@ limitations under the License.
 package actions_test
 
 import (
+	"fmt"
+	"path/filepath"
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli/actions"
@@ -35,22 +37,22 @@ func TestSetupContainers(t *testing.T) {
 		{
 			name: "with services",
 			options: actions.SetupContainersOptions{
-				GenerationPath: "/a/b/c/d",
+				GenerationPath: filepath.Join("a", "b", "c", "d"),
 				Services:       []string{"validator", "consensus", "execution"},
 			},
-			expectedBuildCmd:  "docker compose -f /a/b/c/d/docker-compose.yml build validator consensus execution",
-			expectedPullCmd:   "docker compose -f /a/b/c/d/docker-compose.yml pull validator consensus execution",
-			expectedCreateCmd: "docker compose -f /a/b/c/d/docker-compose.yml create validator consensus execution",
+			expectedBuildCmd:  fmt.Sprintf("docker compose -f %s build validator consensus execution", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
+			expectedPullCmd:   fmt.Sprintf("docker compose -f %s pull validator consensus execution", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
+			expectedCreateCmd: fmt.Sprintf("docker compose -f %s create validator consensus execution", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
 		},
 		{
 			name: "without services",
 			options: actions.SetupContainersOptions{
-				GenerationPath: "/a/b/c/d",
+				GenerationPath: filepath.Join("a", "b", "c", "d"),
 				Services:       []string{},
 			},
-			expectedBuildCmd:  "docker compose -f /a/b/c/d/docker-compose.yml build",
-			expectedPullCmd:   "docker compose -f /a/b/c/d/docker-compose.yml pull",
-			expectedCreateCmd: "docker compose -f /a/b/c/d/docker-compose.yml create",
+			expectedBuildCmd:  fmt.Sprintf("docker compose -f %s build", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
+			expectedPullCmd:   fmt.Sprintf("docker compose -f %s pull", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
+			expectedCreateCmd: fmt.Sprintf("docker compose -f %s create", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
 		},
 	}
 	for _, tc := range tests {
