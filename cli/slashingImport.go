@@ -17,7 +17,7 @@ package cli
 
 import (
 	"errors"
-	"path"
+	"path/filepath"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
@@ -61,7 +61,7 @@ behavior use --start-validator and --stop-validator flags.`,
 		},
 		PreRun: func(cmd *cobra.Command, args []string) {
 			if from == "" {
-				from = path.Join(generationPath, "slashing-export.json")
+				from = filepath.Join(generationPath, "slashing-export.json")
 			}
 			if err := configs.NetworkCheck(network); err != nil {
 				log.Fatal(err)
