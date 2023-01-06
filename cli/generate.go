@@ -237,6 +237,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 			return err
 		}
 	}
+	log.Info(configs.GenerationEnd)
 
 	return nil
 }

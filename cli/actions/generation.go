@@ -49,6 +49,7 @@ func (s *sedgeActions) GenerateCompose(options GenerateComposeOptions) error {
 	if err != nil {
 		return err
 	}
+	log.Info(configs.GeneratedDockerComposeScript)
 
 	log.Info(configs.GeneratingEnvFile)
 	// open output file
@@ -61,11 +62,14 @@ func (s *sedgeActions) GenerateCompose(options GenerateComposeOptions) error {
 	if err != nil {
 		return err
 	}
+	log.Info(configs.GeneratedEnvFile)
 
+	log.Info(configs.CleaningGeneratedFiles)
 	err = generate.CleanGenerated(options.GenerationPath)
 	if err != nil {
 		return err
 	}
+	log.Info(configs.CleanedGeneratedFiles)
 
 	return nil
 }
