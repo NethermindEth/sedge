@@ -76,7 +76,7 @@ behavior use --start-validator and --stop-validator flags.`,
 		},
 	}
 
-	cmd.Flags().StringVarP(&network, "network", "n", "", "network")
+	cmd.Flags().StringVarP(&network, "network", "n", "mainnet", "network")
 	cmd.Flags().BoolVar(&startValidator, "start-validator", false, "starts the validator client after export, regardless of the state the validator was in before")
 	cmd.Flags().BoolVar(&stopValidator, "stop-validator", false, "stops the validator client after export, regardless of the state the validator was in before")
 	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "path to the generation directory")
