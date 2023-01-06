@@ -246,9 +246,6 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, sedgeAc
 }
 
 func lessMevBoost(services []string) []string {
-	if !utils.Contains(services, mevBoost) {
-		return services
-	}
 	newServices := make([]string, 0)
 	for _, service := range services {
 		if service != mevBoost {
