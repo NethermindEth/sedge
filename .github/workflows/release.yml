@@ -181,7 +181,6 @@ jobs:
     - run: pip install launchpadlib --upgrade
     - name: Run copy binaries PPA script
       env: 
-        GOPATH: /home/runner/go
         LP_CREDENTIALS_FILE: /tmp/credentials.txt
       run: |
         echo ${{secrets.PPA_COPY_TOKEN}} | base64 --decode > /tmp/credentials.txt
