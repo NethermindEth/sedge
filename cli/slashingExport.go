@@ -51,7 +51,12 @@ in the same state in which it was found. That means if the validator is running/
 before the export, then the validator will be running/stopped after the command
 is executed, regardless of whether the export fails or not. To force a different
 behavior use --start-validator and --stop-validator flags.`,
-		Args: cobra.ExactArgs(1),
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) != 1 {
+				return ErrInvalidNumberOfArguments
+			}
+			return nil
+		},
 		PreRun: func(cmd *cobra.Command, args []string) {
 			if out == "" {
 				out = filepath.Join(generationPath, "slashing_export.json")
