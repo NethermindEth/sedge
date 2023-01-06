@@ -125,6 +125,10 @@ jobs:
       with:
         path: /tmp/binaries
 
+    - name: Calculate sha256 hashes
+      run: |
+      for hash in /tmp/binaries/sedge-*/*; do sha256sum $hash >> CHANGELOG.md; done
+
     - name: Upload release to Github Releases
       uses: ncipollo/release-action@v1
       with:
