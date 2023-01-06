@@ -36,8 +36,34 @@ func NewCMDRunner(options CMDRunnerOptions) CommandRunner {
 }
 
 func (cr *UnixCMDRunner) BuildDockerComposeUpCMD(options DockerComposeUpOptions) Command {
-	servs := strings.Join(options.Services, " ")
-	command := fmt.Sprintf("docker compose -f %s up -d %s", options.Path, servs)
+	command := fmt.Sprintf("docker compose -f %s up -d", options.Path)
+	if len(options.Services) > 0 {
+		command += " " + strings.Join(options.Services, " ")
+	}
+	return Command{Cmd: command}
+}
+
+func (cr *UnixCMDRunner) BuildDockerComposePullCMD(options DockerComposePullOptions) Command {
+	command := fmt.Sprintf("docker compose -f %s pull", options.Path)
+	if len(options.Services) > 0 {
+		command += " " + strings.Join(options.Services, " ")
+	}
+	return Command{Cmd: command}
+}
+
+func (cr *UnixCMDRunner) BuildDockerComposeCreateCMD(options DockerComposeCreateOptions) Command {
+	command := fmt.Sprintf("docker compose -f %s create", options.Path)
+	if len(options.Services) > 0 {
+		command += " " + strings.Join(options.Services, " ")
+	}
+	return Command{Cmd: command}
+}
+
+func (cr *UnixCMDRunner) BuildDockerComposeBuildCMD(options DockerComposeBuildOptions) Command {
+	command := fmt.Sprintf("docker compose -f %s build", options.Path)
+	if len(options.Services) > 0 {
+		command += " " + strings.Join(options.Services, " ")
+	}
 	return Command{Cmd: command}
 }
 
@@ -70,7 +96,13 @@ func (cr *UnixCMDRunner) BuildDockerComposePSCMD(options DockerComposePsOptions)
 	if options.ServiceName != "" {
 		name += " " + options.ServiceName
 	}
-	command := fmt.Sprintf("docker compose -f %s ps%s%s", options.Path, flags, name)
+
+	var command string
+	if options.Path != "" {
+		command = fmt.Sprintf("docker compose -f %s ps%s%s", options.Path, flags, name)
+	} else {
+		command = fmt.Sprintf("docker compose ps%s%s", flags, name)
+	}
 	return Command{Cmd: command}
 }
 
@@ -120,16 +152,28 @@ func (cr *UnixCMDRunner) BuildDockerComposeDownCMD(options DockerComposeDownOpti
 	return Command{Cmd: command}
 }
 
+func (cr *UnixCMDRunner) BuildCreateFileCMD(options CreateFileOptions) Command {
+	return Command{Cmd: fmt.Sprintf("touch %s", options.FileName)}
+}
+
+func (cr *UnixCMDRunner) BuildEchoToFileCMD(options EchoToFileOptions) Command {
+	return Command{Cmd: fmt.Sprintf("echo %s > %s", options.Content, options.FileName)}
+}
+
+func (cr *UnixCMDRunner) BuildOpenTextEditor(options OpenTextEditorOptions) Command {
+	return Command{Cmd: fmt.Sprintf("less %s", options.FilePath)}
+}
+
 func (cr *UnixCMDRunner) RunCMD(cmd Command) (string, error) {
-	if cr.RunWithSudo {
+	if cr.RunWithSudo && !cmd.ForceNoSudo {
 		log.Debug(`Running command with sudo.`)
 		cmd.Cmd = fmt.Sprintf("sudo %s", cmd.Cmd)
 	} else {
 		log.Debug(`Running command without sudo.`)
 	}
-	return runCmd(cmd.Cmd, cmd.GetOutput, cmd.RunInPty)
+	return runCmd(cmd.Cmd, cmd.GetOutput)
 }
 
-func (cr *UnixCMDRunner) RunBash(script BashScript) (string, error) {
+func (cr *UnixCMDRunner) RunScript(script ScriptFile) (string, error) {
 	return executeBashScript(script)
 }

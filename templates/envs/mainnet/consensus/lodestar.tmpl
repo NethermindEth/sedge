@@ -4,7 +4,13 @@
 CC_PEER_COUNT=50
 CC_LOG_LEVEL=info
 EC_API_URL={{.ExecutionApiURL}}
+EC_AUTH_URL={{.ExecutionAuthURL}}
 CC_INSTANCE_NAME=Lodestar
-CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}chainsafe/lodestar{{end}}
+CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}chainsafe/lodestar:v1.2.2{{end}}
 CC_DATA_DIR={{.CcDataDir}}
+CC_LODESTAR_PRESET=mainnet
+CC_JWT_SECRET_PATH={{.JWTSecretPath}}
+CC_FEE_RECIPIENT={{.FeeRecipient}}{{if .CCBootnodes}}
+CC_BOOTNODES="{{ range $index, $enr := .CCBootnodes}}{{if $index}},{{end}}{{$enr}}{{end}}"{{end}}
+CHECKPOINT_SYNC_URL=https://beaconstate.ethstaker.cc
 {{ end }}

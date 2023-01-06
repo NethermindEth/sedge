@@ -6,38 +6,52 @@
       context: github.com/NethermindEth/teku-init-validator
     volumes:
       - ${VL_DATA_DIR}:/data
-      - ${KEYSTORE_DIR}:/keystore
+      - ${KEYSTORE_DIR}:/keystore{{if .LoggingDriver}}{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
+    logging:
+      driver: "{{.LoggingDriver}}"
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}
 
-  validator:
+  validator:{{if and (ge .UID 0) (ge .GID 0)}}
+    user: "{{.UID}}:{{.GID}}"{{end}}
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
+    restart: unless-stopped
     depends_on:
       validator-import:
         condition: service_completed_successfully
+      validator-blocker:
+        condition: service_completed_successfully{{if .WithConsensusClient}}
+      consensus:
+        condition: service_healthy{{end}}
     networks:
       - sedge
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/var/lib/teku
+      - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
     command:
-      - validator-client
+      - validator-client{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - --network=/network_config/config.yml{{end}}{{end}}
       - --beacon-node-api-endpoint=${CC_API_URL}
-      - --data-path=/var/lib/teku
+      - --data-path=/data
       - --log-destination=CONSOLE
       - --validators-graffiti=${GRAFFITI}
-      - --validator-keys=/var/lib/teku/keys:/var/lib/teku/passwords
+      - --validator-keys=/data/keys:/data/passwords
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
       - --metrics-port={{.VlMetricsPort}}{{with .FeeRecipient}}
-      - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
+      - --validators-proposer-default-fee-recipient=${CC_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
       - --validators-builder-registration-default-enabled=true
-      - --Xvalidators-builder-registration-default-gas-limit=29000000{{end}}
+      - --Xvalidators-builder-registration-default-gas-limit=29000000{{end}}{{if .LoggingDriver}}
     logging:
-      driver: "json-file"
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
         max-size: "10m"
-        max-file: "10"
+        max-file: "10"{{end}}{{end}}
 {{ end }}

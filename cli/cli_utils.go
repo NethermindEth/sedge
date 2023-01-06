@@ -16,73 +16,21 @@ limitations under the License.
 package cli
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
-	"text/template"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
-	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/crypto"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/utils"
-	"github.com/NethermindEth/sedge/templates"
 	"github.com/manifoldco/promptui"
 )
-
-// Interface for Posmoni Eth2 monitor
-type MonitoringTool interface {
-	TrackSync(done <-chan struct{}, beaconEndpoints, executionEndpoints []string, wait time.Duration) <-chan posmoni.EndpointSyncStatus
-}
-
-var monitor MonitoringTool
-
-func initMonitor(builder func() MonitoringTool) {
-	monitor = builder()
-}
-
-func installOrShowInstructions(pending []string) (err error) {
-	// notest
-	optInstall, optExit := "Install dependencies", "Exit. You will manage this dependencies on your own"
-	prompt := promptui.Select{
-		Label: "Select how to proceed with the pending dependencies",
-		Items: []string{optInstall, optExit},
-	}
-
-	if err = utils.HandleInstructions(pending, utils.ShowInstructions); err != nil {
-		return fmt.Errorf(configs.ShowingInstructionsError, err)
-	}
-	_, result, err := prompt.Run()
-	if err != nil {
-		return fmt.Errorf(configs.PromptFailedError, err)
-	}
-
-	switch result {
-	case optInstall:
-		return installDependencies(pending)
-	default:
-		log.Info(configs.Exiting)
-		os.Exit(0)
-	}
-
-	return nil
-}
-
-func installDependencies(pending []string) error {
-	if err := utils.HandleInstructions(pending, utils.InstallDependency); err != nil {
-		return fmt.Errorf(configs.InstallingDependenciesError, err)
-	}
-	return nil
-}
 
 func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error) {
 	var executionClient, consensusClient clients.Client
@@ -100,11 +48,12 @@ func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error
 	combinedClients = clients.Clients{
 		Execution: executionClient,
 		Consensus: consensusClient,
-		Validator: consensusClient}
+		Validator: consensusClient,
+	}
 	return combinedClients, nil
 }
 
-func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Clients, error) {
+func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliCmdFlags) (clients.Clients, error) {
 	var combinedClients clients.Clients
 	var err error
 
@@ -115,33 +64,37 @@ func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Cl
 	}
 
 	// Randomize missing clients, and choose same pair of client for consensus and validator if at least one of them is missing
-	if executionName == "" {
+	if flags.executionName == "" {
 		log.Warnf(configs.ExecutionClientNotSpecifiedWarn, randomizedClients.Execution.Name)
-		executionName = randomizedClients.Execution.Name
+		// TODO: avoid flag edition
+		flags.executionName = randomizedClients.Execution.Name
 	}
-	if consensusName == "" && validatorName == "" {
+	if flags.consensusName == "" && flags.validatorName == "" {
 		log.Warnf(configs.CLNotSpecifiedWarn, randomizedClients.Consensus.Name)
-		consensusName = randomizedClients.Consensus.Name
-		validatorName = randomizedClients.Validator.Name
-	} else if consensusName == "" {
+		// TODO: avoid edit flags
+		flags.consensusName = randomizedClients.Consensus.Name
+		flags.validatorName = randomizedClients.Validator.Name
+	} else if flags.consensusName == "" {
 		log.Warn(configs.ConsensusClientNotSpecifiedWarn)
-		consensusName = validatorName
-	} else if validatorName == "" {
+		// TODO: avoid flag edition
+		flags.consensusName = flags.validatorName
+	} else if flags.validatorName == "" {
 		log.Warn(configs.ValidatorClientNotSpecifiedWarn)
-		validatorName = consensusName
+		// TODO: avoid flag edition
+		flags.validatorName = flags.consensusName
 	}
 
-	exec, ok := allClients[execution][executionName]
+	exec, ok := allClients[execution][flags.executionName]
 	if !ok {
-		exec.Name = executionName
+		exec.Name = flags.executionName
 	}
-	cons, ok := allClients[consensus][consensusName]
+	cons, ok := allClients[consensus][flags.consensusName]
 	if !ok {
-		cons.Name = consensusName
+		cons.Name = flags.consensusName
 	}
-	val, ok := allClients[validator][validatorName]
+	val, ok := allClients[validator][flags.validatorName]
 	if !ok {
-		val.Name = validatorName
+		val.Name = flags.validatorName
 	}
 
 	combinedClients = clients.Clients{
@@ -163,17 +116,17 @@ func validateClients(allClients clients.OrderedClients, w io.Writer) (clients.Cl
 	return combinedClients, nil
 }
 
-func runScriptOrExit() (err error) {
+func runScriptOrExit(cmdRunner commands.CommandRunner, flags *CliCmdFlags) (err error) {
 	// notest
 	log.Infof(configs.InstructionsFor, "running docker-compose script")
-	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
-		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
-		Services: *services,
+	upCMD := cmdRunner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
+		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
+		Services: *flags.services,
 	})
 	fmt.Printf("\n%s\n\n", upCMD.Cmd)
 
 	prompt := promptui.Prompt{
-		Label:     fmt.Sprintf("Run the script with the selected services %s", strings.Join(*services, ", ")),
+		Label:     fmt.Sprintf("Run the script with the selected services %s", strings.Join(*flags.services, ", ")),
 		IsConfirm: true,
 		Default:   "Y",
 	}
@@ -183,173 +136,123 @@ func runScriptOrExit() (err error) {
 		os.Exit(0)
 	}
 
-	if err = runAndShowContainers(*services); err != nil {
+	if err := buildContainers(cmdRunner, *flags.services, flags.generationPath); err != nil {
+		return err
+	}
+	if err = runAndShowContainers(cmdRunner, *flags.services, flags); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func runAndShowContainers(services []string) error {
+func checkRunDependencies(cmdRunner commands.CommandRunner, generationPath string) error {
 	// TODO: (refac) Put this check to checks.go and call it from there
 	// Check if docker engine is on
 	log.Info(configs.CheckingDockerEngine)
-	psCMD := commands.Runner.BuildDockerPSCMD(commands.DockerPSOptions{
+	psCMD := cmdRunner.BuildDockerPSCMD(commands.DockerPSOptions{
 		All: true,
 	})
 	psCMD.GetOutput = true
 	log.Infof(configs.RunningCommand, psCMD.Cmd)
-	if _, err := commands.Runner.RunCMD(psCMD); err != nil {
+	if _, err := cmdRunner.RunCMD(psCMD); err != nil {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
 	}
-
 	// Check that compose plugin is installed with docker running 'docker compose ps'
-	dockerComposePsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+	dockerComposePsCMD := cmdRunner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
 		Path: filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 	})
 	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
 	dockerComposePsCMD.GetOutput = true
-	_, err := commands.Runner.RunCMD(dockerComposePsCMD)
+	_, err := cmdRunner.RunCMD(dockerComposePsCMD)
 	if err != nil {
 		return fmt.Errorf(configs.DockerComposeOffError, err)
 	}
+	return nil
+}
 
-	// Run docker-compose script
-	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
+func buildImages(cmdRunner commands.CommandRunner, services []string, generationPath string) error {
+	// Build images
+	buildCmd := cmdRunner.BuildDockerComposeBuildCMD(commands.DockerComposeBuildOptions{
 		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 		Services: services,
 	})
+	log.Infof(configs.RunningCommand, buildCmd.Cmd)
+	if _, err := cmdRunner.RunCMD(buildCmd); err != nil {
+		return fmt.Errorf(configs.CommandError, buildCmd.Cmd, err)
+	}
+	return nil
+}
+
+func downloadImages(cmdRunner commands.CommandRunner, services []string, generationPath string) error {
+	// Download images
+	pullCmd := cmdRunner.BuildDockerComposePullCMD(commands.DockerComposePullOptions{
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Services: services,
+	})
+	log.Infof(configs.RunningCommand, pullCmd.Cmd)
+	if _, err := cmdRunner.RunCMD(pullCmd); err != nil {
+		return fmt.Errorf(configs.CommandError, pullCmd.Cmd, err)
+	}
+	return nil
+}
+
+func createContainers(cmdRunner commands.CommandRunner, services []string, generationPath string) error {
+	if _, err := cmdRunner.RunCMD(cmdRunner.BuildDockerComposeCreateCMD(commands.DockerComposeCreateOptions{
+		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+		Services: services,
+	})); err != nil {
+		return fmt.Errorf("error creating containers: %w", err)
+	}
+	return nil
+}
+
+func buildContainers(cmdRunner commands.CommandRunner, services []string, generationPath string) error {
+	if err := checkRunDependencies(cmdRunner, generationPath); err != nil {
+		return err
+	}
+	if err := buildImages(cmdRunner, services, generationPath); err != nil {
+		return err
+	}
+	if err := downloadImages(cmdRunner, services, generationPath); err != nil {
+		return err
+	}
+	if err := createContainers(cmdRunner, services, generationPath); err != nil {
+		return err
+	}
+	return nil
+}
+
+// TODO: use flags.services instead a separated arg
+func runAndShowContainers(cmdRunner commands.CommandRunner, services []string, flags *CliCmdFlags) error {
+	// Run docker-compose script
+	upCMD := cmdRunner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
+		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
+		Services: services,
+	})
 	log.Infof(configs.RunningCommand, upCMD.Cmd)
-	if _, err := commands.Runner.RunCMD(upCMD); err != nil {
+	if _, err := cmdRunner.RunCMD(upCMD); err != nil {
 		return fmt.Errorf(configs.CommandError, upCMD.Cmd, err)
 	}
 
 	// Run docker compose ps --filter status=running to show script running containers
-	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path:          filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+	dcpsCMD := cmdRunner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+		Path:          filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		FilterRunning: true,
 	})
 	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
-	if _, err := commands.Runner.RunCMD(dcpsCMD); err != nil {
+	if _, err := cmdRunner.RunCMD(dcpsCMD); err != nil {
 		return fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
 	}
 
 	return nil
 }
 
-type container struct {
-	NetworkSettings networkSettings
-}
-type networkSettings struct {
-	Networks map[string]networks
-}
-type networks struct {
-	IPAddress string
-}
-
-func parseNetwork(js string) (string, error) {
-	var c []container
-	if err := json.NewDecoder(bytes.NewReader([]byte(js))).Decode(&c); err != nil {
-		return "", err
-	}
-	if len(c) == 0 {
-		return "", errors.New(configs.NoOutputDockerInspectError)
-	}
-	if ip := c[0].NetworkSettings.Networks["sedge_network"].IPAddress; ip != "" {
-		return ip, nil
-	}
-	return "", errors.New(configs.IPNotFoundError)
-}
-
-func getContainerIP(service string) (ip string, err error) {
-	// Run docker compose ps --quiet <service> to show service's ID
-	dcpsCMD := commands.Runner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
-		Path:        filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
-		Quiet:       true,
-		ServiceName: service,
-	})
-	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
-	dcpsCMD.GetOutput = true
-	id, err := commands.Runner.RunCMD(dcpsCMD)
-	if err != nil {
-		return ip, fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
-	}
-
-	// Run docker inspect <id> to get IP address
-	inspectCmd := commands.Runner.BuildDockerInspectCMD(commands.DockerInspectOptions{
-		Name: id,
-	})
-	log.Infof(configs.RunningCommand, inspectCmd.Cmd)
-	inspectCmd.GetOutput = true
-	data, err := commands.Runner.RunCMD(inspectCmd)
-	if err != nil {
-		return
-	}
-
-	ip, err = parseNetwork(data)
-	return
-}
-
-func trackSync(m MonitoringTool, elPort, clPort string, wait time.Duration) error {
-	done := make(chan struct{})
-	defer close(done)
-
-	log.Info(configs.GettingContainersIP)
-	executionIP, errE := getContainerIP(execution)
-	if errE != nil {
-		log.Errorf(configs.GetContainerIPError, execution, errE)
-	}
-	consensusIP, errC := getContainerIP(consensus)
-	if errC != nil {
-		log.Errorf(configs.GetContainerIPError, consensus, errC)
-		if errE != nil {
-			// Both IP were not detected, both containers probably failed
-			return errors.New(configs.UnableToTrackSyncError)
-		}
-	}
-
-	consensusUrl := fmt.Sprintf("http://%s:%s", consensusIP, clPort)
-	executionUrl := fmt.Sprintf("http://%s:%s", executionIP, elPort)
-
-	statuses := m.TrackSync(done, []string{consensusUrl}, []string{executionUrl}, wait)
-
-	var esynced, csynced bool
-	// Threshold to stop tracking, to avoid false responses
-	times := 0
-	for s := range statuses {
-		if s.Error != nil {
-			return fmt.Errorf(configs.TrackSyncError, s.Endpoint, s.Error)
-		}
-
-		if s.Endpoint == executionUrl {
-			esynced = s.Synced
-		} else if s.Endpoint == consensusUrl {
-			csynced = s.Synced
-		}
-
-		if esynced && csynced {
-			times++
-			// Stop tracking after consecutive synced reports
-			if times == 3 {
-				// Stop tracking
-				done <- struct{}{}
-				log.Info(configs.NodesSynced)
-				break // statuses channel might still have data before closing done channel
-			}
-		} else {
-			// Restart threshold
-			times = 0
-		}
-	}
-
-	return nil
-}
-
-func RunValidatorOrExit() error {
+func RunValidatorOrExit(cmdRunner commands.CommandRunner, flags *CliCmdFlags) error {
 	// notest
 	log.Infof(configs.InstructionsFor, "running validator service of docker-compose script")
-	upCMD := commands.Runner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
-		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
+	upCMD := cmdRunner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
+		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
 		Services: []string{validator},
 	})
 	fmt.Printf("\n%s\n\n", upCMD.Cmd)
@@ -365,47 +268,31 @@ func RunValidatorOrExit() error {
 		os.Exit(0)
 	}
 
-	if err = runAndShowContainers([]string{validator}); err != nil {
+	if err = runAndShowContainers(cmdRunner, []string{validator}, flags); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func handleJWTSecret() error {
+func handleJWTSecret(flags *CliCmdFlags) error {
 	log.Info(configs.GeneratingJWTSecret)
 
-	// Create scripts directory if not exists
-	if _, err := os.Stat(generationPath); os.IsNotExist(err) {
-		err = os.MkdirAll(generationPath, 0755)
-		if err != nil {
-			return err
-		}
-	}
-
-	rawScript, err := templates.Scripts.ReadFile(filepath.Join("scripts", "jwt_secret.sh"))
+	jwtscret, err := crypto.GenerateJWTSecret()
 	if err != nil {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	tmp, err := template.New("script").Parse(string(rawScript))
+	flags.jwtPath, err = filepath.Abs(filepath.Join(flags.generationPath, "jwtsecret"))
 	if err != nil {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	script := commands.BashScript{
-		Tmp:       tmp,
-		GetOutput: false,
-		Data: map[string]string{
-			"Path": generationPath,
-		},
-	}
-
-	if _, err = commands.Runner.RunBash(script); err != nil {
+	if err := os.MkdirAll(filepath.Dir(flags.jwtPath), 0o755); err != nil {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	jwtPath, err = filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+	err = os.WriteFile(flags.jwtPath, []byte(jwtscret), 0o755)
 	if err != nil {
 		return fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
@@ -414,49 +301,124 @@ func handleJWTSecret() error {
 	return nil
 }
 
-func feeRecipientPrompt() error {
-	// notest
-	validate := func(input string) error {
-		if input != "" && !utils.IsAddress(input) {
-			return errors.New(configs.InvalidFeeRecipientError)
-		}
-		return nil
-	}
-
-	prompt := promptui.Prompt{
-		Label:    "Please enter the Fee Recipient address. You can leave it blank and press enter (not recommended)",
-		Validate: validate,
-	}
-
-	result, err := prompt.Run()
-
-	if err != nil {
-		return fmt.Errorf(configs.PromptFailedError, err)
-	}
-
-	feeRecipient = result
-	return nil
-}
-
-func preRunTeku() error {
+func preRunTeku(flags *CliCmdFlags) error {
 	log.Info(configs.PreparingTekuDatadir)
 	// Change umask to avoid OS from changing the permissions
-	syscall.Umask(0)
-	for _, s := range *services {
+	utils.SetUmask(0)
+	for _, s := range *flags.services {
 		if s == "all" || s == consensus {
 			// Prepare consensus datadir
-			path := filepath.Join(generationPath, configs.ConsensusDefaultDataDir)
-			if err := os.MkdirAll(path, 0777); err != nil {
+			path := filepath.Join(flags.generationPath, configs.ConsensusDir)
+			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, consensus, err)
 			}
 		}
 		if s == "all" || s == validator {
 			// Prepare validator datadir
-			path := filepath.Join(generationPath, configs.ValidatorDefaultDataDir)
-			if err := os.MkdirAll(path, 0777); err != nil {
+			path := filepath.Join(flags.generationPath, configs.ValidatorDir)
+			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, validator, err)
 			}
 		}
 	}
 	return nil
+}
+
+type CustomNetworkConfigsData struct {
+	ChainSpecPath          string
+	NetworkConfigPath      string
+	NetworkGenesisPath     string
+	NetworkDeployBlockPath string
+}
+
+func LoadCustomNetworksConfig(flags *CliCmdFlags) (CustomNetworkConfigsData, error) {
+	var customNetworkConfigsData CustomNetworkConfigsData
+	var chainSpecSrc, networkConfigSrc, genesisSrc, deployBlock string
+
+	networkData, ok := configs.NetworksConfigs()[flags.network]
+	if !ok {
+		return customNetworkConfigsData, fmt.Errorf(configs.UnknownNetworkError, flags.network)
+	}
+
+	eval := func(value, def string) string {
+		if value != "" {
+			return value
+		}
+		return def
+	}
+	chainSpecSrc = eval(flags.customChainSpec, networkData.DefaultCustomChainSpecSrc)
+	networkConfigSrc = eval(flags.customNetworkConfig, networkData.DefaultCustomConfigSrc)
+	genesisSrc = eval(flags.customGenesis, networkData.DefaultCustomGenesisSrc)
+	deployBlock = eval(flags.customDeployBlock, networkData.DefaultCustomDeployBlock)
+
+	// Check if any custom config is needed
+	if chainSpecSrc == "" && networkConfigSrc == "" && genesisSrc == "" && deployBlock == "" {
+		return customNetworkConfigsData, nil
+	}
+
+	destFolder := filepath.Join(flags.generationPath, configs.CustomNetworkConfigsFolder)
+	if _, err := os.Stat(destFolder); err != nil {
+		if os.IsNotExist(err) {
+			err = os.Mkdir(destFolder, os.ModePerm)
+			if err != nil {
+				return customNetworkConfigsData, err
+			}
+		} else {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if chainSpecSrc != "" {
+		customNetworkConfigsData.ChainSpecPath = filepath.Join(destFolder, configs.ExecutionNetworkConfigFileName)
+		log.Info(configs.GettingCustomChainSpec)
+		err := utils.DownloadOrCopy(chainSpecSrc, customNetworkConfigsData.ChainSpecPath, true)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+		customNetworkConfigsData.ChainSpecPath, err = filepath.Abs(customNetworkConfigsData.ChainSpecPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if networkConfigSrc != "" {
+		customNetworkConfigsData.NetworkConfigPath = filepath.Join(destFolder, configs.ConsensusNetworkConfigFileName)
+		log.Info(configs.GettingCustomNetworkConfig)
+		err := utils.DownloadOrCopy(networkConfigSrc, customNetworkConfigsData.NetworkConfigPath, true)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+		customNetworkConfigsData.NetworkConfigPath, err = filepath.Abs(customNetworkConfigsData.NetworkConfigPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if genesisSrc != "" {
+		customNetworkConfigsData.NetworkGenesisPath = filepath.Join(destFolder, configs.ConsensusNetworkGenesisFileName)
+		log.Info(configs.GettingCustomGenesis)
+		err := utils.DownloadOrCopy(genesisSrc, customNetworkConfigsData.NetworkGenesisPath, true)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+		customNetworkConfigsData.NetworkGenesisPath, err = filepath.Abs(customNetworkConfigsData.NetworkGenesisPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if deployBlock != "" {
+		customNetworkConfigsData.NetworkDeployBlockPath = filepath.Join(destFolder, configs.ConsensusNetworkDeployBlockFileName)
+		log.Info(configs.WritingCustomDeployBlock)
+		err := os.WriteFile(customNetworkConfigsData.NetworkDeployBlockPath, []byte(deployBlock), os.ModePerm)
+		if err != nil {
+			return customNetworkConfigsData, fmt.Errorf(configs.ErrorWritingDeployBlockFile, customNetworkConfigsData.NetworkDeployBlockPath, err)
+		}
+		customNetworkConfigsData.NetworkDeployBlockPath, err = filepath.Abs(customNetworkConfigsData.NetworkDeployBlockPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	return customNetworkConfigsData, nil
 }

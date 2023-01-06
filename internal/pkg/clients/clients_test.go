@@ -18,14 +18,12 @@ package clients
 import (
 	"fmt"
 	"testing"
-
-	"github.com/spf13/viper"
 )
 
 // TODO: Add testcases for other networks
 
 func validateSupportedClients(t *testing.T, clientType string, supportedClients []string) {
-	//TODO: validate supported clients
+	// TODO: validate supported clients
 }
 
 func TestSupportedClients(t *testing.T) {
@@ -38,7 +36,6 @@ func TestSupportedClients(t *testing.T) {
 		{"consensus", "mainnet", false},
 		{"validator", "mainnet", false},
 		{"random", "mainnet", true},
-		{"", "mainnet", false}, // This must fail at validation
 	}
 
 	for _, input := range inputs {
@@ -64,22 +61,8 @@ type clientsTestCase struct {
 	isErr              bool
 }
 
-func prepareGetConfigClientsTestCase(testCase clientsTestCase) {
-	for key, value := range testCase.configClientsTypes {
-		viper.Set(key+"Clients", value)
-	}
-}
-
-func cleanGetConfigClientsTestCase(_ clientsTestCase) {
-	viper.Reset()
-}
-
-func cleanAll() {
-	viper.Reset()
-}
-
 func validateClients(resultClients OrderedClients, tc clientsTestCase) bool {
-	//Check if all query clients types are in the result types
+	// Check if all query clients types are in the result types
 Loop1:
 	for _, queryType := range tc.query {
 		for resultType := range resultClients {
@@ -106,12 +89,11 @@ Loop1:
 
 func TestClients(t *testing.T) {
 	inputs := [...]clientsTestCase{
-		{},
 		{
 			map[string][]string{
-				"consensus": {"lighthouse"},
-				"execution": {"nethermind"},
-				"validator": {"lighthouse"},
+				"consensus": {"lighthouse", "prysm", "teku", "lodestar"},
+				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
+				"execution": {"nethermind", "geth", "besu", "erigon"},
 			},
 			[]string{"consensus"},
 			"mainnet",
@@ -129,9 +111,8 @@ func TestClients(t *testing.T) {
 		},
 		{
 			map[string][]string{
-				"consensus": {"lighthouse"},
-				"execution": {"nethermind"},
-				"validator": {"lighthouse"},
+				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
+				"execution": {"nethermind", "geth", "besu", "erigon"},
 			},
 			[]string{"execution", "validator"},
 			"mainnet",
@@ -139,35 +120,42 @@ func TestClients(t *testing.T) {
 		},
 		{
 			map[string][]string{
-				"consensus": {"lighthouse"},
-				"execution": {"nethermind"},
-				"validator": {"lighthouse"},
+				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
+				"consensus": {"lighthouse", "prysm", "teku", "lodestar"},
+				"execution": {"nethermind", "geth", "besu", "erigon"},
 			},
 			[]string{"consensus", "other"},
 			"mainnet",
 			true,
 		},
+		{
+			map[string][]string{
+				"validator": {"lighthouse", "teku", "lodestar"},
+				"consensus": {"lighthouse", "teku", "lodestar"},
+				"execution": {"nethermind"},
+			},
+			[]string{"consensus", "execution", "validator"},
+			"gnosis",
+			false,
+		},
 	}
 
-	t.Cleanup(cleanAll)
+	for i, input := range inputs {
+		t.Run(fmt.Sprintf("Network %s, testcase: %d", input.network, i), func(t *testing.T) {
+			descr := fmt.Sprintf("Clients(%s)", input.query)
 
-	for _, input := range inputs {
-		descr := fmt.Sprintf("Clients(%s)", input.query)
-
-		prepareGetConfigClientsTestCase(input)
-
-		c := ClientInfo{Network: input.network}
-		if res, err := c.Clients(input.query); input.isErr && err == nil {
-			t.Errorf("%s expected to fail", descr)
-		} else if !input.isErr {
-			if err != nil {
-				t.Errorf("%s failed: %v", descr, err)
-			} else if !validateClients(res, input) {
-				t.Errorf("%s got invalid result: %v", descr, res)
+			c := ClientInfo{Network: input.network}
+			if res, err := c.Clients(input.query); input.isErr && err == nil {
+				t.Errorf("%s expected to fail", descr)
+			} else if !input.isErr {
+				if err != nil {
+					t.Errorf("%s failed: %v", descr, err)
+				} else if !validateClients(res, input) {
+					t.Errorf("%s got invalid result: %v", descr, res)
+				}
 			}
-		}
 
-		cleanGetConfigClientsTestCase(input)
+		})
 	}
 }
 
@@ -184,18 +172,18 @@ func TestValidateClient(t *testing.T) {
 		},
 		{
 			client: Client{
-				"nethermind",
-				"execution",
-				true,
+				Name:      "nethermind",
+				Type:      "execution",
+				Supported: true,
 			},
 			clientType: "execution",
 			isErr:      false,
 		},
 		{
 			client: Client{
-				"nethermind",
-				"execution",
-				false,
+				Name:      "nethermind",
+				Type:      "execution",
+				Supported: false,
 			},
 			clientType: "execution",
 			isErr:      true,

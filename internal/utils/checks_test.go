@@ -92,7 +92,7 @@ func TestPreCheck(t *testing.T) {
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", nil
 				},
-				SRunBash: func(bs commands.BashScript) (string, error) {
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
 				},
 			},
@@ -106,7 +106,7 @@ func TestPreCheck(t *testing.T) {
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", nil
 				},
-				SRunBash: func(bs commands.BashScript) (string, error) {
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
 				},
 			},
@@ -120,7 +120,7 @@ func TestPreCheck(t *testing.T) {
 				SRunCMD: func(c commands.Command) (string, error) {
 					return "", fmt.Errorf("test unknown error")
 				},
-				SRunBash: func(bs commands.BashScript) (string, error) {
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
 				},
 			},
@@ -130,7 +130,6 @@ func TestPreCheck(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-
 			descr := fmt.Sprintf("PreCheck(%s)", tc.path)
 			dPath, dcPath := "", ""
 
@@ -138,13 +137,9 @@ func TestPreCheck(t *testing.T) {
 				dPath = test.CreateFakeDep(t, "docker")
 			}
 
-			commands.InitRunner(func() commands.CommandRunner {
-				return tc.runner
-			})
-
 			test.PrepareTestCaseDir(filepath.Join("testdata", "checks_tests", tc.caseTestDataDir, "docker-compose-scripts"), tc.path)
 
-			err := PreCheck(tc.path)
+			err := PreCheck(tc.runner, tc.path)
 			if tc.isErr && err == nil {
 				t.Errorf("%s expected to fail", descr)
 			} else if !tc.isErr && err != nil {
@@ -183,7 +178,7 @@ func buildCheckContainersTestCase(t *testing.T, caseName string, isErr bool) *ch
 			}
 			return "", nil
 		},
-		SRunBash: func(bs commands.BashScript) (string, error) {
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
 		},
 	}
@@ -208,11 +203,7 @@ func TestCheckContainers(t *testing.T) {
 	for _, tc := range tcs {
 		descr := fmt.Sprintf("CheckContainers(%s)", tc.path)
 
-		commands.InitRunner(func() commands.CommandRunner {
-			return tc.runner
-		})
-
-		_, err := CheckContainers(tc.path)
+		_, err := CheckContainers(tc.runner, tc.path)
 		if tc.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
 		} else if !tc.isErr {

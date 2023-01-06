@@ -19,17 +19,20 @@ Downloading any binary from the internet comes with the risk of downloading file
 :::
 
 1. Download correct binary for the machine you want to use for Sedge from the [releases page](https://github.com/NethermindEth/sedge/releases), i.e choose the correct target OS / Arch. For example: if your machine is a Intel / M1 mac then download the `darwin-amd64` / `darwin-arm64` binary. You can also download the binary from the CLI (command line interface) or Terminal with `curl` and `wget`:
+
 <Tabs groupId="download-cmds">
   <TabItem value="curl" label="curl">
 
   ```
-  curl -OL https://github.com/NethermindEth/sedge/releases/download/v<VERSION>/sedge-v<VERSION>-<OS>-<ARCH>
+  curl -L https://github.com/NethermindEth/sedge/releases/download/v<VERSION>/sedge-v<VERSION>-<OS>-<ARCH> --output sedge
   ```
 
   </TabItem>
   <TabItem value="wget" label="wget">
 
-    wget https://github.com/NethermindEth/sedge/releases/download/v<VERSION>/sedge-v<VERSION>-<OS>-<ARCH>
+  ```
+  wget https://github.com/NethermindEth/sedge/releases/download/v<VERSION>/sedge-v<VERSION>-<OS>-<ARCH> -O sedge
+  ```
 
   </TabItem>
 </Tabs>
@@ -50,7 +53,7 @@ After installing Homebrew, you are ready to install Sedge by tapping into the of
 brew install nethermindeth/sedge/sedge
 ```
 
-If you want to update Sedge you can use the following commands: 
+If you want to update Sedge, you can use the following commands: 
 ```
 brew update
 brew upgrade sedge
@@ -65,11 +68,11 @@ brew untap nethermindeth/sedge
 
 ## Using Go
 
-First install the Go programmning language following the [official instructions](https://go.dev/doc/install). You need at least the `1.18.2` version.
+First install the Go programming language following the [official instructions](https://go.dev/doc/install). You need at least the `1.18.2` version.
 
 :::tip
 
-If you want to install Sedge in a M1 mac then you need the `darwin-arm64` package. You can find it clicking on [other downloads](https://go.dev/dl/) from the Go install page.
+If you want to install Sedge in a M1 mac, then you need the `darwin-arm64` package. You can find it clicking on [other downloads](https://go.dev/dl/) from the Go install page.
 
 :::
 
@@ -83,7 +86,7 @@ The executable will be in your `$GOBIN` (`$GOPATH/bin`).
 
 :::tip
 
-To check if the `GOBIN` is not in your PATH you can execute `echo $GOBIN` from the terminal. If it doesn't print anything then is not in your PATH. To add `GOBIN` to your PATH add the following lines to your $HOME/.profile:
+To check if the `GOBIN` is not in your PATH, you can execute `echo $GOBIN` from the terminal. If it doesn't print anything, then is not in your PATH. To add `GOBIN` to your PATH, add the following lines to your $HOME/.profile:
 
 ```bash
 export GOBIN=$GOPATH/bin
@@ -95,7 +98,7 @@ Changes made to a profile file may not apply until the next time you log into yo
 
 ## Build from source
     
-In this method you generate the binary manually (need Go installed) downloading and compiling the source code:
+With this method, you generate the binary manually (need Go installed) downloading and compiling the source code:
 
 ```
 git clone https://github.com/NethermindEth/sedge.git

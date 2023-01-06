@@ -17,40 +17,55 @@ package cli
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/keystores"
 	"github.com/NethermindEth/sedge/test"
+	"github.com/NethermindEth/sedge/test/mock_prompts"
+	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 )
 
 type keysCmdTestCase struct {
-	configPath   string
-	runner       commands.CommandRunner
-	mnemonic     bool
-	network      string
-	keystorePath string
-	fdOut        *bytes.Buffer
-	isErr        bool
+	name           string
+	network        string
+	keystorePath   string
+	passphrasePath string
+	mnemnonicPath  string
+	existingVal    int64
+	numVal         int64
+	runner         commands.CommandRunner
+	prompt         prompts.Prompt
+	fdOut          *bytes.Buffer
+	isErr          bool
 }
 
-func resetKeysCmd() {
-	cfgFile = ""
-	path = ""
-	network = ""
-	existingMnemonic = false
-}
-
-func buildKeysTestCase(t *testing.T, caseName, caseNetwork string, mnemonic, isErr bool) *keysCmdTestCase {
+func buildKeysTestCase(t *testing.T, caseName, caseDataPath, caseNetwork string, existing, num int64, isErr bool) *keysCmdTestCase {
 	tc := keysCmdTestCase{}
 	configPath := t.TempDir()
 
-	err := test.PrepareTestCaseDir(filepath.Join("testdata", "keys_tests", caseName, "config"), configPath)
+	err := test.PrepareTestCaseDir(filepath.Join("testdata", "keys_tests", caseDataPath, "config"), configPath)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
+
+	// Create Mnemonic file
+	mnemonicPath := filepath.Join(configPath, "mnemonic.txt")
+	file, err := os.Create(mnemonicPath)
+	if err != nil {
+		t.Fatalf("Can't build test case: %v", err)
+	}
+	defer file.Close()
+	testMnemonic, err := keystores.CreateMnemonic()
+	if err != nil {
+		t.Fatalf("Can't build test case: %v", err)
+	}
+	file.WriteString(testMnemonic)
 
 	keystorePath := filepath.Join(configPath, "keystore")
 	err = os.MkdirAll(keystorePath, os.ModePerm)
@@ -58,50 +73,89 @@ func buildKeysTestCase(t *testing.T, caseName, caseNetwork string, mnemonic, isE
 		t.Fatalf("Can't build test case: %v", err)
 	}
 
-	// TODO: allow runner edition
-	tc.runner = &test.SimpleCMDRunner{
-		SRunCMD: func(c commands.Command) (string, error) {
-			return "", nil
-		},
-		SRunBash: func(bs commands.BashScript) (string, error) {
-			return "", nil
-		},
-	}
-
-	tc.configPath = filepath.Join(configPath, "config.yaml")
-	tc.network = network
+	tc.name = caseName
+	tc.network = caseNetwork
 	tc.keystorePath = keystorePath
-	tc.mnemonic = mnemonic
+	tc.mnemnonicPath = mnemonicPath
+	tc.passphrasePath = filepath.Join(configPath, "pass.txt")
+	tc.existingVal = existing
+	tc.numVal = num
+	tc.runner = &test.SimpleCMDRunner{} // TODO: mock this
+	tc.prompt = prompts.NewPromptCli()
 	tc.fdOut = new(bytes.Buffer)
 	tc.isErr = isErr
 	return &tc
 }
 
 func TestKeysCmd(t *testing.T) {
-	//TODO: allow to test error programs
+	// TODO: allow to test error programs
 	tcs := []keysCmdTestCase{
-		*buildKeysTestCase(t, "case_1", "mainnet", false, false),
-		*buildKeysTestCase(t, "case_1", "mainnet", true, false),
+		*buildKeysTestCase(t, "Mainnet", "case_1", "mainnet", 0, 1, false),
+		*buildKeysTestCase(t, "Bigger number", "case_1", "sepolia", 0, 100, false),
+		*buildKeysTestCase(t, "Existing validators", "case_1", "sepolia", 100, 10, false),
 	}
 
-	t.Cleanup(resetKeysCmd)
-
 	for _, tc := range tcs {
-		resetKeysCmd()
-		rootCmd.SetArgs([]string{"keys", "--config", tc.configPath, "--path", tc.keystorePath})
+		t.Run(tc.name, func(t *testing.T) {
+			rootCmd := RootCmd()
+			rootCmd.AddCommand(KeysCmd(tc.runner, tc.prompt))
+			rootCmd.SetArgs([]string{
+				"keys",
+				"--network", tc.network,
+				"--path", tc.keystorePath,
+				"--mnemonic-path", tc.mnemnonicPath,
+				"--passphrase-path", tc.passphrasePath,
+				"--existing", fmt.Sprint(tc.existingVal),
+				"--num-validators", fmt.Sprint(tc.numVal),
+			})
+			rootCmd.SetOut(tc.fdOut)
+			log.SetOutput(tc.fdOut)
+
+			descr := fmt.Sprintf("sedge keys --network %s --existing %d --num-validators %d", tc.network, tc.existingVal, tc.numVal)
+			err := rootCmd.Execute()
+			if tc.isErr && err == nil {
+				t.Errorf("%s expected to fail", descr)
+			} else if !tc.isErr && err != nil {
+				t.Errorf("%s failed: %v", descr, err)
+			}
+		},
+		)
+	}
+}
+
+func TestKeysCmd_RandomPassphrase(t *testing.T) {
+	tc := buildKeysTestCase(t, "no prompt", "case_1", "sepolia", 0, 1, false)
+
+	t.Run("no passphrase prompt when random-passphrase flag is used", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		prompt := mock_prompts.NewMockPrompt(ctrl)
+		defer ctrl.Finish()
+
+		prompt.
+			EXPECT().
+			Passphrase().
+			Times(0)
+
+		rootCmd := RootCmd()
+		rootCmd.AddCommand(KeysCmd(&test.SimpleCMDRunner{}, prompt))
+		rootCmd.SetArgs([]string{
+			"keys",
+			"--network", tc.network,
+			"--path", tc.keystorePath,
+			"--mnemonic-path", tc.mnemnonicPath,
+			"--existing", fmt.Sprint(tc.existingVal),
+			"--num-validators", fmt.Sprint(tc.numVal),
+			"--random-passphrase",
+		})
 		rootCmd.SetOut(tc.fdOut)
 		log.SetOutput(tc.fdOut)
 
-		commands.InitRunner(func() commands.CommandRunner {
-			return tc.runner
-		})
-
-		descr := "sedge keys"
+		descr := fmt.Sprintf("sedge keys --network %s --existing %d --num-validators %d", tc.network, tc.existingVal, tc.numVal)
 		err := rootCmd.Execute()
 		if tc.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
 		} else if !tc.isErr && err != nil {
 			t.Errorf("%s failed: %v", descr, err)
 		}
-	}
+	})
 }

@@ -19,9 +19,8 @@ import (
 	"fmt"
 	"net"
 	"regexp"
-	"strconv"
+	"sort"
 	"strings"
-	"time"
 
 	"github.com/NethermindEth/sedge/configs"
 	log "github.com/sirupsen/logrus"
@@ -118,7 +117,7 @@ func IsAddress(a string) bool {
 }
 
 /*
-AssingPorts :
+AssignPorts :
 Checks if port is occupied in a given host
 
 params :-
@@ -131,21 +130,23 @@ returns :-
 a. bool
 True if <port> is available. False otherwise
 */
-func AssingPorts(host string, defaults map[string]string) (ports map[string]string, err error) {
-	ports = make(map[string]string)
-	mask := make(map[string]bool)
+func AssignPorts(host string, defaults map[string]uint16) (ports map[string]uint16, err error) {
+	ports = make(map[string]uint16)
+	mask := make(map[uint16]bool)
 
-	for k, v := range defaults {
-		if v == "" {
-			return ports, fmt.Errorf(configs.DefaultPortEmptyError, k)
+	keys := make([]string, 0, len(defaults))
+	for k := range defaults {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		v := defaults[k]
+		if v == 0 {
+			return ports, fmt.Errorf(configs.DefaultPortInvalidError, k)
 		}
-
-		for !portAvailable(host, v, time.Second*5) || mask[v] {
-			i, err := strconv.Atoi(v)
-			if err != nil {
-				return ports, err
-			}
-			v = strconv.Itoa(i + 1)
+		for !portAvailable(host, v) || mask[v] {
+			v = v + 1
 		}
 		ports[k] = v
 		mask[v] = true
@@ -168,16 +169,47 @@ returns :-
 a. bool
 True if <port> is available. False otherwise
 */
-func portAvailable(host, port string, timeout time.Duration) bool {
-	log.Debugf("Checking port ocuppation of %s\n", net.JoinHostPort(host, port))
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, port), timeout)
+func portAvailable(ip string, port uint16) bool {
+	log.Debugf("checking occupation of %s:%d", ip, port)
+	netIp := net.ParseIP("127.0.0.1")
+	if ip != "localhost" && ip != "0.0.0.0" {
+		netIp = net.ParseIP(ip)
+		if netIp == nil {
+			log.Debugf("invalid host ip address")
+			return true
+		}
+	}
+	sock, err := net.Listen("tcp", fmt.Sprintf("%s:%d", netIp.String(), port))
 	if err != nil {
-		log.Debugf("Port seems available, got connecting error: %v", err)
-		return true
+		log.Debugf("error checking  %s:%d occupation: %v", ip, port, err)
+		return false
 	}
-	if conn != nil {
-		defer conn.Close()
-		log.Debugf("Port open at %s", net.JoinHostPort(host, port))
+	sock.Close()
+	return true
+}
+
+/*
+Filter :
+Filter a slice given a predicate
+
+params :-
+a. list []K
+List to be filtered
+b. filter func(K) bool
+Predicate to be applied to each element of the list
+
+returns :-
+a. []K
+Filtered list
+*/
+func Filter[K any](list []K, filter func(K) bool) []K {
+	n := 0
+	for _, v := range list {
+		if filter(v) {
+			list[n] = v
+			n++
+		}
 	}
-	return conn == nil
+
+	return list[:n]
 }

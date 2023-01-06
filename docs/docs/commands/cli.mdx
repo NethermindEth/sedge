@@ -1,0 +1,423 @@
+---
+sidebar_position: 1
+id: cli
+---
+
+# Cli
+
+`sedge cli` run the setup tool on-premise in a quick way.
+
+## Help
+
+```
+$ sedge cli -h
+Run the setup tool on-premise in a quick way. Provide only the command line
+        options and the tool will do all the work.
+
+        First it will check if dependencies such as docker are installed on your machine
+        and provide instructions for installing them if they are not installed.
+
+        Second, it will generate docker-compose scripts to run the full setup according to your selection.
+
+        Finally, it will run the generated docker-compose script. Only execution and consensus clients will be executed by default.
+
+Usage:
+  sedge cli [flags]
+
+Flags:
+  -c, --consensus string                  Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
+  -e, --execution string                  Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
+  -v, --validator string                  Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
+  -p, --path string                       docker-compose scripts generation path (default "./docker-compose-scripts")
+      --checkpoint-sync-url string        Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity
+  -n, --network string                    Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
+      --fee-recipient string              Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption
+      --no-mev-boost                      Not use mev-boost if supported
+  -m, --mev-boost-image string            Custom docker image to use for Mev Boost. Example: 'sedge cli --mev-boost-image flashbots/mev-boost:latest-portable'
+      --no-validator                      Exclude the validator from the full node setup. Designed for execution and consensus nodes setup without a validator node. Exclude also the validator from other flags. If set, mev-boost will not be used.
+      --jwt-secret-path string            Path to the JWT secret file
+      --graffiti string                   Graffiti to be used by the validator
+  -i, --install                           Install dependencies if not installed without asking
+  -r, --run                               Run the generated docker-compose scripts without asking
+  -y, --yes                               Shortcut for 'sedge cli -r -i --run'. Run without prompts
+      --map-all                           Map all clients ports to host. Use with care. Useful to allow remote access to the clients
+      --run-clients strings               Run only the specified clients. Possible values: execution, consensus, validator, all, none. The 'all' and 'none' option must be used alone. Example: 'sedge cli -r --run-clients=consensus,validator' (default [execution,consensus])
+      --fallback-execution-urls strings   Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge cli -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'
+      --el-extra-flag stringArray         Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge cli --el-extra-flag "<flag1>=value1" --el-extra-flag "<flag2>=\"value2\""'
+      --cl-extra-flag stringArray         Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge cli --cl-extra-flag "<flag1>=value1" --cl-extra-flag "<flag2>=\"value2\""'
+      --vl-extra-flag stringArray         Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag "<flag1>=value1" --vl-extra-flag "<flag2>=\"value2\""'
+      --logging string                    Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
+  -h, --help                              help for cli
+
+Global Flags:
+      --logLevel string   Set Log Level (default "info")
+```
+
+## Execution Example
+
+`cli` is Sedge's main command. This command takes care of the entire validator setup and is highly customizable. We will run it without flags and walk through the process:
+
+- Initialization
+
+```logs
+$ ./sedge cli
+# highlight-start
+2022-XX-XX 00:00:00 -- [INFO] [Logger Init] Log level: info
+2022-XX-XX 00:00:00 -- [INFO] You are running the latest version of sedge. Version:  v0.5.1
+2022-XX-XX 00:00:00 -- [WARN] Execution client not provided. A random client will be selected. Random client: nethermind
+2022-XX-XX 00:00:00 -- [WARN] Consensus and validator clients not provided. Selecting same pair of clients for consensus and validator clients using a random client. Random client: lighthouse
+# highlight-end
+```
+
+:::info
+
+The `logs` shown by Sedge in every step will be displayed and explained. You should compare your `logs` with the ones in this guide to check everything went as expected. Note that some logs are **highlighted**.
+
+:::
+
+As you can see, a configuration file was generated. This configuration file is generated with default values and we don't need to worry about it for this guide.
+
+As we didn't specify the clients to be used in the setup, they were randomly chosen. Nethermind was chosen as the execution client and Lighthouse for the consensus layer.
+
+- Check if dependencies are installed
+
+```
+2022-XX-XX 00:00:00 -- [INFO] Checking dependencies: docker
+```
+<Tabs groupId="dependency-check">
+  <TabItem value="linux" label="linux">
+
+      If a dependency is missing, Sedge will print instructions to install it and a prompt will be shown to let you decide between letting Sedge install it for you or exit and installing it on your own. (Only for Linux)
+
+      ```logs
+      # highlight-start
+      2022-XX-XX 00:00:00 -- [ERRO] dependency docker is not installed on host machine
+      2022-XX-XX 00:00:00 -- [INFO] pending dependencies: docker
+      2022-XX-XX 00:00:00 -- [INFO] Instructions for docker
+      # highlight-end
+
+      sudo apt-get update
+
+      sudo apt apt-get install -y \
+      apt-transport-https \
+      ca-certificates \
+      curl \
+      software-properties-common
+
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+      echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+      $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+      sudo apt-get update
+      sudo apt-get install -y docker-ce
+
+      DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+      sudo mkdir -p $DOCKER_CONFIG/cli-plugins
+      sudo curl -SL "https://github.com/docker/compose/releases/download/v2.6.1/docker-compose-$(uname -s)-$(uname -m)" -o $DOCKER_CONFIG/cli-plugins/docker-compose
+      sudo chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+
+      # highlight-start
+      Use the arrow keys to navigate: ↓ ↑ → ←
+      ? Select how to proceed with the pending dependencies:
+      ▸ Install dependencies
+      Exit. You will manage these dependencies on your own
+      # highlight-end
+      ```
+
+      We will go with the `Install dependencies` option, but feel free to go with the `Exit` option, install dependencies on your own and then run Sedge again.
+
+  </TabItem>
+  <TabItem value="macos" label="macos">
+
+      If you have missing dependencies, then you need to install it first. Search for instructions in the [dependencies guide](dependencies).
+  </TabItem>
+</Tabs>
+
+
+If dependencies were successfully installed, then you should see this log:
+```
+2022-XX-XX 00:00:00 -- [INFO] All dependencies are installed on host machine
+```
+
+- Enter [fee recipient](/docs/concepts/fee-recipient) address
+
+A new prompt will be shown for the fee recipient address. Although you can skip it by pressing enter, we don't recommend doing so.
+
+```
+✔ Please enter the Fee Recipient address. You can leave it blank and press enter (not recommended):
+```
+
+- Generate a `docker-compose` script with a randomized set of execution, consensus and validator clients
+
+The following step will be done automatically.
+
+```logs
+# highlight-next-line
+2022-XX-XX 00:00:00 -- [INFO] Generating docker-compose script for current selection of clients
+2022-XX-XX 00:00:00 -- [INFO] File docker-compose.yml:
+
+version: "3.9"
+
+services:
+
+  execution:
+    stop_grace_period: 1m
+    container_name: execution-client
+    restart: unless-stopped
+    image: ${EC_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${EC_DATA_DIR}:/nethermind/data
+    ports:
+      - "30303:30303/tcp"
+      - "30303:30303/udp"
+    expose:
+      - 8545
+      - 8551
+    command:
+      - --config=${NETWORK}
+      - --datadir=/nethermind/data
+      - --log=${NETHERMIND_LOG_LEVEL}
+      - --Sync.SnapSync=${EC_SNAP_SYNC_ENABLED}
+      - --JsonRpc.Enabled=true
+      - --JsonRpc.Host=0.0.0.0
+      - --JsonRpc.Port=8545
+      - --JsonRpc.EnabledModules=${EC_ENABLED_MODULES}
+      - --JsonRpc.JwtSecretFile=/tmp/jwt/jwtsecret
+      - --JsonRpc.EngineHost=0.0.0.0
+      - --JsonRpc.EnginePort=8551
+      - --Network.DiscoveryPort=30303
+      - --HealthChecks.Enabled=true
+      - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  consensus:
+    stop_grace_period: 1m
+    container_name: consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${CC_DATA_DIR}:/var/lib/lighthouse
+    ports:
+      - "9000:9000/tcp"
+      - "9000:9000/udp"
+      - "5054:5054/tcp"
+    expose:
+      - 4000
+    command:
+      - lighthouse
+      - bn
+      - --disable-upnp
+      - --datadir=/var/lib/lighthouse
+      - --port=9000
+      - --http
+      - --http-address=0.0.0.0
+      - --http-port=4000
+      - --network=${NETWORK}
+      - --target-peers=${CC_PEER_COUNT}
+      - --execution-endpoints=${EC_AUTH_URL}
+      - --execution-jwt=/tmp/jwt/jwtsecret
+      - --eth1-endpoints=${EC_API_URL}
+      - --eth1-endpoints=${EC_API_URL}
+      - --eth1-blocks-per-log-query=150
+      - --debug-level=${CC_LOG_LEVEL}
+      - --validator-monitor-auto
+      - --subscribe-all-subnets
+      - --import-all-attestations
+      - --metrics
+      - --metrics-port=5054
+      - --metrics-address=0.0.0.0
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  validator-import:
+    container_name: validator-import-client
+    build:
+      context: github.com/NethermindEth/lighthouse-init-validator
+      args:
+        LH_VERSION: ${VL_IMAGE_VERSION}
+        NETWORK: ${NETWORK}
+    networks:
+      - sedge
+    volumes:
+      - ${KEYSTORE_DIR}:/keystore
+      - ${VL_DATA_DIR}:/data
+
+  validator:
+    container_name: validator-client
+    image: ${VL_IMAGE_VERSION}
+    depends_on:
+      validator-import:
+        condition: service_completed_successfully
+    networks:
+      - sedge
+    ports:
+      - "5056:5056"
+    volumes:
+      - ${VL_DATA_DIR}:/var/lib/lighthouse
+    command:
+      - lighthouse
+      - vc
+      - --beacon-nodes=${CC_API_URL}
+      - --graffiti=${GRAFFITI}
+      - --network=${NETWORK}
+      - --debug-level=${VL_LOG_LEVEL}
+      - --validators-dir=/data/validators
+      - --metrics
+      - --metrics-port=5056
+      - --metrics-address=0.0.0.0
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+networks:
+  sedge:
+    name: sedge_network
+
+# highlight-start
+2022-XX-XX 00:00:00 -- [INFO] Created file docker-compose-scripts/docker-compose.yml
+2022-XX-XX 00:00:00 -- [INFO] Generating environment file for current selection of clients
+# highlight-end
+2022-XX-XX 00:00:00 -- [INFO] File .env:
+
+# --- Global configuration ---
+NETWORK=mainnet
+
+# --- Execution Layer - Execution Node - configuration ---
+EC_IMAGE_VERSION=nethermind/nethermind
+NETHERMIND_LOG_LEVEL=INFO
+EC_ENABLED_MODULES=[Web3,Eth,Subscribe,Net]
+NETHERMIND_PRUNING_CACHEMB=2048
+EC_DATA_DIR=./execution-data
+EC_SNAP_SYNC_ENABLED=true
+
+# --- Consensus Layer - Beacon Node - configuration ---
+CC_PEER_COUNT=50
+CC_LOG_LEVEL=info
+EC_API_URL=http://execution:8545
+CC_INSTANCE_NAME=Lighthouse
+CC_IMAGE_VERSION=sigp/lighthouse:latest
+CC_DATA_DIR=./consensus-data
+
+# --- Consensus Layer - Validator Node - configuration ---
+CC_API_URL=http://consensus:4000
+GRAFFITI=nethermind
+VL_LOG_LEVEL=info
+VL_INSTANCE_NAME=LighthouseValidator
+VL_IMAGE_VERSION=sigp/lighthouse:latest
+KEYSTORE_DIR=./keystore
+VL_DATA_DIR=./validator-data
+
+# highlight-next-line
+2022-XX-XX 00:00:00 -- [INFO] Created file docker-compose-scripts/.env
+```
+
+- Run the `docker-compose` script
+
+Instructions on how to run the docker-compose script will be displayed and next to it is a confirmation prompt.
+
+```logs
+2022-XX-XX 00:00:00 -- [INFO] Instructions for running docker-compose script
+
+docker compose -f docker-compose-scripts/docker-compose.yml up -d execution consensus
+
+# highlight-next-line
+? Run the script with the selected services execution, consensus? [Y/n]
+```
+
+Notice that it says "Run the script with the selected services **execution, consensus**?". This is because, by default, only these nodes will be up and running at the beginning, as they need to first sync with the network and this can take days.
+
+> On some testnets the sync process takes hours depending on the network age and your internet bandwidth
+
+Sedge will track the syncing progress of the execution and consensus nodes, and after they are completely synced, Sedge will automatically spin up the validator node. This gives you time to prepare the validator keystore (we will do that shortly) and to become familiar with the validator registration.
+
+Now type `Y` or enter to start the following flow (You need to read carefully all the logs from now on):
+
+:::info
+
+Docker commands need to be executed with `sudo` by default, which requires root permissions and hence a **password prompt may arise**. Sedge only executes the commands that are shown in the logs, and you can also check the codebase to check that there's nothing nasty running under the hood. The codebase is public and fully visible on the Github repo.
+
+:::
+
+- Check if docker engine is on
+```
+2022-XX-XX 00:00:00 -- [INFO] Checking if docker engine is on
+2022-XX-XX 00:00:00 -- [INFO] Running command: docker ps -a
+```
+Sedge runs `docker ps -a` to check if docker engine is on. You might have previously installed docker, but this does not mean docker is up and running. Docker engine is usually off when you use Docker Desktop and doesn't have the app on. If this is your case, just start Docker Desktop.
+
+In this case, docker engine is on.
+
+- Run the docker-compose script
+
+In this step, the docker-compose script will be executed, which needs to pull the client's docker images from Docker Hub. This can take a while depending on your internet connection.
+
+```
+2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml up -d execution consensus
+[+] Running 13/13
+⠿ consensus Pulled
+⠿ 45ea9169a5e4 Pull complete
+⠿ 9587c7a34752 Pull complete
+⠿ execution Pulled
+⠿ 405f018f9d1d Pull complete
+⠿ 026cbc59cccf Pull complete
+⠿ bd9aeeeca91c Pull complete
+⠿ 14c2bd6cb1ae Pull complete
+⠿ 49b80f5c597c Pull complete
+⠿ 5d26e9f3c617 Pull complete
+⠿ 44860d1d6af8 Pull complete
+⠿ a9132ab111ad Pull complete
+⠿ d8334d965894 Pull complete
+[+] Running 3/3
+⠿ Network sedge_network       Created
+⠿ Container consensus-client  Started
+⠿ Container execution-client  Started
+```
+
+The above logs are an example of healthy logs when going through this step.
+
+- Display running nodes
+
+```
+2022-XX-XX 00:00:00 -- [INFO] Running command: docker compose -f docker-compose-scripts/docker-compose.yml ps --filter status=running
+NAME                COMMAND                  SERVICE             STATUS              PORTS
+consensus-client    "lighthouse bn --dis…"   consensus           running             0.0.0.0:5054->5054/tcp, :::5054->5054/tcp, 4000/tcp, 0.0.0.0:9000->9000/tcp, :::9000->9000/tcp, 0.0.0.0:9000->9000/udp, :::9000->9000/udp
+execution-client    "./Nethermind.Runner…"   execution           running             0.0.0.0:8008->8008/tcp, :::8008->8008/tcp, 0.0.0.0:30303->30303/tcp, :::30303->30303/tcp, 8545/tcp, 0.0.0.0:30303->30303/udp, :::30303->30303/udp
+```
+
+Double check there are both `consensus-client` and `execution-client` entries. If one of them is missing then, something [has gone wrong](/docs/troubleshooting).
+
+- Further instructions
+
+```
+2022-XX-XX 00:00:00 -- [INFO]
+A validator node needs to connect to a synced consensus node, and the consensus node, in turn, needs to connect to a synced execution node.
+
+While these required nodes (execution/consensus) are syncing, you can setup the keystore folder(s) using the staking-deposit-cli tool (https://github.com/ethereum/staking-deposit-cli) or the command 'sedge keys'. If you don't want to use 'sedge keys', make sure to set .env variables KEYSTORE_DIR and VL_DATA_DIR to correct values. You can also check https://launchpad.ethereum.org/ for tips and more instructions.
+
+Sedge will track the syncing progress of the required nodes and let you run the validator after those nodes are synced (as we recommend). This takes a while, so you have time to prepare the keystore folder.
+
+Don't make the deposit to register the validator until it's ready to run!!!
+
+After you complete the above steps, follow https://launchpad.ethereum.org/ instructions to register the validator addresses of the validators you want to set up and manage using the validator node.
+```
+
+:::info
+
+The date and time of the logs were modified to show more generic logs. Until this step, and depending on your internet connection, the entire process should take just a few minutes.
+
+:::

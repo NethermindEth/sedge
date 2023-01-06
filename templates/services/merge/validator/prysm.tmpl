@@ -1,54 +1,53 @@
 {{/* prysm.tmpl */}}
 {{ define "validator" }}
-  {{with .VlPrysmCfg}}config_validator:
-    container_name: config_prysm_val
-    image: busybox:latest
-    volumes:
-      - ./:/tmp/app
-    command: >
-      sh -c "wget -O /tmp/app/config.yml ${CONFIG_URL}"{{end}}
-
   validator-import:
-    image: ${VL_IMAGE_VERSION}{{with .VlPrysmCfg}}
-    depends_on:
-      config_validator:
-        condition: service_completed_successfully{{end}}
+    image: ${VL_IMAGE_VERSION}
     networks:
       - sedge
     container_name: validator-import-client
     volumes:
-      - ${VL_DATA_DIR}:/var/lib/prysm
-      - ${KEYSTORE_DIR}:/keystore{{with .VlPrysmCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}
-    command: |{{if .VlPrysmCfg}}
-      --chain-config-file=/network_config/config.yml{{else}}
+      - ${VL_DATA_DIR}:/data
+      - ${KEYSTORE_DIR}:/keystore{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
+    command: |
+      accounts import{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      --chain-config-file=/network_config/config.yml{{end}}{{else}}
       --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
-      accounts import
       --accept-terms-of-use
       --keys-dir=/keystore/validator_keys
-      --wallet-dir=/var/lib/prysm/wallet
+      --wallet-dir=/data/wallet
       --wallet-password-file=/keystore/keystore_password.txt
-      --account-password-file=/keystore/keystore_password.txt
+      --account-password-file=/keystore/keystore_password.txt{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
 
   validator:
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
+    restart: unless-stopped
     depends_on: 
       validator-import:
         condition: service_completed_successfully
+      validator-blocker:
+        condition: service_completed_successfully{{if .WithConsensusClient}}
+      consensus:
+        condition: service_healthy{{end}}
     networks:
       - sedge
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/var/lib/prysm
-      - ${KEYSTORE_DIR}/keystore_password.txt:/keystore/keystore_password.txt{{with .VlPrysmCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}
+      - ${VL_DATA_DIR}:/data
+      - ${KEYSTORE_DIR}/keystore_password.txt:/keystore/keystore_password.txt{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
     command:
-      - --datadir=/var/lib/prysm
-      - --wallet-dir=/var/lib/prysm/wallet
-      - --wallet-password-file=/keystore/keystore_password.txt{{if .VlPrysmCfg}}
-      - --chain-config-file=/network_config/config.yml{{else}}
+      - --datadir=/data
+      - --wallet-dir=/data/wallet
+      - --wallet-password-file=/keystore/keystore_password.txt{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - --chain-config-file=/network_config/config.yml{{end}}{{else}}
       - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --beacon-rpc-provider=${CC_API_URL}
       - --graffiti=${GRAFFITI}
@@ -57,12 +56,12 @@
       - --monitoring-host=0.0.0.0
       - --monitoring-port={{.VlMetricsPort}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{with .FeeRecipient}}
-      - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{if .Mev}}
+      - --suggested-fee-recipient=${CC_FEE_RECIPIENT}{{end}}{{if .Mev}}
       - --enable-builder
-      - --enable-validator-registration{{end}}
+      - --enable-validator-registration{{end}}{{if .LoggingDriver}}
     logging:
-      driver: "json-file"
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
         max-size: "10m"
-        max-file: "10"
+        max-file: "10"{{end}}{{end}}
 {{ end }}

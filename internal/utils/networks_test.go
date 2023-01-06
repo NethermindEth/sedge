@@ -21,11 +21,10 @@ import (
 	"testing"
 )
 
-var networks = []string{"mainnet", "kiln", "ropsten", "prater", "sepolia"}
+var networks = []string{"mainnet", "custom", "goerli", "sepolia", "chiado", "gnosis"}
 
 func TestSupportedNetworks(t *testing.T) {
 	names, err := SupportedNetworks()
-
 	if err != nil {
 		t.Errorf("GetSupportedNetworks() failed, gave error: %v", err)
 	}

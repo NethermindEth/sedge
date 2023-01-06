@@ -19,50 +19,90 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/utils"
 )
 
 const (
 	wrongDep = "wrong_dep"
-	network  = "mainnet"
 )
 
 type generateTestCase struct {
-	execution, consensus, validator, path string
-	isErr                                 bool
+	name                            string
+	execution, consensus, validator clients.Client
+	path, network                   string
+	isErr                           bool
 }
 
 func generateTestCases(t *testing.T) (tests []generateTestCase) {
-	tests = []generateTestCase{}
-	c := clients.ClientInfo{Network: network}
+	tests = []generateTestCase{{isErr: true}}
 
-	executionClients, err := c.SupportedClients("execution")
+	networks, err := utils.SupportedNetworks()
 	if err != nil {
-		t.Errorf("SupportedClients(\"execution\") failed: %v", err)
-	}
-	consensusClients, err := c.SupportedClients("consensus")
-	if err != nil {
-		t.Errorf("SupportedClients(\"consensus\") failed: %v", err)
-	}
-	validatorClients, err := c.SupportedClients("validator")
-	if err != nil {
-		t.Errorf("SupportedClients(\"validator\") failed: %v", err)
+		t.Error("SupportedNetworks() failed", err)
 	}
 
-	// TODO: Add CheckpointSyncUrl, FallbackELUrls and FeeRecipient to test data
+	for _, network := range networks {
+		c := clients.ClientInfo{Network: network}
 
-	tests = append(tests, generateTestCase{isErr: true})
+		executionClients, err := c.SupportedClients("execution")
+		if err != nil {
+			t.Errorf("SupportedClients(\"execution\") failed: %v", err)
+		}
+		consensusClients, err := c.SupportedClients("consensus")
+		if err != nil {
+			t.Errorf("SupportedClients(\"consensus\") failed: %v", err)
+		}
+		validatorClients, err := c.SupportedClients("validator")
+		if err != nil {
+			t.Errorf("SupportedClients(\"validator\") failed: %v", err)
+		}
 
-	for _, execution := range executionClients {
-		path := t.TempDir()
-		tests = append(tests, generateTestCase{execution, wrongDep, wrongDep, path, true})
-		for _, consensus := range consensusClients {
-			if utils.Contains(validatorClients, consensus) {
-				path := t.TempDir()
-				tests = append(tests, generateTestCase{
-					execution, consensus, consensus, path, false,
-				}, generateTestCase{execution, consensus, consensus, "", true})
+		// TODO: Add CheckpointSyncUrl, FallbackELUrls and FeeRecipient to test data
+		for _, execution := range executionClients {
+			path := t.TempDir()
+			tests = append(tests,
+				generateTestCase{
+					fmt.Sprintf("Test Network-%s Execution-%s Consensus-%s : wrong consensus error", network, execution, wrongDep),
+					clients.Client{Name: execution},
+					clients.Client{Name: wrongDep},
+					clients.Client{Name: wrongDep},
+					path,
+					network,
+					true,
+				})
+			for _, consensus := range consensusClients {
+				if utils.Contains(validatorClients, consensus) {
+					path := t.TempDir()
+					tests = append(tests,
+						generateTestCase{
+							fmt.Sprintf("Test Network-%s Execution-%s Consensus-%s : full node", network, execution, consensus),
+							clients.Client{Name: execution},
+							clients.Client{Name: consensus},
+							clients.Client{Name: consensus},
+							path,
+							network,
+							false,
+						},
+						generateTestCase{
+							fmt.Sprintf("Test Network-%s Execution-%s Consensus-%s : empty path error", network, execution, consensus),
+							clients.Client{Name: execution},
+							clients.Client{Name: consensus},
+							clients.Client{Name: consensus},
+							"",
+							network,
+							true},
+						generateTestCase{
+							fmt.Sprintf("Test Network-%s Execution-%s Consensus-%s : no validator node", network, execution, wrongDep),
+							clients.Client{Name: execution},
+							clients.Client{Name: consensus},
+							clients.Client{Name: consensus, Omitted: true},
+							path,
+							network,
+							false,
+						})
+				}
 			}
 		}
 	}
@@ -71,25 +111,24 @@ func generateTestCases(t *testing.T) (tests []generateTestCase) {
 }
 
 func validateGeneratedFiles(t *testing.T, testCase generateTestCase) {
-	//TODO: validate generated files
+	// TODO: validate generated files
 }
 
 func TestGenerateScripts(t *testing.T) {
-	t.Parallel()
+	configs.InitNetworksConfigs()
 	inputs := generateTestCases(t)
-
-	for i, input := range inputs {
-		t.Run(fmt.Sprintf("Test case %d", i), func(t *testing.T) {
+	for _, input := range inputs {
+		t.Run(input.name, func(t *testing.T) {
 			gd := GenerationData{
 				ExecutionClient: input.execution,
 				ConsensusClient: input.consensus,
 				ValidatorClient: input.validator,
 				GenerationPath:  input.path,
-				Network:         network,
+				Network:         input.network,
 			}
 			descr := fmt.Sprintf("GenerateScripts(%+v)", gd)
 
-			if _, _, err := GenerateScripts(gd); input.isErr && err == nil {
+			if _, err := GenerateScripts(gd); input.isErr && err == nil {
 				t.Errorf("%s expected to fail", descr)
 			} else if !input.isErr && err != nil {
 				t.Errorf("%s failed: %v", descr, err)

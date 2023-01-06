@@ -2,49 +2,63 @@
 {{ define "validator" }}
   validator-import:
     container_name: validator-import-client
-    image: ${VL_IMAGE_VERSION}
+    build:
+      context: github.com/NethermindEth/lighthouse-init-validator
+      args:
+        LH_VERSION: ${VL_IMAGE_VERSION}
+        NETWORK: {{if .CustomConsensusConfigs}}CUSTOM{{else}}{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
     networks:
       - sedge
     volumes:
       - ${KEYSTORE_DIR}:/keystore
-      - ${VL_DATA_DIR}:/var/lib/lighthouse
-    command: |
-      lighthouse account validator import
-      --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
-      --password-file=/keystore/keystore_password.txt
-      --reuse-password
-      --directory /keystore
-      --datadir /var/lib/lighthouse
+      - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yaml{{end}}{{if .CustomGenesisPath}}
+      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{if .CustomDeployBlockPath}}
+      - {{.CustomDeployBlockPath}}:/network_config/deploy_block.txt{{end}}{{end}}{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
 
   validator:
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
+    restart: unless-stopped
     depends_on: 
       validator-import:
         condition: service_completed_successfully
+      validator-blocker:
+        condition: service_completed_successfully{{if .WithConsensusClient}}
+      consensus:
+        condition: service_healthy{{end}}
     networks:
       - sedge
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/data
+      - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yaml{{end}}{{if .CustomGenesisPath}}
+      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{if .CustomDeployBlockPath}}
+      - {{.CustomDeployBlockPath}}:/network_config/deploy_block.txt{{end}}{{end}}
     command:
-      - lighthouse
-      - vc
-      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
+      - lighthouse{{if .CustomConsensusConfigs}}
+      - --testnet-dir=/network_config{{end}}
+      - vc{{if not .CustomConsensusConfigs}}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --beacon-nodes=${CC_API_URL}
       - --graffiti=${GRAFFITI}
       - --debug-level=${VL_LOG_LEVEL}
       - --validators-dir=/data/validators{{with .FeeRecipient}}
-      - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
+      - --suggested-fee-recipient=${CC_FEE_RECIPIENT}{{end}}
       - --metrics
       - --metrics-port={{.VlMetricsPort}}
       - --metrics-address=0.0.0.0{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
-      - --builder-proposals{{end}}
+      - --builder-proposals{{end}}{{if .LoggingDriver}}
     logging:
-      driver: "json-file"
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
         max-size: "10m"
-        max-file: "10"
+        max-file: "10"{{end}}{{end}}
 {{ end }}

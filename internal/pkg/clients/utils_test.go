@@ -32,19 +32,19 @@ func TestRandomChoice(t *testing.T) {
 		{
 			ClientMap{
 				"a": Client{
-					"a",
-					"A",
-					true,
+					Name:      "a",
+					Type:      "A",
+					Supported: true,
 				},
 				"b": Client{
-					"b",
-					"A",
-					true,
+					Name:      "b",
+					Type:      "A",
+					Supported: true,
 				},
 				"c": Client{
-					"c",
-					"A",
-					true,
+					Name:      "c",
+					Type:      "A",
+					Supported: true,
 				},
 			},
 			false,
@@ -52,19 +52,19 @@ func TestRandomChoice(t *testing.T) {
 		{
 			ClientMap{
 				"a": Client{
-					"a",
-					"A",
-					true,
+					Name:      "a",
+					Type:      "A",
+					Supported: true,
 				},
 				"b": Client{
-					"b",
-					"A",
-					true,
+					Name:      "b",
+					Type:      "A",
+					Supported: true,
 				},
 				"c": Client{
-					"c",
-					"A",
-					false,
+					Name:      "c",
+					Type:      "A",
+					Supported: false,
 				},
 			},
 			false,
@@ -72,14 +72,14 @@ func TestRandomChoice(t *testing.T) {
 		{
 			ClientMap{
 				"a": Client{
-					"a",
-					"A",
-					false,
+					Name:      "a",
+					Type:      "A",
+					Supported: false,
 				},
 				"b": Client{
-					"b",
-					"A",
-					false,
+					Name:      "b",
+					Type:      "A",
+					Supported: false,
 				},
 			},
 			true,

@@ -1,29 +1,22 @@
 {{/* prysm.tmpl */}}
 {{ define "consensus" }}
-  {{with .CcPrysmCfg}}config_beacon:
-    container_name: config_prysm_bc
-    image: busybox:latest
-    volumes:
-      - ./:/tmp/app
-    command: >
-      sh -c "wget -O /tmp/app/config.yml ${CONFIG_URL};
-      wget -O /tmp/app/genesis.ssz ${GENESIS_URL}"{{end}}
-
   consensus:
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{with .CcPrysmCfg}}
-    depends_on:
-      config_beacon:
-        condition: service_completed_successfully{{end}}
+    image: ${CC_IMAGE_VERSION}
+    healthcheck:
+      test: "(curl -s -o /dev/null -w \"%{http_code}\" -X GET http://127.0.0.1:4000/eth/v1/node/health | grep -q 200) || exit 1"
+      interval: 5m
+      retries: 4032
+      start_period: 1m
     networks:
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/prysm
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{with .CcPrysmCfg}}
-      - ./config.yml:/network_config/config.yml
-      - ./genesis.ssz:/network_config/genesis.ssz{{end}}
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{if .CustomGenesisPath}}
+      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
@@ -33,13 +26,13 @@
     expose:
       - {{.ClApiPort}}
       - {{.ClAdditionalApiPort}}
-    command:{{if .CcPrysmCfg}}
-      - --chain-config-file=/network_config/config.yml
-      - --genesis-state=/network_config/genesis.ssz{{else}}
-      - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
-      - --bootstrap-node=${CL_BOOTNODE_1}
-      - --bootstrap-node=${CL_BOOTNODE_2}
-      - --terminal-total-difficulty-override=${TTD}
+    command:{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - --chain-config-file=/network_config/config.yml{{end}}{{if .CustomDeployBlock}}
+      - --contract-deployment-block={{.CustomDeployBlock}}{{end}}{{if .CustomGenesisPath}}
+      - --genesis-state=/network_config/genesis.ssz{{end}}{{else}}
+      - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}{{range $enr := .CCBootnodes}}
+      - --bootstrap-node={{$enr}}{{end}}{{with .TTD}}
+      - --terminal-total-difficulty-override=${TTD}{{end}}
       - --p2p-tcp-port={{.ClDiscoveryPort}}
       - --p2p-udp-port={{.ClDiscoveryPort}}
       - --jwt-secret=/tmp/jwt/jwtsecret
@@ -50,19 +43,19 @@
       - --datadir=/var/lib/prysm/
       - --verbosity=${CC_LOG_LEVEL}
       - --p2p-max-peers=${CC_PEER_COUNT}
-      - --http-web3provider=${EC_AUTH_URL}{{range $url := .FallbackELUrls}}
+      - --execution-endpoint=${EC_AUTH_URL}{{range $url := .FallbackELUrls}}
       - --fallback-web3provider={{$url}}{{end}}
       - --accept-terms-of-use{{with .FeeRecipient}}
-      - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
+      - --suggested-fee-recipient=${CC_FEE_RECIPIENT}{{end}}
       - --monitoring-host=0.0.0.0
-      - --monitoring-port={{.ClMetricsPort}}{{with .CheckpointSyncUrl}}
-      - --checkpoint-sync-url={{.}}
-      - --genesis-beacon-api-url={{.}}{{end}}{{range $flag := .ClExtraFlags}}
+      - --monitoring-port={{.ClMetricsPort}}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
+      - --checkpoint-sync-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}
+      - --genesis-beacon-api-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
-      - --http-mev-relay=http://mevboost:{{.MevPort}}{{end}}
+      - --http-mev-relay=http://mevboost:{{.MevPort}}{{end}}{{if .LoggingDriver}}
     logging:
-      driver: "json-file"
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
         max-size: "10m"
-        max-file: "10"
+        max-file: "10"{{end}}{{end}}
 {{ end }}

@@ -1,0 +1,9 @@
+{{/* docker-compose_base.tmpl */}}
+{{ define "env" }}
+# --- Global configuration ---
+NETWORK=chiado{{if .CustomTTD}}
+TTD={{.CustomTTD}}{{end}}
+{{template "execution" .}}
+{{template "consensus" .}}
+{{template "validator" .}}
+{{ end }}

@@ -16,220 +16,170 @@ limitations under the License.
 package cli
 
 import (
-	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strings"
 
+	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
-	"github.com/NethermindEth/sedge/internal/utils"
-	"github.com/manifoldco/promptui"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/keystores"
+	eth2 "github.com/protolambda/zrnt/eth2/configs"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var (
+type KeysCmdFlags struct {
+	network               string
 	path                  string
 	eth1WithdrawalAddress string
-	existingMnemonic      bool
-)
+	mnemonicPath          string
+	passphrasePath        string
+	existingVal           int64
+	numberVal             int64
+	randomPassphrase      bool
+	install               bool
+}
 
-var (
-	//Windows and Unix path
-	rePath = regexp.MustCompile(`^[a-zA-Z]+:(\\[a-zA-Z0-9_.-]+)+|^~{0,1}\/[a-zA-Z0-9~]+(\/[a-zA-Z0-9_.-]+)+`)
-)
-
-// keysCmd represents the keys command
-var keysCmd = &cobra.Command{
-	Use:   "keys [flags]",
-	Short: "Generate keystore folder",
-	Long: `Generate keystore folder using the eth2.0-deposit-cli tool.
-	
-New mnemonic will be generated if -e/--existing flag is not provided.`,
-	PreRun: func(cmd *cobra.Command, args []string) {
-		var err error
-		// Ensure that path is absolute
-		log.Debugf("Path to keystore file: %s", path)
-		if !filepath.IsAbs(path) {
-			path, err = filepath.Abs(path)
+func KeysCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Command {
+	var (
+		flags      KeysCmdFlags
+		passphrase string
+		mnemonic   string
+	)
+	// Cmd declaration
+	cmd := &cobra.Command{
+		Use:   "keys [flags]",
+		Short: "Generate keystore folder",
+		Long:  "Generate keystore folder using the eth2.0-deposit-cli tool",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			// Validate network
+			if err := configs.CheckNetwork(flags.network); err != nil {
+				log.Fatal(err.Error())
+			}
+			// Ensure that path is absolute
+			log.Debugf("Path to keystore file: %s", flags.path)
+			absPath, err := filepath.Abs(flags.path)
 			if err != nil {
 				log.Fatalf(configs.InvalidVolumePathError, err)
 			}
-		}
-	},
-	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: Validate network when several networks are supported
+			flags.path = absPath
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			// TODO: allow usage of withdrawal address
+			// Get keystore passphrase
+			if !flags.randomPassphrase && flags.passphrasePath != "" {
+				content, err := readFileContent(flags.passphrasePath)
+				if err != nil {
+					log.Fatalf(configs.PassphraseReadFileError, err)
+				}
+				if len(content) < 8 {
+					log.Warn(configs.KeystorePasswordError)
+				} else {
+					passphrase = content
+				}
+			}
+			if !flags.randomPassphrase && len(passphrase) < 8 {
+				passphrase = prompt.Passphrase()
+			}
 
-		// Check if dependencies are installed. Keep checking dependencies until they are all installed
-		for pending := utils.CheckDependencies([]string{"docker"}); len(pending) > 0; {
-			log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
-			if install {
-				// Install dependencies directly
-				if err := installDependencies(pending); err != nil {
+			// Get or generate mnemonic
+			if flags.mnemonicPath != "" {
+				content, err := readFileContent(flags.mnemonicPath)
+				if err != nil {
+					log.Fatalf(configs.MnemonicReadFileError, err)
+				}
+				mnemonic = content
+			}
+			if mnemonic == "" {
+				log.Warn(configs.GeneratingMnemonic)
+				candidate, err := keystores.CreateMnemonic()
+				if err != nil {
 					log.Fatal(err)
 				}
-			} else {
-				// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
-				if err := installOrShowInstructions(pending); err != nil {
+				mnemonic = candidate
+				if err := saveMnemonic(cmdRunner, mnemonic); err != nil {
 					log.Fatal(err)
 				}
 			}
-		}
-		log.Info(configs.DependenciesOK)
 
-		// Prompt for eth1WithdrawalAddress
-		if eth1WithdrawalAddress == "" {
-			eth1WithdrawalPrompt()
-		}
-
-		// Get keystore password
-		password := passwordPrompt()
-
-		// Create keystore folder
-		log.Info(configs.GeneratingKeystore)
-		if err := os.MkdirAll(filepath.Join(path, "keystore"), 0766); err != nil {
-			log.Fatal(err)
-		}
-
-		keystorePath := filepath.Join(path, "keystore", "validator_keys")
-		data := utils.ValidatorKeyData{
-			Existing:              existingMnemonic,
-			Network:               network,
-			Path:                  keystorePath,
-			Password:              password,
-			Eth1WithdrawalAddress: eth1WithdrawalAddress,
-		}
-		if err := utils.GenerateValidatorKey(data); err != nil {
-			log.Fatalf(configs.GeneratingKeystoreError, err)
-		}
-
-		// Check if keystore generation went ok
-		if !emptyKeystore() {
-			log.Infof(configs.KeysFoundAt, keystorePath)
-			if err := createKeystorePassword(password); err != nil {
-				log.Fatalf(configs.CreatingKeystorePasswordError, err)
+			// Get indexes
+			if flags.mnemonicPath == "" {
+				flags.existingVal = 0
+			} else if flags.existingVal < 0 {
+				flags.existingVal = prompt.ExistingVal()
 			}
 
-			log.Warn(configs.ReviewKeystorePath)
-		}
+			if flags.numberVal <= 0 {
+				flags.numberVal = prompt.NumberVal()
+			}
 
-	},
+			keystorePath := filepath.Join(flags.path, "keystore")
+
+			data := keystores.ValidatorKeysGenData{
+				Mnemonic:    mnemonic,
+				Passphrase:  passphrase,
+				OutputPath:  keystorePath,
+				MinIndex:    uint64(flags.existingVal),
+				MaxIndex:    uint64(flags.existingVal) + uint64(flags.numberVal),
+				NetworkName: flags.network,
+				ForkVersion: configs.NetworksConfigs()[flags.network].GenesisForkVersion,
+				// Constants
+				UseUniquePassphrase: true,
+				Insecure:            false,
+				AmountGwei:          uint64(eth2.Mainnet.MAX_EFFECTIVE_BALANCE),
+				AsJsonList:          true,
+			}
+
+			log.Info(configs.GeneratingKeystores)
+			if err := keystores.CreateKeystores(data); err != nil {
+				log.Fatal(err)
+			}
+			log.Info(configs.KeystoresGenerated)
+			log.Info(configs.GeneratingDepositData)
+			if err := keystores.CreateDepositData(data); err != nil {
+				log.Fatal(err)
+			}
+			log.Info(configs.DepositDataGenerated)
+		},
+	}
+	// Flag binds
+	cmd.Flags().StringVarP(&flags.network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia etc.")
+	cmd.Flags().StringVarP(&flags.path, "path", "p", configs.DefaultDockerComposeScriptsPath, "Absolute path to keystore folder. e.g. /home/user/keystore")
+	cmd.Flags().StringVar(&flags.eth1WithdrawalAddress, "eth1-withdrawal-address", "", "If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
+	cmd.Flags().StringVar(&flags.mnemonicPath, "mnemonic-path", "", "Path to file with a existing mnemonic to use.")
+	cmd.Flags().StringVar(&flags.passphrasePath, "passphrase-path", "", "Path to file with a keystores passphrase to use.")
+	cmd.Flags().Int64Var(&flags.existingVal, "existing", -1, `Number of validators generated with the provided mnemonic. Will be ignored if "--mnemonic-path" its not set. This number will be used as the initial index for the generated keystores.`)
+	cmd.Flags().Int64Var(&flags.numberVal, "num-validators", -1, "Number of validators to generate. This number will be used in addition to the existing flag as the end index for the generated keystores.")
+	cmd.Flags().BoolVar(&flags.randomPassphrase, "random-passphrase", false, "Usa a randomly generated passphrase to encrypt keystores.")
+	cmd.Flags().BoolVarP(&flags.install, "install", "i", false, "Install dependencies if not installed without asking")
+	return cmd
 }
 
-func init() {
-	rootCmd.AddCommand(keysCmd)
-
-	// Local flags
-	keysCmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, prater, ropsten, sepolia etc.")
-
-	keysCmd.Flags().StringVarP(&path, "path", "p", configs.DefaultDockerComposeScriptsPath, "Absolute path to keystore folder. e.g. /home/user/keystore")
-
-	keysCmd.Flags().StringVar(&eth1WithdrawalAddress, "eth1-withdrawal-address", "", "If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
-
-	keysCmd.Flags().BoolVarP(&existingMnemonic, "existing", "e", false, "Use existing mnemonic")
-}
-
-func passwordPrompt() string {
-	// notest
-	validate := func(input string) error {
-		if len(input) < 8 {
-			return errors.New(configs.KeystorePasswordError)
-		}
-		return nil
-	}
-
-	prompt := promptui.Prompt{
-		Label:    "Please enter the password you will use for the validator keystore",
-		Validate: validate,
-		Mask:     '*',
-	}
-
-	result, err := prompt.Run()
-
+func saveMnemonic(cmdRunner commands.CommandRunner, mnemonic string) error {
+	file, err := os.CreateTemp(os.TempDir(), "sedge_mnemonic")
 	if err != nil {
-		log.Errorf(configs.PromptFailedError, err)
-		return ""
+		return fmt.Errorf(configs.ShowMnemonicError, err)
+	}
+	defer os.Remove(file.Name())
+
+	if _, err := file.WriteString(fmt.Sprintf(configs.MnemonicPresentation, mnemonic)); err != nil {
+		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
 
-	validate = func(input string) error {
-		if input != result {
-			return errors.New(configs.KeystorePasswordRetryError)
-		}
-		return nil
+	if err := file.Sync(); err != nil {
+		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
 
-	prompt = promptui.Prompt{
-		Label:    "Please re-enter the password. Press Ctrl+C to retry",
-		Validate: validate,
-		Mask:     '*',
-	}
+	openTextEditorCmd := cmdRunner.BuildOpenTextEditor(commands.OpenTextEditorOptions{
+		FilePath: file.Name(),
+	})
+	openTextEditorCmd.ForceNoSudo = true
 
-	_, err = prompt.Run()
-
+	_, err = cmdRunner.RunCMD(openTextEditorCmd)
 	if err != nil {
-		log.Errorf(configs.PromptFailedError, err)
-		return passwordPrompt()
+		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}
 
-	return result
-}
-
-func createKeystorePassword(password string) error {
-	log.Debug(configs.CreatingKeystorePassword)
-
-	// Create file keystore_password.txt
-	file, err := os.Create(filepath.Join(path, "keystore", "keystore_password.txt"))
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	// Write password to file
-	_, err = file.WriteString(password)
-	if err != nil {
-		return err
-	}
-
-	log.Info(configs.KeystorePasswordCreated)
-	return nil
-}
-
-// Check if keystore folder is not empty
-func emptyKeystore() bool {
-	f, err := os.Open(filepath.Join(path, "keystore"))
-	if err != nil {
-		return false
-	}
-	defer f.Close()
-
-	_, err = f.Readdirnames(1)
-	// Either not empty or error, suits both cases
-	return err == io.EOF
-}
-
-func eth1WithdrawalPrompt() error {
-	// notest
-	validate := func(input string) error {
-		if input != "" && !utils.IsAddress(input) {
-			return errors.New("invalid ETH1 address")
-		}
-		return nil
-	}
-
-	prompt := promptui.Prompt{
-		Label:    "Please enter a Eth1 address to be used to create the withdrawal credentials. You can leave it blank and press enter",
-		Validate: validate,
-	}
-
-	result, err := prompt.Run()
-
-	if err != nil {
-		return fmt.Errorf(configs.PromptFailedError, err)
-	}
-
-	eth1WithdrawalAddress = result
 	return nil
 }

@@ -21,7 +21,7 @@ import (
 )
 
 func validateGeneratedConfig(t *testing.T, path string) {
-	//TODO: validate generated config
+	// TODO: validate generated config
 }
 
 func TestGenerateConfig(t *testing.T) {
@@ -30,7 +30,7 @@ func TestGenerateConfig(t *testing.T) {
 		isErr bool
 	}{
 		{t.TempDir(), false},
-		{"", true},
+		{"$$$*&%^", true},
 	}
 
 	for _, input := range inputs {

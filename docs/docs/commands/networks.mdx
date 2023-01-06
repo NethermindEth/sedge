@@ -1,0 +1,42 @@
+---
+sidebar_position: 6
+id: networks
+---
+
+# Networks
+
+Running `sedge networks` will give you a list of supported networks
+
+## Help
+
+```
+$ sedge networks
+Initializing configuration
+List supported networks
+
+Usage:
+  sedge networks [flags]
+
+Flags:
+  -h, --help   help for networks
+
+Global Flags:
+      --logLevel string   Set Log Level (default "info")
+```
+
+## Execution Example
+
+```
+$ sedge networks
+2022-00-00 00:00:00 -- [INFO] [Logger Init] Log level: info
+2022-00-00 00:00:00 -- [INFO] You are running the latest version of sedge. Version:  v0.5.1
+2022-00-00 00:00:00 -- [INFO] Listing supported networks
+
+ #   Supported Networks
+=== ====================
+ 1   chiado
+ 2   gnosis
+ 3   goerli
+ 4   mainnet
+ 5   sepolia
+```

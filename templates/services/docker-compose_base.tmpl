@@ -6,7 +6,7 @@ services:
 {{template "execution" .}}
 {{if .Mev}}
   mevboost:
-    image: flashbots/mev-boost:latest
+    image: {{if .MevImage}}{{.MevImage}}{{else}}flashbots/mev-boost:latest{{end}}
     networks:
       - sedge
     container_name: mev-boost
@@ -15,11 +15,12 @@ services:
       - /app/mev-boost
       - -addr
       - 0.0.0.0:{{.MevPort}}
-      - -${NETWORK}
+      - -{{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
       - -relay-check
       - -relays
       - ${RELAY_URL}{{end}}
 {{template "consensus" .}}
+{{template "validator-blocker" .}}
 {{template "validator" .}}
 
 networks:

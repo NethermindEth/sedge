@@ -1,0 +1,48 @@
+{{/* erigon.tmpl */}}
+{{ define "execution" }}
+  execution:
+    stop_grace_period: 30m
+    container_name: execution-client
+    restart: unless-stopped
+    image: ${EC_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${EC_DATA_DIR}:/home/erigon/.local/share/erigon
+      - ${EC_JWT_SECRET_PATH}:/home/erigon/.local/share/erigon/jwt.hex
+    ports:
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
+      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
+      - "{{.ElApiPort}}:{{.ElApiPort}}"
+      - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
+    expose:
+      - {{.ElApiPort}}
+      - {{.ElAuthPort}}
+    user: root
+    command:
+    - erigon{{with .TTD}}
+    - --override.terminaltotaldifficulty=${TTD}{{end}}
+    - --http
+    - --http.addr=0.0.0.0
+    - --http.port={{.ElApiPort}}
+    - --txpool.disable
+    - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}{{if .ECBootnodes}}
+    - --bootnodes=${EC_BOOTNODES}{{end}}
+    - --authrpc.addr=0.0.0.0
+    - --authrpc.port={{.ElAuthPort}}
+    - --authrpc.vhosts=*
+    - --authrpc.jwtsecret=/home/erigon/.local/share/erigon/jwt.hex
+    - --datadir=/home/erigon/.local/share/erigon
+    - --healthcheck
+    - --metrics
+    - --metrics.addr=0.0.0.0
+    - --metrics.port={{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
+    - --{{$flag}}{{end}}{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
+
+{{ end }}

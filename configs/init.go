@@ -15,34 +15,81 @@ limitations under the License.
 */
 package configs
 
-var JWTNetworks map[string]bool
+import (
+	"fmt"
+	"strings"
+)
 
-var NetworksToServices map[string]string
+var networksConfigs map[string]NetworkConfig
 
-var NetworksToCheckpointUrl map[string]string
+var CustomNetwork NetworkConfig = NetworkConfig{
+	Name:               "custom",
+	RequireJWT:         true,
+	NetworkService:     "merge",
+	GenesisForkVersion: "0x00000000", // TODO: only affects keystores generation, ensure the deposit method does not conflict over this.
+}
 
-func init() {
-	JWTNetworks = map[string]bool{
-		"mainnet": false,
-		"kiln":    true,
-		"ropsten": true,
-		"prater":  true,
-		"sepolia": true,
+func NetworksConfigs() map[string]NetworkConfig {
+	return networksConfigs
+}
+
+func InitNetworksConfigs() {
+	networksConfigs = make(map[string]NetworkConfig)
+
+	configs := []NetworkConfig{
+		{
+			Name:               "mainnet",
+			RequireJWT:         true,
+			NetworkService:     "merge",
+			GenesisForkVersion: "0x00000000",
+		},
+		{
+			Name:               "goerli",
+			RequireJWT:         true,
+			NetworkService:     "merge",
+			GenesisForkVersion: "0x00001020",
+		},
+		{
+			Name:               "sepolia",
+			RequireJWT:         true,
+			NetworkService:     "merge",
+			GenesisForkVersion: "0x90000069",
+		},
+		{
+			Name:                     "chiado",
+			RequireJWT:               true,
+			NetworkService:           "merge",
+			GenesisForkVersion:       "0x0000006f",
+			DefaultCustomConfigSrc:   "https://github.com/gnosischain/configs/raw/main/chiado/config.yaml",
+			DefaultCustomGenesisSrc:  "https://github.com/gnosischain/configs/raw/main/chiado/genesis.ssz",
+			DefaultCustomDeployBlock: "0",
+		},
+		{
+			Name:               "gnosis",
+			RequireJWT:         true,
+			NetworkService:     "merge",
+			GenesisForkVersion: "0x00000064",
+		},
+		CustomNetwork,
 	}
-
-	NetworksToServices = map[string]string{
-		"mainnet": "mainnet",
-		"kiln":    "merge",
-		"ropsten": "merge",
-		"prater":  "merge",
-		"sepolia": "merge",
+	for _, config := range configs {
+		AddNetwork(config)
 	}
+}
 
-	NetworksToCheckpointUrl = map[string]string{
-		"mainnet": "",
-		"kiln":    "",
-		"ropsten": "https://ropsten.checkpoint-sync.ethdevops.io",
-		"prater":  "https://goerli.checkpoint-sync.ethdevops.io",
-		"sepolia": "https://sepolia.checkpoint-sync.ethdevops.io",
+func AddNetwork(network NetworkConfig) {
+	if networksConfigs == nil {
+		networksConfigs = make(map[string]NetworkConfig)
 	}
+	_, found := networksConfigs[network.Name]
+	if !found {
+		networksConfigs[network.Name] = network
+	}
+}
+
+func CheckNetwork(networkName string) error {
+	if _, ok := networksConfigs[strings.ToLower(networkName)]; !ok {
+		return fmt.Errorf(UnknownNetworkError, networkName)
+	}
+	return nil
 }
