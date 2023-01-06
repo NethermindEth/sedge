@@ -3,8 +3,8 @@
 echo 'Installing Ubuntu Archive Tools'
 git clone https://git.launchpad.net/ubuntu-archive-tools
 sudo apt-get install ubuntu-dev-tools -y
-echo 'Installing Pip'
-sudo apt install python3-pip  -y
+# echo 'Installing Pip'
+# sudo apt install python3-pip  -y
 cd ubuntu-archive-tools
 echo 'Installing LaunchpadLib'
 pip install launchpadlib

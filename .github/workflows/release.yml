@@ -174,6 +174,10 @@ jobs:
     - name: Sleep for 1 hour
       run: sleep 3600s
       shell: bash
+    - uses: BSFishy/pip-action@v1
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.8.10'
     - name: Run copy binaries PPA script
       env: 
         GOPATH: /home/runner/go
