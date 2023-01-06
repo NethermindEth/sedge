@@ -61,10 +61,10 @@ func validateValidator(gd *GenData, c *clients.ClientInfo) error {
 	}
 	validatorClients, err := c.SupportedClients(validator)
 	if err != nil {
-		return UnableToGetClientsInfoError
+		return ErrUnableToGetClientsInfo
 	}
 	if !utils.Contains(validatorClients, gd.ValidatorClient.Name) {
-		return ValidatorClientNotValidError
+		return ErrValidatorClientNotValid
 	}
 	return nil
 }
@@ -75,10 +75,10 @@ func validateExecution(gd *GenData, c *clients.ClientInfo) error {
 	}
 	executionClients, err := c.SupportedClients(execution)
 	if err != nil {
-		return UnableToGetClientsInfoError
+		return ErrUnableToGetClientsInfo
 	}
 	if !utils.Contains(executionClients, gd.ExecutionClient.Name) {
-		return ExecutionClientNotValidError
+		return ErrExecutionClientNotValid
 	}
 	return nil
 }
@@ -90,10 +90,10 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 
 	consensusClients, err := c.SupportedClients(consensus)
 	if err != nil {
-		return UnableToGetClientsInfoError
+		return ErrUnableToGetClientsInfo
 	}
 	if !utils.Contains(consensusClients, gd.ConsensusClient.Name) {
-		return ConsensusClientNotValidError
+		return ErrConsensusClientNotValid
 	}
 	return nil
 }
@@ -118,10 +118,10 @@ func getClients(gd *GenData) map[string]*clients.Client {
 func ComposeFile(gd *GenData, at io.Writer) error {
 	// Check empty data
 	if gd == nil {
-		return EmptyDataError
+		return ErrEmptyData
 	}
 	if gd.ExecutionClient == nil && gd.ConsensusClient == nil && gd.ValidatorClient == nil {
-		return EmptyDataError
+		return ErrEmptyData
 	}
 	err := validateClients(gd)
 	if err != nil {
@@ -310,11 +310,11 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 
 func EnvFile(gd *GenData, at io.Writer) error {
 	if gd.ExecutionClient == nil && gd.ConsensusClient == nil && gd.ValidatorClient == nil {
-		return EmptyDataError
+		return ErrEmptyData
 	}
 	rawBaseTmp, err := templates.Envs.ReadFile(strings.Join([]string{"envs", gd.Network, "env_base.tmpl"}, "/"))
 	if err != nil {
-		return TemplateNotFoundError
+		return ErrTemplateNotFound
 	}
 
 	baseTmp, err := template.New("env").Parse(string(rawBaseTmp))

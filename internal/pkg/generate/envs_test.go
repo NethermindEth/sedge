@@ -18,7 +18,6 @@ package generate
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"strings"
 	"testing"
 
@@ -29,7 +28,7 @@ import (
 
 // read the .env file
 func retriveEnvData(t *testing.T, reader io.Reader) map[string]string {
-	envFile, err := ioutil.ReadAll(reader)
+	envFile, err := io.ReadAll(reader)
 	if err != nil {
 		t.Error("unable to read .env file")
 	}
@@ -119,7 +118,7 @@ func TestGenerateEnvFile(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "erigon"},
 				Network:         "wrong",
 			},
-			Error: TemplateNotFoundError,
+			Error: ErrTemplateNotFound,
 		},
 		{
 			name: "Check network",
