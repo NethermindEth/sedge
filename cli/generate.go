@@ -106,7 +106,7 @@ func validateNetwork(network string) error {
 	return nil
 }
 
-func preValidationGenerateCmd(flags *GenCmdFlags) error {
+func preValidationGenerateCmd(network, logging string) error {
 	// Validate network
 	err := validateNetwork(network)
 	if err != nil {

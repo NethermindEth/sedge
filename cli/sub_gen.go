@@ -41,12 +41,17 @@ func FullNodeSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "full-node [flags]",
 		Short: "Generate a full node config, with or without a validator",
-		Args:  cobra.OnlyValidArgs,
+		Long: `Generate a docker-compose file with a full node configuration
+
+It will not generate a validator configuration if the --no-validator flag is set to true.
+
+On mainnet, sepolia and goerli, mev-boost will be activated by default unless you run it with --no-mev-boost flag`,
+		Args: cobra.OnlyValidArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			return preValidationGenerateCmd(&flags)
+			return preValidationGenerateCmd(network, logging)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{execution, consensus, validator})
@@ -85,6 +90,7 @@ func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "execution [flags] [args]",
 		Short: "Generate a execution node config",
+		Long:  "Generate a docker-compose file with a execution node configuration",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
@@ -98,7 +104,7 @@ func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			return nil
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			err := preValidationGenerateCmd(&flags)
+			err := preValidationGenerateCmd(network, logging)
 			if err != nil {
 				return err
 			}
@@ -126,6 +132,7 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "consensus [flags] [args]",
 		Short: "Generate a consensus node config",
+		Long:  "Generate a docker-compose file with a consensus node configuration",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
@@ -139,7 +146,7 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			return nil
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return preValidationGenerateCmd(&flags)
+			return preValidationGenerateCmd(network, logging)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{consensus})
@@ -151,7 +158,7 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 	cmd.Flags().StringVar(&flags.mevBoostUrl, "mev-boost-url", "", "Mev Boost endpoint")
 	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
-	flags.fallbackEL = *cmd.Flags().StringSlice("fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge cli -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
+	flags.fallbackEL = *cmd.Flags().StringSlice("fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge generate consensus --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
 	flags.clExtraFlags = *cmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge generate consensus --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
@@ -177,6 +184,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "validator [flags] [args]",
 		Short: "Generate a validator node config",
+		Long:  "Generate a docker-compose file with a validator node configuration",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
@@ -190,7 +198,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			return nil
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return preValidationGenerateCmd(&flags)
+			return preValidationGenerateCmd(network, logging)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{validator})
@@ -217,9 +225,10 @@ func MevBoostSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "mevboost [flags]",
 		Short: "Generate a mev-boost node config",
+		Long:  "Generate a docker-compose file with a mev-boost node configuration",
 		Args:  cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return preValidationGenerateCmd(&flags)
+			return preValidationGenerateCmd(network, logging)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{mevBoost})
