@@ -25,10 +25,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	ErrInvalidNumberOfArguments = errors.New("invalid number of arguments")
-	ErrInvalidValidatorArgument = errors.New("invalid validator argument")
-)
+var ErrInvalidNumberOfArguments = errors.New("invalid number of arguments")
 
 func SlashingImportCmd(sedgeActions actions.SedgeActions) *cobra.Command {
 	// Flags
@@ -56,7 +53,12 @@ in the same state in which it was found. That means if the validator is running/
 before the import, then the validator will be running/stopped after the command
 is executed, regardless of whether the export fails or not. To force a different
 behavior use --start-validator and --stop-validator flags.`,
-		Args: cobra.ExactArgs(1),
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) != 1 {
+				return ErrInvalidNumberOfArguments
+			}
+			return nil
+		},
 		PreRun: func(cmd *cobra.Command, args []string) {
 			if from == "" {
 				from = path.Join(configs.DefaultDockerComposeScriptsPath, "slashing-export.json")
