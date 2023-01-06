@@ -16,10 +16,10 @@ foreach ($platform in $platforms) {
     $outputName = "$packageName-$VERSION-$GOOS-$GOARCH.exe"
     $ldflags = "-X github.com/NethermindEth/sedge/internal/utils.Version=$VERSION"
 
-    Write-Output "docker buildx build --platform=$GOOS/$GOARCH -t nethermindeth/sedge:$VERSION-$GOOS-$GOARCH --build-arg TARGETOS=$GOOS --build-arg TARGETARCH=$GOARCH --build-arg LDFLAGS=$LDFLAGS --build-arg OUTPUT_NAME=$outputName --build-arg PACKAGE=$package --load . -f scripts/Dockerfile"
-    Write-Output "docker create --name sedge nethermindeth/sedge:$VERSION-$GOOS-$GOARCH"
-    Write-Output "docker cp sedge:/sedge ./build/$outputName"
-    Write-Output "docker rm -f sedge"
+    docker buildx build --platform=$GOOS/$GOARCH -t nethermindeth/sedge:$VERSION-$GOOS-$GOARCH --build-arg TARGETOS=$GOOS --build-arg TARGETARCH=$GOARCH --build-arg LDFLAGS=$LDFLAGS --build-arg OUTPUT_NAME=$outputName --build-arg PACKAGE=$package --load . -f scripts/Dockerfile
+    docker create --name sedge nethermindeth/sedge:$VERSION-$GOOS-$GOARCH
+    docker cp sedge:/sedge ./build/$outputName
+    docker rm -f sedge
     
     if ($? -ne $true) {
         Write-Output "An error has occurred! Aborting the script execution..."
