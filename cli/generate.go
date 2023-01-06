@@ -18,7 +18,6 @@ package cli
 import (
 	"fmt"
 	"github.com/NethermindEth/sedge/cli/actions"
-	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
@@ -34,7 +33,6 @@ import (
 
 // Global vars
 var (
-	install        bool
 	generationPath string
 	network        string
 	logging        string
@@ -66,28 +64,32 @@ type GenCmdFlags struct {
 	consensusApiUrl   string
 }
 
-func GenerateCmd(prompt prompts.Prompt, sedgeAction actions.SedgeActions) *cobra.Command {
+func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "generate [flags]",
 		Short: "Generate new setups according to selected options",
-		Long: `Run the setup tool on-premise in a quick way. Provide only the command line
-	options and the tool will do all the work.
-	
-	First it will check if dependencies such as docker are installed on your machine
-	and provide instructions for installing them if they are not installed.
-	
-	Second, it will generate docker-compose scripts to run the selected setup.`,
+		Long: `Generate new setups according to selected options and flags.
+
+It will only create a docker-compose script, you will need later to run that script.
+
+You can generate:
+- Full Nodes (consensus+execution+validator)
+- Full Nodes without Validator (consensus+execution)
+- Consensus Node
+- Execution Node
+- Validator Node
+- MevBoost Node
+`,
 		Args: cobra.NoArgs,
 	}
 
-	cmd.AddCommand(FullNodeSubCmd(prompt, sedgeAction))
-	cmd.AddCommand(ExecutionSubCmd(prompt, sedgeAction))
-	cmd.AddCommand(ConsensusSubCmd(prompt, sedgeAction))
-	cmd.AddCommand(ValidatorSubCmd(prompt, sedgeAction))
-	cmd.AddCommand(MevBoostSubCmd(prompt, sedgeAction))
+	cmd.AddCommand(FullNodeSubCmd(sedgeAction))
+	cmd.AddCommand(ExecutionSubCmd(sedgeAction))
+	cmd.AddCommand(ConsensusSubCmd(sedgeAction))
+	cmd.AddCommand(ValidatorSubCmd(sedgeAction))
+	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
 
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
-	cmd.PersistentFlags().BoolVarP(&install, "install", "i", false, "Install dependencies if not installed without asking")
 	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, etc.")
 	cmd.PersistentFlags().StringVar(&logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
 	return cmd
@@ -119,7 +121,7 @@ func preValidationGenerateCmd(flags *GenCmdFlags) error {
 	return nil
 }
 
-func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, sedgeAction actions.SedgeActions, services []string) error {
+func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActions, services []string) error {
 
 	// Warn if exposed ports are used
 	if flags.mapAllPorts {
@@ -154,14 +156,8 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, sedgeAc
 	}
 
 	// Get fee recipient
-	feeRecipient := flags.feeRecipient
-	if feeRecipient == "" {
-		if utils.Contains(services, validator) || utils.Contains(services, consensus) {
-			feeRecipient, err = prompt.FeeRecipient()
-			if err != nil {
-				return err
-			}
-		}
+	if flags.feeRecipient == "" {
+		log.Warn(configs.EmptyFeeRecipientError)
 	}
 
 	// Get custom networks configs
@@ -186,7 +182,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, prompt prompts.Prompt, sedgeAc
 		ValidatorClient:         &combinedClients.Validator,
 		Network:                 network,
 		CheckpointSyncUrl:       flags.checkpointSyncUrl,
-		FeeRecipient:            feeRecipient,
+		FeeRecipient:            flags.feeRecipient,
 		JWTSecretPath:           flags.jwtPath,
 		Graffiti:                flags.graffiti,
 		FallbackELUrls:          flags.fallbackEL,

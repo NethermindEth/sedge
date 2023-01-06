@@ -20,8 +20,6 @@ import (
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/test"
-	"github.com/NethermindEth/sedge/test/mock_prompts"
-	"github.com/golang/mock/gomock"
 	"os"
 	"path/filepath"
 	"strings"
@@ -562,14 +560,10 @@ func TestGenerateCmd(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			descr := fmt.Sprintf("sedge generate %s %s %s", tc.subCommand.argsList(), tc.args.toString(), tc.globalArgs.argsList())
 
-			ctrl := gomock.NewController(t)
-			prompt := mock_prompts.NewMockPrompt(ctrl)
-			defer ctrl.Finish()
-
 			sedgeActions := actions.NewSedgeActions(nil, nil, nil)
 
 			rootCmd := RootCmd()
-			rootCmd.AddCommand(GenerateCmd(prompt, sedgeActions))
+			rootCmd.AddCommand(GenerateCmd(sedgeActions))
 			argsL := append([]string{"generate"}, tc.subCommand.argsList()...)
 			argsL = append(argsL, tc.args.argsList()...)
 			argsL = append(argsL, tc.globalArgs.argsList()...)
