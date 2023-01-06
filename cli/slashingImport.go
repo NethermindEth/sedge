@@ -61,7 +61,7 @@ behavior use --start-validator and --stop-validator flags.`,
 		},
 		PreRun: func(cmd *cobra.Command, args []string) {
 			if from == "" {
-				from = path.Join(configs.DefaultDockerComposeScriptsPath, "slashing-export.json")
+				from = path.Join(generationPath, "slashing-export.json")
 			}
 			if err := configs.NetworkCheck(network); err != nil {
 				log.Fatal(err)

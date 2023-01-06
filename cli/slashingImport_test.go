@@ -114,7 +114,7 @@ func TestSlashingImport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  filepath.Join("custom", "dir"),
-				From:            filepath.Join(configs.DefaultDockerComposeScriptsPath, "slashing-export.json"),
+				From:            filepath.Join("custom", "dir", "slashing-export.json"),
 			},
 		},
 		{
@@ -126,7 +126,7 @@ func TestSlashingImport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  filepath.Join("custom", "dir"),
-				From:            filepath.Join(configs.DefaultDockerComposeScriptsPath, "slashing-export.json"),
+				From:            filepath.Join("custom", "dir", "slashing-export.json"),
 			},
 		},
 		{
