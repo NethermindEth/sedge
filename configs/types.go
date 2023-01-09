@@ -21,8 +21,12 @@ type LogConfig struct {
 }
 
 type NetworkConfig struct {
-	Name               string
-	RequireJWT         bool
-	NetworkService     string
-	GenesisForkVersion string
+	Name                      string
+	RequireJWT                bool
+	NetworkService            string
+	GenesisForkVersion        string
+	DefaultCustomChainSpecSrc string
+	DefaultCustomConfigSrc    string
+	DefaultCustomGenesisSrc   string
+	DefaultCustomDeployBlock  string
 }
