@@ -1,7 +1,7 @@
-$package = "cmd\sedge\main.go"
+$package = "cmd/sedge/main.go"
 $packageName = "sedge"
 
-$platforms = @("windows/amd64", "windows/arm64")
+$platforms = @("windows/amd64")
 
 if (-not(Test-Path "build")) {
     New-Item "build" -ItemType Directory | Out-Null
@@ -16,10 +16,7 @@ foreach ($platform in $platforms) {
     $outputName = "$packageName-$VERSION-$GOOS-$GOARCH.exe"
     $ldflags = "-X github.com/NethermindEth/sedge/internal/utils.Version=$VERSION"
 
-    docker buildx build --platform=$GOOS/$GOARCH -t nethermindeth/sedge:$VERSION-$GOOS-$GOARCH --build-arg TARGETOS=$GOOS --build-arg TARGETARCH=$GOARCH --build-arg LDFLAGS=$LDFLAGS --build-arg OUTPUT_NAME=$outputName --build-arg PACKAGE=$package --load . -f scripts/Dockerfile
-    docker create --name sedge nethermindeth/sedge:$VERSION-$GOOS-$GOARCH
-    docker cp sedge:/sedge ./build/$outputName
-    docker rm -f sedge
+    $env:GOOS = $GOOS ; $env:GOARCH = $GOARCH ; $env:CGO_ENABLED = 1 ; go build -ldflags "${LDFLAGS}" -o .\build\$outputName $package 
     
     if ($? -ne $true) {
         Write-Output "An error has occurred! Aborting the script execution..."
