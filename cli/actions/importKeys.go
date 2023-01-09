@@ -25,6 +25,12 @@ type ImportValidatorKeysOptions struct {
 	StopValidator   bool
 	StartValidator  bool
 	From            string
+	CustomConfig    ImportValidatorKeysCustomOptions
+}
+type ImportValidatorKeysCustomOptions struct {
+	NetworkConfigPath *string
+	GenesisPath       *string
+	DeployBlockPath   *string
 }
 
 func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) error {
@@ -43,89 +49,34 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		return err
 	}
 
+	absFrom, err := filepath.Abs(options.From)
+	if err != nil {
+		return err
+	}
+	options.From = absFrom
+
 	var ctID string
 	switch options.ValidatorClient {
 	case "prysm":
-		cmd := []string{
-			"--",
-			"accounts", "import",
-			"--accept-terms-of-use",
-			"--" + options.Network,
-			"--keys-dir=/keystore/validator_keys",
-			"--wallet-dir=/data/wallet",
-			"--wallet-password-file=/keystore/keystore_password.txt",
-			"--account-password-file=/keystore/keystore_password.txt",
-		}
-		prysmCtID, err := setupValidatorImportContainer(s.dockerClient, s.serviceManager, cmd, options.From)
+		prysmCtID, err := setupPrysmValidatorImportContainer(s.dockerClient, s.serviceManager, options)
 		if err != nil {
 			return err
 		}
 		ctID = prysmCtID
 	case "lodestar":
-		var preset string
-		switch options.Network {
-		case "mainnet", "goerli", "sepolia":
-			preset = "mainnet"
-		case "gnosis", "chiado":
-			preset = "gnosis"
-		default:
-			return fmt.Errorf("unknown lodestar preset for network %s", options.Network)
-		}
-		cmd := []string{
-			"validator", "import",
-			"--preset", preset,
-			"--network", options.Network,
-			"--dataDir", "/data",
-			"--importKeystores=/keystore/validator_keys",
-			"--importKeystoresPassword=/keystore/keystore_password.txt",
-		}
-		lodestarCtID, err := setupValidatorImportContainer(s.dockerClient, s.serviceManager, cmd, options.From)
+		lodestarCtID, err := setupLodestarValidatorImport(s.dockerClient, s.serviceManager, options)
 		if err != nil {
 			return err
 		}
 		ctID = lodestarCtID
 	case "lighthouse":
-		// Init build context
-		contextDir, err := lighthouse.InitContext()
-		if err != nil {
-			return fmt.Errorf("error creating context dir: %s", err.Error())
-		}
-		// Build image
-		buildCmd := s.commandRunner.BuildDockerBuildCMD(commands.DockerBuildOptions{
-			Path: contextDir,
-			Tag:  "sedge/validator-import-lighthouse",
-			Args: map[string]string{
-				"NETWORK":    options.Network,
-				"LH_VERSION": "sigp/lighthouse:v3.3.0",
-			},
-		})
-		log.Infof(configs.RunningCommand, buildCmd.Cmd)
-		if _, err = s.commandRunner.RunCMD(buildCmd); err != nil {
-			return err
-		}
-		// Setup container
-		lighthouseCtID, err := setupLighthouseValidatorImport(s.dockerClient, s.serviceManager, options.From)
+		lighthouseCtID, err := setupLighthouseValidatorImport(s.dockerClient, s.serviceManager, s.commandRunner, options)
 		if err != nil {
 			return err
 		}
 		ctID = lighthouseCtID
 	case "teku":
-		// Init build context
-		contextDir, err := teku.InitContext()
-		if err != nil {
-			return err
-		}
-		// Build image
-		buildCmd := s.commandRunner.BuildDockerBuildCMD(commands.DockerBuildOptions{
-			Path: contextDir,
-			Tag:  "sedge/validator-import-teku",
-		})
-		log.Infof(configs.RunningCommand, buildCmd.Cmd)
-		if _, err := s.commandRunner.RunCMD(buildCmd); err != nil {
-			return err
-		}
-		// Setup container
-		tekuCtID, err := setupTekuValidatorImport(s.dockerClient, s.serviceManager, options.From)
+		tekuCtID, err := setupTekuValidatorImport(s.dockerClient, s.serviceManager, s.commandRunner, options)
 		if err != nil {
 			return err
 		}
@@ -147,14 +98,38 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 	return nil
 }
 
-func setupValidatorImportContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, cmd []string, from string) (string, error) {
-	from, err := filepath.Abs(from)
-	if err != nil {
-		return "", err
-	}
+func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, options ImportValidatorKeysOptions) (string, error) {
 	validatorImage, err := serviceManager.Image(services.ServiceCtValidator)
 	if err != nil {
 		return "", err
+	}
+	// Mounts
+	mounts := []mount.Mount{
+		{
+			Type:   mount.TypeBind,
+			Source: options.From,
+			Target: "/keystore",
+		},
+	}
+	// CMD
+	cmd := []string{
+		"--",
+		"accounts", "import",
+		"--accept-terms-of-use",
+		"--" + options.Network,
+		"--keys-dir=/keystore/validator_keys",
+		"--wallet-dir=/data/wallet",
+		"--wallet-password-file=/keystore/keystore_password.txt",
+		"--account-password-file=/keystore/keystore_password.txt",
+	}
+	// Custom options
+	if options.CustomConfig.NetworkConfigPath != nil {
+		mounts = append(mounts, mount.Mount{
+			Type:   mount.TypeBind,
+			Source: *options.CustomConfig.NetworkConfigPath,
+			Target: "/network_config/config.yml",
+		})
+		cmd = append(cmd, "--chain-config-file=/network_config/config.yml")
 	}
 	log.Debugf("Creating %s container", services.ServiceCtValidatorImport)
 	ct, err := dockerClient.ContainerCreate(context.Background(),
@@ -163,13 +138,7 @@ func setupValidatorImportContainer(dockerClient client.APIClient, serviceManager
 			Cmd:   cmd,
 		},
 		&container.HostConfig{
-			Mounts: []mount.Mount{
-				{
-					Type:   mount.TypeBind,
-					Source: from,
-					Target: "/keystore",
-				},
-			},
+			Mounts:      mounts,
 			VolumesFrom: []string{services.ServiceCtValidator},
 		},
 		&network.NetworkingConfig{},
@@ -182,20 +151,119 @@ func setupValidatorImportContainer(dockerClient client.APIClient, serviceManager
 	return ct.ID, nil
 }
 
-func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, from string) (string, error) {
+func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, options ImportValidatorKeysOptions) (string, error) {
+	validatorImage, err := serviceManager.Image(services.ServiceCtValidator)
+	if err != nil {
+		return "", err
+	}
+	// Mounts
+	mounts := []mount.Mount{
+		{
+			Type:   mount.TypeBind,
+			Source: options.From,
+			Target: "/keystore",
+		},
+	}
+	// CMD
+	var preset string
+	switch options.Network {
+	case "mainnet", "goerli", "sepolia":
+		preset = "mainnet"
+	case "gnosis", "chiado":
+		preset = "gnosis"
+	default:
+		return "", fmt.Errorf("unknown lodestar preset for network %s", options.Network)
+	}
+	cmd := []string{
+		"validator", "import",
+		"--preset", preset,
+		"--network", options.Network,
+		"--dataDir", "/data",
+		"--importKeystores=/keystore/validator_keys",
+		"--importKeystoresPassword=/keystore/keystore_password.txt",
+	}
+	if options.CustomConfig.NetworkConfigPath != nil {
+		mounts = append(mounts, mount.Mount{
+			Type:   mount.TypeBind,
+			Source: *options.CustomConfig.NetworkConfigPath,
+			Target: "/network_config/config.yaml",
+		})
+		cmd = append(cmd, "--paramsFile=/network_config/config.yaml")
+	}
+	log.Debugf("Creating %s container", services.ServiceCtValidatorImport)
+	ct, err := dockerClient.ContainerCreate(context.Background(),
+		&container.Config{
+			Image: validatorImage,
+			Cmd:   cmd,
+		},
+		&container.HostConfig{
+			Mounts:      mounts,
+			VolumesFrom: []string{services.ServiceCtValidator},
+		},
+		&network.NetworkingConfig{},
+		&v1.Platform{},
+		services.ServiceCtValidatorImport,
+	)
+	if err != nil {
+		return "", err
+	}
+	return ct.ID, nil
+}
+
+func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, commandRunner commands.CommandRunner, options ImportValidatorKeysOptions) (string, error) {
+	// Init build context
+	contextDir, err := lighthouse.InitContext()
+	if err != nil {
+		return "", fmt.Errorf("error creating context dir: %s", err.Error())
+	}
+	// Build image
+	buildCmd := commandRunner.BuildDockerBuildCMD(commands.DockerBuildOptions{
+		Path: contextDir,
+		Tag:  "sedge/validator-import-lighthouse",
+		Args: map[string]string{
+			"NETWORK":    options.Network,
+			"LH_VERSION": "sigp/lighthouse:v3.3.0",
+		},
+	})
+	log.Infof(configs.RunningCommand, buildCmd.Cmd)
+	if _, err = commandRunner.RunCMD(buildCmd); err != nil {
+		return "", err
+	}
+	mounts := []mount.Mount{
+		{
+			Type:   mount.TypeBind,
+			Source: options.From,
+			Target: "/keystore",
+		},
+	}
+	if options.CustomConfig.NetworkConfigPath != nil {
+		mounts = append(mounts, mount.Mount{
+			Type:   mount.TypeBind,
+			Source: *options.CustomConfig.NetworkConfigPath,
+			Target: "/network_config/config.yaml",
+		})
+	}
+	if options.CustomConfig.GenesisPath != nil {
+		mounts = append(mounts, mount.Mount{
+			Type:   mount.TypeBind,
+			Source: *options.CustomConfig.GenesisPath,
+			Target: "/network_config/genesis.ssz",
+		})
+	}
+	if options.CustomConfig.DeployBlockPath != nil {
+		mounts = append(mounts, mount.Mount{
+			Type:   mount.TypeBind,
+			Source: *options.CustomConfig.DeployBlockPath,
+			Target: "/network_config/deploy_block.txt",
+		})
+	}
 	log.Debugf("Creating %s container", services.ServiceCtValidatorImport)
 	ct, err := dockerClient.ContainerCreate(context.Background(),
 		&container.Config{
 			Image: "sedge/validator-import-lighthouse",
 		},
 		&container.HostConfig{
-			Mounts: []mount.Mount{
-				{
-					Type:   mount.TypeBind,
-					Source: from,
-					Target: "/keystore",
-				},
-			},
+			Mounts:      mounts,
 			VolumesFrom: []string{services.ServiceCtValidator},
 		},
 		&network.NetworkingConfig{},
@@ -208,20 +276,43 @@ func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManage
 	return ct.ID, nil
 }
 
-func setupTekuValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, from string) (string, error) {
+func setupTekuValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, commandRunner commands.CommandRunner, options ImportValidatorKeysOptions) (string, error) {
+	// Init build context
+	contextDir, err := teku.InitContext()
+	if err != nil {
+		return "", err
+	}
+	// Build image
+	buildCmd := commandRunner.BuildDockerBuildCMD(commands.DockerBuildOptions{
+		Path: contextDir,
+		Tag:  "sedge/validator-import-teku",
+	})
+	log.Infof(configs.RunningCommand, buildCmd.Cmd)
+	if _, err := commandRunner.RunCMD(buildCmd); err != nil {
+		return "", err
+	}
+	// Mounts
+	mounts := []mount.Mount{
+		{
+			Type:   mount.TypeBind,
+			Source: options.From,
+			Target: "/keystore",
+		},
+	}
+	if options.CustomConfig.NetworkConfigPath != nil {
+		mounts = append(mounts, mount.Mount{
+			Type:   mount.TypeBind,
+			Source: *options.CustomConfig.NetworkConfigPath,
+			Target: "/network_config/config.yml",
+		})
+	}
 	log.Debugf("Creating %s container", services.ServiceCtValidatorImport)
 	ct, err := dockerClient.ContainerCreate(context.Background(),
 		&container.Config{
 			Image: "sedge/validator-import-teku",
 		},
 		&container.HostConfig{
-			Mounts: []mount.Mount{
-				{
-					Type:   mount.TypeBind,
-					Source: from,
-					Target: "/keystore",
-				},
-			},
+			Mounts:      mounts,
 			VolumesFrom: []string{services.ServiceCtValidator},
 		},
 		&network.NetworkingConfig{},
