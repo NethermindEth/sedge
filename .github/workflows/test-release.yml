@@ -111,6 +111,7 @@ jobs:
       env: 
         GOPATH: /home/runner/go
       run: |
+        export VERSION=0.2.5
         cd /home/runner/work/sedge/sedge/sedge
         chmod +x scripts/publish-ppa.sh
         ./scripts/publish-ppa.sh
