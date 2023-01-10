@@ -99,7 +99,7 @@ jobs:
       run: echo ${{secrets.GPG_OWNERTRUST}} | base64 --decode | gpg --import-ownertrust
     - name: Install dependencies for PPA
       run: |
-        sudo apt update > /dev/null 2>&1 && sudo apt install golang-go debhelper/focal-backports libdebhelper-perl/focal-backports build-essential devscripts rsync -y > /dev/null 2>&1
+        sudo apt update && sudo apt install golang-go debhelper/focal-backports libdebhelper-perl/focal-backports build-essential devscripts rsync -y
     - name: Checking out Sedge repository
       uses: actions/checkout@master
       with:
