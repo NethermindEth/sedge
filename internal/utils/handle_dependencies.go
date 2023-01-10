@@ -177,7 +177,7 @@ func getScriptPath(dependency string) (path string, distro DistroInfo, err error
 		return path, distro, fmt.Errorf(configs.DistroInfoError, err)
 	}
 
-	path = fmt.Sprintf("setup/%s/%s/%s_%s.sh", runtime.GOOS, dependency, distro.Name, distro.Version)
+	path = fmt.Sprintf("setup/linux/%s/%s_%s.sh", dependency, distro.Name, distro.Version)
 	return path, distro, nil
 }
 
