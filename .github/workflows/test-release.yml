@@ -81,7 +81,6 @@ jobs:
     env: 
       VERSION: ${{ github.event.inputs.tag }}
       PPA_GPG_KEYID: ${{ secrets.PPA_GPG_KEYID }}
-    needs: publish-github
     steps:
     - run: echo "$GPG_SECRET_KEY" > /tmp/SECRET_KEY
       shell: bash
