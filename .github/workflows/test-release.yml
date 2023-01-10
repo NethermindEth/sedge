@@ -1,6 +1,9 @@
 name: 'Test Release Sedge PPA'
 
 on:
+  push:
+    branches:
+      - build/debian-pkg
   workflow_dispatch:
     inputs:
       tag:
