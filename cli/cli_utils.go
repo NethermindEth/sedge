@@ -33,7 +33,7 @@ import (
 )
 
 func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error) {
-	var executionClient, consensusClient clients.Client
+	var executionClient, consensusClient *clients.Client
 	var combinedClients clients.Clients
 
 	executionClient, err := clients.RandomChoice(allClients[execution])
@@ -54,7 +54,7 @@ func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error
 }
 
 func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
-	var executionClient, consensusClient, validatorClient clients.Client
+	var executionClient, consensusClient, validatorClient *clients.Client
 	var err error
 
 	// execution client
@@ -73,7 +73,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 	} else {
-		executionClient.Omitted = true
+		executionClient = nil
 	}
 	// consensus client
 	if utils.Contains(services, consensus) {
@@ -91,7 +91,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 	} else {
-		consensusClient.Omitted = true
+		consensusClient = nil
 	}
 	// validator client
 	if utils.Contains(services, validator) && !flags.noValidator {
@@ -109,7 +109,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 	} else {
-		validatorClient.Omitted = true
+		validatorClient = nil
 	}
 
 	return &clients.Clients{
@@ -163,14 +163,14 @@ func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliC
 		val.Name = flags.validatorName
 	}
 	if !utils.Contains(*flags.services, execution) && len(*flags.services) > 0 && (*flags.services)[0] != "all" {
-		exec.Omitted = true
+		exec = nil
 	}
 	if !utils.Contains(*flags.services, consensus) && len(*flags.services) > 0 && (*flags.services)[0] != "all" {
-		cons.Omitted = true
+		cons = nil
 	}
 	if !utils.Contains(*flags.services, validator) && len(*flags.services) > 0 && (*flags.services)[0] != "all" ||
 		flags.noValidator {
-		val.Omitted = true
+		val = nil
 	}
 
 	combinedClients = clients.Clients{

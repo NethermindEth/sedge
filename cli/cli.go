@@ -332,10 +332,20 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		return []error{err}
 	}
 
-	combinedClients.Execution.Image = clientImages.execution
-	combinedClients.Consensus.Image = clientImages.consensus
-	combinedClients.Validator.Image = clientImages.validator
-	combinedClients.Validator.Omitted = flags.noValidator
+	if combinedClients.Execution != nil {
+		combinedClients.Execution.Image = clientImages.execution
+	}
+	if combinedClients.Consensus != nil {
+		combinedClients.Consensus.Image = clientImages.consensus
+	}
+
+	if flags.noValidator {
+		combinedClients.Validator = nil
+	} else {
+		if combinedClients.Validator != nil {
+			combinedClients.Validator.Image = clientImages.validator
+		}
+	}
 
 	var vlStartGracePeriod time.Duration
 	switch flags.network {
@@ -350,9 +360,9 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	// Generate docker-compose scripts
 	gd := &generate.GenData{
 		Services:                *flags.services,
-		ExecutionClient:         &combinedClients.Execution,
-		ConsensusClient:         &combinedClients.Consensus,
-		ValidatorClient:         &combinedClients.Validator,
+		ExecutionClient:         combinedClients.Execution,
+		ConsensusClient:         combinedClients.Consensus,
+		ValidatorClient:         combinedClients.Validator,
 		Network:                 flags.network,
 		CheckpointSyncUrl:       flags.checkpointSyncUrl,
 		FeeRecipient:            flags.feeRecipient,
@@ -395,7 +405,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	// If teku is chosen, then prepare datadir with 777 permissions
-	if combinedClients.Consensus.Name == "teku" {
+	if combinedClients.Consensus != nil && combinedClients.Consensus.Name == "teku" {
 		if err = preRunTeku(*flags.services, flags.generationPath); err != nil {
 			return []error{err}
 		}

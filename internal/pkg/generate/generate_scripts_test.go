@@ -310,7 +310,6 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 								Services:        []string{execution, consensus},
 								ExecutionClient: &clients.Client{Name: executionCl},
 								ConsensusClient: &clients.Client{Name: consensusCl},
-								ValidatorClient: &clients.Client{Name: consensusCl, Omitted: true},
 								Network:         network,
 							},
 							CheckFunctions: []CheckFunc{defaultFunc},
@@ -321,7 +320,6 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 								Services:        []string{execution, consensus},
 								ExecutionClient: &clients.Client{Name: executionCl},
 								ConsensusClient: &clients.Client{Name: wrongDep},
-								ValidatorClient: &clients.Client{Name: consensusCl, Omitted: true},
 								Network:         network,
 							},
 							ErrorGenCompose: ErrConsensusClientNotValid,
@@ -354,9 +352,6 @@ func TestGenerateComposeServices(t *testing.T) {
 			Description: "Test generation import",
 			GenerationData: &GenData{
 				Services:        []string{mevBoost},
-				ExecutionClient: &clients.Client{Name: "nethermind", Omitted: true},
-				ConsensusClient: &clients.Client{Name: "teku", Omitted: true},
-				ValidatorClient: &clients.Client{Name: "teku", Omitted: true},
 				Network:         "mainnet",
 				Mev:             true,
 				MevBoostService: true,
@@ -448,7 +443,6 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 								ExecutionClient: &clients.Client{Name: executionCl},
 								ECBootnodes:     []string{"enode:1", "enode:2", "enode:3"},
 								ConsensusClient: &clients.Client{Name: consensusCl},
-								ValidatorClient: &clients.Client{Name: consensusCl, Omitted: true},
 								Network:         network,
 							},
 							CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkTTDOnExecution},
@@ -457,9 +451,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 							Description: fmt.Sprintf(baseDescription+"ccBootnodes tests, execution: %s, consensus: %s, validator: %s, network: %s, Execution Client not Valid", executionCl, consensusCl, consensusCl, network),
 							GenerationData: &GenData{
 								Services:        []string{consensus},
-								ExecutionClient: &clients.Client{Name: executionCl, Omitted: true},
 								ConsensusClient: &clients.Client{Name: consensusCl},
-								ValidatorClient: &clients.Client{Name: consensusCl, Omitted: true},
 								CCBootnodes:     []string{"enr:1", "enr:2"},
 								Network:         network,
 							},
@@ -579,7 +571,7 @@ func TestGenComposeFileSimpleExecution(t *testing.T) {
 			Data: &GenData{
 				Network: "mainnet",
 			},
-			Error: ErrEmptyData,
+			//Error: ErrEmptyData,
 		},
 	}
 
@@ -669,14 +661,16 @@ func TestEnvFileAndFlags(t *testing.T) {
 				assert.ErrorIs(t, err, tt.Error)
 				return
 			}
-			if tt.Data.ConsensusApiUrl == "" {
-				str := buffer.String()
-				assert.Contains(t, str, "CC_API_URL="+tt.Data.ConsensusClient.Endpoint+":")
-			} else {
-				if tt.Data.ConsensusClient.Name == "prysm" && !tt.Data.ValidatorClient.Omitted {
-					assert.Contains(t, buffer.String(), "CC_API_URL=consensus:")
+			if tt.Data.ConsensusClient != nil {
+				if tt.Data.ConsensusApiUrl == "" {
+					str := buffer.String()
+					assert.Contains(t, str, "CC_API_URL="+endpointOrEmpty(tt.Data.ConsensusClient)+":")
 				} else {
-					assert.Contains(t, buffer.String(), "CC_API_URL="+tt.Data.ConsensusApiUrl)
+					if tt.Data.ConsensusClient.Name == "prysm" && tt.Data.ValidatorClient != nil {
+						assert.Contains(t, buffer.String(), "CC_API_URL=consensus:")
+					} else {
+						assert.Contains(t, buffer.String(), "CC_API_URL="+tt.Data.ConsensusApiUrl)
+					}
 				}
 			}
 		})

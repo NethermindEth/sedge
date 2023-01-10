@@ -59,7 +59,7 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check ec image",
 			data: &GenData{
-				ExecutionClient: &clients.Client{Name: "nethermind", Omitted: false},
+				ExecutionClient: &clients.Client{Name: "nethermind"},
 				Network:         "mainnet",
 			},
 			fieldsToCheck: map[string]string{
@@ -69,7 +69,7 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check set of ec image",
 			data: &GenData{
-				ExecutionClient: &clients.Client{Name: "besu", Omitted: false, Image: "custom"},
+				ExecutionClient: &clients.Client{Name: "besu", Image: "custom"},
 				Network:         "mainnet",
 				JWTSecretPath:   "/tmp/jwt",
 			},
@@ -82,7 +82,7 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check RELAY_URL",
 			data: &GenData{
-				ExecutionClient: &clients.Client{Name: "besu", Omitted: false},
+				ExecutionClient: &clients.Client{Name: "besu"},
 				Network:         "mainnet",
 			},
 			fieldsToCheck: map[string]string{
@@ -92,7 +92,7 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check set of RELAY_URL",
 			data: &GenData{
-				ExecutionClient: &clients.Client{Name: "geth", Omitted: false},
+				ExecutionClient: &clients.Client{Name: "geth"},
 				Network:         "mainnet",
 				RelayURL:        "https://sample.relay",
 			},
@@ -103,7 +103,7 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check validator Graffiti and keystore",
 			data: &GenData{
-				ValidatorClient: &clients.Client{Name: "prysm", Omitted: false},
+				ValidatorClient: &clients.Client{Name: "prysm"},
 				Network:         "mainnet",
 				Graffiti:        "graffiti",
 			},

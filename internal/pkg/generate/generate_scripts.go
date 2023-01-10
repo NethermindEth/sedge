@@ -56,7 +56,7 @@ func validateClients(gd *GenData) error {
 }
 
 func validateValidator(gd *GenData, c *clients.ClientInfo) error {
-	if gd.ValidatorClient == nil || gd.ValidatorClient.Omitted {
+	if gd.ValidatorClient == nil {
 		return nil
 	}
 	validatorClients, err := c.SupportedClients(validator)
@@ -70,7 +70,7 @@ func validateValidator(gd *GenData, c *clients.ClientInfo) error {
 }
 
 func validateExecution(gd *GenData, c *clients.ClientInfo) error {
-	if gd.ExecutionClient == nil || gd.ExecutionClient.Omitted {
+	if gd.ExecutionClient == nil {
 		return nil
 	}
 	executionClients, err := c.SupportedClients(execution)
@@ -84,7 +84,7 @@ func validateExecution(gd *GenData, c *clients.ClientInfo) error {
 }
 
 func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
-	if gd.ConsensusClient == nil || gd.ConsensusClient.Omitted {
+	if gd.ConsensusClient == nil {
 		return nil
 	}
 
@@ -106,12 +106,6 @@ func getClients(gd *GenData) map[string]*clients.Client {
 		validator: gd.ValidatorClient,
 	}
 
-	for i := range cls {
-		if cls[i] == nil {
-			cls[i] = &clients.Client{Omitted: true}
-		}
-	}
-
 	return cls
 }
 
@@ -120,9 +114,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	if gd == nil {
 		return ErrEmptyData
 	}
-	if gd.ExecutionClient == nil && gd.ConsensusClient == nil && gd.ValidatorClient == nil {
-		return ErrEmptyData
-	}
+	//if gd.ExecutionClient == nil && gd.ConsensusClient == nil && gd.ValidatorClient == nil {
+	//	return ErrEmptyData
+	//}
 	err := validateClients(gd)
 	if err != nil {
 		return err
@@ -161,9 +155,11 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	cls := getClients(gd)
 
 	for tmpKind, client := range cls {
-		name := client.Name
-		if client.Omitted {
+		var name string
+		if client == nil {
 			name = empty
+		} else {
+			name = client.Name
 		}
 		tmp, err := templates.Services.ReadFile(strings.Join([]string{"services",
 			configs.NetworksConfigs()[gd.Network].NetworkService,
@@ -178,7 +174,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		}
 	}
 	validatorBlockerTemplate := ""
-	if !cls[validator].Omitted {
+	if cls[validator] != nil {
 		validatorBlockerTemplate = "validator-blocker"
 	} else {
 		validatorBlockerTemplate = "empty-validator-blocker"
@@ -202,11 +198,11 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	// Check vars related to Consensus service
 	var xeeVersion, clCheckpointSyncUrl bool
 
-	if !cls[execution].Omitted {
+	if cls[execution] != nil {
 		gd.ExecutionClient.Endpoint = configs.OnPremiseExecutionURL
 	}
 
-	if !cls[consensus].Omitted {
+	if cls[consensus] != nil {
 		gd.ConsensusClient.Endpoint = configs.OnPremiseConsensusURL
 		// Check for XEE_VERSION in teku
 		xeeVersion, err = env.CheckVariable(env.ReXEEV, gd.Network, "consensus", gd.ConsensusClient.Name)
@@ -237,14 +233,14 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ecBootnodes = configs.NetworksConfigs()[gd.Network].DefaultECBootnodes
 	}
 	var mevSupported bool
-	if !cls[validator].Omitted {
+	if cls[validator] != nil {
 		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient.Name)
 		if err != nil {
 			return err
 		}
 	}
 	// If consensus is running with other services, and not set the MevBoostEndpoint, set it to the default
-	if !cls[consensus].Omitted && (!cls[execution].Omitted || !cls[validator].Omitted) && gd.MevBoostEndpoint == "" && gd.Mev {
+	if cls[consensus] != nil && (cls[execution] != nil || cls[validator] != nil) && gd.MevBoostEndpoint == "" && gd.Mev {
 		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ConsensusClient.Name)
 		if err != nil {
 			return err
@@ -309,9 +305,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 }
 
 func EnvFile(gd *GenData, at io.Writer) error {
-	if gd.ExecutionClient == nil && gd.ConsensusClient == nil && gd.ValidatorClient == nil {
-		return ErrEmptyData
-	}
+	//if gd.ExecutionClient == nil && gd.ConsensusClient == nil && gd.ValidatorClient == nil {
+	//	return ErrEmptyData
+	//}
 	rawBaseTmp, err := templates.Envs.ReadFile(strings.Join([]string{"envs", gd.Network, "env_base.tmpl"}, "/"))
 	if err != nil {
 		return ErrTemplateNotFound
@@ -326,7 +322,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 
 	for tmpKind, client := range cls {
 		var tmp []byte
-		if client.Omitted {
+		if client == nil {
 			tmp, err = templates.Services.ReadFile(strings.Join([]string{
 				"services",
 				configs.NetworksConfigs()[gd.Network].NetworkService,
@@ -347,20 +343,22 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		}
 	}
 	executionApiUrl := gd.ExecutionApiUrl
-	if executionApiUrl == "" {
-		executionApiUrl = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELApi"])
-	}
 	executionAuthUrl := gd.ExecutionAuthUrl
-	if executionAuthUrl == "" {
-		executionAuthUrl = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELAuth"])
+	if cls[execution] != nil {
+		if executionApiUrl == "" {
+			executionApiUrl = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELApi"])
+		}
+		if executionAuthUrl == "" {
+			executionAuthUrl = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELAuth"])
+		}
 	}
 	consensusApiUrl := gd.ConsensusApiUrl
 	var consensusAdditionalApiUrl string
 	if consensusApiUrl == "" {
-		consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", cls[consensus].Endpoint, gd.Ports["CLAdditionalApi"])
-		consensusApiUrl = fmt.Sprintf("%s:%v", cls[consensus].Endpoint, gd.Ports["CLApi"])
+		consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLAdditionalApi"])
+		consensusApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLApi"])
 	} else {
-		if cls[consensus].Name == "prysm" {
+		if cls[consensus] != nil && cls[consensus].Name == "prysm" {
 			consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", "consensus", gd.Ports["CLAdditionalApi"])
 		} else {
 			consensusAdditionalApiUrl = consensusApiUrl
@@ -369,11 +367,11 @@ func EnvFile(gd *GenData, at io.Writer) error {
 
 	// TODO: Use OS wise delimiter for these data structs
 	data := EnvData{
-		ElImage:                   cls[execution].Image,
+		ElImage:                   imageOrEmpty(cls[execution]),
 		ElDataDir:                 "./" + configs.ExecutionDir,
-		CcImage:                   cls[consensus].Image,
+		CcImage:                   imageOrEmpty(cls[consensus]),
 		CcDataDir:                 "./" + configs.ConsensusDir,
-		VlImage:                   cls[validator].Image,
+		VlImage:                   imageOrEmpty(cls[validator]),
 		VlDataDir:                 "./" + configs.ValidatorDir,
 		ExecutionApiURL:           executionApiUrl,
 		ExecutionAuthURL:          executionAuthUrl,
@@ -381,15 +379,15 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ConsensusAdditionalApiURL: consensusAdditionalApiUrl,
 		FeeRecipient:              gd.FeeRecipient,
 		JWTSecretPath:             gd.JWTSecretPath,
-		ExecutionEngineName:       cls[execution].Name,
-		ConsensusClientName:       cls[consensus].Name,
+		ExecutionEngineName:       nameOrEmpty(cls[execution]),
+		ConsensusClientName:       nameOrEmpty(cls[consensus]),
 		KeystoreDir:               "./" + configs.KeystoreDir,
 		Graffiti:                  gd.Graffiti,
 		RelayURL:                  gd.RelayURL,
 	}
 
 	// Fix prysm rpc url
-	if cls[validator].Name == "prysm" {
+	if cls[validator] != nil && cls[validator].Name == "prysm" {
 		data.ConsensusAdditionalApiURL = fmt.Sprintf("%s:%d", "consensus", gd.Ports["CLAdditionalApi"])
 	}
 
@@ -400,4 +398,24 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	}
 
 	return nil
+}
+
+func endpointOrEmpty(cls *clients.Client) string {
+	if cls != nil {
+		return cls.Endpoint
+	}
+	return ""
+}
+
+func nameOrEmpty(cls *clients.Client) string {
+	if cls != nil {
+		return cls.Name
+	}
+	return ""
+}
+func imageOrEmpty(cls *clients.Client) string {
+	if cls != nil {
+		return cls.Image
+	}
+	return ""
 }

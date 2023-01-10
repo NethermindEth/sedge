@@ -43,7 +43,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 	configs.InitNetworksConfigs()
 	samplePath := t.TempDir()
 	sampleData := &generate.GenData{
-		ExecutionClient: &clients.Client{Name: "nethermind", Omitted: false},
+		ExecutionClient: &clients.Client{Name: "nethermind"},
 		Network:         "mainnet",
 	}
 	sedgeAction := newAction(t, nil)
@@ -90,7 +90,7 @@ func TestFolderCreationOnCompose(t *testing.T) {
 	configs.InitNetworksConfigs()
 	samplePath := t.TempDir() + "test"
 	sampleData := &generate.GenData{
-		ExecutionClient: &clients.Client{Name: "nethermind", Omitted: false},
+		ExecutionClient: &clients.Client{Name: "nethermind"},
 		Network:         "mainnet",
 	}
 	sedgeAction := newAction(t, nil)

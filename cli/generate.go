@@ -177,9 +177,9 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	}
 	// Generate docker-compose scripts
 	gd := generate.GenData{
-		ExecutionClient:         &combinedClients.Execution,
-		ConsensusClient:         &combinedClients.Consensus,
-		ValidatorClient:         &combinedClients.Validator,
+		ExecutionClient:         combinedClients.Execution,
+		ConsensusClient:         combinedClients.Consensus,
+		ValidatorClient:         combinedClients.Validator,
 		Network:                 network,
 		CheckpointSyncUrl:       flags.checkpointSyncUrl,
 		FeeRecipient:            flags.feeRecipient,
@@ -232,7 +232,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	}
 
 	// If teku is chosen, then prepare datadir with 777 permissions
-	if combinedClients.Consensus.Name == "teku" {
+	if combinedClients.Consensus != nil && combinedClients.Consensus.Name == "teku" {
 		if err = preRunTeku(services, generationPath); err != nil {
 			return err
 		}
