@@ -9,7 +9,7 @@
       - sedge
     volumes:
       - ${EC_DATA_DIR}:/var/lib/besu/data
-      - ${CC_JWT_SECRET_PATH}:/var/lib/besu/jwtsecret{{if .CustomChainSpecPath}}
+      - ${EC_JWT_SECRET_PATH}:/var/lib/besu/jwtsecret{{if .CustomChainSpecPath}}
       - {{.CustomChainSpecPath}}:/nethermind/custom_config/chainspec.json{{end}}
     user: root
     ports:
