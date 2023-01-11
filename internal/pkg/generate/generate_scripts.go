@@ -222,13 +222,19 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	// Check for CC Bootnode nodes
-	ccBootnodes := gd.CCBootnodes
+	var ccBootnodes []string
+	if gd.CCBootnodes != nil {
+		ccBootnodes = *gd.CCBootnodes
+	}
 	if len(ccBootnodes) == 0 {
 		ccBootnodes = configs.NetworksConfigs()[gd.Network].DefaultCCBootnodes
 	}
 
 	// Check for Bootnode nodes
-	ecBootnodes := gd.ECBootnodes
+	var ecBootnodes []string
+	if gd.ECBootnodes != nil {
+		ecBootnodes = *gd.ECBootnodes
+	}
 	if len(ecBootnodes) == 0 {
 		ecBootnodes = configs.NetworksConfigs()[gd.Network].DefaultECBootnodes
 	}
@@ -270,10 +276,10 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ClApiPort:           gd.Ports["CLApi"],
 		ClAdditionalApiPort: gd.Ports["CLAdditionalApi"],
 		VlMetricsPort:       gd.Ports["VLMetrics"],
-		FallbackELUrls:      gd.FallbackELUrls,
-		ElExtraFlags:        gd.ElExtraFlags,
-		ClExtraFlags:        gd.ClExtraFlags,
-		VlExtraFlags:        gd.VlExtraFlags,
+		FallbackELUrls:      arrayOrEmpty(gd.FallbackELUrls),
+		ElExtraFlags:        arrayOrEmpty(gd.ElExtraFlags),
+		ClExtraFlags:        arrayOrEmpty(gd.ClExtraFlags),
+		VlExtraFlags:        arrayOrEmpty(gd.VlExtraFlags),
 		ECBootnodesList:     ecBootnodes,
 		CCBootnodesList:     ccBootnodes,
 		ECBootnodes:         strings.Join(ecBootnodes, ","),
@@ -302,6 +308,13 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	return nil
+}
+
+func arrayOrEmpty(array *[]string) []string {
+	if array == nil {
+		return []string{}
+	}
+	return *array
 }
 
 func EnvFile(gd *GenData, at io.Writer) error {

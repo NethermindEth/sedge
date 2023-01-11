@@ -142,8 +142,8 @@ func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceMana
 	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
 	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
-	flags.customEnodes = *cmd.Flags().StringSlice("execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
-	flags.customEnrs = *cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
+	flags.customEnodes = cmd.Flags().StringSlice("execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
+	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
 	cmd.Flags().StringVar(&flags.slashingProtection, "slashing-protection", "", "Path to the file with slashing protection interchange data (EIP-3076)")
 	cmd.Flags().SortFlags = false
 	return cmd
@@ -368,10 +368,10 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		FeeRecipient:            flags.feeRecipient,
 		JWTSecretPath:           flags.jwtPath,
 		Graffiti:                flags.graffiti,
-		FallbackELUrls:          *flags.fallbackEL,
-		ElExtraFlags:            *flags.elExtraFlags,
-		ClExtraFlags:            *flags.clExtraFlags,
-		VlExtraFlags:            *flags.vlExtraFlags,
+		FallbackELUrls:          flags.fallbackEL,
+		ElExtraFlags:            flags.elExtraFlags,
+		ClExtraFlags:            flags.clExtraFlags,
+		VlExtraFlags:            flags.vlExtraFlags,
 		MapAllPorts:             flags.mapAllPorts,
 		Mev:                     !flags.noMev && !flags.noValidator,
 		MevImage:                flags.mevImage,

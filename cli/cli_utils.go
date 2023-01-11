@@ -413,8 +413,8 @@ type CustomFlags struct {
 	customNetworkConfig string
 	customGenesis       string
 	customDeployBlock   string
-	customEnodes        []string
-	customEnrs          []string
+	customEnodes        *[]string
+	customEnrs          *[]string
 }
 
 func LoadCustomNetworksConfig(flags *CustomFlags, network, generationPath string) (CustomNetworkConfigsData, error) {
