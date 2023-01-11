@@ -175,9 +175,6 @@ jobs:
       run: sleep 3600s
       shell: bash
     - uses: actions/setup-python@v4
-      with:
-        python-version: '3.8.10'
-        cache: 'pip'
     - run: pip install launchpadlib --upgrade
     - name: Run copy binaries PPA script
       env: 
