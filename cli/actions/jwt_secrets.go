@@ -9,19 +9,19 @@ import (
 	"path/filepath"
 )
 
-type CreateJwtSecretOptions struct {
-	JwtPath        string
+type CreateJWTSecretOptions struct {
+	JWTPath        string
 	Network        string
 	GenerationPath string
 }
 
-func (s *sedgeActions) CreateJwtSecrets(options CreateJwtSecretOptions) (string, error) {
+func (s *sedgeActions) CreateJwtSecrets(options CreateJWTSecretOptions) (string, error) {
 	if options.Network == "" {
 		return "", ErrorNetworkNotFound
 	}
 	// Generate JWT secret if necessary
 	var err error
-	jwtPath := options.JwtPath
+	jwtPath := options.JWTPath
 	if jwtPath == "" && configs.NetworksConfigs()[options.Network].RequireJWT {
 		return handleJWTSecret(options.GenerationPath)
 	} else if filepath.IsAbs(jwtPath) { // Ensure jwtPath is absolute

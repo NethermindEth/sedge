@@ -312,8 +312,8 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 
 	// Generate JWT secret if necessary
 	jwtPath := flags.jwtPath
-	jwtPath, err = sedgeActions.CreateJwtSecrets(actions.CreateJwtSecretOptions{
-		JwtPath:        jwtPath,
+	jwtPath, err = sedgeActions.CreateJwtSecrets(actions.CreateJWTSecretOptions{
+		JWTPath:        jwtPath,
 		Network:        flags.network,
 		GenerationPath: flags.generationPath,
 	})

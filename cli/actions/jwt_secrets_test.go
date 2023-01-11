@@ -12,30 +12,30 @@ func TestCreateJwtSecrets(t *testing.T) {
 	configs.InitNetworksConfigs()
 	tests := []struct {
 		name    string
-		options actions.CreateJwtSecretOptions
+		options actions.CreateJWTSecretOptions
 		err     bool
 	}{
 		{
 			name: "Wrong Jwt Path",
-			options: actions.CreateJwtSecretOptions{
+			options: actions.CreateJWTSecretOptions{
 				GenerationPath: t.TempDir(),
-				JwtPath:        filepath.Join("a", "b", "c"),
+				JWTPath:        filepath.Join("a", "b", "c"),
 				Network:        "mainnet",
 			},
 		},
 		{
 			name: "Missing network",
-			options: actions.CreateJwtSecretOptions{
+			options: actions.CreateJWTSecretOptions{
 				GenerationPath: t.TempDir(),
-				JwtPath:        "",
+				JWTPath:        "",
 			},
 			err: true,
 		},
 		{
 			name: "Generation of jwt",
-			options: actions.CreateJwtSecretOptions{
+			options: actions.CreateJWTSecretOptions{
 				GenerationPath: t.TempDir(),
-				JwtPath:        "",
+				JWTPath:        "",
 				Network:        "mainnet",
 			},
 		},
@@ -49,7 +49,7 @@ func TestCreateJwtSecrets(t *testing.T) {
 				return
 			}
 			assert.True(t, !tc.err)
-			if tc.options.JwtPath != "" {
+			if tc.options.JWTPath != "" {
 				return
 			}
 			assert.FileExists(t, jwtPath)
