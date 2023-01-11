@@ -19,7 +19,7 @@ cd ..
 echo 'Signing package'
 debsign -p 'gpg --batch --yes --no-tty --pinentry-mode loopback --passphrase-file /tmp/PASSPHRASE' -S -k$PPA_GPG_KEYID sedge_${VERSION}_source.changes
 echo 'Uploading'
-dput -s -f ppa:nethermindeth/sedge sedge_${VERSION}_source.changes
+dput -f ppa:nethermindeth/sedge sedge_${VERSION}_source.changes
 echo "Publishing Sedge to PPA complete"
 echo 'Cleanup'
 rm -r sedge_$VERSION*
