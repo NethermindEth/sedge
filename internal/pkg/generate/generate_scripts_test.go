@@ -57,7 +57,10 @@ var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env
 	if err != nil {
 		return err
 	}
-	ccBootnodes := data.CCBootnodes
+	var ccBootnodes []string
+	if data.CCBootnodes != nil {
+		ccBootnodes = *data.CCBootnodes
+	}
 	if len(ccBootnodes) == 0 {
 		ccBootnodes = configs.NetworksConfigs()[data.Network].DefaultCCBootnodes
 	}
@@ -114,7 +117,10 @@ var checkECBootnodesOnExecution = func(t *testing.T, data *GenData, compose, env
 	if err != nil {
 		return err
 	}
-	ecBootnodes := data.ECBootnodes
+	var ecBootnodes []string
+	if data.ECBootnodes != nil {
+		ecBootnodes = *data.ECBootnodes
+	}
 	if len(ecBootnodes) == 0 {
 		ecBootnodes = configs.NetworksConfigs()[data.Network].DefaultECBootnodes
 	}
@@ -203,7 +209,11 @@ var checkExtraFlagsOnExecution = func(t *testing.T, data *GenData, compose, env 
 	}
 
 	if composeData.Services.Execution != nil {
-		for _, flag := range data.ElExtraFlags {
+		var extraFlags []string
+		if data.ElExtraFlags != nil {
+			extraFlags = *data.ElExtraFlags
+		}
+		for _, flag := range extraFlags {
 			assert.True(t, utils.Contains(composeData.Services.Execution.Command, "--"+flag))
 		}
 	} else {
@@ -364,7 +374,7 @@ func TestGenerateComposeServices(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				Services:        []string{execution},
 				Network:         "mainnet",
-				ElExtraFlags:    []string{"extra", "flag"},
+				ElExtraFlags:    &[]string{"extra", "flag"},
 			},
 			CheckFunctions: []CheckFunc{checkExtraFlagsOnExecution},
 		},
@@ -441,7 +451,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 							GenerationData: &GenData{
 								Services:        []string{execution, consensus},
 								ExecutionClient: &clients.Client{Name: executionCl},
-								ECBootnodes:     []string{"enode:1", "enode:2", "enode:3"},
+								ECBootnodes:     &[]string{"enode:1", "enode:2", "enode:3"},
 								ConsensusClient: &clients.Client{Name: consensusCl},
 								Network:         network,
 							},
@@ -452,7 +462,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 							GenerationData: &GenData{
 								Services:        []string{consensus},
 								ConsensusClient: &clients.Client{Name: consensusCl},
-								CCBootnodes:     []string{"enr:1", "enr:2"},
+								CCBootnodes:     &[]string{"enr:1", "enr:2"},
 								Network:         network,
 							},
 							CheckFunctions: []CheckFunc{defaultFunc, checkCCBootnodesOnConsensus},

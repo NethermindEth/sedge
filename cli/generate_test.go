@@ -131,11 +131,11 @@ func (flags *GenCmdFlags) argsList() []string {
 	if flags.customDeployBlock != "" {
 		s = append(s, "--custom-deploy-block", flags.customDeployBlock)
 	}
-	if len(flags.customEnodes) != 0 {
-		s = append(s, "--execution-bootnodes", strings.Join(flags.customEnodes, ","))
+	if flags.customEnodes != nil && len(*flags.customEnodes) != 0 {
+		s = append(s, "--execution-bootnodes", strings.Join(*flags.customEnodes, ","))
 	}
-	if len(flags.customEnrs) != 0 {
-		s = append(s, "--consensus-bootnodes", strings.Join(flags.customEnrs, ","))
+	if flags.customEnrs != nil && len(*flags.customEnrs) != 0 {
+		s = append(s, "--consensus-bootnodes", strings.Join(*flags.customEnrs, ","))
 	}
 	return s
 }
