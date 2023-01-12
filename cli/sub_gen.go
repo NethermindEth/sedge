@@ -40,7 +40,7 @@ func FullNodeSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "full-node [flags]",
 		Short: "Generate a full node config, with or without a validator",
-		Long: `Generate a docker-compose and an environment file with a full node configuration
+		Long: `Generate a docker-compose and an environment file with a full node configuration.
 
 It will not generate a validator configuration if the --no-validator flag is set to true.
 
@@ -133,7 +133,7 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "consensus [flags] [args]",
 		Short: "Generate a consensus node config",
-		Long: "Generate a docker-compose file with a consensus node configuration\n" +
+		Long: "Generate a docker-compose and an environment file with a consensus node configuration\n" +
 			"Valid args: name of execution clients according to network\n\n" +
 			"Should be one of: lighthouse, teku, prysm, lodestar",
 		Args: func(cmd *cobra.Command, args []string) error {

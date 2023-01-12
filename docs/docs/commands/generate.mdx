@@ -13,7 +13,7 @@ Running `sedge generate` with the different sub commands will generate the docke
 $ sedge generate -h
 Generate new setups according to selected options and flags.
 
-It will only create a docker-compose script, you will need later to run that script.
+It will create a 'docker-compose.yml' and an '.env', you will need later to run the docker-compose script.
 
 You can generate:
 - Full Nodes (consensus+execution+validator)
@@ -50,7 +50,7 @@ Use "sedge generate [command] --help" for more information about a command.
 #### Full-Node
 
 ```
-Generate a docker-compose file with a full node configuration
+Generate a docker-compose and an environment file with a full node configuration.
 
 It will not generate a validator configuration if the --no-validator flag is set to true.
 
@@ -95,7 +95,11 @@ Global Flags:
 
 ```
 $ sedge generate consensus -h
-Generate a docker-compose file with a consensus node configuration
+Generate a docker-compose and an environment file with a consensus node configuration
+
+Valid args: name of execution clients according to network
+
+Should be one of: lighthouse, teku, prysm, lodestar
 
 Usage:
   sedge generate consensus [flags] [args]
@@ -127,7 +131,10 @@ Global Flags:
 
 ```
 $ sedge generate execution -h
-Generate a docker-compose file with a execution node configuration
+Generate a docker-compose and an environment file with a execution node configuration.
+Valid args: name of execution clients according to network
+
+Should be one of: nethermind, geth, besu, erigon
 
 Usage:
   sedge generate execution [flags] [args]
@@ -152,7 +159,10 @@ Global Flags:
 
 ```
 $ sedge generate validator -h
-Generate a docker-compose file with a validator node configuration
+Generate a docker-compose and an environment file with a validator node configuration
+Valid args: name of execution clients according to network
+
+Should be one of: lighthouse, teku, prysm, lodestar
 
 Usage:
   sedge generate validator [flags] [args]
@@ -177,7 +187,7 @@ Global Flags:
 
 ```
 $ sedge generate mevboost -h
-Generate a docker-compose file with a mev-boost node configuration
+Generate a docker-compose and an environment file with a mev-boost node configuration
 
 Usage:
   sedge generate mevboost [flags]
