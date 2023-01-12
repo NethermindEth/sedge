@@ -15,7 +15,7 @@ type CreateJWTSecretOptions struct {
 	GenerationPath string
 }
 
-func (s *sedgeActions) CreateJwtSecrets(options CreateJWTSecretOptions) (string, error) {
+func (s *sedgeActions) CreateJWTSecrets(options CreateJWTSecretOptions) (string, error) {
 	if options.Network == "" {
 		return "", ErrorNetworkNotFound
 	}
