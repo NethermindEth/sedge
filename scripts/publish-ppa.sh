@@ -3,7 +3,7 @@
 set -e
 cd /home/runner/work/sedge/sedge/sedge
 mkdir -p build/package/debian/src/github.com/NethermindEth/sedge/
-rsync -aq . build/package/debian/src/github.com/NethermindEth/sedge/ --exclude build/ --exclude .git/ --exclude docs/ --exclude scripts/
+rsync -aq . build/package/debian/src/github.com/NethermindEth/sedge/ --exclude build/ --exclude .git/ --exclude docs/
 cd build/package/debian/src/github.com/NethermindEth/sedge/ && go mod vendor
 cd /home/runner/work/sedge/sedge/sedge
 
