@@ -52,6 +52,7 @@ func TestCreateJwtSecrets(t *testing.T) {
 				}
 				tc.options.JWTPath = filepath.Join(tc.options.JWTPath, "jwtSecret")
 				defer os.Remove(file.Name())
+				defer file.Close()
 			}
 			jwtPath, err := sedgeActions.CreateJWTSecrets(tc.options)
 			if tc.err {
