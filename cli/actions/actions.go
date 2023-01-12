@@ -22,6 +22,7 @@ import (
 )
 
 type SedgeActions interface {
+	GetCommandRunner() commands.CommandRunner
 	ImportSlashingInterchangeData(SlashingImportOptions) error
 	ExportSlashingInterchangeData(SlashingExportOptions) error
 	SetupContainers(SetupContainersOptions) error
@@ -41,4 +42,8 @@ func NewSedgeActions(dockerClient client.APIClient, serviceManager services.Serv
 		serviceManager: serviceManager,
 		commandRunner:  commandRunner,
 	}
+}
+
+func (s *sedgeActions) GetCommandRunner() commands.CommandRunner {
+	return s.commandRunner
 }

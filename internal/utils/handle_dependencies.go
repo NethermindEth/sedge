@@ -210,3 +210,14 @@ func dependencySupported(dependency string) bool {
 
 	return true
 }
+
+func DependenciesSupported(dependencies []string) (supported []string, unsupported []string) {
+	for _, dependency := range dependencies {
+		if dependencySupported(dependency) {
+			supported = append(supported, dependency)
+		} else {
+			unsupported = append(unsupported, dependency)
+		}
+	}
+	return
+}

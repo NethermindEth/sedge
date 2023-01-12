@@ -33,6 +33,21 @@ func (m *MockPrompt) EXPECT() *MockPromptMockRecorder {
 	return m.recorder
 }
 
+// Confirm mocks base method.
+func (m *MockPrompt) Confirm(label string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Confirm", label)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Confirm indicates an expected call of Confirm.
+func (mr *MockPromptMockRecorder) Confirm(label interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Confirm", reflect.TypeOf((*MockPrompt)(nil).Confirm), label)
+}
+
 // Eth1Withdrawal mocks base method.
 func (m *MockPrompt) Eth1Withdrawal() (string, error) {
 	m.ctrl.T.Helper()
@@ -77,6 +92,66 @@ func (mr *MockPromptMockRecorder) FeeRecipient() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeRecipient", reflect.TypeOf((*MockPrompt)(nil).FeeRecipient))
 }
 
+// Input mocks base method.
+func (m *MockPrompt) Input(label string, optional bool) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Input", label, optional)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Input indicates an expected call of Input.
+func (mr *MockPromptMockRecorder) Input(label, optional interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Input", reflect.TypeOf((*MockPrompt)(nil).Input), label, optional)
+}
+
+// InputFilePath mocks base method.
+func (m *MockPrompt) InputFilePath(label string, required bool) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InputFilePath", label, required)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InputFilePath indicates an expected call of InputFilePath.
+func (mr *MockPromptMockRecorder) InputFilePath(label, required interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InputFilePath", reflect.TypeOf((*MockPrompt)(nil).InputFilePath), label, required)
+}
+
+// InputHide mocks base method.
+func (m *MockPrompt) InputHide(label string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InputHide", label)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InputHide indicates an expected call of InputHide.
+func (mr *MockPromptMockRecorder) InputHide(label interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InputHide", reflect.TypeOf((*MockPrompt)(nil).InputHide), label)
+}
+
+// InputNumber mocks base method.
+func (m *MockPrompt) InputNumber(label string) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InputNumber", label)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InputNumber indicates an expected call of InputNumber.
+func (mr *MockPromptMockRecorder) InputNumber(label interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InputNumber", reflect.TypeOf((*MockPrompt)(nil).InputNumber), label)
+}
+
 // NumberVal mocks base method.
 func (m *MockPrompt) NumberVal() int64 {
 	m.ctrl.T.Helper()
@@ -103,4 +178,24 @@ func (m *MockPrompt) Passphrase() string {
 func (mr *MockPromptMockRecorder) Passphrase() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Passphrase", reflect.TypeOf((*MockPrompt)(nil).Passphrase))
+}
+
+// Select mocks base method.
+func (m *MockPrompt) Select(label string, options ...string) (string, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{label}
+	for _, a := range options {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Select", varargs...)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Select indicates an expected call of Select.
+func (mr *MockPromptMockRecorder) Select(label interface{}, options ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{label}, options...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Select", reflect.TypeOf((*MockPrompt)(nil).Select), varargs...)
 }

@@ -46,30 +46,35 @@ func init() {
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00000000",
+			SupportsMEVBoost:   true,
 		},
 		{
 			Name:               "goerli",
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00001020",
+			SupportsMEVBoost:   true,
 		},
 		{
 			Name:               "sepolia",
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x90000069",
+			SupportsMEVBoost:   false,
 		},
 		{
 			Name:               "chiado",
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x0000006f",
+			SupportsMEVBoost:   false,
 		},
 		{
 			Name:               "gnosis",
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00000064",
+			SupportsMEVBoost:   false,
 		},
 	}
 	for _, config := range configs {

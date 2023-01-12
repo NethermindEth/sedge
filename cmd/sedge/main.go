@@ -45,6 +45,7 @@ func main() {
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
 		cli.CliCmd(cmdRunner, prompt, serviceManager, sedgeActions),
+		cli.CliRefactorCmd(prompt, sedgeActions),
 		cli.KeysCmd(cmdRunner, prompt),
 		cli.DownCmd(cmdRunner),
 		cli.ClientsCmd(),

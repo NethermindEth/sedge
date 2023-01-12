@@ -25,4 +25,5 @@ type NetworkConfig struct {
 	RequireJWT         bool
 	NetworkService     string
 	GenesisForkVersion string
+	SupportsMEVBoost   bool
 }
