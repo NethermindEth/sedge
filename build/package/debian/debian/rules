@@ -1,0 +1,31 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+export GOPATH=$(CURDIR)
+export HOME=$(CURDIR)
+export DEB_BUILD_OPTIONS = noautodbgsym
+PKGDIR=debian/sedge
+
+%:
+	dh $@ 
+
+clean:
+	dh_clean
+	rm -rf $(GOPATH)/bin/* $(GOPATH)/pkg/*
+	rm -f $(GOPATH)/goinstall.log
+
+binary-arch: clean
+	dh_prep
+	dh_installdirs
+	cd $(GOPATH)/src/github.com/NethermindEth/sedge/cmd/sedge/ && go install > /dev/null 2>&1
+	mkdir -p $(PKGDIR)/usr/bin
+	cp $(GOPATH)/bin/* $(PKGDIR)/usr/bin/
+	dh_strip --no-automatic-dbgsym
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-arch
