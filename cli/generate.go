@@ -211,7 +211,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		CustomDeployBlockPath:   customNetworkConfigsData.NetworkDeployBlockPath,
 		MevBoostOnValidator:     flags.mevBoostOnVal,
 	}
-	err = sedgeAction.GenerateCompose(actions.GenerateComposeOptions{
+	err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: &gd,
 		GenerationPath: generationPath,
 	})

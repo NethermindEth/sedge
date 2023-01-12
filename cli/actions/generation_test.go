@@ -48,7 +48,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 	}
 	sedgeAction := newAction(t, nil)
 
-	err := sedgeAction.GenerateCompose(actions.GenerateComposeOptions{
+	err := sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: sampleData,
 		GenerationPath: samplePath,
 	})
@@ -65,24 +65,17 @@ func TestGenerateDockerCompose(t *testing.T) {
 	// Validate that Execution Client info matches the sample data
 	// load the docker-compose file
 	composeFile, err := os.ReadFile(filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
-	if err != nil {
-		t.Error("unable to read docker-compose.yml")
-	}
+	assert.Nilf(t, err, "unable to read docker-compose.yml")
+
 	var composeData generate.ComposeData
 	err = yaml.Unmarshal(composeFile, &composeData)
-	if err != nil {
-		t.Error("unable to parse docker-compose.yml")
-	}
+	assert.Nilf(t, err, "unable to parse docker-compose.yml")
 
 	// Check that the execution client is nethermind
-	if composeData.Services.Execution.ContainerName != "execution-client" {
-		t.Error("execution client image does not match")
-	}
+	assert.Equal(t, composeData.Services.Execution.ContainerName, "execution-client")
 
 	// Check other services are nil
-	if composeData.Services.Consensus != nil {
-		t.Error("consensus client should be nil")
-	}
+	assert.Nil(t, composeData.Services.Consensus)
 
 }
 
@@ -95,12 +88,11 @@ func TestFolderCreationOnCompose(t *testing.T) {
 	}
 	sedgeAction := newAction(t, nil)
 
-	err := sedgeAction.GenerateCompose(actions.GenerateComposeOptions{
+	err := sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: sampleData,
 		GenerationPath: samplePath,
 	})
-	if err != nil {
-		t.Error("GenerateDockerComposeAndEnvFile() failed", err)
+	if !assert.Nilf(t, err, "GenerateDockerComposeAndEnvFile() failed") {
 		return
 	}
 
@@ -112,8 +104,7 @@ func TestFolderCreationOnCompose(t *testing.T) {
 	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultEnvFileName))
 	// Remove the folder
 	err = os.RemoveAll(samplePath)
-	if err != nil {
-		t.Error("unable to remove sample folder")
+	if !assert.Nilf(t, err, "unable to remove sample folder") {
 		return
 	}
 	assert.NoDirExists(t, samplePath)

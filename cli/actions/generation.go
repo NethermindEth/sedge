@@ -24,12 +24,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type GenerateComposeOptions struct {
+type GenerateOptions struct {
 	GenerationData *generate.GenData
 	GenerationPath string
 }
 
-func (s *sedgeActions) GenerateCompose(options GenerateComposeOptions) error {
+func (s *sedgeActions) Generate(options GenerateOptions) error {
 	// Create scripts directory if not exists
 	if _, err := os.Stat(options.GenerationPath); os.IsNotExist(err) {
 		err = os.MkdirAll(options.GenerationPath, 0o755)

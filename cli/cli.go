@@ -386,7 +386,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		CustomDeployBlock:       flags.customDeployBlock,
 		CustomDeployBlockPath:   customNetworkConfigsData.NetworkDeployBlockPath,
 	}
-	err = sedgeActions.GenerateCompose(actions.GenerateComposeOptions{GenerationData: gd, GenerationPath: flags.generationPath})
+	err = sedgeActions.Generate(actions.GenerateOptions{GenerationData: gd, GenerationPath: flags.generationPath})
 	if err != nil {
 		return []error{err}
 	}
