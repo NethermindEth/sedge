@@ -22,7 +22,7 @@
       - {{.ElApiPort}}
       - {{.ElAuthPort}}
     command:{{if .TTD}}
-    - --terminalTotalDifficulty={{.TTD}}{{end}}
+    - --override-genesis-config=terminalTotalDifficulty={{.TTD}}{{end}}
     - --sync-mode=X_SNAP
     - --data-storage-format=BONSAI{{if .CustomChainSpecPath}}
     - --genesis-file=/nethermind/custom_config/chainspec.json{{else}}
