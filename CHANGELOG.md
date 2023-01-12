@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated installation of docker and docker compose using dependency installer.
+- Updated installation script for docker and docker-compose.
 - Fixed validator restart failure:
   - Validator waits a grace period (2 epochs) before starting.
   - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint returns with the HTTP code 200 in its docker-compose `healthcheck` condition so that the validator waits for the consensus be healthy. This replace the older track sync method.
