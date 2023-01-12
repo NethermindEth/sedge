@@ -97,7 +97,7 @@ var checkTTDOnExecution = func(t *testing.T, data *GenData, compose, env io.Read
 	}
 	if customTTD != "" {
 		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "besu" {
-			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--terminalTotalDifficulty="+customTTD)
+			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--override-genesis-config=terminalTotalDifficulty="+customTTD)
 		}
 		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "erigon" {
 			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--override.terminaltotaldifficulty="+customTTD)

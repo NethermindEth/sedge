@@ -40,12 +40,12 @@ func FullNodeSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "full-node [flags]",
 		Short: "Generate a full node config, with or without a validator",
-		Long: `Generate a docker-compose file with a full node configuration
+		Long: `Generate a docker-compose and an environment file with a full node configuration
 
 It will not generate a validator configuration if the --no-validator flag is set to true.
 
 On mainnet, sepolia and goerli, mev-boost will be activated by default unless you run it with --no-mev-boost flag`,
-		Args: cobra.OnlyValidArgs,
+		Args: cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
@@ -89,7 +89,9 @@ func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "execution [flags] [args]",
 		Short: "Generate a execution node config",
-		Long:  "Generate a docker-compose file with a execution node configuration",
+		Long: "Generate a docker-compose and an environment file with a execution node configuration.\n" +
+			"Valid args: name of execution clients according to network\n\n" +
+			"Should be one of: nethermind, geth, besu, erigon",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
@@ -131,7 +133,9 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "consensus [flags] [args]",
 		Short: "Generate a consensus node config",
-		Long:  "Generate a docker-compose file with a consensus node configuration",
+		Long: "Generate a docker-compose file with a consensus node configuration\n" +
+			"Valid args: name of execution clients according to network\n\n" +
+			"Should be one of: lighthouse, teku, prysm, lodestar",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
@@ -183,7 +187,9 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "validator [flags] [args]",
 		Short: "Generate a validator node config",
-		Long:  "Generate a docker-compose file with a validator node configuration",
+		Long: "Generate a docker-compose and an environment file with a validator node configuration\n" +
+			"Valid args: name of execution clients according to network\n\n" +
+			"Should be one of: lighthouse, teku, prysm, lodestar",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
@@ -224,7 +230,7 @@ func MevBoostSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "mevboost [flags]",
 		Short: "Generate a mev-boost node config",
-		Long:  "Generate a docker-compose file with a mev-boost node configuration",
+		Long:  "Generate a docker-compose and an environment file with a mev-boost node configuration",
 		Args:  cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return preValidationGenerateCmd(network, logging)

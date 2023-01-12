@@ -70,7 +70,7 @@ func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		Short: "Generate new setups according to selected options",
 		Long: `Generate new setups according to selected options and flags.
 
-It will only create a docker-compose script, you will need later to run that script.
+It will create a 'docker-compose.yml' and an '.env', you will need later to run the docker-compose script.
 
 You can generate:
 - Full Nodes (consensus+execution+validator)
