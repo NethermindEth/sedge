@@ -133,3 +133,54 @@ jobs:
         draft: true
         tag: ${{ github.event.inputs.tag }}
         name: ${{ github.event.inputs.tag }}
+
+  publish-ppa:
+    name: "Publishing Sedge to PPA repository"
+    runs-on: ubuntu-latest
+    env: 
+      VERSION: ${{ github.event.inputs.tag }}
+      PPA_GPG_KEYID: ${{ secrets.PPA_GPG_KEYID }}
+    needs: publish-github
+    steps:
+    - run: echo "$GPG_SECRET_KEY" > /tmp/SECRET_KEY
+      shell: bash
+      env:
+        GPG_SECRET_KEY: ${{secrets.PPA_GPG_SECRET_KEY}}
+    - run: echo "$GPG_PASSPHRASE" | base64 -d > /tmp/PASSPHRASE
+      shell: bash
+      env:
+        GPG_PASSPHRASE: ${{secrets.PPA_GPG_PASSPHRASE}}
+    - name: Import GPG key
+      run: base64 --decode -i /tmp/SECRET_KEY | gpg --import --no-tty --batch --yes
+    - name: Import GPG Owner Trust
+      run: echo ${{secrets.GPG_OWNERTRUST}} | base64 --decode | gpg --import-ownertrust
+    - name: Install dependencies for PPA
+      run: |
+        sudo apt update && sudo apt install golang-go debhelper libdebhelper-perl build-essential devscripts rsync -y
+    - name: Checking out Sedge repository
+      uses: actions/checkout@master
+      with:
+        path: sedge
+    - uses: actions/setup-go@v3
+      with:
+        go-version: '1.18.3'
+    - name: Run publish PPA script
+      env: 
+        GOPATH: /home/runner/go
+      run: |
+        cd /home/runner/work/sedge/sedge/sedge
+        chmod +x scripts/publish-ppa.sh
+        ./scripts/publish-ppa.sh
+    - name: Sleep for 1 hour
+      run: sleep 3600s
+      shell: bash
+    - uses: actions/setup-python@v4
+    - run: pip install launchpadlib --upgrade
+    - name: Run copy binaries PPA script
+      env: 
+        LP_CREDENTIALS_FILE: /tmp/credentials.txt
+      run: |
+        echo ${{secrets.PPA_COPY_TOKEN}} | base64 --decode > /tmp/credentials.txt
+        cd /home/runner/work/sedge/sedge/sedge
+        chmod +x scripts/copy-ppa-packages-to-new-series.sh
+        ./scripts/copy-ppa-packages-to-new-series.sh

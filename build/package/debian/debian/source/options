@@ -1,0 +1,3 @@
+tar-ignore = .hg
+tar-ignore = .git
+tar-ignore = .bzr
