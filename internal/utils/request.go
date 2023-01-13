@@ -59,7 +59,6 @@ func GetRequest(url string, retryDuration time.Duration) (*http.Response, error)
 		}
 		return nil
 	}, b)
-
 	if err != nil {
 		return nil, err
 	}
