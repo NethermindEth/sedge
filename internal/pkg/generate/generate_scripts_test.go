@@ -92,7 +92,8 @@ func generateTestCases(t *testing.T) (tests []generateTestCase) {
 							clients.Client{Name: consensus},
 							"",
 							network,
-							true},
+							true,
+						},
 						generateTestCase{
 							fmt.Sprintf("Test Network-%s Execution-%s Consensus-%s : no validator node", network, execution, wrongDep),
 							clients.Client{Name: execution},
