@@ -28,7 +28,7 @@ const (
 	GeneratedEnvFile              = "Generated environment file for current selection of clients"
 	CleaningGeneratedFiles        = "Cleaning generated docker-compose and environment files"
 	CleanedGeneratedFiles         = "Cleaned generated files"
-	GenerationEnd                 = "Generation of files successfully, happy staking! You should use now 'sedge run'"
+	GenerationEnd                 = "Generation of files successfully, happy staking! You can use now 'sedge run' to start the setup."
 	Exiting                       = "Exiting..."
 	InstructionsFor               = "Instructions for %s"
 	OSNotSupported                = "installation not supported for %s"
