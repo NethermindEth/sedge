@@ -70,15 +70,15 @@ func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		Short: "Generate new setups according to selected options",
 		Long: `Generate new setups according to selected options and flags.
 
-It will create a 'docker-compose.yml' and an '.env', you will need later to run the docker-compose script.
+It will create a 'docker-compose.yml' and a '.env', which you will need later to run the docker-compose script. You can use 'sedge run' to run the script and start the setup.
 
 You can generate:
-- Full Nodes (consensus+execution+validator)
-- Full Nodes without Validator (consensus+execution)
-- Consensus Node
+- Full Node (execution + consensus + validator)
+- Full Node without Validator (execution + consensus)
 - Execution Node
+- Consensus Node
 - Validator Node
-- MevBoost Node
+- Mev-Boost Instance
 `,
 		Args: cobra.NoArgs,
 	}
@@ -123,7 +123,7 @@ func preValidationGenerateCmd(network, logging string) error {
 
 func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActions, services []string) error {
 
-	// Warn if exposed ports are used
+	// Warn if ports are being exposed
 	if flags.mapAllPorts {
 		log.Warn(configs.MapAllPortsWarning)
 	}
@@ -133,9 +133,9 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		log.Warnf(configs.CheckpointUrlUsedWarning, flags.checkpointSyncUrl)
 	}
 
-	// Get all clients: supported + configured
+	// Get all supported clients
 	c := clients.ClientInfo{Network: network}
-	clientsMap, errs := c.Clients(lessMevBoost(services))
+	clientsMap, errs := c.Clients(onlyClients(services))
 	if len(errs) > 0 {
 		return errs[0]
 	}
@@ -146,16 +146,18 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		return err
 	}
 
+	// Mkdir generation path if doesn't exist
 	err = initGenPath(generationPath)
 	if err != nil {
 		return err
 	}
 
+	// Generate jwt secrets if needed
 	if flags.jwtPath, err = generateJWTSecret(flags.jwtPath); err != nil {
 		return err
 	}
 
-	// Get fee recipient
+	// Warning if no fee recipient is set
 	if flags.feeRecipient == "" {
 		log.Warn(configs.EmptyFeeRecipientError)
 	}
@@ -242,7 +244,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	return nil
 }
 
-func lessMevBoost(services []string) []string {
+func onlyClients(services []string) []string {
 	newServices := make([]string, 0)
 	for _, service := range services {
 		if service != mevBoost {
