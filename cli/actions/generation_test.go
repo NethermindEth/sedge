@@ -59,7 +59,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 
 	// Check that docker-compose file exists
 	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
-	// Check that .env file doesn't exist
+	// Check that .env exists
 	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultEnvFileName))
 
 	// Validate that Execution Client info matches the sample data
