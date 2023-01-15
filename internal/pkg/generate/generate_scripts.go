@@ -119,9 +119,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	if gd == nil {
 		return ErrEmptyData
 	}
-	//if gd.ExecutionClient == nil && gd.ConsensusClient == nil && gd.ValidatorClient == nil {
-	//	return ErrEmptyData
-	//}
 	err := validateClients(gd)
 	if err != nil {
 		return err
@@ -297,7 +294,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		CustomNetwork:       gd.Network == configs.CustomNetwork.Name, // Used custom templates
 		CustomConsensusConfigs: gd.CustomNetworkConfigPath != "" ||
 			gd.CustomGenesisPath != "" ||
-			gd.CustomDeployBlockPath != "",                  // Have custom configs paths
+			gd.CustomDeployBlockPath != "", // Have custom configs paths
 		CustomChainSpecPath:     gd.CustomChainSpecPath,     // Path to chainspec.json
 		CustomNetworkConfigPath: gd.CustomNetworkConfigPath, // Path to config.yaml
 		CustomGenesisPath:       gd.CustomGenesisPath,       // Path to genesis.ssz
@@ -325,9 +322,6 @@ func arrayOrEmpty(array *[]string) []string {
 
 // EnvFile generates a .env file with the provided GenData
 func EnvFile(gd *GenData, at io.Writer) error {
-	//if gd.ExecutionClient == nil && gd.ConsensusClient == nil && gd.ValidatorClient == nil {
-	//	return ErrEmptyData
-	//}
 	rawBaseTmp, err := templates.Envs.ReadFile(strings.Join([]string{"envs", gd.Network, "env_base.tmpl"}, "/"))
 	if err != nil {
 		return ErrTemplateNotFound
