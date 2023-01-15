@@ -26,8 +26,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// read the .env file
-func retriveEnvData(t *testing.T, reader io.Reader) map[string]string {
+// retrieveEnvData is a helper function that retrieves the environment data from the given reader
+func retrieveEnvData(t *testing.T, reader io.Reader) map[string]string {
 	envFile, err := io.ReadAll(reader)
 	if err != nil {
 		t.Error("unable to read .env file")
@@ -153,7 +153,7 @@ func TestGenerateEnvFile(t *testing.T) {
 				return
 			}
 			// read the .env file
-			data := retriveEnvData(t, &buffer)
+			data := retrieveEnvData(t, &buffer)
 			for key, value := range tt.fieldsToCheck {
 				assert.Contains(t, data, key)
 				assert.Equal(t, value, strings.ReplaceAll(data[key], "\r", ""))

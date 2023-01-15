@@ -255,7 +255,7 @@ var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) erro
 	}
 
 	// load .env file
-	envData := retriveEnvData(t, env)
+	envData := retrieveEnvData(t, env)
 	if data.Network == "gnosis" {
 		// Check that the right network is set
 		assert.Contains(t, envData, "EL_NETWORK")
