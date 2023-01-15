@@ -102,8 +102,8 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 	return nil
 }
 
-// getClients convert genData clients to clients.Clients
-func getClients(gd *GenData) map[string]*clients.Client {
+// mapClients convert genData clients to clients.Clients
+func mapClients(gd *GenData) map[string]*clients.Client {
 	cls := map[string]*clients.Client{
 		execution: gd.ExecutionClient,
 		consensus: gd.ConsensusClient,
@@ -157,7 +157,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		return err
 	}
 
-	cls := getClients(gd)
+	cls := mapClients(gd)
 
 	for tmpKind, client := range cls {
 		var name string
@@ -297,7 +297,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		CustomNetwork:       gd.Network == configs.CustomNetwork.Name, // Used custom templates
 		CustomConsensusConfigs: gd.CustomNetworkConfigPath != "" ||
 			gd.CustomGenesisPath != "" ||
-			gd.CustomDeployBlockPath != "", // Have custom configs paths
+			gd.CustomDeployBlockPath != "",                  // Have custom configs paths
 		CustomChainSpecPath:     gd.CustomChainSpecPath,     // Path to chainspec.json
 		CustomNetworkConfigPath: gd.CustomNetworkConfigPath, // Path to config.yaml
 		CustomGenesisPath:       gd.CustomGenesisPath,       // Path to genesis.ssz
@@ -338,7 +338,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		return err
 	}
 
-	cls := getClients(gd)
+	cls := mapClients(gd)
 
 	for tmpKind, client := range cls {
 		var tmp []byte
