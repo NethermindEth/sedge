@@ -65,9 +65,11 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 		if flags.executionName != "" {
-			log.Warn(configs.CustomImagesWarning)
 			executionClient.Name = executionParts[0]
-			executionClient.Image = strings.Join(executionParts[1:], ":")
+			if len(executionParts) > 1 {
+				log.Warn(configs.CustomExecutionImagesWarning)
+				executionClient.Image = strings.Join(executionParts[1:], ":")
+			}
 		}
 		if err = clients.ValidateClient(executionClient, execution); err != nil {
 			return nil, err
@@ -83,9 +85,11 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 		if flags.consensusName != "" {
-			log.Warn(configs.CustomImagesWarning)
 			consensusClient.Name = consensusParts[0]
-			consensusClient.Image = strings.Join(consensusParts[1:], ":")
+			if len(consensusParts) > 1 {
+				log.Warn(configs.CustomConsensusImagesWarning)
+				consensusClient.Image = strings.Join(consensusParts[1:], ":")
+			}
 		}
 		if err = clients.ValidateClient(consensusClient, consensus); err != nil {
 			return nil, err
@@ -101,9 +105,12 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 		if flags.validatorName != "" {
-			log.Warn(configs.CustomImagesWarning)
 			validatorClient.Name = validatorParts[0]
-			validatorClient.Image = strings.Join(validatorParts[1:], ":")
+			if len(validatorParts) > 1 {
+				log.Warn(configs.CustomValidatorImagesWarning)
+				validatorClient.Image = strings.Join(validatorParts[1:], ":")
+
+			}
 		}
 		if err = clients.ValidateClient(validatorClient, validator); err != nil {
 			return nil, err
