@@ -41,6 +41,7 @@ const (
 	empty           = "empty"
 )
 
+// validateClients validates each client in GenData
 func validateClients(gd *GenData) error {
 	c := clients.ClientInfo{Network: gd.Network}
 	if err := validateConsensus(gd, &c); err != nil {
@@ -55,6 +56,7 @@ func validateClients(gd *GenData) error {
 	return nil
 }
 
+// validateValidator validates the validator client in GenData
 func validateValidator(gd *GenData, c *clients.ClientInfo) error {
 	if gd.ValidatorClient == nil {
 		return nil
@@ -69,6 +71,7 @@ func validateValidator(gd *GenData, c *clients.ClientInfo) error {
 	return nil
 }
 
+// validateExecution validates the execution client in GenData
 func validateExecution(gd *GenData, c *clients.ClientInfo) error {
 	if gd.ExecutionClient == nil {
 		return nil
@@ -83,6 +86,7 @@ func validateExecution(gd *GenData, c *clients.ClientInfo) error {
 	return nil
 }
 
+// validateConsensus validates the consensus client in GenData
 func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 	if gd.ConsensusClient == nil {
 		return nil
@@ -109,6 +113,7 @@ func getClients(gd *GenData) map[string]*clients.Client {
 	return cls
 }
 
+// ComposeFile generates a docker-compose file with the provided GenData
 func ComposeFile(gd *GenData, at io.Writer) error {
 	// Check empty data
 	if gd == nil {
@@ -310,6 +315,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	return nil
 }
 
+// arrayOrEmpty returns an empty array if the input is nil, otherwise returns the input
 func arrayOrEmpty(array *[]string) []string {
 	if array == nil {
 		return []string{}
@@ -317,6 +323,7 @@ func arrayOrEmpty(array *[]string) []string {
 	return *array
 }
 
+// EnvFile generates a .env file with the provided GenData
 func EnvFile(gd *GenData, at io.Writer) error {
 	//if gd.ExecutionClient == nil && gd.ConsensusClient == nil && gd.ValidatorClient == nil {
 	//	return ErrEmptyData
@@ -413,6 +420,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	return nil
 }
 
+// endpointOrEmpty returns the endpoint of the client if it is not nil, otherwise returns an empty string
 func endpointOrEmpty(cls *clients.Client) string {
 	if cls != nil {
 		return cls.Endpoint
@@ -420,12 +428,15 @@ func endpointOrEmpty(cls *clients.Client) string {
 	return ""
 }
 
+// nameOrEmpty returns the name of the client if it is not nil, otherwise returns an empty string
 func nameOrEmpty(cls *clients.Client) string {
 	if cls != nil {
 		return cls.Name
 	}
 	return ""
 }
+
+// imageOrEmpty returns the image of the client if it is not nil, otherwise returns an empty string
 func imageOrEmpty(cls *clients.Client) string {
 	if cls != nil {
 		return cls.Image
