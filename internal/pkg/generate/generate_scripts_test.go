@@ -53,7 +53,7 @@ func clean(s string) string {
 }
 
 var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := getComposeData(compose)
+	composeData, err := retrieveComposeData(compose)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env
 }
 
 var checkTTDOnExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := getComposeData(compose)
+	composeData, err := retrieveComposeData(compose)
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ var checkTTDOnExecution = func(t *testing.T, data *GenData, compose, env io.Read
 }
 
 var checkECBootnodesOnExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := getComposeData(compose)
+	composeData, err := retrieveComposeData(compose)
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,8 @@ var checkECBootnodesOnExecution = func(t *testing.T, data *GenData, compose, env
 	return nil
 }
 
-func getComposeData(compose io.Reader) (*ComposeData, error) {
+// retrieveComposeData returns compose data from the reader
+func retrieveComposeData(compose io.Reader) (*ComposeData, error) {
 	// load compose file
 	composeBytes, err := io.ReadAll(compose)
 	if err != nil {
