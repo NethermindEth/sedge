@@ -99,12 +99,12 @@ func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 				}
 				flags.executionName = args[0]
 			}
-			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
-				return err
-			}
 			return nil
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
+				return err
+			}
 			err := preValidationGenerateCmd(network, logging)
 			if err != nil {
 				return err
@@ -143,12 +143,12 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 				}
 				flags.consensusName = args[0]
 			}
-			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
-				return err
-			}
 			return nil
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
+				return err
+			}
 			return preValidationGenerateCmd(network, logging)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -197,12 +197,12 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 				}
 				flags.validatorName = args[0]
 			}
-			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
-				return err
-			}
 			return nil
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
+				return err
+			}
 			return preValidationGenerateCmd(network, logging)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
