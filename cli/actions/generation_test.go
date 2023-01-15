@@ -71,7 +71,9 @@ func TestGenerateDockerCompose(t *testing.T) {
 	err = yaml.Unmarshal(composeFile, &composeData)
 	assert.Nilf(t, err, "unable to parse docker-compose.yml")
 
-	// Check that the execution client is nethermind
+	// Check that the execution service is set.
+	assert.NotNil(t, composeData.Services.Execution)
+	// Check that the execution container name is `execution-client'.
 	assert.Equal(t, composeData.Services.Execution.ContainerName, "execution-client")
 
 	// Check other services are nil
