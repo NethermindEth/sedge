@@ -78,7 +78,6 @@ func TestGenerateDockerCompose(t *testing.T) {
 
 	// Check other services are nil
 	assert.Nil(t, composeData.Services.Consensus)
-
 }
 
 func TestFolderCreationOnCompose(t *testing.T) {

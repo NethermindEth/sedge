@@ -17,13 +17,12 @@ package generate
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"text/template"
 
 	"github.com/NethermindEth/sedge/internal/pkg/env"
-
-	"io"
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
@@ -163,10 +162,12 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		} else {
 			name = client.Name
 		}
-		tmp, err := templates.Services.ReadFile(strings.Join([]string{"services",
+		tmp, err := templates.Services.ReadFile(strings.Join([]string{
+			"services",
 			configs.NetworksConfigs()[gd.Network].NetworkService,
 			tmpKind,
-			name + ".tmpl"}, "/"))
+			name + ".tmpl",
+		}, "/"))
 		if err != nil {
 			return err
 		}
@@ -341,7 +342,8 @@ func EnvFile(gd *GenData, at io.Writer) error {
 				"services",
 				configs.NetworksConfigs()[gd.Network].NetworkService,
 				tmpKind,
-				"empty.tmpl"}, "/"))
+				"empty.tmpl",
+			}, "/"))
 			if err != nil {
 				return err
 			}

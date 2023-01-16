@@ -209,7 +209,7 @@ func TestMissingEnvVars(t *testing.T) {
 			}
 			// read the .env file
 			data := retrieveEnvData(t, &buffer)
-			for key, _ := range tt.fieldsToCheck {
+			for key := range tt.fieldsToCheck {
 				assert.NotContains(t, data, key)
 			}
 		})

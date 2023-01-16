@@ -19,12 +19,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"strings"
-	"testing"
-
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
+	"testing"
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
@@ -217,7 +216,6 @@ var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader)
 	}
 
 	if utils.Contains(data.Services, mevBoost) {
-
 		if composeData.Services.Mevboost != nil {
 			assert.Equal(t, "flashbots/mev-boost:latest", composeData.Services.Mevboost.Image)
 			assert.Equal(t, "mev-boost", composeData.Services.Mevboost.ContainerName)
@@ -449,7 +447,6 @@ func TestGenerateComposeServices(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.Description, func(t *testing.T) {
-
 			var buffer bytes.Buffer
 			err := ComposeFile(tt.GenerationData, io.Writer(&buffer))
 			assert.ErrorIs(t, err, tt.ErrorGenCompose)

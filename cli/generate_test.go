@@ -17,13 +17,14 @@ package cli
 
 import (
 	"fmt"
-	"github.com/NethermindEth/sedge/cli/actions"
-	"github.com/NethermindEth/sedge/configs"
-	"github.com/NethermindEth/sedge/test"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/NethermindEth/sedge/cli/actions"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/test"
 )
 
 type subCmd struct {

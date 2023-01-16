@@ -17,6 +17,11 @@ package cli
 
 import (
 	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
@@ -25,10 +30,6 @@ import (
 	"github.com/NethermindEth/sedge/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"io"
-	"os"
-	"path/filepath"
-	"time"
 )
 
 // Global vars
@@ -122,7 +123,6 @@ func preValidationGenerateCmd(network, logging string) error {
 }
 
 func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActions, services []string) error {
-
 	// Warn if ports are being exposed
 	if flags.mapAllPorts {
 		log.Warn(configs.MapAllPortsWarning)
