@@ -44,7 +44,7 @@ func FullNodeSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 
 It will not generate a validator configuration if the --no-validator flag is set to true.
 
-On mainnet, sepolia and goerli, mev-boost will be activated by default unless you run it with --no-mev-boost flag`,
+On mainnet, sepolia and goerli, mev-boost will be activated by default unless you run it with --no-mev-boost flag.`,
 		Args: cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
@@ -91,7 +91,8 @@ func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		Short: "Generate a execution node config",
 		Long: "Generate a docker-compose and an environment file with a execution node configuration.\n" +
 			"Valid args: name of execution clients according to network\n\n" +
-			"Should be one of: nethermind, geth, besu, erigon",
+			"Should be one of: nethermind, geth, besu, erigon\n" +
+			"Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate execution nethermind:docker.image'. If you want to use the default docker image, just use the client name",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
@@ -135,7 +136,8 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		Short: "Generate a consensus node config",
 		Long: "Generate a docker-compose and an environment file with a consensus node configuration\n" +
 			"Valid args: name of execution clients according to network\n\n" +
-			"Should be one of: lighthouse, teku, prysm, lodestar" +
+			"Should be one of: lighthouse, teku, prysm, lodestar\n" +
+			"Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate consensus prysm:docker.image'. If you want to use the default docker image, just use the client name" +
 			"\n\n" +
 			"Required flags:\n" +
 			"- '--execution-api-url'\n" +
@@ -169,7 +171,7 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
 	flags.fallbackEL = cmd.Flags().StringSlice("fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge generate consensus --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
 	flags.clExtraFlags = cmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge generate consensus --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
+	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
 	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
 	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
@@ -193,7 +195,8 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		Short: "Generate a validator node config",
 		Long: "Generate a docker-compose and an environment file with a validator node configuration\n" +
 			"Valid args: name of execution clients according to network\n\n" +
-			"Should be one of: lighthouse, teku, prysm, lodestar" +
+			"Should be one of: lighthouse, teku, prysm, lodestar\n" +
+			"Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate validator prysm:docker.image'. If you want to use the default docker image, just use the client name" +
 			"\n\n" +
 			"Required flags:\n" +
 			"- `--consensus-url`",
@@ -222,6 +225,9 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 	cmd.Flags().StringVar(&flags.graffiti, "graffiti", "", "Graffiti to be used by the validator")
 	cmd.Flags().BoolVar(&flags.mevBoostOnVal, "mev-boost", false, "Use mev-boost while turning on validator node")
+	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
+	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
+	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
 	flags.vlExtraFlags = cmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge generate validator --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	err := cmd.MarkFlagRequired("consensus-url")
 	if err != nil {
