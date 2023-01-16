@@ -52,6 +52,39 @@ func clean(s string) string {
 	return strings.ReplaceAll(s, "\r", "")
 }
 
+var checkOnlyExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData, err := retrieveComposeData(compose)
+	if err != nil {
+		return err
+	}
+	assert.NotNil(t, composeData.Services)
+	assert.NotNil(t, composeData.Services.Execution)
+	assert.Equal(t, composeData.Services.Execution.ContainerName, "execution-client")
+	return nil
+}
+
+var checkOnlyConsensus = func(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData, err := retrieveComposeData(compose)
+	if err != nil {
+		return err
+	}
+	assert.NotNil(t, composeData.Services)
+	assert.NotNil(t, composeData.Services.Consensus)
+	assert.Equal(t, composeData.Services.Consensus.ContainerName, "consensus-client")
+	return nil
+}
+
+var checkOnlyValidator = func(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData, err := retrieveComposeData(compose)
+	if err != nil {
+		return err
+	}
+	assert.NotNil(t, composeData.Services)
+	assert.NotNil(t, composeData.Services.Validator)
+	assert.Equal(t, composeData.Services.Validator.ContainerName, "validator-client")
+	return nil
+}
+
 var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData, err := retrieveComposeData(compose)
 	if err != nil {
@@ -302,6 +335,35 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 		// TODO: Add CheckpointSyncUrl, FallbackELUrls and FeeRecipient to test data
 		for _, executionCl := range executionClients {
 			for _, consensusCl := range consensusClients {
+				tests = append(tests,
+					genTestData{
+						Description: fmt.Sprintf(baseDescription+"execution: %s, network: %s, only execution", executionCl, network),
+						GenerationData: &GenData{
+							ExecutionClient: &clients.Client{Name: executionCl},
+							Network:         network,
+							Services:        []string{execution},
+						},
+						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyExecution},
+					},
+					genTestData{
+						Description: fmt.Sprintf(baseDescription+"consensus: %s, network: %s, only consensus", consensusCl, network),
+						GenerationData: &GenData{
+							ConsensusClient: &clients.Client{Name: consensusCl},
+							Network:         network,
+							Services:        []string{consensus},
+						},
+						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyConsensus},
+					},
+					genTestData{
+						Description: fmt.Sprintf(baseDescription+"validator: %s, network: %s, only validator", consensusCl, network),
+						GenerationData: &GenData{
+							ValidatorClient: &clients.Client{Name: consensusCl},
+							Network:         network,
+							Services:        []string{validator},
+						},
+						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyValidator},
+					},
+				)
 				if utils.Contains(validatorClients, consensusCl) {
 					tests = append(tests,
 						genTestData{
