@@ -91,7 +91,7 @@ func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		Short: "Generate a execution node config",
 		Long: "Generate a docker-compose and an environment file with a execution node configuration.\n" +
 			"Valid args: name of execution clients according to network\n\n" +
-			"Should be one of: nethermind, geth, besu, erigon\n" +
+			"Should be one of: nethermind, geth, besu, erigon. If you don't provide one, it will chosen randomly.\n" +
 			"Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate execution nethermind:docker.image'. If you want to use the default docker image, just use the client name",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
@@ -136,7 +136,7 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		Short: "Generate a consensus node config",
 		Long: "Generate a docker-compose and an environment file with a consensus node configuration\n" +
 			"Valid args: name of execution clients according to network\n\n" +
-			"Should be one of: lighthouse, teku, prysm, lodestar\n" +
+			"Should be one of: lighthouse, teku, prysm, lodestar. If you don't provide one, it will chosen randomly.\n" +
 			"Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate consensus prysm:docker.image'. If you want to use the default docker image, just use the client name" +
 			"\n\n" +
 			"Required flags:\n" +
@@ -195,7 +195,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		Short: "Generate a validator node config",
 		Long: "Generate a docker-compose and an environment file with a validator node configuration\n" +
 			"Valid args: name of execution clients according to network\n\n" +
-			"Should be one of: lighthouse, teku, prysm, lodestar\n" +
+			"Should be one of: lighthouse, teku, prysm, lodestar. If you don't provide one, it will chosen randomly.\n" +
 			"Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate validator prysm:docker.image'. If you want to use the default docker image, just use the client name" +
 			"\n\n" +
 			"Required flags:\n" +
