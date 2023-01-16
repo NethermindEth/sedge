@@ -39,7 +39,7 @@ func SlashingImportCmd(sedgeActions actions.SedgeActions) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:   "slashing-import [validator]",
+		Use:   "slashing-import [flags] [validator]",
 		Short: "Import slashing protection data",
 		Long: `
 Import Slashing Protection Interchange Format (EIP-3076) data. This command assumes

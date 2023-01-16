@@ -36,7 +36,7 @@ func SlashingExportCmd(sedgeActions actions.SedgeActions) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:   "slashing-export [validator]",
+		Use:   "slashing-export [flags] [validator]",
 		Short: "Export slashing protection data",
 		Long: `
 Export Slashing Protection Interchange Format (EIP-3076) data. This command assumes
