@@ -45,12 +45,12 @@ func TestSlashingExport_ValidatorIsRequired(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {})
-
-		slashingImportCmd := cli.SlashingExportCmd(nil)
-		slashingImportCmd.SetArgs(tt.args)
-		err := slashingImportCmd.Execute()
-		assert.ErrorIs(t, err, tt.expectedErr)
+		t.Run(tt.name, func(t *testing.T) {
+			slashingImportCmd := cli.SlashingExportCmd(nil)
+			slashingImportCmd.SetArgs(tt.args)
+			err := slashingImportCmd.Execute()
+			assert.ErrorIs(t, err, tt.expectedErr)
+		})
 	}
 }
 
