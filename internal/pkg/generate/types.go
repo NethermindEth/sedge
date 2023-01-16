@@ -19,6 +19,7 @@ import "github.com/NethermindEth/sedge/internal/pkg/clients"
 
 // EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
 type EnvData struct {
+	Mev                       bool
 	ElImage                   string
 	ElDataDir                 string
 	CcImage                   string

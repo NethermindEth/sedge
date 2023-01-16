@@ -379,8 +379,26 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		}
 	}
 
+	var mevSupported bool
+	if cls[validator] != nil {
+		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient.Name)
+		if err != nil {
+			return err
+		}
+	}
+	// If consensus is running with other services, and not set the MevBoostEndpoint, set it to the default
+	if cls[consensus] != nil && (cls[execution] != nil || cls[validator] != nil) && gd.MevBoostEndpoint == "" && gd.Mev {
+		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ConsensusClient.Name)
+		if err != nil {
+			return err
+		}
+		if mevSupported {
+			gd.MevBoostEndpoint = fmt.Sprintf("%s:%v", configs.DefaultMevBoostEndpoint, gd.Ports["MevPort"])
+		}
+	}
 	// TODO: Use OS wise delimiter for these data structs
 	data := EnvData{
+		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		ElImage:                   imageOrEmpty(cls[execution]),
 		ElDataDir:                 "./" + configs.ExecutionDir,
 		CcImage:                   imageOrEmpty(cls[consensus]),

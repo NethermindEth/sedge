@@ -83,8 +83,9 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check RELAY_URL",
 			data: &GenData{
-				ExecutionClient: &clients.Client{Name: "besu"},
+				ValidatorClient: &clients.Client{Name: "prysm"},
 				Network:         "mainnet",
+				Mev:             true,
 			},
 			fieldsToCheck: map[string]string{
 				"RELAY_URL": "https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net",
@@ -93,8 +94,9 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check set of RELAY_URL",
 			data: &GenData{
-				ExecutionClient: &clients.Client{Name: "geth"},
+				ValidatorClient: &clients.Client{Name: "teku"},
 				Network:         "mainnet",
+				Mev:             true,
 				RelayURL:        "https://sample.relay",
 			},
 			fieldsToCheck: map[string]string{
@@ -158,6 +160,57 @@ func TestGenerateEnvFile(t *testing.T) {
 			for key, value := range tt.fieldsToCheck {
 				assert.Contains(t, data, key)
 				assert.True(t, strings.Contains(strings.ReplaceAll(data[key], "\r", ""), value))
+			}
+		})
+	}
+}
+
+// Test some env vars doesn't exist
+func TestMissingEnvVars(t *testing.T) {
+	configs.InitNetworksConfigs()
+	tests := []struct {
+		name          string
+		data          *GenData
+		Error         error
+		fieldsToCheck []string
+	}{
+		{
+			name: "Check RELAY_URL",
+			data: &GenData{
+				ConsensusClient: &clients.Client{Name: "teku"},
+				Network:         "mainnet",
+				Mev:             true,
+			},
+			fieldsToCheck: []string{
+				"RELAY_URL",
+			},
+		},
+		{
+			name: "Check set of RELAY_URL",
+			data: &GenData{
+				ValidatorClient: &clients.Client{Name: "teku"},
+				Network:         "mainnet",
+				RelayURL:        "https://sample.relay",
+			},
+			fieldsToCheck: []string{
+				"RELAY_URL",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// generate buffer to write the .env file
+			var buffer bytes.Buffer
+			if err := EnvFile(tt.data, &buffer); err != nil {
+				if err != tt.Error {
+					t.Error("unable to generate .env file")
+				}
+				return
+			}
+			// read the .env file
+			data := retrieveEnvData(t, &buffer)
+			for key, _ := range tt.fieldsToCheck {
+				assert.NotContains(t, data, key)
 			}
 		})
 	}
