@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 9
 id: slashing-import 
 ---
 
@@ -24,8 +24,19 @@ before the import, then the validator will be running/stopped after the command
 is executed, regardless of whether the export fails or not. To force a different
 behavior use --start-validator and --stop-validator flags.
 
+The [validator] is a required argument used to specify which validator client, from
+all supported by Sedge (lighthouse, lodestar, prysm or teku), is used to import the
+Slashing Protection data. This is necessary because each client has its own way to
+achieve the importation.
+
 Usage:
-  sedge slashing-import [validator] [flags]
+  sedge slashing-import [flags] [validator]
+
+Examples:
+
+sedge slashing-import --from slashing-data.json prysm
+sedge slashing-import --from slashing-data.json --stop-validator lodestar 
+sedge slashing-import --from slashing-data.json --start-validator lighthouse
 
 Flags:
   -f, --from string       path to the JSON file in the EIP-3076 format with the slashing protection data to import (default: <generation-dir>/slashing_export.json)
@@ -36,7 +47,7 @@ Flags:
       --stop-validator    stops the validator client after import, regardless of the state the validator was in before
 
 Global Flags:
-      --logLevel string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info") 
+      --logLevel string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
 ```
 
 ## Execution Example

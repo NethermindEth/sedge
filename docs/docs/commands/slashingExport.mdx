@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 8
 id: slashing-export
 ---
 
@@ -25,12 +25,23 @@ before the export, then the validator will be running/stopped after the command
 is executed, regardless of whether the export fails or not. To force a different
 behavior use --start-validator and --stop-validator flags.
 
+The [validator] is a required argument used to specify which validator client, from
+all supported by Sedge (lighthouse, lodestar, prysm or teku), is used to exporting
+the Slashing Protection data. This is necessary because each client has its own way
+to achieve the exportation.
+
 Usage:
-  sedge slashing-export [validator] [flags]
+  sedge slashing-export [flags] [validator]
+
+Examples:
+
+sedge slashing-export --out slashing-data.json prysm
+sedge slashing-export --out slashing-data.json --stop-validator lodestar 
+sedge slashing-export --out slashing-data.json --start-validator lighthouse
 
 Flags:
   -h, --help              help for slashing-export
-  -n, --network string    network
+  -n, --network string    network (default "mainnet")
   -o, --out string        path to write the JSON file in the EIP-3076 format with the slashing protection data (default "<generation-dir>/slashing_export.json")
   -p, --path string       path to the generation directory (default "./docker-compose-scripts")
       --start-validator   starts the validator client after export, regardless of the state the validator was in before
