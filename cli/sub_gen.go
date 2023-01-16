@@ -131,11 +131,15 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 
 	cmd := &cobra.Command{
-		Use:   "consensus [flags] [args]",
+		Use:   "consensus [flags] --execution-api-url <URL> --execution-auth-url <URL> [args]",
 		Short: "Generate a consensus node config",
 		Long: "Generate a docker-compose and an environment file with a consensus node configuration\n" +
 			"Valid args: name of execution clients according to network\n\n" +
-			"Should be one of: lighthouse, teku, prysm, lodestar",
+			"Should be one of: lighthouse, teku, prysm, lodestar" +
+			"\n\n" +
+			"Required flags:\n" +
+			"- '--execution-api-url'\n" +
+			"- '--execution-auth-url'",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
@@ -156,6 +160,8 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		},
 	}
 	// Bind flags
+	cmd.Flags().StringVar(&flags.executionApiUrl, "execution-api-url", "", "Execution API endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-api-url=https://mainnet.infura.io/v3/YOUR-PROJECT-ID'")
+	cmd.Flags().StringVar(&flags.executionAuthUrl, "execution-auth-url", "", "Execution AUTH endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-auth-url=https://mainnet .infura.io/v3/YOUR-PROJECT-ID'")
 	cmd.Flags().StringVar(&flags.checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity")
 	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
 	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
@@ -167,8 +173,6 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
 	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
 	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
-	cmd.Flags().StringVar(&flags.executionApiUrl, "execution-api-url", "", "Execution API endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-api-url=https://mainnet.infura.io/v3/YOUR-PROJECT-ID'")
-	cmd.Flags().StringVar(&flags.executionAuthUrl, "execution-auth-url", "", "Execution AUTH endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-auth-url=https://mainnet .infura.io/v3/YOUR-PROJECT-ID'")
 	err := cmd.MarkFlagRequired("execution-api-url")
 	if err != nil {
 		return nil
@@ -185,11 +189,14 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 
 	cmd := &cobra.Command{
-		Use:   "validator [flags] [args]",
+		Use:   "validator [flags] --consensus-url <URL> [args]",
 		Short: "Generate a validator node config",
 		Long: "Generate a docker-compose and an environment file with a validator node configuration\n" +
 			"Valid args: name of execution clients according to network\n\n" +
-			"Should be one of: lighthouse, teku, prysm, lodestar",
+			"Should be one of: lighthouse, teku, prysm, lodestar" +
+			"\n\n" +
+			"Required flags:\n" +
+			"- `--consensus-url`",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
@@ -210,12 +217,12 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		},
 	}
 	// Bind flags
+	cmd.Flags().StringVar(&flags.consensusApiUrl, "consensus-url", "", "Consensus endpoint for the validator client to connect to. Example: 'sedge generate validator --consensus-url http://localhost:8545'")
 	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
 	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 	cmd.Flags().StringVar(&flags.graffiti, "graffiti", "", "Graffiti to be used by the validator")
 	cmd.Flags().BoolVar(&flags.mevBoostOnVal, "mev-boost", false, "Use mev-boost while turning on validator node")
 	flags.vlExtraFlags = cmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge generate validator --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	cmd.Flags().StringVar(&flags.consensusApiUrl, "consensus-url", "", "Consensus endpoint for the validator client to connect to. Example: 'sedge generate validator --consensus-url http://localhost:8545'")
 	err := cmd.MarkFlagRequired("consensus-url")
 	if err != nil {
 		return nil
