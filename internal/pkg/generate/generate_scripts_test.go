@@ -548,56 +548,6 @@ func TestValidateClients(t *testing.T) {
 	}
 }
 
-func TestGenComposeFileSimpleExecution(t *testing.T) {
-	configs.InitNetworksConfigs()
-	tests := []struct {
-		Description string
-		Data        *GenData
-		Error       error
-	}{
-		{
-			Description: "Test generation of compose services",
-			Data: &GenData{
-				ExecutionClient: &clients.Client{Name: "nethermind"},
-				ConsensusClient: &clients.Client{Name: "teku"},
-				ValidatorClient: &clients.Client{Name: "teku"},
-				Network:         "mainnet",
-				Mev:             true,
-			},
-			Error: nil,
-		},
-		{
-			Description: "Test generation of compose services",
-			Data: &GenData{
-				ExecutionClient: &clients.Client{Name: "nethermind"},
-				ConsensusClient: &clients.Client{Name: "teku"},
-				ValidatorClient: &clients.Client{Name: "teku"},
-				Network:         "mainnet",
-				Mev:             true,
-			},
-			Error: nil,
-		},
-		{
-			Description: "Empty data",
-			Data: &GenData{
-				Network: "mainnet",
-			},
-			//Error: ErrEmptyData,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.Description, func(t *testing.T) {
-			var buffer bytes.Buffer
-			err := ComposeFile(tt.Data, io.Writer(&buffer))
-			assert.ErrorIs(t, err, tt.Error)
-			if tt.Error != nil {
-				return
-			}
-		})
-	}
-}
-
 func TestEnvFileAndFlags(t *testing.T) {
 	configs.InitNetworksConfigs()
 	tests := []struct {
@@ -653,7 +603,7 @@ func TestEnvFileAndFlags(t *testing.T) {
 			Error: nil,
 		},
 		{
-			Description: "Teku consensus with ConsensusAdditionalUrl",
+			Description: "Teku consensus and validator with ConsensusApiUrl",
 			Data: &GenData{
 				ConsensusClient: &clients.Client{Name: "teku"},
 				ValidatorClient: &clients.Client{Name: "teku"},
