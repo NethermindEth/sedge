@@ -360,7 +360,7 @@ func TestGenerateComposeServices(t *testing.T) {
 			CheckFunctions: []CheckFunc{defaultFunc},
 		},
 		{
-			Description: "Test generation import",
+			Description: "Test mevBoost service",
 			GenerationData: &GenData{
 				Services:        []string{mevBoost},
 				Network:         "mainnet",
