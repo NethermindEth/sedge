@@ -50,7 +50,16 @@ validator database being locked while it's running but leaves the validator clie
 in the same state in which it was found. That means if the validator is running/stopped
 before the export, then the validator will be running/stopped after the command
 is executed, regardless of whether the export fails or not. To force a different
-behavior use --start-validator and --stop-validator flags.`,
+behavior use --start-validator and --stop-validator flags.
+
+The [validator] is a required argument used to specify which validator client, from
+all supported by Sedge (lighthouse, lodestar, prysm or teku), is used to exporting
+the Slashing Protection data. This is necessary because each client has its own way
+to achieve the exportation.`,
+		Example: `
+sedge slashing-export --out slashing-data.json prysm
+sedge slashing-export --out slashing-data.json --stop-validator lodestar 
+sedge slashing-export --out slashing-data.json --start-validator lighthouse`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 1 {
 				return ErrInvalidNumberOfArguments
