@@ -46,9 +46,9 @@ func TestSlashingExport_ValidatorIsRequired(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			slashingImportCmd := cli.SlashingExportCmd(nil)
-			slashingImportCmd.SetArgs(tt.args)
-			err := slashingImportCmd.Execute()
+			slashingExportCmd := cli.SlashingExportCmd(nil)
+			slashingExportCmd.SetArgs(tt.args)
+			err := slashingExportCmd.Execute()
 			assert.ErrorIs(t, err, tt.expectedErr)
 		})
 	}
@@ -177,9 +177,9 @@ func TestSlashingExport_Params(t *testing.T) {
 			actions := mock_actions.NewMockSedgeActions(ctrl)
 			actions.EXPECT().ExportSlashingInterchangeData(tt.actionOptions).Times(1)
 
-			slashingImportCmd := cli.SlashingExportCmd(actions)
-			slashingImportCmd.SetArgs(tt.args)
-			err := slashingImportCmd.Execute()
+			slashingExportCmd := cli.SlashingExportCmd(actions)
+			slashingExportCmd.SetArgs(tt.args)
+			err := slashingExportCmd.Execute()
 
 			assert.Nil(t, err)
 		})
