@@ -272,8 +272,14 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceManager services.ServiceManager, sedgeActions actions.SedgeActions) []error {
 	// Warnings
 	// Warn if custom images are used
-	if clientImages.execution != "" || clientImages.consensus != "" || clientImages.validator != "" {
-		log.Warn(configs.CustomImagesWarning)
+	if clientImages.execution != "" {
+		log.Warn(configs.CustomExecutionImagesWarning)
+	}
+	if clientImages.consensus != "" {
+		log.Warn(configs.CustomConsensusImagesWarning)
+	}
+	if clientImages.validator != "" {
+		log.Warn(configs.CustomValidatorImagesWarning)
 	}
 	// Warn if exposed ports are used
 	if flags.mapAllPorts {
