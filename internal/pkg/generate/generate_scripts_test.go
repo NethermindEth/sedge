@@ -693,7 +693,6 @@ func TestCleanGeneratedFiles(t *testing.T) {
 	tests := []struct {
 		Description string
 		Data        *GenData
-		Error       error
 	}{
 		{
 			Description: "Test generation of compose services",
@@ -704,7 +703,6 @@ func TestCleanGeneratedFiles(t *testing.T) {
 				Network:         "mainnet",
 				Mev:             true,
 			},
-			Error: nil,
 		},
 		{
 			Description: "Test generation of compose services",
@@ -715,7 +713,6 @@ func TestCleanGeneratedFiles(t *testing.T) {
 				Network:         "mainnet",
 				Mev:             true,
 			},
-			Error: nil,
 		},
 	}
 
@@ -729,15 +726,9 @@ func TestCleanGeneratedFiles(t *testing.T) {
 				return
 			}
 			defer out.Close()
-			assert.ErrorIs(t, err, nil)
-			if tt.Error != nil {
-				return
-			}
+			assert.Nil(t, err)
 			err = ComposeFile(tt.Data, out)
-			assert.ErrorIs(t, err, tt.Error)
-			if tt.Error != nil {
-				return
-			}
+			assert.Nil(t, err)
 			assert.FileExists(t, filepath.Join(path, configs.DefaultDockerComposeScriptName))
 
 			// open output file
@@ -745,17 +736,11 @@ func TestCleanGeneratedFiles(t *testing.T) {
 			assert.ErrorIs(t, err, nil)
 			defer out.Close()
 			err = EnvFile(tt.Data, out)
-			assert.ErrorIs(t, err, tt.Error)
-			if tt.Error != nil {
-				return
-			}
+			assert.Nil(t, err)
 			assert.FileExists(t, filepath.Join(path, configs.DefaultEnvFileName))
 
 			err = CleanGenerated(path)
-			assert.ErrorIs(t, err, tt.Error)
-			if tt.Error != nil {
-				return
-			}
+			assert.Nil(t, err)
 		})
 	}
 }
