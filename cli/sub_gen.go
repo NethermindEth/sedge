@@ -21,7 +21,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var CustomFlagsUsedWithoutCustomNetwork = errors.New("set custom flags with custom network")
+var CustomFlagsUsedWithoutCustomNetwork = errors.New("custom flags used without --network custom")
 
 func validateCustomNetwork(flags *CustomFlags, net string) error {
 	if net != "custom" {
