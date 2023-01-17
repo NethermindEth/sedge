@@ -1,9 +1,24 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package commands
 
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -39,7 +54,7 @@ func (cr *WindowsCMDRunner) BuildDockerComposePullCMD(options DockerComposePullO
 	return Command{Cmd: command}
 }
 
-func (cr *UnixCMDRunner) BuildDockerComposeCreateCMD(options DockerComposeCreateOptions) Command {
+func (cr *WindowsCMDRunner) BuildDockerComposeCreateCMD(options DockerComposeCreateOptions) Command {
 	command := fmt.Sprintf("docker compose -f %s create", options.Path)
 	if len(options.Services) > 0 {
 		command += " " + strings.Join(options.Services, " ")
@@ -47,7 +62,7 @@ func (cr *UnixCMDRunner) BuildDockerComposeCreateCMD(options DockerComposeCreate
 	return Command{Cmd: command}
 }
 
-func (cr *UnixCMDRunner) BuildDockerComposeBuildCMD(options DockerComposeBuildOptions) Command {
+func (cr *WindowsCMDRunner) BuildDockerComposeBuildCMD(options DockerComposeBuildOptions) Command {
 	command := fmt.Sprintf("docker compose -f %s build", options.Path)
 	if len(options.Services) > 0 {
 		command += " " + strings.Join(options.Services, " ")
@@ -196,7 +211,7 @@ func (cr *WindowsCMDRunner) RunScript(script ScriptFile) (string, error) {
 	}
 
 	tempFileDir := os.TempDir()
-	rawScript, err := ioutil.ReadAll(&scriptBuffer)
+	rawScript, err := io.ReadAll(&scriptBuffer)
 	if err != nil {
 		return out, err
 	}

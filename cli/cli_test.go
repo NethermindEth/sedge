@@ -359,6 +359,8 @@ func TestCliCmd(t *testing.T) {
 		),
 	}
 
+	configs.InitNetworksConfigs()
+
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			descr := fmt.Sprintf("sedge cli %s", tc.args.toString())

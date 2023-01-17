@@ -154,7 +154,6 @@ func TestClients(t *testing.T) {
 					t.Errorf("%s got invalid result: %v", descr, res)
 				}
 			}
-
 		})
 	}
 }
