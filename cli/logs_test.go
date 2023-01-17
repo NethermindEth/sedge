@@ -18,11 +18,12 @@ package cli
 import (
 	"bytes"
 	"fmt"
-	"github.com/NethermindEth/sedge/configs"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/NethermindEth/sedge/configs"
 
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/test"

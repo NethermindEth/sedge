@@ -17,10 +17,11 @@ package cli
 
 import (
 	"bytes"
-	"github.com/NethermindEth/sedge/configs"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/NethermindEth/sedge/configs"
 
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/test"
