@@ -63,6 +63,7 @@ type GenCmdFlags struct {
 	executionApiUrl   string
 	executionAuthUrl  string
 	consensusApiUrl   string
+	waitEpoch         int
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -169,14 +170,20 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	}
 
 	var vlStartGracePeriod time.Duration
-	switch network {
-	case "mainnet", "goerli", "sepolia":
-		vlStartGracePeriod = 2 * configs.EpochTimeETH
-	case "gnosis", "chiado":
-		vlStartGracePeriod = 2 * configs.EpochTimeGNO
-	default:
-		vlStartGracePeriod = 2 * configs.EpochTimeETH
+
+	if flags.waitEpoch != 0 {
+		vlStartGracePeriod = time.Duration(flags.waitEpoch) * time.Minute
+	} else {
+		switch network {
+		case "mainnet", "goerli", "sepolia":
+			vlStartGracePeriod = 2 * configs.EpochTimeETH
+		case "gnosis", "chiado":
+			vlStartGracePeriod = 2 * configs.EpochTimeGNO
+		default:
+			vlStartGracePeriod = 2 * configs.EpochTimeETH
+		}
 	}
+
 	// Generate docker-compose scripts
 	gd := generate.GenData{
 		ExecutionClient:         combinedClients.Execution,

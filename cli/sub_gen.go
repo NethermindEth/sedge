@@ -78,6 +78,7 @@ On mainnet, sepolia and goerli, mev-boost will be activated by default unless yo
 	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
 	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
+	cmd.Flags().IntVar(&flags.waitEpoch, "wait-epoch", 0, "Number of epochs to wait before starting and restarting of the validator client.")
 	flags.customEnodes = cmd.Flags().StringSlice("execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
 	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
 	cmd.Flags().SortFlags = false
@@ -229,6 +230,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
 	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
+	cmd.Flags().IntVar(&flags.waitEpoch, "wait-epoch", 0, "Number of epochs to wait before starting and restarting of the validator client.")
 	flags.vlExtraFlags = cmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge generate validator --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	err := cmd.MarkFlagRequired("consensus-url")
 	if err != nil {
