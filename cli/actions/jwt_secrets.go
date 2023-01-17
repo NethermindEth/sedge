@@ -2,11 +2,12 @@ package actions
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/crypto"
 	log "github.com/sirupsen/logrus"
-	"os"
-	"path/filepath"
 )
 
 type CreateJWTSecretOptions struct {
@@ -31,6 +32,7 @@ func (s *sedgeActions) CreateJWTSecrets(options CreateJWTSecretOptions) (string,
 	}
 	return jwtPath, nil
 }
+
 func handleJWTSecret(generationPath string) (string, error) {
 	log.Info(configs.GeneratingJWTSecret)
 

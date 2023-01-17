@@ -1,12 +1,13 @@
 package actions_test
 
 import (
-	"github.com/NethermindEth/sedge/cli/actions"
-	"github.com/NethermindEth/sedge/configs"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/NethermindEth/sedge/cli/actions"
+	"github.com/NethermindEth/sedge/configs"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateJwtSecrets(t *testing.T) {
