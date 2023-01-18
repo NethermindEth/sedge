@@ -21,14 +21,14 @@
       - {{.ElAuthPort}}
     user: root
     command:
-    - erigon{{with .TTD}}
-    - --override.terminaltotaldifficulty=${TTD}{{end}}
+    - erigon{{if .TTD}}
+    - --override.terminaltotaldifficulty={{.TTD}}{{end}}
     - --http
     - --http.addr=0.0.0.0
     - --http.port={{.ElApiPort}}
     - --txpool.disable
     - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}{{if .ECBootnodes}}
-    - --bootnodes=${EC_BOOTNODES}{{end}}
+    - --bootnodes={{.ECBootnodes}}{{end}}
     - --authrpc.addr=0.0.0.0
     - --authrpc.port={{.ElAuthPort}}
     - --authrpc.vhosts=*

@@ -25,6 +25,9 @@ type NetworkConfig struct {
 	RequireJWT                bool
 	NetworkService            string
 	GenesisForkVersion        string
+	DefaultTTD                string
+	DefaultECBootnodes        []string
+	DefaultCCBootnodes        []string
 	DefaultCustomChainSpecSrc string
 	DefaultCustomConfigSrc    string
 	DefaultCustomGenesisSrc   string
