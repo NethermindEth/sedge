@@ -31,17 +31,17 @@ func TestRandomChoice(t *testing.T) {
 		},
 		{
 			ClientMap{
-				"a": Client{
+				"a": &Client{
 					Name:      "a",
 					Type:      "A",
 					Supported: true,
 				},
-				"b": Client{
+				"b": &Client{
 					Name:      "b",
 					Type:      "A",
 					Supported: true,
 				},
-				"c": Client{
+				"c": &Client{
 					Name:      "c",
 					Type:      "A",
 					Supported: true,
@@ -51,17 +51,17 @@ func TestRandomChoice(t *testing.T) {
 		},
 		{
 			ClientMap{
-				"a": Client{
+				"a": &Client{
 					Name:      "a",
 					Type:      "A",
 					Supported: true,
 				},
-				"b": Client{
+				"b": &Client{
 					Name:      "b",
 					Type:      "A",
 					Supported: true,
 				},
-				"c": Client{
+				"c": &Client{
 					Name:      "c",
 					Type:      "A",
 					Supported: false,
@@ -71,12 +71,12 @@ func TestRandomChoice(t *testing.T) {
 		},
 		{
 			ClientMap{
-				"a": Client{
+				"a": &Client{
 					Name:      "a",
 					Type:      "A",
 					Supported: false,
 				},
-				"b": Client{
+				"b": &Client{
 					Name:      "b",
 					Type:      "A",
 					Supported: false,
@@ -95,7 +95,7 @@ func TestRandomChoice(t *testing.T) {
 		} else if !input.isErr {
 			if err != nil {
 				t.Errorf("%s failed: %v", descr, err)
-			} else if !validateResultClient(res, input.clients) {
+			} else if !validateResultClient(*res, input.clients) {
 				t.Errorf("%s got invalid result: %v", descr, res)
 			}
 
