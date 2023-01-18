@@ -1,21 +1,39 @@
 ---
-sidebar_position: 8
+sidebar_position: 5
 id: chiado
 ---
 
-# Run a Validator or a Full Node on Chiado
+# Chiado
+
+Chiado is a Gnosis Chain tesnet. Gnosis Chain is an EVM based Ethereum sidechain that is designed to be a platform for
+decentralized prediction markets.
+
+## Supported Execution Clients
+- [Nethermind](https://docs.nethermind.io/)
+
+## Supported Consensus Clients
+- [Lighthouse](https://lighthouse-book.sigmaprime.io/)
+- [Lodestar](https://chainsafe.github.io/lodestar/)
+- [Teku](https://docs.teku.consensys.net/en/latest/)
+
+## Supported Validator Clients
+- [Lighthouse](https://lighthouse-book.sigmaprime.io/)
+- [Lodestar](https://chainsafe.github.io/lodestar/)
+- [Teku](https://docs.teku.consensys.net/en/latest/)
+
+## Run a Validator or a Full Node
 
 Validators and Full Nodes protect the network by validating transactions and blocks. They are the backbone of the
 network and are responsible for the security of the network. This guide shows you how to use Sedge to set up a full node or a validator on Chiado, a Gnosis testnet.
 
 :::info
 
- Validating the Gnosis Beacon Chain requires 1
+Validating the Gnosis Beacon Chain requires 1
 [GNO](https://docs.gnosischain.com/about/tokens/gno) per validator process.
 
 :::
 
-## Running a Full Node
+### Running a Full Node
 
 For running a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge cli`. For example:
 
@@ -23,7 +41,7 @@ For running a full node (without a validator node) with random clients, you only
 sedge cli --no-validator --network=chiado
 ```
 
-## Running a Validator
+### Running a Validator
 
 For running a validator with random clients, you need to omit the `--no-validator` flag. For example:
 
@@ -31,7 +49,7 @@ For running a validator with random clients, you need to omit the `--no-validato
 sedge cli --network=chiado
 ```
 
-## Create keystore for validator
+### Create keystore for validator
 
 To create a keystore for a validator, you need to run the following command:
 
