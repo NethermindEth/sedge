@@ -240,12 +240,6 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		return err
 	}
 
-	// If teku is chosen, then prepare datadir with 777 permissions
-	if combinedClients.Consensus != nil && combinedClients.Consensus.Name == "teku" {
-		if err = preRunTeku(services, generationPath); err != nil {
-			return err
-		}
-	}
 	log.Info(configs.GenerationEnd)
 
 	return nil
