@@ -11,21 +11,21 @@ There are several reasons why you would need to manage the setup after using Sed
 
 :::caution
 
-Each time you execute `sedge cli` to generate the docker-compose file, that file and all modified files under the `docker-compose-scripts` directory will be overwritten.
+Each time you execute `sedge cli` to generate the docker-compose file, that file and all modified files under the `sedge-data` directory will be overwritten.
 
 :::
 
 ## Execute the setup
 
-Once generated the docker-compose file, you can modify either the environment variables in the `.env` file or the `docker-compose.yml` under the `docker-compose-scripts` directory.
+Once generated the docker-compose file, you can modify either the environment variables in the `.env` file or the `docker-compose.yml` under the `sedge-data` directory.
 
-After that, you can run the following command to start the setup from the `docker-compose-scripts` directory:
+After that, you can run the following command to start the setup from the `sedge-data` directory:
 
 ```bash
 docker compose up -d
 ```
 
-or the following command from any directory assuming that you have the path to the `docker-compose-scripts` folder (let's call it `<path>`):
+or the following command from any directory assuming that you have the path to the `sedge-data` folder (let's call it `<path>`):
 
 ```bash
 docker compose -f <path> up -d
@@ -33,13 +33,13 @@ docker compose -f <path> up -d
 
 ## Stop the setup
 
-To stop the setup, you can run the following command from the `docker-compose-scripts` directory:
+To stop the setup, you can run the following command from the `sedge-data` directory:
 
 ```bash
 docker compose down
 ```
 
-or the following command from any directory assuming that you have the path to the `docker-compose-scripts` folder (let's call it `<path>`):
+or the following command from any directory assuming that you have the path to the `sedge-data` folder (let's call it `<path>`):
 
 ```bash
 docker compose -f <path> down
@@ -47,7 +47,7 @@ docker compose -f <path> down
 
 ## Check the container logs
 
-The compose stack is made of several running docker containers. The setup for an Ethereum full node that Sedge applies consists of a container for each node (execution, consensus and validator node). You can run the following command to check the logs of a given container/node from the `docker-compose-scripts` directory:
+The compose stack is made of several running docker containers. The setup for an Ethereum full node that Sedge applies consists of a container for each node (execution, consensus and validator node). You can run the following command to check the logs of a given container/node from the `sedge-data` directory:
 
 ```bash
 docker compose logs <node>
@@ -55,7 +55,7 @@ docker compose logs <node>
 
 > Replace `<node>` with the node type, e.g: execution, consensus, validator
 
-or the following command from any directory assuming that you have the path to the `docker-compose-scripts` folder (let's call it `<path>`):
+or the following command from any directory assuming that you have the path to the `sedge-data` folder (let's call it `<path>`):
 
 ```bash
 docker compose -f <path> logs <node>

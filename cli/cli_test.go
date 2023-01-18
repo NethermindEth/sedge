@@ -23,8 +23,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/NethermindEth/sedge/test"
@@ -180,7 +181,7 @@ func buildCliTestCase(
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
-	dcPath := filepath.Join(configPath, "docker-compose-scripts")
+	dcPath := filepath.Join(configPath, configs.DefaultSedgeDataFolderName)
 	err = os.Mkdir(dcPath, os.ModePerm)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
