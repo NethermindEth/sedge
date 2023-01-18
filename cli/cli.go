@@ -410,13 +410,6 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		return nil
 	}
 
-	// If teku is chosen, then prepare datadir with 777 permissions
-	if combinedClients.Consensus != nil && combinedClients.Consensus.Name == "teku" {
-		if err = preRunTeku(*flags.services, flags.generationPath); err != nil {
-			return []error{err}
-		}
-	}
-
 	if flags.run {
 		if utils.Contains(*flags.services, "validator") {
 			*flags.services = append(*flags.services, "validator-import")
