@@ -295,7 +295,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		CustomNetwork:       gd.Network == configs.CustomNetwork.Name, // Used custom templates
 		CustomConsensusConfigs: gd.CustomNetworkConfigPath != "" ||
 			gd.CustomGenesisPath != "" ||
-			gd.CustomDeployBlockPath != "",                  // Have custom configs paths
+			gd.CustomDeployBlockPath != "", // Have custom configs paths
 		CustomChainSpecPath:     gd.CustomChainSpecPath,     // Path to chainspec.json
 		CustomNetworkConfigPath: gd.CustomNetworkConfigPath, // Path to config.yaml
 		CustomGenesisPath:       gd.CustomGenesisPath,       // Path to genesis.ssz
