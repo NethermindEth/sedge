@@ -15,6 +15,12 @@ limitations under the License.
 */
 package configs
 
+import (
+	"fmt"
+	"os"
+	"path"
+)
+
 // All the strings that are needed for debugging and info logging, and constant strings.
 const (
 	CheckingDependencies          = "Checking dependencies: %s"
@@ -27,6 +33,7 @@ const (
 	OSNotSupported                = "installation not supported for %s"
 	ProvideClients                = "Please provide both execution client and consensus client"
 	CreatedFile                   = "Created file %s"
+	DefaultSedgeDataFolderName    = "sedge-data"
 	ClientNotSupported            = "client %s is not supported. Please use 'clients' command to see the list of supported clients"
 	PrintingFile                  = "File %s:"
 	SupportedClients              = "Supported clients of type %s: %v"
@@ -46,9 +53,10 @@ const (
 	KeysFoundAt                   = "If everything went well, your keys can be found at: %s"
 	ImageNotFoundBuilding         = "Image %s not found, building it"
 	ImageNotFoundPulling          = "Image %s not found, pulling it"
-	ReviewKeystorePath            = "In case you used custom paths for the 'cli' or the 'keys' commands, please review if the keystore path in the generated .env file points to the generated keystore folder (the .env key should be KEYSTORE_DIR). If not, change the path in the .env file to the correct one."
-	NodesSynced                   = "Execution and Consensus clients are synced, proceeding to start validator node"
-	RemoteNodeNeeded              = `
+
+	ReviewKeystorePath = "In case you used custom paths for the 'cli' or the 'keys' commands, please review if the keystore path in the generated .env file points to the generated keystore folder (the .env key should be KEYSTORE_DIR). If not, change the path in the .env file to the correct one."
+	NodesSynced        = "Execution and Consensus clients are synced, proceeding to start validator node"
+	RemoteNodeNeeded   = `
 If you want to run a validator, make sure you have access to a remote or external consensus node.
 	
 You can use one of your own, a friend's node or providers such as Infura. Edit the .env file accordingly please, check that variable CC_NODE <-> (consensus endpoint) have the correct value. The validator node requires a high available consensus node, and consensus in turn needs a high available execution node.`
@@ -103,3 +111,13 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 	GettingCustomNetworkConfig = "Getting custom network config..."
 	WritingCustomDeployBlock   = "Writing custom deploy block..."
 )
+
+var DefaultAbsSedgeDataPath string
+
+func init() {
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
+	DefaultAbsSedgeDataPath = path.Join(cwd, DefaultSedgeDataFolderName)
+}
