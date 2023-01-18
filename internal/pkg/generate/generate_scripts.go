@@ -248,7 +248,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 			return err
 		}
 	}
-	// If consensus is running with other services, and not set the MevBoostEndpoint, set it to the default
+	// If consensus is running with the validator, and the MevBoostEndpoint is not set, set it to the default value
 	if cls[consensus] != nil && cls[validator] != nil && gd.MevBoostEndpoint == "" && gd.Mev {
 		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ConsensusClient.Name)
 		if err != nil {
@@ -295,7 +295,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		CustomNetwork:       gd.Network == configs.CustomNetwork.Name, // Used custom templates
 		CustomConsensusConfigs: gd.CustomNetworkConfigPath != "" ||
 			gd.CustomGenesisPath != "" ||
-			gd.CustomDeployBlockPath != "", // Have custom configs paths
+			gd.CustomDeployBlockPath != "",                  // Have custom configs paths
 		CustomChainSpecPath:     gd.CustomChainSpecPath,     // Path to chainspec.json
 		CustomNetworkConfigPath: gd.CustomNetworkConfigPath, // Path to config.yaml
 		CustomGenesisPath:       gd.CustomGenesisPath,       // Path to genesis.ssz
