@@ -213,6 +213,7 @@ func buildCliTestCase(
 }
 
 func TestCliCmd(t *testing.T) {
+	configs.InitNetworksConfigs()
 	// TODO: Add more test cases
 	tcs := []cliCmdTestCase{
 		*buildCliTestCase(

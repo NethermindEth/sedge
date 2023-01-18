@@ -10,6 +10,5 @@ CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}chainsafe/lodestar:v1.2.2{{e
 CC_DATA_DIR={{.CcDataDir}}
 CC_LODESTAR_PRESET=mainnet
 CC_JWT_SECRET_PATH={{.JWTSecretPath}}
-CC_FEE_RECIPIENT={{.FeeRecipient}}{{if .CCBootnodes}}
-CC_BOOTNODES="{{ range $index, $enr := .CCBootnodes}}{{if $index}},{{end}}{{$enr}}{{end}}"{{end}}
+CC_FEE_RECIPIENT={{.FeeRecipient}}
 {{ end }}

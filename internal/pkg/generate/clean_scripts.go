@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -37,11 +38,9 @@ cleanFlags
 This function get the raw flags data from the generated docker compose and
 remove the existing duplicates. In case of errors it returns the original
 flags.
-
 params :-
 a. rawFlags any
 Raw flags data from
-
 returns :-
 a. any
 Flags after being processed
@@ -116,11 +115,9 @@ func cleanFlags(rawFlags any) any {
 CleanDockerCompose
 This functions is responsible for the process of cleaning a generated
 docker compose script.
-
 params :-
 a. dockerComposePath string
 Path of the docker compose file to clean
-
 returns :-
 a. error
 Error if any
@@ -131,6 +128,7 @@ func CleanDockerCompose(dockerComposePath string) error {
 	if err != nil {
 		return fmt.Errorf(configs.CleaningDCFileError, err)
 	}
+	defer file.Close()
 
 	raw, err := io.ReadAll(file)
 	if err != nil {
@@ -138,11 +136,6 @@ func CleanDockerCompose(dockerComposePath string) error {
 	}
 
 	info, err := file.Stat()
-	if err != nil {
-		return fmt.Errorf(configs.CleaningDCFileError, err)
-	}
-
-	err = file.Close()
 	if err != nil {
 		return fmt.Errorf(configs.CleaningDCFileError, err)
 	}
@@ -209,11 +202,9 @@ CleanEnvFile
 This functions is resposible for the process of cleaning a generated `.env`
 file. It removes the duplicated env var in the file keeping only the latest
 apparititon of it.
-
 params :-
 a. envFilePath string
 Path of the generated `.env` file
-
 returns :-
 a. error
 Error if any
@@ -224,6 +215,7 @@ func CleanEnvFile(envFilePath string) error {
 	if err != nil {
 		return fmt.Errorf(configs.CleaningEnvFileError, err)
 	}
+	defer file.Close()
 
 	rawLines, err := io.ReadAll(file)
 	if err != nil {
@@ -232,7 +224,6 @@ func CleanEnvFile(envFilePath string) error {
 	lines := strings.Split(string(rawLines), "\n")
 
 	info, err := file.Stat()
-	file.Close()
 	if err != nil {
 		return fmt.Errorf(configs.CleaningEnvFileError, err)
 	}
@@ -280,20 +271,18 @@ func CleanEnvFile(envFilePath string) error {
 /*
 CleanGenerated
 This functions handles the process of cleaning the generation results files
-
 params :-
 a. gr GenerationResults
 The generations results to be cleaned
-
 returns:-
 a. error
 Error if any
 */
-func CleanGenerated(gr GenerationResults) error {
-	err := CleanEnvFile(gr.EnvFilePath)
+func CleanGenerated(genPath string) error {
+	err := CleanEnvFile(filepath.Join(genPath, configs.DefaultEnvFileName))
 	if err != nil {
 		return err
 	}
 
-	return CleanDockerCompose(gr.DockerComposePath)
+	return CleanDockerCompose(filepath.Join(genPath, configs.DefaultDockerComposeScriptName))
 }

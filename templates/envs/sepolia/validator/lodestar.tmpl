@@ -9,4 +9,5 @@ VL_IMAGE_VERSION={{if .VlImage}}{{.VlImage}}{{else}}chainsafe/lodestar:v1.2.2{{e
 KEYSTORE_DIR={{.KeystoreDir}}
 VL_DATA_DIR={{.VlDataDir}}
 VL_LODESTAR_PRESET=mainnet
+MEV=true
 {{ end }}
