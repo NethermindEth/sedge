@@ -1,6 +1,6 @@
 $package = "cmd/sedge/main.go"
 $packageName = "sedge"
-$VERSION = "v0.6.0"
+
 $platforms = @("windows/amd64")
 
 if (-not(Test-Path "build")) {
