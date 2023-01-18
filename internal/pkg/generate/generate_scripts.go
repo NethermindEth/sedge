@@ -388,7 +388,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 			return err
 		}
 	}
-	// If consensus is running with other services, and not set the MevBoostEndpoint, set it to the default
+	// If consensus is running with the validator, and the MevBoostEndpoint is not set, set it to the default value
 	if cls[consensus] != nil && cls[validator] != nil && gd.MevBoostEndpoint == "" && gd.Mev {
 		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ConsensusClient.Name)
 		if err != nil {
