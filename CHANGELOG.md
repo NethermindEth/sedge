@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Documentation for all supported networks and clients.
 - Support for custom networks
 - When generating new mnemonic, show it without a trace.
 - Support import/export slashing protection interchange data [EIP-3076](https://eips.ethereum.org/EIPS/eip-3076)
@@ -17,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated installation script for docker and docker compose in Linux flavours.
 - Fixed validator restart failure:
   - Validator waits a grace period (2 epochs) before starting.
   - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint returns with the HTTP code 200 in its docker-compose `healthcheck` condition so that the validator waits for the consensus be healthy. This replace the older track sync method.

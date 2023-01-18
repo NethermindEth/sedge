@@ -15,6 +15,9 @@ sudo chkconfig docker on
 
 DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
 mkdir -p $DOCKER_CONFIG/cli-plugins
-wget "https://github.com/docker/compose/releases/download/v2.6.1/docker-compose-$(uname -s)-$(uname -m)" 
+wget "https://github.com/docker/compose/releases/download/v2.6.1/docker-compose-$(uname -s)-$(uname -m)"
 sudo mv docker-compose-$(uname -s)-$(uname -m) $DOCKER_CONFIG/cli-plugins/docker-compose
 sudo chmod -v +x $DOCKER_CONFIG/cli-plugins/docker-compose
+
+sudo usermod -aG docker $USER
+newgrp - docker
