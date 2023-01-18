@@ -27,6 +27,7 @@ type SedgeActions interface {
 	SetupContainers(SetupContainersOptions) error
 	RunContainers(RunContainersOptions) error
 	InstallDependencies(InstallDependenciesOptions) error
+	Generate(GenerateOptions) error
 }
 
 type sedgeActions struct {
