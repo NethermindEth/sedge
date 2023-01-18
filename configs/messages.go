@@ -15,6 +15,12 @@ limitations under the License.
 */
 package configs
 
+import (
+	"fmt"
+	"os"
+	"path"
+)
+
 // All the strings that are needed for debugging and info logging, and constant strings.
 const (
 	DefaultMevBoostEndpoint       = "http://mevboost"
@@ -34,6 +40,7 @@ const (
 	OSNotSupported                = "installation not supported for %s"
 	ProvideClients                = "Please provide both execution client and consensus client"
 	CreatedFile                   = "Created file %s"
+	DefaultSedgeDataFolderName    = "sedge-data"
 	ClientNotSupported            = "client %s is not supported. Please use 'clients' command to see the list of supported clients"
 	PrintingFile                  = "File %s:"
 	SupportedClients              = "Supported clients of type %s: %v"
@@ -113,3 +120,13 @@ Follow https://launchpad.ethereum.org/ and happy staking!`
 	GettingCustomNetworkConfig = "Getting custom network config..."
 	WritingCustomDeployBlock   = "Writing custom deploy block..."
 )
+
+var DefaultAbsSedgeDataPath string
+
+func init() {
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
+	DefaultAbsSedgeDataPath = path.Join(cwd, DefaultSedgeDataFolderName)
+}
