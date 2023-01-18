@@ -18,6 +18,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -38,41 +39,35 @@ import (
 )
 
 const (
-	execution, consensus, validator = "execution", "consensus", "validator"
-	slashingImportFile              = "slashing-import.json"
+	slashingImportFile                        = "slashing-import.json"
+	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mevboost"
 )
 
 type CliCmdFlags struct {
-	executionName       string
-	consensusName       string
-	validatorName       string
-	generationPath      string
-	checkpointSyncUrl   string
-	network             string
-	feeRecipient        string
-	noMev               bool
-	mevImage            string
-	noValidator         bool
-	jwtPath             string
-	graffiti            string
-	install             bool
-	run                 bool
-	yes                 bool
-	mapAllPorts         bool
-	services            *[]string
-	fallbackEL          *[]string
-	elExtraFlags        *[]string
-	clExtraFlags        *[]string
-	vlExtraFlags        *[]string
-	logging             string
-	customTTD           string
-	customChainSpec     string
-	customNetworkConfig string
-	customGenesis       string
-	customDeployBlock   string
-	customEnodes        *[]string
-	customEnrs          *[]string
-	slashingProtection  string
+	CustomFlags
+	executionName      string
+	consensusName      string
+	validatorName      string
+	generationPath     string
+	checkpointSyncUrl  string
+	network            string
+	feeRecipient       string
+	noMev              bool
+	mevImage           string
+	noValidator        bool
+	jwtPath            string
+	graffiti           string
+	install            bool
+	run                bool
+	yes                bool
+	mapAllPorts        bool
+	services           *[]string
+	fallbackEL         *[]string
+	elExtraFlags       *[]string
+	clExtraFlags       *[]string
+	vlExtraFlags       *[]string
+	logging            string
+	slashingProtection string
 }
 
 type clientImages struct {
@@ -123,7 +118,7 @@ func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceMana
 	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.validatorName, "validator", "v", "", "Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
-	cmd.Flags().StringVarP(&flags.generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
+	cmd.Flags().StringVarP(&flags.generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data")
 	cmd.Flags().StringVar(&flags.checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity")
 	cmd.Flags().StringVarP(&flags.network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, etc.")
 	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
@@ -277,8 +272,14 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceManager services.ServiceManager, sedgeActions actions.SedgeActions) []error {
 	// Warnings
 	// Warn if custom images are used
-	if clientImages.execution != "" || clientImages.consensus != "" || clientImages.validator != "" {
-		log.Warn(configs.CustomImagesWarning)
+	if clientImages.execution != "" {
+		log.Warn(configs.CustomExecutionImagesWarning)
+	}
+	if clientImages.consensus != "" {
+		log.Warn(configs.CustomConsensusImagesWarning)
+	}
+	if clientImages.validator != "" {
+		log.Warn(configs.CustomValidatorImagesWarning)
 	}
 	// Warn if exposed ports are used
 	if flags.mapAllPorts {
@@ -332,15 +333,25 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	// Get custom networks configs
-	customNetworkConfigsData, err := LoadCustomNetworksConfig(flags)
+	customNetworkConfigsData, err := LoadCustomNetworksConfig(&flags.CustomFlags, flags.network, flags.generationPath)
 	if err != nil {
 		return []error{err}
 	}
 
-	combinedClients.Execution.Image = clientImages.execution
-	combinedClients.Consensus.Image = clientImages.consensus
-	combinedClients.Validator.Image = clientImages.validator
-	combinedClients.Validator.Omitted = flags.noValidator
+	if combinedClients.Execution != nil {
+		combinedClients.Execution.Image = clientImages.execution
+	}
+	if combinedClients.Consensus != nil {
+		combinedClients.Consensus.Image = clientImages.consensus
+	}
+
+	if flags.noValidator {
+		combinedClients.Validator = nil
+	} else {
+		if combinedClients.Validator != nil {
+			combinedClients.Validator.Image = clientImages.validator
+		}
+	}
 
 	var vlStartGracePeriod time.Duration
 	switch flags.network {
@@ -353,28 +364,27 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	// Generate docker-compose scripts
-	gd := generate.GenerationData{
+	gd := &generate.GenData{
 		Services:                *flags.services,
 		ExecutionClient:         combinedClients.Execution,
 		ConsensusClient:         combinedClients.Consensus,
 		ValidatorClient:         combinedClients.Validator,
-		GenerationPath:          flags.generationPath,
 		Network:                 flags.network,
 		CheckpointSyncUrl:       flags.checkpointSyncUrl,
 		FeeRecipient:            flags.feeRecipient,
 		JWTSecretPath:           jwtPath,
 		Graffiti:                flags.graffiti,
-		FallbackELUrls:          *flags.fallbackEL,
-		ElExtraFlags:            *flags.elExtraFlags,
-		ClExtraFlags:            *flags.clExtraFlags,
-		VlExtraFlags:            *flags.vlExtraFlags,
+		FallbackELUrls:          flags.fallbackEL,
+		ElExtraFlags:            flags.elExtraFlags,
+		ClExtraFlags:            flags.clExtraFlags,
+		VlExtraFlags:            flags.vlExtraFlags,
 		MapAllPorts:             flags.mapAllPorts,
 		Mev:                     !flags.noMev && !flags.noValidator,
 		MevImage:                flags.mevImage,
 		LoggingDriver:           configs.GetLoggingDriver(flags.logging),
 		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
-		ECBootnodes:             *flags.customEnodes,
-		CCBootnodes:             *flags.customEnrs,
+		ECBootnodes:             flags.customEnodes,
+		CCBootnodes:             flags.customEnrs,
 		CustomTTD:               flags.customTTD,
 		CustomChainSpecPath:     customNetworkConfigsData.ChainSpecPath,
 		CustomNetworkConfigPath: customNetworkConfigsData.NetworkConfigPath,
@@ -382,29 +392,22 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		CustomDeployBlock:       flags.customDeployBlock,
 		CustomDeployBlockPath:   customNetworkConfigsData.NetworkDeployBlockPath,
 	}
-	results, err := generate.GenerateScripts(gd)
+	err = sedgeActions.Generate(actions.GenerateOptions{GenerationData: gd, GenerationPath: flags.generationPath})
 	if err != nil {
 		return []error{err}
 	}
 
 	// Print final files
-	log.Infof(configs.CreatedFile, results.EnvFilePath)
-	ui.PrintFileContent(cmd.OutOrStdout(), results.EnvFilePath)
+	log.Infof(configs.CreatedFile, filepath.Join(generationPath, configs.DefaultEnvFileName))
+	ui.PrintFileContent(cmd.OutOrStdout(), filepath.Join(generationPath, configs.DefaultEnvFileName))
 
-	log.Infof(configs.CreatedFile, results.DockerComposePath)
-	ui.PrintFileContent(cmd.OutOrStdout(), results.DockerComposePath)
+	log.Infof(configs.CreatedFile, filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
+	ui.PrintFileContent(cmd.OutOrStdout(), filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
 
 	// If --run-clients=none was set then exit and don't run anything
 	if len(*flags.services) == 0 {
 		log.Info(configs.HappyStaking2)
 		return nil
-	}
-
-	// If teku is chosen, then prepare datadir with 777 permissions
-	if combinedClients.Consensus.Name == "teku" {
-		if err = preRunTeku(flags); err != nil {
-			return []error{err}
-		}
 	}
 
 	if flags.run {

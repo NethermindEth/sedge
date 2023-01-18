@@ -192,7 +192,7 @@ func TestValidateClient(t *testing.T) {
 	for _, input := range inputs {
 		descr := fmt.Sprintf("ValidateClient(%v, %s)", input.client, input.clientType)
 
-		if err := ValidateClient(input.client, input.clientType); input.isErr && err == nil {
+		if err := ValidateClient(&input.client, input.clientType); input.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
 		} else if !input.isErr && err != nil {
 			t.Errorf("%s failed: %v", descr, err)
