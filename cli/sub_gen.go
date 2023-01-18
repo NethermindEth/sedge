@@ -45,7 +45,11 @@ func FullNodeSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 
 It will not generate a validator configuration if the --no-validator flag is set to true.
 
-On mainnet, sepolia and goerli, mev-boost will be activated by default unless you run it with --no-mev-boost flag.`,
+On mainnet, sepolia and goerli, mev-boost will be activated by default unless you run it with --no-mev-boost flag.
+
+If you don't provide a execution, consensus or validator client, it will be chosen randomly. If one of consensus or validator is provided, but the other one is omitted, then the same pair of clients will be used for both consensus and validator.
+
+Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate full-node --execution nethermind:docker.image'. If you want to use the default docker image, just use the client name`,
 		Args: cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
