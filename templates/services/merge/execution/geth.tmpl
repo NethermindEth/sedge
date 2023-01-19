@@ -2,7 +2,7 @@
 {{ define "execution" }}
   execution:
     stop_grace_period: 30m
-    container_name: execution-client{{if .ContainerTag}}_{{.ContainerTag}}{{end}}
+    container_name: sedge-execution-client{{if .ContainerTag}}_{{.ContainerTag}}{{end}}
     restart: unless-stopped
     image: ${EC_IMAGE_VERSION}
     networks:

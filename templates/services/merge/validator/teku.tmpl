@@ -1,7 +1,7 @@
 {{/* teku.tmpl */}}
 {{ define "validator" }}
   validator-import:
-    container_name: validator-import-client{{if .ContainerTag}}_{{.ContainerTag}}{{end}}
+    container_name: sedge-validator-import{{if .ContainerTag}}_{{.ContainerTag}}{{end}}
     build:
       context: github.com/NethermindEth/teku-init-validator
     volumes:
@@ -16,7 +16,7 @@
 
   validator:{{if and (ge .UID 0) (ge .GID 0)}}
     user: "{{.UID}}:{{.GID}}"{{end}}
-    container_name: validator-client
+    container_name: sedge-validator-client{{if .ContainerTag}}_{{.ContainerTag}}{{end}}
     image: ${VL_IMAGE_VERSION}
     restart: unless-stopped
     depends_on:

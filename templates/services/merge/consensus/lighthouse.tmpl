@@ -2,7 +2,7 @@
 {{ define "consensus" }}
   consensus:
     stop_grace_period: 30s
-    container_name: consensus-client{{if .ContainerTag}}_{{.ContainerTag}}{{end}}
+    container_name: sedge-consensus-client{{if .ContainerTag}}_{{.ContainerTag}}{{end}}
     restart: unless-stopped
     image: ${CC_IMAGE_VERSION}{{if .Mev}}
     depends_on:{{if .Mev}}
