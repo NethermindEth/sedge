@@ -172,7 +172,7 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 	case "gnosis", "chiado":
 		preset = "gnosis"
 	default:
-		return "", fmt.Errorf("unknown lodestar preset for network %s", options.Network)
+		return "", newErrUnknownLodestarPreset(options.Network)
 	}
 	cmd := []string{
 		"validator", "import",
@@ -214,7 +214,7 @@ func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManage
 	// Init build context
 	contextDir, err := lighthouse.InitContext()
 	if err != nil {
-		return "", fmt.Errorf("error creating context dir: %s", err.Error())
+		return "", fmt.Errorf("%w: %s", ErrCreatingContextDir, err.Error())
 	}
 	// Build image
 	buildCmd := commandRunner.BuildDockerBuildCMD(commands.DockerBuildOptions{
@@ -336,7 +336,7 @@ func runAndWait(dockerClient client.APIClient, serviceManager services.ServiceMa
 		select {
 		case exitResult := <-ctExit:
 			if exitResult.StatusCode != 0 {
-				return fmt.Errorf("validator-import service ends with status code %d, check container %s logs for more details", exitResult.StatusCode, ctID)
+				return newErrValidatorImportCtBadExitCode(ctID, exitResult.StatusCode)
 			}
 			return deleteContainer(dockerClient, ctID)
 		case exitErr := <-errChan:

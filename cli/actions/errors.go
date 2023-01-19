@@ -15,6 +15,22 @@ limitations under the License.
 */
 package actions
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
-var ErrUnsupportedValidatorClient = errors.New("unsupported validator client")
+var (
+	ErrUnsupportedValidatorClient   = errors.New("unsupported validator client")
+	ErrCreatingContextDir           = errors.New("error creating context dir")
+	ErrValidatorImportCtBadExitCode = errors.New("validator import container exited with non-zero exit code")
+	ErrUnknownLodestarPreset        = errors.New("unknown lodestar preset")
+)
+
+func newErrValidatorImportCtBadExitCode(ctId string, exitCode int64) error {
+	return fmt.Errorf("%w: validator-import service ends with status code %d, check container %s logs for more details", ErrValidatorImportCtBadExitCode, exitCode, ctId)
+}
+
+func newErrUnknownLodestarPreset(network string) error {
+	return fmt.Errorf("%w for network %s", ErrUnknownLodestarPreset, network)
+}
