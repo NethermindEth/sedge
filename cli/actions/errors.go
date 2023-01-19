@@ -17,4 +17,7 @@ package actions
 
 import "errors"
 
-var ErrUnsupportedValidatorClient = errors.New("unsupported validator client")
+var (
+	ErrUnsupportedValidatorClient = errors.New("unsupported validator client")
+	ErrorNetworkNotFound          = errors.New("network not found")
+)
