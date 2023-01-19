@@ -19,12 +19,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/NethermindEth/sedge/internal/pkg/services"
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"

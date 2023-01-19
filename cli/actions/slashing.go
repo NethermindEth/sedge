@@ -209,7 +209,8 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 }
 
 func runSlashingContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, cmd []string,
-	validatorContainerName string) error {
+	validatorContainerName string,
+) error {
 	validatorImage, err := serviceManager.Image(validatorContainerName)
 	if err != nil {
 		return err
