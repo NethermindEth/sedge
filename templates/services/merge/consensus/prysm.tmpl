@@ -30,9 +30,9 @@
       - --chain-config-file=/network_config/config.yml{{end}}{{if .CustomDeployBlock}}
       - --contract-deployment-block={{.CustomDeployBlock}}{{end}}{{if .CustomGenesisPath}}
       - --genesis-state=/network_config/genesis.ssz{{end}}{{else}}
-      - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}{{range $enr := .CCBootnodes}}
-      - --bootstrap-node={{$enr}}{{end}}{{with .TTD}}
-      - --terminal-total-difficulty-override=${TTD}{{end}}
+      - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}{{range $enr := .CCBootnodesList}}
+      - --bootstrap-node={{$enr}}{{end}}{{if .TTD}}
+      - --terminal-total-difficulty-override={{.TTD}}{{end}}
       - --p2p-tcp-port={{.ClDiscoveryPort}}
       - --p2p-udp-port={{.ClDiscoveryPort}}
       - --jwt-secret=/tmp/jwt/jwtsecret
@@ -51,8 +51,8 @@
       - --monitoring-port={{.ClMetricsPort}}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
       - --checkpoint-sync-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}
       - --genesis-beacon-api-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{end}}{{range $flag := .ClExtraFlags}}
-      - --{{$flag}}{{end}}{{if .Mev}}
-      - --http-mev-relay=http://mevboost:{{.MevPort}}{{end}}{{if .LoggingDriver}}
+      - --{{$flag}}{{end}}{{if .MevBoostEndpoint}}
+      - --http-mev-relay={{.MevBoostEndpoint}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:

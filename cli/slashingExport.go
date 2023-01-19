@@ -93,7 +93,7 @@ sedge slashing-export --out slashing-data.json --start-validator lighthouse`,
 	cmd.Flags().StringVarP(&network, "network", "n", "mainnet", "network")
 	cmd.Flags().BoolVar(&startValidator, "start-validator", false, "starts the validator client after export, regardless of the state the validator was in before")
 	cmd.Flags().BoolVar(&stopValidator, "stop-validator", false, "stops the validator client after export, regardless of the state the validator was in before")
-	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "path to the generation directory")
-	cmd.Flags().StringVarP(&out, "out", "o", "", `path to write the JSON file in the EIP-3076 format with the slashing protection data (default "<generation-dir>/slashing_export.json")`)
+	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "path to the generation directory")
+	cmd.Flags().StringVarP(&out, "out", "o", "", `path to write slashing protection data (default "[GENERATION_PATH]/slashing_export.json")`)
 	return cmd
 }

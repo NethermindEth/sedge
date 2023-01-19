@@ -34,6 +34,21 @@ func (m *MockSedgeActions) EXPECT() *MockSedgeActionsMockRecorder {
 	return m.recorder
 }
 
+// CreateJWTSecrets mocks base method.
+func (m *MockSedgeActions) CreateJWTSecrets(arg0 actions.CreateJWTSecretOptions) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateJWTSecrets", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateJWTSecrets indicates an expected call of CreateJWTSecrets.
+func (mr *MockSedgeActionsMockRecorder) CreateJWTSecrets(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateJWTSecrets", reflect.TypeOf((*MockSedgeActions)(nil).CreateJWTSecrets), arg0)
+}
+
 // ExportSlashingInterchangeData mocks base method.
 func (m *MockSedgeActions) ExportSlashingInterchangeData(arg0 actions.SlashingExportOptions) error {
 	m.ctrl.T.Helper()
@@ -46,6 +61,20 @@ func (m *MockSedgeActions) ExportSlashingInterchangeData(arg0 actions.SlashingEx
 func (mr *MockSedgeActionsMockRecorder) ExportSlashingInterchangeData(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExportSlashingInterchangeData", reflect.TypeOf((*MockSedgeActions)(nil).ExportSlashingInterchangeData), arg0)
+}
+
+// Generate mocks base method.
+func (m *MockSedgeActions) Generate(arg0 actions.GenerateOptions) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Generate", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Generate indicates an expected call of Generate.
+func (mr *MockSedgeActionsMockRecorder) Generate(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Generate", reflect.TypeOf((*MockSedgeActions)(nil).Generate), arg0)
 }
 
 // ImportSlashingInterchangeData mocks base method.

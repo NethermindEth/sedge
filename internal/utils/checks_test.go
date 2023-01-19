@@ -137,7 +137,7 @@ func TestPreCheck(t *testing.T) {
 				dPath = test.CreateFakeDep(t, "docker")
 			}
 
-			test.PrepareTestCaseDir(filepath.Join("testdata", "checks_tests", tc.caseTestDataDir, "docker-compose-scripts"), tc.path)
+			test.PrepareTestCaseDir(filepath.Join("testdata", "checks_tests", tc.caseTestDataDir, configs.DefaultSedgeDataFolderName), tc.path)
 
 			err := PreCheck(tc.runner, tc.path)
 			if tc.isErr && err == nil {
@@ -165,7 +165,7 @@ type checkContainersTC struct {
 
 func buildCheckContainersTestCase(t *testing.T, caseName string, isErr bool) *checkContainersTC {
 	dcPath := t.TempDir()
-	test.PrepareTestCaseDir(filepath.Join("testdata", "checks_tests", caseName, "docker-compose-scripts"), dcPath)
+	test.PrepareTestCaseDir(filepath.Join("testdata", "checks_tests", caseName, configs.DefaultSedgeDataFolderName), dcPath)
 
 	tc := checkContainersTC{}
 	tc.path = dcPath

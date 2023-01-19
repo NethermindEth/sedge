@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Documentation for all supported networks and clients.
 - Support for custom networks
 - When generating new mnemonic, show it without a trace.
 - Support import slashing protection interchange data [EIP-3076](https://eips.ethereum.org/EIPS/eip-3076)
@@ -20,11 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated installation script for docker and docker compose in Linux flavours.
+- Use newed created action for JWT secret handling
 - Fixed validator restart failure:
   - Validator waits a grace period (2 epochs) before starting.
   - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint returns with the HTTP code 200 in its docker-compose `healthcheck` condition so that the validator waits for the consensus be healthy. This replace the older track sync method.
   - Validator service now always restarts unless stopped.
   - Removed `v` from the tag on release scripts. Now we should use `Tag=v1.0.0` instead of `Tag=1.0.0`.
+- Rename sedge data directory name to `sedge-data` instead of `docker-compose-scripts`.
 
 ### Removed
 
