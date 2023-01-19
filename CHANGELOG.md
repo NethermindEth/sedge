@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support import/export slashing protection interchange data [EIP-3076](https://eips.ethereum.org/EIPS/eip-3076)
 - Support the new command `run`, used to run all the services generated
 - Support for PPA packaging (apt install)
+- Added flag `--container-tag` to add a suffix to sedge containers name.
 
 ### Changed
 
