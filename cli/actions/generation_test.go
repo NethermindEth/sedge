@@ -45,6 +45,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 	sampleData := &generate.GenData{
 		ExecutionClient: &clients.Client{Name: "nethermind"},
 		Network:         "mainnet",
+		ContainerTags:   "sampleTag",
 	}
 	sedgeAction := newAction(t, nil)
 
@@ -73,8 +74,8 @@ func TestGenerateDockerCompose(t *testing.T) {
 
 	// Check that the execution service is set.
 	assert.NotNil(t, composeData.Services.Execution)
-	// Check that the execution container name is `execution-client'.
-	assert.Equal(t, composeData.Services.Execution.ContainerName, "execution-client")
+	// Check that the execution container name is `sedge-execution-client_sampleTag'.
+	assert.Equal(t, composeData.Services.Execution.ContainerName, "sedge-execution-client_sampleTag")
 
 	// Check other services are nil
 	assert.Nil(t, composeData.Services.Consensus)

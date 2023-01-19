@@ -41,21 +41,30 @@ type SlashingImportOptions struct {
 	StartValidator  bool
 	GenerationPath  string
 	From            string
+	ContainerTag    string
+}
+
+func containerNameAndTag(containerName, tag string) string {
+	if tag != "" {
+		return containerName + "_" + tag
+	}
+	return containerName
 }
 
 func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptions) error {
+	validatorContainerName := containerNameAndTag(services.ServiceCtValidator, options.ContainerTag)
 	// Check validator container exists
-	_, err := s.serviceManager.ContainerId(services.ServiceCtValidator)
+	_, err := s.serviceManager.ContainerId(validatorContainerName)
 	if err != nil {
 		return err
 	}
-	previouslyRunning, err := s.serviceManager.IsRunning(services.ServiceCtValidator)
+	previouslyRunning, err := s.serviceManager.IsRunning(validatorContainerName)
 	if err != nil {
 		return err
 	}
 	// Stop validator
 	log.Info("Stopping validator client")
-	if err := s.serviceManager.Stop(services.ServiceCtValidator); err != nil {
+	if err := s.serviceManager.Stop(validatorContainerName); err != nil {
 		return err
 	}
 
@@ -102,14 +111,14 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
 	log.Infof("Importing slashing data to client %s from %s", options.ValidatorClient, options.From)
-	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd); err != nil {
+	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd, validatorContainerName); err != nil {
 		return err
 	}
 
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
 		log.Info("the validator container is being restarted")
-		if err := s.serviceManager.Start(services.ServiceCtValidator); err != nil {
+		if err := s.serviceManager.Start(validatorContainerName); err != nil {
 			return err
 		}
 	}
@@ -123,21 +132,23 @@ type SlashingExportOptions struct {
 	StartValidator  bool
 	GenerationPath  string
 	Out             string
+	ContainerTag    string
 }
 
 func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptions) error {
+	validatorContainerName := containerNameAndTag(services.ServiceCtValidator, options.ContainerTag)
 	// Check validator container exists
-	_, err := s.serviceManager.ContainerId(services.ServiceCtValidator)
+	_, err := s.serviceManager.ContainerId(validatorContainerName)
 	if err != nil {
 		return err
 	}
-	previouslyRunning, err := s.serviceManager.IsRunning(services.ServiceCtValidator)
+	previouslyRunning, err := s.serviceManager.IsRunning(validatorContainerName)
 	if err != nil {
 		return err
 	}
 	// Stop validator client
 	log.Info("Stopping validator client")
-	if err := s.serviceManager.Stop(services.ServiceCtValidator); err != nil {
+	if err := s.serviceManager.Stop(validatorContainerName); err != nil {
 		return err
 	}
 
@@ -177,7 +188,7 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
 	log.Infof("Exporting slashing data from client %s", options.ValidatorClient)
-	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd); err != nil {
+	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd, validatorContainerName); err != nil {
 		return err
 	}
 	copyFrom := filepath.Join(options.GenerationPath, configs.ValidatorDir, "slashing_protection.json")
@@ -189,15 +200,16 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
 		log.Info("the validator container is being restarted")
-		if err := s.serviceManager.Start(services.ServiceCtValidator); err != nil {
+		if err := s.serviceManager.Start(validatorContainerName); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func runSlashingContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, cmd []string) error {
-	validatorImage, err := serviceManager.Image(services.ServiceCtValidator)
+func runSlashingContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, cmd []string,
+	validatorContainerName string) error {
+	validatorImage, err := serviceManager.Image(validatorContainerName)
 	if err != nil {
 		return err
 	}
@@ -208,7 +220,7 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 			Cmd:   cmd,
 		},
 		&container.HostConfig{
-			VolumesFrom: []string{services.ServiceCtValidator},
+			VolumesFrom: []string{validatorContainerName},
 		},
 		&network.NetworkingConfig{},
 		&v1.Platform{},

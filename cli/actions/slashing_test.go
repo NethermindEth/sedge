@@ -170,7 +170,7 @@ func TestSlashingImport_ValidatorRunning(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			s := slashingGoldenPath(t, ctrl)
+			s := slashingGoldenPath(t, ctrl, "")
 
 			generationPath := t.TempDir()
 			from := setupSlashingDataFile(t, filepath.Join(t.TempDir(), "slashing-data.json"))
@@ -199,7 +199,9 @@ func TestSlashingExport_ValidatorRunning(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			s := slashingGoldenPath(t, ctrl)
+			tag := "sampleTag"
+
+			s := slashingGoldenPath(t, ctrl, tag)
 
 			generationPath := t.TempDir()
 
@@ -210,6 +212,7 @@ func TestSlashingExport_ValidatorRunning(t *testing.T) {
 				Network:         "sepolia",
 				GenerationPath:  generationPath,
 				Out:             out,
+				ContainerTag:    tag,
 			})
 			assert.Nil(t, err)
 			assert.FileExists(t, out)
@@ -222,21 +225,29 @@ func TestSlashingExport_ValidatorRunning(t *testing.T) {
 	}
 }
 
+func containerNameAndTag(containerName, tag string) string {
+	if tag != "" {
+		return containerName + "_" + tag
+	}
+	return containerName
+}
+
 // slashingGoldenPath returns a SedgeActions interface with a mocked docker client
 // with all the required responses for a correct slashing container execution.
 // This setup is valid for the export and import process.
-func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
+func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag string) actions.SedgeActions {
 	dockerClient := mock_client.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
 	slashingCtName := "validator-slashing-data"
 	slashingCtId := "slashing-ct-id"
 
+	validatorContainerName := containerNameAndTag(services.ServiceCtValidator, containerTag)
 	// Mock ContainerList
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
 			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+			Filters: filters.NewArgs(filters.Arg("name", validatorContainerName)),
 		}).
 		Return([]types.Container{
 			{ID: validatorCtId},
@@ -244,7 +255,7 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller) actions.SedgeActi
 		Times(1)
 	// Mock ContainerInspect
 	dockerClient.EXPECT().
-		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
+		ContainerInspect(gomock.Any(), validatorContainerName).
 		Return(types.ContainerJSON{
 			ContainerJSONBase: &types.ContainerJSONBase{
 				ID: validatorCtId,
@@ -270,7 +281,7 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller) actions.SedgeActi
 		Return(nil).
 		Times(1)
 	dockerClient.EXPECT().
-		ContainerStart(gomock.Any(), services.ServiceCtValidator, gomock.Any()).
+		ContainerStart(gomock.Any(), validatorContainerName, gomock.Any()).
 		Return(nil).
 		Times(1)
 	// Mock ContainerWait

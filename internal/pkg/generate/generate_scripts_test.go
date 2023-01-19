@@ -58,7 +58,7 @@ var checkOnlyExecution = func(t *testing.T, data *GenData, compose, env io.Reade
 	}
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Execution)
-	assert.Equal(t, composeData.Services.Execution.ContainerName, "execution-client")
+	assert.Equal(t, composeData.Services.Execution.ContainerName, "sedge-execution-client")
 	return nil
 }
 
@@ -69,7 +69,7 @@ var checkOnlyConsensus = func(t *testing.T, data *GenData, compose, env io.Reade
 	}
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Consensus)
-	assert.Equal(t, composeData.Services.Consensus.ContainerName, "consensus-client")
+	assert.Equal(t, composeData.Services.Consensus.ContainerName, "sedge-consensus-client")
 	return nil
 }
 
@@ -80,7 +80,7 @@ var checkOnlyValidator = func(t *testing.T, data *GenData, compose, env io.Reade
 	}
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Validator)
-	assert.Equal(t, composeData.Services.Validator.ContainerName, "validator-client")
+	assert.Equal(t, composeData.Services.Validator.ContainerName, "sedge-validator-client")
 	return nil
 }
 

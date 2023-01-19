@@ -68,6 +68,7 @@ type CliCmdFlags struct {
 	vlExtraFlags       *[]string
 	logging            string
 	slashingProtection string
+	containerTag       string
 }
 
 type clientImages struct {
@@ -145,6 +146,7 @@ func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceMana
 	flags.customEnodes = cmd.Flags().StringSlice("execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
 	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
 	cmd.Flags().StringVar(&flags.slashingProtection, "slashing-protection", "", "Path to the file with slashing protection interchange data (EIP-3076)")
+	cmd.PersistentFlags().StringVar(&flags.containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client_<tag>.")
 	cmd.Flags().SortFlags = false
 	return cmd
 }
@@ -391,6 +393,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		CustomGenesisPath:       customNetworkConfigsData.NetworkGenesisPath,
 		CustomDeployBlock:       flags.customDeployBlock,
 		CustomDeployBlockPath:   customNetworkConfigsData.NetworkDeployBlockPath,
+		ContainerTags:           flags.containerTag,
 	}
 	err = sedgeActions.Generate(actions.GenerateOptions{GenerationData: gd, GenerationPath: flags.generationPath})
 	if err != nil {
@@ -418,8 +421,9 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 			return []error{err}
 		}
 		if flags.slashingProtection != "" {
+			validatorImportClient := services.ContainerNameWithTag(services.ServiceCtValidatorImport, flags.containerTag)
 			// Setup wait for validator import
-			exitCh, errCh := serviceManager.Wait(services.ServiceCtValidatorImport, dockerct.WaitConditionNextExit)
+			exitCh, errCh := serviceManager.Wait(validatorImportClient, dockerct.WaitConditionNextExit)
 			// Run validator-import
 			if err := runAndShowContainers(cmdRunner, []string{"validator-import"}, flags); err != nil {
 				return []error{err}
@@ -438,7 +442,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 				return []error{err}
 			}
 			if exitCode != 0 {
-				return []error{fmt.Errorf("%s ends with unexpected status code %d", services.ServiceCtValidatorImport, exitCode)}
+				return []error{fmt.Errorf("%s ends with unexpected status code %d", validatorImportClient, exitCode)}
 			}
 			if err := sedgeActions.ImportSlashingInterchangeData(actions.SlashingImportOptions{
 				ValidatorClient: flags.validatorName,

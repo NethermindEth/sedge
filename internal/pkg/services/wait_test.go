@@ -39,7 +39,7 @@ func TestWaitErrCh(t *testing.T) {
 	wantErrCh <- wantErr
 
 	dockerClient.EXPECT().
-		ContainerWait(context.Background(), "validator-client", gomock.Any()).
+		ContainerWait(context.Background(), "sedge-validator-client", gomock.Any()).
 		Return(make(chan container.ContainerWaitOKBody), wantErrCh).
 		Times(1)
 
@@ -68,7 +68,7 @@ func TestWaitExitCh(t *testing.T) {
 	wantWaitCh <- wantWait
 
 	dockerClient.EXPECT().
-		ContainerWait(context.Background(), "validator-client", gomock.Any()).
+		ContainerWait(context.Background(), "sedge-validator-client", gomock.Any()).
 		Return(wantWaitCh, make(chan error)).
 		Times(1)
 
