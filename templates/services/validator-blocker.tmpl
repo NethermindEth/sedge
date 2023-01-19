@@ -1,6 +1,7 @@
 {{/* validator-blocker.tmpl */}}
 {{ define "validator-blocker" }}
   validator-blocker:
+    container_name: validator-blocker{{if .ContainerTag}}_{{.ContainerTag}}{{end}}
     image: busybox:latest
     command: >
       sh -c "

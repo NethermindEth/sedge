@@ -9,7 +9,7 @@ services:
     image: {{if .MevImage}}{{.MevImage}}{{else}}flashbots/mev-boost:latest{{end}}
     networks:
       - sedge
-    container_name: mev-boost
+    container_name: mev-boost{{if .ContainerTag}}_{{.ContainerTag}}{{end}}
     restart: on-failure
     entrypoint:
       - /app/mev-boost
@@ -25,5 +25,5 @@ services:
 
 networks:
   sedge:
-    name: sedge_network
+    name: sedge_network{{if .ContainerTag}}_{{.ContainerTag}}{{end}}
 {{ end }}

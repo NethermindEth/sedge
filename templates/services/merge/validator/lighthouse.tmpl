@@ -1,7 +1,7 @@
 {{/* lighthouse.tmpl */}}
 {{ define "validator" }}
   validator-import:
-    container_name: validator-import-client
+    container_name: validator-import-client{{if .ContainerTag}}_{{.ContainerTag}}{{end}}
     build:
       context: github.com/NethermindEth/lighthouse-init-validator
       args:
