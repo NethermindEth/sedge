@@ -40,8 +40,7 @@ import (
 	"github.com/google/uuid"
 	hbls "github.com/herumi/bls-eth-go-binary/bls"
 	"github.com/protolambda/go-keystorev4"
-	"github.com/protolambda/zrnt/eth2/beacon"
-	eth2 "github.com/protolambda/zrnt/eth2/configs"
+	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/util/hashing"
 	"github.com/protolambda/ztyp/tree"
 	"github.com/tyler-smith/go-bip39"
@@ -286,7 +285,7 @@ func mnemonicToSeed(mnemonic string) (seed []byte, err error) {
 func CreateDepositData(
 	vkgd ValidatorKeysGenData,
 ) error {
-	var genesisForkVersion beacon.Version
+	var genesisForkVersion common.Version
 	if err := genesisForkVersion.UnmarshalText([]byte(vkgd.ForkVersion)); err != nil {
 		return fmt.Errorf(configs.ForkVersionDecodeError, err)
 	}
@@ -321,19 +320,19 @@ func CreateDepositData(
 			return fmt.Errorf(configs.WithdrawalSecretKeyCreationError, withdrAccPath, err)
 		}
 
-		var pub beacon.BLSPubkey
+		var pub common.BLSPubkey
 		copy(pub[:], val.PublicKey().Marshal())
 
-		var withdrPub beacon.BLSPubkey
+		var withdrPub common.BLSPubkey
 		copy(withdrPub[:], withdr.PublicKey().Marshal())
 		withdrCreds := hashing.Hash(withdrPub[:])
-		withdrCreds[0] = eth2.Mainnet.BLS_WITHDRAWAL_PREFIX[0]
+		withdrCreds[0] = common.BLS_WITHDRAWAL_PREFIX
 
-		data := beacon.DepositData{
+		data := common.DepositData{
 			Pubkey:                pub,
 			WithdrawalCredentials: withdrCreds,
-			Amount:                beacon.Gwei(vkgd.AmountGwei),
-			Signature:             beacon.BLSSignature{},
+			Amount:                common.Gwei(vkgd.AmountGwei),
+			Signature:             common.BLSSignature{},
 		}
 		msgRoot := data.ToMessage().HashTreeRoot(tree.GetHashFn())
 		var secKey hbls.SecretKey
@@ -341,8 +340,8 @@ func CreateDepositData(
 			return fmt.Errorf(configs.KeystoreSecretKeyConvertionError, err)
 		}
 
-		dom := beacon.ComputeDomain(eth2.Mainnet.DOMAIN_DEPOSIT, genesisForkVersion, beacon.Root{})
-		msg := beacon.ComputeSigningRoot(msgRoot, dom)
+		dom := common.ComputeDomain(common.DOMAIN_DEPOSIT, genesisForkVersion, common.Root{})
+		msg := common.ComputeSigningRoot(msgRoot, dom)
 		sig := secKey.SignHash(msg[:])
 		copy(data.Signature[:], sig.Serialize())
 

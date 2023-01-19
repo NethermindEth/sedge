@@ -12,7 +12,7 @@ foreach ($platform in $platforms) {
     $GOOS = $parts[0]
     $GOARCH = $parts[1]
     $outputName = "$packageName-$VERSION-$GOOS-$GOARCH.exe"
-    $ldflags = "-X github.com/NethermindEth/sedge/internal/utils.Version=$VERSION"
+    $ldflags = "-X github.com/NethermindEth/sedge/internal/utils.Version=$VERSION -extldflags -static"
 
     $env:GOOS = $GOOS ; $env:GOARCH = $GOARCH ; $env:CGO_ENABLED = 1 ; go build -ldflags "${ldflags}" -o .\build\$outputName $package 
     
