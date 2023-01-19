@@ -44,7 +44,7 @@ func TestWaitErrCh(t *testing.T) {
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	exitCh, errCh := serviceManager.Wait(services.ServiceCtValidator, container.WaitConditionNextExit)
+	exitCh, errCh := serviceManager.Wait(services.DefaultSedgeValidatorClient, container.WaitConditionNextExit)
 	select {
 	case <-waitCh:
 		t.Fatal("err channel timeout")
@@ -73,7 +73,7 @@ func TestWaitExitCh(t *testing.T) {
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	exitCh, errCh := serviceManager.Wait(services.ServiceCtValidator, container.WaitConditionNextExit)
+	exitCh, errCh := serviceManager.Wait(services.DefaultSedgeValidatorClient, container.WaitConditionNextExit)
 	select {
 	case <-waitCh:
 		t.Fatal("exit channel timeout")

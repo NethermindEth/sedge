@@ -21,9 +21,11 @@ import (
 )
 
 const (
-	ServiceCtSlashingData    = "validator-slashing-data"
-	ServiceCtValidator       = "sedge-validator-client"
-	ServiceCtValidatorImport = "validator-import-client"
+	ServiceCtSlashingData       = "validator-slashing-data"
+	ServiceCtValidatorImport    = "validator-import-client"
+	DefaultSedgeValidatorClient = "sedge-validator-client"
+	DefaultSedgeExecutionClient = "sedge-execution-client"
+	DefaultSedgeConsensusClient = "sedge-consensus-client"
 )
 
 type ServiceManager interface {

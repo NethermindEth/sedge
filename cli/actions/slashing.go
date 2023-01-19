@@ -52,7 +52,7 @@ func containerNameAndTag(containerName, tag string) string {
 }
 
 func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptions) error {
-	validatorContainerName := containerNameAndTag(services.ServiceCtValidator, options.ContainerTag)
+	validatorContainerName := containerNameAndTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 	// Check validator container exists
 	_, err := s.serviceManager.ContainerId(validatorContainerName)
 	if err != nil {
@@ -136,7 +136,7 @@ type SlashingExportOptions struct {
 }
 
 func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptions) error {
-	validatorContainerName := containerNameAndTag(services.ServiceCtValidator, options.ContainerTag)
+	validatorContainerName := containerNameAndTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 	// Check validator container exists
 	_, err := s.serviceManager.ContainerId(validatorContainerName)
 	if err != nil {

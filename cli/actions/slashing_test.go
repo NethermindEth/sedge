@@ -57,7 +57,7 @@ func validatorNotFoundHelper(t *testing.T, ctrl *gomock.Controller) actions.Sedg
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
 			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return(make([]types.Container, 0), nil).
 		Times(1)
@@ -94,14 +94,14 @@ func checkValidatorFailureHelper(t *testing.T, ctrl *gomock.Controller, wantErro
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
 			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
 			{ID: "validatorctid"},
 		}, nil).
 		Times(1)
 	dockerClient.EXPECT().
-		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
+		ContainerInspect(gomock.Any(), services.DefaultSedgeValidatorClient).
 		Return(types.ContainerJSON{}, wantError).
 		Times(1)
 
@@ -137,14 +137,14 @@ func validatorStopFailureHelper(t *testing.T, ctrl *gomock.Controller) actions.S
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
 			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
 			{ID: validatorCtId},
 		}, nil).
 		Times(1)
 	dockerClient.EXPECT().
-		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
+		ContainerInspect(gomock.Any(), services.DefaultSedgeValidatorClient).
 		Return(types.ContainerJSON{
 			ContainerJSONBase: &types.ContainerJSONBase{
 				ID: validatorCtId,
@@ -239,10 +239,10 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag stri
 	dockerClient := mock_client.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
-	slashingCtName := "validator-slashing-data"
+	slashingCtName := services.ServiceCtSlashingData
 	slashingCtId := "slashing-ct-id"
 
-	validatorContainerName := containerNameAndTag(services.ServiceCtValidator, containerTag)
+	validatorContainerName := containerNameAndTag(services.DefaultSedgeValidatorClient, containerTag)
 	// Mock ContainerList
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
@@ -366,7 +366,7 @@ func unsupportedClientsHelper(t *testing.T, ctrl *gomock.Controller) actions.Sed
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
 			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
 			{ID: validatorCtId},
@@ -374,7 +374,7 @@ func unsupportedClientsHelper(t *testing.T, ctrl *gomock.Controller) actions.Sed
 		Times(1)
 	// Mock ContainerInspect
 	dockerClient.EXPECT().
-		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
+		ContainerInspect(gomock.Any(), services.DefaultSedgeValidatorClient).
 		Return(types.ContainerJSON{
 			ContainerJSONBase: &types.ContainerJSONBase{
 				ID: validatorCtId,

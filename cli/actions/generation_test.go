@@ -75,7 +75,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 	// Check that the execution service is set.
 	assert.NotNil(t, composeData.Services.Execution)
 	// Check that the execution container name is `sedge-execution-client_sampleTag'.
-	assert.Equal(t, composeData.Services.Execution.ContainerName, "sedge-execution-client_sampleTag")
+	assert.Equal(t, composeData.Services.Execution.ContainerName, services.DefaultSedgeExecutionClient+"_sampleTag")
 
 	// Check other services are nil
 	assert.Nil(t, composeData.Services.Consensus)

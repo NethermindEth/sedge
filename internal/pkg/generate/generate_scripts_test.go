@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"io"
 	"os"
 	"path/filepath"
@@ -58,7 +59,7 @@ var checkOnlyExecution = func(t *testing.T, data *GenData, compose, env io.Reade
 	}
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Execution)
-	assert.Equal(t, composeData.Services.Execution.ContainerName, "sedge-execution-client")
+	assert.Equal(t, composeData.Services.Execution.ContainerName, services.DefaultSedgeExecutionClient)
 	return nil
 }
 
@@ -69,7 +70,7 @@ var checkOnlyConsensus = func(t *testing.T, data *GenData, compose, env io.Reade
 	}
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Consensus)
-	assert.Equal(t, composeData.Services.Consensus.ContainerName, "sedge-consensus-client")
+	assert.Equal(t, composeData.Services.Consensus.ContainerName, services.DefaultSedgeConsensusClient)
 	return nil
 }
 
@@ -80,7 +81,7 @@ var checkOnlyValidator = func(t *testing.T, data *GenData, compose, env io.Reade
 	}
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Validator)
-	assert.Equal(t, composeData.Services.Validator.ContainerName, "sedge-validator-client")
+	assert.Equal(t, composeData.Services.Validator.ContainerName, services.DefaultSedgeValidatorClient)
 	return nil
 }
 
