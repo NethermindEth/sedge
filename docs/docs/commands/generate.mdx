@@ -34,6 +34,7 @@ Available Commands:
   validator   Generate a validator node config
 
 Flags:
+      --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client_<tag>.
   -h, --help             help for generate
       --logging string   Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
   -n, --network string   Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
@@ -91,6 +92,7 @@ Flags:
   -h, --help                              help for full-node
 
 Global Flags:
+      --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client_<tag>.
       --logLevel string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
       --logging string    Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [json none] (default "json")
   -n, --network string    Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
@@ -131,6 +133,7 @@ Flags:
   -h, --help                              help for consensus
 
 Global Flags:
+      --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client_<tag>.
       --logLevel string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
       --logging string    Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
   -n, --network string    Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
@@ -160,6 +163,7 @@ Flags:
   -h, --help                          help for execution
 
 Global Flags:
+      --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client_<tag>.
       --logLevel string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
       --logging string    Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
   -n, --network string    Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
@@ -196,6 +200,7 @@ Flags:
   -h, --help                         help for validator
 
 Global Flags:
+      --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client_<tag>.
       --logLevel string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
       --logging string    Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
   -n, --network string    Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
@@ -218,6 +223,7 @@ Flags:
   -h, --help                     help for mevboost
 
 Global Flags:
+      --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client_<tag>.
       --logLevel string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
       --logging string    Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
   -n, --network string    Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")

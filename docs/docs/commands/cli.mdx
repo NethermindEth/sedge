@@ -12,14 +12,14 @@ id: cli
 ```
 $ sedge cli -h
 Run the setup tool on-premise in a quick way. Provide only the command line
-        options and the tool will do all the work.
+options and the tool will do all the work.
 
-        First it will check if dependencies such as docker are installed on your machine
-        and provide instructions for installing them if they are not installed.
+First it will check if dependencies such as docker are installed on your machine
+and provide instructions for installing them if they are not installed.
 
-        Second, it will generate docker-compose scripts to run the full setup according to your selection.
+Second, it will generate docker-compose scripts to run the full setup according to your selection.
 
-        Finally, it will run the generated docker-compose script. Only execution and consensus clients will be executed by default.
+Finally, it will run the generated docker-compose script.
 
 Usage:
   sedge cli [flags]
@@ -28,7 +28,7 @@ Flags:
   -c, --consensus string                  Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
   -e, --execution string                  Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
   -v, --validator string                  Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
-  -p, --path string                       docker-compose scripts generation path (default "./docker-compose-scripts")
+  -p, --path string                       generation path for sedge data (default "/Users/maceo/go/src/github.com/NethermindEth/sedge/sedge-data")
       --checkpoint-sync-url string        Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity
   -n, --network string                    Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
       --fee-recipient string              Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption
@@ -46,11 +46,20 @@ Flags:
       --el-extra-flag stringArray         Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge cli --el-extra-flag "<flag1>=value1" --el-extra-flag "<flag2>=\"value2\""'
       --cl-extra-flag stringArray         Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge cli --cl-extra-flag "<flag1>=value1" --cl-extra-flag "<flag2>=\"value2\""'
       --vl-extra-flag stringArray         Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag "<flag1>=value1" --vl-extra-flag "<flag2>=\"value2\""'
-      --logging string                    Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
+      --logging string                    Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [json none] (default "json")
+      --custom-ttd string                 Custom Terminal Total Difficulty to use for the execution client
+      --custom-chainSpec string           File path or url to use as custom network chainSpec for execution client.
+      --custom-config string              File path or url to use as custom network config file for consensus client.
+      --custom-genesis string             File path or url to use as custom network genesis for consensus client.
+      --custom-deploy-block string        Custom network deploy block to use for consensus client.
+      --execution-bootnodes strings       List of comma separated enodes to use as custom network peers for execution client.
+      --consensus-bootnodes strings       List of comma separated enrs to use as custom network peers for consensus client.
+      --slashing-protection string        Path to the file with slashing protection interchange data (EIP-3076)
+      --container-tag string              Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client_<tag>.
   -h, --help                              help for cli
 
 Global Flags:
-      --logLevel string   Set Log Level (default "info")
+      --logLevel string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
 ```
 
 ## Execution Example
