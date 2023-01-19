@@ -18,7 +18,6 @@ package configs
 const (
 	ConfigFileName                      = ".sedge"
 	CustomNetworkConfigsFolder          = "./custom_configs"
-	DefaultDockerComposeScriptsPath     = "./docker-compose-scripts"
 	DefaultDockerComposeScriptName      = "docker-compose.yml"
 	ExecutionNetworkConfigFileName      = "chainSpec.json"
 	ConsensusNetworkConfigFileName      = "config.yaml"

@@ -15,11 +15,6 @@ limitations under the License.
 */
 package configs
 
-import (
-	"fmt"
-	"strings"
-)
-
 var networksConfigs map[string]NetworkConfig
 
 var CustomNetwork NetworkConfig = NetworkConfig{
@@ -38,7 +33,7 @@ func InitNetworksConfigs() {
 
 	configs := []NetworkConfig{
 		{
-			Name:               "mainnet",
+			Name:               NetworkMainnet,
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00000000",
@@ -48,7 +43,7 @@ func InitNetworksConfigs() {
 			},
 		},
 		{
-			Name:               "goerli",
+			Name:               NetworkGoerli,
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00001020",
@@ -61,7 +56,7 @@ func InitNetworksConfigs() {
 			},
 		},
 		{
-			Name:               "sepolia",
+			Name:               NetworkSepolia,
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x90000069",
@@ -74,7 +69,7 @@ func InitNetworksConfigs() {
 			},
 		},
 		{
-			Name:                     "chiado",
+			Name:                     NetworkChiado,
 			RequireJWT:               true,
 			NetworkService:           "merge",
 			GenesisForkVersion:       "0x0000006f",
@@ -86,7 +81,7 @@ func InitNetworksConfigs() {
 			},
 		},
 		{
-			Name:               "gnosis",
+			Name:               NetworkGnosis,
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00000064",
@@ -109,11 +104,4 @@ func AddNetwork(network NetworkConfig) {
 	if !found {
 		networksConfigs[network.Name] = network
 	}
-}
-
-func CheckNetwork(networkName string) error {
-	if _, ok := networksConfigs[strings.ToLower(networkName)]; !ok {
-		return fmt.Errorf(UnknownNetworkError, networkName)
-	}
-	return nil
 }
