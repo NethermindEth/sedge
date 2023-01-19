@@ -225,13 +225,6 @@ func TestSlashingExport_ValidatorRunning(t *testing.T) {
 	}
 }
 
-func containerNameAndTag(containerName, tag string) string {
-	if tag != "" {
-		return containerName + "_" + tag
-	}
-	return containerName
-}
-
 // slashingGoldenPath returns a SedgeActions interface with a mocked docker client
 // with all the required responses for a correct slashing container execution.
 // This setup is valid for the export and import process.
@@ -242,7 +235,7 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag stri
 	slashingCtName := services.ServiceCtSlashingData
 	slashingCtId := "slashing-ct-id"
 
-	validatorContainerName := containerNameAndTag(services.DefaultSedgeValidatorClient, containerTag)
+	validatorContainerName := services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, containerTag)
 	// Mock ContainerList
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
