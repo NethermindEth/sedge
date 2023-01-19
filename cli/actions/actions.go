@@ -28,6 +28,7 @@ type SedgeActions interface {
 	RunContainers(RunContainersOptions) error
 	InstallDependencies(InstallDependenciesOptions) error
 	Generate(GenerateOptions) error
+	CreateJWTSecrets(CreateJWTSecretOptions) (string, error)
 }
 
 type sedgeActions struct {

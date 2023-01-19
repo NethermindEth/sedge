@@ -55,6 +55,7 @@ func main() {
 		cli.LogsCmd(cmdRunner),
 		cli.VersionCmd(),
 		cli.SlashingExportCmd(sedgeActions),
+		cli.SlashingImportCmd(sedgeActions),
 		cli.RunCmd(cmdRunner, sedgeActions),
 		cli.GenerateCmd(sedgeActions),
 	)

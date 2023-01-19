@@ -20,7 +20,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
@@ -171,15 +170,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		return err
 	}
 
-	var vlStartGracePeriod time.Duration
-	switch network {
-	case "mainnet", "goerli", "sepolia":
-		vlStartGracePeriod = time.Duration(flags.waitEpoch) * configs.EpochTimeETH
-	case "gnosis", "chiado":
-		vlStartGracePeriod = time.Duration(flags.waitEpoch) * configs.EpochTimeGNO
-	default:
-		vlStartGracePeriod = time.Duration(flags.waitEpoch) * configs.EpochTimeETH
-	}
+	vlStartGracePeriod := configs.NetworkEpochTime(network)
 
 	// Generate docker-compose scripts
 	gd := generate.GenData{

@@ -54,7 +54,7 @@ func KeysCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Com
 		Long:  "Generate keystore folder using the eth2.0-deposit-cli tool",
 		PreRun: func(cmd *cobra.Command, args []string) {
 			// Validate network
-			if err := configs.CheckNetwork(flags.network); err != nil {
+			if err := configs.NetworkCheck(flags.network); err != nil {
 				log.Fatal(err.Error())
 			}
 			// Ensure that path is absolute

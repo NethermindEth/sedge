@@ -63,9 +63,12 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 		return err
 	}
 	// Stop validator
-	log.Info("Stopping validator client")
-	if err := s.serviceManager.Stop(validatorContainerName); err != nil {
-		return err
+	if previouslyRunning {
+		log.Info("Stopping validator client...")
+		if err := s.serviceManager.Stop(validatorContainerName); err != nil {
+			return err
+		}
+		log.Info("Validator client stopped.")
 	}
 
 	// Copy slashing data to generation path
@@ -117,10 +120,11 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
-		log.Info("the validator container is being restarted")
+		log.Info("The validator container is being restarted")
 		if err := s.serviceManager.Start(validatorContainerName); err != nil {
 			return err
 		}
+		log.Info("Validator started.")
 	}
 	return nil
 }
@@ -147,9 +151,12 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 		return err
 	}
 	// Stop validator client
-	log.Info("Stopping validator client")
-	if err := s.serviceManager.Stop(validatorContainerName); err != nil {
-		return err
+	if previouslyRunning {
+		log.Info("Stopping validator client")
+		if err := s.serviceManager.Stop(validatorContainerName); err != nil {
+			return err
+		}
+		log.Info("Validator client stopped.")
 	}
 
 	var cmd []string
@@ -192,17 +199,18 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 		return err
 	}
 	copyFrom := filepath.Join(options.GenerationPath, configs.ValidatorDir, "slashing_protection.json")
-	log.Debugf("copying slashing data file from %s to %s", copyFrom, options.Out)
+	log.Debugf("Copying slashing data file from %s to %s", copyFrom, options.Out)
 	if err := utils.CopyFile(copyFrom, options.Out); err != nil {
 		return err
 	}
 
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
-		log.Info("the validator container is being restarted")
+		log.Info("The validator container is being restarted...")
 		if err := s.serviceManager.Start(validatorContainerName); err != nil {
 			return err
 		}
+		log.Info("Validator started.")
 	}
 	return nil
 }
@@ -229,9 +237,9 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 	if err != nil {
 		return err
 	}
-	log.Debugf("slashing container id: %s", ct.ID)
+	log.Debugf("Slashing protection container id: %s", ct.ID)
 	ctExit, errChan := serviceManager.Wait(services.ServiceCtSlashingData, container.WaitConditionNextExit)
-	log.Info("The slashing data container is starting")
+	log.Info("The slashing protection container is starting...")
 	if err := dockerClient.ContainerStart(context.Background(), ct.ID, types.ContainerStartOptions{}); err != nil {
 		return err
 	}
@@ -239,8 +247,9 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 		select {
 		case exitResult := <-ctExit:
 			if exitResult.StatusCode != 0 {
-				return fmt.Errorf("slashing service ends with status code %d, check container %s logs for more details", exitResult.StatusCode, ct.ID)
+				return fmt.Errorf("slashing protection container ends with status code %d, check container %s logs for more details", exitResult.StatusCode, ct.ID)
 			}
+			log.Info("The slashing container ends successfully.")
 			return deleteContainer(dockerClient, ct.ID)
 		case exitErr := <-errChan:
 			return exitErr
@@ -249,9 +258,9 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 }
 
 func deleteContainer(dockerClient client.APIClient, container string) error {
-	log.Debugf("removing container %s", container)
+	log.Debugf("Removing container %s", container)
 	if err := dockerClient.ContainerRemove(context.Background(), container, types.ContainerRemoveOptions{}); err != nil {
-		return fmt.Errorf("error removing slashing container %s: %w", container, err)
+		return fmt.Errorf("error removing container %s: %w", container, err)
 	}
 	return nil
 }
