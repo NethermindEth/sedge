@@ -220,7 +220,7 @@ var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader)
 	if utils.Contains(data.Services, mevBoost) {
 		if composeData.Services.Mevboost != nil {
 			assert.Equal(t, "flashbots/mev-boost:latest", composeData.Services.Mevboost.Image)
-			assert.Equal(t, "mev-boost", composeData.Services.Mevboost.ContainerName)
+			assert.Equal(t, "sedge-mev-boost", composeData.Services.Mevboost.ContainerName)
 			assert.Equal(t, "on-failure", composeData.Services.Mevboost.Restart)
 		} else {
 			return errors.New("mevboost service is not present")

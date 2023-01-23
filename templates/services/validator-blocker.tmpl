@@ -1,7 +1,7 @@
 {{/* validator-blocker.tmpl */}}
 {{ define "validator-blocker" }}
   validator-blocker:
-    container_name: validator-blocker{{if .ContainerTag}}_{{.ContainerTag}}{{end}}
+    container_name: sedge-validator-blocker{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     image: busybox:latest
     command: >
       sh -c "

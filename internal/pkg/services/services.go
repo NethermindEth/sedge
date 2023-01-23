@@ -22,7 +22,7 @@ import (
 
 const (
 	ServiceCtSlashingData       = "validator-slashing-data"
-	ServiceCtValidatorImport    = "validator-import-client"
+	ServiceCtValidatorImport    = "sedge-validator-import"
 	DefaultSedgeValidatorClient = "sedge-validator-client"
 	DefaultSedgeExecutionClient = "sedge-execution-client"
 	DefaultSedgeConsensusClient = "sedge-consensus-client"
@@ -45,7 +45,7 @@ func ContainerNameWithTag(containerName, tag string) string {
 	if tag == "" {
 		return containerName
 	}
-	return containerName + "_" + tag
+	return containerName + "-" + tag
 }
 
 type serviceManager struct {
