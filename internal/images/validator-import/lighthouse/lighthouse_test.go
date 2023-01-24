@@ -3,6 +3,7 @@ package lighthouse_test
 import (
 	"embed"
 	"io/ioutil"
+	"path"
 	"path/filepath"
 	"testing"
 
@@ -22,7 +23,7 @@ func TestInitContext(t *testing.T) {
 			assert.NoError(t, err)
 			data, err := ioutil.ReadFile(filepath.Join(contextDir, entry.Name()))
 			assert.NoError(t, err)
-			expectedData, err := lighthouseContext.ReadFile(filepath.Join("context", entry.Name()))
+			expectedData, err := lighthouseContext.ReadFile(path.Join("context", entry.Name()))
 			assert.NoError(t, err)
 			assert.Equal(t, expectedData, data)
 		})

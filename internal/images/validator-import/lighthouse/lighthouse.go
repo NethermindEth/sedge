@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 //go:embed context
@@ -22,7 +23,7 @@ func InitContext() (string, error) {
 		return "", err
 	}
 	for _, item := range contextDir {
-		itemData, err := lighthouseContext.ReadFile(filepath.Join("context", item.Name()))
+		itemData, err := lighthouseContext.ReadFile(strings.Join([]string{"context", item.Name()}, "/"))
 		if err != nil {
 			return "", err
 		}

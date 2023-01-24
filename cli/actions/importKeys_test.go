@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"testing"
 
@@ -131,13 +132,14 @@ func TestImportKeys_UnsupportedClient(t *testing.T) {
 var keystoreTestData embed.FS
 
 func setupKeystoreDir(t *testing.T) (string, error) {
+	t.Helper()
 	tempKeystore := t.TempDir()
 
 	baseTestDir := "testdata/keystore"
 	dirs := []string{""}
 	for len(dirs) > 0 {
 		currentDir := dirs[0]
-		dirEntries, err := keystoreTestData.ReadDir(filepath.Join(baseTestDir, currentDir))
+		dirEntries, err := keystoreTestData.ReadDir(path.Join(baseTestDir, currentDir))
 		if err != nil {
 			return "", err
 		}
@@ -145,7 +147,7 @@ func setupKeystoreDir(t *testing.T) (string, error) {
 			if entry.IsDir() {
 				dirs = append(dirs, filepath.Join(currentDir, entry.Name()))
 			} else {
-				entryData, err := keystoreTestData.ReadFile(filepath.Join(baseTestDir, currentDir, entry.Name()))
+				entryData, err := keystoreTestData.ReadFile(path.Join(baseTestDir, currentDir, entry.Name()))
 				if err != nil {
 					return "", err
 				}
