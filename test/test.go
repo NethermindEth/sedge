@@ -15,6 +15,8 @@ limitations under the License.
 */
 package test
 
+// notest
+
 import (
 	"fmt"
 	"os"
