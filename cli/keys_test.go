@@ -25,8 +25,8 @@ import (
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
-	"github.com/NethermindEth/sedge/test/mock_prompts"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 )
@@ -128,7 +128,7 @@ func TestKeysCmd_RandomPassphrase(t *testing.T) {
 
 	t.Run("no passphrase prompt when random-passphrase flag is used", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		prompt := mock_prompts.NewMockPrompt(ctrl)
+		prompt := sedge_mocks.NewMockPrompt(ctrl)
 		defer ctrl.Finish()
 
 		prompt.

@@ -28,8 +28,8 @@ import (
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
-	"github.com/NethermindEth/sedge/test/mock_prompts"
 	"github.com/docker/docker/client"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
@@ -368,7 +368,7 @@ func TestCliCmd(t *testing.T) {
 			descr := fmt.Sprintf("sedge cli %s", tc.args.toString())
 
 			ctrl := gomock.NewController(t)
-			prompt := mock_prompts.NewMockPrompt(ctrl)
+			prompt := sedge_mocks.NewMockPrompt(ctrl)
 			defer ctrl.Finish()
 
 			dockerClient, err := client.NewClientWithOpts(client.FromEnv)
