@@ -23,9 +23,13 @@ run: ## run
 run-cli: compile ## run cli
 	@./build/sedge cli --config ./config.yaml
 
-test: ## run tests
+generate: ## generate go files
+	@go generate ./...
+
+test: generate ## run tests
 	@mkdir -p coverage
 	@go test -coverprofile=coverage/coverage.out -covermode=count ./...
+	@rm -r mocks
 
 codecov-test: ## unit tests with coverage using the courtney tool
 	@mkdir -p coverage

@@ -22,8 +22,8 @@ import (
 
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
-	mock_actions "github.com/NethermindEth/sedge/cli/actions/mock"
 	"github.com/NethermindEth/sedge/configs"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -176,7 +176,7 @@ func TestSlashingExport_Params(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			actions := mock_actions.NewMockSedgeActions(ctrl)
+			actions := sedge_mocks.NewMockSedgeActions(ctrl)
 			actions.EXPECT().ExportSlashingInterchangeData(tt.actionOptions).Times(1)
 
 			slashingExportCmd := cli.SlashingExportCmd(actions)
@@ -209,7 +209,7 @@ func TestSlashingExport_Errors(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			actions := mock_actions.NewMockSedgeActions(ctrl)
+			actions := sedge_mocks.NewMockSedgeActions(ctrl)
 			var fatal bool
 			actions.EXPECT().ExportSlashingInterchangeData(gomock.Any()).Return(errors.New("action error")).Times(1)
 			defer func() { log.StandardLogger().ExitFunc = nil }()
