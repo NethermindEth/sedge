@@ -16,14 +16,16 @@ limitations under the License.
 package cli_test
 
 import (
+	"errors"
 	"path/filepath"
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
-	"github.com/NethermindEth/sedge/cli/actions/mock"
+	mock_actions "github.com/NethermindEth/sedge/cli/actions/mock"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/golang/mock/gomock"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -182,6 +184,43 @@ func TestSlashingExport_Params(t *testing.T) {
 			err := slashingExportCmd.Execute()
 
 			assert.Nil(t, err)
+		})
+	}
+}
+
+func TestSlashingExport_Errors(t *testing.T) {
+	tests := []struct {
+		name string
+		args []string
+		run  bool
+	}{
+		{
+			name: "invalid network",
+			args: []string{"lighthouse", "--network", "invalid_network"},
+		},
+		{
+			name: "action error",
+			args: []string{"lighthouse"},
+			run:  true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			actions := mock_actions.NewMockSedgeActions(ctrl)
+			var fatal bool
+			actions.EXPECT().ExportSlashingInterchangeData(gomock.Any()).Return(errors.New("action error")).Times(1)
+			defer func() { log.StandardLogger().ExitFunc = nil }()
+			log.StandardLogger().ExitFunc = func(int) { fatal = true }
+
+			slashingExportCmd := cli.SlashingExportCmd(actions)
+			slashingExportCmd.SetArgs(tt.args)
+			err := slashingExportCmd.Execute()
+
+			assert.Nil(t, err)
+			assert.True(t, fatal)
 		})
 	}
 }
