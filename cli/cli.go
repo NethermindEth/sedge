@@ -338,10 +338,10 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	if combinedClients.Execution != nil {
-		combinedClients.Execution.Image = clientImages.execution
+		combinedClients.Execution.SetImageOrDefault(clientImages.execution)
 	}
 	if combinedClients.Consensus != nil {
-		combinedClients.Consensus.Image = clientImages.consensus
+		combinedClients.Consensus.SetImageOrDefault(clientImages.consensus)
 	}
 
 	if flags.noValidator {

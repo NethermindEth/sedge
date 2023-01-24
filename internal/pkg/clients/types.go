@@ -30,6 +30,35 @@ func (c *Client) SetImageOrDefault(image string) {
 	switch c.Type {
 	case "validator":
 		c.setValidatorImage(image)
+	case "consensus":
+		c.setConsensusImage(image)
+	case "execution":
+		c.setExecutionImage(image)
+	}
+}
+
+func (c *Client) setExecutionImage(image string) {
+	switch c.Name {
+	case "geth":
+		c.Image = valueOrDefault(image, configs.Geth_Image)
+	case "besu":
+		c.Image = valueOrDefault(image, configs.Besu_Image)
+	case "nethermind":
+		c.Image = valueOrDefault(image, configs.Nethermind_Image)
+	case "erigon":
+		c.Image = valueOrDefault(image, configs.Erigon_Image)
+	}
+}
+
+func (c *Client) setConsensusImage(image string) {
+	switch c.Name {
+	// TODO add teku and remove if condition in templates
+	case "lighthouse":
+		c.Image = valueOrDefault(image, configs.Lighthouse_ConsensusImage)
+	case "prysm":
+		c.Image = valueOrDefault(image, configs.Prysm_ConsensusImage)
+	case "lodestar":
+		c.Image = valueOrDefault(image, configs.Lodestar_ConsensusImage)
 	}
 }
 
