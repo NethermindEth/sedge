@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/NethermindEth/sedge/internal/pkg/services"
-	mock_client "github.com/NethermindEth/sedge/test/mock_docker"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/errdefs"
 	"github.com/golang/mock/gomock"
@@ -31,7 +31,7 @@ import (
 
 func TestImageFound(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	expectedImage := "expected-image"
@@ -53,7 +53,7 @@ func TestImageFound(t *testing.T) {
 
 func TestImageNotFound(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	expectedError := errdefs.NotFound(fmt.Errorf("error"))
