@@ -1,6 +1,7 @@
 {{/* nimbus.tmpl */}}
 {{ define "consensus" }}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
-  consensus-sync:
+  consensus-sync:{{if and (ge .UID 0) (ge .GID 0)}}
+    user: "{{.UID}}:{{.GID}}"{{end}}
     stop_grace_period: 30s
     container_name: sedge-consensus-import
     image: ${CC_IMAGE_VERSION}
@@ -13,9 +14,9 @@
       - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{if .CustomDeployBlockPath}}
       - {{.CustomDeployBlockPath}}:/network_config/deploy_block.txt{{end}}{{end}}
     command:
-      - build/nimbus_beacon_node trustedNodeSync \
-      - --network:{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}} \
-      - --data-dir=/var/lib/nimbus \
+      - trustedNodeSync
+      - --network:{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
+      - --data-dir=/var/lib/nimbus
       - --trusted-node-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
