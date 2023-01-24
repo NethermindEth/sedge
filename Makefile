@@ -31,7 +31,7 @@ test: generate ## run tests
 	@go test -coverprofile=coverage/coverage.out -covermode=count ./...
 	@rm -r mocks
 
-codecov-test: ## unit tests with coverage using the courtney tool
+codecov-test: generate ## unit tests with coverage using the courtney tool
 	@mkdir -p coverage
 	@courtney/courtney -v -o coverage/coverage.out ./...
 
