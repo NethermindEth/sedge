@@ -38,12 +38,15 @@ codecov-test: generate ## unit tests with coverage using the courtney tool
 install-gofumpt: ## install gofumpt
 	go install mvdan.cc/gofumpt@latest
 
+install-mockgen: ## install mockgen
+	go install github.com/golang/mock/mockgen@v1.6.0 
+
 install-courtney: ## Install courtney for code coverage
 	@git clone https://github.com/stdevMac/courtney
 	@(cd courtney && go get  ./... && go build courtney.go)
 	@go get ./...
 
-install-deps: | install-gofumpt install-courtney ## Install some project dependencies
+install-deps: | install-gofumpt install-courtney install-mockgen ## Install some project dependencies
 
 coverage: codecov-test ## show tests coverage
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
