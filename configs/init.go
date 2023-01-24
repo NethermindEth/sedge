@@ -29,8 +29,6 @@ func NetworksConfigs() map[string]NetworkConfig {
 }
 
 func InitNetworksConfigs() {
-	networksConfigs = make(map[string]NetworkConfig)
-
 	configs := []NetworkConfig{
 		{
 			Name:               NetworkMainnet,
