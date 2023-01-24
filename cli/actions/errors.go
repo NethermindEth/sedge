@@ -28,8 +28,9 @@ var (
 	ErrorNetworkNotFound            = errors.New("network not found")
 )
 
-func newErrValidatorImportCtBadExitCode(ctId string, exitCode int64) error {
-	return fmt.Errorf("%w: validator-import service ends with status code %d, check container %s logs for more details", ErrValidatorImportCtBadExitCode, exitCode, ctId)
+func newErrValidatorImportCtBadExitCode(ctId string, exitCode int64, logs string) error {
+	return fmt.Errorf(`%w: validator-import service container with id %s ends with status code %d. Here is the logs for more details:
+%s`, ErrValidatorImportCtBadExitCode, ctId, exitCode, logs)
 }
 
 func newErrUnknownLodestarPreset(network string) error {

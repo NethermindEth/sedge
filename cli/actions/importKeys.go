@@ -3,6 +3,7 @@ package actions
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"path/filepath"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -336,11 +337,29 @@ func runAndWait(dockerClient client.APIClient, serviceManager services.ServiceMa
 		select {
 		case exitResult := <-ctExit:
 			if exitResult.StatusCode != 0 {
-				return newErrValidatorImportCtBadExitCode(ctID, exitResult.StatusCode)
+				logs, err := containerLogs(dockerClient, ctID)
+				if err != nil {
+					return err
+				}
+				return newErrValidatorImportCtBadExitCode(ctID, exitResult.StatusCode, logs)
 			}
 			return deleteContainer(dockerClient, ctID)
 		case exitErr := <-errChan:
 			return exitErr
 		}
 	}
+}
+
+func containerLogs(dockerClient client.APIClient, ctID string) (string, error) {
+	logReader, err := dockerClient.ContainerLogs(context.Background(), ctID, types.ContainerLogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Follow:     false,
+	})
+	if err != nil {
+		return "", err
+	}
+	defer logReader.Close()
+	logs, err := ioutil.ReadAll(logReader)
+	return string(logs), err
 }
