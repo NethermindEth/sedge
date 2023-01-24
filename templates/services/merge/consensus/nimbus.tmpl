@@ -1,13 +1,38 @@
 {{/* nimbus.tmpl */}}
-{{ define "consensus" }}
+{{ define "consensus" }}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
+  consensus-sync:
+    stop_grace_period: 30s
+    container_name: sedge-consensus-import
+    image: ${CC_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${CC_DATA_DIR}:/var/lib/nimbus
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yaml{{end}}{{if .CustomGenesisPath}}
+      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{if .CustomDeployBlockPath}}
+      - {{.CustomDeployBlockPath}}:/network_config/deploy_block.txt{{end}}{{end}}
+    command:
+      - build/nimbus_beacon_node trustedNodeSync \
+      - --network:{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}} \
+      - --data-dir=/var/lib/nimbus \
+      - --trusted-node-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}{{end}}
+
   consensus:
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{if .Mev}}
-    depends_on:
+    image: ${CC_IMAGE_VERSION}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl .Mev}}
+    depends_on:{{if .Mev}}
       mevboost:
-        condition: service_started{{end}}
+        condition: service_started{{end}}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
+      consensus-sync:
+        condition: service_completed_successfully{{end}}{{end}}
     healthcheck:
       test: "(curl -s -o /dev/null -w \"%{http_code}\" -X GET http://127.0.0.1:4000/eth/v1/node/health | grep -q 200) || exit 1"
       interval: 5m
@@ -43,8 +68,8 @@
       - --rest
       - --rest-port={{.ClApiPort}}
       - --rest-address=0.0.0.0{{if .FeeRecipient}}
-      - --suggested-fee-recipient=${CC_FEE_RECIPIENT}{{end}}
-      - --trusted-node-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}
+      - --suggested-fee-recipient=${CC_FEE_RECIPIENT}{{end}}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
+      - --trusted-node-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{end}}
       - --metrics
       - --metrics-port={{.ClMetricsPort}}
       - --metrics-address=0.0.0.0
