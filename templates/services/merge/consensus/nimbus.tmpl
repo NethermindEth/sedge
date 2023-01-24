@@ -3,7 +3,7 @@
   consensus-sync:{{if and (ge .UID 0) (ge .GID 0)}}
     user: "{{.UID}}:{{.GID}}"{{end}}
     stop_grace_period: 30s
-    container_name: sedge-consensus-import
+    container_name: sedge-consensus-trusted-sync
     image: ${CC_IMAGE_VERSION}
     networks:
       - sedge
@@ -24,7 +24,8 @@
         max-size: "10m"
         max-file: "10"{{end}}{{end}}{{end}}
 
-  consensus:
+  consensus:{{if and (ge .UID 0) (ge .GID 0)}}
+    user: "{{.UID}}:{{.GID}}"{{end}}
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
@@ -69,8 +70,7 @@
       - --rest
       - --rest-port={{.ClApiPort}}
       - --rest-address=0.0.0.0{{if .FeeRecipient}}
-      - --suggested-fee-recipient=${CC_FEE_RECIPIENT}{{end}}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
-      - --trusted-node-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{end}}
+      - --suggested-fee-recipient=${CC_FEE_RECIPIENT}{{end}}
       - --metrics
       - --metrics-port={{.ClMetricsPort}}
       - --metrics-address=0.0.0.0
