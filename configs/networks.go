@@ -43,7 +43,7 @@ func NetworkCheck(value string) error {
 }
 
 func NetworkSupported() []string {
-	// no test
+	// notest
 	return []string{
 		NetworkMainnet,
 		NetworkGoerli,

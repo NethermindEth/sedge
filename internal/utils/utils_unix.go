@@ -21,5 +21,6 @@ package utils
 import "syscall"
 
 func SetUmask(mask int) {
+	// no test
 	syscall.Umask(mask)
 }
