@@ -279,7 +279,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 
 	combinedClients.Execution.Image = clientImages.execution
 	combinedClients.Consensus.Image = clientImages.consensus
-	combinedClients.Validator.Image = clientImages.validator
+	combinedClients.Validator.SetImageOrDefault(clientImages.validator)
 	combinedClients.Validator.Omitted = flags.noValidator
 
 	var vlStartGracePeriod time.Duration
