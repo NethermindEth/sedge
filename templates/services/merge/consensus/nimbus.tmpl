@@ -42,7 +42,7 @@
       - --subscribe-all-subnets
       - --rest
       - --rest-port={{.ClApiPort}}
-      - --rest-address=0.0.0.0{{if ${CC_FEE_RECIPIENT}}}
+      - --rest-address=0.0.0.0{{if .FeeRecipient}}
       - --suggested-fee-recipient=${CC_FEE_RECIPIENT}{{end}}
       - --trusted-node-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}
       - --metrics
