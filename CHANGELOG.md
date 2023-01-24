@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Support for Nimbus as Consensus Client.
 - Documentation for all supported networks and clients.
 - Support for custom networks
 - When generating new mnemonic, show it without a trace.
