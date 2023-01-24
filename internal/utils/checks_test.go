@@ -83,7 +83,24 @@ func TestPreCheck(t *testing.T) {
 		runner          commands.CommandRunner
 		isErr           bool
 		noDocker        bool
+		dependencies    []string
 	}{
+		{
+			name:            "Bad dependencies",
+			caseTestDataDir: "case_1",
+			path:            t.TempDir(),
+			runner: &test.SimpleCMDRunner{
+				SRunCMD: func(c commands.Command) (string, error) {
+					return "", nil
+				},
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
+					return "", nil
+				},
+			},
+			isErr:        true,
+			noDocker:     true,
+			dependencies: []string{"invalid_dep"},
+		},
 		{
 			name:            "Ok",
 			caseTestDataDir: "case_1",
@@ -137,6 +154,12 @@ func TestPreCheck(t *testing.T) {
 				dPath = test.CreateFakeDep(t, "docker")
 			}
 
+			var deps []string
+			if len(tc.dependencies) > 0 && tc.noDocker {
+				copy(deps, configs.Dependencies)
+				configs.Dependencies = tc.dependencies
+			}
+
 			test.PrepareTestCaseDir(filepath.Join("testdata", "checks_tests", tc.caseTestDataDir, configs.DefaultSedgeDataFolderName), tc.path)
 
 			err := PreCheck(tc.runner, tc.path)
@@ -151,6 +174,11 @@ func TestPreCheck(t *testing.T) {
 			}
 			if dcPath != "" {
 				test.DeleteFakeDep(dcPath)
+			}
+
+			// cleanup
+			if len(tc.dependencies) > 0 && tc.noDocker {
+				configs.Dependencies = deps
 			}
 		})
 	}
