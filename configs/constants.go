@@ -15,6 +15,8 @@ limitations under the License.
 */
 package configs
 
+var Dependencies []string = []string{"docker"}
+
 const (
 	OnPremiseExecutionURL = "http://execution"
 	OnPremiseConsensusURL = "http://consensus"
