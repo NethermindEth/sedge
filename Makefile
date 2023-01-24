@@ -41,7 +41,7 @@ install-courtney: ## Install courtney for code coverage
 
 install-deps: | install-gofumpt install-courtney ## Install some project dependencies
 
-coverage: coverage/coverage.out ## show tests coverage
+coverage: codecov-test ## show tests coverage
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 clients: compile ## Run cmd clients with ./config.yaml
