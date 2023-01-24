@@ -37,8 +37,8 @@ behavior use --start-validator and --stop-validator flags.
 
 The [validator] is a required argument used to specify which validator client, from
 all supported by Sedge (lighthouse, lodestar, prysm or teku), is used to import the
-Slashing Protection data. This is necessary because each client has its own way to
-achieve the importation.`,
+validator keys. This is necessary because each client has its own way to achieve
+the importation.`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				return ErrInvalidNumberOfArguments
@@ -78,6 +78,6 @@ achieve the importation.`,
 	cmd.Flags().StringVar(&from, "from", configs.DefaultAbsSedgeDataPath, "docker-compose scripts generation path")
 	cmd.Flags().StringVar(&customConfigPath, "custom-config", "", "file path or url to use as custom network config.")
 	cmd.Flags().StringVar(&customGenesisPath, "custom-genesis", "", "file path or url to use as custom network genesis.")
-	cmd.Flags().StringVar(&customDeployBlock, "custom-deploy-block", "", "fustom network deploy block.")
+	cmd.Flags().StringVar(&customDeployBlock, "custom-deploy-block", "", "custom network deploy block.")
 	return cmd
 }
