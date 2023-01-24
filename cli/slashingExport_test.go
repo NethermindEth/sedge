@@ -21,8 +21,8 @@ import (
 
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
-	"github.com/NethermindEth/sedge/cli/actions/mock"
 	"github.com/NethermindEth/sedge/configs"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -174,7 +174,7 @@ func TestSlashingExport_Params(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			actions := mock_actions.NewMockSedgeActions(ctrl)
+			actions := sedge_mocks.NewMockSedgeActions(ctrl)
 			actions.EXPECT().ExportSlashingInterchangeData(tt.actionOptions).Times(1)
 
 			slashingExportCmd := cli.SlashingExportCmd(actions)
