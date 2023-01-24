@@ -34,7 +34,7 @@ jobs:
         run: make install-gofumpt
 
       - name: Install mockgen
-        run: install-mockgen
+        run: make install-mockgen
 
       - name: Check Format Unix
         if: matrix.os == 'ubuntu-latest'
