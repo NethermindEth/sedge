@@ -17,7 +17,6 @@ package actions_test
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -113,7 +112,7 @@ func TestSlashingImport_ValidatorRunning(t *testing.T) {
 			})
 			assert.Nil(t, err)
 			assert.FileExists(t, copiedFile)
-			copiedData, err := ioutil.ReadFile(copiedFile)
+			copiedData, err := os.ReadFile(copiedFile)
 			if err != nil {
 				panic(err)
 			}
@@ -143,7 +142,7 @@ func TestSlashingExport_ValidatorRunning(t *testing.T) {
 			})
 			assert.Nil(t, err)
 			assert.FileExists(t, out)
-			copiedData, err := ioutil.ReadFile(out)
+			copiedData, err := os.ReadFile(out)
 			if err != nil {
 				panic(err)
 			}
@@ -242,7 +241,7 @@ func TestSlashingImport_UnsupportedClient(t *testing.T) {
 			})
 			assert.ErrorIs(t, err, actions.ErrUnsupportedValidatorClient)
 			assert.FileExists(t, copiedFile)
-			copiedData, err := ioutil.ReadFile(copiedFile)
+			copiedData, err := os.ReadFile(copiedFile)
 			if err != nil {
 				panic(err)
 			}
@@ -352,7 +351,7 @@ func setupSlashingDataFile(t *testing.T, path string) string {
 	if err := os.MkdirAll(filepath.Dir(path), 0o777); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := ioutil.WriteFile(path, []byte(slashingFile), 0o777); err != nil {
+	if err := os.WriteFile(path, []byte(slashingFile), 0o777); err != nil {
 		t.Fatal(err.Error())
 	}
 	return path

@@ -23,6 +23,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/NethermindEth/sedge/configs"
+
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
@@ -179,7 +181,7 @@ func buildCliTestCase(
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
-	dcPath := filepath.Join(configPath, "docker-compose-scripts")
+	dcPath := filepath.Join(configPath, configs.DefaultSedgeDataFolderName)
 	err = os.Mkdir(dcPath, os.ModePerm)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
@@ -211,6 +213,7 @@ func buildCliTestCase(
 }
 
 func TestCliCmd(t *testing.T) {
+	configs.InitNetworksConfigs()
 	// TODO: Add more test cases
 	tcs := []cliCmdTestCase{
 		*buildCliTestCase(
@@ -357,6 +360,8 @@ func TestCliCmd(t *testing.T) {
 			true,
 		),
 	}
+
+	configs.InitNetworksConfigs()
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {

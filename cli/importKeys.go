@@ -1,15 +1,11 @@
 package cli
 
 import (
-	"errors"
-
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
-
-var ErrInvalidNumberOfArguments = errors.New("invalid number of arguments")
 
 func ImportKeysCmd(sedgeActions actions.SedgeActions) *cobra.Command {
 	// Flags
@@ -79,7 +75,7 @@ achieve the importation.`,
 	cmd.Flags().StringVarP(&network, "network", "n", "", "network")
 	cmd.Flags().BoolVar(&startValidator, "start-validator", false, "starts the validator client after import, regardless of the state the validator was in before")
 	cmd.Flags().BoolVar(&stopValidator, "stop-validator", false, "stops the validator client after import, regardless of the state the validator was in before")
-	cmd.Flags().StringVar(&from, "from", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
+	cmd.Flags().StringVar(&from, "from", configs.DefaultAbsSedgeDataPath, "docker-compose scripts generation path")
 	cmd.Flags().StringVar(&customConfigPath, "custom-config", "", "file path or url to use as custom network config.")
 	cmd.Flags().StringVar(&customGenesisPath, "custom-genesis", "", "file path or url to use as custom network genesis.")
 	cmd.Flags().StringVar(&customDeployBlock, "custom-deploy-block", "", "fustom network deploy block.")

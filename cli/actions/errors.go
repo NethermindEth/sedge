@@ -25,6 +25,7 @@ var (
 	ErrCreatingContextDir           = errors.New("error creating context dir")
 	ErrValidatorImportCtBadExitCode = errors.New("validator import container exited with non-zero exit code")
 	ErrUnknownLodestarPreset        = errors.New("unknown lodestar preset")
+	ErrorNetworkNotFound            = errors.New("network not found")
 )
 
 func newErrValidatorImportCtBadExitCode(ctId string, exitCode int64) error {

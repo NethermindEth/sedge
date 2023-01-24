@@ -6,9 +6,7 @@
     restart: unless-stopped
     depends_on:
       validator-blocker:
-        condition: service_completed_successfully{{if .VlCustomCfg}}
-      config_consensus:
-        condition: service_completed_successfully{{end}}{{if .WithConsensusClient}}
+        condition: service_completed_successfully{{if .WithConsensusClient}}
       consensus:
         condition: service_healthy{{end}}
     networks:
@@ -16,11 +14,10 @@
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/data{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
-      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
+      - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
     command:
-      - validator-client{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - validator-client{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       - --network=/network_config/config.yml{{end}}{{end}}
       - --beacon-node-api-endpoint=${CC_API_URL}
       - --data-path=/data
@@ -31,7 +28,7 @@
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
       - --metrics-port={{.VlMetricsPort}}{{with .FeeRecipient}}
-      - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
+      - --validators-proposer-default-fee-recipient=${CC_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
       - --validators-builder-registration-default-enabled=true
       - --Xvalidators-builder-registration-default-gas-limit=29000000{{end}}{{if .LoggingDriver}}

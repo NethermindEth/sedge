@@ -37,12 +37,12 @@ Random element from list
 b. error
 Error if any
 */
-func RandomChoice(clients ClientMap) (client Client, err error) {
+func RandomChoice(clients ClientMap) (client *Client, err error) {
 	if len(clients) == 0 {
 		return client, errors.New(configs.EmptyClientMapError)
 	}
 
-	list := make([]Client, 0)
+	list := make([]*Client, 0)
 	for _, client := range clients {
 		if client.Supported {
 			list = append(list, client)

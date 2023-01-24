@@ -24,7 +24,6 @@ type Client struct {
 	Image     string
 	Endpoint  string
 	Supported bool
-	Omitted   bool
 }
 
 func (c *Client) SetImageOrDefault(image string) {
@@ -56,11 +55,11 @@ func valueOrDefault(value string, defaultValue string) string {
 
 // Clients : Struct Represent a combination of execution, consensus and validator clients
 type Clients struct {
-	Execution Client
-	Consensus Client
-	Validator Client
+	Execution *Client
+	Consensus *Client
+	Validator *Client
 }
 
-type ClientMap map[string]Client
+type ClientMap map[string]*Client
 
 type OrderedClients map[string]ClientMap

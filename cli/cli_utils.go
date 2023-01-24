@@ -33,7 +33,7 @@ import (
 )
 
 func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error) {
-	var executionClient, consensusClient clients.Client
+	var executionClient, consensusClient *clients.Client
 	var combinedClients clients.Clients
 
 	executionClient, err := clients.RandomChoice(allClients[execution])
@@ -51,6 +51,79 @@ func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error
 		Validator: consensusClient,
 	}
 	return combinedClients, nil
+}
+
+func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
+	var executionClient, consensusClient, validatorClient *clients.Client
+	var err error
+
+	// execution client
+	if utils.Contains(services, execution) {
+		executionParts := strings.Split(flags.executionName, ":")
+		executionClient, err = clients.RandomChoice(allClients[execution])
+		if err != nil {
+			return nil, err
+		}
+		if flags.executionName != "" {
+			executionClient.Name = executionParts[0]
+			if len(executionParts) > 1 {
+				log.Warn(configs.CustomExecutionImagesWarning)
+				executionClient.Image = strings.Join(executionParts[1:], ":")
+			}
+		}
+		if err = clients.ValidateClient(executionClient, execution); err != nil {
+			return nil, err
+		}
+	} else {
+		executionClient = nil
+	}
+	// consensus client
+	if utils.Contains(services, consensus) {
+		consensusParts := strings.Split(flags.consensusName, ":")
+		consensusClient, err = clients.RandomChoice(allClients[consensus])
+		if err != nil {
+			return nil, err
+		}
+		if flags.consensusName != "" {
+			consensusClient.Name = consensusParts[0]
+			if len(consensusParts) > 1 {
+				log.Warn(configs.CustomConsensusImagesWarning)
+				consensusClient.Image = strings.Join(consensusParts[1:], ":")
+			}
+		}
+		if err = clients.ValidateClient(consensusClient, consensus); err != nil {
+			return nil, err
+		}
+	} else {
+		consensusClient = nil
+	}
+	// validator client
+	if utils.Contains(services, validator) && !flags.noValidator {
+		validatorParts := strings.Split(flags.validatorName, ":")
+		validatorClient, err = clients.RandomChoice(allClients[validator])
+		if err != nil {
+			return nil, err
+		}
+		if flags.validatorName != "" {
+			validatorClient.Name = validatorParts[0]
+			if len(validatorParts) > 1 {
+				log.Warn(configs.CustomValidatorImagesWarning)
+				validatorClient.Image = strings.Join(validatorParts[1:], ":")
+
+			}
+		}
+		if err = clients.ValidateClient(validatorClient, validator); err != nil {
+			return nil, err
+		}
+	} else {
+		validatorClient = nil
+	}
+
+	return &clients.Clients{
+		Execution: executionClient,
+		Consensus: consensusClient,
+		Validator: validatorClient,
+	}, err
 }
 
 func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliCmdFlags) (clients.Clients, error) {
@@ -95,6 +168,16 @@ func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliC
 	val, ok := allClients[validator][flags.validatorName]
 	if !ok {
 		val.Name = flags.validatorName
+	}
+	if !utils.Contains(*flags.services, execution) && len(*flags.services) > 0 && (*flags.services)[0] != "all" {
+		exec = nil
+	}
+	if !utils.Contains(*flags.services, consensus) && len(*flags.services) > 0 && (*flags.services)[0] != "all" {
+		cons = nil
+	}
+	if !utils.Contains(*flags.services, validator) && len(*flags.services) > 0 && (*flags.services)[0] != "all" ||
+		flags.noValidator {
+		val = nil
 	}
 
 	combinedClients = clients.Clients{
@@ -275,51 +358,160 @@ func RunValidatorOrExit(cmdRunner commands.CommandRunner, flags *CliCmdFlags) er
 	return nil
 }
 
-func handleJWTSecret(flags *CliCmdFlags) error {
+func handleJWTSecret(generationPath string) (string, error) {
 	log.Info(configs.GeneratingJWTSecret)
 
 	jwtscret, err := crypto.GenerateJWTSecret()
 	if err != nil {
-		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	flags.jwtPath, err = filepath.Abs(filepath.Join(flags.generationPath, "jwtsecret"))
+	jwtPath, err := filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
 	if err != nil {
-		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	if err := os.MkdirAll(filepath.Dir(flags.jwtPath), 0o755); err != nil {
-		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+	if err := os.MkdirAll(filepath.Dir(jwtPath), 0o755); err != nil {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	err = os.WriteFile(flags.jwtPath, []byte(jwtscret), 0o755)
+	err = os.WriteFile(jwtPath, []byte(jwtscret), 0o755)
 	if err != nil {
-		return fmt.Errorf(configs.GenerateJWTSecretError, err)
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
 	log.Info(configs.JWTSecretGenerated)
-	return nil
+	return jwtPath, nil
 }
 
-func preRunTeku(flags *CliCmdFlags) error {
+func preRunTeku(services []string, generationPath string) error {
 	log.Info(configs.PreparingTekuDatadir)
 	// Change umask to avoid OS from changing the permissions
 	utils.SetUmask(0)
-	for _, s := range *flags.services {
+	for _, s := range services {
 		if s == "all" || s == consensus {
 			// Prepare consensus datadir
-			path := filepath.Join(flags.generationPath, configs.ConsensusDir)
+			path := filepath.Join(generationPath, configs.ConsensusDir)
 			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, consensus, err)
 			}
 		}
 		if s == "all" || s == validator {
 			// Prepare validator datadir
-			path := filepath.Join(flags.generationPath, configs.ValidatorDir)
+			path := filepath.Join(generationPath, configs.ValidatorDir)
 			if err := os.MkdirAll(path, 0o777); err != nil {
 				return fmt.Errorf(configs.TekuDatadirError, validator, err)
 			}
 		}
 	}
 	return nil
+}
+
+type CustomNetworkConfigsData struct {
+	ChainSpecPath          string
+	NetworkConfigPath      string
+	NetworkGenesisPath     string
+	NetworkDeployBlockPath string
+}
+
+type CustomFlags struct {
+	customTTD           string
+	customChainSpec     string
+	customNetworkConfig string
+	customGenesis       string
+	customDeployBlock   string
+	customEnodes        *[]string
+	customEnrs          *[]string
+}
+
+func LoadCustomNetworksConfig(flags *CustomFlags, network, generationPath string) (CustomNetworkConfigsData, error) {
+	var customNetworkConfigsData CustomNetworkConfigsData
+	var chainSpecSrc, networkConfigSrc, genesisSrc, deployBlock string
+
+	networkData, ok := configs.NetworksConfigs()[network]
+	if !ok {
+		return customNetworkConfigsData, fmt.Errorf(configs.UnknownNetworkError, network)
+	}
+
+	eval := func(value, def string) string {
+		if value != "" {
+			return value
+		}
+		return def
+	}
+	chainSpecSrc = eval(flags.customChainSpec, networkData.DefaultCustomChainSpecSrc)
+	networkConfigSrc = eval(flags.customNetworkConfig, networkData.DefaultCustomConfigSrc)
+	genesisSrc = eval(flags.customGenesis, networkData.DefaultCustomGenesisSrc)
+	deployBlock = eval(flags.customDeployBlock, networkData.DefaultCustomDeployBlock)
+
+	// Check if any custom config is needed
+	if chainSpecSrc == "" && networkConfigSrc == "" && genesisSrc == "" && deployBlock == "" {
+		return customNetworkConfigsData, nil
+	}
+
+	destFolder := filepath.Join(generationPath, configs.CustomNetworkConfigsFolder)
+	if _, err := os.Stat(destFolder); err != nil {
+		if os.IsNotExist(err) {
+			err = os.Mkdir(destFolder, os.ModePerm)
+			if err != nil {
+				return customNetworkConfigsData, err
+			}
+		} else {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if chainSpecSrc != "" {
+		customNetworkConfigsData.ChainSpecPath = filepath.Join(destFolder, configs.ExecutionNetworkConfigFileName)
+		log.Info(configs.GettingCustomChainSpec)
+		err := utils.DownloadOrCopy(chainSpecSrc, customNetworkConfigsData.ChainSpecPath, true)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+		customNetworkConfigsData.ChainSpecPath, err = filepath.Abs(customNetworkConfigsData.ChainSpecPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if networkConfigSrc != "" {
+		customNetworkConfigsData.NetworkConfigPath = filepath.Join(destFolder, configs.ConsensusNetworkConfigFileName)
+		log.Info(configs.GettingCustomNetworkConfig)
+		err := utils.DownloadOrCopy(networkConfigSrc, customNetworkConfigsData.NetworkConfigPath, true)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+		customNetworkConfigsData.NetworkConfigPath, err = filepath.Abs(customNetworkConfigsData.NetworkConfigPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if genesisSrc != "" {
+		customNetworkConfigsData.NetworkGenesisPath = filepath.Join(destFolder, configs.ConsensusNetworkGenesisFileName)
+		log.Info(configs.GettingCustomGenesis)
+		err := utils.DownloadOrCopy(genesisSrc, customNetworkConfigsData.NetworkGenesisPath, true)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+		customNetworkConfigsData.NetworkGenesisPath, err = filepath.Abs(customNetworkConfigsData.NetworkGenesisPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if deployBlock != "" {
+		customNetworkConfigsData.NetworkDeployBlockPath = filepath.Join(destFolder, configs.ConsensusNetworkDeployBlockFileName)
+		log.Info(configs.WritingCustomDeployBlock)
+		err := os.WriteFile(customNetworkConfigsData.NetworkDeployBlockPath, []byte(deployBlock), os.ModePerm)
+		if err != nil {
+			return customNetworkConfigsData, fmt.Errorf(configs.ErrorWritingDeployBlockFile, customNetworkConfigsData.NetworkDeployBlockPath, err)
+		}
+		customNetworkConfigsData.NetworkDeployBlockPath, err = filepath.Abs(customNetworkConfigsData.NetworkDeployBlockPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	return customNetworkConfigsData, nil
 }
