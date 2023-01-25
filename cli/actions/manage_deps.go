@@ -33,8 +33,7 @@ type DependenciesHandlers interface {
 	InstallOrShowInstructions(cmdRunner commands.CommandRunner, dependencies []string) error
 }
 
-type dependenciesHandlers struct {
-}
+type dependenciesHandlers struct{}
 
 func (dh *dependenciesHandlers) InstallDependencies(cmdRunner commands.CommandRunner, pending []string) error {
 	// notest
