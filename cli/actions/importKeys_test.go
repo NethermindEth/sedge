@@ -59,7 +59,7 @@ func TestImportKeys_ValidatorRunning(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			dockerClient := importKeysGoldenPath(t, ctrl)
+			dockerClient := importKeysGoldenPath(t, ctrl, false)
 			serviceManager := services.NewServiceManager(dockerClient)
 			cmdRunner := test.SimpleCMDRunner{}
 			s := actions.NewSedgeActions(dockerClient, serviceManager, &cmdRunner)
@@ -85,7 +85,7 @@ func TestImportKeysCustom_ValidatorRunning(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			dockerClient := importKeysGoldenPatCustomImage(t, ctrl)
+			dockerClient := importKeysGoldenPath(t, ctrl, true)
 			serviceManager := services.NewServiceManager(dockerClient)
 			cmdRunner := test.SimpleCMDRunner{}
 			s := actions.NewSedgeActions(dockerClient, serviceManager, &cmdRunner)
@@ -166,7 +166,8 @@ func setupKeystoreDir(t *testing.T) (string, error) {
 
 // importKeysGoldenPath returns a mocked docker client interface with all the
 // required responses for a correct validator import keys container execution.
-func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller) client.APIClient {
+func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage bool) client.APIClient {
+	t.Helper()
 	dockerClient := mock_client.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
@@ -183,7 +184,7 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller) client.APIClien
 			{ID: validatorCtId},
 		}, nil)
 	// Mock ContainerInspect
-	dockerClient.EXPECT().
+	inspectCall := dockerClient.EXPECT().
 		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
 		Return(types.ContainerJSON{
 			ContainerJSONBase: &types.ContainerJSONBase{
@@ -192,74 +193,12 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller) client.APIClien
 					Running: true,
 				},
 			},
-		}, nil).
-		Times(3)
-	// Mock ContainerStop
-	dockerClient.EXPECT().
-		ContainerStop(gomock.Any(), validatorCtId, gomock.Any()).
-		Return(nil)
-	// Mock ContainerCreate
-	dockerClient.EXPECT().
-		ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), validatorImportCtName).
-		Return(container.ContainerCreateCreatedBody{ID: validatorImportCtId}, nil).
-		Times(1)
-	// Mock ContainerStart
-	dockerClient.EXPECT().
-		ContainerStart(gomock.Any(), validatorImportCtId, gomock.Any()).
-		Return(nil).
-		Times(1)
-	dockerClient.EXPECT().
-		ContainerStart(gomock.Any(), services.ServiceCtValidator, gomock.Any()).
-		Return(nil).
-		Times(1)
-	// Mock ContainerWait
-	exitCh := make(chan container.ContainerWaitOKBody, 1)
-	exitCh <- container.ContainerWaitOKBody{
-		StatusCode: 0,
+		}, nil)
+	if withCustomImage {
+		inspectCall.Times(2)
+	} else {
+		inspectCall.Times(3)
 	}
-	dockerClient.EXPECT().
-		ContainerWait(gomock.Any(), validatorImportCtName, container.WaitConditionNextExit).
-		Return(exitCh, make(chan error)).
-		Times(1)
-	// Mock ContainerRemove
-	dockerClient.EXPECT().
-		ContainerRemove(gomock.Any(), validatorImportCtId, types.ContainerRemoveOptions{}).
-		Return(nil).
-		Times(1)
-
-	return dockerClient
-}
-
-// importKeysGoldenPatCustomImage returns a mocked docker client interface with
-// all the required responses for a correct custom validator import keys container execution.
-func importKeysGoldenPatCustomImage(t *testing.T, ctrl *gomock.Controller) client.APIClient {
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
-
-	validatorCtId := "validatorctid"
-	validatorImportCtName := "validator-import-client"
-	validatorImportCtId := "validator-import-ct-id"
-
-	// Mock ContainerList
-	dockerClient.EXPECT().
-		ContainerList(gomock.Any(), types.ContainerListOptions{
-			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
-		}).
-		Return([]types.Container{
-			{ID: validatorCtId},
-		}, nil)
-	// Mock ContainerInspect
-	dockerClient.EXPECT().
-		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
-		Return(types.ContainerJSON{
-			ContainerJSONBase: &types.ContainerJSONBase{
-				ID: validatorCtId,
-				State: &types.ContainerState{
-					Running: true,
-				},
-			},
-		}, nil).
-		Times(2)
 	// Mock ContainerStop
 	dockerClient.EXPECT().
 		ContainerStop(gomock.Any(), validatorCtId, gomock.Any()).
