@@ -16,8 +16,6 @@ limitations under the License.
 package main
 
 import (
-	"log"
-	"os"
 	"runtime"
 
 	"github.com/NethermindEth/sedge/cli"
@@ -27,6 +25,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/docker/docker/client"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -75,6 +74,6 @@ func main() {
 		cli.GenerateCmd(sedgeActions),
 	)
 	if err := sedgeCmd.Execute(); err != nil {
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }
