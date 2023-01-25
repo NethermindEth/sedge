@@ -56,18 +56,16 @@ func TestGenerateEnvFile(t *testing.T) {
 		Error         error
 		fieldsToCheck map[string]string
 	}{
-		// TODO: uncomment when we fix this test
-		// {
-		// 	name: "Check ec image",
-		// 	data: &GenData{
-		// 		ExecutionClient: &clients.Client{Name: "nethermind"},
-		// 		Network:         "mainnet",
-		// 	},
-		// 	fieldsToCheck: map[string]string{
-		// 		// WIll match any image
-		// 		"EC_IMAGE_VERSION": "nethermind/nethermind:",
-		// 	},
-		// },
+		{
+			name: "Check ec image",
+			data: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind", Image: configs.Nethermind_Image},
+				Network:         "mainnet",
+			},
+			fieldsToCheck: map[string]string{
+				"EC_IMAGE_VERSION": configs.Nethermind_Image,
+			},
+		},
 		{
 			name: "Check set of ec image",
 			data: &GenData{
