@@ -57,7 +57,9 @@ func TestRunContainers(t *testing.T) {
 					return "", nil
 				},
 			}
-			sedgeActions := actions.NewSedgeActions(nil, nil, commandRunner)
+			sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{
+				CommandRunner: commandRunner,
+			})
 			sedgeActions.RunContainers(tc.options)
 		})
 	}

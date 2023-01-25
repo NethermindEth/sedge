@@ -35,7 +35,10 @@ func newAction(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
 	t.Helper()
 	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
+	return actions.NewSedgeActions(actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+	})
 }
 
 // Test that the generated compose file with dump data is generated correctly

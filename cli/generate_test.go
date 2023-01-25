@@ -561,7 +561,7 @@ func TestGenerateCmd(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			descr := fmt.Sprintf("sedge generate %s %s %s", tc.subCommand.argsList(), tc.args.toString(), tc.globalArgs.argsList())
 
-			sedgeActions := actions.NewSedgeActions(nil, nil, nil)
+			sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{})
 
 			rootCmd := RootCmd()
 			rootCmd.AddCommand(GenerateCmd(sedgeActions))

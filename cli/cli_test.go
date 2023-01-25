@@ -377,7 +377,10 @@ func TestCliCmd(t *testing.T) {
 			}
 			defer dockerClient.Close()
 			serviceManager := services.NewServiceManager(dockerClient)
-			sedgeActions := actions.NewSedgeActions(dockerClient, serviceManager, nil)
+			sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{
+				DockerClient:   dockerClient,
+				ServiceManager: serviceManager,
+			})
 
 			rootCmd := RootCmd()
 			rootCmd.AddCommand(CliCmd(tc.runner, prompt, serviceManager, sedgeActions))

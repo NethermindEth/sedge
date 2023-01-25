@@ -35,7 +35,7 @@ func RunCmd(cmdRunner commands.CommandRunner, sedgeActions actions.SedgeActions)
 		Short: "Run services",
 		Long:  "Run all the generated services",
 		Run: func(cmd *cobra.Command, args []string) {
-			if err := sedgeActions.InstallDependencies(actions.InstallDependenciesOptions{
+			if err := sedgeActions.ManageDependencies(actions.ManageDependenciesOptions{
 				Dependencies: []string{"docker"},
 				Install:      true,
 			}); err != nil {

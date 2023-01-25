@@ -32,19 +32,34 @@ import (
 func main() {
 	// Init configs
 	configs.InitNetworksConfigs()
+
 	// Commands Runner
 	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{
 		RunAsAdmin: runtime.GOOS == "linux",
 	})
+
 	// Prompt used to interact with the user input
 	prompt := prompts.NewPromptCli()
+
+	// Docker client
 	dockerClient, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer dockerClient.Close()
+
+	// Docker service
 	serviceManager := services.NewServiceManager(dockerClient)
-	sedgeActions := actions.NewSedgeActions(dockerClient, serviceManager, cmdRunner)
+
+	// Init Sedge Actions
+	sdgOpts := actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+		CommandRunner:  cmdRunner,
+		DepsHandlers:   actions.NewDependenciesHandlers(),
+	}
+	sedgeActions := actions.NewSedgeActions(sdgOpts)
+
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
 		cli.CliCmd(cmdRunner, prompt, serviceManager, sedgeActions),
