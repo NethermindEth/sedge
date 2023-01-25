@@ -117,7 +117,6 @@ func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceMa
 		"--",
 		"accounts", "import",
 		"--accept-terms-of-use",
-		"--" + options.Network,
 		"--keys-dir=/keystore/validator_keys",
 		"--wallet-dir=/data/wallet",
 		"--wallet-password-file=/keystore/keystore_password.txt",
@@ -131,6 +130,8 @@ func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceMa
 			Target: "/network_config/config.yml",
 		})
 		cmd = append(cmd, "--chain-config-file=/network_config/config.yml")
+	} else {
+		cmd = append(cmd, "--"+options.Network)
 	}
 	log.Debugf("Creating %s container", services.ServiceCtValidatorImport)
 	ct, err := dockerClient.ContainerCreate(context.Background(),
@@ -178,7 +179,6 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 	cmd := []string{
 		"validator", "import",
 		"--preset", preset,
-		"--network", options.Network,
 		"--dataDir", "/data",
 		"--importKeystores=/keystore/validator_keys",
 		"--importKeystoresPassword=/keystore/keystore_password.txt",
@@ -190,6 +190,8 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 			Target: "/network_config/config.yaml",
 		})
 		cmd = append(cmd, "--paramsFile=/network_config/config.yaml")
+	} else {
+		cmd = append(cmd, "--network", options.Network)
 	}
 	log.Debugf("Creating %s container", services.ServiceCtValidatorImport)
 	ct, err := dockerClient.ContainerCreate(context.Background(),
