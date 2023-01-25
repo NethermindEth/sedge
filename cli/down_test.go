@@ -17,11 +17,14 @@ package cli
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/test"
@@ -71,7 +74,6 @@ func buildDownTestCase(t *testing.T, caseName string, isErr bool) *downCmdTestCa
 }
 
 func TestDownCmd(t *testing.T) {
-	// TODO: allow to test error programs
 	tcs := []downCmdTestCase{
 		*buildDownTestCase(t, "case_1", false),
 	}
@@ -91,4 +93,97 @@ func TestDownCmd(t *testing.T) {
 			t.Errorf("%s failed: %v", descr, err)
 		}
 	}
+}
+
+func TestDown_Error(t *testing.T) {
+	var fatal bool
+	defer func() { log.StandardLogger().ExitFunc = nil }()
+	log.StandardLogger().ExitFunc = func(int) { fatal = true }
+
+	// docker compose ps error, PreCheck error
+	desc := "docker compose ps error, PreCheck error"
+	fatal = false
+	runner := &test.SimpleCMDRunner{
+		SRunCMD: func(c commands.Command) (string, error) {
+			if strings.Contains(c.Cmd, "docker compose") && strings.Contains(c.Cmd, "ps") {
+				return "", errors.New("runner error")
+			}
+			return "", nil
+		},
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
+			return "", nil
+		},
+	}
+	tt := buildDownTestCase(t, "case_1", false)
+
+	downCmd := DownCmd(runner)
+	downCmd.SetArgs([]string{"--path", tt.generationPath})
+	err := downCmd.Execute()
+
+	assert.Nil(t, err, desc)
+	assert.True(t, fatal, desc)
+
+	// docker compose ps --status running error, Check Containers error
+	desc = "docker compose ps --status running error, Check Containers error"
+	fatal = false
+	runner = &test.SimpleCMDRunner{
+		SRunCMD: func(c commands.Command) (string, error) {
+			if strings.Contains(c.Cmd, "docker compose") && strings.Contains(c.Cmd, "ps") && strings.Contains(c.Cmd, "--filter status=running") {
+				return "", errors.New("runner error")
+			}
+			return "", nil
+		},
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
+			return "", nil
+		},
+	}
+
+	downCmd = DownCmd(runner)
+	downCmd.SetArgs([]string{"--path", tt.generationPath})
+	err = downCmd.Execute()
+
+	assert.Nil(t, err, desc)
+	assert.True(t, fatal, desc)
+
+	// docker compose down error
+	desc = "docker compose down error"
+	fatal = false
+	runner = &test.SimpleCMDRunner{
+		SRunCMD: func(c commands.Command) (string, error) {
+			if strings.Contains(c.Cmd, "docker compose") && strings.Contains(c.Cmd, "down") {
+				return "", errors.New("runner error")
+			}
+			return "", nil
+		},
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
+			return "", nil
+		},
+	}
+
+	downCmd = DownCmd(runner)
+	downCmd.SetArgs([]string{"--path", tt.generationPath})
+	err = downCmd.Execute()
+
+	assert.Nil(t, err, desc)
+	assert.True(t, fatal, desc)
+
+	// Generation path error
+	desc = "Generation path error"
+	fatal = false
+	runner = &test.SimpleCMDRunner{
+		SRunCMD: func(c commands.Command) (string, error) {
+			return "", nil
+		},
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
+			return "", nil
+		},
+	}
+	tDir := t.TempDir()
+
+	downCmd = DownCmd(runner)
+	downCmd.SetArgs([]string{"--path", tDir})
+	err = downCmd.Execute()
+
+	assert.Nil(t, err, desc)
+	assert.True(t, fatal, desc)
 }
