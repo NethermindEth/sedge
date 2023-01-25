@@ -40,13 +40,13 @@ func (c *Client) SetImageOrDefault(image string) {
 func (c *Client) setExecutionImage(image string) {
 	switch c.Name {
 	case "geth":
-		c.Image = valueOrDefault(image, configs.Geth_Image)
+		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Get.String())
 	case "besu":
-		c.Image = valueOrDefault(image, configs.Besu_Image)
+		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Besu.String())
 	case "nethermind":
-		c.Image = valueOrDefault(image, configs.Nethermind_Image)
+		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Nethermind.String())
 	case "erigon":
-		c.Image = valueOrDefault(image, configs.Erigon_Image)
+		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Erigon.String())
 	}
 }
 
@@ -54,24 +54,24 @@ func (c *Client) setConsensusImage(image string) {
 	switch c.Name {
 	// TODO add teku and remove if condition in templates
 	case "lighthouse":
-		c.Image = valueOrDefault(image, configs.Lighthouse_ConsensusImage)
+		c.Image = valueOrDefault(image, configs.ClientImages.BeaconChain.Lighthouse.String())
 	case "prysm":
-		c.Image = valueOrDefault(image, configs.Prysm_ConsensusImage)
+		c.Image = valueOrDefault(image, configs.ClientImages.BeaconChain.Prysm.String())
 	case "lodestar":
-		c.Image = valueOrDefault(image, configs.Lodestar_ConsensusImage)
+		c.Image = valueOrDefault(image, configs.ClientImages.BeaconChain.Lodestar.String())
 	}
 }
 
 func (c *Client) setValidatorImage(image string) {
 	switch c.Name {
 	case "lighthouse":
-		c.Image = valueOrDefault(image, configs.Lighthouse_ValidatorImage)
+		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Lighthouse.String())
 	case "prysm":
-		c.Image = valueOrDefault(image, configs.Prysm_ValidatorImage)
+		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Prysm.String())
 	case "teku":
-		c.Image = valueOrDefault(image, configs.Teku_ValidatorImage)
+		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Teku.String())
 	case "lodestar":
-		c.Image = valueOrDefault(image, configs.Lodestar_ValidatorImage)
+		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Lodestar.String())
 	}
 }
 

@@ -225,7 +225,7 @@ func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManage
 		Tag:  "sedge/validator-import-lighthouse",
 		Args: map[string]string{
 			"NETWORK":    options.Network,
-			"LH_VERSION": configs.Lighthouse_ValidatorImage,
+			"LH_VERSION": configs.ClientImages.Validator.Lighthouse.String(),
 		},
 	})
 	log.Infof(configs.RunningCommand, buildCmd.Cmd)
