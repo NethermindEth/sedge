@@ -16,7 +16,9 @@ limitations under the License.
 package cli
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,6 +27,8 @@ import (
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/test"
+	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 type subCmd struct {
@@ -52,7 +56,7 @@ type generateCmdTestCase struct {
 	subCommand subCmd
 	args       GenCmdFlags
 	globalArgs globalFlags
-	isErr      bool
+	err        error
 }
 
 func (flags *globalFlags) argsList() []string {
@@ -152,7 +156,7 @@ func buildGenerateTestCase(
 	args GenCmdFlags,
 	globalArgs globalFlags,
 	subCommand subCmd,
-	isErr bool,
+	tErr error,
 ) *generateCmdTestCase {
 	tc := generateCmdTestCase{}
 	configPath := t.TempDir()
@@ -173,11 +177,13 @@ func buildGenerateTestCase(
 	tc.globalArgs.generationPath = t.TempDir()
 	tc.subCommand = subCommand
 	tc.configPath = filepath.Join(configPath, "config.yaml")
-	tc.isErr = isErr
+	tc.err = tErr
 	return &tc
 }
 
 func TestGenerateCmd(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
 	configs.InitNetworksConfigs()
 	tcs := []generateCmdTestCase{
 		*buildGenerateTestCase(
@@ -198,7 +204,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "full-node",
 				args: []string{},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -218,7 +224,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "full",
 				args: []string{},
 			},
-			true,
+			errors.New("unknown shorthand flag: 'e' in -e"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -238,7 +244,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "full-node",
 				args: []string{},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -256,15 +262,13 @@ func TestGenerateCmd(t *testing.T) {
 				name: "full-node",
 				args: []string{},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
 			"Bad network input", "case_1",
 			GenCmdFlags{
-				executionName: "nethermind",
-				consensusName: "lighthouse",
-				feeRecipient:  "0x0000000000000000000000000000000000000000",
+				feeRecipient: "0x0000000000000000000000000000000000000000",
 			},
 			globalFlags{
 				install:        false,
@@ -274,9 +278,9 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			subCmd{
 				name: "consensus",
-				args: []string{},
+				args: []string{"lighthouse"},
 			},
-			true,
+			errors.New("unknown network \"wrong\". Please provide correct network name. Use 'networks' command to see the list of supported networks"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -296,7 +300,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{"teku"},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -315,7 +319,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{"teku"},
 			},
-			true,
+			errors.New("required flag(s) \"execution-auth-url\" not set"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -334,7 +338,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{"teku"},
 			},
-			true,
+			errors.New("required flag(s) \"execution-api-url\" not set"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -354,7 +358,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{"wrong"},
 			},
-			true,
+			errors.New("invalid consensus client"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -373,7 +377,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "validator",
 				args: []string{},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -391,7 +395,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "validator",
 				args: []string{},
 			},
-			true,
+			errors.New("required flag(s) \"consensus-url\" not set"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -410,7 +414,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "validator",
 				args: []string{"teku"},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -426,7 +430,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "mevboost",
 				args: []string{},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -442,7 +446,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "mevboost",
 				args: []string{"wrong"},
 			},
-			true,
+			errors.New("unknown command \"wrong\" for \"sedge generate mevboost\""),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -460,7 +464,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "execution",
 				args: []string{"nethermind"},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -476,7 +480,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "execution",
 				args: []string{"geth"},
 			},
-			true,
+			errors.New("invalid execution client"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -492,7 +496,7 @@ func TestGenerateCmd(t *testing.T) {
 			subCmd{
 				name: "full-node",
 			},
-			true),
+			errors.New("custom flags used without --network custom")),
 		*buildGenerateTestCase(
 			t,
 			"Custom Network and custom ttd, should work", "case_1",
@@ -508,7 +512,7 @@ func TestGenerateCmd(t *testing.T) {
 			subCmd{
 				name: "full-node",
 			},
-			false),
+			nil),
 		*buildGenerateTestCase(
 			t,
 			"Custom Network and custom ttd, execution node, should work", "case_1",
@@ -523,7 +527,7 @@ func TestGenerateCmd(t *testing.T) {
 			subCmd{
 				name: "execution",
 			},
-			false),
+			nil),
 		*buildGenerateTestCase(
 			t,
 			"Mainnet Network custom ChainSpec, execution node, shouldn't work", "case_1",
@@ -538,7 +542,7 @@ func TestGenerateCmd(t *testing.T) {
 			subCmd{
 				name: "execution",
 			},
-			true),
+			errors.New("custom flags used without --network custom")),
 		*buildGenerateTestCase(
 			t,
 			"Validator", "case_1",
@@ -554,13 +558,12 @@ func TestGenerateCmd(t *testing.T) {
 			subCmd{
 				name: "full-node",
 			},
-			false),
+			nil),
 	}
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			descr := fmt.Sprintf("sedge generate %s %s %s", tc.subCommand.argsList(), tc.args.toString(), tc.globalArgs.argsList())
-
+			descr := fmt.Sprintf("sedge generate %s %s %s", strings.Join(tc.subCommand.argsList(), " "), tc.args.toString(), strings.Join(tc.globalArgs.argsList(), " "))
 			sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{})
 
 			rootCmd := RootCmd()
@@ -569,11 +572,14 @@ func TestGenerateCmd(t *testing.T) {
 			argsL = append(argsL, tc.args.argsList()...)
 			argsL = append(argsL, tc.globalArgs.argsList()...)
 			rootCmd.SetArgs(argsL)
+			rootCmd.SetOutput(io.Discard)
 
-			if err := rootCmd.Execute(); !tc.isErr && err != nil {
-				t.Errorf("%s failed: %v", descr, err)
-			} else if tc.isErr && err == nil {
-				t.Errorf("%s expected to fail", descr)
+			err := rootCmd.Execute()
+
+			if tc.err != nil {
+				assert.EqualError(t, err, tc.err.Error(), descr)
+			} else {
+				assert.NoError(t, err, descr)
 			}
 		})
 	}
