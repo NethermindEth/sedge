@@ -33,7 +33,7 @@ import (
 )
 
 func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error) {
-	var executionClient, consensusClient *clients.Client
+	var executionClient, consensusClient, validatorClient *clients.Client
 	var combinedClients clients.Clients
 
 	executionClient, err := clients.RandomChoice(allClients[execution])
@@ -44,11 +44,12 @@ func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error
 	if err != nil {
 		return combinedClients, err
 	}
+	validatorClient, err = clients.RandomChoice(allClients[validator])
 
 	combinedClients = clients.Clients{
 		Execution: executionClient,
 		Consensus: consensusClient,
-		Validator: consensusClient,
+		Validator: validatorClient,
 	}
 	return combinedClients, nil
 }
