@@ -52,11 +52,12 @@ func (c *Client) setExecutionImage(image string) {
 
 func (c *Client) setConsensusImage(image string) {
 	switch c.Name {
-	// TODO add teku and remove if condition in templates
 	case "lighthouse":
 		c.Image = valueOrDefault(image, configs.ClientImages.BeaconChain.Lighthouse.String())
 	case "prysm":
 		c.Image = valueOrDefault(image, configs.ClientImages.BeaconChain.Prysm.String())
+	case "teku":
+		c.Image = valueOrDefault(image, configs.ClientImages.BeaconChain.Teku.String())
 	case "lodestar":
 		c.Image = valueOrDefault(image, configs.ClientImages.BeaconChain.Lodestar.String())
 	}
