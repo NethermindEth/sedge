@@ -47,9 +47,11 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		return err
 	}
 	// Stop validator
-	log.Info("Stopping validator client")
-	if err := s.serviceManager.Stop(services.ServiceCtValidator); err != nil {
-		return err
+	if previouslyRunning {
+		log.Info("Stopping validator client")
+		if err := s.serviceManager.Stop(services.ServiceCtValidator); err != nil {
+			return err
+		}
 	}
 
 	absFrom, err := filepath.Abs(options.From)
