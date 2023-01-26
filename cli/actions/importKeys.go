@@ -111,6 +111,7 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 			return err
 		}
 	}
+	log.Info("Validator keys imported successfully")
 	return nil
 }
 
