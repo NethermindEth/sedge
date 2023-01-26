@@ -17,6 +17,7 @@ package cli_test
 
 import (
 	"errors"
+	"io"
 	"path/filepath"
 	"testing"
 
@@ -189,19 +190,25 @@ func TestSlashingExport_Params(t *testing.T) {
 }
 
 func TestSlashingExport_Errors(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
 	tests := []struct {
 		name string
 		args []string
 		run  bool
+		err  error
 	}{
 		{
 			name: "invalid network",
 			args: []string{"lighthouse", "--network", "invalid_network"},
+			err:  errors.New("invalid network: invalid_network"),
 		},
 		{
 			name: "action error",
 			args: []string{"lighthouse"},
 			run:  true,
+			err:  errors.New("action error"),
 		},
 	}
 	for _, tt := range tests {
@@ -210,17 +217,16 @@ func TestSlashingExport_Errors(t *testing.T) {
 			defer ctrl.Finish()
 
 			actions := sedge_mocks.NewMockSedgeActions(ctrl)
-			var fatal bool
-			actions.EXPECT().ExportSlashingInterchangeData(gomock.Any()).Return(errors.New("action error")).Times(1)
-			defer func() { log.StandardLogger().ExitFunc = nil }()
-			log.StandardLogger().ExitFunc = func(int) { fatal = true }
+			if tt.run {
+				actions.EXPECT().ExportSlashingInterchangeData(gomock.Any()).Return(errors.New("action error")).Times(1)
+			}
 
 			slashingExportCmd := cli.SlashingExportCmd(actions)
 			slashingExportCmd.SetArgs(tt.args)
+			slashingExportCmd.SetOutput(io.Discard)
 			err := slashingExportCmd.Execute()
 
-			assert.Nil(t, err)
-			assert.True(t, fatal)
+			assert.EqualError(t, err, tt.err.Error())
 		})
 	}
 }
