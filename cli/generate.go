@@ -18,6 +18,7 @@ package cli
 import (
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 
@@ -265,6 +266,9 @@ func generateJWTSecret(jwtPath string) (string, error) {
 			return jwtPath, err
 		}
 	} else if filepath.IsAbs(jwtPath) { // Ensure jwtPath is absolute
+		if f, err := os.Stat(jwtPath); os.IsNotExist(err) || !f.Mode().IsRegular() {
+			return jwtPath, fmt.Errorf(configs.InvalidJWTSecret, jwtPath)
+		}
 		if jwtPath, err = filepath.Abs(jwtPath); err != nil {
 			return jwtPath, err
 		}
