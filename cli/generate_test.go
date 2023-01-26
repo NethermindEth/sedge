@@ -52,7 +52,6 @@ type globalFlags struct {
 
 type generateCmdTestCase struct {
 	name       string
-	configPath string
 	subCommand subCmd
 	args       GenCmdFlags
 	globalArgs globalFlags
@@ -161,12 +160,8 @@ func buildGenerateTestCase(
 	tc := generateCmdTestCase{}
 	configPath := t.TempDir()
 
-	err := test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", caseTestDataDir, "config"), configPath)
-	if err != nil {
-		t.Fatalf("Can't build test case: %v", err)
-	}
 	dcPath := filepath.Join(configPath, "docker-compose-scripts")
-	err = os.Mkdir(dcPath, os.ModePerm)
+	err := os.Mkdir(dcPath, os.ModePerm)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
@@ -176,7 +171,6 @@ func buildGenerateTestCase(
 	tc.globalArgs = globalArgs
 	tc.globalArgs.generationPath = t.TempDir()
 	tc.subCommand = subCommand
-	tc.configPath = filepath.Join(configPath, "config.yaml")
 	tc.err = tErr
 	return &tc
 }
@@ -197,7 +191,6 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			globalFlags{
 				install: false,
-				network: "mainnet",
 				logging: "",
 			},
 			subCmd{
@@ -208,13 +201,74 @@ func TestGenerateCmd(t *testing.T) {
 		),
 		*buildGenerateTestCase(
 			t,
-			"Wrong sub command", "case_1",
-			GenCmdFlags{
-				executionName:     "nethermind",
-				validatorName:     "lighthouse",
-				feeRecipient:      "0x0000000000000000000000000000000000000000",
-				checkpointSyncUrl: "http://localhost:8545",
+			"full-node Random clients, no feeRecipient", "case_1",
+			GenCmdFlags{},
+			globalFlags{
+				install: false,
+				logging: "",
 			},
+			subCmd{
+				name: "full-node",
+				args: []string{},
+			},
+			nil,
+		),
+		*buildGenerateTestCase(
+			t,
+			"full-node Random clients, custom Ckpt sync endpoint", "case_1",
+			GenCmdFlags{
+				checkpointSyncUrl: "http://localhost:8080",
+			},
+			globalFlags{
+				install: false,
+				logging: "",
+			},
+			subCmd{
+				name: "full-node",
+				args: []string{},
+			},
+			nil,
+		),
+		*buildGenerateTestCase(
+			t,
+			"consensus Random client, custom Ckpt sync endpoint", "case_1",
+			GenCmdFlags{
+				executionAuthUrl:  "http://localhost:8545",
+				executionApiUrl:   "http://localhost:8545",
+				checkpointSyncUrl: "http://localhost:8080",
+			},
+			globalFlags{
+				install: false,
+				logging: "",
+			},
+			subCmd{
+				name: "consensus",
+				args: []string{},
+			},
+			nil,
+		),
+		*buildGenerateTestCase(
+			t,
+			"consensus Random client, bad custom Ckpt sync endpoint", "case_1",
+			GenCmdFlags{
+				executionAuthUrl:  "http://localhost:8545",
+				executionApiUrl:   "http://localhost:8545",
+				checkpointSyncUrl: "./8080",
+			},
+			globalFlags{
+				install: false,
+				logging: "",
+			},
+			subCmd{
+				name: "consensus",
+				args: []string{},
+			},
+			fmt.Errorf(configs.InvalidCkptSyncURL, "./8080"),
+		),
+		*buildGenerateTestCase(
+			t,
+			"Wrong sub command", "case_1",
+			GenCmdFlags{},
 			globalFlags{
 				install: false,
 				network: "",
@@ -224,7 +278,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "full",
 				args: []string{},
 			},
-			errors.New("unknown shorthand flag: 'e' in -e"),
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -583,4 +637,79 @@ func TestGenerateCmd(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGeneratePathCases(t *testing.T) {
+	configs.InitNetworksConfigs()
+	// Silence logger
+	log.SetOutput(io.Discard)
+
+	// Custom Generation path
+	path := t.TempDir()
+	descr := fmt.Sprintf("Generation path error, sedge generate execution --path %s", path)
+	sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{})
+
+	rootCmd := RootCmd()
+	rootCmd.AddCommand(GenerateCmd(sedgeActions))
+	argsL := []string{"generate", "execution", "--path", path}
+	rootCmd.SetArgs(argsL)
+	rootCmd.SetOutput(io.Discard)
+
+	err := rootCmd.Execute()
+
+	assert.NoError(t, err, descr)
+
+	// Init generation path
+	path = t.TempDir()
+	if err = os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	descr = fmt.Sprintf("Init generation path, sedge generate execution --path %s", path)
+	sedgeActions = actions.NewSedgeActions(actions.SedgeActionsOptions{})
+
+	rootCmd = RootCmd()
+	rootCmd.AddCommand(GenerateCmd(sedgeActions))
+	argsL = []string{"generate", "execution", "--path", path}
+	rootCmd.SetArgs(argsL)
+	rootCmd.SetOutput(io.Discard)
+
+	err = rootCmd.Execute()
+
+	assert.NoError(t, err, descr)
+
+	// Custom jwt secret path, good
+	path = t.TempDir()
+	descr = fmt.Sprintf("Custom jwt secret path, good, sedge generate execution --jwt-secret-path %s", path)
+	err = test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", "jwtsecret"), path)
+	if err != nil {
+		t.Fatalf("Can't build test case: %v", err)
+	}
+	path = filepath.Join(path, "jwtsecret")
+
+	sedgeActions = actions.NewSedgeActions(actions.SedgeActionsOptions{})
+
+	rootCmd = RootCmd()
+	rootCmd.AddCommand(GenerateCmd(sedgeActions))
+	argsL = []string{"generate", "execution", "--jwt-secret-path", path}
+	rootCmd.SetArgs(argsL)
+	rootCmd.SetOutput(io.Discard)
+
+	err = rootCmd.Execute()
+
+	assert.NoError(t, err, descr)
+
+	// Custom jwt secret path, error
+	path = t.TempDir()
+	descr = fmt.Sprintf("Custom jwt secret path, error, sedge generate execution --jwt-secret-path %s", path)
+	sedgeActions = actions.NewSedgeActions(actions.SedgeActionsOptions{})
+
+	rootCmd = RootCmd()
+	rootCmd.AddCommand(GenerateCmd(sedgeActions))
+	argsL = []string{"generate", "execution", "--jwt-secret-path", path}
+	rootCmd.SetArgs(argsL)
+	rootCmd.SetOutput(io.Discard)
+
+	err = rootCmd.Execute()
+
+	assert.Error(t, err, descr)
 }
