@@ -69,10 +69,13 @@ func TestImportKeys_ValidatorRunning(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			generationPath := t.TempDir()
+
 			s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 				ValidatorClient: validatorClient,
 				Network:         "sepolia",
 				From:            from,
+				GenerationPath:  generationPath,
 			})
 		})
 	}
@@ -95,10 +98,13 @@ func TestImportKeysCustom_ValidatorRunning(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			generationPath := t.TempDir()
+
 			s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 				ValidatorClient: validatorClient,
 				Network:         "sepolia",
 				From:            from,
+				GenerationPath:  generationPath,
 			})
 		})
 	}
@@ -118,10 +124,13 @@ func TestImportKeys_UnsupportedClient(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			generationPath := t.TempDir()
+
 			err = s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 				ValidatorClient: validatorClient,
 				Network:         "sepolia",
 				From:            from,
+				GenerationPath:  generationPath,
 			})
 			assert.ErrorIs(t, err, actions.ErrUnsupportedValidatorClient)
 		})
