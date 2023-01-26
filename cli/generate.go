@@ -130,6 +130,11 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 
 	// Warn if checkpoint url used
 	if flags.checkpointSyncUrl != "" {
+		// Check checkpoint url is a valid URL
+		_, err := url.ParseRequestURI(flags.checkpointSyncUrl)
+		if err != nil {
+			return fmt.Errorf(configs.InvalidCkptSyncURL, flags.checkpointSyncUrl)
+		}
 		log.Warnf(configs.CheckpointUrlUsedWarning, flags.checkpointSyncUrl)
 	}
 
