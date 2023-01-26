@@ -3,6 +3,7 @@ package actions_test
 import (
 	"embed"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -18,7 +19,7 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/golang/mock/gomock"
-	"gotest.tools/v3/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestImportKeys_ValidatorNotFound(t *testing.T) {
@@ -71,12 +72,13 @@ func TestImportKeys_ValidatorRunning(t *testing.T) {
 
 			generationPath := t.TempDir()
 
-			s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+			err = s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 				ValidatorClient: validatorClient,
 				Network:         "sepolia",
 				From:            from,
 				GenerationPath:  generationPath,
 			})
+			assert.NoError(t, err)
 		})
 	}
 }
@@ -100,12 +102,13 @@ func TestImportKeysCustom_ValidatorRunning(t *testing.T) {
 
 			generationPath := t.TempDir()
 
-			s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+			err = s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 				ValidatorClient: validatorClient,
 				Network:         "sepolia",
 				From:            from,
 				GenerationPath:  generationPath,
 			})
+			assert.NoError(t, err)
 		})
 	}
 }
@@ -133,6 +136,86 @@ func TestImportKeys_UnsupportedClient(t *testing.T) {
 				GenerationPath:  generationPath,
 			})
 			assert.ErrorIs(t, err, actions.ErrUnsupportedValidatorClient)
+		})
+	}
+}
+
+func TestImportKeys_CustomOptions(t *testing.T) {
+	tests := []struct {
+		client      string
+		network     string
+		customImage bool
+	}{}
+	for _, validatorClient := range []string{"prysm", "lodestar"} {
+		for _, network := range []string{"sepolia", "goerli", "mainnet"} {
+			tests = append(tests, struct {
+				client      string
+				network     string
+				customImage bool
+			}{validatorClient, network, false})
+		}
+	}
+	for _, validatorClient := range []string{"lighthouse", "teku"} {
+		for _, network := range []string{"sepolia", "goerli", "mainnet"} {
+			tests = append(tests, struct {
+				client      string
+				network     string
+				customImage bool
+			}{validatorClient, network, true})
+		}
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%s_%s", tt.client, tt.network), func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			dockerClient := importKeysGoldenPath(t, ctrl, tt.customImage)
+			serviceManager := services.NewServiceManager(dockerClient)
+			cmdRunner := test.SimpleCMDRunner{}
+			s := actions.NewSedgeActions(dockerClient, serviceManager, &cmdRunner)
+
+			from, err := setupKeystoreDir(t)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			generationPath := t.TempDir()
+			customConfigPath := t.TempDir()
+
+			customNetworkFile, err := ioutil.TempFile(customConfigPath, "config.yaml")
+			if err != nil {
+				t.Fatal(err)
+			}
+			customNetworkConfigPath := filepath.Join(customConfigPath, "config.yaml")
+			defer customNetworkFile.Close()
+
+			customGenesisFile, err := ioutil.TempFile(customConfigPath, "genesis.yaml")
+			if err != nil {
+				t.Fatal(err)
+			}
+			customGenesisConfigPath := filepath.Join(customConfigPath, "genesis.yaml")
+			defer customGenesisFile.Close()
+
+			customDeployBlockFile, err := ioutil.TempFile(customConfigPath, "deployblock")
+			if err != nil {
+				t.Fatal(err)
+			}
+			customDeployBlockPath := filepath.Join(customConfigPath, "deployblock")
+			defer customDeployBlockFile.Close()
+
+			err = s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+				CustomConfig: actions.ImportValidatorKeysCustomOptions{
+					NetworkConfigPath: &customNetworkConfigPath,
+					GenesisPath:       &customGenesisConfigPath,
+					DeployBlockPath:   &customDeployBlockPath,
+				},
+				ValidatorClient: tt.client,
+				Network:         tt.network,
+				From:            from,
+				GenerationPath:  generationPath,
+			})
+			assert.NoError(t, err)
 		})
 	}
 }
