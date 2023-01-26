@@ -18,6 +18,7 @@ package cli
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -161,9 +162,11 @@ func (flags *CliCmdFlags) toString() string {
 
 func prepareCliCmd(tc cliCmdTestCase) {
 	// Set output buffers
-	log.SetOutput(tc.fdOut)
+	//log.SetOutput(tc.fdOut)
 	// Set config file path
 	initLogging()
+	// Silence logger
+	log.SetOutput(io.Discard)
 }
 
 func buildCliTestCase(
@@ -386,6 +389,7 @@ func TestCliCmd(t *testing.T) {
 			rootCmd.AddCommand(CliCmd(tc.runner, prompt, serviceManager, sedgeActions))
 			argsL := append([]string{"cli"}, tc.args.argsList()...)
 			rootCmd.SetArgs(argsL)
+			rootCmd.SetOutput(io.Discard)
 
 			prepareCliCmd(tc)
 
