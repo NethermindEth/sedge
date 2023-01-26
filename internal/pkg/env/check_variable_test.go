@@ -37,7 +37,7 @@ func TestCheckVariable(t *testing.T) {
 	}{
 		{
 			"Test case 1, mainnet, no TTD",
-			ReCONFIG,
+			ReMEV,
 			"mainnet",
 			"execution",
 			"nethermind",
@@ -46,7 +46,7 @@ func TestCheckVariable(t *testing.T) {
 		},
 		{
 			"Test case 2, invalid network, error",
-			ReCONFIG,
+			ReMEV,
 			"testnet",
 			"consensus",
 			"teku",
@@ -55,7 +55,7 @@ func TestCheckVariable(t *testing.T) {
 		},
 		{
 			"Test case 3, invalid clientType, error",
-			ReCONFIG,
+			ReMEV,
 			"mainnet",
 			"test",
 			"test",
@@ -64,7 +64,7 @@ func TestCheckVariable(t *testing.T) {
 		},
 		{
 			"Test case 4, invalid client, error",
-			ReCONFIG,
+			ReMEV,
 			"mainnet",
 			"consensus",
 			"test",
@@ -73,7 +73,7 @@ func TestCheckVariable(t *testing.T) {
 		},
 		{
 			"Test case 5, mainnet, no prysm config",
-			ReCONFIG,
+			ReMEV,
 			"mainnet",
 			"execution",
 			"nethermind",
@@ -82,7 +82,7 @@ func TestCheckVariable(t *testing.T) {
 		},
 		{
 			"Test case 6, goerli, no prysm config in nethermind",
-			ReCONFIG,
+			ReMEV,
 			"goerli",
 			"execution",
 			"nethermind",
@@ -91,7 +91,7 @@ func TestCheckVariable(t *testing.T) {
 		},
 		{
 			"Test case 7, chiado, prysm config, no consensus config",
-			ReCONFIG,
+			ReMEV,
 			"chiado",
 			"consensus",
 			"prysm",
@@ -100,7 +100,7 @@ func TestCheckVariable(t *testing.T) {
 		},
 		{
 			"Test case 8, chiado, prysm config, no validator config",
-			ReCONFIG,
+			ReMEV,
 			"chiado",
 			"validator",
 			"prysm",
@@ -114,55 +114,6 @@ func TestCheckVariable(t *testing.T) {
 			got, err := CheckVariable(tc.regex, tc.network, tc.clientType, tc.client)
 
 			descr := fmt.Sprintf("CheckVariable(re, %s, %s, %s) with regex %v", tc.network, tc.clientType, tc.client, tc.regex)
-			if err = utils.CheckErr(descr, tc.isErr, err); err != nil {
-				t.Error(err)
-			}
-
-			if tc.want != got {
-				t.Errorf("Expected %v, got %v. Function call: %s", tc.want, got, descr)
-			}
-		})
-	}
-}
-
-func TestCheckVariableBase(t *testing.T) {
-	t.Parallel()
-
-	tcs := []struct {
-		name    string
-		regex   *regexp.Regexp
-		network string
-		want    bool
-		isErr   bool
-	}{
-		{
-			"Test case 1, mainnet, no TTD",
-			ReTTD,
-			"mainnet",
-			false,
-			false,
-		},
-		{
-			"Test case 2, invalid network, error",
-			ReTTD,
-			"testnet",
-			false,
-			true,
-		},
-		{
-			"Test case 3, goerli, TTD",
-			ReTTD,
-			"goerli",
-			true,
-			false,
-		},
-	}
-
-	for _, tc := range tcs {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := CheckVariableBase(tc.regex, tc.network)
-
-			descr := fmt.Sprintf("CheckVariableBase(re, %s) with regex %v", tc.network, tc.regex)
 			if err = utils.CheckErr(descr, tc.isErr, err); err != nil {
 				t.Error(err)
 			}

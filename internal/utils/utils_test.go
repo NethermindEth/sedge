@@ -23,7 +23,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestSkipLines(t *testing.T) {
@@ -124,12 +123,17 @@ func TestPortAvailable(t *testing.T) {
 		}))
 	defer server.Close()
 	split := strings.Split(server.URL, ":")
-	host, port := split[1][2:], split[2]
+	host, strPort := split[1][2:], split[2]
+	port64, err := strconv.ParseUint(strPort, 10, 16)
+	if err != nil {
+		t.Fatalf("cannot convert http server port: %v", err)
+	}
+	port := uint16(port64)
 
 	tcs := []struct {
 		name string
 		host string
-		port string
+		port uint16
 		want bool
 	}{
 		{
@@ -144,20 +148,20 @@ func TestPortAvailable(t *testing.T) {
 		},
 		{
 			"Test case 3, good host and bad port",
-			host, "666666666",
+			host, 9999,
 			true,
 		},
 		{
 			"Test case 4, good host and available port",
-			"localhost", "9999",
+			"localhost", 9999,
 			true,
 		},
 	}
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			if got := portAvailable(tc.host, tc.port, time.Millisecond*200); tc.want != got {
-				t.Errorf("portAvailable(%s, %s, %s) failed; expected: %v, got: %v", tc.host, tc.port, "200ms", tc.want, got)
+			if got := portAvailable(tc.host, tc.port); tc.want != got {
+				t.Errorf("portAvailable(%s, %d) failed; expected: %v, got: %v", tc.host, tc.port, tc.want, got)
 			}
 		})
 	}
@@ -170,49 +174,53 @@ func TestAssignPorts(t *testing.T) {
 		}))
 	defer server.Close()
 	split := strings.Split(server.URL, ":")
-	host, port := split[1][2:], split[2]
-	portN, _ := strconv.Atoi(port)
+	host, strPort := split[1][2:], split[2]
+	port64, err := strconv.ParseUint(strPort, 10, 16)
+	if err != nil {
+		t.Fatalf("cannot convert http server port: %v", err)
+	}
+	port := uint16(port64)
 
 	tcs := []struct {
 		name     string
 		host     string
-		defaults map[string]string
-		want     map[string]string
+		defaults map[string]uint16
+		want     map[string]uint16
 		isErr    bool
 	}{
 		{
 			"Test case 1, good host and defaults",
 			host,
-			map[string]string{"EL": "8545", "CL": port},
-			map[string]string{"EL": "8545", "CL": strconv.Itoa(portN + 1)},
+			map[string]uint16{"EL": 8545, "CL": port},
+			map[string]uint16{"EL": 8545, "CL": port + 1},
 			false,
 		},
 		{
 			"Test case 2, good host and bad defaults",
 			host,
-			map[string]string{"EL": "8545", "CL": ""},
-			map[string]string{},
+			map[string]uint16{"EL": 8545, "CL": 0},
+			map[string]uint16{},
 			true,
 		},
 		{
 			"Test case 3, good host and bad defaults",
 			host,
-			map[string]string{"CL": "", "EL": "8545"},
-			map[string]string{},
+			map[string]uint16{"CL": 0, "EL": 8545},
+			map[string]uint16{},
 			true,
 		},
 		{
 			"Test case 4, bad host and good defaults",
 			"b@dh0$t",
-			map[string]string{"CL": "9000", "EL": "8545"},
-			map[string]string{"CL": "9000", "EL": "8545"},
+			map[string]uint16{"CL": 9000, "EL": 8545},
+			map[string]uint16{"CL": 9000, "EL": 8545},
 			false,
 		},
 		{
 			"Test case 5, good host and successive increments",
 			host,
-			map[string]string{"CL": port, "EL": strconv.Itoa(portN + 1)},
-			map[string]string{"CL": strconv.Itoa(portN + 1), "EL": strconv.Itoa(portN + 2)},
+			map[string]uint16{"CL": port, "EL": port + 1},
+			map[string]uint16{"CL": port + 1, "EL": port + 2},
 			false,
 		},
 	}
@@ -229,7 +237,7 @@ func TestAssignPorts(t *testing.T) {
 			if err == nil {
 				for k := range tc.want {
 					if tc.want[k] != got[k] {
-						t.Errorf("A mismatch in the result has been found. Expected (key: %s, value: %s); got (key: %s, value %s). Call: %s. Expected object: %+v, Got: %+v", k, tc.want[k], k, got[k], descr, tc.want, got)
+						t.Errorf("A mismatch in the result has been found. Expected (key: %s, value: %d); got (key: %s, value %d). Call: %s. Expected object: %+v, Got: %+v", k, tc.want[k], k, got[k], descr, tc.want, got)
 					}
 				}
 			}

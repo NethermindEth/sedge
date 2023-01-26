@@ -20,6 +20,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/alexeyco/simpletable"
@@ -34,11 +36,21 @@ func ensureResult(t *testing.T, fdOut *bytes.Buffer, outputDir string) {
 	if err != nil {
 		t.Fatalf("Can't read test case output: %v", err)
 	}
+	defer file.Close()
+
 	output, err := io.ReadAll(file)
 	if err != nil {
 		t.Fatalf("Can't read test case output: %v", err)
 	}
-	if stable, soutput := string(table), string(output); stable != soutput {
+	stable, soutput := string(table), string(output)
+
+	if runtime.GOOS == "windows" {
+		// Remove \r character
+		stable = strings.ReplaceAll(stable, "\r", "")
+		soutput = strings.ReplaceAll(soutput, "\r", "")
+	}
+
+	if stable != soutput {
 		t.Errorf("Wrong output.\nExpected:\n%s\nBut got:\n%s", soutput, stable)
 	}
 }

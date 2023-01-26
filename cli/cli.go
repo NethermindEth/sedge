@@ -16,54 +16,57 @@ limitations under the License.
 package cli
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
-	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
-	posmonidb "github.com/NethermindEth/posmoni/pkg/eth2/db"
-	posmoninet "github.com/NethermindEth/posmoni/pkg/eth2/networking"
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
+	dockerct "github.com/docker/docker/api/types/container"
 	"github.com/spf13/cobra"
 )
 
 const (
-	execution, consensus, validator = "execution", "consensus", "validator"
+	slashingImportFile                        = "slashing-import.json"
+	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mevboost"
 )
 
 type CliCmdFlags struct {
-	executionName     string
-	consensusName     string
-	validatorName     string
-	generationPath    string
-	checkpointSyncUrl string
-	network           string
-	feeRecipient      string
-	noMev             bool
-	mevImage          string
-	noValidator       bool
-	jwtPath           string
-	graffiti          string
-	install           bool
-	run               bool
-	yes               bool
-	mapAllPorts       bool
-	services          *[]string
-	fallbackEL        *[]string
-	elExtraFlags      *[]string
-	clExtraFlags      *[]string
-	vlExtraFlags      *[]string
-	logging           string
+	CustomFlags
+	executionName      string
+	consensusName      string
+	validatorName      string
+	generationPath     string
+	checkpointSyncUrl  string
+	network            string
+	feeRecipient       string
+	noMev              bool
+	mevImage           string
+	noValidator        bool
+	jwtPath            string
+	graffiti           string
+	install            bool
+	run                bool
+	yes                bool
+	mapAllPorts        bool
+	services           *[]string
+	fallbackEL         *[]string
+	elExtraFlags       *[]string
+	clExtraFlags       *[]string
+	vlExtraFlags       *[]string
+	logging            string
+	slashingProtection string
 }
 
 type clientImages struct {
@@ -72,29 +75,7 @@ type clientImages struct {
 	validator string
 }
 
-func CliCmd(prompt prompts.Prompt) *cobra.Command {
-	// Initialize monitoring tool
-	initMonitor(func() MonitoringTool {
-		// Initialize Eth2 Monitoring tool
-		moniCfg := posmoni.ConfigOpts{
-			Checkers: []posmoni.CfgChecker{
-				{Key: posmoni.Execution, ErrMsg: posmoni.NoExecutionFoundError, Data: []string{configs.OnPremiseExecutionURL}},
-				{Key: posmoni.Consensus, ErrMsg: posmoni.NoConsensusFoundError, Data: []string{configs.OnPremiseConsensusURL}},
-			},
-		}
-		m, err := posmoni.NewEth2Monitor(
-			posmonidb.EmptyRepository{},
-			&posmoninet.BeaconClient{RetryDuration: time.Minute * 10},
-			&posmoninet.ExecutionClient{RetryDuration: time.Minute * 10},
-			posmoninet.SubscribeOpts{},
-			moniCfg,
-		)
-		if err != nil {
-			log.Fatalf(configs.MonitoringToolInitError, err)
-		}
-
-		return m
-	})
+func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceManager services.ServiceManager, sedgeActions actions.SedgeActions) *cobra.Command {
 	var (
 		flags  CliCmdFlags
 		images clientImages
@@ -124,7 +105,7 @@ func CliCmd(prompt prompts.Prompt) *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			// notest
-			if errs := runCliCmd(cmd, args, &flags, &images, prompt); len(errs) > 0 {
+			if errs := runCliCmd(cmd, args, &flags, &images, cmdRunner, prompt, serviceManager, sedgeActions); len(errs) > 0 {
 				for _, err := range errs {
 					log.Error(err)
 				}
@@ -136,7 +117,7 @@ func CliCmd(prompt prompts.Prompt) *cobra.Command {
 	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.validatorName, "validator", "v", "", "Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
-	cmd.Flags().StringVarP(&flags.generationPath, "path", "p", configs.DefaultDockerComposeScriptsPath, "docker-compose scripts generation path")
+	cmd.Flags().StringVarP(&flags.generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data")
 	cmd.Flags().StringVar(&flags.checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity")
 	cmd.Flags().StringVarP(&flags.network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, etc.")
 	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
@@ -155,7 +136,14 @@ func CliCmd(prompt prompts.Prompt) *cobra.Command {
 	flags.clExtraFlags = cmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge cli --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	flags.vlExtraFlags = cmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringVar(&flags.logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
-	// TODO: check if this condition is still necessary
+	cmd.Flags().StringVar(&flags.customTTD, "custom-ttd", "", "Custom Terminal Total Difficulty to use for the execution client")
+	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
+	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
+	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
+	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
+	flags.customEnodes = cmd.Flags().StringSlice("execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
+	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
+	cmd.Flags().StringVar(&flags.slashingProtection, "slashing-protection", "", "Path to the file with slashing protection interchange data (EIP-3076)")
 	cmd.Flags().SortFlags = false
 	return cmd
 }
@@ -204,10 +192,27 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 	if !utils.Contains(networks, flags.network) {
 		return nil, fmt.Errorf(configs.UnknownNetworkError, flags.network)
 	}
+	if flags.network == configs.CustomNetwork.Name {
+		if flags.customChainSpec == "" || flags.customNetworkConfig == "" || flags.customGenesis == "" || flags.customTTD == "" || flags.customDeployBlock == "" {
+			return nil, fmt.Errorf(configs.MissingCustomConfigs)
+		}
+	}
+
+	// Validate custom ttd
+	if flags.customTTD != "" &&
+		!regexp.MustCompile(`^[1-9]\d*$`).Match([]byte(strings.TrimSpace(flags.customTTD))) {
+		return nil, fmt.Errorf(configs.InvalidTTD)
+	}
+
+	// Validate custom deploy block
+	if flags.customDeployBlock != "" &&
+		!regexp.MustCompile(`^[0-9]\d*$`).Match([]byte(strings.TrimSpace(flags.customDeployBlock))) {
+		return nil, fmt.Errorf(configs.InvalidDeployBLock)
+	}
 
 	// Validate fee recipient
 	if flags.feeRecipient != "" && !utils.IsAddress(flags.feeRecipient) {
-		return nil, errors.New(configs.InvalidFeeRecipientError)
+		return nil, fmt.Errorf(configs.InvalidFeeRecipientError)
 	}
 
 	var clientImages clientImages
@@ -236,14 +241,44 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 		return nil, err
 	}
 
+	// validate custom network flags
+	urlOrPaths := map[string]string{
+		"ChainSpec":      flags.customChainSpec,
+		"Network config": flags.customNetworkConfig,
+		"Genesis":        flags.customGenesis,
+	}
+	for kind, value := range urlOrPaths {
+		if value == "" {
+			continue
+		}
+		if err := utils.CheckUrlOrPath(value); err != nil {
+			return nil, fmt.Errorf("invalid %s: %w", kind, err)
+		}
+	}
+
+	// ensure generation path exists
+	_, err = os.Stat(flags.generationPath)
+	if os.IsNotExist(err) {
+		err = os.MkdirAll(flags.generationPath, os.ModePerm)
+	}
+	if err != nil {
+		return nil, fmt.Errorf(configs.InvalidGenerationPath, flags.generationPath, err)
+	}
+
 	return &clientImages, nil
 }
 
-func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, prompt prompts.Prompt) []error {
+func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceManager services.ServiceManager, sedgeActions actions.SedgeActions) []error {
 	// Warnings
 	// Warn if custom images are used
-	if clientImages.execution != "" || clientImages.consensus != "" || clientImages.validator != "" {
-		log.Warn(configs.CustomImagesWarning)
+	if clientImages.execution != "" {
+		log.Warn(configs.CustomExecutionImagesWarning)
+	}
+	if clientImages.consensus != "" {
+		log.Warn(configs.CustomConsensusImagesWarning)
+	}
+	if clientImages.validator != "" {
+		log.Warn(configs.CustomValidatorImagesWarning)
 	}
 	// Warn if exposed ports are used
 	if flags.mapAllPorts {
@@ -257,9 +292,9 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 
 	// Get all clients: supported + configured
 	c := clients.ClientInfo{Network: flags.network}
-	clientsMap, errors := c.Clients([]string{execution, consensus, validator})
-	if len(errors) > 0 {
-		return errors
+	clientsMap, clientsErrors := c.Clients([]string{execution, consensus, validator})
+	if len(clientsErrors) > 0 {
+		return clientsErrors
 	}
 
 	// Handle selection and validation of clients
@@ -268,35 +303,22 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		return []error{err}
 	}
 
-	dependencies := configs.GetDependencies()
-	log.Infof(configs.CheckingDependencies, strings.Join(dependencies, ", "))
-
-	// Check if dependencies are installed. Keep checking dependencies until they are all installed
-	for pending := utils.CheckDependencies(dependencies); len(pending) > 0; pending = utils.CheckDependencies(dependencies) {
-		log.Infof(configs.DependenciesPending, strings.Join(pending, ", "))
-		if flags.install {
-			// Install dependencies directly
-			if err := installDependencies(pending); err != nil {
-				return []error{err}
-			}
-		} else {
-			// Let the user decide to see the instructions for installing dependencies and exit or let the tool install them and continue
-			if err := installOrShowInstructions(pending); err != nil {
-				return []error{err}
-			}
-		}
+	if err := sedgeActions.InstallDependencies(actions.InstallDependenciesOptions{
+		Dependencies: configs.GetDependencies(),
+		Install:      flags.install,
+	}); err != nil {
+		return []error{err}
 	}
-	log.Info(configs.DependenciesOK)
 
 	// Generate JWT secret if necessary
-	if flags.jwtPath == "" && configs.NetworksConfigs[flags.network].RequireJWT {
-		if err = handleJWTSecret(flags); err != nil {
-			return []error{err}
-		}
-	} else if filepath.IsAbs(flags.jwtPath) { // Ensure jwtPath is absolute
-		if flags.jwtPath, err = filepath.Abs(flags.jwtPath); err != nil {
-			return []error{err}
-		}
+	jwtPath := flags.jwtPath
+	jwtPath, err = sedgeActions.CreateJWTSecrets(actions.CreateJWTSecretOptions{
+		JWTPath:        jwtPath,
+		Network:        flags.network,
+		GenerationPath: flags.generationPath,
+	})
+	if err != nil {
+		return []error{err}
 	}
 
 	// Get fee recipient
@@ -309,48 +331,69 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		flags.feeRecipient = feeRecipient
 	}
 
-	combinedClients.Execution.Image = clientImages.execution
-	combinedClients.Consensus.Image = clientImages.consensus
-	combinedClients.Validator.Image = clientImages.validator
-	combinedClients.Validator.Omited = flags.noValidator
-
-	// Generate docker-compose scripts
-	gd := generate.GenerationData{
-		ExecutionClient:   combinedClients.Execution,
-		ConsensusClient:   combinedClients.Consensus,
-		ValidatorClient:   combinedClients.Validator,
-		GenerationPath:    flags.generationPath,
-		Network:           flags.network,
-		CheckpointSyncUrl: flags.checkpointSyncUrl,
-		FeeRecipient:      flags.feeRecipient,
-		JWTSecretPath:     flags.jwtPath,
-		Graffiti:          flags.graffiti,
-		FallbackELUrls:    *flags.fallbackEL,
-		ElExtraFlags:      *flags.elExtraFlags,
-		ClExtraFlags:      *flags.clExtraFlags,
-		VlExtraFlags:      *flags.vlExtraFlags,
-		MapAllPorts:       flags.mapAllPorts,
-		Mev:               !flags.noMev && !flags.noValidator,
-		MevImage:          flags.mevImage,
-		LoggingDriver:     configs.GetLoggingDriver(flags.logging),
-	}
-	results, err := generate.GenerateScripts(gd)
+	// Get custom networks configs
+	customNetworkConfigsData, err := LoadCustomNetworksConfig(&flags.CustomFlags, flags.network, flags.generationPath)
 	if err != nil {
 		return []error{err}
 	}
 
-	// Clean generated .env and docker compose files
-	err = generate.CleanGenerated(results)
+	if combinedClients.Execution != nil {
+		combinedClients.Execution.Image = clientImages.execution
+	}
+	if combinedClients.Consensus != nil {
+		combinedClients.Consensus.Image = clientImages.consensus
+	}
+
+	if flags.noValidator {
+		combinedClients.Validator = nil
+	} else {
+		if combinedClients.Validator != nil {
+			combinedClients.Validator.Image = clientImages.validator
+		}
+	}
+
+	vlStartGracePeriod := configs.NetworkEpochTime(flags.network)
+
+	// Generate docker-compose scripts
+	gd := &generate.GenData{
+		Services:                *flags.services,
+		ExecutionClient:         combinedClients.Execution,
+		ConsensusClient:         combinedClients.Consensus,
+		ValidatorClient:         combinedClients.Validator,
+		Network:                 flags.network,
+		CheckpointSyncUrl:       flags.checkpointSyncUrl,
+		FeeRecipient:            flags.feeRecipient,
+		JWTSecretPath:           jwtPath,
+		Graffiti:                flags.graffiti,
+		FallbackELUrls:          flags.fallbackEL,
+		ElExtraFlags:            flags.elExtraFlags,
+		ClExtraFlags:            flags.clExtraFlags,
+		VlExtraFlags:            flags.vlExtraFlags,
+		MapAllPorts:             flags.mapAllPorts,
+		Mev:                     !flags.noMev && !flags.noValidator,
+		MevImage:                flags.mevImage,
+		LoggingDriver:           configs.GetLoggingDriver(flags.logging),
+		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
+		ECBootnodes:             flags.customEnodes,
+		CCBootnodes:             flags.customEnrs,
+		CustomTTD:               flags.customTTD,
+		CustomChainSpecPath:     customNetworkConfigsData.ChainSpecPath,
+		CustomNetworkConfigPath: customNetworkConfigsData.NetworkConfigPath,
+		CustomGenesisPath:       customNetworkConfigsData.NetworkGenesisPath,
+		CustomDeployBlock:       flags.customDeployBlock,
+		CustomDeployBlockPath:   customNetworkConfigsData.NetworkDeployBlockPath,
+	}
+	err = sedgeActions.Generate(actions.GenerateOptions{GenerationData: gd, GenerationPath: flags.generationPath})
 	if err != nil {
 		return []error{err}
 	}
 
 	// Print final files
-	log.Infof(configs.CreatedFile, results.EnvFilePath)
-	ui.PrintFileContent(cmd.OutOrStdout(), results.EnvFilePath)
+	log.Infof(configs.CreatedFile, filepath.Join(generationPath, configs.DefaultEnvFileName))
+	ui.PrintFileContent(cmd.OutOrStdout(), filepath.Join(generationPath, configs.DefaultEnvFileName))
 
-	log.Infof(configs.CreatedFile, results.DockerComposePath)
-	ui.PrintFileContent(cmd.OutOrStdout(), results.DockerComposePath)
+	log.Infof(configs.CreatedFile, filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
+	ui.PrintFileContent(cmd.OutOrStdout(), filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
 
 	// If --run-clients=none was set then exit and don't run anything
 	if len(*flags.services) == 0 {
@@ -358,51 +401,55 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		return nil
 	}
 
-	// If teku is chosen, then prepare datadir with 777 permissions
-	if combinedClients.Consensus.Name == "teku" {
-		if err = preRunTeku(flags); err != nil {
+	if flags.run {
+		if utils.Contains(*flags.services, "validator") {
+			*flags.services = append(*flags.services, "validator-import")
+		}
+		if err := buildContainers(cmdRunner, *flags.services, flags.generationPath); err != nil {
 			return []error{err}
 		}
-	}
-
-	if flags.run {
-		if err = runAndShowContainers(*flags.services, flags); err != nil {
+		if flags.slashingProtection != "" {
+			// Setup wait for validator import
+			exitCh, errCh := serviceManager.Wait(services.ServiceCtValidatorImport, dockerct.WaitConditionNextExit)
+			// Run validator-import
+			if err := runAndShowContainers(cmdRunner, []string{"validator-import"}, flags); err != nil {
+				return []error{err}
+			}
+			exitCode, err := func(exitCh <-chan dockerct.ContainerWaitOKBody, errCh <-chan error) (int64, error) {
+				for {
+					select {
+					case exitOk := <-exitCh:
+						return exitOk.StatusCode, nil
+					case err := <-errCh:
+						return -1, err
+					}
+				}
+			}(exitCh, errCh)
+			if err != nil {
+				return []error{err}
+			}
+			if exitCode != 0 {
+				return []error{fmt.Errorf("%s ends with unexpected status code %d", services.ServiceCtValidatorImport, exitCode)}
+			}
+			if err := sedgeActions.ImportSlashingInterchangeData(actions.SlashingImportOptions{
+				ValidatorClient: flags.validatorName,
+				Network:         flags.network,
+				StopValidator:   false,
+				StartValidator:  false,
+				GenerationPath:  flags.generationPath,
+				From:            flags.slashingProtection,
+			}); err != nil {
+				return []error{err}
+			}
+		}
+		if err = runAndShowContainers(cmdRunner, *flags.services, flags); err != nil {
 			return []error{err}
 		}
 	} else {
 		// Let the user decide to see the instructions for executing the scripts and exit or let the tool execute them
-		if err = runScriptOrExit(flags); err != nil {
+		if err = runScriptOrExit(cmdRunner, flags); err != nil {
 			return []error{err}
 		}
-	}
-
-	if !flags.noValidator {
-		log.Info(configs.ValidatorTips)
-
-		// Run validator after execution and consensus clients are synced, unless the user intencionally wants to run the validator service in the previous step
-		if !utils.Contains(*flags.services, validator) {
-			// Wait for clients to start
-			// log.Info(configs.WaitingForNodesToStart)
-			// time.Sleep(waitingTime)
-			// Track sync of execution and consensus clients
-			// TODO: Parameterize wait arg of trackSync
-			if err = trackSync(monitor, results.ELPort, results.CLPort, time.Minute*5, flags); err != nil {
-				return []error{err}
-			}
-
-			// TODO: Prompt for waiting for keystore and validator registration to run the validator
-			if flags.run {
-				if err = runAndShowContainers([]string{validator}, flags); err != nil {
-					return []error{err}
-				}
-			} else {
-				// Let the user decide to see the instructions for executing the validator and exit or let the tool execute it
-				if err = RunValidatorOrExit(flags); err != nil {
-					return []error{err}
-				}
-			}
-		}
-		log.Info(configs.HappyStaking)
 	}
 
 	return nil

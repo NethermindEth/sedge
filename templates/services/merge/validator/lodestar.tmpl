@@ -2,21 +2,16 @@
 {{ define "validator" }}
   validator-import:
     container_name: validator-import-client
-    image: ${VL_IMAGE_VERSION}{{with .VlCustomCfg}}
-    depends_on:
-      config_consensus:
-        condition: service_completed_successfully{{end}}
+    image: ${VL_IMAGE_VERSION}
     networks:
       - sedge
     volumes:
       - ${KEYSTORE_DIR}:/keystore
-      - ${VL_DATA_DIR}:/data{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
-      - ./config.yml:/network_config/config.yaml{{end}}{{if .VlRemoteGen}}
-      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{if .VlRemoteDpl}}
-      - ./deploy_block.txt:/network_config/deploy_block.txt{{end}}{{end}}
+      - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yaml{{end}}{{end}}
     command: |
       validator import
-      --preset=${VL_LODESTAR_PRESET}{{if not .VlCustomCfg}}
+      --preset=${VL_LODESTAR_PRESET}{{if not .CustomConsensusConfigs}}
       --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}
       --paramsFile /network_config/config.yaml{{end}}
       --dataDir=/data
@@ -30,20 +25,24 @@
   validator:
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
+    restart: unless-stopped
     depends_on:
       validator-import:
         condition: service_completed_successfully
+      validator-blocker:
+        condition: service_completed_successfully{{if .WithConsensusClient}}
+      consensus:
+        condition: service_healthy{{end}}
     networks:
       - sedge
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/data/validator{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}{{if .VlRemoteGen}}
-      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
+      - ${VL_DATA_DIR}:/data/validator{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
     command: 
       - validator
-      - --preset=${VL_LODESTAR_PRESET}{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - --preset=${VL_LODESTAR_PRESET}{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       - --paramsFile=/network_config/config.yml{{end}}{{else}}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --dataDir=/data/validator
@@ -53,7 +52,7 @@
       - --metrics=true
       - --metrics.address=0.0.0.0
       - --metrics.port={{.VlMetricsPort}}{{with .FeeRecipient}}
-      - --suggestedFeeRecipient=${CL_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
+      - --suggestedFeeRecipient=${CC_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
       - --builder=true{{end}}
       - --graffiti=${GRAFFITI}{{if .LoggingDriver}}

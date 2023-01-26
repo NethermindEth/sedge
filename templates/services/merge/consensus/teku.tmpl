@@ -1,22 +1,26 @@
 {{/* teku.tmpl */}}
 {{ define "consensus" }}
-  consensus:
+  consensus:{{if and (ge .UID 0) (ge .GID 0)}}
+    user: "{{.UID}}:{{.GID}}"{{end}}
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{if or .Mev .CcCustomCfg}}
+    image: ${CC_IMAGE_VERSION}{{if .Mev}}
     depends_on:{{if .Mev}}
       mevboost:
-        condition: service_started{{end}}{{if .CcCustomCfg}}
-      config_consensus:
-        condition: service_completed_successfully{{end}}{{end}}
+        condition: service_started{{end}}{{end}}
+    healthcheck:
+      test: "(curl -s -o /dev/null -w \"%{http_code}\" -X GET http://127.0.0.1:4000/eth/v1/node/health | grep -q 200) || exit 1"
+      interval: 5m
+      retries: 4032
+      start_period: 1m
     networks:
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/teku
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}{{if .CcRemoteGen}}
-      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{if .CustomGenesisPath}}
+      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
@@ -26,11 +30,11 @@
       - {{.ClApiPort}}
     command:
       - --log-destination=CONSOLE
-      - --logging=${CC_LOG_LEVEL}{{if not .CcCustomCfg}}
-      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}{{if .CcRemoteGen}}
-      - --initial-state=/network_config/genesis.ssz{{end}}{{if .CcRemoteCfg}}
-      - --network=/network_config/config.yml{{end}}{{end}}{{if .Bootnodes}}
-      - --p2p-discovery-bootnodes=${CL_BOOTNODES}{{end}}
+      - --logging=${CC_LOG_LEVEL}{{if not .CustomConsensusConfigs}}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}{{if .CustomGenesisPath}}
+      - --initial-state=/network_config/genesis.ssz{{end}}{{if .CustomNetworkConfigPath}}
+      - --network=/network_config/config.yml{{end}}{{end}}{{if .CCBootnodes}}
+      - --p2p-discovery-bootnodes={{.CCBootnodes}}{{end}}
       - --p2p-enabled=true
       - --p2p-port={{.ClDiscoveryPort}}
       - --p2p-peer-upper-bound=${CC_PEER_COUNT}
@@ -46,16 +50,16 @@
       - --data-storage-mode=PRUNE
       - --data-storage-non-canonical-blocks-enabled=false
       - --ee-endpoint=${EC_AUTH_URL}{{with .FeeRecipient}}
-      - --validators-proposer-default-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
-      - --ee-jwt-secret-file=/tmp/jwt/jwtsecret{{with .TTD}}
-      - --Xnetwork-total-terminal-difficulty-override=${TTD}{{end}}
+      - --validators-proposer-default-fee-recipient=${CC_FEE_RECIPIENT}{{end}}
+      - --ee-jwt-secret-file=/tmp/jwt/jwtsecret{{if .TTD}}
+      - --Xnetwork-total-terminal-difficulty-override={{.TTD}}{{end}}
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
       - --metrics-port={{.ClMetricsPort}}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
       - --initial-state={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}/eth/v2/debug/beacon/states/finalized{{end}}{{range $flag := .ClExtraFlags}}
-      - --{{$flag}}{{end}}{{if .Mev}}
-      - --builder-endpoint=http://mevboost:{{.MevPort}}{{end}}{{if .XeeVersion}}
+      - --{{$flag}}{{end}}{{if .MevBoostEndpoint}}
+      - --builder-endpoint={{.MevBoostEndpoint}}{{end}}{{if .XeeVersion}}
       - --Xee-version=${XEE_VERSION}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}

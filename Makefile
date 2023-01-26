@@ -12,7 +12,7 @@ compile: ## compile:
 
 compile-linux: ## compile:
 	@mkdir -p build
-	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/sedge cmd/main.go
+	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/sedge cmd/sedge/main.go
 
 install: compile ## compile the binary and copy it to PATH
 	@sudo cp build/sedge /usr/local/bin
@@ -58,9 +58,10 @@ gomod_tidy: ## go mod tidy
 format: ## run code formatting
 	gofumpt -l -w .
 
+# assert `gofumpt -l` produces no output
+format-check: SHELL:=/bin/bash
 format-check: ## check formatting
-	# assert `gofumpt -l` produces no output
-	test ! $$(gofumpt -l . | tee /dev/stderr)
+	test -z "$$(gofumpt -l . | tee >(cat 1>&2))"
 
 
 help: ## Show this help
