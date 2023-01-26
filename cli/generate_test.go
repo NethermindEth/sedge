@@ -182,6 +182,59 @@ func TestGenerateCmd(t *testing.T) {
 	tcs := []generateCmdTestCase{
 		*buildGenerateTestCase(
 			t,
+			"Execution, bad number of arguments", "case_1",
+			GenCmdFlags{},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "",
+				logging:        "",
+			},
+			subCmd{
+				name: "execution",
+				args: []string{"nethermind", "besu"},
+			},
+			errors.New("requires one argument"),
+		),
+		*buildGenerateTestCase(
+			t,
+			"Consensus, bad number of arguments", "case_1",
+			GenCmdFlags{
+				executionAuthUrl: "http://localhost:8545",
+				executionApiUrl:  "http://localhost:8545",
+			},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "",
+				logging:        "",
+			},
+			subCmd{
+				name: "consensus",
+				args: []string{"teku", "lodestar"},
+			},
+			errors.New("requires one argument"),
+		),
+		*buildGenerateTestCase(
+			t,
+			"Validator, bad number of arguments", "case_1",
+			GenCmdFlags{
+				consensusApiUrl: "http://localhost:4000",
+			},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "",
+				logging:        "",
+			},
+			subCmd{
+				name: "validator",
+				args: []string{"teku", "lodestar"},
+			},
+			errors.New("requires one argument"),
+		),
+		*buildGenerateTestCase(
+			t,
 			"full-node Fixed clients", "case_1",
 			GenCmdFlags{
 				executionName: "nethermind",
@@ -453,7 +506,7 @@ func TestGenerateCmd(t *testing.T) {
 		),
 		*buildGenerateTestCase(
 			t,
-			"validator good client", "case_1",
+			"Validator good client", "case_1",
 			GenCmdFlags{
 				consensusApiUrl: "http://localhost:4000",
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
@@ -599,7 +652,7 @@ func TestGenerateCmd(t *testing.T) {
 			errors.New("custom flags used without --network custom")),
 		*buildGenerateTestCase(
 			t,
-			"Validator", "case_1",
+			"Full-node, custom TTD", "case_1",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 				CustomFlags: CustomFlags{
@@ -613,6 +666,24 @@ func TestGenerateCmd(t *testing.T) {
 				name: "full-node",
 			},
 			nil),
+		*buildGenerateTestCase(
+			t,
+			"Execution ", "case_1",
+			GenCmdFlags{
+				mapAllPorts: true,
+			},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "sepolia",
+				logging:        "",
+			},
+			subCmd{
+				name: "execution",
+				args: []string{"nethermind"},
+			},
+			nil,
+		),
 	}
 
 	for _, tc := range tcs {
