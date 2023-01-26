@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"path/filepath"
+
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	log "github.com/sirupsen/logrus"
@@ -75,7 +77,7 @@ the importation.`,
 	cmd.Flags().StringVarP(&network, "network", "n", "", "network")
 	cmd.Flags().BoolVar(&startValidator, "start-validator", false, "starts the validator client after import, regardless of the state the validator was in before")
 	cmd.Flags().BoolVar(&stopValidator, "stop-validator", false, "stops the validator client after import, regardless of the state the validator was in before")
-	cmd.Flags().StringVar(&from, "from", configs.DefaultAbsSedgeDataPath, "docker-compose scripts generation path")
+	cmd.Flags().StringVar(&from, "from", filepath.Join(configs.DefaultAbsSedgeDataPath, "keystore"), "path to the validator keys, must follow the EIP-2335: BLS12-381 Keystore standard")
 	cmd.Flags().StringVar(&customConfigPath, "custom-config", "", "file path or url to use as custom network config.")
 	cmd.Flags().StringVar(&customGenesisPath, "custom-genesis", "", "file path or url to use as custom network genesis.")
 	cmd.Flags().StringVar(&customDeployBlock, "custom-deploy-block", "", "custom network deploy block.")
