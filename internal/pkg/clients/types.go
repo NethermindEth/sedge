@@ -40,7 +40,7 @@ func (c *Client) SetImageOrDefault(image string) {
 func (c *Client) setExecutionImage(image string) {
 	switch c.Name {
 	case "geth":
-		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Get.String())
+		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Geth.String())
 	case "besu":
 		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Besu.String())
 	case "nethermind":
@@ -53,13 +53,13 @@ func (c *Client) setExecutionImage(image string) {
 func (c *Client) setConsensusImage(image string) {
 	switch c.Name {
 	case "lighthouse":
-		c.Image = valueOrDefault(image, configs.ClientImages.BeaconChain.Lighthouse.String())
+		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Lighthouse.String())
 	case "prysm":
-		c.Image = valueOrDefault(image, configs.ClientImages.BeaconChain.Prysm.String())
+		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Prysm.String())
 	case "teku":
-		c.Image = valueOrDefault(image, configs.ClientImages.BeaconChain.Teku.String())
+		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Teku.String())
 	case "lodestar":
-		c.Image = valueOrDefault(image, configs.ClientImages.BeaconChain.Lodestar.String())
+		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Lodestar.String())
 	}
 }
 

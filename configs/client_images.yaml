@@ -11,7 +11,7 @@ execution:
   erigon:
     name: erigon/erigon
     version: v2.29.0
-beacon-chain:
+consensus:
   lighthouse:
     name: sigp/lighthouse
     version: v3.3.0

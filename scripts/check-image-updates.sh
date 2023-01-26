@@ -42,21 +42,21 @@ update-client "Erigon" "execution" ".execution.erigon" "$ERIGON_LATEST"
 
 # Lighthouse
 LIGHTHOUSE_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/sigp/lighthouse/releases/latest | jq -r ".tag_name")
-update-client "Lighthouse" "beacon-chain" ".beacon-chain.lighthouse" "$LIGHTHOUSE_LATEST_VERSION"
+update-client "Lighthouse" "consensus" ".consensus.lighthouse" "$LIGHTHOUSE_LATEST_VERSION"
 update-client "Lighthouse" "validator" ".validator.lighthouse" "$LIGHTHOUSE_LATEST_VERSION"
 
 # Lodestar
 LODESTAR_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/ChainSafe/lodestar/releases/latest | jq -r ".tag_name")
-update-client "Lodestar" "beacon-chain" ".beacon-chain.lodestar" "$LODESTAR_LATEST_VERSION"
+update-client "Lodestar" "consensus" ".consensus.lodestar" "$LODESTAR_LATEST_VERSION"
 update-client "Lodestar" "validator" ".validator.lodestar" "$LODESTAR_LATEST_VERSION"
 
 # Teku
 TEKU_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/ConsenSys/teku/releases/latest | jq -r ".tag_name")
-update-client "Teku" "beacon-chain" ".beacon-chain.teku" "$TEKU_LATEST_VERSION"
+update-client "Teku" "consensus" ".consensus.teku" "$TEKU_LATEST_VERSION"
 update-client "Teku" "validator" ".validator.teku" "$TEKU_LATEST_VERSION"
 
 ## Prysm
 PRYSM_LATEST_BEACON_VERSION=$(curl -H "Authorization: Bearer $PAT" https://api.github.com/orgs/gnosischain/packages/container/gbc-prysm-beacon-chain/versions | jq -r '.[0].metadata.container.tags[0]')
-update-client "Prysm" "beacon-chain" ".beacon-chain.prysm" "$PRYSM_LATEST_VERSION"
+update-client "Prysm" "consensus" ".consensus.prysm" "$PRYSM_LATEST_VERSION"
 PRYSM_LATEST_VALIDATOR_VERSION=$(curl -H "Authorization: Bearer $PAT" https://api.github.com/orgs/gnosischain/packages/container/gbc-prysm-validator/versions | jq -r '.[0].metadata.container.tags[0]')
 update-client "Prysm" "validator" ".validator.prysm" "$PRYSM_LATEST_VALIDATOR_VERSION"
