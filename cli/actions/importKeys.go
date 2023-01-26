@@ -106,7 +106,7 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 	}
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
-		log.Info("the validator container is being restarted")
+		log.Info("The validator container is being restarted")
 		if err := s.serviceManager.Start(services.ServiceCtValidator); err != nil {
 			return err
 		}
