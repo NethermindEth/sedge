@@ -36,6 +36,7 @@ func SlashingImportCmd(sedgeActions actions.SedgeActions) *cobra.Command {
 		startValidator  bool
 		generationPath  string
 		from            string
+		containerTag    string
 	)
 
 	cmd := &cobra.Command{
@@ -85,6 +86,7 @@ sedge slashing-import --from slashing-data.json --start-validator lighthouse`,
 				StartValidator:  startValidator,
 				GenerationPath:  generationPath,
 				From:            from,
+				ContainerTag:    containerTag,
 			})
 			if err != nil {
 				log.Fatal(err)
@@ -97,5 +99,6 @@ sedge slashing-import --from slashing-data.json --start-validator lighthouse`,
 	cmd.Flags().BoolVar(&stopValidator, "stop-validator", false, "stops the validator client after import, regardless of the state the validator was in before")
 	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "path to the generation directory")
 	cmd.Flags().StringVarP(&from, "from", "f", "", "path to the JSON file in the EIP-3076 format with the slashing protection data to import (default: <generation-dir>/slashing_export.json)")
+	cmd.PersistentFlags().StringVar(&containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client_<tag>.")
 	return cmd
 }
