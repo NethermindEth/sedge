@@ -112,4 +112,6 @@ const (
 	InvalidTTD                        = "invalid terminal total difficulty"
 	InvalidDeployBLock                = "invalid deploy block"
 	InvalidGenerationPath             = "invalid generation path %s: %v"
+	InvalidCkptSyncURL                = "invalid checkpoint sync url %s"
+	InvalidJWTSecret                  = "there is no jwtsecret file in the provided path %s"
 )
