@@ -17,6 +17,7 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
+	"github.com/otiai10/copy"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -26,6 +27,7 @@ type ImportValidatorKeysOptions struct {
 	StopValidator   bool
 	StartValidator  bool
 	From            string
+	GenerationPath  string
 	CustomConfig    ImportValidatorKeysCustomOptions
 }
 type ImportValidatorKeysCustomOptions struct {
@@ -55,6 +57,17 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		return err
 	}
 	options.From = absFrom
+	absGenerationPath, err := filepath.Abs(options.GenerationPath)
+	if err != nil {
+		return err
+	}
+	options.GenerationPath = absGenerationPath
+
+	if !isDefaultKeysPath(options.GenerationPath, options.From) {
+		defaultKeystorePath := filepath.Join(options.GenerationPath, "keystore")
+		log.Warnf("The keys path is not the default one, copying the keys to the default path %s", defaultKeystorePath)
+		copy.Copy(options.From, defaultKeystorePath)
+	}
 
 	var ctID string
 	switch options.ValidatorClient {
@@ -97,6 +110,10 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		}
 	}
 	return nil
+}
+
+func isDefaultKeysPath(generationPath, from string) bool {
+	return from == filepath.Join(generationPath, "keystore")
 }
 
 func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, options ImportValidatorKeysOptions) (string, error) {
