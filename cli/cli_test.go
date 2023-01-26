@@ -177,7 +177,7 @@ func buildCliTestCase(
 	tc := cliCmdTestCase{}
 	configPath := t.TempDir()
 
-	err := test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", caseTestDataDir, "config"), configPath)
+	err := test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", caseTestDataDir), configPath)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
