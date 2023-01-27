@@ -46,6 +46,7 @@ type SlashingImportOptions struct {
 
 func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptions) error {
 	validatorContainerName := services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
+	slashingContainerName := services.ContainerNameWithTag(services.ServiceCtSlashingData, options.ContainerTag)
 	// Check validator container exists
 	_, err := s.serviceManager.ContainerId(validatorContainerName)
 	if err != nil {
@@ -107,7 +108,7 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
 	log.Infof("Importing slashing data to client %s from %s", options.ValidatorClient, options.From)
-	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd, validatorContainerName); err != nil {
+	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd, validatorContainerName, slashingContainerName); err != nil {
 		return err
 	}
 
@@ -134,6 +135,7 @@ type SlashingExportOptions struct {
 
 func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptions) error {
 	validatorContainerName := services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
+	slashingContainerName := services.ContainerNameWithTag(services.ServiceCtSlashingData, options.ContainerTag)
 	// Check validator container exists
 	_, err := s.serviceManager.ContainerId(validatorContainerName)
 	if err != nil {
@@ -188,7 +190,7 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
 	log.Infof("Exporting slashing data from client %s", options.ValidatorClient)
-	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd, validatorContainerName); err != nil {
+	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd, validatorContainerName, slashingContainerName); err != nil {
 		return err
 	}
 	copyFrom := filepath.Join(options.GenerationPath, configs.ValidatorDir, "slashing_protection.json")
@@ -209,7 +211,7 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 }
 
 func runSlashingContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, cmd []string,
-	validatorContainerName string,
+	validatorContainerName string, slashingContainerName string,
 ) error {
 	validatorImage, err := serviceManager.Image(validatorContainerName)
 	if err != nil {
@@ -226,13 +228,13 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 		},
 		&network.NetworkingConfig{},
 		&v1.Platform{},
-		services.ServiceCtSlashingData,
+		slashingContainerName,
 	)
 	if err != nil {
 		return err
 	}
 	log.Debugf("Slashing protection container id: %s", ct.ID)
-	ctExit, errChan := serviceManager.Wait(services.ServiceCtSlashingData, container.WaitConditionNextExit)
+	ctExit, errChan := serviceManager.Wait(slashingContainerName, container.WaitConditionNextExit)
 	log.Info("The slashing protection container is starting...")
 	if err := dockerClient.ContainerStart(context.Background(), ct.ID, types.ContainerStartOptions{}); err != nil {
 		return err

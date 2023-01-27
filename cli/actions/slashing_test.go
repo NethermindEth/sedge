@@ -232,7 +232,7 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag stri
 	dockerClient := mock_client.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
-	slashingCtName := services.ServiceCtSlashingData
+	slashingCtName := services.ContainerNameWithTag(services.ServiceCtSlashingData, containerTag)
 	slashingCtId := "slashing-ct-id"
 
 	validatorContainerName := services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, containerTag)

@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	ServiceCtSlashingData       = "validator-slashing-data"
+	ServiceCtSlashingData       = "sedge-validator-slashing-data-manager"
 	ServiceCtValidatorImport    = "sedge-validator-import"
 	DefaultSedgeValidatorClient = "sedge-validator-client"
 	DefaultSedgeExecutionClient = "sedge-execution-client"
