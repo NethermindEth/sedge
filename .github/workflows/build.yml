@@ -2,37 +2,52 @@ name: sedge CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   build:
     name: Build sedge
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ["1.18.2"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Set git to use LF
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
 
-    - name: Setup Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: '1.18.2'
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Check Format
-      run: make format-check
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
 
-    - name: Check go mod status
-      run: |
-        make gomod_tidy
-        if [[ ! -z $(git status -s) ]]
-        then
-          echo "Go mod - state is not clean:"
-          git status -s
-          git diff "$GITHUB_SHA"
-          exit 1
-        fi
+      - name: Install gofumpt
+        if: matrix.os == 'ubuntu-latest'
+        run: make install-gofumpt
 
-    - name: Check build
-      run: make compile
+      - name: Check Format Unix
+        if: matrix.os == 'ubuntu-latest'
+        run: test -z "$(gofumpt -l . | tee >(cat 1>&2))"
+
+      - name: Check go mod status
+        run: |
+          make gomod_tidy
+          if [[ ! -z $(git status -s) ]];
+          then
+            echo "Go mod - state is not clean:"
+            git status -s
+            git diff "$GITHUB_SHA"
+            exit 1
+          fi
+        shell: bash
+
+      - name: Check build
+        run: make compile

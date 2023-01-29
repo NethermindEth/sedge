@@ -23,12 +23,15 @@ import (
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/cli/prompts"
+	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/docker/docker/client"
 )
 
 func main() {
+	// Init configs
+	configs.InitNetworksConfigs()
 	// Commands Runner
 	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{
 		RunAsAdmin: runtime.GOOS == "linux",
@@ -53,7 +56,9 @@ func main() {
 		cli.LogsCmd(cmdRunner),
 		cli.VersionCmd(),
 		cli.SlashingExportCmd(sedgeActions),
+		cli.SlashingImportCmd(sedgeActions),
 		cli.RunCmd(cmdRunner, sedgeActions),
+		cli.GenerateCmd(sedgeActions),
 	)
 	if err := sedgeCmd.Execute(); err != nil {
 		os.Exit(1)

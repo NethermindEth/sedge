@@ -84,7 +84,7 @@ func (c ClientInfo) Clients(clientTypes []string) (clients OrderedClients, errs 
 		log.Debugf(configs.SupportedClients, clientType, strings.ToLower(strings.Join(supportedClients, ", ")))
 
 		for _, client := range supportedClients {
-			clients[clientType][client] = Client{Name: client, Type: clientType, Supported: true}
+			clients[clientType][client] = &Client{Name: client, Type: clientType, Supported: true}
 		}
 	}
 
@@ -103,7 +103,10 @@ returns :-
 a. error
 Error if client is not supported or configured
 */
-func ValidateClient(client Client, currentType string) error {
+func ValidateClient(client *Client, currentType string) error {
+	if client == nil {
+		return nil
+	}
 	if client.Type == "" {
 		return fmt.Errorf(configs.IncorrectClientError, currentType, client.Name)
 	}
