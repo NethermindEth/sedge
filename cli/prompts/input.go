@@ -24,8 +24,8 @@ func (p *promptCli) Input(label string, required bool) (string, error) {
 
 func (p *promptCli) InputHide(label string) (string, error) {
 	prompt := promptui.Prompt{
-		Label:       label,
-		HideEntered: true,
+		Label: label,
+		Mask:  '*',
 	}
 	return prompt.Run()
 }

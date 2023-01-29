@@ -2,7 +2,13 @@ package cli
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
+
+	eth2 "github.com/protolambda/zrnt/eth2/configs"
+
+	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/pkg/generate"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/cli/prompts"
@@ -48,31 +54,15 @@ const (
 )
 
 type CliRefactorOptions struct {
+	genData                  generate.GenData
 	generationPath           string
-	network                  string
 	nodeType                 string
 	withValidator            bool
-	exposeAllPorts           bool
 	importSlashingProtection bool
 	slashingProtectionFrom   string
-	customNetworkConfig      string
-	customChainSpec          string
-	customGenesis            string
-	customTTD                string
 	customDeployBlock        string
-	executionBootNodes       string
-	consensusBootNodes       string
-	mevBoostImage            string
-	mevBoostEndpoint         string
 	relayURL                 string
-	executionClient          string
-	consensusClient          string
-	validatorClient          string
-	graffiti                 string
-	ckptSyncURL              string
-	feeRecipient             string
 	jwtSourceType            string
-	jwtPath                  string
 	keystoreSourceType       string
 	keystorePath             string
 	keystoreMnemonicSource   string
@@ -99,18 +89,22 @@ func CliRefactorCmd(p prompts.Prompt, actions actions.SedgeActions) *cobra.Comma
 			}
 			switch o.nodeType {
 			case NodeTypeFullNode:
+				o.genData.Services = append(o.genData.Services, "execution", "consensus")
 				if err := setupFullNode(p, o, actions); err != nil {
 					log.Fatal(err)
 				}
 			case NodeTypeExecution:
+				o.genData.Services = append(o.genData.Services, "execution")
 				if err := setupExecutionNode(p, o, actions); err != nil {
 					log.Fatal(err)
 				}
 			case NodeTypeConsensus:
+				o.genData.Services = append(o.genData.Services, "consensus")
 				if err := setupConsensusNode(p, o, actions); err != nil {
 					log.Fatal(err)
 				}
 			case NodeTypeValidator:
+				o.genData.Services = append(o.genData.Services, "validator")
 				if err := setupValidatorNode(p, o, actions); err != nil {
 					log.Fatal(err)
 				}
@@ -120,11 +114,11 @@ func CliRefactorCmd(p prompts.Prompt, actions actions.SedgeActions) *cobra.Comma
 	return cmd
 }
 
-func setupFullNode(p prompts.Prompt, o *CliRefactorOptions, actions actions.SedgeActions) error {
+func setupFullNode(p prompts.Prompt, o *CliRefactorOptions, a actions.SedgeActions) error {
 	if err := confirmWithValidator(p, o); err != nil {
 		return err
 	}
-	if o.network == NetworkCustom {
+	if o.genData.Network == NetworkCustom {
 		if err := runPromptActions(p, o,
 			inputCustomNetworkConfig,
 			inputCustomChainSpec,
@@ -138,9 +132,10 @@ func setupFullNode(p prompts.Prompt, o *CliRefactorOptions, actions actions.Sedg
 		}
 	}
 	if o.withValidator {
-		if configs.SupportsMEVBoost(o.network) {
+		o.genData.Services = append(o.genData.Services, "validator")
+		if configs.SupportsMEVBoost(o.genData.Network) {
 			if err := runPromptActions(p, o,
-				inputMevBoostImage,
+				inputMevImage,
 				inputRelayURL,
 			); err != nil {
 				return err
@@ -150,6 +145,7 @@ func setupFullNode(p prompts.Prompt, o *CliRefactorOptions, actions actions.Sedg
 			selectExecutionClient,
 			selectConsensusClient,
 			selectValidatorClient,
+			inputValidatorGracePeriod,
 			inputGraffiti,
 			inputCheckpointSyncURL,
 			inputFeeRecipient,
@@ -175,16 +171,39 @@ func setupFullNode(p prompts.Prompt, o *CliRefactorOptions, actions actions.Sedg
 	if err := setupJWT(p, o, false); err != nil {
 		return err
 	}
-	// TODO call generate action
-	log.Error("unimplemented generation")
-	return postGenerate(p, o, actions)
+	// Set constant values
+	o.genData.Mev = true
+	// Call generate action
+	if err := a.Generate(actions.GenerateOptions{
+		GenerationData: &o.genData,
+		GenerationPath: o.generationPath,
+	}); err != nil {
+		return err
+	}
+	_ = generate.GenData{
+		FallbackELUrls: nil, // TODO add to consensus client setup
+
+		ElExtraFlags: nil, // TODO add to prompts
+		ClExtraFlags: nil, // TODO add to prompts
+		VlExtraFlags: nil, // TODO add to prompts
+
+		MevBoostOnValidator: false, // TODO add to prompts
+
+		ExecutionApiUrl:  "", // TODO what is this?
+		ExecutionAuthUrl: "", // TODO what is this?
+		ConsensusApiUrl:  "", // TODO what is this?
+
+		CustomDeployBlock:     "", // TODO ask to Carlos
+		CustomDeployBlockPath: "", // TODO ask to carlos
+	}
+	return postGenerate(p, o, a)
 }
 
 func setupExecutionNode(p prompts.Prompt, o *CliRefactorOptions, actions actions.SedgeActions) error {
 	if err := selectExecutionClient(p, o); err != nil {
 		return err
 	}
-	if o.network == NetworkCustom {
+	if o.genData.Network == NetworkCustom {
 		if err := runPromptActions(p, o,
 			inputCustomChainSpec,
 			inputCustomTTD,
@@ -210,7 +229,7 @@ func setupConsensusNode(p prompts.Prompt, o *CliRefactorOptions, actions actions
 	if err := selectConsensusClient(p, o); err != nil {
 		return err
 	}
-	if o.network == NetworkCustom {
+	if o.genData.Network == NetworkCustom {
 		if err := runPromptActions(p, o,
 			inputCustomNetworkConfig,
 			inputCustomGenesis,
@@ -223,7 +242,7 @@ func setupConsensusNode(p prompts.Prompt, o *CliRefactorOptions, actions actions
 		if err := inputCheckpointSyncURL(p, o); err != nil {
 			return err
 		}
-		if configs.SupportsMEVBoost(o.network) {
+		if configs.SupportsMEVBoost(o.genData.Network) {
 			if err := inputMevBoostEndpoint(p, o); err != nil {
 				return err
 			}
@@ -247,7 +266,7 @@ func setupValidatorNode(p prompts.Prompt, o *CliRefactorOptions, actions actions
 	if err := selectValidatorClient(p, o); err != nil {
 		return err
 	}
-	if o.network == NetworkCustom {
+	if o.genData.Network == NetworkCustom {
 		if err := runPromptActions(p, o,
 			inputCustomNetworkConfig,
 			inputCustomGenesis,
@@ -259,6 +278,7 @@ func setupValidatorNode(p prompts.Prompt, o *CliRefactorOptions, actions actions
 	}
 	if err := runPromptActions(p, o,
 		inputGraffiti,
+		inputValidatorGracePeriod,
 		inputFeeRecipient,
 		inputGenerationPath,
 	); err != nil {
@@ -280,8 +300,11 @@ func setupJWT(p prompts.Prompt, o *CliRefactorOptions, skip bool) error {
 	}
 	switch o.jwtSourceType {
 	case SourceTypeCreate:
-		log.Error("unimplemented JWT generation")
-		// TODO: generate JWT
+		jwtPath, err := generateJWTSecret("")
+		o.genData.JWTSecretPath = jwtPath
+		if err != nil {
+			return err
+		}
 	case SourceTypeExisting:
 		if err := inputJWTPath(p, o); err != nil {
 			return err
@@ -300,7 +323,7 @@ func postGenerate(p prompts.Prompt, o *CliRefactorOptions, a actions.SedgeAction
 			return err
 		}
 	}
-	pendingDependencies := utils.CheckDependencies([]string{"docker", "invalid-dep"})
+	pendingDependencies := utils.CheckDependencies([]string{"docker"})
 	if len(pendingDependencies) > 0 {
 		supported, unsupported := utils.DependenciesSupported(pendingDependencies)
 		if len(unsupported) > 0 {
@@ -338,14 +361,18 @@ func postGenerate(p prompts.Prompt, o *CliRefactorOptions, a actions.SedgeAction
 	case NodeTypeValidator:
 		services = []string{"validator"}
 	}
-	a.SetupContainers(actions.SetupContainersOptions{
+	if err := a.SetupContainers(actions.SetupContainersOptions{
 		GenerationPath: o.generationPath,
 		Services:       services,
-	})
-	a.RunContainers(actions.RunContainersOptions{
+	}); err != nil {
+		return err
+	}
+	if err := a.RunContainers(actions.RunContainersOptions{
 		GenerationPath: o.generationPath,
 		Services:       services,
-	})
+	}); err != nil {
+		return err
+	}
 	// TODO: Final tips
 	log.Error("show final tips")
 	return nil
@@ -359,8 +386,7 @@ func generateKeystore(p prompts.Prompt, o *CliRefactorOptions, a actions.SedgeAc
 	case SourceTypeSkip:
 		return nil
 	case SourceTypeCreate:
-		// TODO generate keystore
-		log.Error("unimplemented keystore generation")
+		// Get the mnemonic
 		if err := selectKeystoreMnemonicSource(p, o); err != nil {
 			return err
 		}
@@ -379,6 +405,7 @@ func generateKeystore(p prompts.Prompt, o *CliRefactorOptions, a actions.SedgeAc
 				return err
 			}
 		}
+		// Get the passphrase
 		if err := selectKeystorePassphraseSource(p, o); err != nil {
 			return err
 		}
@@ -390,7 +417,11 @@ func generateKeystore(p prompts.Prompt, o *CliRefactorOptions, a actions.SedgeAc
 			if err := inputKeystorePassphrasePath(p, o); err != nil {
 				return err
 			}
-			// TODO open file and set passphrase
+			if passphrase, err := readFileContent(o.keystorePassphrasePath); err != nil {
+				return err
+			} else {
+				o.keystorePassphrase = passphrase
+			}
 		case SourceTypeCreate:
 			if err := inputKeystorePassphrase(p, o); err != nil {
 				return err
@@ -403,6 +434,23 @@ func generateKeystore(p prompts.Prompt, o *CliRefactorOptions, a actions.SedgeAc
 		); err != nil {
 			return err
 		}
+		if err := keystores.CreateKeystores(keystores.ValidatorKeysGenData{
+			Mnemonic:    o.keystoreMnemonic,
+			Passphrase:  o.keystorePassphrase,
+			OutputPath:  filepath.Join(o.generationPath, "keystores"),
+			MinIndex:    uint64(o.existingValidators),
+			MaxIndex:    uint64(o.existingValidators) + uint64(o.numberOfValidators),
+			NetworkName: o.genData.Network,
+			ForkVersion: configs.NetworksConfigs()[o.genData.Network].GenesisForkVersion,
+			// Constants
+			UseUniquePassphrase: true,
+			Insecure:            false,
+			AmountGwei:          uint64(eth2.Mainnet.MAX_EFFECTIVE_BALANCE),
+			AsJsonList:          true,
+		}); err != nil {
+			return err
+		}
+
 	case SourceTypeExisting:
 		if err := inputKeystorePath(p, o); err != nil {
 			return err
@@ -418,8 +466,8 @@ func generateKeystore(p prompts.Prompt, o *CliRefactorOptions, a actions.SedgeAc
 			return err
 		}
 		err := a.ImportSlashingInterchangeData(actions.SlashingImportOptions{
-			ValidatorClient: o.validatorClient,
-			Network:         o.network,
+			ValidatorClient: o.genData.ValidatorClient.Name,
+			Network:         o.genData.Network,
 			GenerationPath:  o.generationPath,
 			From:            o.slashingProtectionFrom,
 		})
@@ -442,7 +490,7 @@ func runPromptActions(p prompts.Prompt, o *CliRefactorOptions, actions ...prompt
 }
 
 func selectNetwork(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	o.network, err = p.Select("Select network", NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom)
+	o.genData.Network, err = p.Select("Select network", NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom)
 	return
 }
 
@@ -453,20 +501,41 @@ func selectNodeType(p prompts.Prompt, o *CliRefactorOptions) (err error) {
 
 func selectExecutionClient(p prompts.Prompt, o *CliRefactorOptions) (err error) {
 	// TODO: support randomize
-	o.executionClient, err = p.Select("Select execution client", ExecutionNethermind, ExecutionGeth, ExecutionBesu, ExecutionErigon)
-	return
+	selectedExecutionClient, err := p.Select("Select execution client", ExecutionNethermind, ExecutionGeth, ExecutionBesu, ExecutionErigon)
+	if err != nil {
+		return err
+	}
+	o.genData.ExecutionClient = &clients.Client{
+		Name: selectedExecutionClient,
+		Type: "execution",
+	}
+	return nil
 }
 
 func selectConsensusClient(p prompts.Prompt, o *CliRefactorOptions) (err error) {
 	// TODO: support randomize
-	o.consensusClient, err = p.Select("Select consensus client", ConsensusLighthouse, ConsensusLodestar, ConsensusPrysm, ConsensusTeku)
-	return
+	selectedConsensusClient, err := p.Select("Select consensus client", ConsensusLighthouse, ConsensusLodestar, ConsensusPrysm, ConsensusTeku)
+	if err != nil {
+		return err
+	}
+	o.genData.ConsensusClient = &clients.Client{
+		Name: selectedConsensusClient,
+		Type: "consensus",
+	}
+	return nil
 }
 
 func selectValidatorClient(p prompts.Prompt, o *CliRefactorOptions) (err error) {
 	// TODO: support randomize
-	o.validatorClient, err = p.Select("Select validator client", ValidatorLighthouse, ValidatorLodestar, ValidatorPrysm, ValidatorTeku)
-	return
+	selectedValidatorClient, err := p.Select("Select validator client", ValidatorLighthouse, ValidatorLodestar, ValidatorPrysm, ValidatorTeku)
+	if err != nil {
+		return err
+	}
+	o.genData.ValidatorClient = &clients.Client{
+		Name: selectedValidatorClient,
+		Type: "validator",
+	}
+	return nil
 }
 
 func selectJWTSource(p prompts.Prompt, o *CliRefactorOptions) (err error) {
@@ -500,7 +569,7 @@ func confirmWithValidator(p prompts.Prompt, o *CliRefactorOptions) (err error) {
 }
 
 func confirmExposeAllPorts(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	o.exposeAllPorts, err = p.Confirm("Do you want to expose all ports?")
+	o.genData.MapAllPorts, err = p.Confirm("Do you want to expose all ports?")
 	return
 }
 
@@ -515,22 +584,22 @@ func confirmInstallDependencies(p prompts.Prompt, o *CliRefactorOptions) (err er
 }
 
 func inputCustomNetworkConfig(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	o.customNetworkConfig, err = p.InputFilePath("Custom Network Config", true)
+	o.genData.CustomNetworkConfigPath, err = p.InputFilePath("Custom Network Config", true)
 	return
 }
 
 func inputCustomChainSpec(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	o.customChainSpec, err = p.InputFilePath("Custom ChainSpec", true)
+	o.genData.CustomChainSpecPath, err = p.InputFilePath("Custom ChainSpec", true)
 	return
 }
 
 func inputCustomGenesis(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	o.customGenesis, err = p.InputFilePath("Custom Genesis", true)
+	o.genData.CustomGenesisPath, err = p.InputFilePath("Custom Genesis", true)
 	return
 }
 
 func inputCustomTTD(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	o.customTTD, err = p.Input("Custom TTD", false)
+	o.genData.CustomTTD, err = p.Input("Custom TTD", false)
 	return
 }
 
@@ -540,47 +609,66 @@ func inputCustomDeployBlock(p prompts.Prompt, o *CliRefactorOptions) (err error)
 }
 
 func inputExecutionBootNodes(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	o.executionBootNodes, err = p.Input("Execution boot nodes", false)
-	return
+	bootNodesInput, err := p.Input("Execution boot nodes", false)
+	if err != nil {
+		return err
+	}
+	bootNodesList := strings.Split(bootNodesInput, ",")
+	o.genData.ECBootnodes = &bootNodesList
+	return nil
 }
 
 func inputConsensusBootNodes(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	o.consensusBootNodes, err = p.Input("Consensus boot nodes", false)
-	return
+	bootNodesInput, err := p.Input("Consensus boot nodes", false)
+	if err != nil {
+		return err
+	}
+	bootNodesList := strings.Split(bootNodesInput, ",")
+	o.genData.CCBootnodes = &bootNodesList
+	return nil
 }
 
-func inputMevBoostImage(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	// TODO add default value
-	o.mevBoostImage, err = p.Input("Mev-Boost image", false)
+func inputMevImage(p prompts.Prompt, o *CliRefactorOptions) (err error) {
+	// Default value is set in the template
+	o.genData.MevImage, err = p.Input("Mev-Boost image", false)
 	return
 }
 
 func inputMevBoostEndpoint(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	o.mevBoostEndpoint, err = p.Input("Mev-Boost endpoint", false)
+	o.genData.MevBoostEndpoint, err = p.Input("Mev-Boost endpoint", false)
 	return
 }
 
 func inputRelayURL(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	// TODO add default value
-	o.relayURL, err = p.Input("Relay URL", false)
+	// TODO add default relay URL value, it is not present in the generate command
+	o.genData.RelayURL, err = p.Input("Relay URL", false)
 	return
 }
 
 func inputGraffiti(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	o.graffiti, err = p.Input("Graffiti", false)
+	o.genData.Graffiti, err = p.Input("Graffiti", false)
 	return
 }
 
 func inputCheckpointSyncURL(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	// TODO: add default value
-	o.ckptSyncURL, err = p.Input("Checkpoint sync URL", false)
+	// Default value is set in the template
+	o.genData.CheckpointSyncUrl, err = p.Input("Checkpoint sync URL", false)
 	return
 }
 
 func inputFeeRecipient(p prompts.Prompt, o *CliRefactorOptions) (err error) {
 	// TODO: Is necessary to add a default value?
-	o.feeRecipient, err = p.Input("Fee recipient", true)
+	o.genData.FeeRecipient, err = p.Input("Fee recipient", true)
 	return
+}
+
+func inputValidatorGracePeriod(p prompts.Prompt, o *CliRefactorOptions) (err error) {
+	epochs, err := p.InputNumber("Validator grace period (epochs)")
+	if err != nil {
+		return err
+	}
+	o.genData.VLStartGracePeriod = uint(epochs * int64(configs.NetworkEpochTime(o.genData.Network)))
+	return nil
 }
 
 func inputGenerationPath(p prompts.Prompt, o *CliRefactorOptions) (err error) {
@@ -590,7 +678,7 @@ func inputGenerationPath(p prompts.Prompt, o *CliRefactorOptions) (err error) {
 }
 
 func inputJWTPath(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	o.jwtPath, err = p.Input("JWT path", true)
+	o.genData.JWTSecretPath, err = p.Input("JWT path", true)
 	return
 }
 
