@@ -186,7 +186,7 @@ func setupFullNode(p prompts.Prompt, o *CliCmdOptions, a actions.SedgeActions) e
 	return postGenerate(p, o, a)
 }
 
-func setupExecutionNode(p prompts.Prompt, o *CliCmdOptions, actions actions.SedgeActions) error {
+func setupExecutionNode(p prompts.Prompt, o *CliCmdOptions, a actions.SedgeActions) error {
 	if err := selectExecutionClient(p, o); err != nil {
 		return err
 	}
@@ -208,11 +208,16 @@ func setupExecutionNode(p prompts.Prompt, o *CliCmdOptions, actions actions.Sedg
 	if err := setupJWT(p, o, true); err != nil {
 		return err
 	}
-	log.Error("unimplemented generation")
-	return postGenerate(p, o, actions)
+	if err := a.Generate(actions.GenerateOptions{
+		GenerationData: &o.genData,
+		GenerationPath: o.generationPath,
+	}); err != nil {
+		return err
+	}
+	return postGenerate(p, o, a)
 }
 
-func setupConsensusNode(p prompts.Prompt, o *CliCmdOptions, actions actions.SedgeActions) error {
+func setupConsensusNode(p prompts.Prompt, o *CliCmdOptions, a actions.SedgeActions) error {
 	if err := selectConsensusClient(p, o); err != nil {
 		return err
 	}
@@ -245,11 +250,16 @@ func setupConsensusNode(p prompts.Prompt, o *CliCmdOptions, actions actions.Sedg
 	if err := setupJWT(p, o, true); err != nil {
 		return err
 	}
-	log.Error("unimplemented generation")
-	return postGenerate(p, o, actions)
+	if err := a.Generate(actions.GenerateOptions{
+		GenerationData: &o.genData,
+		GenerationPath: o.generationPath,
+	}); err != nil {
+		return err
+	}
+	return postGenerate(p, o, a)
 }
 
-func setupValidatorNode(p prompts.Prompt, o *CliCmdOptions, actions actions.SedgeActions) error {
+func setupValidatorNode(p prompts.Prompt, o *CliCmdOptions, a actions.SedgeActions) error {
 	if err := selectValidatorClient(p, o); err != nil {
 		return err
 	}
@@ -271,8 +281,13 @@ func setupValidatorNode(p prompts.Prompt, o *CliCmdOptions, actions actions.Sedg
 	); err != nil {
 		return err
 	}
-	log.Error("unimplemented generation")
-	return postGenerate(p, o, actions)
+	if err := a.Generate(actions.GenerateOptions{
+		GenerationData: &o.genData,
+		GenerationPath: o.generationPath,
+	}); err != nil {
+		return err
+	}
+	return postGenerate(p, o, a)
 }
 
 func setupJWT(p prompts.Prompt, o *CliCmdOptions, skip bool) error {
@@ -348,20 +363,26 @@ func postGenerate(p prompts.Prompt, o *CliCmdOptions, a actions.SedgeActions) er
 	case NodeTypeValidator:
 		services = []string{"validator"}
 	}
-	if err := a.SetupContainers(actions.SetupContainersOptions{
-		GenerationPath: o.generationPath,
-		Services:       services,
-	}); err != nil {
+	run, err := p.Confirm("Run services")
+	if err != nil {
 		return err
 	}
-	if err := a.RunContainers(actions.RunContainersOptions{
-		GenerationPath: o.generationPath,
-		Services:       services,
-	}); err != nil {
-		return err
+	if run {
+		if err := a.SetupContainers(actions.SetupContainersOptions{
+			GenerationPath: o.generationPath,
+			Services:       services,
+		}); err != nil {
+			return err
+		}
+		if err := a.RunContainers(actions.RunContainersOptions{
+			GenerationPath: o.generationPath,
+			Services:       services,
+		}); err != nil {
+			return err
+		}
+		// TODO: Final tips
+		log.Error("show final tips")
 	}
-	// TODO: Final tips
-	log.Error("show final tips")
 	return nil
 }
 
@@ -397,9 +418,6 @@ func generateKeystore(p prompts.Prompt, o *CliCmdOptions, a actions.SedgeActions
 			return err
 		}
 		switch o.keystorePassphraseSource {
-		case SourceTypeRandom:
-			// TODO generate random passphrase
-			log.Error("unimplemented random passphrase generation")
 		case SourceTypeExisting:
 			if err := inputKeystorePassphrasePath(p, o); err != nil {
 				return err
@@ -592,17 +610,17 @@ func confirmWithValidator(p prompts.Prompt, o *CliCmdOptions) (err error) {
 }
 
 func confirmExposeAllPorts(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	o.genData.MapAllPorts, err = p.Confirm("Do you want to expose all ports?")
+	o.genData.MapAllPorts, err = p.Confirm("Do you want to expose all ports")
 	return
 }
 
 func confirmImportSlashingProtection(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	o.importSlashingProtection, err = p.Confirm("Do you want to import slashing protection data?")
+	o.importSlashingProtection, err = p.Confirm("Do you want to import slashing protection data")
 	return
 }
 
 func confirmInstallDependencies(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	o.installDependencies, err = p.Confirm("Install dependencies?")
+	o.installDependencies, err = p.Confirm("Install dependencies")
 	return
 }
 
@@ -622,17 +640,17 @@ func inputCustomGenesis(p prompts.Prompt, o *CliCmdOptions) (err error) {
 }
 
 func inputCustomTTD(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	o.genData.CustomTTD, err = p.Input("Custom TTD", false)
+	o.genData.CustomTTD, err = p.Input("Custom TTD", false, "")
 	return
 }
 
 func inputCustomDeployBlock(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	o.customDeployBlock, err = p.Input("Custom deploy block", false)
+	o.customDeployBlock, err = p.Input("Custom deploy block", false, "")
 	return
 }
 
 func inputExecutionBootNodes(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	bootNodesInput, err := p.Input("Execution boot nodes", false)
+	bootNodesInput, err := p.Input("Execution boot nodes", false, "")
 	if err != nil {
 		return err
 	}
@@ -642,7 +660,7 @@ func inputExecutionBootNodes(p prompts.Prompt, o *CliCmdOptions) (err error) {
 }
 
 func inputConsensusBootNodes(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	bootNodesInput, err := p.Input("Consensus boot nodes", false)
+	bootNodesInput, err := p.Input("Consensus boot nodes", false, "")
 	if err != nil {
 		return err
 	}
@@ -653,40 +671,40 @@ func inputConsensusBootNodes(p prompts.Prompt, o *CliCmdOptions) (err error) {
 
 func inputMevImage(p prompts.Prompt, o *CliCmdOptions) (err error) {
 	// Default value is set in the template
-	o.genData.MevImage, err = p.Input("Mev-Boost image", false)
+	o.genData.MevImage, err = p.Input("Mev-Boost image", false, "flashbots/mev-boost:latest")
 	return
 }
 
 func inputMevBoostEndpoint(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	o.genData.MevBoostEndpoint, err = p.Input("Mev-Boost endpoint", false)
+	o.genData.MevBoostEndpoint, err = p.Input("Mev-Boost endpoint", false, "")
 	return
 }
 
 func inputRelayURL(p prompts.Prompt, o *CliCmdOptions) (err error) {
 	// TODO add default relay URL value, it is not present in the generate command
-	o.genData.RelayURL, err = p.Input("Relay URL", false)
+	o.genData.RelayURL, err = p.Input("Relay URL", false, "")
 	return
 }
 
 func inputGraffiti(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	o.genData.Graffiti, err = p.Input("Graffiti", false)
+	o.genData.Graffiti, err = p.Input("Graffiti", false, "")
 	return
 }
 
 func inputCheckpointSyncURL(p prompts.Prompt, o *CliCmdOptions) (err error) {
 	// Default value is set in the template
-	o.genData.CheckpointSyncUrl, err = p.Input("Checkpoint sync URL", false)
+	o.genData.CheckpointSyncUrl, err = p.Input("Checkpoint sync URL", false, "")
 	return
 }
 
 func inputFeeRecipient(p prompts.Prompt, o *CliCmdOptions) (err error) {
 	// TODO: Is necessary to add a default value?
-	o.genData.FeeRecipient, err = p.Input("Fee recipient", true)
+	o.genData.FeeRecipient, err = p.FeeRecipient()
 	return
 }
 
 func inputValidatorGracePeriod(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	epochs, err := p.InputNumber("Validator grace period (epochs)")
+	epochs, err := p.InputNumber("Validator grace period (epochs)", 1)
 	if err != nil {
 		return err
 	}
@@ -696,22 +714,25 @@ func inputValidatorGracePeriod(p prompts.Prompt, o *CliCmdOptions) (err error) {
 
 func inputGenerationPath(p prompts.Prompt, o *CliCmdOptions) (err error) {
 	// TODO: add default
-	o.generationPath, err = p.Input("Generation path", true)
+	o.generationPath, err = p.Input("Generation path", false, configs.DefaultAbsSedgeDataPath)
+	if o.generationPath == "" {
+		o.generationPath = configs.DefaultAbsSedgeDataPath
+	}
 	return
 }
 
 func inputJWTPath(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	o.genData.JWTSecretPath, err = p.Input("JWT path", true)
+	o.genData.JWTSecretPath, err = p.Input("JWT path", true, "")
 	return
 }
 
 func inputKeystoreMnemonicPath(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	o.keystoreMnemonic, err = p.Input("Mnemonic path", true)
+	o.keystoreMnemonic, err = p.Input("Mnemonic path", true, "")
 	return
 }
 
 func inputKeystorePassphrasePath(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	o.keystorePassphrasePath, err = p.Input("Passphrase path", true)
+	o.keystorePassphrasePath, err = p.Input("Passphrase path", true, "")
 	return
 }
 
@@ -721,22 +742,22 @@ func inputKeystorePassphrase(p prompts.Prompt, o *CliCmdOptions) (err error) {
 }
 
 func inputWithdrawalAddress(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	o.withdrawalAddress, err = p.Input("Withdrawal address", false)
+	o.withdrawalAddress, err = p.Input("Withdrawal address", false, "")
 	return
 }
 
 func inputNumberOfValidators(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	o.numberOfValidators, err = p.InputNumber("Number of validators")
+	o.numberOfValidators, err = p.InputNumber("Number of validators", 1)
 	return
 }
 
 func inputNumberOfExistingValidators(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	o.existingValidators, err = p.InputNumber("Existing validators")
+	o.existingValidators, err = p.InputNumber("Existing validators", 0)
 	return
 }
 
 func inputKeystorePath(p prompts.Prompt, o *CliCmdOptions) (err error) {
-	o.keystorePath, err = p.Input("Keystore path", true)
+	o.keystorePath, err = p.Input("Keystore path", true, "")
 	return
 }
 

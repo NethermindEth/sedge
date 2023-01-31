@@ -24,8 +24,8 @@ type Prompt interface {
 
 	Select(label string, options ...string) (string, error)
 	Confirm(label string) (bool, error)
-	Input(label string, required bool) (string, error)
+	Input(label string, required bool, defaultValue string) (string, error)
 	InputHide(label string) (string, error)
-	InputNumber(label string) (int64, error)
+	InputNumber(label string, defaultValue int64) (int64, error)
 	InputFilePath(label string, required bool) (string, error)
 }

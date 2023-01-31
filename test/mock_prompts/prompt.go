@@ -93,18 +93,18 @@ func (mr *MockPromptMockRecorder) FeeRecipient() *gomock.Call {
 }
 
 // Input mocks base method.
-func (m *MockPrompt) Input(label string, optional bool) (string, error) {
+func (m *MockPrompt) Input(label string, required bool, defaultValue string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Input", label, optional)
+	ret := m.ctrl.Call(m, "Input", label, required, defaultValue)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Input indicates an expected call of Input.
-func (mr *MockPromptMockRecorder) Input(label, optional interface{}) *gomock.Call {
+func (mr *MockPromptMockRecorder) Input(label, required, defaultValue interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Input", reflect.TypeOf((*MockPrompt)(nil).Input), label, optional)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Input", reflect.TypeOf((*MockPrompt)(nil).Input), label, required, defaultValue)
 }
 
 // InputFilePath mocks base method.
@@ -138,18 +138,18 @@ func (mr *MockPromptMockRecorder) InputHide(label interface{}) *gomock.Call {
 }
 
 // InputNumber mocks base method.
-func (m *MockPrompt) InputNumber(label string) (int64, error) {
+func (m *MockPrompt) InputNumber(label string, defaultValue int64) (int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InputNumber", label)
+	ret := m.ctrl.Call(m, "InputNumber", label, defaultValue)
 	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // InputNumber indicates an expected call of InputNumber.
-func (mr *MockPromptMockRecorder) InputNumber(label interface{}) *gomock.Call {
+func (mr *MockPromptMockRecorder) InputNumber(label, defaultValue interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InputNumber", reflect.TypeOf((*MockPrompt)(nil).InputNumber), label)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InputNumber", reflect.TypeOf((*MockPrompt)(nil).InputNumber), label, defaultValue)
 }
 
 // NumberVal mocks base method.

@@ -9,7 +9,10 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-func (p *promptCli) Input(label string, required bool) (string, error) {
+func (p *promptCli) Input(label string, required bool, defaultValue string) (string, error) {
+	if defaultValue != "" {
+		label = fmt.Sprintf("%s (default: %s)", label, defaultValue)
+	}
 	prompt := promptui.Prompt{
 		Label: label,
 		Validate: func(s string) error {
@@ -30,13 +33,15 @@ func (p *promptCli) InputHide(label string) (string, error) {
 	return prompt.Run()
 }
 
-func (p *promptCli) InputNumber(label string) (int64, error) {
+func (p *promptCli) InputNumber(label string, defaultValue int64) (int64, error) {
+	label = fmt.Sprintf("%s (default: %d)", label, defaultValue)
 	prompt := promptui.Prompt{
 		Label: label,
 		Validate: func(s string) error {
 			_, err := strconv.ParseInt(s, 10, 64)
 			return err
 		},
+		Default: fmt.Sprintf("%d", defaultValue),
 	}
 	input, err := prompt.Run()
 	if err != nil {
