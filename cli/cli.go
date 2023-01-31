@@ -66,7 +66,21 @@ type CliCmdOptions struct {
 func CliCmd(p prompts.Prompt, actions actions.SedgeActions) *cobra.Command {
 	o := new(CliCmdOptions)
 	cmd := &cobra.Command{
-		Use: "cli",
+		Use:   "cli",
+		Short: "generate a node setup interactively",
+		Long: `
+This command will guide you through the process of setting up one of these node types:
+
+- Full Node (execution + consensus + validator)
+- Full Node without Validator (execution + consensus)
+- Execution Node
+- Consensus Node
+- Validator Node
+
+Follow the prompts to select the options you want for your node. At the end of the process, you will
+be asked to run the generated setup or not. If you chose to run the setup, it will be executed for you
+using docker compose command behind the scenes.
+`,
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := selectNetwork(p, o); err != nil {
 				log.Fatal(err)
