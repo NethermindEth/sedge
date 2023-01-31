@@ -501,7 +501,12 @@ func selectNodeType(p prompts.Prompt, o *CliRefactorOptions) (err error) {
 
 func selectExecutionClient(p prompts.Prompt, o *CliRefactorOptions) (err error) {
 	// TODO: support randomize
-	selectedExecutionClient, err := p.Select("Select execution client", ExecutionNethermind, ExecutionGeth, ExecutionBesu, ExecutionErigon)
+	c := clients.ClientInfo{Network: o.genData.Network}
+	supportedClients, err := c.SupportedClients(execution)
+	if err != nil {
+		return err
+	}
+	selectedExecutionClient, err := p.Select("Select execution client", supportedClients...)
 	if err != nil {
 		return err
 	}
@@ -514,7 +519,12 @@ func selectExecutionClient(p prompts.Prompt, o *CliRefactorOptions) (err error) 
 
 func selectConsensusClient(p prompts.Prompt, o *CliRefactorOptions) (err error) {
 	// TODO: support randomize
-	selectedConsensusClient, err := p.Select("Select consensus client", ConsensusLighthouse, ConsensusLodestar, ConsensusPrysm, ConsensusTeku)
+	c := clients.ClientInfo{Network: o.genData.Network}
+	supportedClients, err := c.SupportedClients(execution)
+	if err != nil {
+		return err
+	}
+	selectedConsensusClient, err := p.Select("Select consensus client", supportedClients...)
 	if err != nil {
 		return err
 	}
@@ -527,7 +537,12 @@ func selectConsensusClient(p prompts.Prompt, o *CliRefactorOptions) (err error) 
 
 func selectValidatorClient(p prompts.Prompt, o *CliRefactorOptions) (err error) {
 	// TODO: support randomize
-	selectedValidatorClient, err := p.Select("Select validator client", ValidatorLighthouse, ValidatorLodestar, ValidatorPrysm, ValidatorTeku)
+	c := clients.ClientInfo{Network: o.genData.Network}
+	supportedClients, err := c.SupportedClients(execution)
+	if err != nil {
+		return err
+	}
+	selectedValidatorClient, err := p.Select("Select validator client", supportedClients...)
 	if err != nil {
 		return err
 	}
