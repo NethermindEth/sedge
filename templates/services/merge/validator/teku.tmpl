@@ -1,6 +1,7 @@
 {{/* teku.tmpl */}}
 {{ define "validator" }}
-  validator:
+  validator:{{if and (ge .UID 0) (ge .GID 0)}}
+    user: "{{.UID}}:{{.GID}}"{{end}}
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
     restart: unless-stopped
