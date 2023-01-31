@@ -47,8 +47,7 @@ func main() {
 	sedgeActions := actions.NewSedgeActions(dockerClient, serviceManager, cmdRunner)
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
-		cli.CliCmd(cmdRunner, prompt, serviceManager, sedgeActions),
-		cli.CliRefactorCmd(prompt, sedgeActions),
+		cli.CliCmd(prompt, sedgeActions),
 		cli.KeysCmd(cmdRunner, prompt),
 		cli.DownCmd(cmdRunner),
 		cli.ClientsCmd(),
