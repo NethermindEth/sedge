@@ -20,6 +20,9 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/NethermindEth/sedge/internal/crypto"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
@@ -37,6 +40,20 @@ var (
 	network        string
 	logging        string
 )
+
+const (
+	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mevboost"
+)
+
+type CustomFlags struct {
+	customTTD           string
+	customChainSpec     string
+	customNetworkConfig string
+	customGenesis       string
+	customDeployBlock   string
+	customEnodes        *[]string
+	customEnrs          *[]string
+}
 
 // GenCmdFlags is a struct that holds the flags of the generate command
 type GenCmdFlags struct {
@@ -163,7 +180,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	}
 
 	// Get custom networks configs
-	customNetworkConfigsData, err := LoadCustomNetworksConfig(&flags.CustomFlags, network, generationPath)
+	customNetworkConfigsData, err := loadCustomNetworksConfig(&flags.CustomFlags, network, generationPath)
 	if err != nil {
 		return err
 	}
@@ -231,6 +248,79 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	return nil
 }
 
+func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
+	var executionClient, consensusClient, validatorClient *clients.Client
+	var err error
+
+	// execution client
+	if utils.Contains(services, execution) {
+		executionParts := strings.Split(flags.executionName, ":")
+		executionClient, err = clients.RandomChoice(allClients[execution])
+		if err != nil {
+			return nil, err
+		}
+		if flags.executionName != "" {
+			executionClient.Name = executionParts[0]
+			if len(executionParts) > 1 {
+				log.Warn(configs.CustomExecutionImagesWarning)
+				executionClient.Image = strings.Join(executionParts[1:], ":")
+			}
+		}
+		if err = clients.ValidateClient(executionClient, execution); err != nil {
+			return nil, err
+		}
+	} else {
+		executionClient = nil
+	}
+	// consensus client
+	if utils.Contains(services, consensus) {
+		consensusParts := strings.Split(flags.consensusName, ":")
+		consensusClient, err = clients.RandomChoice(allClients[consensus])
+		if err != nil {
+			return nil, err
+		}
+		if flags.consensusName != "" {
+			consensusClient.Name = consensusParts[0]
+			if len(consensusParts) > 1 {
+				log.Warn(configs.CustomConsensusImagesWarning)
+				consensusClient.Image = strings.Join(consensusParts[1:], ":")
+			}
+		}
+		if err = clients.ValidateClient(consensusClient, consensus); err != nil {
+			return nil, err
+		}
+	} else {
+		consensusClient = nil
+	}
+	// validator client
+	if utils.Contains(services, validator) && !flags.noValidator {
+		validatorParts := strings.Split(flags.validatorName, ":")
+		validatorClient, err = clients.RandomChoice(allClients[validator])
+		if err != nil {
+			return nil, err
+		}
+		if flags.validatorName != "" {
+			validatorClient.Name = validatorParts[0]
+			if len(validatorParts) > 1 {
+				log.Warn(configs.CustomValidatorImagesWarning)
+				validatorClient.Image = strings.Join(validatorParts[1:], ":")
+
+			}
+		}
+		if err = clients.ValidateClient(validatorClient, validator); err != nil {
+			return nil, err
+		}
+	} else {
+		validatorClient = nil
+	}
+
+	return &clients.Clients{
+		Execution: executionClient,
+		Consensus: consensusClient,
+		Validator: validatorClient,
+	}, err
+}
+
 func onlyClients(services []string) []string {
 	newServices := make([]string, 0)
 	for _, service := range services {
@@ -265,4 +355,129 @@ func generateJWTSecret(jwtPath string) (string, error) {
 		}
 	}
 	return jwtPath, nil
+}
+
+func handleJWTSecret(generationPath string) (string, error) {
+	log.Info(configs.GeneratingJWTSecret)
+
+	jwtscret, err := crypto.GenerateJWTSecret()
+	if err != nil {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	jwtPath, err := filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+	if err != nil {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(jwtPath), 0o755); err != nil {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	err = os.WriteFile(jwtPath, []byte(jwtscret), 0o755)
+	if err != nil {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	log.Info(configs.JWTSecretGenerated)
+	return jwtPath, nil
+}
+
+type customNetworkConfigsData struct {
+	ChainSpecPath          string
+	NetworkConfigPath      string
+	NetworkGenesisPath     string
+	NetworkDeployBlockPath string
+}
+
+func loadCustomNetworksConfig(flags *CustomFlags, network, generationPath string) (customNetworkConfigsData, error) {
+	var customNetworkConfigsData customNetworkConfigsData
+	var chainSpecSrc, networkConfigSrc, genesisSrc, deployBlock string
+
+	networkData, ok := configs.NetworksConfigs()[network]
+	if !ok {
+		return customNetworkConfigsData, fmt.Errorf(configs.UnknownNetworkError, network)
+	}
+
+	eval := func(value, def string) string {
+		if value != "" {
+			return value
+		}
+		return def
+	}
+	chainSpecSrc = eval(flags.customChainSpec, networkData.DefaultCustomChainSpecSrc)
+	networkConfigSrc = eval(flags.customNetworkConfig, networkData.DefaultCustomConfigSrc)
+	genesisSrc = eval(flags.customGenesis, networkData.DefaultCustomGenesisSrc)
+	deployBlock = eval(flags.customDeployBlock, networkData.DefaultCustomDeployBlock)
+
+	// Check if any custom config is needed
+	if chainSpecSrc == "" && networkConfigSrc == "" && genesisSrc == "" && deployBlock == "" {
+		return customNetworkConfigsData, nil
+	}
+
+	destFolder := filepath.Join(generationPath, configs.CustomNetworkConfigsFolder)
+	if _, err := os.Stat(destFolder); err != nil {
+		if os.IsNotExist(err) {
+			err = os.Mkdir(destFolder, os.ModePerm)
+			if err != nil {
+				return customNetworkConfigsData, err
+			}
+		} else {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if chainSpecSrc != "" {
+		customNetworkConfigsData.ChainSpecPath = filepath.Join(destFolder, configs.ExecutionNetworkConfigFileName)
+		log.Info(configs.GettingCustomChainSpec)
+		err := utils.DownloadOrCopy(chainSpecSrc, customNetworkConfigsData.ChainSpecPath, true)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+		customNetworkConfigsData.ChainSpecPath, err = filepath.Abs(customNetworkConfigsData.ChainSpecPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if networkConfigSrc != "" {
+		customNetworkConfigsData.NetworkConfigPath = filepath.Join(destFolder, configs.ConsensusNetworkConfigFileName)
+		log.Info(configs.GettingCustomNetworkConfig)
+		err := utils.DownloadOrCopy(networkConfigSrc, customNetworkConfigsData.NetworkConfigPath, true)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+		customNetworkConfigsData.NetworkConfigPath, err = filepath.Abs(customNetworkConfigsData.NetworkConfigPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if genesisSrc != "" {
+		customNetworkConfigsData.NetworkGenesisPath = filepath.Join(destFolder, configs.ConsensusNetworkGenesisFileName)
+		log.Info(configs.GettingCustomGenesis)
+		err := utils.DownloadOrCopy(genesisSrc, customNetworkConfigsData.NetworkGenesisPath, true)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+		customNetworkConfigsData.NetworkGenesisPath, err = filepath.Abs(customNetworkConfigsData.NetworkGenesisPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if deployBlock != "" {
+		customNetworkConfigsData.NetworkDeployBlockPath = filepath.Join(destFolder, configs.ConsensusNetworkDeployBlockFileName)
+		log.Info(configs.WritingCustomDeployBlock)
+		err := os.WriteFile(customNetworkConfigsData.NetworkDeployBlockPath, []byte(deployBlock), os.ModePerm)
+		if err != nil {
+			return customNetworkConfigsData, fmt.Errorf(configs.ErrorWritingDeployBlockFile, customNetworkConfigsData.NetworkDeployBlockPath, err)
+		}
+		customNetworkConfigsData.NetworkDeployBlockPath, err = filepath.Abs(customNetworkConfigsData.NetworkDeployBlockPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	return customNetworkConfigsData, nil
 }

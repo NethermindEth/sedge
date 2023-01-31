@@ -1,456 +1,746 @@
-/*
-Copyright 2022 Nethermind
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-	http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cli
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
+	eth2 "github.com/protolambda/zrnt/eth2/configs"
+
+	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/pkg/generate"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
-	"github.com/NethermindEth/sedge/internal/pkg/clients"
-	"github.com/NethermindEth/sedge/internal/pkg/commands"
-	"github.com/NethermindEth/sedge/internal/pkg/generate"
-	"github.com/NethermindEth/sedge/internal/pkg/services"
-	"github.com/NethermindEth/sedge/internal/ui"
+	"github.com/NethermindEth/sedge/internal/pkg/keystores"
 	"github.com/NethermindEth/sedge/internal/utils"
-	dockerct "github.com/docker/docker/api/types/container"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 const (
-	slashingImportFile                        = "slashing-import.json"
-	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mevboost"
+	NetworkMainnet = "mainnet"
+	NetworkGoerli  = "goerli"
+	NetworkSepolia = "sepolia"
+	NetworkGnosis  = "gnosis"
+	NetworkChiado  = "chiado"
+	NetworkCustom  = "custom"
+
+	NodeTypeFullNode  = "full-node"
+	NodeTypeExecution = "execution"
+	NodeTypeConsensus = "consensus"
+	NodeTypeValidator = "validator"
+
+	Randomize = "randomize"
+
+	SourceTypeExisting = "existing"
+	SourceTypeCreate   = "create"
+	SourceTypeSkip     = "skip"
+	SourceTypeRandom   = "random"
 )
 
-type CliCmdFlags struct {
-	CustomFlags
-	executionName      string
-	consensusName      string
-	validatorName      string
-	generationPath     string
-	checkpointSyncUrl  string
-	network            string
-	feeRecipient       string
-	noMev              bool
-	mevImage           string
-	noValidator        bool
-	jwtPath            string
-	graffiti           string
-	install            bool
-	run                bool
-	yes                bool
-	mapAllPorts        bool
-	services           *[]string
-	fallbackEL         *[]string
-	elExtraFlags       *[]string
-	clExtraFlags       *[]string
-	vlExtraFlags       *[]string
-	logging            string
-	slashingProtection string
+type CliCmdOptions struct {
+	genData                  generate.GenData
+	generationPath           string
+	nodeType                 string
+	withValidator            bool
+	importSlashingProtection bool
+	slashingProtectionFrom   string
+	customDeployBlock        string
+	relayURL                 string
+	jwtSourceType            string
+	keystoreSourceType       string
+	keystorePath             string
+	keystoreMnemonicSource   string
+	keystoreMnemonic         string
+	keystorePassphraseSource string
+	keystorePassphrasePath   string
+	keystorePassphrase       string
+	withdrawalAddress        string
+	numberOfValidators       int64
+	existingValidators       int64
+	installDependencies      bool
 }
 
-type clientImages struct {
-	execution string
-	consensus string
-	validator string
-}
-
-func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceManager services.ServiceManager, sedgeActions actions.SedgeActions) *cobra.Command {
-	var (
-		flags  CliCmdFlags
-		images clientImages
-	)
-
+func CliCmd(p prompts.Prompt, actions actions.SedgeActions) *cobra.Command {
+	o := new(CliCmdOptions)
 	cmd := &cobra.Command{
-		Use:   "cli [flags]",
-		Short: "Quick start sedge",
-		Long: `Run the setup tool on-premise in a quick way. Provide only the command line
-	options and the tool will do all the work.
-	
-	First it will check if dependencies such as docker are installed on your machine
-	and provide instructions for installing them if they are not installed.
-	
-	Second, it will generate docker-compose scripts to run the full setup according to your selection.
-	
-	Finally, it will run the generated docker-compose script. Only execution and consensus clients will be executed by default.`,
-		Args: cobra.NoArgs,
-		PreRunE: func(cmd *cobra.Command, args []string) error {
-			// notest
-			clientImages, err := preRunCliCmd(cmd, args, &flags)
-			if err != nil {
-				return err
-			}
-			images = *clientImages
-			return nil
-		},
+		Use: "cli",
 		Run: func(cmd *cobra.Command, args []string) {
-			// notest
-			if errs := runCliCmd(cmd, args, &flags, &images, cmdRunner, prompt, serviceManager, sedgeActions); len(errs) > 0 {
-				for _, err := range errs {
-					log.Error(err)
+			if err := selectNetwork(p, o); err != nil {
+				log.Fatal(err)
+			}
+			if err := selectNodeType(p, o); err != nil {
+				log.Fatal(err)
+			}
+			switch o.nodeType {
+			case NodeTypeFullNode:
+				o.genData.Services = append(o.genData.Services, "execution", "consensus")
+				if err := setupFullNode(p, o, actions); err != nil {
+					log.Fatal(err)
 				}
-				os.Exit(1)
+			case NodeTypeExecution:
+				o.genData.Services = append(o.genData.Services, "execution")
+				if err := setupExecutionNode(p, o, actions); err != nil {
+					log.Fatal(err)
+				}
+			case NodeTypeConsensus:
+				o.genData.Services = append(o.genData.Services, "consensus")
+				if err := setupConsensusNode(p, o, actions); err != nil {
+					log.Fatal(err)
+				}
+			case NodeTypeValidator:
+				o.genData.Services = append(o.genData.Services, "validator")
+				if err := setupValidatorNode(p, o, actions); err != nil {
+					log.Fatal(err)
+				}
 			}
 		},
 	}
-	// Bind flags
-	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
-	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
-	cmd.Flags().StringVarP(&flags.validatorName, "validator", "v", "", "Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
-	cmd.Flags().StringVarP(&flags.generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data")
-	cmd.Flags().StringVar(&flags.checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity")
-	cmd.Flags().StringVarP(&flags.network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, etc.")
-	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
-	cmd.Flags().BoolVar(&flags.noMev, "no-mev-boost", false, "Not use mev-boost if supported")
-	cmd.Flags().StringVarP(&flags.mevImage, "mev-boost-image", "m", "", "Custom docker image to use for Mev Boost. Example: 'sedge cli --mev-boost-image flashbots/mev-boost:latest-portable'")
-	cmd.Flags().BoolVar(&flags.noValidator, "no-validator", false, "Exclude the validator from the full node setup. Designed for execution and consensus nodes setup without a validator node. Exclude also the validator from other flags. If set, mev-boost will not be used.")
-	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
-	cmd.Flags().StringVar(&flags.graffiti, "graffiti", "", "Graffiti to be used by the validator")
-	cmd.Flags().BoolVarP(&flags.install, "install", "i", false, "Install dependencies if not installed without asking")
-	cmd.Flags().BoolVarP(&flags.run, "run", "r", false, "Run the generated docker-compose scripts without asking")
-	cmd.Flags().BoolVarP(&flags.yes, "yes", "y", false, "Shortcut for 'sedge cli -r -i --run'. Run without prompts")
-	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
-	flags.services = cmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all, none. The 'all' and 'none' option must be used alone. Example: 'sedge cli -r --run-clients=consensus,validator'")
-	flags.fallbackEL = cmd.Flags().StringSlice("fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge cli -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
-	flags.elExtraFlags = cmd.Flags().StringArray("el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge cli --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	flags.clExtraFlags = cmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge cli --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	flags.vlExtraFlags = cmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	cmd.Flags().StringVar(&flags.logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
-	cmd.Flags().StringVar(&flags.customTTD, "custom-ttd", "", "Custom Terminal Total Difficulty to use for the execution client")
-	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
-	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
-	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
-	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
-	flags.customEnodes = cmd.Flags().StringSlice("execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
-	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
-	cmd.Flags().StringVar(&flags.slashingProtection, "slashing-protection", "", "Path to the file with slashing protection interchange data (EIP-3076)")
-	cmd.Flags().SortFlags = false
 	return cmd
 }
 
-func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clientImages, error) {
-	// Quick run
-	if flags.yes {
-		// TODO: avoid flag edition
-		flags.install, flags.run = true, true
+func setupFullNode(p prompts.Prompt, o *CliCmdOptions, a actions.SedgeActions) error {
+	if err := confirmWithValidator(p, o); err != nil {
+		return err
 	}
-
-	// Validate run-clients flag
-	if utils.Contains(*flags.services, "all") {
-		if len(*flags.services) == 1 {
-			// all used correctly
-			// TODO: avoid edit flags
-			flags.services = &[]string{execution, consensus, validator}
-		} else {
-			// Ambiguous value
-			return nil, fmt.Errorf(configs.RunClientsFlagAmbiguousError, *flags.services)
-		}
-	} else if utils.Contains(*flags.services, "none") {
-		if len(*flags.services) == 1 {
-			// all used correctly
-			// TODO: avoid edit flags
-			flags.services = &[]string{}
-		} else {
-			// Ambiguous value
-			return nil, fmt.Errorf(configs.RunClientsFlagAmbiguousError, *flags.services)
-		}
-	} else if !utils.ContainsOnly(*flags.services, []string{execution, consensus, validator}) {
-		return nil, fmt.Errorf(configs.RunClientsError, strings.Join(*flags.services, ","), strings.Join([]string{execution, consensus, validator}, ","))
-	}
-	// Exclude validator from run-clients if no-validator flag is set
-	if flags.noValidator && utils.Contains(*flags.services, validator) {
-		*flags.services = utils.Filter(*flags.services, func(s string) bool {
-			return s != validator
-		})
-	}
-
-	// Validate network
-	networks, err := utils.SupportedNetworks()
-	if err != nil {
-		return nil, fmt.Errorf(configs.NetworkValidationFailedError, err)
-	}
-	if !utils.Contains(networks, flags.network) {
-		return nil, fmt.Errorf(configs.UnknownNetworkError, flags.network)
-	}
-	if flags.network == configs.CustomNetwork.Name {
-		if flags.customChainSpec == "" || flags.customNetworkConfig == "" || flags.customGenesis == "" || flags.customTTD == "" || flags.customDeployBlock == "" {
-			return nil, fmt.Errorf(configs.MissingCustomConfigs)
+	if o.genData.Network == NetworkCustom {
+		if err := runPromptActions(p, o,
+			inputCustomNetworkConfig,
+			inputCustomChainSpec,
+			inputCustomGenesis,
+			inputCustomTTD,
+			inputCustomDeployBlock,
+			inputExecutionBootNodes,
+			inputConsensusBootNodes,
+		); err != nil {
+			return err
 		}
 	}
-
-	// Validate custom ttd
-	if flags.customTTD != "" &&
-		!regexp.MustCompile(`^[1-9]\d*$`).Match([]byte(strings.TrimSpace(flags.customTTD))) {
-		return nil, fmt.Errorf(configs.InvalidTTD)
-	}
-
-	// Validate custom deploy block
-	if flags.customDeployBlock != "" &&
-		!regexp.MustCompile(`^[0-9]\d*$`).Match([]byte(strings.TrimSpace(flags.customDeployBlock))) {
-		return nil, fmt.Errorf(configs.InvalidDeployBLock)
-	}
-
-	// Validate fee recipient
-	if flags.feeRecipient != "" && !utils.IsAddress(flags.feeRecipient) {
-		return nil, fmt.Errorf(configs.InvalidFeeRecipientError)
-	}
-
-	var clientImages clientImages
-
-	// Prepare custom images
-	if flags.executionName != "" {
-		executionParts := strings.Split(flags.executionName, ":")
-		// TODO: avoid edit flag
-		flags.executionName = executionParts[0]
-		clientImages.execution = strings.Join(executionParts[1:], ":")
-	}
-	if flags.consensusName != "" {
-		consensusParts := strings.Split(flags.consensusName, ":")
-		// TODO: avoid edit flag
-		flags.consensusName = consensusParts[0]
-		clientImages.consensus = strings.Join(consensusParts[1:], ":")
-	}
-	if flags.validatorName != "" {
-		validatorParts := strings.Split(flags.validatorName, ":")
-		// TODO: avoid edit flag
-		flags.validatorName = validatorParts[0]
-		clientImages.validator = strings.Join(validatorParts[1:], ":")
-	}
-
-	if err := configs.ValidateLoggingFlag(flags.logging); err != nil {
-		return nil, err
-	}
-
-	// validate custom network flags
-	urlOrPaths := map[string]string{
-		"ChainSpec":      flags.customChainSpec,
-		"Network config": flags.customNetworkConfig,
-		"Genesis":        flags.customGenesis,
-	}
-	for kind, value := range urlOrPaths {
-		if value == "" {
-			continue
+	if o.withValidator {
+		o.genData.Services = append(o.genData.Services, "validator")
+		if configs.SupportsMEVBoost(o.genData.Network) {
+			if err := runPromptActions(p, o,
+				inputMevImage,
+				inputRelayURL,
+			); err != nil {
+				return err
+			}
 		}
-		if err := utils.CheckUrlOrPath(value); err != nil {
-			return nil, fmt.Errorf("invalid %s: %w", kind, err)
+		if err := runPromptActions(p, o,
+			selectExecutionClient,
+			selectConsensusClient,
+			selectValidatorClient,
+			inputValidatorGracePeriod,
+			inputGraffiti,
+			inputCheckpointSyncURL,
+			inputFeeRecipient,
+		); err != nil {
+			return err
+		}
+	} else {
+		if err := runPromptActions(p, o,
+			selectExecutionClient,
+			selectConsensusClient,
+			inputCheckpointSyncURL,
+			inputFeeRecipient,
+		); err != nil {
+			return err
 		}
 	}
-
-	// ensure generation path exists
-	_, err = os.Stat(flags.generationPath)
-	if os.IsNotExist(err) {
-		err = os.MkdirAll(flags.generationPath, os.ModePerm)
+	if err := runPromptActions(p, o,
+		confirmExposeAllPorts,
+		inputGenerationPath,
+	); err != nil {
+		return err
 	}
-	if err != nil {
-		return nil, fmt.Errorf(configs.InvalidGenerationPath, flags.generationPath, err)
+	if err := setupJWT(p, o, false); err != nil {
+		return err
 	}
+	// Set constant values
+	o.genData.Mev = true
+	// Call generate action
+	if err := a.Generate(actions.GenerateOptions{
+		GenerationData: &o.genData,
+		GenerationPath: o.generationPath,
+	}); err != nil {
+		return err
+	}
+	_ = generate.GenData{
+		FallbackELUrls: nil, // TODO add to consensus client setup
 
-	return &clientImages, nil
+		ElExtraFlags: nil, // TODO add to prompts
+		ClExtraFlags: nil, // TODO add to prompts
+		VlExtraFlags: nil, // TODO add to prompts
+
+		MevBoostOnValidator: false, // TODO add to prompts
+
+		ExecutionApiUrl:  "", // TODO what is this?
+		ExecutionAuthUrl: "", // TODO what is this?
+		ConsensusApiUrl:  "", // TODO what is this?
+
+		CustomDeployBlock:     "", // TODO ask to Carlos
+		CustomDeployBlockPath: "", // TODO ask to carlos
+	}
+	return postGenerate(p, o, a)
 }
 
-func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImages *clientImages, cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceManager services.ServiceManager, sedgeActions actions.SedgeActions) []error {
-	// Warnings
-	// Warn if custom images are used
-	if clientImages.execution != "" {
-		log.Warn(configs.CustomExecutionImagesWarning)
+func setupExecutionNode(p prompts.Prompt, o *CliCmdOptions, actions actions.SedgeActions) error {
+	if err := selectExecutionClient(p, o); err != nil {
+		return err
 	}
-	if clientImages.consensus != "" {
-		log.Warn(configs.CustomConsensusImagesWarning)
+	if o.genData.Network == NetworkCustom {
+		if err := runPromptActions(p, o,
+			inputCustomChainSpec,
+			inputCustomTTD,
+			inputExecutionBootNodes,
+		); err != nil {
+			return err
+		}
 	}
-	if clientImages.validator != "" {
-		log.Warn(configs.CustomValidatorImagesWarning)
+	if err := runPromptActions(p, o,
+		confirmExposeAllPorts,
+		inputGenerationPath,
+	); err != nil {
+		return err
 	}
-	// Warn if exposed ports are used
-	if flags.mapAllPorts {
-		log.Warn(configs.MapAllPortsWarning)
+	if err := setupJWT(p, o, true); err != nil {
+		return err
 	}
+	log.Error("unimplemented generation")
+	return postGenerate(p, o, actions)
+}
 
-	// Warn if checkpoint url used
-	if flags.checkpointSyncUrl != "" {
-		log.Warnf(configs.CheckpointUrlUsedWarning, flags.checkpointSyncUrl)
+func setupConsensusNode(p prompts.Prompt, o *CliCmdOptions, actions actions.SedgeActions) error {
+	if err := selectConsensusClient(p, o); err != nil {
+		return err
 	}
-
-	// Get all clients: supported + configured
-	c := clients.ClientInfo{Network: flags.network}
-	clientsMap, clientsErrors := c.Clients([]string{execution, consensus, validator})
-	if len(clientsErrors) > 0 {
-		return clientsErrors
+	if o.genData.Network == NetworkCustom {
+		if err := runPromptActions(p, o,
+			inputCustomNetworkConfig,
+			inputCustomGenesis,
+			inputCustomDeployBlock,
+			inputConsensusBootNodes,
+		); err != nil {
+			return err
+		}
+	} else {
+		if err := inputCheckpointSyncURL(p, o); err != nil {
+			return err
+		}
+		if configs.SupportsMEVBoost(o.genData.Network) {
+			if err := inputMevBoostEndpoint(p, o); err != nil {
+				return err
+			}
+		}
 	}
-
-	// Handle selection and validation of clients
-	combinedClients, err := validateClients(clientsMap, cmd.OutOrStdout(), flags)
-	if err != nil {
-		return []error{err}
+	if err := runPromptActions(p, o,
+		inputFeeRecipient,
+		confirmExposeAllPorts,
+		inputGenerationPath,
+	); err != nil {
+		return err
 	}
-
-	if err := sedgeActions.InstallDependencies(actions.InstallDependenciesOptions{
-		Dependencies: configs.GetDependencies(),
-		Install:      flags.install,
-	}); err != nil {
-		return []error{err}
+	if err := setupJWT(p, o, true); err != nil {
+		return err
 	}
+	log.Error("unimplemented generation")
+	return postGenerate(p, o, actions)
+}
 
-	// Generate JWT secret if necessary
-	jwtPath := flags.jwtPath
-	jwtPath, err = sedgeActions.CreateJWTSecrets(actions.CreateJWTSecretOptions{
-		JWTPath:        jwtPath,
-		Network:        flags.network,
-		GenerationPath: flags.generationPath,
-	})
-	if err != nil {
-		return []error{err}
+func setupValidatorNode(p prompts.Prompt, o *CliCmdOptions, actions actions.SedgeActions) error {
+	if err := selectValidatorClient(p, o); err != nil {
+		return err
 	}
+	if o.genData.Network == NetworkCustom {
+		if err := runPromptActions(p, o,
+			inputCustomNetworkConfig,
+			inputCustomGenesis,
+			inputCustomDeployBlock,
+			inputConsensusBootNodes,
+		); err != nil {
+			return err
+		}
+	}
+	if err := runPromptActions(p, o,
+		inputGraffiti,
+		inputValidatorGracePeriod,
+		inputFeeRecipient,
+		inputGenerationPath,
+	); err != nil {
+		return err
+	}
+	log.Error("unimplemented generation")
+	return postGenerate(p, o, actions)
+}
 
-	// Get fee recipient
-	if !flags.yes && flags.feeRecipient == "" {
-		feeRecipient, err := prompt.FeeRecipient()
+func setupJWT(p prompts.Prompt, o *CliCmdOptions, skip bool) error {
+	if skip {
+		if err := selectJWTSourceOrSkip(p, o); err != nil {
+			return err
+		}
+	} else {
+		if err := selectJWTSource(p, o); err != nil {
+			return err
+		}
+	}
+	switch o.jwtSourceType {
+	case SourceTypeCreate:
+		jwtPath, err := generateJWTSecret("")
+		o.genData.JWTSecretPath = jwtPath
 		if err != nil {
-			return []error{err}
+			return err
 		}
-		// TODO: avoid flag edition
-		flags.feeRecipient = feeRecipient
-	}
-
-	// Get custom networks configs
-	customNetworkConfigsData, err := LoadCustomNetworksConfig(&flags.CustomFlags, flags.network, flags.generationPath)
-	if err != nil {
-		return []error{err}
-	}
-
-	if combinedClients.Execution != nil {
-		combinedClients.Execution.Image = clientImages.execution
-	}
-	if combinedClients.Consensus != nil {
-		combinedClients.Consensus.Image = clientImages.consensus
-	}
-
-	if flags.noValidator {
-		combinedClients.Validator = nil
-	} else {
-		if combinedClients.Validator != nil {
-			combinedClients.Validator.Image = clientImages.validator
+	case SourceTypeExisting:
+		if err := inputJWTPath(p, o); err != nil {
+			return err
 		}
+	case SourceTypeSkip:
+		break
+	default:
+		return fmt.Errorf("unknown JWT source type %s", o.jwtSourceType)
 	}
-
-	vlStartGracePeriod := configs.NetworkEpochTime(flags.network)
-
-	// Generate docker-compose scripts
-	gd := &generate.GenData{
-		Services:                *flags.services,
-		ExecutionClient:         combinedClients.Execution,
-		ConsensusClient:         combinedClients.Consensus,
-		ValidatorClient:         combinedClients.Validator,
-		Network:                 flags.network,
-		CheckpointSyncUrl:       flags.checkpointSyncUrl,
-		FeeRecipient:            flags.feeRecipient,
-		JWTSecretPath:           jwtPath,
-		Graffiti:                flags.graffiti,
-		FallbackELUrls:          flags.fallbackEL,
-		ElExtraFlags:            flags.elExtraFlags,
-		ClExtraFlags:            flags.clExtraFlags,
-		VlExtraFlags:            flags.vlExtraFlags,
-		MapAllPorts:             flags.mapAllPorts,
-		Mev:                     !flags.noMev && !flags.noValidator,
-		MevImage:                flags.mevImage,
-		LoggingDriver:           configs.GetLoggingDriver(flags.logging),
-		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
-		ECBootnodes:             flags.customEnodes,
-		CCBootnodes:             flags.customEnrs,
-		CustomTTD:               flags.customTTD,
-		CustomChainSpecPath:     customNetworkConfigsData.ChainSpecPath,
-		CustomNetworkConfigPath: customNetworkConfigsData.NetworkConfigPath,
-		CustomGenesisPath:       customNetworkConfigsData.NetworkGenesisPath,
-		CustomDeployBlock:       flags.customDeployBlock,
-		CustomDeployBlockPath:   customNetworkConfigsData.NetworkDeployBlockPath,
-	}
-	err = sedgeActions.Generate(actions.GenerateOptions{GenerationData: gd, GenerationPath: flags.generationPath})
-	if err != nil {
-		return []error{err}
-	}
-
-	// Print final files
-	log.Infof(configs.CreatedFile, filepath.Join(generationPath, configs.DefaultEnvFileName))
-	ui.PrintFileContent(cmd.OutOrStdout(), filepath.Join(generationPath, configs.DefaultEnvFileName))
-
-	log.Infof(configs.CreatedFile, filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
-	ui.PrintFileContent(cmd.OutOrStdout(), filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
-
-	// If --run-clients=none was set then exit and don't run anything
-	if len(*flags.services) == 0 {
-		log.Info(configs.HappyStaking2)
-		return nil
-	}
-
-	if flags.run {
-		if utils.Contains(*flags.services, "validator") {
-			*flags.services = append(*flags.services, "validator-import")
-		}
-		if err := buildContainers(cmdRunner, *flags.services, flags.generationPath); err != nil {
-			return []error{err}
-		}
-		if flags.slashingProtection != "" {
-			// Setup wait for validator import
-			exitCh, errCh := serviceManager.Wait(services.ServiceCtValidatorImport, dockerct.WaitConditionNextExit)
-			// Run validator-import
-			if err := runAndShowContainers(cmdRunner, []string{"validator-import"}, flags); err != nil {
-				return []error{err}
-			}
-			exitCode, err := func(exitCh <-chan dockerct.ContainerWaitOKBody, errCh <-chan error) (int64, error) {
-				for {
-					select {
-					case exitOk := <-exitCh:
-						return exitOk.StatusCode, nil
-					case err := <-errCh:
-						return -1, err
-					}
-				}
-			}(exitCh, errCh)
-			if err != nil {
-				return []error{err}
-			}
-			if exitCode != 0 {
-				return []error{fmt.Errorf("%s ends with unexpected status code %d", services.ServiceCtValidatorImport, exitCode)}
-			}
-			if err := sedgeActions.ImportSlashingInterchangeData(actions.SlashingImportOptions{
-				ValidatorClient: flags.validatorName,
-				Network:         flags.network,
-				StopValidator:   false,
-				StartValidator:  false,
-				GenerationPath:  flags.generationPath,
-				From:            flags.slashingProtection,
-			}); err != nil {
-				return []error{err}
-			}
-		}
-		if err = runAndShowContainers(cmdRunner, *flags.services, flags); err != nil {
-			return []error{err}
-		}
-	} else {
-		// Let the user decide to see the instructions for executing the scripts and exit or let the tool execute them
-		if err = runScriptOrExit(cmdRunner, flags); err != nil {
-			return []error{err}
-		}
-	}
-
 	return nil
+}
+
+func postGenerate(p prompts.Prompt, o *CliCmdOptions, a actions.SedgeActions) error {
+	if o.withValidator || o.nodeType == NodeTypeValidator {
+		if err := generateKeystore(p, o, a); err != nil {
+			return err
+		}
+	}
+	pendingDependencies := utils.CheckDependencies([]string{"docker"})
+	if len(pendingDependencies) > 0 {
+		supported, unsupported := utils.DependenciesSupported(pendingDependencies)
+		if len(unsupported) > 0 {
+			log.Warnf("unsupported install dependencies %s", strings.Join(unsupported, " "))
+			return nil
+		}
+		if err := confirmInstallDependencies(p, o); err != nil {
+			return err
+		}
+		if !o.installDependencies {
+			for _, s := range supported {
+				if err := utils.ShowInstructions(a.GetCommandRunner(), s); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+		for _, s := range supported {
+			if err := utils.InstallDependency(a.GetCommandRunner(), s); err != nil {
+				return err
+			}
+		}
+	}
+	var services []string
+	switch o.nodeType {
+	case NodeTypeFullNode:
+		services = []string{"execution", "consensus"}
+		if o.withValidator {
+			services = append(services, "validator")
+		}
+	case NodeTypeExecution:
+		services = []string{"execution"}
+	case NodeTypeConsensus:
+		services = []string{"consensus"}
+	case NodeTypeValidator:
+		services = []string{"validator"}
+	}
+	if err := a.SetupContainers(actions.SetupContainersOptions{
+		GenerationPath: o.generationPath,
+		Services:       services,
+	}); err != nil {
+		return err
+	}
+	if err := a.RunContainers(actions.RunContainersOptions{
+		GenerationPath: o.generationPath,
+		Services:       services,
+	}); err != nil {
+		return err
+	}
+	// TODO: Final tips
+	log.Error("show final tips")
+	return nil
+}
+
+func generateKeystore(p prompts.Prompt, o *CliCmdOptions, a actions.SedgeActions) error {
+	if err := selectKeystoreSource(p, o); err != nil {
+		return err
+	}
+	switch o.keystoreSourceType {
+	case SourceTypeSkip:
+		return nil
+	case SourceTypeCreate:
+		// Get the mnemonic
+		if err := selectKeystoreMnemonicSource(p, o); err != nil {
+			return err
+		}
+		switch o.keystoreMnemonicSource {
+		case SourceTypeCreate:
+			candidate, err := keystores.CreateMnemonic()
+			if err != nil {
+				return err
+			}
+			if err := saveMnemonic(a.GetCommandRunner(), candidate); err != nil {
+				return err
+			}
+			o.keystoreMnemonic = candidate
+		case SourceTypeExisting:
+			if err := inputKeystoreMnemonicPath(p, o); err != nil {
+				return err
+			}
+		}
+		// Get the passphrase
+		if err := selectKeystorePassphraseSource(p, o); err != nil {
+			return err
+		}
+		switch o.keystorePassphraseSource {
+		case SourceTypeRandom:
+			// TODO generate random passphrase
+			log.Error("unimplemented random passphrase generation")
+		case SourceTypeExisting:
+			if err := inputKeystorePassphrasePath(p, o); err != nil {
+				return err
+			}
+			if passphrase, err := readFileContent(o.keystorePassphrasePath); err != nil {
+				return err
+			} else {
+				o.keystorePassphrase = passphrase
+			}
+		case SourceTypeCreate:
+			if err := inputKeystorePassphrase(p, o); err != nil {
+				return err
+			}
+		}
+		if err := runPromptActions(p, o,
+			inputWithdrawalAddress,
+			inputNumberOfValidators,
+			inputNumberOfExistingValidators,
+		); err != nil {
+			return err
+		}
+		if err := keystores.CreateKeystores(keystores.ValidatorKeysGenData{
+			Mnemonic:    o.keystoreMnemonic,
+			Passphrase:  o.keystorePassphrase,
+			OutputPath:  filepath.Join(o.generationPath, "keystores"),
+			MinIndex:    uint64(o.existingValidators),
+			MaxIndex:    uint64(o.existingValidators) + uint64(o.numberOfValidators),
+			NetworkName: o.genData.Network,
+			ForkVersion: configs.NetworksConfigs()[o.genData.Network].GenesisForkVersion,
+			// Constants
+			UseUniquePassphrase: true,
+			Insecure:            false,
+			AmountGwei:          uint64(eth2.Mainnet.MAX_EFFECTIVE_BALANCE),
+			AsJsonList:          true,
+		}); err != nil {
+			return err
+		}
+
+	case SourceTypeExisting:
+		if err := inputKeystorePath(p, o); err != nil {
+			return err
+		}
+	}
+	// TODO call validator import
+	log.Error("missing call to import validator keys")
+	if err := confirmImportSlashingProtection(p, o); err != nil {
+		return err
+	}
+	if o.importSlashingProtection {
+		if err := inputImportSlashingProtectionFrom(p, o); err != nil {
+			return err
+		}
+		err := a.ImportSlashingInterchangeData(actions.SlashingImportOptions{
+			ValidatorClient: o.genData.ValidatorClient.Name,
+			Network:         o.genData.Network,
+			GenerationPath:  o.generationPath,
+			From:            o.slashingProtectionFrom,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type promptAction func(prompts.Prompt, *CliCmdOptions) error
+
+func runPromptActions(p prompts.Prompt, o *CliCmdOptions, actions ...promptAction) error {
+	for _, action := range actions {
+		if err := action(p, o); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func selectNetwork(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.genData.Network, err = p.Select("Select network", NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom)
+	return
+}
+
+func selectNodeType(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.nodeType, err = p.Select("Select node type", NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator)
+	return
+}
+
+func selectExecutionClient(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	c := clients.ClientInfo{Network: o.genData.Network}
+	supportedClients, err := c.SupportedClients(execution)
+	if err != nil {
+		return err
+	}
+	selectedExecutionClient, err := p.Select("Select execution client", append(supportedClients, Randomize)...)
+	if err != nil {
+		return err
+	}
+	// In case random is selected, select a random client
+	if selectedExecutionClient == Randomize {
+		randomName, err := clients.RandomClientName(supportedClients)
+		if err != nil {
+			return err
+		}
+		selectedExecutionClient = randomName
+	}
+	o.genData.ExecutionClient = &clients.Client{
+		Name: selectedExecutionClient,
+		Type: "execution",
+	}
+	return nil
+}
+
+func selectConsensusClient(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	c := clients.ClientInfo{Network: o.genData.Network}
+	supportedClients, err := c.SupportedClients(consensus)
+	if err != nil {
+		return err
+	}
+	selectedConsensusClient, err := p.Select("Select consensus client", append(supportedClients, Randomize)...)
+	if err != nil {
+		return err
+	}
+	// In case random is selected, select a random client
+	if selectedConsensusClient == Randomize {
+		randomName, err := clients.RandomClientName(supportedClients)
+		if err != nil {
+			return err
+		}
+		selectedConsensusClient = randomName
+	}
+	o.genData.ConsensusClient = &clients.Client{
+		Name: selectedConsensusClient,
+		Type: "consensus",
+	}
+	return nil
+}
+
+func selectValidatorClient(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	c := clients.ClientInfo{Network: o.genData.Network}
+	supportedClients, err := c.SupportedClients(validator)
+	if err != nil {
+		return err
+	}
+	selectedValidatorClient, err := p.Select("Select validator client", append(supportedClients, Randomize)...)
+	if err != nil {
+		return err
+	}
+	// In case random is selected, select a random client
+	if selectedValidatorClient == Randomize {
+		randomName, err := clients.RandomClientName(supportedClients)
+		if err != nil {
+			return err
+		}
+		selectedValidatorClient = randomName
+	}
+	o.genData.ValidatorClient = &clients.Client{
+		Name: selectedValidatorClient,
+		Type: "validator",
+	}
+	return nil
+}
+
+func selectJWTSource(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.jwtSourceType, err = p.Select("Select JWT source", SourceTypeCreate, SourceTypeExisting)
+	return
+}
+
+func selectJWTSourceOrSkip(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.jwtSourceType, err = p.Select("Select JWT source", SourceTypeCreate, SourceTypeExisting, SourceTypeSkip)
+	return
+}
+
+func selectKeystoreSource(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.keystoreSourceType, err = p.Select("Select keystore source", SourceTypeCreate, SourceTypeExisting, SourceTypeSkip)
+	return
+}
+
+func selectKeystoreMnemonicSource(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.keystoreMnemonicSource, err = p.Select("Select mnemonic source", SourceTypeCreate, SourceTypeExisting)
+	return
+}
+
+func selectKeystorePassphraseSource(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.keystorePassphraseSource, err = p.Select("Select passphrase source", SourceTypeRandom, SourceTypeExisting, SourceTypeCreate)
+	return
+}
+
+func confirmWithValidator(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.withValidator, err = p.Confirm("Do you want to set up a validator")
+	return
+}
+
+func confirmExposeAllPorts(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.genData.MapAllPorts, err = p.Confirm("Do you want to expose all ports?")
+	return
+}
+
+func confirmImportSlashingProtection(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.importSlashingProtection, err = p.Confirm("Do you want to import slashing protection data?")
+	return
+}
+
+func confirmInstallDependencies(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.installDependencies, err = p.Confirm("Install dependencies?")
+	return
+}
+
+func inputCustomNetworkConfig(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.genData.CustomNetworkConfigPath, err = p.InputFilePath("Custom Network Config", true)
+	return
+}
+
+func inputCustomChainSpec(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.genData.CustomChainSpecPath, err = p.InputFilePath("Custom ChainSpec", true)
+	return
+}
+
+func inputCustomGenesis(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.genData.CustomGenesisPath, err = p.InputFilePath("Custom Genesis", true)
+	return
+}
+
+func inputCustomTTD(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.genData.CustomTTD, err = p.Input("Custom TTD", false)
+	return
+}
+
+func inputCustomDeployBlock(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.customDeployBlock, err = p.Input("Custom deploy block", false)
+	return
+}
+
+func inputExecutionBootNodes(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	bootNodesInput, err := p.Input("Execution boot nodes", false)
+	if err != nil {
+		return err
+	}
+	bootNodesList := strings.Split(bootNodesInput, ",")
+	o.genData.ECBootnodes = &bootNodesList
+	return nil
+}
+
+func inputConsensusBootNodes(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	bootNodesInput, err := p.Input("Consensus boot nodes", false)
+	if err != nil {
+		return err
+	}
+	bootNodesList := strings.Split(bootNodesInput, ",")
+	o.genData.CCBootnodes = &bootNodesList
+	return nil
+}
+
+func inputMevImage(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	// Default value is set in the template
+	o.genData.MevImage, err = p.Input("Mev-Boost image", false)
+	return
+}
+
+func inputMevBoostEndpoint(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.genData.MevBoostEndpoint, err = p.Input("Mev-Boost endpoint", false)
+	return
+}
+
+func inputRelayURL(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	// TODO add default relay URL value, it is not present in the generate command
+	o.genData.RelayURL, err = p.Input("Relay URL", false)
+	return
+}
+
+func inputGraffiti(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.genData.Graffiti, err = p.Input("Graffiti", false)
+	return
+}
+
+func inputCheckpointSyncURL(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	// Default value is set in the template
+	o.genData.CheckpointSyncUrl, err = p.Input("Checkpoint sync URL", false)
+	return
+}
+
+func inputFeeRecipient(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	// TODO: Is necessary to add a default value?
+	o.genData.FeeRecipient, err = p.Input("Fee recipient", true)
+	return
+}
+
+func inputValidatorGracePeriod(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	epochs, err := p.InputNumber("Validator grace period (epochs)")
+	if err != nil {
+		return err
+	}
+	o.genData.VLStartGracePeriod = uint(epochs * int64(configs.NetworkEpochTime(o.genData.Network)))
+	return nil
+}
+
+func inputGenerationPath(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	// TODO: add default
+	o.generationPath, err = p.Input("Generation path", true)
+	return
+}
+
+func inputJWTPath(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.genData.JWTSecretPath, err = p.Input("JWT path", true)
+	return
+}
+
+func inputKeystoreMnemonicPath(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.keystoreMnemonic, err = p.Input("Mnemonic path", true)
+	return
+}
+
+func inputKeystorePassphrasePath(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.keystorePassphrasePath, err = p.Input("Passphrase path", true)
+	return
+}
+
+func inputKeystorePassphrase(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.keystorePassphrase, err = p.InputHide("Passphrase")
+	return
+}
+
+func inputWithdrawalAddress(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.withdrawalAddress, err = p.Input("Withdrawal address", false)
+	return
+}
+
+func inputNumberOfValidators(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.numberOfValidators, err = p.InputNumber("Number of validators")
+	return
+}
+
+func inputNumberOfExistingValidators(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.existingValidators, err = p.InputNumber("Existing validators")
+	return
+}
+
+func inputKeystorePath(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.keystorePath, err = p.Input("Keystore path", true)
+	return
+}
+
+func inputImportSlashingProtectionFrom(p prompts.Prompt, o *CliCmdOptions) (err error) {
+	o.slashingProtectionFrom, err = p.InputFilePath("Interchange slashing protection file", true)
+	return
 }
