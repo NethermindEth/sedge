@@ -47,6 +47,8 @@ const (
 	ValidatorPrysm      = "prysm"
 	ValidatorTeku       = "teku"
 
+	Randomize = "Randomize"
+
 	SourceTypeExisting = "existing"
 	SourceTypeCreate   = "create"
 	SourceTypeSkip     = "skip"
@@ -500,15 +502,22 @@ func selectNodeType(p prompts.Prompt, o *CliRefactorOptions) (err error) {
 }
 
 func selectExecutionClient(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	// TODO: support randomize
 	c := clients.ClientInfo{Network: o.genData.Network}
 	supportedClients, err := c.SupportedClients(execution)
 	if err != nil {
 		return err
 	}
-	selectedExecutionClient, err := p.Select("Select execution client", supportedClients...)
+	selectedExecutionClient, err := p.Select("Select execution client", append(supportedClients, Randomize)...)
 	if err != nil {
 		return err
+	}
+	// In case random is selected, select a random client
+	if selectedExecutionClient == Randomize {
+		randomName, err := clients.RandomClientName(supportedClients)
+		if err != nil {
+			return err
+		}
+		selectedExecutionClient = randomName
 	}
 	o.genData.ExecutionClient = &clients.Client{
 		Name: selectedExecutionClient,
@@ -518,15 +527,22 @@ func selectExecutionClient(p prompts.Prompt, o *CliRefactorOptions) (err error) 
 }
 
 func selectConsensusClient(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	// TODO: support randomize
 	c := clients.ClientInfo{Network: o.genData.Network}
-	supportedClients, err := c.SupportedClients(execution)
+	supportedClients, err := c.SupportedClients(consensus)
 	if err != nil {
 		return err
 	}
-	selectedConsensusClient, err := p.Select("Select consensus client", supportedClients...)
+	selectedConsensusClient, err := p.Select("Select consensus client", append(supportedClients, Randomize)...)
 	if err != nil {
 		return err
+	}
+	// In case random is selected, select a random client
+	if selectedConsensusClient == Randomize {
+		randomName, err := clients.RandomClientName(supportedClients)
+		if err != nil {
+			return err
+		}
+		selectedConsensusClient = randomName
 	}
 	o.genData.ConsensusClient = &clients.Client{
 		Name: selectedConsensusClient,
@@ -536,15 +552,22 @@ func selectConsensusClient(p prompts.Prompt, o *CliRefactorOptions) (err error) 
 }
 
 func selectValidatorClient(p prompts.Prompt, o *CliRefactorOptions) (err error) {
-	// TODO: support randomize
 	c := clients.ClientInfo{Network: o.genData.Network}
-	supportedClients, err := c.SupportedClients(execution)
+	supportedClients, err := c.SupportedClients(validator)
 	if err != nil {
 		return err
 	}
-	selectedValidatorClient, err := p.Select("Select validator client", supportedClients...)
+	selectedValidatorClient, err := p.Select("Select validator client", append(supportedClients, Randomize)...)
 	if err != nil {
 		return err
+	}
+	// In case random is selected, select a random client
+	if selectedValidatorClient == Randomize {
+		randomName, err := clients.RandomClientName(supportedClients)
+		if err != nil {
+			return err
+		}
+		selectedValidatorClient = randomName
 	}
 	o.genData.ValidatorClient = &clients.Client{
 		Name: selectedValidatorClient,
