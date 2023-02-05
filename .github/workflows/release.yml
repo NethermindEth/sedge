@@ -153,12 +153,16 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: /tmp/binaries
+      - name: Generate Changelog
+        run: |
+          awk '/## \[Unreleased\]/ {flag=1;next} /## \[/ {flag=0} flag' CHANGELOG.md > /tmp/changelog
+          echo -e "## [${{env.VERSION}}]\n$(cat /tmp/changelog)" > /tmp/changelog
 
       - name: Upload release to Github Releases
         uses: ncipollo/release-action@v1
         with:
           artifacts: "/tmp/binaries/sedge-*/*"
-          bodyFile: "CHANGELOG.md"
+          bodyFile: "/tmp/changelog"
           draft: true
           tag: ${{ github.event.inputs.tag }}
           name: ${{ github.event.inputs.tag }}
