@@ -3,6 +3,7 @@ module github.com/NethermindEth/sedge
 go 1.18
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.3.6
 	github.com/alexeyco/simpletable v1.0.0
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
 	github.com/cenkalti/backoff/v4 v4.2.0
@@ -12,7 +13,6 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/herumi/bls-eth-go-binary v1.28.1
 	github.com/jarcoal/httpmock v1.2.0
-	github.com/manifoldco/promptui v0.9.0
 	github.com/opencontainers/image-spec v1.0.2
 	github.com/protolambda/go-keystorev4 v0.0.0-20211007151826-f20444f6d564
 	github.com/protolambda/zrnt v0.30.0
@@ -30,7 +30,7 @@ require (
 
 require (
 	github.com/Microsoft/go-winio v0.6.0 // indirect
-	github.com/chzyer/readline v1.5.1 // indirect
+	github.com/creack/pty v1.1.18 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
@@ -41,10 +41,14 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/holiman/uint256 v1.2.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/kilic/bls12-381 v0.1.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.3 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
+	github.com/mattn/go-colorable v0.1.2 // indirect
+	github.com/mattn/go-isatty v0.0.8 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
+	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/term v0.0.0-20221205130635-1aeaba878587 // indirect
@@ -60,6 +64,7 @@ require (
 	golang.org/x/mod v0.7.0 // indirect
 	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/term v0.4.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
 	golang.org/x/time v0.0.0-20220609170525-579cf78fd858 // indirect
 	golang.org/x/tools v0.5.0 // indirect

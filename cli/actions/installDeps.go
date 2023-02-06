@@ -23,8 +23,8 @@ import (
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/prompter"
 	"github.com/NethermindEth/sedge/internal/utils"
-	"github.com/manifoldco/promptui"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -64,23 +64,20 @@ func installDependencies(cmdRunner commands.CommandRunner, pending []string) err
 	return nil
 }
 
-func installOrShowInstructions(cmdRunner commands.CommandRunner, pending []string) (err error) {
+func installOrShowInstructions(cmdRunner commands.CommandRunner, pending []string) error {
 	// notest
 	optInstall, optExit := "Install dependencies", "Exit. You will manage this dependencies on your own"
-	prompt := promptui.Select{
-		Label: "Select how to proceed with the pending dependencies",
-		Items: []string{optInstall, optExit},
+	prompt := prompter.New()
+	options := []string{optInstall, optExit}
+	index, err := prompt.Select("Select how to proceed with the pending dependencies", "", options)
+	if err != nil {
+		return err
 	}
-
 	if err = utils.HandleInstructions(cmdRunner, pending, utils.ShowInstructions); err != nil {
 		return fmt.Errorf(configs.ShowingInstructionsError, err)
 	}
-	_, result, err := prompt.Run()
-	if err != nil {
-		return fmt.Errorf(configs.PromptFailedError, err)
-	}
 
-	switch result {
+	switch options[index] {
 	case optInstall:
 		return installDependencies(cmdRunner, pending)
 	default:

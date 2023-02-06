@@ -20,10 +20,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
+	"github.com/NethermindEth/sedge/internal/prompter"
 	eth2 "github.com/protolambda/zrnt/eth2/configs"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -41,7 +41,7 @@ type KeysCmdFlags struct {
 	install               bool
 }
 
-func KeysCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Command {
+func KeysCmd(cmdRunner commands.CommandRunner, p prompter.Prompter) *cobra.Command {
 	var (
 		flags      KeysCmdFlags
 		passphrase string
@@ -80,7 +80,11 @@ func KeysCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Com
 				}
 			}
 			if !flags.randomPassphrase && len(passphrase) < 8 {
-				passphrase = prompt.Passphrase()
+				input, err := p.InputSecret("Enter keystore passphrase (min 8 characters):")
+				if err != nil {
+					log.Fatal(err)
+				}
+				passphrase = input
 			}
 
 			// Get or generate mnemonic
@@ -107,11 +111,19 @@ func KeysCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Com
 			if flags.mnemonicPath == "" {
 				flags.existingVal = 0
 			} else if flags.existingVal < 0 {
-				flags.existingVal = prompt.ExistingVal()
+				existingVal, err := p.InputInt64("Enter the number of existing validators (0 if none):", 0)
+				if err != nil {
+					log.Fatal(err)
+				}
+				flags.existingVal = existingVal
 			}
 
 			if flags.numberVal <= 0 {
-				flags.numberVal = prompt.NumberVal()
+				numberVal, err := p.InputInt64("Enter the number of validators to generate:", 1)
+				if err != nil {
+					log.Fatal(err)
+				}
+				flags.numberVal = numberVal
 			}
 
 			keystorePath := filepath.Join(flags.path, "keystore")

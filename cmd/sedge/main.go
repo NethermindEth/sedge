@@ -22,10 +22,10 @@ import (
 
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
-	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
+	"github.com/NethermindEth/sedge/internal/prompter"
 	"github.com/docker/docker/client"
 )
 
@@ -37,7 +37,7 @@ func main() {
 		RunAsAdmin: runtime.GOOS == "linux",
 	})
 	// Prompt used to interact with the user input
-	prompt := prompts.NewPromptCli()
+	prompt := prompter.New()
 	dockerClient, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		log.Fatal(err)
