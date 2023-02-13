@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated Checkpoint Sync Url for Goerli
 - Updated installation script for docker and docker compose in Linux flavours.
 - Use newed created action for JWT secret handling
 - Fixed validator restart failure:
