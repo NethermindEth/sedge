@@ -124,6 +124,11 @@ func KeysCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Com
 
 			keystorePath := filepath.Join(flags.path, "keystore")
 
+			var withdrawalAddress string
+			if flags.eth1WithdrawalAddress != "" {
+				withdrawalAddress = flags.eth1WithdrawalAddress[2:]
+			}
+
 			data := keystores.ValidatorKeysGenData{
 				Mnemonic:          mnemonic,
 				Passphrase:        passphrase,
@@ -132,7 +137,7 @@ func KeysCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt) *cobra.Com
 				MaxIndex:          uint64(flags.existingVal) + uint64(flags.numberVal),
 				NetworkName:       flags.network,
 				ForkVersion:       configs.NetworksConfigs()[flags.network].GenesisForkVersion,
-				WithdrawalAddress: flags.eth1WithdrawalAddress[2:],
+				WithdrawalAddress: withdrawalAddress,
 				// Constants
 				UseUniquePassphrase: true,
 				Insecure:            false,
