@@ -309,24 +309,37 @@ func CreateDepositData(
 		depositData.WriteString("[")
 	}
 	for i := vkgd.MinIndex; i < vkgd.MaxIndex; i++ {
+		// Validator credentials
 		valAccPath := fmt.Sprintf("m/12381/3600/%d/0/0", i)
 		val, err := util.PrivateKeyFromSeedAndPath(valSeed, valAccPath)
 		if err != nil {
 			return fmt.Errorf(configs.KeystoreSecretKeyCreationError, valAccPath, err)
 		}
-		withdrAccPath := fmt.Sprintf("m/12381/3600/%d/0", i)
-		withdr, err := util.PrivateKeyFromSeedAndPath(withdrSeed, withdrAccPath)
-		if err != nil {
-			return fmt.Errorf(configs.WithdrawalSecretKeyCreationError, withdrAccPath, err)
-		}
-
 		var pub common.BLSPubkey
 		copy(pub[:], val.PublicKey().Marshal())
 
+		// Withdrawal credentials
 		var withdrPub common.BLSPubkey
-		copy(withdrPub[:], withdr.PublicKey().Marshal())
-		withdrCreds := hashing.Hash(withdrPub[:])
-		withdrCreds[0] = common.BLS_WITHDRAWAL_PREFIX
+		var withdrPrefix byte
+		var withdrCreds [32]byte
+		if vkgd.WithdrawalAddress != "" {
+			withdrPrefix = common.ETH1_ADDRESS_WITHDRAWAL_PREFIX
+			eth1Addr, err := hex.DecodeString(vkgd.WithdrawalAddress)
+			if err != nil {
+				return fmt.Errorf(configs.WithdrawalEth1SecretKeyCreationError, vkgd.WithdrawalAddress, err)
+			}
+			copy(withdrCreds[32-len(eth1Addr):], eth1Addr)
+		} else {
+			withdrPrefix = common.BLS_WITHDRAWAL_PREFIX
+			withdrAccPath := fmt.Sprintf("m/12381/3600/%d/0", i)
+			withdr, err := util.PrivateKeyFromSeedAndPath(withdrSeed, withdrAccPath)
+			if err != nil {
+				return fmt.Errorf(configs.WithdrawalBLSSecretKeyCreationError, withdrAccPath, err)
+			}
+			copy(withdrPub[:], withdr.PublicKey().Marshal())
+			withdrCreds = hashing.Hash(withdrPub[:])
+		}
+		withdrCreds[0] = withdrPrefix
 
 		data := common.DepositData{
 			Pubkey:                pub,
