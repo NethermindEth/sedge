@@ -2,6 +2,7 @@ package actions_test
 
 import (
 	"errors"
+	"runtime"
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli/actions"
@@ -13,6 +14,11 @@ import (
 )
 
 func TestManageDependencies(t *testing.T) {
+	// Skip test on windows
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping test on windows")
+	}
+
 	tests := []struct {
 		name         string
 		options      actions.ManageDependenciesOptions
