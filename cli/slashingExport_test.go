@@ -31,6 +31,9 @@ import (
 )
 
 func TestSlashingExport_ValidatorIsRequired(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
 	tests := []struct {
 		name        string
 		args        []string
@@ -51,6 +54,7 @@ func TestSlashingExport_ValidatorIsRequired(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			slashingExportCmd := cli.SlashingExportCmd(nil)
 			slashingExportCmd.SetArgs(tt.args)
+			slashingExportCmd.SetOutput(io.Discard)
 			err := slashingExportCmd.Execute()
 			assert.ErrorIs(t, err, tt.expectedErr)
 		})
@@ -58,6 +62,9 @@ func TestSlashingExport_ValidatorIsRequired(t *testing.T) {
 }
 
 func TestSlashingExport_Params(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
 	tests := []struct {
 		name          string
 		args          []string
@@ -182,6 +189,7 @@ func TestSlashingExport_Params(t *testing.T) {
 
 			slashingExportCmd := cli.SlashingExportCmd(actions)
 			slashingExportCmd.SetArgs(tt.args)
+			slashingExportCmd.SetOutput(io.Discard)
 			err := slashingExportCmd.Execute()
 
 			assert.Nil(t, err)
