@@ -85,6 +85,12 @@ func TestRun(t *testing.T) {
 			args:      cmdArgs{services: []string{"bad_service"}},
 			preRunErr: fmt.Errorf(configs.InvalidService, "bad_service"),
 		},
+		{
+			name:      "Without env file",
+			pTestData: "no_env",
+			args:      cmdArgs{services: []string{"execution", "consensus"}},
+			preRunErr: fmt.Errorf(configs.InvalidComposeErr, emptyErr),
+		},
 	}
 	// TODO: Add tests cases for Actions errors
 
