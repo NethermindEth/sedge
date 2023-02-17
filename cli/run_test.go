@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli"
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
@@ -91,9 +92,36 @@ func TestRun(t *testing.T) {
 			args:      cmdArgs{services: []string{"execution", "consensus"}},
 			preRunErr: fmt.Errorf(configs.InvalidComposeErr, emptyErr),
 		},
+		{
+			name:      "No compose file in path",
+			pTestData: "no_compose",
+			args:      cmdArgs{services: []string{"execution", "consensus"}},
+			preRunErr: fmt.Errorf(configs.ComposeNotFoundErr, emptyErr),
+		},
+		{
+			name:      "Valid docker-compose, no services provided",
+			pTestData: "valid",
+			args:      cmdArgs{},
+		},
+		{
+			name:      "Dependencies error",
+			pTestData: "valid",
+			args:      cmdArgs{services: []string{"execution", "consensus"}},
+			depsErr:   true,
+		},
+		{
+			name:      "Setup error",
+			pTestData: "valid",
+			args:      cmdArgs{services: []string{"execution", "consensus"}},
+			setupErr:  true,
+		},
+		{
+			name:      "Run error",
+			pTestData: "valid",
+			args:      cmdArgs{services: []string{"execution", "consensus"}},
+			runErr:    true,
+		},
 	}
-	// TODO: Add tests cases for Actions errors
-
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			// Setup
@@ -110,54 +138,66 @@ func TestRun(t *testing.T) {
 			args := []string{"--path", tc.args.path}
 			if len(tc.args.services) > 0 {
 				args = append(args, "--services")
-				args = append(args, tc.args.services...)
+				args = append(args, strings.Join(tc.args.services, ","))
+			} else {
+				tc.args.services = []string{}
 			}
+			t.Logf("Running test with args: %v", args)
 
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			actions := sedge_mocks.NewMockSedgeActions(ctrl)
+			mActions := sedge_mocks.NewMockSedgeActions(ctrl)
 			if tc.preRunErr == nil {
 				if tc.depsErr {
-					actions.EXPECT().ManageDependencies(gomock.Any()).Return(errors.New(configs.DependencyErr)).Times(1)
+					mActions.EXPECT().ManageDependencies(gomock.Any()).Return(errors.New(configs.DependencyErr)).Times(1)
 				} else {
-					actions.EXPECT().ManageDependencies(gomock.Any()).Return(nil).Times(1)
-				}
+					mActions.EXPECT().ManageDependencies(gomock.Any()).Return(nil).Times(1)
 
-				if tc.setupErr {
-					actions.EXPECT().SetupContainers(gomock.Any()).Return(errors.New(configs.SetupContainersErr)).Times(1)
-				} else {
-					actions.EXPECT().SetupContainers(gomock.Any()).Return(nil).Times(1)
-				}
+					sopts := actions.SetupContainersOptions{
+						GenerationPath: tc.args.path,
+						Services:       tc.args.services,
+					}
+					if tc.setupErr {
+						mActions.EXPECT().SetupContainers(sopts).Return(errors.New(configs.SetupContainersErr)).Times(1)
+					} else {
+						mActions.EXPECT().SetupContainers(sopts).Return(nil).Times(1)
 
-				if tc.runErr {
-					actions.EXPECT().RunContainers(gomock.Any()).Return(errors.New(configs.StartingContainersErr)).Times(1)
-				} else {
-					actions.EXPECT().RunContainers(gomock.Any()).Return(nil).Times(1)
+						ropts := actions.RunContainersOptions{
+							GenerationPath: tc.args.path,
+							Services:       tc.args.services,
+						}
+						if tc.runErr {
+							mActions.EXPECT().RunContainers(ropts).Return(errors.New(configs.StartingContainersErr)).Times(1)
+						} else {
+							mActions.EXPECT().RunContainers(ropts).Return(nil).Times(1)
+						}
+					}
 				}
 			}
 
-			runCmd := cli.RunCmd(actions)
+			runCmd := cli.RunCmd(mActions)
 			runCmd.SetArgs(args)
 			runCmd.SetOutput(io.Discard)
 			err := runCmd.Execute()
 
-			// Dando error porque los mensajes son diferentes, el %w esta dando bateos
 			if tc.preRunErr != nil {
-				// assert.True(t, strings.Contains(err.Error(), tc.preRunErr))
 				assert.ErrorContains(t, err, tc.preRunErr.Error())
-			} else {
+			} else if !tc.depsErr && !tc.setupErr && !tc.runErr {
 				assert.NoError(t, err)
 			}
 
 			if tc.depsErr {
-				assert.True(t, strings.Contains(err.Error(), configs.DependencyErr))
+				assert.ErrorContains(t, err, fmt.Errorf(configs.DependencyErr, emptyErr).Error())
+				//assert.True(t, strings.Contains(err.Error(), configs.DependencyErr))
 			}
 			if tc.setupErr {
-				assert.True(t, strings.Contains(err.Error(), configs.SetupContainersErr))
+				assert.ErrorContains(t, err, fmt.Errorf(configs.SetupContainersErr, emptyErr).Error())
+				//assert.True(t, strings.Contains(err.Error(), configs.SetupContainersErr))
 			}
 			if tc.runErr {
-				assert.True(t, strings.Contains(err.Error(), configs.StartingContainersErr))
+				assert.ErrorContains(t, err, fmt.Errorf(configs.StartingContainersErr, emptyErr).Error())
+				//assert.True(t, strings.Contains(err.Error(), configs.StartingContainersErr))
 			}
 		})
 	}
