@@ -167,7 +167,7 @@ func TestDown_Error(t *testing.T) {
 	err = downCmd.Execute()
 
 	if err != nil {
-		assert.EqualError(t, err, fmt.Sprintf("command 'docker compose -f %s/docker-compose.yml down' throws error: runner error", tt.generationPath), desc)
+		assert.EqualError(t, err, fmt.Sprintf("command 'docker compose -f %s down' throws error: runner error", filepath.Join(tt.generationPath, "docker-compose.yml")), desc)
 	} else {
 		assert.NoError(t, err, desc)
 	}
