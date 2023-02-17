@@ -34,6 +34,7 @@ test: generate ## run tests
 codecov-test: generate ## unit tests with coverage using the courtney tool
 	@mkdir -p coverage
 	@courtney/courtney -v -o coverage/coverage.out ./...
+	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 install-gofumpt: ## install gofumpt
 	go install mvdan.cc/gofumpt@latest
@@ -48,7 +49,7 @@ install-courtney: ## Install courtney for code coverage
 
 install-deps: | install-gofumpt install-courtney install-mockgen ## Install some project dependencies
 
-coverage: codecov-test ## show tests coverage
+coverage: ## show tests coverage
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 clients: compile ## Run cmd clients with ./config.yaml
