@@ -189,15 +189,12 @@ func TestRun(t *testing.T) {
 
 			if tc.depsErr {
 				assert.ErrorContains(t, err, fmt.Errorf(configs.DependencyErr, emptyErr).Error())
-				//assert.True(t, strings.Contains(err.Error(), configs.DependencyErr))
 			}
 			if tc.setupErr {
 				assert.ErrorContains(t, err, fmt.Errorf(configs.SetupContainersErr, emptyErr).Error())
-				//assert.True(t, strings.Contains(err.Error(), configs.SetupContainersErr))
 			}
 			if tc.runErr {
 				assert.ErrorContains(t, err, fmt.Errorf(configs.StartingContainersErr, emptyErr).Error())
-				//assert.True(t, strings.Contains(err.Error(), configs.StartingContainersErr))
 			}
 		})
 	}
