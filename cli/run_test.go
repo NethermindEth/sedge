@@ -72,7 +72,7 @@ func TestRun(t *testing.T) {
 			name:      "Valid args, bad docker-compose, no version",
 			pTestData: "no_version",
 			args:      cmdArgs{services: []string{"execution", "consensus"}}, // Leave error commented in case we add a version check
-			//preRunErr: fmt.Errorf(configs.MissingVersionErr),
+			// preRunErr: fmt.Errorf(configs.MissingVersionErr),
 		},
 		{
 			name:      "Bad compose path",
@@ -83,7 +83,7 @@ func TestRun(t *testing.T) {
 			name:      "Valid docker-compose, bad services",
 			pTestData: "valid",
 			args:      cmdArgs{services: []string{"bad_service"}},
-			preRunErr: fmt.Errorf(configs.ServicesNotFoundErr),
+			preRunErr: fmt.Errorf(configs.InvalidService, "bad_service"),
 		},
 	}
 	// TODO: Add tests cases for Actions errors
@@ -138,7 +138,7 @@ func TestRun(t *testing.T) {
 
 			// Dando error porque los mensajes son diferentes, el %w esta dando bateos
 			if tc.preRunErr != nil {
-				//assert.True(t, strings.Contains(err.Error(), tc.preRunErr))
+				// assert.True(t, strings.Contains(err.Error(), tc.preRunErr))
 				assert.ErrorContains(t, err, tc.preRunErr.Error())
 			} else {
 				assert.NoError(t, err)

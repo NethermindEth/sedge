@@ -29,7 +29,6 @@ generate: ## generate go files
 test: generate ## run tests
 	@mkdir -p coverage
 	@go test -coverprofile=coverage/coverage.out -covermode=count ./...
-	@rm -r mocks
 
 codecov-test: generate ## unit tests with coverage using the courtney tool
 	@mkdir -p coverage

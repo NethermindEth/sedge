@@ -6,6 +6,7 @@ require (
 	github.com/alexeyco/simpletable v1.0.0
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
 	github.com/cenkalti/backoff/v4 v4.2.0
+	github.com/compose-spec/compose-go v1.10.0
 	github.com/docker/docker v20.10.22+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v47 v47.1.0
@@ -25,13 +26,13 @@ require (
 	github.com/wealdtech/go-eth2-util v1.8.0
 	golang.org/x/sync v0.1.0
 	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools/v3 v3.4.0
 )
 
 require (
 	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
-	github.com/compose-spec/compose-go v1.10.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/distribution/distribution/v3 v3.0.0-20221103125252-ebfa2a0ac0a9 // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
@@ -70,5 +71,4 @@ require (
 	golang.org/x/text v0.6.0 // indirect
 	golang.org/x/time v0.0.0-20220609170525-579cf78fd858 // indirect
 	golang.org/x/tools v0.5.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -162,7 +162,7 @@ func (flags *CliCmdFlags) toString() string {
 
 func prepareCliCmd(tc cliCmdTestCase) {
 	// Set output buffers
-	//log.SetOutput(tc.fdOut)
+	// log.SetOutput(tc.fdOut)
 	// Set config file path
 	initLogging()
 	// Silence logger

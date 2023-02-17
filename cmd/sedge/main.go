@@ -70,7 +70,7 @@ func main() {
 		cli.VersionCmd(),
 		cli.SlashingExportCmd(sedgeActions),
 		cli.SlashingImportCmd(sedgeActions),
-		cli.RunCmd(cmdRunner, sedgeActions),
+		cli.RunCmd(sedgeActions),
 		cli.GenerateCmd(sedgeActions),
 	)
 	if err := sedgeCmd.Execute(); err != nil {
