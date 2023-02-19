@@ -36,6 +36,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed config file dependency.
 - Removed `prysm` from consensus templates on Gnosis as supported client.
 
+### Fixed
+
+- Add missing params at teku validator template.
+- Remove double params at prysm validator template.
+
 ## [v0.6.0] - 2022-12-23
 
 ### Added
