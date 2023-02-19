@@ -75,7 +75,7 @@ type GenData struct {
 	ExecutionApiUrl         string
 	ExecutionAuthUrl        string
 	ConsensusApiUrl         string
-	ContainerTags           string
+	ContainerTag            string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
