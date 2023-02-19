@@ -47,6 +47,7 @@
       - --metrics-port={{.VlMetricsPort}}{{with .FeeRecipient}}
       - --validators-proposer-default-fee-recipient=${CC_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .Mev}}
+      - --validators-proposer-blinded-blocks-enabled=true
       - --validators-builder-registration-default-enabled=true
       - --Xvalidators-builder-registration-default-gas-limit=29000000{{end}}{{if .LoggingDriver}}
     logging:
