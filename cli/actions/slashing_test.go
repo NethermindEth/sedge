@@ -239,7 +239,7 @@ func TestSlashingImport_UnsupportedClient(t *testing.T) {
 				GenerationPath:  generationPath,
 				From:            from,
 			})
-			assert.ErrorIs(t, err, actions.ErrUnsupportedValidatorClient)
+			assert.ErrorIs(t, err, actions.UnsupportedValidatorClientError)
 			assert.FileExists(t, copiedFile)
 			copiedData, err := os.ReadFile(copiedFile)
 			if err != nil {
@@ -269,7 +269,7 @@ func TestSlashingExport_UnsupportedClient(t *testing.T) {
 				GenerationPath:  generationPath,
 				Out:             out,
 			})
-			assert.ErrorIs(t, err, actions.ErrUnsupportedValidatorClient)
+			assert.ErrorIs(t, err, actions.UnsupportedValidatorClientError)
 			assert.NoFileExists(t, out)
 		})
 	}

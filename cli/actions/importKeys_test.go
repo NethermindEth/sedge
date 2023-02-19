@@ -135,7 +135,7 @@ func TestImportKeys_UnsupportedClient(t *testing.T) {
 				From:            from,
 				GenerationPath:  generationPath,
 			})
-			assert.ErrorIs(t, err, actions.ErrUnsupportedValidatorClient)
+			assert.ErrorIs(t, err, actions.UnsupportedValidatorClientError)
 		})
 	}
 }

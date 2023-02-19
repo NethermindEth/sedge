@@ -98,7 +98,7 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		}
 		ctID = tekuCtID
 	default:
-		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
+		return fmt.Errorf("%w: %s", UnsupportedValidatorClientError, options.ValidatorClient)
 	}
 	log.Info("Importing validator keys")
 	if err := runAndWait(s.dockerClient, s.serviceManager, ctID); err != nil {
@@ -194,7 +194,7 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 	case "gnosis", "chiado":
 		preset = "gnosis"
 	default:
-		return "", newErrUnknownLodestarPreset(options.Network)
+		return "", newUnknownLodestarPresetError(options.Network)
 	}
 	cmd := []string{
 		"validator", "import",
@@ -237,7 +237,7 @@ func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManage
 	// Init build context
 	contextDir, err := lighthouse.InitContext()
 	if err != nil {
-		return "", fmt.Errorf("%w: %s", ErrCreatingContextDir, err.Error())
+		return "", fmt.Errorf("%w: %s", CreatingContextDirError, err.Error())
 	}
 	// Build image
 	buildCmd := commandRunner.BuildDockerBuildCMD(commands.DockerBuildOptions{
@@ -363,7 +363,7 @@ func runAndWait(dockerClient client.APIClient, serviceManager services.ServiceMa
 				if err != nil {
 					return err
 				}
-				return newErrValidatorImportCtBadExitCode(ctID, exitResult.StatusCode, logs)
+				return newValidatorImportCtBadExitCodeError(ctID, exitResult.StatusCode, logs)
 			}
 			return deleteContainer(dockerClient, ctID)
 		case exitErr := <-errChan:

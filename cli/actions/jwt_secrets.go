@@ -18,7 +18,7 @@ type CreateJWTSecretOptions struct {
 
 func (s *sedgeActions) CreateJWTSecrets(options CreateJWTSecretOptions) (string, error) {
 	if options.Network == "" {
-		return "", ErrorNetworkNotFound
+		return "", NetworkNotFoundError
 	}
 	// Generate JWT secret if necessary
 	var err error
