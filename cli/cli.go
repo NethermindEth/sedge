@@ -182,20 +182,16 @@ func setupFullNode(p prompter.Prompter, o *CliCmdOptions, a actions.SedgeActions
 		return err
 	}
 	_ = generate.GenData{
-		FallbackELUrls: nil, // TODO add to consensus client setup
+		// TODO add to simple consensus client setup
+		ExecutionApiUrl:  "",
+		ExecutionAuthUrl: "",
 
-		ElExtraFlags: nil, // TODO add to prompts
-		ClExtraFlags: nil, // TODO add to prompts
-		VlExtraFlags: nil, // TODO add to prompts
+		// TODO: add to simple validator client setup
+		ConsensusApiUrl:     "",
+		MevBoostOnValidator: false,
 
-		MevBoostOnValidator: false, // TODO add to prompts
-
-		ExecutionApiUrl:  "", // TODO what is this?
-		ExecutionAuthUrl: "", // TODO what is this?
-		ConsensusApiUrl:  "", // TODO what is this?
-
-		CustomDeployBlock:     "", // TODO ask to Carlos
-		CustomDeployBlockPath: "", // TODO ask to carlos
+		CustomDeployBlock:     "", // TODO add to prompts
+		CustomDeployBlockPath: "", // TODO add to prompts
 	}
 	return postGenerate(p, o, a)
 }
@@ -736,7 +732,8 @@ func inputMevBoostEndpoint(p prompter.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputRelayURL(p prompter.Prompter, o *CliCmdOptions) (err error) {
-	// TODO add default relay URL value, it is not present in the generate command
+	// TODO add default relay URL value and remove it from the template
+	// TODO support multiple relay URLs
 	o.genData.RelayURL, err = p.Input("Relay URL", "", false)
 	return
 }
@@ -753,7 +750,6 @@ func inputCheckpointSyncURL(p prompter.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputFeeRecipient(p prompter.Prompter, o *CliCmdOptions) (err error) {
-	// TODO: Is necessary to add a default value?
 	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address. You can leave it blank and press enter (not recommended)", "")
 	return
 }
@@ -768,7 +764,7 @@ func inputValidatorGracePeriod(p prompter.Prompter, o *CliCmdOptions) (err error
 }
 
 func inputGenerationPath(p prompter.Prompter, o *CliCmdOptions) (err error) {
-	// TODO: add default
+	// TODO: show default value in the prompt
 	o.generationPath, err = p.Input("Generation path", configs.DefaultAbsSedgeDataPath, false)
 	if o.generationPath == "" {
 		o.generationPath = configs.DefaultAbsSedgeDataPath
