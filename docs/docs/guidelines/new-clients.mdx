@@ -31,7 +31,7 @@ The most important things to add:
 new client.
 2. Add what is going to be the environment vars for the docker compose file under each of the supported networks for this
 new client, for example:
-    - `templates/envs/[network]/execution/new_client.tmpl`
+ - `templates/envs/[network]/execution/new_client.tmpl`
 3. Update the script that check for updates on the images at `scripts/check-image-updates.sh`.
 4. Update documentation, including all the references on `docs/docs` folder, that are going to be displayed on Sedge
 official documentation, and on the `Readme.md`
@@ -43,8 +43,9 @@ official documentation, and on the `Readme.md`
 While adding a Validator Client, you should follow this steps:
 1. Add a template under `templates/services/merge/validator/` that contains all the docker compose parts for run that
 new client.
-2. Ensure the template for the service import properly all the keystores in the right place, you should see the
-`validator-import` in other templates.
+2. Make sure to add any necessary code for the validator keystore import service. Make your chances in the
+`cli/actions/importKeys.go` file and check how has been done for other validators. The service should import properly
+all the keystores in the right place.
 3. Add what is going to be the environment vars for the docker compose file under each of the supported networks for this
 new client, for example:
  - `templates/envs/[network]/validator/new_client.tmpl`.
@@ -53,3 +54,4 @@ new client, for example:
 official documentation, and on the `Readme.md`
 6. Add entry on the `CHANGELOG.md`
 7. Run tests, and add new tests if needed.
+8. Create a PR with your changes, and we will review it as soon as possible.
