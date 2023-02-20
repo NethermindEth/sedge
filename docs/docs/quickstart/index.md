@@ -19,5 +19,3 @@ Pre-built binaries are available for both macOS and Linux, and you can also buil
 A complete tour on using Sedge for setting up a validator or full Ethereum node (because the setup involves an execution and consensus clients) can be found in the [Complete quickstart guide](quickstart/complete-guide).
 
 Other guides in this section shows you how to setup a validator with only one step, and also how to setup a validator with mev-boost.
-
-For a tour of Sedge's design and features, see the [Overview](/docs/overview).
