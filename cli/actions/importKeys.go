@@ -101,9 +101,7 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		return fmt.Errorf("%w: %s", UnsupportedValidatorClientError, options.ValidatorClient)
 	}
 	log.Info("Importing validator keys")
-	if err := runAndWait(s.dockerClient, s.serviceManager, ctID); err != nil {
-		return err
-	}
+	runErr := runAndWait(s.dockerClient, s.serviceManager, ctID)
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
 		log.Info("The validator container is being restarted")
@@ -111,8 +109,10 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 			return err
 		}
 	}
-	log.Info("Validator keys imported successfully")
-	return nil
+	if runErr == nil {
+		log.Info("Validator keys imported successfully")
+	}
+	return runErr
 }
 
 func isDefaultKeysPath(generationPath, from string) bool {
