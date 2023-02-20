@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli/actions"
@@ -55,31 +56,34 @@ func TestImportKeys_ValidatorStopFailure(t *testing.T) {
 
 func TestImportKeys_ValidatorRunning(t *testing.T) {
 	clients := []string{"prysm", "lodestar"}
+	networks := []string{"sepolia", "gnosis"}
 	for _, validatorClient := range clients {
-		t.Run(validatorClient, func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
+		for _, network := range networks {
+			t.Run(validatorClient, func(t *testing.T) {
+				ctrl := gomock.NewController(t)
+				defer ctrl.Finish()
 
-			dockerClient := importKeysGoldenPath(t, ctrl, false)
-			serviceManager := services.NewServiceManager(dockerClient)
-			cmdRunner := test.SimpleCMDRunner{}
-			s := actions.NewSedgeActions(dockerClient, serviceManager, &cmdRunner)
+				dockerClient := importKeysGoldenPath(t, ctrl, false)
+				serviceManager := services.NewServiceManager(dockerClient)
+				cmdRunner := test.SimpleCMDRunner{}
+				s := actions.NewSedgeActions(dockerClient, serviceManager, &cmdRunner)
 
-			from, err := setupKeystoreDir(t)
-			if err != nil {
-				t.Fatal(err)
-			}
+				from, err := setupKeystoreDir(t)
+				if err != nil {
+					t.Fatal(err)
+				}
 
-			generationPath := t.TempDir()
+				generationPath := t.TempDir()
 
-			err = s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
-				ValidatorClient: validatorClient,
-				Network:         "sepolia",
-				From:            from,
-				GenerationPath:  generationPath,
+				err = s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+					ValidatorClient: validatorClient,
+					Network:         network,
+					From:            from,
+					GenerationPath:  generationPath,
+				})
+				assert.NoError(t, err)
 			})
-			assert.NoError(t, err)
-		})
+		}
 	}
 }
 
@@ -220,6 +224,31 @@ func TestImportKeys_CustomOptions(t *testing.T) {
 	}
 }
 
+func TestImportKeys_UnexpectedExitCode(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	dockerClient := importKeysExitError(t, ctrl)
+	serviceManager := services.NewServiceManager(dockerClient)
+	cmdRunner := test.SimpleCMDRunner{}
+	s := actions.NewSedgeActions(dockerClient, serviceManager, &cmdRunner)
+
+	from, err := setupKeystoreDir(t)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	generationPath := t.TempDir()
+
+	err = s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+		ValidatorClient: "prysm",
+		Network:         "sepolia",
+		From:            from,
+		GenerationPath:  generationPath,
+	})
+	assert.ErrorIs(t, err, actions.ValidatorImportCtBadExitCodeError)
+}
+
 //go:embed testdata/keystore
 var keystoreTestData embed.FS
 
@@ -323,6 +352,76 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 		ContainerRemove(gomock.Any(), validatorImportCtId, types.ContainerRemoveOptions{}).
 		Return(nil).
 		Times(1)
+
+	return dockerClient
+}
+
+func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient {
+	t.Helper()
+	dockerClient := mock_client.NewMockAPIClient(ctrl)
+
+	validatorCtId := "validatorctid"
+	validatorImportCtName := "validator-import-client"
+	validatorImportCtId := "validator-import-ct-id"
+
+	// Mock ContainerList
+	dockerClient.EXPECT().
+		ContainerList(gomock.Any(), types.ContainerListOptions{
+			All:     true,
+			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+		}).
+		Return([]types.Container{
+			{ID: validatorCtId},
+		}, nil)
+	// Mock ContainerInspect
+	dockerClient.EXPECT().
+		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
+		Return(types.ContainerJSON{
+			ContainerJSONBase: &types.ContainerJSONBase{
+				ID: validatorCtId,
+				State: &types.ContainerState{
+					Running: true,
+				},
+			},
+		}, nil).
+		Times(3)
+	// Mock ContainerStop
+	dockerClient.EXPECT().
+		ContainerStop(gomock.Any(), validatorCtId, gomock.Any()).
+		Return(nil)
+	// Mock ContainerCreate
+	dockerClient.EXPECT().
+		ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), validatorImportCtName).
+		Return(container.ContainerCreateCreatedBody{ID: validatorImportCtId}, nil).
+		Times(1)
+	// Mock ContainerStart
+	dockerClient.EXPECT().
+		ContainerStart(gomock.Any(), validatorImportCtId, gomock.Any()).
+		Return(nil).
+		Times(1)
+	dockerClient.EXPECT().
+		ContainerStart(gomock.Any(), services.ServiceCtValidator, gomock.Any()).
+		Return(nil).
+		Times(1)
+	// Mock ContainerWait
+	exitCh := make(chan container.ContainerWaitOKBody, 1)
+	exitCh <- container.ContainerWaitOKBody{
+		StatusCode: 1,
+	}
+	dockerClient.EXPECT().
+		ContainerWait(gomock.Any(), validatorImportCtName, container.WaitConditionNextExit).
+		Return(exitCh, make(chan error)).
+		Times(1)
+	// Mock container logs
+	dockerClient.EXPECT().
+		ContainerLogs(gomock.Any(), validatorImportCtId, gomock.Any()).
+		Return(ioutil.NopCloser(strings.NewReader("logs")), nil).
+		Times(1)
+	// Mock ContainerRemove
+	// dockerClient.EXPECT().
+	// 	ContainerRemove(gomock.Any(), validatorImportCtId, types.ContainerRemoveOptions{}).
+	// 	Return(nil).
+	// 	Times(1)
 
 	return dockerClient
 }
