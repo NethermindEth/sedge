@@ -33,6 +33,7 @@ func SlashingExportCmd(sedgeActions actions.SedgeActions) *cobra.Command {
 		startValidator  bool
 		generationPath  string
 		out             string
+		containerTag    string
 	)
 
 	cmd := &cobra.Command{
@@ -83,6 +84,7 @@ sedge slashing-export --out slashing-data.json --start-validator lighthouse`,
 				StartValidator:  startValidator,
 				GenerationPath:  generationPath,
 				Out:             out,
+				ContainerTag:    containerTag,
 			})
 			if err != nil {
 				log.Fatal(err)
@@ -95,5 +97,6 @@ sedge slashing-export --out slashing-data.json --start-validator lighthouse`,
 	cmd.Flags().BoolVar(&stopValidator, "stop-validator", false, "stops the validator client after export, regardless of the state the validator was in before")
 	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "path to the generation directory")
 	cmd.Flags().StringVarP(&out, "out", "o", "", `path to write slashing protection data (default "[GENERATION_PATH]/slashing_export.json")`)
+	cmd.PersistentFlags().StringVar(&containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.")
 	return cmd
 }

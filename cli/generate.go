@@ -36,6 +36,7 @@ var (
 	generationPath string
 	network        string
 	logging        string
+	containerTag   string
 )
 
 // GenCmdFlags is a struct that holds the flags of the generate command
@@ -93,6 +94,7 @@ You can generate:
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultSedgeDataFolderName, "generation path for sedge data. Default is sedge-data")
 	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, etc.")
 	cmd.PersistentFlags().StringVar(&logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
+	cmd.PersistentFlags().StringVar(&containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.")
 	return cmd
 }
 
@@ -205,6 +207,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		CustomDeployBlock:       flags.customDeployBlock,
 		CustomDeployBlockPath:   customNetworkConfigsData.NetworkDeployBlockPath,
 		MevBoostOnValidator:     flags.mevBoostOnVal,
+		ContainerTag:            containerTag,
 	}
 	err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: &gd,
