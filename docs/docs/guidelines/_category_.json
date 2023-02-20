@@ -1,0 +1,10 @@
+{
+  "label": "Contribution Guidelines",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Guidelines to follow when contributing to Sedge",
+    "slug": "guidelines"
+  }
+}
+

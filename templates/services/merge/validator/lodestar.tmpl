@@ -1,7 +1,7 @@
 {{/* lodestar.tmpl */}}
 {{ define "validator" }}
   validator-import:
-    container_name: validator-import-client
+    container_name: sedge-validator-import{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     image: ${VL_IMAGE_VERSION}
     networks:
       - sedge
@@ -23,7 +23,7 @@
         max-size: "10m"
         max-file: "10"{{end}}
   validator:
-    container_name: validator-client
+    container_name: sedge-validator-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     image: ${VL_IMAGE_VERSION}
     restart: unless-stopped
     depends_on:
