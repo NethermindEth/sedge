@@ -302,6 +302,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		CustomDeployBlockPath:   gd.CustomDeployBlockPath,   // Path to deploy_block.txt
 		UID:                     os.Geteuid(),
 		GID:                     os.Getegid(),
+		ContainerTag:            gd.ContainerTag,
 	}
 
 	// Save to writer

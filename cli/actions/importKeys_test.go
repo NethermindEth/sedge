@@ -292,21 +292,20 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 	dockerClient := mock_client.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
-	validatorImportCtName := "validator-import-client"
 	validatorImportCtId := "validator-import-ct-id"
 
 	// Mock ContainerList
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
 			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
 			{ID: validatorCtId},
 		}, nil)
 	// Mock ContainerInspect
 	inspectCall := dockerClient.EXPECT().
-		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
+		ContainerInspect(gomock.Any(), services.DefaultSedgeValidatorClient).
 		Return(types.ContainerJSON{
 			ContainerJSONBase: &types.ContainerJSONBase{
 				ID: validatorCtId,
@@ -326,7 +325,7 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 		Return(nil)
 	// Mock ContainerCreate
 	dockerClient.EXPECT().
-		ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), validatorImportCtName).
+		ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), services.ServiceCtValidatorImport).
 		Return(container.ContainerCreateCreatedBody{ID: validatorImportCtId}, nil).
 		Times(1)
 	// Mock ContainerStart
@@ -335,7 +334,7 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 		Return(nil).
 		Times(1)
 	dockerClient.EXPECT().
-		ContainerStart(gomock.Any(), services.ServiceCtValidator, gomock.Any()).
+		ContainerStart(gomock.Any(), services.DefaultSedgeValidatorClient, gomock.Any()).
 		Return(nil).
 		Times(1)
 	// Mock ContainerWait
@@ -344,7 +343,7 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 		StatusCode: 0,
 	}
 	dockerClient.EXPECT().
-		ContainerWait(gomock.Any(), validatorImportCtName, container.WaitConditionNextExit).
+		ContainerWait(gomock.Any(), services.ServiceCtValidatorImport, container.WaitConditionNextExit).
 		Return(exitCh, make(chan error)).
 		Times(1)
 	// Mock ContainerRemove
@@ -361,21 +360,20 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 	dockerClient := mock_client.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
-	validatorImportCtName := "validator-import-client"
 	validatorImportCtId := "validator-import-ct-id"
 
 	// Mock ContainerList
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
 			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
 			{ID: validatorCtId},
 		}, nil)
 	// Mock ContainerInspect
 	dockerClient.EXPECT().
-		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
+		ContainerInspect(gomock.Any(), services.DefaultSedgeValidatorClient).
 		Return(types.ContainerJSON{
 			ContainerJSONBase: &types.ContainerJSONBase{
 				ID: validatorCtId,
@@ -391,7 +389,7 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 		Return(nil)
 	// Mock ContainerCreate
 	dockerClient.EXPECT().
-		ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), validatorImportCtName).
+		ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), services.ServiceCtValidatorImport).
 		Return(container.ContainerCreateCreatedBody{ID: validatorImportCtId}, nil).
 		Times(1)
 	// Mock ContainerStart
@@ -400,7 +398,7 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 		Return(nil).
 		Times(1)
 	dockerClient.EXPECT().
-		ContainerStart(gomock.Any(), services.ServiceCtValidator, gomock.Any()).
+		ContainerStart(gomock.Any(), services.DefaultSedgeValidatorClient, gomock.Any()).
 		Return(nil).
 		Times(1)
 	// Mock ContainerWait
@@ -409,7 +407,7 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 		StatusCode: 1,
 	}
 	dockerClient.EXPECT().
-		ContainerWait(gomock.Any(), validatorImportCtName, container.WaitConditionNextExit).
+		ContainerWait(gomock.Any(), services.ServiceCtValidatorImport, container.WaitConditionNextExit).
 		Return(exitCh, make(chan error)).
 		Times(1)
 	// Mock container logs
@@ -417,11 +415,6 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 		ContainerLogs(gomock.Any(), validatorImportCtId, gomock.Any()).
 		Return(ioutil.NopCloser(strings.NewReader("logs")), nil).
 		Times(1)
-	// Mock ContainerRemove
-	// dockerClient.EXPECT().
-	// 	ContainerRemove(gomock.Any(), validatorImportCtId, types.ContainerRemoveOptions{}).
-	// 	Return(nil).
-	// 	Times(1)
 
 	return dockerClient
 }

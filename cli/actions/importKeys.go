@@ -38,18 +38,18 @@ type ImportValidatorKeysCustomOptions struct {
 
 func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) error {
 	// Check validator container exists
-	_, err := s.serviceManager.ContainerId(services.ServiceCtValidator)
+	_, err := s.serviceManager.ContainerId(services.DefaultSedgeValidatorClient)
 	if err != nil {
 		return err
 	}
-	previouslyRunning, err := s.serviceManager.IsRunning(services.ServiceCtValidator)
+	previouslyRunning, err := s.serviceManager.IsRunning(services.DefaultSedgeValidatorClient)
 	if err != nil {
 		return err
 	}
 	// Stop validator
 	if previouslyRunning {
 		log.Info("Stopping validator client")
-		if err := s.serviceManager.Stop(services.ServiceCtValidator); err != nil {
+		if err := s.serviceManager.Stop(services.DefaultSedgeValidatorClient); err != nil {
 			return err
 		}
 	}
@@ -105,7 +105,7 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
 		log.Info("The validator container is being restarted")
-		if err := s.serviceManager.Start(services.ServiceCtValidator); err != nil {
+		if err := s.serviceManager.Start(services.DefaultSedgeValidatorClient); err != nil {
 			return err
 		}
 	}
@@ -120,7 +120,7 @@ func isDefaultKeysPath(generationPath, from string) bool {
 }
 
 func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, options ImportValidatorKeysOptions) (string, error) {
-	validatorImage, err := serviceManager.Image(services.ServiceCtValidator)
+	validatorImage, err := serviceManager.Image(services.DefaultSedgeValidatorClient)
 	if err != nil {
 		return "", err
 	}
@@ -161,7 +161,7 @@ func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceMa
 		},
 		&container.HostConfig{
 			Mounts:      mounts,
-			VolumesFrom: []string{services.ServiceCtValidator},
+			VolumesFrom: []string{services.DefaultSedgeValidatorClient},
 		},
 		&network.NetworkingConfig{},
 		&v1.Platform{},
@@ -174,7 +174,7 @@ func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceMa
 }
 
 func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, options ImportValidatorKeysOptions) (string, error) {
-	validatorImage, err := serviceManager.Image(services.ServiceCtValidator)
+	validatorImage, err := serviceManager.Image(services.DefaultSedgeValidatorClient)
 	if err != nil {
 		return "", err
 	}
@@ -221,7 +221,7 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 		},
 		&container.HostConfig{
 			Mounts:      mounts,
-			VolumesFrom: []string{services.ServiceCtValidator},
+			VolumesFrom: []string{services.DefaultSedgeValidatorClient},
 		},
 		&network.NetworkingConfig{},
 		&v1.Platform{},
@@ -287,7 +287,7 @@ func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManage
 		},
 		&container.HostConfig{
 			Mounts:      mounts,
-			VolumesFrom: []string{services.ServiceCtValidator},
+			VolumesFrom: []string{services.DefaultSedgeValidatorClient},
 		},
 		&network.NetworkingConfig{},
 		&v1.Platform{},
@@ -336,7 +336,7 @@ func setupTekuValidatorImport(dockerClient client.APIClient, serviceManager serv
 		},
 		&container.HostConfig{
 			Mounts:      mounts,
-			VolumesFrom: []string{services.ServiceCtValidator},
+			VolumesFrom: []string{services.DefaultSedgeValidatorClient},
 		},
 		&network.NetworkingConfig{},
 		&v1.Platform{},

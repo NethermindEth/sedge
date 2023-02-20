@@ -25,6 +25,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/NethermindEth/sedge/internal/pkg/services"
+
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/utils"
@@ -58,7 +60,7 @@ var checkOnlyExecution = func(t *testing.T, data *GenData, compose, env io.Reade
 	}
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Execution)
-	assert.Equal(t, composeData.Services.Execution.ContainerName, "execution-client")
+	assert.Equal(t, composeData.Services.Execution.ContainerName, services.DefaultSedgeExecutionClient)
 	return nil
 }
 
@@ -69,7 +71,7 @@ var checkOnlyConsensus = func(t *testing.T, data *GenData, compose, env io.Reade
 	}
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Consensus)
-	assert.Equal(t, composeData.Services.Consensus.ContainerName, "consensus-client")
+	assert.Equal(t, composeData.Services.Consensus.ContainerName, services.DefaultSedgeConsensusClient)
 	return nil
 }
 
@@ -80,7 +82,7 @@ var checkOnlyValidator = func(t *testing.T, data *GenData, compose, env io.Reade
 	}
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Validator)
-	assert.Equal(t, composeData.Services.Validator.ContainerName, "validator-client")
+	assert.Equal(t, composeData.Services.Validator.ContainerName, services.DefaultSedgeValidatorClient)
 	return nil
 }
 
@@ -218,7 +220,7 @@ var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader)
 	if utils.Contains(data.Services, mevBoost) {
 		if composeData.Services.Mevboost != nil {
 			assert.Equal(t, "flashbots/mev-boost:latest", composeData.Services.Mevboost.Image)
-			assert.Equal(t, "mev-boost", composeData.Services.Mevboost.ContainerName)
+			assert.Equal(t, "sedge-mev-boost", composeData.Services.Mevboost.ContainerName)
 			assert.Equal(t, "on-failure", composeData.Services.Mevboost.Restart)
 		} else {
 			return errors.New("mevboost service is not present")
