@@ -210,9 +210,9 @@ func TestImportKeys_CustomOptions(t *testing.T) {
 
 			err = s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 				CustomConfig: actions.ImportValidatorKeysCustomOptions{
-					NetworkConfigPath: &customNetworkConfigPath,
-					GenesisPath:       &customGenesisConfigPath,
-					DeployBlockPath:   &customDeployBlockPath,
+					NetworkConfigPath: customNetworkConfigPath,
+					GenesisPath:       customGenesisConfigPath,
+					DeployBlockPath:   customDeployBlockPath,
 				},
 				ValidatorClient: tt.client,
 				Network:         tt.network,

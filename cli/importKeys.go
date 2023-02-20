@@ -59,15 +59,11 @@ the importation.`,
 				StartValidator:  startValidator,
 				From:            from,
 				GenerationPath:  generationPath,
-			}
-			if customConfigPath != "" {
-				options.CustomConfig.NetworkConfigPath = &customConfigPath
-			}
-			if customGenesisPath != "" {
-				options.CustomConfig.GenesisPath = &customGenesisPath
-			}
-			if customDeployBlock != "" {
-				options.CustomConfig.DeployBlockPath = &customDeployBlock
+				CustomConfig: actions.ImportValidatorKeysCustomOptions{
+					NetworkConfigPath: customConfigPath,
+					GenesisPath:       customGenesisPath,
+					DeployBlockPath:   customDeployBlock,
+				},
 			}
 			err := sedgeActions.ImportValidatorKeys(options)
 			if err != nil {
@@ -76,7 +72,7 @@ the importation.`,
 		},
 	}
 
-	cmd.Flags().StringVarP(&network, "network", "n", "", "network")
+	cmd.Flags().StringVarP(&network, "network", "n", "mainnet", "network")
 	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "path to the generation directory")
 	cmd.Flags().BoolVar(&startValidator, "start-validator", false, "starts the validator client after import, regardless of the state the validator was in before")
 	cmd.Flags().BoolVar(&stopValidator, "stop-validator", false, "stops the validator client after import, regardless of the state the validator was in before")

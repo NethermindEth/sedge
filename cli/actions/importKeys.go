@@ -31,9 +31,9 @@ type ImportValidatorKeysOptions struct {
 	CustomConfig    ImportValidatorKeysCustomOptions
 }
 type ImportValidatorKeysCustomOptions struct {
-	NetworkConfigPath *string
-	GenesisPath       *string
-	DeployBlockPath   *string
+	NetworkConfigPath string
+	GenesisPath       string
+	DeployBlockPath   string
 }
 
 func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) error {
@@ -143,10 +143,10 @@ func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceMa
 		"--account-password-file=/keystore/keystore_password.txt",
 	}
 	// Custom options
-	if options.CustomConfig.NetworkConfigPath != nil {
+	if options.CustomConfig.NetworkConfigPath != "" {
 		mounts = append(mounts, mount.Mount{
 			Type:   mount.TypeBind,
-			Source: *options.CustomConfig.NetworkConfigPath,
+			Source: options.CustomConfig.NetworkConfigPath,
 			Target: "/network_config/config.yml",
 		})
 		cmd = append(cmd, "--chain-config-file=/network_config/config.yml")
@@ -203,10 +203,10 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 		"--importKeystores=/keystore/validator_keys",
 		"--importKeystoresPassword=/keystore/keystore_password.txt",
 	}
-	if options.CustomConfig.NetworkConfigPath != nil {
+	if options.CustomConfig.NetworkConfigPath != "" {
 		mounts = append(mounts, mount.Mount{
 			Type:   mount.TypeBind,
-			Source: *options.CustomConfig.NetworkConfigPath,
+			Source: options.CustomConfig.NetworkConfigPath,
 			Target: "/network_config/config.yaml",
 		})
 		cmd = append(cmd, "--paramsFile=/network_config/config.yaml")
@@ -259,24 +259,24 @@ func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManage
 			Target: "/keystore",
 		},
 	}
-	if options.CustomConfig.NetworkConfigPath != nil {
+	if options.CustomConfig.NetworkConfigPath != "" {
 		mounts = append(mounts, mount.Mount{
 			Type:   mount.TypeBind,
-			Source: *options.CustomConfig.NetworkConfigPath,
+			Source: options.CustomConfig.NetworkConfigPath,
 			Target: "/network_config/config.yaml",
 		})
 	}
-	if options.CustomConfig.GenesisPath != nil {
+	if options.CustomConfig.GenesisPath != "" {
 		mounts = append(mounts, mount.Mount{
 			Type:   mount.TypeBind,
-			Source: *options.CustomConfig.GenesisPath,
+			Source: options.CustomConfig.GenesisPath,
 			Target: "/network_config/genesis.ssz",
 		})
 	}
-	if options.CustomConfig.DeployBlockPath != nil {
+	if options.CustomConfig.DeployBlockPath != "" {
 		mounts = append(mounts, mount.Mount{
 			Type:   mount.TypeBind,
-			Source: *options.CustomConfig.DeployBlockPath,
+			Source: options.CustomConfig.DeployBlockPath,
 			Target: "/network_config/deploy_block.txt",
 		})
 	}
@@ -322,10 +322,10 @@ func setupTekuValidatorImport(dockerClient client.APIClient, serviceManager serv
 			Target: "/keystore",
 		},
 	}
-	if options.CustomConfig.NetworkConfigPath != nil {
+	if options.CustomConfig.NetworkConfigPath != "" {
 		mounts = append(mounts, mount.Mount{
 			Type:   mount.TypeBind,
-			Source: *options.CustomConfig.NetworkConfigPath,
+			Source: options.CustomConfig.NetworkConfigPath,
 			Target: "/network_config/config.yml",
 		})
 	}
