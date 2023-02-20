@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with the new command `slashing-export`.
 - Support the new command `run`, used to run all the services generated
 - Support for PPA packaging (apt install)
+- Added flag `--container-tag` to add a suffix to sedge containers name.
 
 ### Changed
 

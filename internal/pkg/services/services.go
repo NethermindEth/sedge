@@ -21,9 +21,11 @@ import (
 )
 
 const (
-	ServiceCtSlashingData    = "validator-slashing-data"
-	ServiceCtValidator       = "validator-client"
-	ServiceCtValidatorImport = "validator-import-client"
+	ServiceCtSlashingData       = "sedge-validator-slashing-data-manager"
+	ServiceCtValidatorImport    = "sedge-validator-import"
+	DefaultSedgeValidatorClient = "sedge-validator-client"
+	DefaultSedgeExecutionClient = "sedge-execution-client"
+	DefaultSedgeConsensusClient = "sedge-consensus-client"
 )
 
 type ServiceManager interface {
@@ -37,6 +39,13 @@ type ServiceManager interface {
 
 func NewServiceManager(dockerClient client.APIClient) ServiceManager {
 	return &serviceManager{dockerClient: dockerClient}
+}
+
+func ContainerNameWithTag(containerName, tag string) string {
+	if tag == "" {
+		return containerName
+	}
+	return containerName + "-" + tag
 }
 
 type serviceManager struct {
