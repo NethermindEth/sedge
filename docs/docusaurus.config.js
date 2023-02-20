@@ -7,7 +7,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Sedge documentation',
-  tagline: 'Sedge was created for the setup and deployment of Validator, Consensus and Execution clients with ease',
+  tagline: 'Sedge was created for the setup and deployment of an Ethereum node with ease',
   url: 'https://docs.sedge.nethermind.io/',
   baseUrl: '/',
   onBrokenLinks: 'throw',
