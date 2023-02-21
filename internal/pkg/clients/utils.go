@@ -60,9 +60,13 @@ func RandomChoice(clients ClientMap) (client *Client, err error) {
 	return list[n.Int64()], nil
 }
 
+// ErrEmptyClientsList is returned when the clients list is empty
+var ErrEmptyClientsList = errors.New("empty clients list")
+
+// RandomClientName returns a random client name from a list of clients
 func RandomClientName(clients []string) (client string, err error) {
 	if len(clients) == 0 {
-		return client, errors.New(configs.EmptyClientMapError)
+		return client, ErrEmptyClientsList
 	}
 
 	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(clients))))
