@@ -40,6 +40,7 @@ sedge slashing-export --out slashing-data.json --stop-validator lodestar
 sedge slashing-export --out slashing-data.json --start-validator lighthouse
 
 Flags:
+      --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
   -h, --help              help for slashing-export
   -n, --network string    network (default "mainnet")
   -o, --out string        path to write the JSON file in the EIP-3076 format with the slashing protection data (default "<generation-dir>/slashing_export.json")

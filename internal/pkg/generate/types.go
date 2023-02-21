@@ -75,6 +75,7 @@ type GenData struct {
 	ExecutionApiUrl         string
 	ExecutionAuthUrl        string
 	ConsensusApiUrl         string
+	ContainerTag            string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -120,6 +121,7 @@ type DockerComposeData struct {
 	VLStartGracePeriod      uint
 	UID                     int // Needed for teku
 	GID                     int // Needed for teku
+	ContainerTag            string
 }
 
 // WithConsensusClient returns true if the consensus client is explicitly required
