@@ -755,13 +755,13 @@ func TestGeneratePathCases(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
-	path = filepath.Join(path, "jwtsecret")
+	jwtPath := filepath.Join(path, "jwtsecret")
 
 	sedgeActions = actions.NewSedgeActions(actions.SedgeActionsOptions{})
 
 	rootCmd = RootCmd()
 	rootCmd.AddCommand(GenerateCmd(sedgeActions))
-	argsL = []string{"generate", "execution", "--jwt-secret-path", path}
+	argsL = []string{"generate", "execution", "--path", path, "--jwt-secret-path", jwtPath}
 	rootCmd.SetArgs(argsL)
 	rootCmd.SetOutput(io.Discard)
 
