@@ -13,8 +13,8 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
-	mock_client "github.com/NethermindEth/sedge/test/mock_docker"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -66,7 +66,11 @@ func TestImportKeys_ValidatorRunning(t *testing.T) {
 				dockerClient := importKeysGoldenPath(t, ctrl, false)
 				serviceManager := services.NewServiceManager(dockerClient)
 				cmdRunner := test.SimpleCMDRunner{}
-				s := actions.NewSedgeActions(dockerClient, serviceManager, &cmdRunner)
+				s := actions.NewSedgeActions(actions.SedgeActionsOptions{
+					DockerClient:   dockerClient,
+					ServiceManager: serviceManager,
+					CommandRunner:  &cmdRunner,
+				})
 
 				from, err := setupKeystoreDir(t)
 				if err != nil {
@@ -97,7 +101,11 @@ func TestImportKeysCustom_ValidatorRunning(t *testing.T) {
 			dockerClient := importKeysGoldenPath(t, ctrl, true)
 			serviceManager := services.NewServiceManager(dockerClient)
 			cmdRunner := test.SimpleCMDRunner{}
-			s := actions.NewSedgeActions(dockerClient, serviceManager, &cmdRunner)
+			s := actions.NewSedgeActions(actions.SedgeActionsOptions{
+				DockerClient:   dockerClient,
+				ServiceManager: serviceManager,
+				CommandRunner:  &cmdRunner,
+			})
 
 			from, err := setupKeystoreDir(t)
 			if err != nil {
@@ -177,7 +185,11 @@ func TestImportKeys_CustomOptions(t *testing.T) {
 			dockerClient := importKeysGoldenPath(t, ctrl, tt.customImage)
 			serviceManager := services.NewServiceManager(dockerClient)
 			cmdRunner := test.SimpleCMDRunner{}
-			s := actions.NewSedgeActions(dockerClient, serviceManager, &cmdRunner)
+			s := actions.NewSedgeActions(actions.SedgeActionsOptions{
+				DockerClient:   dockerClient,
+				ServiceManager: serviceManager,
+				CommandRunner:  &cmdRunner,
+			})
 
 			from, err := setupKeystoreDir(t)
 			if err != nil {
@@ -231,7 +243,11 @@ func TestImportKeys_UnexpectedExitCode(t *testing.T) {
 	dockerClient := importKeysExitError(t, ctrl)
 	serviceManager := services.NewServiceManager(dockerClient)
 	cmdRunner := test.SimpleCMDRunner{}
-	s := actions.NewSedgeActions(dockerClient, serviceManager, &cmdRunner)
+	s := actions.NewSedgeActions(actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+		CommandRunner:  &cmdRunner,
+	})
 
 	from, err := setupKeystoreDir(t)
 	if err != nil {
@@ -289,7 +305,7 @@ func setupKeystoreDir(t *testing.T) (string, error) {
 // required responses for a correct validator import keys container execution.
 func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage bool) client.APIClient {
 	t.Helper()
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
 	validatorImportCtId := "validator-import-ct-id"
@@ -357,7 +373,7 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 
 func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient {
 	t.Helper()
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
 	validatorImportCtId := "validator-import-ct-id"

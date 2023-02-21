@@ -18,6 +18,7 @@ package cli
 import (
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 
@@ -132,6 +133,11 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 
 	// Warn if checkpoint url used
 	if flags.checkpointSyncUrl != "" {
+		// Check checkpoint url is a valid URL
+		_, err := url.ParseRequestURI(flags.checkpointSyncUrl)
+		if err != nil {
+			return fmt.Errorf(configs.InvalidCkptSyncURL, flags.checkpointSyncUrl)
+		}
 		log.Warnf(configs.CheckpointUrlUsedWarning, flags.checkpointSyncUrl)
 	}
 
@@ -263,6 +269,9 @@ func generateJWTSecret(jwtPath string) (string, error) {
 			return jwtPath, err
 		}
 	} else if filepath.IsAbs(jwtPath) { // Ensure jwtPath is absolute
+		if f, err := os.Stat(jwtPath); os.IsNotExist(err) || !f.Mode().IsRegular() {
+			return jwtPath, fmt.Errorf(configs.InvalidJWTSecret, jwtPath)
+		}
 		if jwtPath, err = filepath.Abs(jwtPath); err != nil {
 			return jwtPath, err
 		}

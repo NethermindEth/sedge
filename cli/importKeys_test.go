@@ -20,8 +20,8 @@ import (
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli/actions"
-	mock_actions "github.com/NethermindEth/sedge/cli/actions/mock"
 	"github.com/NethermindEth/sedge/configs"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -123,7 +123,7 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			actions := mock_actions.NewMockSedgeActions(gomock.NewController(t))
+			actions := sedge_mocks.NewMockSedgeActions(gomock.NewController(t))
 
 			actions.EXPECT().ImportValidatorKeys(tt.expectedOptions).Times(1)
 

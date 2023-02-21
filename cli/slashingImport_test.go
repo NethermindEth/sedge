@@ -16,18 +16,24 @@ limitations under the License.
 package cli_test
 
 import (
+	"errors"
+	"io"
 	"path/filepath"
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
-	"github.com/NethermindEth/sedge/cli/actions/mock"
 	"github.com/NethermindEth/sedge/configs"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSlashingImport_ValidatorIsRequired(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
 	tests := []struct {
 		name        string
 		args        []string
@@ -49,12 +55,16 @@ func TestSlashingImport_ValidatorIsRequired(t *testing.T) {
 
 		slashingImportCmd := cli.SlashingImportCmd(nil)
 		slashingImportCmd.SetArgs(tt.args)
+		slashingImportCmd.SetOutput(io.Discard)
 		err := slashingImportCmd.Execute()
 		assert.ErrorIs(t, err, tt.expectedErr)
 	}
 }
 
 func TestSlashingImport_Params(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
 	tests := []struct {
 		name          string
 		args          []string
@@ -174,14 +184,57 @@ func TestSlashingImport_Params(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			actions := mock_actions.NewMockSedgeActions(ctrl)
+			actions := sedge_mocks.NewMockSedgeActions(ctrl)
 			actions.EXPECT().ImportSlashingInterchangeData(tt.actionOptions).Times(1)
 
 			slashingImportCmd := cli.SlashingImportCmd(actions)
 			slashingImportCmd.SetArgs(tt.args)
+			slashingImportCmd.SetOutput(io.Discard)
 			err := slashingImportCmd.Execute()
 
 			assert.Nil(t, err)
+		})
+	}
+}
+
+func TestSlashingImport_Errors(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
+	tests := []struct {
+		name string
+		args []string
+		run  bool
+		err  error
+	}{
+		{
+			name: "invalid network",
+			args: []string{"lighthouse", "--network", "invalid_network"},
+			err:  errors.New("invalid network: invalid_network"),
+		},
+		{
+			name: "action error",
+			args: []string{"lighthouse"},
+			run:  true,
+			err:  errors.New("action error"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			actions := sedge_mocks.NewMockSedgeActions(ctrl)
+			if tt.run {
+				actions.EXPECT().ImportSlashingInterchangeData(gomock.Any()).Return(errors.New("action error")).Times(1)
+			}
+
+			slashingImportCmd := cli.SlashingImportCmd(actions)
+			slashingImportCmd.SetArgs(tt.args)
+			slashingImportCmd.SetOutput(io.Discard)
+			err := slashingImportCmd.Execute()
+
+			assert.EqualError(t, err, tt.err.Error())
 		})
 	}
 }

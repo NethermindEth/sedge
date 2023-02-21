@@ -18,6 +18,7 @@ package cli
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,8 +29,8 @@ import (
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
-	"github.com/NethermindEth/sedge/test/mock_prompts"
 	"github.com/docker/docker/client"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
@@ -161,9 +162,11 @@ func (flags *CliCmdFlags) toString() string {
 
 func prepareCliCmd(tc cliCmdTestCase) {
 	// Set output buffers
-	log.SetOutput(tc.fdOut)
+	// log.SetOutput(tc.fdOut)
 	// Set config file path
 	initLogging()
+	// Silence logger
+	log.SetOutput(io.Discard)
 }
 
 func buildCliTestCase(
@@ -177,7 +180,7 @@ func buildCliTestCase(
 	tc := cliCmdTestCase{}
 	configPath := t.TempDir()
 
-	err := test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", caseTestDataDir, "config"), configPath)
+	err := test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", caseTestDataDir), configPath)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
@@ -368,7 +371,7 @@ func TestCliCmd(t *testing.T) {
 			descr := fmt.Sprintf("sedge cli %s", tc.args.toString())
 
 			ctrl := gomock.NewController(t)
-			prompt := mock_prompts.NewMockPrompt(ctrl)
+			prompt := sedge_mocks.NewMockPrompt(ctrl)
 			defer ctrl.Finish()
 
 			dockerClient, err := client.NewClientWithOpts(client.FromEnv)
@@ -377,12 +380,16 @@ func TestCliCmd(t *testing.T) {
 			}
 			defer dockerClient.Close()
 			serviceManager := services.NewServiceManager(dockerClient)
-			sedgeActions := actions.NewSedgeActions(dockerClient, serviceManager, nil)
+			sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{
+				DockerClient:   dockerClient,
+				ServiceManager: serviceManager,
+			})
 
 			rootCmd := RootCmd()
 			rootCmd.AddCommand(CliCmd(tc.runner, prompt, serviceManager, sedgeActions))
 			argsL := append([]string{"cli"}, tc.args.argsList()...)
 			rootCmd.SetArgs(argsL)
+			rootCmd.SetOutput(io.Discard)
 
 			prepareCliCmd(tc)
 

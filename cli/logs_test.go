@@ -17,13 +17,16 @@ package cli
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/test"
@@ -145,5 +148,109 @@ func TestLogsCmd(t *testing.T) {
 		} else if !tc.isErr && err != nil {
 			t.Errorf("%s failed: %v", descr, err)
 		}
+	}
+}
+
+func TestLogs_Error(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
+	// docker compose ps error, PreCheck error
+	desc := "docker compose ps error, PreCheck error"
+	runner := &test.SimpleCMDRunner{
+		SRunCMD: func(c commands.Command) (string, error) {
+			if strings.Contains(c.Cmd, "docker compose") && strings.Contains(c.Cmd, "ps") {
+				return "", errors.New("runner error")
+			}
+			return "", nil
+		},
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
+			return "", nil
+		},
+	}
+	tt := buildDownTestCase(t, "case_1", false)
+
+	logsCmd := LogsCmd(runner)
+	logsCmd.SetArgs([]string{"--path", tt.generationPath})
+	logsCmd.SetOutput(io.Discard)
+	err := logsCmd.Execute()
+
+	if err != nil {
+		assert.EqualError(t, err, "it seems docker compose plugin is not installed. Please install it and try again. Error: runner error", desc)
+	} else {
+		assert.NoError(t, err, desc)
+	}
+
+	// docker compose ps --status running error, Check Containers error
+	desc = "docker compose ps --status running error, Check Containers error"
+	runner = &test.SimpleCMDRunner{
+		SRunCMD: func(c commands.Command) (string, error) {
+			if strings.Contains(c.Cmd, "docker compose") && strings.Contains(c.Cmd, "ps") && strings.Contains(c.Cmd, "--filter status=running") {
+				return "", errors.New("runner error")
+			}
+			return "", nil
+		},
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
+			return "", nil
+		},
+	}
+
+	logsCmd = LogsCmd(runner)
+	logsCmd.SetArgs([]string{"--path", tt.generationPath})
+	logsCmd.SetOutput(io.Discard)
+	err = logsCmd.Execute()
+
+	if err != nil {
+		assert.EqualError(t, err, "services of docker-compose script provided are not running. Error: runner error", desc)
+	} else {
+		assert.NoError(t, err, desc)
+	}
+
+	// docker compose down error
+	desc = "docker compose down error"
+	runner = &test.SimpleCMDRunner{
+		SRunCMD: func(c commands.Command) (string, error) {
+			if strings.Contains(c.Cmd, "docker compose") && strings.Contains(c.Cmd, "down") {
+				return "", errors.New("runner error")
+			}
+			return "", nil
+		},
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
+			return "", nil
+		},
+	}
+
+	logsCmd = LogsCmd(runner)
+	logsCmd.SetArgs([]string{"--path", tt.generationPath})
+	logsCmd.SetOutput(io.Discard)
+	err = logsCmd.Execute()
+
+	if err != nil {
+		assert.EqualError(t, err, fmt.Sprintf("command 'docker compose -f %s/docker-compose.yml down' throws error: runner error", tt.generationPath), desc)
+	} else {
+		assert.NoError(t, err, desc)
+	}
+
+	// Generation path error
+	desc = "Generation path error"
+	runner = &test.SimpleCMDRunner{
+		SRunCMD: func(c commands.Command) (string, error) {
+			return "", nil
+		},
+		SRunBash: func(bs commands.ScriptFile) (string, error) {
+			return "", nil
+		},
+	}
+	tDir := t.TempDir()
+
+	logsCmd = LogsCmd(runner)
+	logsCmd.SetArgs([]string{"--path", tDir})
+	logsCmd.SetOutput(io.Discard)
+	err = logsCmd.Execute()
+
+	if err != nil {
+		assert.EqualError(t, err, fmt.Sprintf(configs.DockerComposeScriptNotFoundError, tDir, configs.DefaultAbsSedgeDataPath), desc)
+	} else {
+		assert.NoError(t, err, desc)
 	}
 }

@@ -15,8 +15,6 @@ limitations under the License.
 */
 package cli
 
-// notest
-
 import (
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
@@ -30,10 +28,12 @@ func NetworksCmd() *cobra.Command {
 		Use:   "networks",
 		Short: "List supported networks",
 		Long:  `List supported networks`,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := runListNetworksCmd(cmd, args); err != nil {
-				log.Fatal(err)
+				return err
 			}
+
+			return nil
 		},
 	}
 	return cmd

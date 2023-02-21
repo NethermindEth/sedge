@@ -25,7 +25,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
-	mock_client "github.com/NethermindEth/sedge/test/mock_docker"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
@@ -33,9 +33,12 @@ import (
 
 func newAction(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
 	t.Helper()
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
+	return actions.NewSedgeActions(actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+	})
 }
 
 // Test that the generated compose file with dump data is generated correctly
