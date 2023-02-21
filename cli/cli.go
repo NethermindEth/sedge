@@ -788,7 +788,7 @@ func inputKeystorePassphrasePath(p prompter.Prompter, o *CliCmdOptions) (err err
 }
 
 func inputKeystorePassphrase(p prompter.Prompter, o *CliCmdOptions) (err error) {
-	o.keystorePassphrase, err = p.InputSecret("Passphrase")
+	o.keystorePassphrase, err = p.InputSecret("Enter keystore passphrase (min 8 characters):")
 	return
 }
 
