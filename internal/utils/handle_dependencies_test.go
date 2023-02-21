@@ -23,6 +23,7 @@ import (
 
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/test"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetScriptPath(t *testing.T) {
@@ -260,4 +261,61 @@ func TestInstallDependency(t *testing.T) {
 			t.Errorf("%s failed: %v", descr, err)
 		}
 	}
+}
+
+func TestDependenciesSupported(t *testing.T) {
+	tests := []struct {
+		name         string
+		os           []string
+		dependencies []string
+		supported    []string
+		unsupported  []string
+	}{
+		{
+			name:         "No dependencies",
+			os:           []string{"linux", "darwin", "windows"},
+			dependencies: []string{},
+			supported:    []string{},
+			unsupported:  []string{},
+		},
+		{
+			name:         "Supported docker in linux",
+			os:           []string{"linux"},
+			dependencies: []string{"docker", "wR0n9"},
+			supported:    []string{"docker"},
+			unsupported:  []string{"wR0n9"},
+		},
+		{
+			name:         "Anything supported in linux and windows",
+			os:           []string{"darwin", "windows"},
+			dependencies: []string{"docker", "wR0n9"},
+			supported:    []string{},
+			unsupported:  []string{"docker", "wR0n9"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !contains(tt.os, runtime.GOOS) {
+				t.Skipf("Test not supported in %s", runtime.GOOS)
+			}
+			supported, unsupported := DependenciesSupported(tt.dependencies)
+			assert.Len(t, supported, len(tt.supported))
+			for _, s := range supported {
+				assert.Contains(t, tt.supported, s)
+			}
+			assert.Len(t, unsupported, len(tt.unsupported))
+			for _, s := range unsupported {
+				assert.Contains(t, tt.unsupported, s)
+			}
+		})
+	}
+}
+
+func contains(elems []string, v string) bool {
+	for _, s := range elems {
+		if v == s {
+			return true
+		}
+	}
+	return false
 }

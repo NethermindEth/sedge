@@ -211,6 +211,8 @@ func dependencySupported(dependency string) bool {
 	return true
 }
 
+// DependenciesSupported returns the list of supported and unsupported dependencies
+// from the given list of dependencies.
 func DependenciesSupported(dependencies []string) (supported []string, unsupported []string) {
 	for _, dependency := range dependencies {
 		if dependencySupported(dependency) {
