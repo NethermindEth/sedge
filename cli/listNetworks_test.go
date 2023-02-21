@@ -16,28 +16,10 @@ limitations under the License.
 package cli
 
 import (
-	"bytes"
 	"testing"
 
 	log "github.com/sirupsen/logrus"
 )
-
-type networksTestCase struct {
-	name     string
-	logsOut  *bytes.Buffer
-	tableOut *bytes.Buffer
-	isErr    bool
-}
-
-func buildNetworksTestCase(t *testing.T, name string, isErr bool) listClientsTestCase {
-	tc := listClientsTestCase{}
-
-	tc.name = name
-	tc.logsOut = new(bytes.Buffer)
-	tc.tableOut = new(bytes.Buffer)
-	tc.isErr = isErr
-	return tc
-}
 
 func TestNetworksCmd(t *testing.T) {
 	tcs := [...]listClientsTestCase{

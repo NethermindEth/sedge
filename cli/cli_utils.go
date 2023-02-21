@@ -384,29 +384,6 @@ func handleJWTSecret(generationPath string) (string, error) {
 	return jwtPath, nil
 }
 
-func preRunTeku(services []string, generationPath string) error {
-	log.Info(configs.PreparingTekuDatadir)
-	// Change umask to avoid OS from changing the permissions
-	utils.SetUmask(0)
-	for _, s := range services {
-		if s == "all" || s == consensus {
-			// Prepare consensus datadir
-			path := filepath.Join(generationPath, configs.ConsensusDir)
-			if err := os.MkdirAll(path, 0o777); err != nil {
-				return fmt.Errorf(configs.TekuDatadirError, consensus, err)
-			}
-		}
-		if s == "all" || s == validator {
-			// Prepare validator datadir
-			path := filepath.Join(generationPath, configs.ValidatorDir)
-			if err := os.MkdirAll(path, 0o777); err != nil {
-				return fmt.Errorf(configs.TekuDatadirError, validator, err)
-			}
-		}
-	}
-	return nil
-}
-
 type CustomNetworkConfigsData struct {
 	ChainSpecPath          string
 	NetworkConfigPath      string
