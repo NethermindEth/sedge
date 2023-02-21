@@ -43,44 +43,63 @@ func newAction(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
 
 // Test that the generated compose file with dump data is generated correctly
 func TestGenerateDockerCompose(t *testing.T) {
+	tests := []struct {
+		tag string
+	}{
+		{
+			tag: "",
+		},
+		{
+			tag: "sampleTag",
+		},
+	}
+
 	configs.InitNetworksConfigs()
-	samplePath := t.TempDir()
-	sampleData := &generate.GenData{
-		ExecutionClient: &clients.Client{Name: "nethermind"},
-		Network:         "mainnet",
+	for _, test := range tests {
+
+		samplePath := t.TempDir()
+		sampleData := &generate.GenData{
+			ExecutionClient: &clients.Client{Name: "nethermind"},
+			Network:         "mainnet",
+			ContainerTag:    test.tag,
+		}
+		sedgeAction := newAction(t, nil)
+
+		err := sedgeAction.Generate(actions.GenerateOptions{
+			GenerationData: sampleData,
+			GenerationPath: samplePath,
+		})
+		if err != nil {
+			t.Error("GenerateDockerComposeAndEnvFile() failed", err)
+			return
+		}
+
+		// Check that docker-compose file exists
+		assert.FileExists(t, filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
+		// Check that .env exists
+		assert.FileExists(t, filepath.Join(samplePath, configs.DefaultEnvFileName))
+
+		// Validate that Execution Client info matches the sample data
+		// load the docker-compose file
+		composeFile, err := os.ReadFile(filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
+		assert.Nilf(t, err, "unable to read docker-compose.yml")
+
+		var composeData generate.ComposeData
+		err = yaml.Unmarshal(composeFile, &composeData)
+		assert.Nilf(t, err, "unable to parse docker-compose.yml")
+
+		// Check that the execution service is set.
+		assert.NotNil(t, composeData.Services.Execution)
+		// Check that the execution container name contains the tag.
+		if test.tag == "" {
+			assert.Equal(t, composeData.Services.Execution.ContainerName, services.DefaultSedgeExecutionClient)
+		} else {
+			assert.Equal(t, composeData.Services.Execution.ContainerName, services.DefaultSedgeExecutionClient+"-sampleTag")
+		}
+
+		// Check other services are nil
+		assert.Nil(t, composeData.Services.Consensus)
 	}
-	sedgeAction := newAction(t, nil)
-
-	err := sedgeAction.Generate(actions.GenerateOptions{
-		GenerationData: sampleData,
-		GenerationPath: samplePath,
-	})
-	if err != nil {
-		t.Error("GenerateDockerComposeAndEnvFile() failed", err)
-		return
-	}
-
-	// Check that docker-compose file exists
-	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
-	// Check that .env exists
-	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultEnvFileName))
-
-	// Validate that Execution Client info matches the sample data
-	// load the docker-compose file
-	composeFile, err := os.ReadFile(filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
-	assert.Nilf(t, err, "unable to read docker-compose.yml")
-
-	var composeData generate.ComposeData
-	err = yaml.Unmarshal(composeFile, &composeData)
-	assert.Nilf(t, err, "unable to parse docker-compose.yml")
-
-	// Check that the execution service is set.
-	assert.NotNil(t, composeData.Services.Execution)
-	// Check that the execution container name is `execution-client'.
-	assert.Equal(t, composeData.Services.Execution.ContainerName, "execution-client")
-
-	// Check other services are nil
-	assert.Nil(t, composeData.Services.Consensus)
 }
 
 func TestFolderCreationOnCompose(t *testing.T) {

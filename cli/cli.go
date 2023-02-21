@@ -67,6 +67,7 @@ type CliCmdFlags struct {
 	vlExtraFlags       *[]string
 	logging            string
 	slashingProtection string
+	containerTag       string
 }
 
 type clientImages struct {
@@ -85,14 +86,14 @@ func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceMana
 		Use:   "cli [flags]",
 		Short: "Quick start sedge",
 		Long: `Run the setup tool on-premise in a quick way. Provide only the command line
-	options and the tool will do all the work.
+options and the tool will do all the work.
 	
-	First it will check if dependencies such as docker are installed on your machine
-	and provide instructions for installing them if they are not installed.
+First it will check if dependencies such as docker are installed on your machine
+and provide instructions for installing them if they are not installed.
 	
-	Second, it will generate docker-compose scripts to run the full setup according to your selection.
+Second, it will generate docker-compose scripts to run the full setup according to your selection.
 	
-	Finally, it will run the generated docker-compose script. Only execution and consensus clients will be executed by default.`,
+Finally, it will run the generated docker-compose script.`,
 		Args: cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// notest
@@ -144,6 +145,7 @@ func CliCmd(cmdRunner commands.CommandRunner, prompt prompts.Prompt, serviceMana
 	flags.customEnodes = cmd.Flags().StringSlice("execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
 	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
 	cmd.Flags().StringVar(&flags.slashingProtection, "slashing-protection", "", "Path to the file with slashing protection interchange data (EIP-3076)")
+	cmd.PersistentFlags().StringVar(&flags.containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.")
 	cmd.Flags().SortFlags = false
 	return cmd
 }
@@ -382,6 +384,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		CustomGenesisPath:       customNetworkConfigsData.NetworkGenesisPath,
 		CustomDeployBlock:       flags.customDeployBlock,
 		CustomDeployBlockPath:   customNetworkConfigsData.NetworkDeployBlockPath,
+		ContainerTag:            flags.containerTag,
 	}
 	err = sedgeActions.Generate(actions.GenerateOptions{GenerationData: gd, GenerationPath: flags.generationPath})
 	if err != nil {
@@ -409,8 +412,9 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 			return []error{err}
 		}
 		if flags.slashingProtection != "" {
+			validatorImportClient := services.ContainerNameWithTag(services.ServiceCtValidatorImport, flags.containerTag)
 			// Setup wait for validator import
-			exitCh, errCh := serviceManager.Wait(services.ServiceCtValidatorImport, dockerct.WaitConditionNextExit)
+			exitCh, errCh := serviceManager.Wait(validatorImportClient, dockerct.WaitConditionNextExit)
 			// Run validator-import
 			if err := runAndShowContainers(cmdRunner, []string{"validator-import"}, flags); err != nil {
 				return []error{err}
@@ -429,7 +433,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 				return []error{err}
 			}
 			if exitCode != 0 {
-				return []error{fmt.Errorf("%s ends with unexpected status code %d", services.ServiceCtValidatorImport, exitCode)}
+				return []error{fmt.Errorf("%s ends with unexpected status code %d", validatorImportClient, exitCode)}
 			}
 			if err := sedgeActions.ImportSlashingInterchangeData(actions.SlashingImportOptions{
 				ValidatorClient: flags.validatorName,
