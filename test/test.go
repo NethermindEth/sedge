@@ -15,6 +15,8 @@ limitations under the License.
 */
 package test
 
+// notest
+
 import (
 	"fmt"
 	"os"
@@ -34,6 +36,10 @@ func CreateFakeDep(t *testing.T, dependency string) (depPath string) {
 		t.Fatalf("Can't fake dependency %s", dependency)
 	}
 	file.Close()
+	err = os.Chmod(filepath.Join(depPath, dependency), 0o777)
+	if err != nil {
+		t.Fatalf("Can't fake dependency %s", dependency)
+	}
 
 	PATH := os.Getenv("PATH")
 	err = os.Setenv("PATH", fmt.Sprintf("%s:%s", PATH, depPath))

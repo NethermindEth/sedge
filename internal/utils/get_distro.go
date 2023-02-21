@@ -60,6 +60,7 @@ func getOSInfo() (distro DistroInfo, err error) {
 	defer func() {
 		cerr := f.Close()
 		if err == nil && cerr != nil {
+			// notest
 			log.Errorf(configs.ClosingFileError, file)
 			err = cerr
 		}

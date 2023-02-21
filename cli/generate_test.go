@@ -16,7 +16,9 @@ limitations under the License.
 package cli
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,6 +27,8 @@ import (
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/test"
+	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 type subCmd struct {
@@ -48,11 +52,10 @@ type globalFlags struct {
 
 type generateCmdTestCase struct {
 	name       string
-	configPath string
 	subCommand subCmd
 	args       GenCmdFlags
 	globalArgs globalFlags
-	isErr      bool
+	err        error
 }
 
 func (flags *globalFlags) argsList() []string {
@@ -152,17 +155,13 @@ func buildGenerateTestCase(
 	args GenCmdFlags,
 	globalArgs globalFlags,
 	subCommand subCmd,
-	isErr bool,
+	tErr error,
 ) *generateCmdTestCase {
 	tc := generateCmdTestCase{}
 	configPath := t.TempDir()
 
-	err := test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", caseTestDataDir, "config"), configPath)
-	if err != nil {
-		t.Fatalf("Can't build test case: %v", err)
-	}
 	dcPath := filepath.Join(configPath, "docker-compose-scripts")
-	err = os.Mkdir(dcPath, os.ModePerm)
+	err := os.Mkdir(dcPath, os.ModePerm)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
@@ -172,14 +171,68 @@ func buildGenerateTestCase(
 	tc.globalArgs = globalArgs
 	tc.globalArgs.generationPath = t.TempDir()
 	tc.subCommand = subCommand
-	tc.configPath = filepath.Join(configPath, "config.yaml")
-	tc.isErr = isErr
+	tc.err = tErr
 	return &tc
 }
 
 func TestGenerateCmd(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
 	configs.InitNetworksConfigs()
 	tcs := []generateCmdTestCase{
+		*buildGenerateTestCase(
+			t,
+			"Execution, bad number of arguments", "case_1",
+			GenCmdFlags{},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "",
+				logging:        "",
+			},
+			subCmd{
+				name: "execution",
+				args: []string{"nethermind", "besu"},
+			},
+			errors.New("requires one argument"),
+		),
+		*buildGenerateTestCase(
+			t,
+			"Consensus, bad number of arguments", "case_1",
+			GenCmdFlags{
+				executionAuthUrl: "http://localhost:8545",
+				executionApiUrl:  "http://localhost:8545",
+			},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "",
+				logging:        "",
+			},
+			subCmd{
+				name: "consensus",
+				args: []string{"teku", "lodestar"},
+			},
+			errors.New("requires one argument"),
+		),
+		*buildGenerateTestCase(
+			t,
+			"Validator, bad number of arguments", "case_1",
+			GenCmdFlags{
+				consensusApiUrl: "http://localhost:4000",
+			},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "",
+				logging:        "",
+			},
+			subCmd{
+				name: "validator",
+				args: []string{"teku", "lodestar"},
+			},
+			errors.New("requires one argument"),
+		),
 		*buildGenerateTestCase(
 			t,
 			"full-node Fixed clients", "case_1",
@@ -191,24 +244,84 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			globalFlags{
 				install: false,
-				network: "mainnet",
 				logging: "",
 			},
 			subCmd{
 				name: "full-node",
 				args: []string{},
 			},
-			false,
+			nil,
+		),
+		*buildGenerateTestCase(
+			t,
+			"full-node Random clients, no feeRecipient", "case_1",
+			GenCmdFlags{},
+			globalFlags{
+				install: false,
+				logging: "",
+			},
+			subCmd{
+				name: "full-node",
+				args: []string{},
+			},
+			nil,
+		),
+		*buildGenerateTestCase(
+			t,
+			"full-node Random clients, custom Ckpt sync endpoint", "case_1",
+			GenCmdFlags{
+				checkpointSyncUrl: "http://localhost:8080",
+			},
+			globalFlags{
+				install: false,
+				logging: "",
+			},
+			subCmd{
+				name: "full-node",
+				args: []string{},
+			},
+			nil,
+		),
+		*buildGenerateTestCase(
+			t,
+			"consensus Random client, custom Ckpt sync endpoint", "case_1",
+			GenCmdFlags{
+				executionAuthUrl:  "http://localhost:8545",
+				executionApiUrl:   "http://localhost:8545",
+				checkpointSyncUrl: "http://localhost:8080",
+			},
+			globalFlags{
+				install: false,
+				logging: "",
+			},
+			subCmd{
+				name: "consensus",
+				args: []string{},
+			},
+			nil,
+		),
+		*buildGenerateTestCase(
+			t,
+			"consensus Random client, bad custom Ckpt sync endpoint", "case_1",
+			GenCmdFlags{
+				executionAuthUrl:  "http://localhost:8545",
+				executionApiUrl:   "http://localhost:8545",
+				checkpointSyncUrl: "./8080",
+			},
+			globalFlags{
+				install: false,
+				logging: "",
+			},
+			subCmd{
+				name: "consensus",
+				args: []string{},
+			},
+			fmt.Errorf(configs.InvalidCkptSyncURL, "./8080"),
 		),
 		*buildGenerateTestCase(
 			t,
 			"Wrong sub command", "case_1",
-			GenCmdFlags{
-				executionName:     "nethermind",
-				validatorName:     "lighthouse",
-				feeRecipient:      "0x0000000000000000000000000000000000000000",
-				checkpointSyncUrl: "http://localhost:8545",
-			},
+			GenCmdFlags{},
 			globalFlags{
 				install: false,
 				network: "",
@@ -218,7 +331,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "full",
 				args: []string{},
 			},
-			true,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -238,7 +351,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "full-node",
 				args: []string{},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -256,15 +369,13 @@ func TestGenerateCmd(t *testing.T) {
 				name: "full-node",
 				args: []string{},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
 			"Bad network input", "case_1",
 			GenCmdFlags{
-				executionName: "nethermind",
-				consensusName: "lighthouse",
-				feeRecipient:  "0x0000000000000000000000000000000000000000",
+				feeRecipient: "0x0000000000000000000000000000000000000000",
 			},
 			globalFlags{
 				install:        false,
@@ -274,9 +385,9 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			subCmd{
 				name: "consensus",
-				args: []string{},
+				args: []string{"lighthouse"},
 			},
-			true,
+			errors.New("unknown network \"wrong\". Please provide correct network name. Use 'networks' command to see the list of supported networks"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -296,7 +407,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{"teku"},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -315,7 +426,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{"teku"},
 			},
-			true,
+			errors.New("required flag(s) \"execution-auth-url\" not set"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -334,7 +445,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{"teku"},
 			},
-			true,
+			errors.New("required flag(s) \"execution-api-url\" not set"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -354,7 +465,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{"wrong"},
 			},
-			true,
+			errors.New("invalid consensus client"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -373,7 +484,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "validator",
 				args: []string{},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -391,11 +502,11 @@ func TestGenerateCmd(t *testing.T) {
 				name: "validator",
 				args: []string{},
 			},
-			true,
+			errors.New("required flag(s) \"consensus-url\" not set"),
 		),
 		*buildGenerateTestCase(
 			t,
-			"validator good client", "case_1",
+			"Validator good client", "case_1",
 			GenCmdFlags{
 				consensusApiUrl: "http://localhost:4000",
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
@@ -410,7 +521,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "validator",
 				args: []string{"teku"},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -426,7 +537,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "mevboost",
 				args: []string{},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -442,7 +553,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "mevboost",
 				args: []string{"wrong"},
 			},
-			true,
+			errors.New("unknown command \"wrong\" for \"sedge generate mevboost\""),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -460,7 +571,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "execution",
 				args: []string{"nethermind"},
 			},
-			false,
+			nil,
 		),
 		*buildGenerateTestCase(
 			t,
@@ -476,7 +587,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "execution",
 				args: []string{"geth"},
 			},
-			true,
+			errors.New("invalid execution client"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -492,7 +603,7 @@ func TestGenerateCmd(t *testing.T) {
 			subCmd{
 				name: "full-node",
 			},
-			true),
+			errors.New("custom flags used without --network custom")),
 		*buildGenerateTestCase(
 			t,
 			"Custom Network and custom ttd, should work", "case_1",
@@ -508,7 +619,7 @@ func TestGenerateCmd(t *testing.T) {
 			subCmd{
 				name: "full-node",
 			},
-			false),
+			nil),
 		*buildGenerateTestCase(
 			t,
 			"Custom Network and custom ttd, execution node, should work", "case_1",
@@ -523,7 +634,7 @@ func TestGenerateCmd(t *testing.T) {
 			subCmd{
 				name: "execution",
 			},
-			false),
+			nil),
 		*buildGenerateTestCase(
 			t,
 			"Mainnet Network custom ChainSpec, execution node, shouldn't work", "case_1",
@@ -538,10 +649,10 @@ func TestGenerateCmd(t *testing.T) {
 			subCmd{
 				name: "execution",
 			},
-			true),
+			errors.New("custom flags used without --network custom")),
 		*buildGenerateTestCase(
 			t,
-			"Validator", "case_1",
+			"Full-node, custom TTD", "case_1",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 				CustomFlags: CustomFlags{
@@ -554,14 +665,31 @@ func TestGenerateCmd(t *testing.T) {
 			subCmd{
 				name: "full-node",
 			},
-			false),
+			nil),
+		*buildGenerateTestCase(
+			t,
+			"Execution ", "case_1",
+			GenCmdFlags{
+				mapAllPorts: true,
+			},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "sepolia",
+				logging:        "",
+			},
+			subCmd{
+				name: "execution",
+				args: []string{"nethermind"},
+			},
+			nil,
+		),
 	}
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			descr := fmt.Sprintf("sedge generate %s %s %s", tc.subCommand.argsList(), tc.args.toString(), tc.globalArgs.argsList())
-
-			sedgeActions := actions.NewSedgeActions(nil, nil, nil)
+			descr := fmt.Sprintf("sedge generate %s %s %s", strings.Join(tc.subCommand.argsList(), " "), tc.args.toString(), strings.Join(tc.globalArgs.argsList(), " "))
+			sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{})
 
 			rootCmd := RootCmd()
 			rootCmd.AddCommand(GenerateCmd(sedgeActions))
@@ -569,12 +697,90 @@ func TestGenerateCmd(t *testing.T) {
 			argsL = append(argsL, tc.args.argsList()...)
 			argsL = append(argsL, tc.globalArgs.argsList()...)
 			rootCmd.SetArgs(argsL)
+			rootCmd.SetOutput(io.Discard)
 
-			if err := rootCmd.Execute(); !tc.isErr && err != nil {
-				t.Errorf("%s failed: %v", descr, err)
-			} else if tc.isErr && err == nil {
-				t.Errorf("%s expected to fail", descr)
+			err := rootCmd.Execute()
+
+			if tc.err != nil {
+				assert.EqualError(t, err, tc.err.Error(), descr)
+			} else {
+				assert.NoError(t, err, descr)
 			}
 		})
 	}
+}
+
+func TestGeneratePathCases(t *testing.T) {
+	configs.InitNetworksConfigs()
+	// Silence logger
+	log.SetOutput(io.Discard)
+
+	// Custom Generation path
+	path := t.TempDir()
+	descr := fmt.Sprintf("Generation path error, sedge generate execution --path %s", path)
+	sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{})
+
+	rootCmd := RootCmd()
+	rootCmd.AddCommand(GenerateCmd(sedgeActions))
+	argsL := []string{"generate", "execution", "--path", path}
+	rootCmd.SetArgs(argsL)
+	rootCmd.SetOutput(io.Discard)
+
+	err := rootCmd.Execute()
+
+	assert.NoError(t, err, descr)
+
+	// Init generation path
+	path = t.TempDir()
+	if err = os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	descr = fmt.Sprintf("Init generation path, sedge generate execution --path %s", path)
+	sedgeActions = actions.NewSedgeActions(actions.SedgeActionsOptions{})
+
+	rootCmd = RootCmd()
+	rootCmd.AddCommand(GenerateCmd(sedgeActions))
+	argsL = []string{"generate", "execution", "--path", path}
+	rootCmd.SetArgs(argsL)
+	rootCmd.SetOutput(io.Discard)
+
+	err = rootCmd.Execute()
+
+	assert.NoError(t, err, descr)
+
+	// Custom jwt secret path, good
+	path = t.TempDir()
+	descr = fmt.Sprintf("Custom jwt secret path, good, sedge generate execution --jwt-secret-path %s", path)
+	err = test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", "jwtsecret"), path)
+	if err != nil {
+		t.Fatalf("Can't build test case: %v", err)
+	}
+	jwtPath := filepath.Join(path, "jwtsecret")
+
+	sedgeActions = actions.NewSedgeActions(actions.SedgeActionsOptions{})
+
+	rootCmd = RootCmd()
+	rootCmd.AddCommand(GenerateCmd(sedgeActions))
+	argsL = []string{"generate", "execution", "--path", path, "--jwt-secret-path", jwtPath}
+	rootCmd.SetArgs(argsL)
+	rootCmd.SetOutput(io.Discard)
+
+	err = rootCmd.Execute()
+
+	assert.NoError(t, err, descr)
+
+	// Custom jwt secret path, error
+	path = t.TempDir()
+	descr = fmt.Sprintf("Custom jwt secret path, error, sedge generate execution --jwt-secret-path %s", path)
+	sedgeActions = actions.NewSedgeActions(actions.SedgeActionsOptions{})
+
+	rootCmd = RootCmd()
+	rootCmd.AddCommand(GenerateCmd(sedgeActions))
+	argsL = []string{"generate", "execution", "--jwt-secret-path", path}
+	rootCmd.SetArgs(argsL)
+	rootCmd.SetOutput(io.Discard)
+
+	err = rootCmd.Execute()
+
+	assert.Error(t, err, descr)
 }

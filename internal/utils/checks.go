@@ -63,7 +63,7 @@ Error if any
 */
 func PreCheck(cmdRunner commands.CommandRunner, generationPath string) error {
 	// Check docker is installed
-	pending := CheckDependencies([]string{"docker"})
+	pending := CheckDependencies(configs.Dependencies)
 	for _, dependency := range pending {
 		log.Errorf(configs.DependencyNotInstalledError, dependency)
 	}

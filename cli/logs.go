@@ -16,6 +16,7 @@ limitations under the License.
 package cli
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -42,15 +43,15 @@ func LogsCmd(cmdRunner commands.CommandRunner) *cobra.Command {
 		Long: `Get running container logs using docker-compose CLI. If no services are provided, the logs of all running services will be displayed.
 	
 	By default will run 'docker compose -f <script> logs --follow <service>'`,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			if err = utils.PreCheck(cmdRunner, flags.path); err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			var rawServices string
 			if rawServices, err = utils.CheckContainers(cmdRunner, flags.path); err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			file := filepath.Join(flags.path, configs.DefaultDockerComposeScriptName)
@@ -71,8 +72,10 @@ func LogsCmd(cmdRunner commands.CommandRunner) *cobra.Command {
 
 			log.Debugf(configs.RunningCommand, logsCMD.Cmd)
 			if _, err := cmdRunner.RunCMD(logsCMD); err != nil {
-				log.Fatalf(configs.GettingLogsError, strings.Join(services, " "), err)
+				return fmt.Errorf(configs.GettingLogsError, strings.Join(services, " "), err)
 			}
+
+			return nil
 		},
 	}
 	// Bind flags

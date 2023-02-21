@@ -305,7 +305,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		return []error{err}
 	}
 
-	if err := sedgeActions.InstallDependencies(actions.InstallDependenciesOptions{
+	if err := sedgeActions.ManageDependencies(actions.ManageDependenciesOptions{
 		Dependencies: configs.GetDependencies(),
 		Install:      flags.install,
 	}); err != nil {

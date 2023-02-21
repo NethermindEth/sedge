@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/NethermindEth/sedge/internal/pkg/services"
-	mock_client "github.com/NethermindEth/sedge/test/mock_docker"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/golang/mock/gomock"
@@ -29,7 +29,7 @@ import (
 
 func TestContainerId(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	wantId := "container-id"
@@ -54,7 +54,7 @@ func TestContainerId(t *testing.T) {
 
 func TestContainerIdError(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	wantErr := errors.New("error")
@@ -75,7 +75,7 @@ func TestContainerIdError(t *testing.T) {
 
 func TestContainerIdNotFound(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	containerName := "container-name"
@@ -95,7 +95,7 @@ func TestContainerIdNotFound(t *testing.T) {
 
 func TestContainerIdMultiple(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	containerName := "container-name"

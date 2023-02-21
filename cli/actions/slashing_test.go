@@ -24,7 +24,7 @@ import (
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
-	mock_client "github.com/NethermindEth/sedge/test/mock_docker"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -52,7 +52,7 @@ func TestSlashingExport_ValidatorNotFound(t *testing.T) {
 
 func validatorNotFoundHelper(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
 	t.Helper()
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
@@ -63,7 +63,10 @@ func validatorNotFoundHelper(t *testing.T, ctrl *gomock.Controller) actions.Sedg
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
+	return actions.NewSedgeActions(actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+	})
 }
 
 func TestSlashingImport_CheckValidatorFailure(t *testing.T) {
@@ -89,7 +92,7 @@ func TestSlashingExport_CheckValidatorFailure(t *testing.T) {
 }
 
 func checkValidatorFailureHelper(t *testing.T, ctrl *gomock.Controller, wantError error) actions.SedgeActions {
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
@@ -106,7 +109,10 @@ func checkValidatorFailureHelper(t *testing.T, ctrl *gomock.Controller, wantErro
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
+	return actions.NewSedgeActions(actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+	})
 }
 
 func TestSlashingImport_ValidatorStopFailure(t *testing.T) {
@@ -130,7 +136,7 @@ func TestSlashingExport_ValidatorStopFailure(t *testing.T) {
 }
 
 func validatorStopFailureHelper(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
 
@@ -160,7 +166,10 @@ func validatorStopFailureHelper(t *testing.T, ctrl *gomock.Controller) actions.S
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
+	return actions.NewSedgeActions(actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+	})
 }
 
 func TestSlashingImport_ValidatorRunning(t *testing.T) {
@@ -229,7 +238,7 @@ func TestSlashingExport_ValidatorRunning(t *testing.T) {
 // with all the required responses for a correct slashing container execution.
 // This setup is valid for the export and import process.
 func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag string) actions.SedgeActions {
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
 	slashingCtName := services.ContainerNameWithTag(services.ServiceCtSlashingData, containerTag)
@@ -293,7 +302,10 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag stri
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
+	return actions.NewSedgeActions(actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+	})
 }
 
 func TestSlashingImport_UnsupportedClient(t *testing.T) {
@@ -351,7 +363,7 @@ func TestSlashingExport_UnsupportedClient(t *testing.T) {
 }
 
 func unsupportedClientsHelper(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
 
@@ -384,7 +396,10 @@ func unsupportedClientsHelper(t *testing.T, ctrl *gomock.Controller) actions.Sed
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
+	return actions.NewSedgeActions(actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+	})
 }
 
 const (

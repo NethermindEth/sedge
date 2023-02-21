@@ -21,7 +21,6 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -69,16 +68,17 @@ sedge slashing-import --from slashing-data.json --start-validator lighthouse`,
 			}
 			return nil
 		},
-		PreRun: func(cmd *cobra.Command, args []string) {
+		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if from == "" {
 				from = filepath.Join(generationPath, "slashing-export.json")
 			}
 			if err := configs.NetworkCheck(network); err != nil {
-				log.Fatal(err)
+				return err
 			}
 			validatorClient = args[0]
+			return nil
 		},
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			err := sedgeActions.ImportSlashingInterchangeData(actions.SlashingImportOptions{
 				ValidatorClient: validatorClient,
 				Network:         network,
@@ -89,8 +89,10 @@ sedge slashing-import --from slashing-data.json --start-validator lighthouse`,
 				ContainerTag:    containerTag,
 			})
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
+
+			return nil
 		},
 	}
 

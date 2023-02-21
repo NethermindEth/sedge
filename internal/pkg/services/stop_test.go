@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/NethermindEth/sedge/internal/pkg/services"
-	mock_client "github.com/NethermindEth/sedge/test/mock_docker"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/errdefs"
 	"github.com/golang/mock/gomock"
@@ -31,7 +31,7 @@ import (
 
 func TestStopContainerNotFound(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	expectedError := errdefs.NotFound(errors.New("error"))
@@ -48,7 +48,7 @@ func TestStopContainerNotFound(t *testing.T) {
 
 func TestStopError(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	expectedError := errors.New("error")
@@ -65,7 +65,7 @@ func TestStopError(t *testing.T) {
 
 func TestStopContainerAlreadyStopped(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	dockerClient.EXPECT().
@@ -86,7 +86,7 @@ func TestStopContainerAlreadyStopped(t *testing.T) {
 
 func TestStopContainerError(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	expectedError := errors.New("error")

@@ -40,6 +40,7 @@ func GenerateJWTSecret() (string, error) {
 		return "", err
 	}
 	if n != 32 {
+		// notest
 		return "", errors.New(configs.CannotGenerateSecret)
 	}
 

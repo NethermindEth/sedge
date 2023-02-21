@@ -16,8 +16,6 @@ limitations under the License.
 package main
 
 import (
-	"log"
-	"os"
 	"runtime"
 
 	"github.com/NethermindEth/sedge/cli"
@@ -27,24 +25,40 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/docker/docker/client"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
 	// Init configs
 	configs.InitNetworksConfigs()
+
 	// Commands Runner
 	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{
 		RunAsAdmin: runtime.GOOS == "linux",
 	})
+
 	// Prompt used to interact with the user input
 	prompt := prompts.NewPromptCli()
+
+	// Docker client
 	dockerClient, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer dockerClient.Close()
+
+	// Docker service
 	serviceManager := services.NewServiceManager(dockerClient)
-	sedgeActions := actions.NewSedgeActions(dockerClient, serviceManager, cmdRunner)
+
+	// Init Sedge Actions
+	sdgOpts := actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+		CommandRunner:  cmdRunner,
+		DepsHandlers:   actions.NewDependenciesHandlers(),
+	}
+	sedgeActions := actions.NewSedgeActions(sdgOpts)
+
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
 		cli.CliCmd(cmdRunner, prompt, serviceManager, sedgeActions),
@@ -56,10 +70,10 @@ func main() {
 		cli.VersionCmd(),
 		cli.SlashingExportCmd(sedgeActions),
 		cli.SlashingImportCmd(sedgeActions),
-		cli.RunCmd(cmdRunner, sedgeActions),
+		cli.RunCmd(sedgeActions),
 		cli.GenerateCmd(sedgeActions),
 	)
 	if err := sedgeCmd.Execute(); err != nil {
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }

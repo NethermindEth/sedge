@@ -45,7 +45,7 @@ func TestCreateJwtSecrets(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			sedgeActions := actions.NewSedgeActions(nil, nil, nil)
+			sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{})
 			if tc.options.JWTPath != "" {
 				file, err := os.Create(filepath.Join(tc.options.JWTPath, "jwtSecret"))
 				if err != nil {

@@ -36,6 +36,12 @@ jobs:
       - name: Check Format Unix
         if: matrix.os == 'ubuntu-latest'
         run: test -z "$(gofumpt -l . | tee >(cat 1>&2))"
+      
+      - name: Install mockgen
+        run: make install-mockgen
+
+      - name: Generate mocks
+        run: make generate
 
       - name: Check go mod status
         run: |
