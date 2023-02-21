@@ -22,14 +22,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var CustomFlagsUsedWithoutCustomNetwork = errors.New("custom flags used without --network custom")
+var ErrCustomFlagsUsedWithoutCustomNetwork = errors.New("custom flags used without --network custom")
 
 func validateCustomNetwork(flags *CustomFlags, net string) error {
 	if net != "custom" {
 		if len(flags.customTTD) != 0 || len(flags.customChainSpec) != 0 || len(flags.customNetworkConfig) != 0 ||
 			len(flags.customGenesis) != 0 || len(flags.customDeployBlock) != 0 {
 			// TODO add error on expected place
-			return CustomFlagsUsedWithoutCustomNetwork
+			return ErrCustomFlagsUsedWithoutCustomNetwork
 		}
 	}
 	return nil
