@@ -39,6 +39,7 @@ a. chan error
 Channel to where error will be sent
 */
 func goCopy(wait *sync.WaitGroup, dst io.WriteCloser, src io.Reader, isStdin bool) <-chan error {
+	// notest
 	errChan := make(chan error)
 	wait.Add(1)
 	go func() {

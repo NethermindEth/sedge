@@ -18,10 +18,12 @@ package cli
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
 	"github.com/NethermindEth/sedge/internal/ui"
@@ -48,7 +50,7 @@ func buildKeysTestCase(t *testing.T, caseName, caseDataPath, caseNetwork string,
 	tc := keysCmdTestCase{}
 	configPath := t.TempDir()
 
-	err := test.PrepareTestCaseDir(filepath.Join("testdata", "keys_tests", caseDataPath, "config"), configPath)
+	err := test.PrepareTestCaseDir(filepath.Join("testdata", "keys_tests", caseDataPath), configPath)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
@@ -88,6 +90,9 @@ func buildKeysTestCase(t *testing.T, caseName, caseDataPath, caseNetwork string,
 
 func TestKeysCmd(t *testing.T) {
 	// TODO: allow to test error programs
+	// Silence logger
+	log.SetOutput(io.Discard)
+	configs.InitNetworksConfigs()
 	tcs := []keysCmdTestCase{
 		*buildKeysTestCase(t, "Mainnet", "case_1", "mainnet", 0, 1, false),
 		*buildKeysTestCase(t, "Bigger number", "case_1", "sepolia", 0, 100, false),

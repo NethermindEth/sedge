@@ -27,7 +27,7 @@ type SedgeActions interface {
 	ExportSlashingInterchangeData(SlashingExportOptions) error
 	SetupContainers(SetupContainersOptions) error
 	RunContainers(RunContainersOptions) error
-	InstallDependencies(InstallDependenciesOptions) error
+	ManageDependencies(ManageDependenciesOptions) error
 	Generate(GenerateOptions) error
 	CreateJWTSecrets(CreateJWTSecretOptions) (string, error)
 }
@@ -36,13 +36,22 @@ type sedgeActions struct {
 	dockerClient   client.APIClient
 	serviceManager services.ServiceManager
 	commandRunner  commands.CommandRunner
+	depsHandlers   DependenciesHandlers
 }
 
-func NewSedgeActions(dockerClient client.APIClient, serviceManager services.ServiceManager, commandRunner commands.CommandRunner) SedgeActions {
+type SedgeActionsOptions struct {
+	DockerClient   client.APIClient
+	ServiceManager services.ServiceManager
+	CommandRunner  commands.CommandRunner
+	DepsHandlers   DependenciesHandlers
+}
+
+func NewSedgeActions(options SedgeActionsOptions) SedgeActions {
 	return &sedgeActions{
-		dockerClient:   dockerClient,
-		serviceManager: serviceManager,
-		commandRunner:  commandRunner,
+		dockerClient:   options.DockerClient,
+		serviceManager: options.ServiceManager,
+		commandRunner:  options.CommandRunner,
+		depsHandlers:   options.DepsHandlers,
 	}
 }
 

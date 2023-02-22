@@ -48,11 +48,12 @@ func TestListClientsCmd(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			rootCmd := RootCmd()
 			rootCmd.SetOut(tc.tableOut)
-			log.SetOutput(tc.logsOut)
-			// Configure config path
+			rootCmd.AddCommand(ClientsCmd())
+			rootCmd.SetArgs([]string{"clients"})
 			initLogging()
+			log.SetOutput(tc.logsOut)
 
-			err := runListClientsCmd(rootCmd, []string{})
+			err := rootCmd.Execute()
 			if tc.isErr && err == nil {
 				t.Error("sedge clients expected to fail")
 			} else if !tc.isErr && err != nil {

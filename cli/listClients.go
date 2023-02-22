@@ -30,10 +30,12 @@ func ClientsCmd() *cobra.Command {
 		Use:   "clients",
 		Short: "List supported clients",
 		Long:  `List supported clients for execution and consensus engines`,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := runListClientsCmd(cmd, args); err != nil {
-				log.Fatal(err)
+				return err
 			}
+
+			return nil
 		},
 	}
 	return cmd

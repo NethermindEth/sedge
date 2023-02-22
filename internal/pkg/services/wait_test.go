@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/NethermindEth/sedge/internal/pkg/services"
-	mock_client "github.com/NethermindEth/sedge/test/mock_docker"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/docker/docker/api/types/container"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -30,7 +30,7 @@ import (
 
 func TestWaitErrCh(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	waitCh := time.After(3 * time.Second)
@@ -57,7 +57,7 @@ func TestWaitErrCh(t *testing.T) {
 
 func TestWaitExitCh(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	waitCh := time.After(3 * time.Second)

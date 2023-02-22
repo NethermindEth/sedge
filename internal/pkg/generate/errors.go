@@ -27,10 +27,10 @@ var ErrEmptyData = errors.New("data is nil")
 var ErrUnableToGetClientsInfo = errors.New("unable to get clients information")
 
 // ErrConsensusClientNotValid is returned when the consensus client is not valid
-var ErrConsensusClientNotValid = errors.New("consensus client not valid")
+var ErrConsensusClientNotValid = errors.New("invalid consensus client")
 
 // ErrExecutionClientNotValid is returned when the execution client is not valid
-var ErrExecutionClientNotValid = errors.New("execution client not valid")
+var ErrExecutionClientNotValid = errors.New("invalid execution client")
 
 // ErrValidatorClientNotValid is returned when the validator client is not valid
-var ErrValidatorClientNotValid = errors.New("validator client not valid")
+var ErrValidatorClientNotValid = errors.New("invalid validator client")

@@ -126,6 +126,7 @@ var DefaultAbsSedgeDataPath string
 func init() {
 	cwd, err := os.Getwd()
 	if err != nil {
+		// notest
 		fmt.Println(err)
 	}
 	DefaultAbsSedgeDataPath = path.Join(cwd, DefaultSedgeDataFolderName)
