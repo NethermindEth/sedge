@@ -118,8 +118,10 @@ func (p *prompter) InputInt64(prompt string, defaultValue int64) (result int64, 
 
 func (p *prompter) EthAddress(prompt string, defaultValue string, required bool) (result string, err error) {
 	options := []survey.AskOpt{
-		survey.WithValidator(survey.Required),
 		survey.WithValidator(EthAddressValidator),
+	}
+	if required {
+		options = append(options, survey.WithValidator(survey.Required))
 	}
 	q := &survey.Input{
 		Message: prompt,
