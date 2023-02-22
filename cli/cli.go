@@ -811,7 +811,7 @@ func inputNumberOfValidators(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputNumberOfExistingValidators(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.existingValidators, err = p.InputInt64("Existing validators", 0)
+	o.existingValidators, err = p.InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", 0)
 	return
 }
 
