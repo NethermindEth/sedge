@@ -31,7 +31,7 @@ type Prompter interface {
 	InputInt64(prompt string, defaultValue int64) (result int64, err error)
 	InputFilePath(prompt, defaultValue string, required bool) (result string, err error)
 	InputSecret(prompt string) (result string, err error)
-	EthAddress(prompt string, defaultValue string) (result string, err error)
+	EthAddress(prompt string, defaultValue string, required bool) (result string, err error)
 }
 
 func NewPrompter() Prompter {
@@ -116,8 +116,9 @@ func (p *prompter) InputInt64(prompt string, defaultValue int64) (result int64, 
 	return
 }
 
-func (p *prompter) EthAddress(prompt string, defaultValue string) (result string, err error) {
+func (p *prompter) EthAddress(prompt string, defaultValue string, required bool) (result string, err error) {
 	options := []survey.AskOpt{
+		survey.WithValidator(survey.Required),
 		survey.WithValidator(EthAddressValidator),
 	}
 	q := &survey.Input{
