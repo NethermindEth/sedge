@@ -16,9 +16,7 @@ var (
 
 func EthAddressValidator(ans interface{}) error {
 	if str, ok := ans.(string); ok && !utils.IsAddress(str) {
-		if len(str) > 0 && !utils.IsAddress(str) {
-			return ErrInvalidEthereumAddress
-		}
+		return ErrInvalidEthereumAddress
 	}
 	return nil
 }
