@@ -96,35 +96,28 @@ Follow the prompts to select the options you want for your node. At the end of t
 be asked to run the generated setup or not. If you chose to run the setup, it will be executed for you
 using docker compose command behind the scenes.
 `,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := selectNetwork(p, o); err != nil {
-				log.Fatal(err)
+				return err
 			}
 			if err := selectNodeType(p, o); err != nil {
-				log.Fatal(err)
+				return err
 			}
 			switch o.nodeType {
 			case NodeTypeFullNode:
 				o.genData.Services = append(o.genData.Services, "execution", "consensus")
-				if err := setupFullNode(p, o, actions); err != nil {
-					log.Fatal(err)
-				}
+				return setupFullNode(p, o, actions)
 			case NodeTypeExecution:
 				o.genData.Services = append(o.genData.Services, "execution")
-				if err := setupExecutionNode(p, o, actions); err != nil {
-					log.Fatal(err)
-				}
+				return setupExecutionNode(p, o, actions)
 			case NodeTypeConsensus:
 				o.genData.Services = append(o.genData.Services, "consensus")
-				if err := setupConsensusNode(p, o, actions); err != nil {
-					log.Fatal(err)
-				}
+				return setupConsensusNode(p, o, actions)
 			case NodeTypeValidator:
 				o.genData.Services = append(o.genData.Services, "validator")
-				if err := setupValidatorNode(p, o, actions); err != nil {
-					log.Fatal(err)
-				}
+				return setupValidatorNode(p, o, actions)
 			}
+			return nil
 		},
 	}
 	return cmd
