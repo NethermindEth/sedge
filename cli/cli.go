@@ -478,6 +478,15 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) e
 		if err := inputKeystorePath(p, o); err != nil {
 			return err
 		}
+		validationErrors := keystores.ValidateKeystoreDir(o.keystorePath)
+		if len(validationErrors) > 0 {
+			log.Warnf("Keystore folder %s has %d validation errors. Check the following:", o.keystorePath, len(validationErrors))
+			for index, e := range validationErrors {
+				log.Warnf("%d. %s", index+1, e.Error())
+			}
+		} else {
+			log.Infof("Keystore folder %s is valid", o.keystorePath)
+		}
 	}
 	// TODO call validator import
 	log.Error("missing call to import validator keys")
