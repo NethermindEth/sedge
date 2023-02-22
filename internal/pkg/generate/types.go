@@ -179,14 +179,6 @@ type Consensus struct {
 	Command         []string `yaml:"command"`
 	Logging         *Logging `yaml:"logging"`
 }
-type ValidatorImport struct {
-	ContainerName string   `yaml:"container_name"`
-	Image         string   `yaml:"image"`
-	Networks      []string `yaml:"networks"`
-	Volumes       []string `yaml:"volumes"`
-	Command       string   `yaml:"command"`
-	Logging       *Logging `yaml:"logging"`
-}
 type ValidatorBlocker struct {
 	Image   string `yaml:"image"`
 	Command string `yaml:"command"`
@@ -218,7 +210,6 @@ type Services struct {
 	Execution        *Execution        `yaml:"execution"`
 	Mevboost         *Mevboost         `yaml:"mevboost"`
 	Consensus        *Consensus        `yaml:"consensus"`
-	ValidatorImport  *ValidatorImport  `yaml:"validator-import"`
 	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker"`
 	Validator        *Validator        `yaml:"validator"`
 	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus"`

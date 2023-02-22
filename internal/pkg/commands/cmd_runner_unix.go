@@ -123,13 +123,19 @@ func (cr *UnixCMDRunner) BuildDockerComposeLogsCMD(options DockerComposeLogsOpti
 }
 
 func (cr *UnixCMDRunner) BuildDockerBuildCMD(options DockerBuildOptions) Command {
-	command := fmt.Sprintf("docker build %s", options.Path)
+	command := "docker build"
 	if len(options.Tag) > 0 {
 		log.Debug(`Command "docker build" built with "-t" flag.`)
 		command += " -t " + options.Tag
 	} else {
-		log.Debug(`Command "docker build" built withot "-t" flag.`)
+		log.Debug(`Command "docker build" built without "-t" flag.`)
 	}
+	if len(options.Args) > 0 {
+		for key, value := range options.Args {
+			command += fmt.Sprintf(" --build-arg %s=%s", key, value)
+		}
+	}
+	command += " " + options.Path
 	return Command{Cmd: command}
 }
 
