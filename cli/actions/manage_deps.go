@@ -28,6 +28,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+//go:generate mockgen -package=sedge_mocks -destination=../../mocks/depsHandler.go github.com/NethermindEth/sedge/cli/actions DependenciesHandlers
 type DependenciesHandlers interface {
 	InstallDependencies(cmdRunner commands.CommandRunner, dependencies []string) error
 	InstallOrShowInstructions(cmdRunner commands.CommandRunner, dependencies []string) error

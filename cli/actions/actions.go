@@ -21,6 +21,7 @@ import (
 	"github.com/docker/docker/client"
 )
 
+//go:generate mockgen -package=sedge_mocks -destination=../../mocks/sedgeActions.go github.com/NethermindEth/sedge/cli/actions SedgeActions
 type SedgeActions interface {
 	GetCommandRunner() commands.CommandRunner
 	ImportSlashingInterchangeData(SlashingImportOptions) error
