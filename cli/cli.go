@@ -763,7 +763,7 @@ func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputValidatorGracePeriod(p ui.Prompter, o *CliCmdOptions) (err error) {
-	epochs, err := p.InputInt64("Validator grace period (epochs)", 1)
+	epochs, err := p.InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", 1)
 	if err != nil {
 		return err
 	}
