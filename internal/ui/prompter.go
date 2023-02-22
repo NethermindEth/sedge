@@ -1,14 +1,27 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package ui
 
 import (
-	"errors"
 	"fmt"
-	"os"
-	"strconv"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/NethermindEth/sedge/internal/utils"
 )
+
+// notest
 
 //go:generate mockgen -source=prompter.go -destination=prompter_mock.go -package=ui
 type Prompter interface {
@@ -65,23 +78,11 @@ func (p *prompter) Input(prompt, defaultValue string, required bool) (result str
 
 func (p *prompter) InputFilePath(prompt, defaultValue string, required bool) (result string, err error) {
 	options := []survey.AskOpt{
-		survey.WithValidator(func(ans interface{}) error {
-			if str, ok := ans.(string); ok {
-				fileInfo, err := os.Stat(str)
-				if err != nil {
-					return err
-				}
-				if fileInfo.IsDir() {
-					return errors.New("is a directory not a file")
-				}
-			}
-			return nil
-		}),
+		survey.WithValidator(FilePathValidator),
 	}
 	if required {
 		options = append(options, survey.WithValidator(survey.Required))
 	}
-	options = append(options)
 	q := &survey.Input{
 		Message: prompt,
 	}
@@ -105,13 +106,7 @@ func (p *prompter) InputSecret(prompt string) (result string, err error) {
 
 func (p *prompter) InputInt64(prompt string, defaultValue int64) (result int64, err error) {
 	options := []survey.AskOpt{
-		survey.WithValidator(func(ans interface{}) error {
-			if str, ok := ans.(string); !ok {
-				_, err := strconv.ParseInt(str, 10, 64)
-				return err
-			}
-			return nil
-		}),
+		survey.WithValidator(Int64Validator),
 	}
 	q := &survey.Input{
 		Message: prompt,
@@ -123,14 +118,7 @@ func (p *prompter) InputInt64(prompt string, defaultValue int64) (result int64, 
 
 func (p *prompter) EthAddress(prompt string, defaultValue string) (result string, err error) {
 	options := []survey.AskOpt{
-		survey.WithValidator(func(ans interface{}) error {
-			if str, ok := ans.(string); ok && !utils.IsAddress(str) {
-				if len(str) > 0 && !utils.IsAddress(str) {
-					return errors.New("not a valid ethereum address")
-				}
-			}
-			return nil
-		}),
+		survey.WithValidator(EthAddressValidator),
 	}
 	q := &survey.Input{
 		Message: prompt,
