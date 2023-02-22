@@ -699,7 +699,7 @@ func inputCustomGenesis(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputCustomTTD(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomTTD, err = p.Input("Custom TTD", "", false)
+	o.genData.CustomTTD, err = p.Input("Custom TTD (Terminal Total Difficulty)", "", false)
 	return
 }
 
