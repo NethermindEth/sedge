@@ -9,7 +9,7 @@ import (
 
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
-	"github.com/NethermindEth/sedge/internal/prompter"
+	"github.com/NethermindEth/sedge/internal/ui"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
@@ -63,7 +63,7 @@ type CliCmdOptions struct {
 	installDependencies      bool
 }
 
-func CliCmd(p prompter.Prompter, actions actions.SedgeActions) *cobra.Command {
+func CliCmd(p ui.Prompter, actions actions.SedgeActions) *cobra.Command {
 	o := new(CliCmdOptions)
 	cmd := &cobra.Command{
 		Use:   "cli",
@@ -115,7 +115,7 @@ using docker compose command behind the scenes.
 	return cmd
 }
 
-func setupFullNode(p prompter.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
 	if err := confirmWithValidator(p, o); err != nil {
 		return err
 	}
@@ -196,7 +196,7 @@ func setupFullNode(p prompter.Prompter, o *CliCmdOptions, a actions.SedgeActions
 	return postGenerate(p, o, a)
 }
 
-func setupExecutionNode(p prompter.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
 	if err := selectExecutionClient(p, o); err != nil {
 		return err
 	}
@@ -227,7 +227,7 @@ func setupExecutionNode(p prompter.Prompter, o *CliCmdOptions, a actions.SedgeAc
 	return postGenerate(p, o, a)
 }
 
-func setupConsensusNode(p prompter.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
 	if err := selectConsensusClient(p, o); err != nil {
 		return err
 	}
@@ -269,7 +269,7 @@ func setupConsensusNode(p prompter.Prompter, o *CliCmdOptions, a actions.SedgeAc
 	return postGenerate(p, o, a)
 }
 
-func setupValidatorNode(p prompter.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
 	if err := selectValidatorClient(p, o); err != nil {
 		return err
 	}
@@ -300,7 +300,7 @@ func setupValidatorNode(p prompter.Prompter, o *CliCmdOptions, a actions.SedgeAc
 	return postGenerate(p, o, a)
 }
 
-func setupJWT(p prompter.Prompter, o *CliCmdOptions, skip bool) error {
+func setupJWT(p ui.Prompter, o *CliCmdOptions, skip bool) error {
 	if skip {
 		if err := selectJWTSourceOrSkip(p, o); err != nil {
 			return err
@@ -329,7 +329,7 @@ func setupJWT(p prompter.Prompter, o *CliCmdOptions, skip bool) error {
 	return nil
 }
 
-func postGenerate(p prompter.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+func postGenerate(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
 	if o.withValidator || o.nodeType == NodeTypeValidator {
 		if err := generateKeystore(p, o, a); err != nil {
 			return err
@@ -396,7 +396,7 @@ func postGenerate(p prompter.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 	return nil
 }
 
-func generateKeystore(p prompter.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
 	if err := selectKeystoreSource(p, o); err != nil {
 		return err
 	}
@@ -493,9 +493,9 @@ func generateKeystore(p prompter.Prompter, o *CliCmdOptions, a actions.SedgeActi
 	return nil
 }
 
-type promptAction func(prompter.Prompter, *CliCmdOptions) error
+type promptAction func(ui.Prompter, *CliCmdOptions) error
 
-func runPromptActions(p prompter.Prompter, o *CliCmdOptions, actions ...promptAction) error {
+func runPromptActions(p ui.Prompter, o *CliCmdOptions, actions ...promptAction) error {
 	for _, action := range actions {
 		if err := action(p, o); err != nil {
 			return err
@@ -504,7 +504,7 @@ func runPromptActions(p prompter.Prompter, o *CliCmdOptions, actions ...promptAc
 	return nil
 }
 
-func selectNetwork(p prompter.Prompter, o *CliCmdOptions) error {
+func selectNetwork(p ui.Prompter, o *CliCmdOptions) error {
 	options := []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}
 	index, err := p.Select("Select network", "", options)
 	if err != nil {
@@ -514,7 +514,7 @@ func selectNetwork(p prompter.Prompter, o *CliCmdOptions) error {
 	return nil
 }
 
-func selectNodeType(p prompter.Prompter, o *CliCmdOptions) error {
+func selectNodeType(p ui.Prompter, o *CliCmdOptions) error {
 	options := []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}
 	index, err := p.Select("Select node type", "", options)
 	if err != nil {
@@ -524,7 +524,7 @@ func selectNodeType(p prompter.Prompter, o *CliCmdOptions) error {
 	return nil
 }
 
-func selectExecutionClient(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func selectExecutionClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 	c := clients.ClientInfo{Network: o.genData.Network}
 	supportedClients, err := c.SupportedClients(execution)
 	if err != nil {
@@ -551,7 +551,7 @@ func selectExecutionClient(p prompter.Prompter, o *CliCmdOptions) (err error) {
 	return nil
 }
 
-func selectConsensusClient(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func selectConsensusClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 	c := clients.ClientInfo{Network: o.genData.Network}
 	supportedClients, err := c.SupportedClients(consensus)
 	if err != nil {
@@ -578,7 +578,7 @@ func selectConsensusClient(p prompter.Prompter, o *CliCmdOptions) (err error) {
 	return nil
 }
 
-func selectValidatorClient(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func selectValidatorClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 	c := clients.ClientInfo{Network: o.genData.Network}
 	supportedClients, err := c.SupportedClients(validator)
 	if err != nil {
@@ -605,7 +605,7 @@ func selectValidatorClient(p prompter.Prompter, o *CliCmdOptions) (err error) {
 	return nil
 }
 
-func selectJWTSource(p prompter.Prompter, o *CliCmdOptions) error {
+func selectJWTSource(p ui.Prompter, o *CliCmdOptions) error {
 	options := []string{SourceTypeCreate, SourceTypeExisting}
 	index, err := p.Select("Select JWT source", "", options)
 	if err != nil {
@@ -615,7 +615,7 @@ func selectJWTSource(p prompter.Prompter, o *CliCmdOptions) error {
 	return nil
 }
 
-func selectJWTSourceOrSkip(p prompter.Prompter, o *CliCmdOptions) error {
+func selectJWTSourceOrSkip(p ui.Prompter, o *CliCmdOptions) error {
 	options := []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}
 	index, err := p.Select("Select JWT source", "", options)
 	if err != nil {
@@ -625,7 +625,7 @@ func selectJWTSourceOrSkip(p prompter.Prompter, o *CliCmdOptions) error {
 	return nil
 }
 
-func selectKeystoreSource(p prompter.Prompter, o *CliCmdOptions) error {
+func selectKeystoreSource(p ui.Prompter, o *CliCmdOptions) error {
 	options := []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}
 	index, err := p.Select("Select keystore source", "", options)
 	if err != nil {
@@ -635,7 +635,7 @@ func selectKeystoreSource(p prompter.Prompter, o *CliCmdOptions) error {
 	return nil
 }
 
-func selectKeystoreMnemonicSource(p prompter.Prompter, o *CliCmdOptions) error {
+func selectKeystoreMnemonicSource(p ui.Prompter, o *CliCmdOptions) error {
 	options := []string{SourceTypeCreate, SourceTypeExisting}
 	index, err := p.Select("Select mnemonic source", "", options)
 	if err != nil {
@@ -645,7 +645,7 @@ func selectKeystoreMnemonicSource(p prompter.Prompter, o *CliCmdOptions) error {
 	return nil
 }
 
-func selectKeystorePassphraseSource(p prompter.Prompter, o *CliCmdOptions) error {
+func selectKeystorePassphraseSource(p ui.Prompter, o *CliCmdOptions) error {
 	options := []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}
 	index, err := p.Select("Select passphrase source", "", options)
 	if err != nil {
@@ -655,52 +655,52 @@ func selectKeystorePassphraseSource(p prompter.Prompter, o *CliCmdOptions) error
 	return nil
 }
 
-func confirmWithValidator(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func confirmWithValidator(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.withValidator, err = p.Confirm("Do you want to set up a validator?", false)
 	return
 }
 
-func confirmExposeAllPorts(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func confirmExposeAllPorts(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.MapAllPorts, err = p.Confirm("Do you want to expose all ports?", false)
 	return
 }
 
-func confirmImportSlashingProtection(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func confirmImportSlashingProtection(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.importSlashingProtection, err = p.Confirm("Do you want to import slashing protection data?", false)
 	return
 }
 
-func confirmInstallDependencies(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func confirmInstallDependencies(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.installDependencies, err = p.Confirm("Install dependencies?", false)
 	return
 }
 
-func inputCustomNetworkConfig(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputCustomNetworkConfig(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.CustomNetworkConfigPath, err = p.InputFilePath("Custom network config file path", "", true)
 	return
 }
 
-func inputCustomChainSpec(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputCustomChainSpec(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.CustomChainSpecPath, err = p.InputFilePath("Custom ChainSpec", "", true)
 	return
 }
 
-func inputCustomGenesis(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputCustomGenesis(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.CustomGenesisPath, err = p.InputFilePath("Custom Genesis", "", true)
 	return
 }
 
-func inputCustomTTD(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputCustomTTD(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.CustomTTD, err = p.Input("Custom TTD", "", false)
 	return
 }
 
-func inputCustomDeployBlock(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputCustomDeployBlock(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.customDeployBlock, err = p.Input("Custom deploy block", "", false)
 	return
 }
 
-func inputExecutionBootNodes(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputExecutionBootNodes(p ui.Prompter, o *CliCmdOptions) (err error) {
 	bootNodesInput, err := p.Input("Execution boot nodes", "", false)
 	if err != nil {
 		return err
@@ -710,7 +710,7 @@ func inputExecutionBootNodes(p prompter.Prompter, o *CliCmdOptions) (err error) 
 	return nil
 }
 
-func inputConsensusBootNodes(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputConsensusBootNodes(p ui.Prompter, o *CliCmdOptions) (err error) {
 	bootNodesInput, err := p.Input("Consensus boot nodes", "", false)
 	if err != nil {
 		return err
@@ -720,41 +720,41 @@ func inputConsensusBootNodes(p prompter.Prompter, o *CliCmdOptions) (err error) 
 	return nil
 }
 
-func inputMevImage(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputMevImage(p ui.Prompter, o *CliCmdOptions) (err error) {
 	// Default value is set in the template
 	o.genData.MevImage, err = p.Input("Mev-Boost image", "flashbots/mev-boost:latest", false)
 	return
 }
 
-func inputMevBoostEndpoint(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputMevBoostEndpoint(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.MevBoostEndpoint, err = p.Input("Mev-Boost endpoint", "", false)
 	return
 }
 
-func inputRelayURL(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 	// TODO add default relay URL value and remove it from the template
 	// TODO support multiple relay URLs
 	o.genData.RelayURL, err = p.Input("Relay URL", "", false)
 	return
 }
 
-func inputGraffiti(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputGraffiti(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.Graffiti, err = p.Input("Graffiti", "", false)
 	return
 }
 
-func inputCheckpointSyncURL(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputCheckpointSyncURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 	// Default value is set in the template
 	o.genData.CheckpointSyncUrl, err = p.Input("Checkpoint sync URL", "", false)
 	return
 }
 
-func inputFeeRecipient(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address. You can leave it blank and press enter (not recommended)", "")
 	return
 }
 
-func inputValidatorGracePeriod(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputValidatorGracePeriod(p ui.Prompter, o *CliCmdOptions) (err error) {
 	epochs, err := p.InputInt64("Validator grace period (epochs)", 1)
 	if err != nil {
 		return err
@@ -763,7 +763,7 @@ func inputValidatorGracePeriod(p prompter.Prompter, o *CliCmdOptions) (err error
 	return nil
 }
 
-func inputGenerationPath(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputGenerationPath(p ui.Prompter, o *CliCmdOptions) (err error) {
 	// TODO: show default value in the prompt
 	o.generationPath, err = p.Input("Generation path", configs.DefaultAbsSedgeDataPath, false)
 	if o.generationPath == "" {
@@ -772,47 +772,47 @@ func inputGenerationPath(p prompter.Prompter, o *CliCmdOptions) (err error) {
 	return
 }
 
-func inputJWTPath(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputJWTPath(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.JWTSecretPath, err = p.InputFilePath("JWT path", "", true)
 	return
 }
 
-func inputKeystoreMnemonicPath(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputKeystoreMnemonicPath(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.keystoreMnemonic, err = p.Input("Mnemonic path", "", true)
 	return
 }
 
-func inputKeystorePassphrasePath(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputKeystorePassphrasePath(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.keystorePassphrasePath, err = p.Input("Passphrase path", "", true)
 	return
 }
 
-func inputKeystorePassphrase(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputKeystorePassphrase(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.keystorePassphrase, err = p.InputSecret("Enter keystore passphrase (min 8 characters):")
 	return
 }
 
-func inputWithdrawalAddress(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputWithdrawalAddress(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.withdrawalAddress, err = p.Input("Withdrawal address", "", false)
 	return
 }
 
-func inputNumberOfValidators(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputNumberOfValidators(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.numberOfValidators, err = p.InputInt64("Number of validators", 1)
 	return
 }
 
-func inputNumberOfExistingValidators(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputNumberOfExistingValidators(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.existingValidators, err = p.InputInt64("Existing validators", 0)
 	return
 }
 
-func inputKeystorePath(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputKeystorePath(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.keystorePath, err = p.Input("Keystore path", "", true)
 	return
 }
 
-func inputImportSlashingProtectionFrom(p prompter.Prompter, o *CliCmdOptions) (err error) {
+func inputImportSlashingProtectionFrom(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.slashingProtectionFrom, err = p.InputFilePath("Interchange slashing protection file", "", true)
 	return
 }

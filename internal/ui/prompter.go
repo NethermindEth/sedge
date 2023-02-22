@@ -1,4 +1,4 @@
-package prompter
+package ui
 
 import (
 	"errors"
@@ -10,7 +10,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/utils"
 )
 
-//go:generate mockgen -source=prompter.go -destination=prompter_mock.go -package=prompter
+//go:generate mockgen -source=prompter.go -destination=prompter_mock.go -package=ui
 type Prompter interface {
 	Select(message string, defaultValue string, options []string) (int, error)
 	Confirm(string, bool) (bool, error)
@@ -21,7 +21,7 @@ type Prompter interface {
 	EthAddress(prompt string, defaultValue string) (result string, err error)
 }
 
-func New() Prompter {
+func NewPrompter() Prompter {
 	return &prompter{}
 }
 

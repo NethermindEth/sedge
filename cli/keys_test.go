@@ -24,7 +24,7 @@ import (
 
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
-	"github.com/NethermindEth/sedge/internal/prompter"
+	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/test"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
@@ -39,7 +39,7 @@ type keysCmdTestCase struct {
 	existingVal    int64
 	numVal         int64
 	runner         commands.CommandRunner
-	prompt         prompter.Prompter
+	prompt         ui.Prompter
 	fdOut          *bytes.Buffer
 	isErr          bool
 }
@@ -80,7 +80,7 @@ func buildKeysTestCase(t *testing.T, caseName, caseDataPath, caseNetwork string,
 	tc.existingVal = existing
 	tc.numVal = num
 	tc.runner = &test.SimpleCMDRunner{} // TODO: mock this
-	tc.prompt = prompter.New()
+	tc.prompt = ui.NewPrompter()
 	tc.fdOut = new(bytes.Buffer)
 	tc.isErr = isErr
 	return &tc
@@ -127,7 +127,7 @@ func TestKeysCmd_RandomPassphrase(t *testing.T) {
 
 	t.Run("no passphrase prompt when random-passphrase flag is used", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		prompt := prompter.NewMockPrompter(ctrl)
+		prompt := ui.NewMockPrompter(ctrl)
 		defer ctrl.Finish()
 
 		prompt.

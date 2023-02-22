@@ -23,7 +23,7 @@ import (
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
-	"github.com/NethermindEth/sedge/internal/prompter"
+	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -67,7 +67,7 @@ func installDependencies(cmdRunner commands.CommandRunner, pending []string) err
 func installOrShowInstructions(cmdRunner commands.CommandRunner, pending []string) error {
 	// notest
 	optInstall, optExit := "Install dependencies", "Exit. You will manage this dependencies on your own"
-	prompt := prompter.New()
+	prompt := ui.NewPrompter()
 	options := []string{optInstall, optExit}
 	index, err := prompt.Select("Select how to proceed with the pending dependencies", "", options)
 	if err != nil {

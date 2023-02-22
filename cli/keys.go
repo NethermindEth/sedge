@@ -23,7 +23,7 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
-	"github.com/NethermindEth/sedge/internal/prompter"
+	"github.com/NethermindEth/sedge/internal/ui"
 	eth2 "github.com/protolambda/zrnt/eth2/configs"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -41,7 +41,7 @@ type KeysCmdFlags struct {
 	install               bool
 }
 
-func KeysCmd(cmdRunner commands.CommandRunner, p prompter.Prompter) *cobra.Command {
+func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 	var (
 		flags      KeysCmdFlags
 		passphrase string
