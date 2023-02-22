@@ -340,18 +340,16 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	if combinedClients.Execution != nil {
-		combinedClients.Execution.Image = clientImages.execution
+		combinedClients.Execution.SetImageOrDefault(clientImages.execution)
 	}
 	if combinedClients.Consensus != nil {
-		combinedClients.Consensus.Image = clientImages.consensus
+		combinedClients.Consensus.SetImageOrDefault(clientImages.consensus)
 	}
 
 	if flags.noValidator {
 		combinedClients.Validator = nil
-	} else {
-		if combinedClients.Validator != nil {
-			combinedClients.Validator.Image = clientImages.validator
-		}
+	} else if combinedClients.Validator != nil {
+		combinedClients.Validator.SetImageOrDefault(clientImages.validator)
 	}
 
 	vlStartGracePeriod := configs.NetworkEpochTime(flags.network)
@@ -405,11 +403,21 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	}
 
 	if flags.run {
-		if utils.Contains(*flags.services, "validator") {
-			*flags.services = append(*flags.services, "validator-import")
-		}
 		if err := buildContainers(cmdRunner, *flags.services, flags.generationPath); err != nil {
 			return []error{err}
+		}
+		if utils.Contains(*flags.services, "validator") {
+			keysPath, err := filepath.Abs(filepath.Join(flags.generationPath, "keystore"))
+			if err != nil {
+				return []error{err}
+			}
+			if err := sedgeActions.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+				ValidatorClient: flags.validatorName,
+				Network:         flags.network,
+				From:            keysPath,
+			}); err != nil {
+				return []error{err}
+			}
 		}
 		if flags.slashingProtection != "" {
 			validatorImportClient := services.ContainerNameWithTag(services.ServiceCtValidatorImport, flags.containerTag)

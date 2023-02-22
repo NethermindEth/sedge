@@ -281,9 +281,6 @@ var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) erro
 	if utils.Contains(data.Services, mevBoost) {
 		assert.NotNil(t, composeData.Services.Mevboost)
 	}
-	if utils.Contains(data.Services, validatorImport) {
-		assert.NotNil(t, composeData.Services.ValidatorImport)
-	}
 	if utils.Contains(data.Services, configConsensus) {
 		assert.NotNil(t, composeData.Services.ConfigConsensus)
 	}

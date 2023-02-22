@@ -59,12 +59,11 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check ec image",
 			data: &GenData{
-				ExecutionClient: &clients.Client{Name: "nethermind"},
+				ExecutionClient: &clients.Client{Name: "nethermind", Image: configs.ClientImages.Execution.Nethermind.String()},
 				Network:         "mainnet",
 			},
 			fieldsToCheck: map[string]string{
-				// WIll match any image
-				"EC_IMAGE_VERSION": "nethermind/nethermind:",
+				"EC_IMAGE_VERSION": configs.ClientImages.Execution.Nethermind.String(),
 			},
 		},
 		{

@@ -1,33 +1,10 @@
 {{/* lighthouse.tmpl */}}
 {{ define "validator" }}
-  validator-import:
-    container_name: sedge-validator-import{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
-    build:
-      context: github.com/NethermindEth/lighthouse-init-validator
-      args:
-        LH_VERSION: ${VL_IMAGE_VERSION}
-        NETWORK: {{if .CustomConsensusConfigs}}CUSTOM{{else}}{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
-    networks:
-      - sedge
-    volumes:
-      - ${KEYSTORE_DIR}:/keystore
-      - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - {{.CustomNetworkConfigPath}}:/network_config/config.yaml{{end}}{{if .CustomGenesisPath}}
-      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{if .CustomDeployBlockPath}}
-      - {{.CustomDeployBlockPath}}:/network_config/deploy_block.txt{{end}}{{end}}{{if .LoggingDriver}}
-    logging:
-      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
-      options:
-        max-size: "10m"
-        max-file: "10"{{end}}{{end}}
-
   validator:
     container_name: sedge-validator-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     image: ${VL_IMAGE_VERSION}
     restart: unless-stopped
     depends_on: 
-      validator-import:
-        condition: service_completed_successfully
       validator-blocker:
         condition: service_completed_successfully{{if .WithConsensusClient}}
       consensus:

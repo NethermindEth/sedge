@@ -29,6 +29,7 @@ type SedgeActions interface {
 	ManageDependencies(ManageDependenciesOptions) error
 	Generate(GenerateOptions) error
 	CreateJWTSecrets(CreateJWTSecretOptions) (string, error)
+	ImportValidatorKeys(ImportValidatorKeysOptions) error
 }
 
 type sedgeActions struct {

@@ -71,6 +71,7 @@ func main() {
 		cli.SlashingExportCmd(sedgeActions),
 		cli.SlashingImportCmd(sedgeActions),
 		cli.RunCmd(sedgeActions),
+		cli.ImportKeysCmd(sedgeActions),
 		cli.GenerateCmd(sedgeActions),
 	)
 	if err := sedgeCmd.Execute(); err != nil {
