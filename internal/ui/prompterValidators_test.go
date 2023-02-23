@@ -49,6 +49,11 @@ func TestEthAddressValidator(t *testing.T) {
 			input: "bananas",
 			want:  ErrInvalidEthereumAddress,
 		},
+		{
+			name:  "empty string",
+			input: "",
+			want:  ErrInvalidEthereumAddress,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
