@@ -767,7 +767,7 @@ func inputCheckpointSyncURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address. You can leave it blank and press enter (not recommended)", "", true)
+	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address.", "", true)
 	return
 }
 
