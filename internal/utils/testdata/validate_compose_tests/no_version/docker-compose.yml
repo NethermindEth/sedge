@@ -1,0 +1,172 @@
+services:
+  execution:
+    stop_grace_period: 30s
+    container_name: execution-client
+    restart: unless-stopped
+    image: ${EC_IMAGE_VERSION}
+    networks:
+    - sedge
+    volumes:
+    - ${EC_DATA_DIR}:/nethermind/data
+    - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+    - 30303:30303/tcp
+    - 30303:30303/udp
+    - 8008:8008
+    expose:
+    - 8545
+    - 8551
+    command:
+    - --config=${NETWORK}
+    - --datadir=/nethermind/data
+    - --log=${NETHERMIND_LOG_LEVEL}
+    - --Sync.SnapSync=${EC_SNAP_SYNC_ENABLED}
+    - --JsonRpc.Enabled=true
+    - --JsonRpc.Host=0.0.0.0
+    - --JsonRpc.Port=8545
+    - --JsonRpc.EnabledModules=${EC_ENABLED_MODULES}
+    - --JsonRpc.JwtSecretFile=/tmp/jwt/jwtsecret
+    - --JsonRpc.EngineHost=0.0.0.0
+    - --JsonRpc.EnginePort=8551
+    - --Network.DiscoveryPort=30303
+    - --Network.Bootnodes=enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303,enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30303,enode://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303,enode://103858bdb88756c71f15e9b5e09b56dc1be52f0a5021d46301dbbfb7e130029cc9d0d6f73f693bc29b665770fff7da4d34f3c6379fe12721b5d7a0bcb5ca1fc1@191.234.162.198:30303,enode://715171f50508aba88aecd1250af392a45a330af91d7b90701c436b618c86aaa1589c9184561907bebbb56439b8f8787bc01f49a7c77276c58c1b09822d75e8e8@52.231.165.108:30303,enode://5d6d7cd20d6da4bb83a1d28cadb5d409b64edf314c0335df658c1a54e32c7c4a7ab7823d57c39b6a757556e68ff1df17c748b698544a55cb488b52479a92b60f@104.42.217.25:30303,enode://2b252ab6a1d0f971d9722cb839a42cb81db019ba44c08754628ab4a823487071b5695317c8ccd085219c3a03af063495b2f1da8d18218da2d6a82981b45e6ffc@65.108.70.101:30303,enode://4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166:30303
+    - --Discovery.Bootnodes=enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303,enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30303,enode://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303,enode://103858bdb88756c71f15e9b5e09b56dc1be52f0a5021d46301dbbfb7e130029cc9d0d6f73f693bc29b665770fff7da4d34f3c6379fe12721b5d7a0bcb5ca1fc1@191.234.162.198:30303,enode://715171f50508aba88aecd1250af392a45a330af91d7b90701c436b618c86aaa1589c9184561907bebbb56439b8f8787bc01f49a7c77276c58c1b09822d75e8e8@52.231.165.108:30303,enode://5d6d7cd20d6da4bb83a1d28cadb5d409b64edf314c0335df658c1a54e32c7c4a7ab7823d57c39b6a757556e68ff1df17c748b698544a55cb488b52479a92b60f@104.42.217.25:30303,enode://2b252ab6a1d0f971d9722cb839a42cb81db019ba44c08754628ab4a823487071b5695317c8ccd085219c3a03af063495b2f1da8d18218da2d6a82981b45e6ffc@65.108.70.101:30303,enode://4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166:30303
+    - --Network.StaticPeers=enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303,enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30303,enode://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303,enode://103858bdb88756c71f15e9b5e09b56dc1be52f0a5021d46301dbbfb7e130029cc9d0d6f73f693bc29b665770fff7da4d34f3c6379fe12721b5d7a0bcb5ca1fc1@191.234.162.198:30303,enode://715171f50508aba88aecd1250af392a45a330af91d7b90701c436b618c86aaa1589c9184561907bebbb56439b8f8787bc01f49a7c77276c58c1b09822d75e8e8@52.231.165.108:30303,enode://5d6d7cd20d6da4bb83a1d28cadb5d409b64edf314c0335df658c1a54e32c7c4a7ab7823d57c39b6a757556e68ff1df17c748b698544a55cb488b52479a92b60f@104.42.217.25:30303,enode://2b252ab6a1d0f971d9722cb839a42cb81db019ba44c08754628ab4a823487071b5695317c8ccd085219c3a03af063495b2f1da8d18218da2d6a82981b45e6ffc@65.108.70.101:30303,enode://4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166:30303
+    - --HealthChecks.Enabled=true
+    - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}
+    - --Metrics.Enabled=true
+    - --Metrics.ExposePort=8008
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+  mevboost:
+    image: flashbots/mev-boost:latest
+    networks:
+    - sedge
+    container_name: mev-boost
+    restart: on-failure
+    entrypoint:
+    - /app/mev-boost
+    - -addr
+    - 0.0.0.0:18550
+    - -${NETWORK}
+    - -relay-check
+    - -relays
+    - ${RELAY_URL}
+  consensus:
+    stop_grace_period: 30s
+    container_name: consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    depends_on:
+      mevboost:
+        condition: service_started
+    healthcheck:
+      test: (curl -s -o /dev/null -w "%{http_code}" -X GET http://127.0.0.1:4000/eth/v1/node/health
+        | grep -q 200) || exit 1
+      interval: 5m
+      retries: 4032
+      start_period: 1m
+    networks:
+    - sedge
+    volumes:
+    - ${CC_DATA_DIR}:/var/lib/lighthouse
+    - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+    - 9000:9000/tcp
+    - 9000:9000/udp
+    - 5054:5054/tcp
+    expose:
+    - 4000
+    command:
+    - lighthouse
+    - bn
+    - --disable-upnp
+    - --datadir=/var/lib/lighthouse
+    - --port=9000
+    - --http
+    - --http-address=0.0.0.0
+    - --http-port=4000
+    - --network=${NETWORK}
+    - --target-peers=${CC_PEER_COUNT}
+    - --execution-endpoints=${EC_AUTH_URL}
+    - --execution-jwt=/tmp/jwt/jwtsecret
+    - --eth1-endpoints=${EC_API_URL}
+    - --debug-level=${CC_LOG_LEVEL}
+    - --validator-monitor-auto
+    - --subscribe-all-subnets
+    - --import-all-attestations
+    - --metrics
+    - --metrics-port=5054
+    - --metrics-address=0.0.0.0
+    - --checkpoint-sync-url=${CHECKPOINT_SYNC_URL}
+    - --builder=http://mevboost:18550
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+  validator-blocker:
+    image: busybox:latest
+    command: |-
+      sh -c "
+        echo 'Waiting 420 seconds of grace period before starting the validator';
+        sleep 420;
+        echo 'Done';
+      "
+  validator-import:
+    container_name: validator-import-client
+    build:
+      context: github.com/NethermindEth/lighthouse-init-validator
+      args:
+        LH_VERSION: ${VL_IMAGE_VERSION}
+        NETWORK: ${NETWORK}
+    networks:
+    - sedge
+    volumes:
+    - ${KEYSTORE_DIR}:/keystore
+    - ${VL_DATA_DIR}:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+  validator:
+    container_name: validator-client
+    image: ${VL_IMAGE_VERSION}
+    restart: unless-stopped
+    depends_on:
+      validator-import:
+        condition: service_completed_successfully
+      validator-blocker:
+        condition: service_completed_successfully
+      consensus:
+        condition: service_healthy
+    networks:
+    - sedge
+    ports:
+    - 5056:5056
+    volumes:
+    - ${VL_DATA_DIR}:/data
+    command:
+    - lighthouse
+    - vc
+    - --network=${NETWORK}
+    - --beacon-nodes=${CC_API_URL}
+    - --graffiti=${GRAFFITI}
+    - --debug-level=${VL_LOG_LEVEL}
+    - --validators-dir=/data/validators
+    - --metrics
+    - --metrics-port=5056
+    - --metrics-address=0.0.0.0
+    - --builder-proposals
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+networks:
+  sedge:
+    name: sedge_network
