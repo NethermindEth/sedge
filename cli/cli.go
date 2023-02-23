@@ -65,7 +65,6 @@ type CliCmdOptions struct {
 	withValidator            bool
 	importSlashingProtection bool
 	slashingProtectionFrom   string
-	customDeployBlock        string
 	jwtSourceType            string
 	keystoreSourceType       string
 	keystorePath             string
@@ -107,16 +106,12 @@ using docker compose command behind the scenes.
 			}
 			switch o.nodeType {
 			case NodeTypeFullNode:
-				o.genData.Services = append(o.genData.Services, "execution", "consensus")
 				return setupFullNode(p, o, actions)
 			case NodeTypeExecution:
-				o.genData.Services = append(o.genData.Services, "execution")
 				return setupExecutionNode(p, o, actions)
 			case NodeTypeConsensus:
-				o.genData.Services = append(o.genData.Services, "consensus")
 				return setupConsensusNode(p, o, actions)
 			case NodeTypeValidator:
-				o.genData.Services = append(o.genData.Services, "validator")
 				return setupValidatorNode(p, o, actions)
 			}
 			return nil
@@ -126,6 +121,7 @@ using docker compose command behind the scenes.
 }
 
 func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+	o.genData.Services = []string{"execution", "consensus"}
 	if err := confirmWithValidator(p, o); err != nil {
 		return err
 	}
@@ -195,6 +191,7 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) erro
 }
 
 func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+	o.genData.Services = []string{"execution"}
 	if err := selectExecutionClient(p, o); err != nil {
 		return err
 	}
@@ -226,6 +223,7 @@ func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 }
 
 func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+	o.genData.Services = []string{"consensus"}
 	if err := selectConsensusClient(p, o); err != nil {
 		return err
 	}
@@ -270,6 +268,7 @@ func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 }
 
 func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+	o.genData.Services = []string{"validator"}
 	if err := selectValidatorClient(p, o); err != nil {
 		return err
 	}
@@ -718,7 +717,7 @@ func inputCustomTTD(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputCustomDeployBlock(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.customDeployBlock, err = p.Input("Custom deploy block", "", false)
+	o.genData.CustomDeployBlock, err = p.Input("Custom deploy block", "", false)
 	return
 }
 
