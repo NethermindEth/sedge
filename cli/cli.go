@@ -192,18 +192,6 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) erro
 	}); err != nil {
 		return err
 	}
-	_ = generate.GenData{
-		// TODO add to simple consensus client setup
-		ExecutionApiUrl:  "",
-		ExecutionAuthUrl: "",
-
-		// TODO: add to simple validator client setup
-		ConsensusApiUrl:     "",
-		MevBoostOnValidator: false,
-
-		CustomDeployBlock:     "", // TODO add to prompts
-		CustomDeployBlockPath: "", // TODO add to prompts
-	}
 	return postGenerate(p, o, a)
 }
 
@@ -262,6 +250,8 @@ func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 		}
 	}
 	if err := runPromptActions(p, o,
+		inputExecutionAPIUrl,
+		inputExecutionAuthUrl,
 		inputFeeRecipient,
 		confirmExposeAllPorts,
 		inputGenerationPath,
@@ -295,9 +285,11 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 		}
 	}
 	if err := runPromptActions(p, o,
+		inputConsensusAPIUrl,
 		inputGraffiti,
 		inputValidatorGracePeriod,
 		inputFeeRecipient,
+		confirmEnableMEVBoost,
 		inputGenerationPath,
 	); err != nil {
 		return err
@@ -701,6 +693,11 @@ func confirmInstallDependencies(p ui.Prompter, o *CliCmdOptions) (err error) {
 	return
 }
 
+func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
+	o.genData.MevBoostOnValidator, err = p.Confirm("Enable MEV Boost?", false)
+	return
+}
+
 func inputCustomNetworkConfig(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.CustomNetworkConfigPath, err = p.InputFilePath("Custom network config file path", "", true)
 	return
@@ -840,5 +837,20 @@ func inputKeystorePath(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func inputImportSlashingProtectionFrom(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.slashingProtectionFrom, err = p.InputFilePath("Interchange slashing protection file", "", true)
+	return
+}
+
+func inputExecutionAPIUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
+	o.genData.ExecutionApiUrl, err = p.Input("Execution API URL", "", false)
+	return
+}
+
+func inputExecutionAuthUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
+	o.genData.ExecutionAuthUrl, err = p.Input("Execution Auth API URL", "", false)
+	return
+}
+
+func inputConsensusAPIUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
+	o.genData.ConsensusApiUrl, err = p.Input("Consensus API URL", "", false)
 	return
 }
