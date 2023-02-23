@@ -66,7 +66,6 @@ type CliCmdOptions struct {
 	importSlashingProtection bool
 	slashingProtectionFrom   string
 	customDeployBlock        string
-	relayURL                 string
 	jwtSourceType            string
 	keystoreSourceType       string
 	keystorePath             string
