@@ -186,7 +186,7 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) erro
 	o.genData.Mev = true
 	// Call generate action
 	if err := a.Generate(actions.GenerateOptions{
-		GenerationData: &o.genData,
+		GenerationData: o.genData,
 		GenerationPath: o.generationPath,
 	}); err != nil {
 		return err
@@ -217,7 +217,7 @@ func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 		return err
 	}
 	if err := a.Generate(actions.GenerateOptions{
-		GenerationData: &o.genData,
+		GenerationData: o.genData,
 		GenerationPath: o.generationPath,
 	}); err != nil {
 		return err
@@ -261,7 +261,7 @@ func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 		return err
 	}
 	if err := a.Generate(actions.GenerateOptions{
-		GenerationData: &o.genData,
+		GenerationData: o.genData,
 		GenerationPath: o.generationPath,
 	}); err != nil {
 		return err
@@ -294,7 +294,7 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 		return err
 	}
 	if err := a.Generate(actions.GenerateOptions{
-		GenerationData: &o.genData,
+		GenerationData: o.genData,
 		GenerationPath: o.generationPath,
 	}); err != nil {
 		return err

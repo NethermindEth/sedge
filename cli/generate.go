@@ -233,7 +233,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ContainerTag:            containerTag,
 	}
 	err = sedgeAction.Generate(actions.GenerateOptions{
-		GenerationData: &gd,
+		GenerationData: gd,
 		GenerationPath: generationPath,
 	})
 	if err != nil {

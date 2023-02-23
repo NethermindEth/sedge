@@ -58,7 +58,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 	for _, test := range tests {
 
 		samplePath := t.TempDir()
-		sampleData := &generate.GenData{
+		sampleData := generate.GenData{
 			ExecutionClient: &clients.Client{Name: "nethermind"},
 			Network:         "mainnet",
 			ContainerTag:    test.tag,
@@ -105,7 +105,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 func TestFolderCreationOnCompose(t *testing.T) {
 	configs.InitNetworksConfigs()
 	samplePath := t.TempDir() + "test"
-	sampleData := &generate.GenData{
+	sampleData := generate.GenData{
 		ExecutionClient: &clients.Client{Name: "nethermind"},
 		Network:         "mainnet",
 	}

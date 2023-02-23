@@ -25,7 +25,7 @@ import (
 )
 
 type GenerateOptions struct {
-	GenerationData *generate.GenData
+	GenerationData generate.GenData
 	GenerationPath string
 }
 
@@ -45,7 +45,7 @@ func (s *sedgeActions) Generate(options GenerateOptions) error {
 		return err
 	}
 	defer out.Close()
-	err = generate.ComposeFile(options.GenerationData, out)
+	err = generate.ComposeFile(&options.GenerationData, out)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (s *sedgeActions) Generate(options GenerateOptions) error {
 		return err
 	}
 	defer outEnv.Close()
-	err = generate.EnvFile(options.GenerationData, outEnv)
+	err = generate.EnvFile(&options.GenerationData, outEnv)
 	if err != nil {
 		return err
 	}
