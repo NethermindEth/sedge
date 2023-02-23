@@ -16,6 +16,7 @@ limitations under the License.
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -54,6 +55,8 @@ const (
 	SourceTypeSkip     = "skip"
 	SourceTypeRandom   = "random"
 )
+
+var ErrCancelled = errors.New("cancelled by the user")
 
 type CliCmdOptions struct {
 	genData                  generate.GenData
@@ -483,6 +486,12 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) e
 			log.Warnf("Keystore folder %s has %d validation errors. Check the following:", o.keystorePath, len(validationErrors))
 			for index, e := range validationErrors {
 				log.Warnf("%d. %s", index+1, e.Error())
+			}
+			cont, err := p.Confirm("Do you want to continue regardless the keystore folder validation warnings?", false)
+			if err != nil {
+				return err
+			} else if !cont {
+				return ErrCancelled
 			}
 		} else {
 			log.Infof("Keystore folder %s is valid", o.keystorePath)
