@@ -1,0 +1,7 @@
+version: "3.9"
+services:
+  execution:
+  consensus:
+networks:
+  sedge:
+    name: sedge_network

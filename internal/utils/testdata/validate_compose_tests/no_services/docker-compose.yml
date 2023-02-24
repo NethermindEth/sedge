@@ -1,0 +1,4 @@
+version: "3.9"
+networks:
+  sedge:
+    name: sedge_network

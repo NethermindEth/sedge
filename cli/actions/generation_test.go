@@ -16,19 +16,29 @@ limitations under the License.
 package actions_test
 
 import (
+	"crypto/rand"
+	"fmt"
+	"io"
+	"math/big"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
+	"github.com/NethermindEth/sedge/internal/utils"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
+	"github.com/stretchr/testify/require"
 )
 
 func newAction(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
@@ -41,74 +51,278 @@ func newAction(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
 	})
 }
 
+func contains(t *testing.T, list []string, str string) bool {
+	t.Helper()
+	for _, s := range list {
+		if strings.Contains(s, str) {
+			return true
+		}
+	}
+	return false
+}
+
+type genTestData struct {
+	name    string
+	genData *generate.GenData
+}
+
 // Test that the generated compose file with dump data is generated correctly
 func TestGenerateDockerCompose(t *testing.T) {
-	tests := []struct {
-		tag string
-	}{
-		{
-			tag: "",
-		},
-		{
-			tag: "sampleTag",
-		},
+	// Silence logger
+	log.SetOutput(io.Discard)
+	tests := make([]genTestData, 0)
+
+	networks, err := utils.SupportedNetworks()
+	if err != nil {
+		t.Error("SupportedNetworks() failed", err)
+	}
+
+	for _, network := range networks {
+		c := clients.ClientInfo{Network: network}
+
+		executionClients, err := c.SupportedClients("execution")
+		if err != nil {
+			t.Errorf("SupportedClients(\"execution\") failed: %v", err)
+		}
+		consensusClients, err := c.SupportedClients("consensus")
+		if err != nil {
+			t.Errorf("SupportedClients(\"consensus\") failed: %v", err)
+		}
+		validatorClients, err := c.SupportedClients("validator")
+		if err != nil {
+			t.Errorf("SupportedClients(\"validator\") failed: %v", err)
+		}
+
+		rNum, err := rand.Int(rand.Reader, big.NewInt(int64(100)))
+		if err != nil {
+			t.Errorf("rand.Int() failed: %v", err)
+		}
+		gracePeriod := configs.NetworkEpochTime(network) * time.Duration(int(rNum.Int64()))
+		ckptSync := fmt.Sprintf("http://localhost:%d", 40+rNum.Int64())
+
+		for _, executionCl := range executionClients {
+			for _, consensusCl := range consensusClients {
+				tests = append(tests,
+					genTestData{
+						name: fmt.Sprintf("execution: %s, network: %s, only execution", executionCl, network),
+						genData: &generate.GenData{
+							ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
+							Network:         network,
+						},
+					},
+					genTestData{
+						name: fmt.Sprintf("execution: %s, network: %s, only execution with tag", executionCl, network),
+						genData: &generate.GenData{
+							ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
+							Network:         network,
+							ContainerTag:    "sampleTag",
+						},
+					},
+					genTestData{
+						name: fmt.Sprintf("consensus: %s, network: %s, only consensus", consensusCl, network),
+						genData: &generate.GenData{
+							ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
+							Network:         network,
+						},
+					},
+					genTestData{
+						name: fmt.Sprintf("consensus: %s, network: %s, only consensus with tag", consensusCl, network),
+						genData: &generate.GenData{
+							ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
+							Network:         network,
+							ContainerTag:    "sampleTag",
+						},
+					},
+					genTestData{
+						name: fmt.Sprintf("consensus: %s, network: %s, only consensus with custom Checkpoint sync URL", consensusCl, network),
+						genData: &generate.GenData{
+							ConsensusClient:   &clients.Client{Name: consensusCl, Type: "consensus"},
+							Network:           network,
+							CheckpointSyncUrl: ckptSync,
+						},
+					},
+					genTestData{
+						name: fmt.Sprintf("validator: %s, network: %s, only validator", consensusCl, network),
+						genData: &generate.GenData{
+							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
+							Network:         network,
+						},
+					},
+					genTestData{
+						name: fmt.Sprintf("validator: %s, network: %s, only validator with tag", consensusCl, network),
+						genData: &generate.GenData{
+							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
+							Network:         network,
+							ContainerTag:    "sampleTag",
+						},
+					},
+				)
+				if utils.Contains(validatorClients, consensusCl) {
+					tests = append(tests,
+						genTestData{
+							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s, network: %s, all", executionCl, consensusCl, consensusCl, network),
+							genData: &generate.GenData{
+								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
+								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
+								ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
+								Network:         network,
+							},
+						},
+						genTestData{
+							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s, network: %s, all, with tag", executionCl, consensusCl, consensusCl, network),
+							genData: &generate.GenData{
+								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
+								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
+								ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
+								Network:         network,
+								ContainerTag:    "sampleTag",
+							},
+						},
+						genTestData{
+							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s, network: %s, all, waitEpoch set and custom Checkpoint Sync URL", executionCl, consensusCl, consensusCl, network),
+							genData: &generate.GenData{
+								ExecutionClient:    &clients.Client{Name: executionCl, Type: "execution"},
+								ConsensusClient:    &clients.Client{Name: consensusCl, Type: "consensus"},
+								ValidatorClient:    &clients.Client{Name: consensusCl, Type: "validator"},
+								Network:            network,
+								ContainerTag:       "sampleTag",
+								VLStartGracePeriod: uint(gracePeriod.Abs()),
+								CheckpointSyncUrl:  ckptSync,
+							},
+						},
+						genTestData{
+							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, network),
+							genData: &generate.GenData{
+								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
+								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
+								Network:         network,
+							},
+						},
+						genTestData{
+							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s, network: %s, no validator, with tag", executionCl, consensusCl, consensusCl, network),
+							genData: &generate.GenData{
+								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
+								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
+								Network:         network,
+								ContainerTag:    "sampleTag",
+							},
+						},
+					)
+				}
+			}
+		}
 	}
 
 	configs.InitNetworksConfigs()
-	for _, test := range tests {
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			samplePath := t.TempDir()
+			sedgeAction := newAction(t, nil)
 
-		samplePath := t.TempDir()
-		sampleData := &generate.GenData{
-			ExecutionClient: &clients.Client{Name: "nethermind"},
-			Network:         "mainnet",
-			ContainerTag:    test.tag,
-		}
-		sedgeAction := newAction(t, nil)
+			// Always set the JWT secret path
+			tc.genData.JWTSecretPath = samplePath
 
-		err := sedgeAction.Generate(actions.GenerateOptions{
-			GenerationData: sampleData,
-			GenerationPath: samplePath,
+			// Setup client images
+			if tc.genData.ExecutionClient != nil {
+				tc.genData.ExecutionClient.SetImageOrDefault("")
+			}
+			if tc.genData.ConsensusClient != nil {
+				tc.genData.ConsensusClient.SetImageOrDefault("")
+			}
+			if tc.genData.ValidatorClient != nil {
+				tc.genData.ValidatorClient.SetImageOrDefault("")
+			}
+
+			err := sedgeAction.Generate(actions.GenerateOptions{
+				GenerationData: tc.genData,
+				GenerationPath: samplePath,
+			})
+			if err != nil {
+				t.Error("GenerateDockerComposeAndEnvFile() failed", err)
+				return
+			}
+
+			validateGeneration(t, samplePath)
+			cmpData, err := generate.ParseCompose(filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
+			require.Nil(t, err)
+			// envData, err := utils.ParseEnv(filepath.Join(samplePath, configs.DefaultEnvFileName))
+			// require.Nil(t, err)
+
+			// Validate that Execution Client info matches the sample data
+			if tc.genData.ExecutionClient != nil {
+				// Check that the execution service is set.
+				assert.NotNil(t, cmpData.Services.Execution)
+				// Check that the execution container name contains the tag.
+				if tc.genData.ContainerTag == "" {
+					assert.Equal(t, services.DefaultSedgeExecutionClient, cmpData.Services.Execution.ContainerName)
+				} else {
+					assert.Equal(t, services.DefaultSedgeExecutionClient+"-sampleTag", cmpData.Services.Execution.ContainerName)
+				}
+			}
+
+			// Validate that Consensus Client info matches the sample data
+			if tc.genData.ConsensusClient != nil {
+				// Check that the consensus service is set.
+				assert.NotNil(t, cmpData.Services.Consensus)
+				// Check that the consensus container name contains the tag.
+				if tc.genData.ContainerTag == "" {
+					assert.Equal(t, services.DefaultSedgeConsensusClient, cmpData.Services.Consensus.ContainerName)
+				} else {
+					assert.Equal(t, services.DefaultSedgeConsensusClient+"-sampleTag", cmpData.Services.Consensus.ContainerName)
+				}
+				// Check that Checkpoint Sync URL is set
+				if tc.genData.CheckpointSyncUrl != "" {
+					assert.True(t, contains(t, cmpData.Services.Consensus.Command, tc.genData.CheckpointSyncUrl), "Checkpoint Sync URL not found in consensus service command: %s", cmpData.Services.Consensus.Command)
+				}
+			}
+
+			// Validate that Validator Client info matches the sample data
+			if tc.genData.ValidatorClient != nil {
+				// Check that the validator service is set.
+				assert.NotNil(t, cmpData.Services.Validator)
+				// Check that the validator container name contains the tag.
+				if tc.genData.ContainerTag == "" {
+					assert.Equal(t, services.DefaultSedgeValidatorClient, cmpData.Services.Validator.ContainerName)
+				} else {
+					assert.Equal(t, services.DefaultSedgeValidatorClient+"-sampleTag", cmpData.Services.Validator.ContainerName)
+				}
+				// Check that the validator-blocker service is set.
+				assert.NotNil(t, cmpData.Services.ValidatorBlocker)
+				// Check that the validator grace period is set. Get the number after sleep
+				re := regexp.MustCompile("sleep [0-9]+")
+				fullSleep := re.FindAllString(cmpData.Services.ValidatorBlocker.Command, -1)
+				re = regexp.MustCompile("[0-9]+")
+				sleep := re.FindAllString(fullSleep[0], -1)
+				sleepTime, err := strconv.Atoi(sleep[0])
+				if err != nil {
+					t.Error("Failed to parse sleep time", err)
+				} else {
+					// Check that the sleep time is equal to the grace period
+					assert.Equal(t, tc.genData.VLStartGracePeriod, uint(sleepTime))
+				}
+			}
 		})
-		if err != nil {
-			t.Error("GenerateDockerComposeAndEnvFile() failed", err)
-			return
-		}
-
-		// Check that docker-compose file exists
-		assert.FileExists(t, filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
-		// Check that .env exists
-		assert.FileExists(t, filepath.Join(samplePath, configs.DefaultEnvFileName))
-
-		// Validate that Execution Client info matches the sample data
-		// load the docker-compose file
-		composeFile, err := os.ReadFile(filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
-		assert.Nilf(t, err, "unable to read docker-compose.yml")
-
-		var composeData generate.ComposeData
-		err = yaml.Unmarshal(composeFile, &composeData)
-		assert.Nilf(t, err, "unable to parse docker-compose.yml")
-
-		// Check that the execution service is set.
-		assert.NotNil(t, composeData.Services.Execution)
-		// Check that the execution container name contains the tag.
-		if test.tag == "" {
-			assert.Equal(t, composeData.Services.Execution.ContainerName, services.DefaultSedgeExecutionClient)
-		} else {
-			assert.Equal(t, composeData.Services.Execution.ContainerName, services.DefaultSedgeExecutionClient+"-sampleTag")
-		}
-
-		// Check other services are nil
-		assert.Nil(t, composeData.Services.Consensus)
 	}
 }
 
 func TestFolderCreationOnCompose(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
 	configs.InitNetworksConfigs()
 	samplePath := t.TempDir() + "test"
+	c := clients.ClientInfo{Network: "mainnet"}
+	clientsMap, _ := c.Clients([]string{"execution", "consensus"})
 	sampleData := &generate.GenData{
-		ExecutionClient: &clients.Client{Name: "nethermind"},
+		ExecutionClient: clientsMap["execution"]["nethermind"],
+		ConsensusClient: clientsMap["consensus"]["lighthouse"],
+		ValidatorClient: clientsMap["consensus"]["lighthouse"],
 		Network:         "mainnet",
+		JWTSecretPath:   samplePath,
 	}
+	sampleData.ExecutionClient.Image = configs.ClientImages.Execution.Nethermind.String()
+	sampleData.ConsensusClient.Image = configs.ClientImages.Consensus.Lighthouse.String()
+	sampleData.ValidatorClient.Image = configs.ClientImages.Consensus.Lighthouse.String()
+
 	sedgeAction := newAction(t, nil)
 
 	err := sedgeAction.Generate(actions.GenerateOptions{
@@ -119,16 +333,24 @@ func TestFolderCreationOnCompose(t *testing.T) {
 		return
 	}
 
+	validateGeneration(t, samplePath)
+	// Remove the folder
+	err = os.RemoveAll(samplePath)
+	require.NoError(t, err, "unable to remove sample folder")
+	// Check that the folder was removed
+	assert.NoDirExists(t, samplePath)
+}
+
+func validateGeneration(t *testing.T, samplePath string) {
+	t.Helper()
+
 	// Check that the folder was created
 	assert.DirExists(t, samplePath)
 	// Check that docker-compose file exists
 	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
-	// Check that .env file doesn't exist
+	// Check that .env file exist
 	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultEnvFileName))
-	// Remove the folder
-	err = os.RemoveAll(samplePath)
-	if !assert.Nilf(t, err, "unable to remove sample folder") {
-		return
-	}
-	assert.NoDirExists(t, samplePath)
+	// Check compose file correctness
+	err := utils.ValidateCompose(filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
+	require.NoError(t, err, "generated compose file is not valid")
 }

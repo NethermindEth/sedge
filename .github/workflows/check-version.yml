@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout Sedge repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Run update check script
         run: chmod +x ./scripts/check-image-updates.sh && ./scripts/check-image-updates.sh
