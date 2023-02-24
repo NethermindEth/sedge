@@ -1,6 +1,6 @@
 execution:
   geth:
-    name: ethereum/client-go:v1.10.26
+    name: ethereum/client-go
     version: v1.10.26
   besu:
     name: hyperledger/besu

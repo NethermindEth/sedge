@@ -53,7 +53,7 @@ func TestSetImageOrDefault_Execution(t *testing.T) {
 				Name: "erigon",
 				Type: "execution",
 			},
-			expectedImage: *regexp.MustCompile(`^erigon/erigon:v\d+\.\d+\.\d+$`),
+			expectedImage: *regexp.MustCompile(`^thorax/erigon:v\d+\.\d+\.\d+$`),
 		},
 	}
 	for _, test := range tests {
