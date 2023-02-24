@@ -19,6 +19,7 @@ import (
 	"errors"
 	"io"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/NethermindEth/sedge/test"
@@ -33,7 +34,7 @@ func TestValidateCompose(t *testing.T) {
 	tcs := []struct {
 		name      string
 		pTestData string
-		err       error
+		err       map[string]error
 	}{
 		{
 			name:      "Valid docker-compose",
@@ -46,7 +47,11 @@ func TestValidateCompose(t *testing.T) {
 		{
 			name:      "Invalid docker-compose, empty services, yaml schema error",
 			pTestData: "bad_services",
-			err:       errors.New("must be a mapping"),
+			err: map[string]error{
+				"linux":   errors.New("must be a mapping"),
+				"darwin":  errors.New("must be a mapping"),
+				"windows": errors.New("must be a mapping"),
+			},
 		},
 		{
 			name:      "Valid docker-compose, bad services",
@@ -55,12 +60,20 @@ func TestValidateCompose(t *testing.T) {
 		{
 			name:      "Without env file",
 			pTestData: "no_env",
-			err:       errors.New("empty section between colons"),
+			err: map[string]error{
+				"linux":   errors.New("empty section between colons"),
+				"darwin":  errors.New("empty section between colons"),
+				"windows": errors.New("empty section between colons"),
+			},
 		},
 		{
 			name:      "No compose file in path",
 			pTestData: "no_compose",
-			err:       errors.New("no such file or directory"),
+			err: map[string]error{
+				"linux":   errors.New("no such file or directory"),
+				"darwin":  errors.New("no such file or directory"),
+				"windows": errors.New("The system cannot find the file specified"),
+			},
 		},
 	}
 	for _, tc := range tcs {
@@ -79,7 +92,7 @@ func TestValidateCompose(t *testing.T) {
 			err := ValidateCompose(path)
 
 			if tc.err != nil {
-				assert.ErrorContains(t, err, tc.err.Error())
+				assert.ErrorContains(t, err, tc.err[runtime.GOOS].Error())
 			} else {
 				assert.NoError(t, err)
 			}
@@ -92,7 +105,7 @@ func TestParseEnv(t *testing.T) {
 		name      string
 		pTestData string
 		out       map[string]string
-		err       error
+		err       map[string]error
 	}{
 		{
 			name:      "Valid env file, two keys",
@@ -117,7 +130,11 @@ func TestParseEnv(t *testing.T) {
 		{
 			name:      "Without env file",
 			pTestData: "no_env",
-			err:       errors.New("no such file or directory"),
+			err: map[string]error{
+				"linux":   errors.New("no such file or directory"),
+				"darwin":  errors.New("no such file or directory"),
+				"windows": errors.New("The system cannot find the file specified"),
+			},
 		},
 	}
 	for _, tc := range tcs {
@@ -136,7 +153,7 @@ func TestParseEnv(t *testing.T) {
 			got, err := ParseEnv(path)
 
 			if tc.err != nil {
-				assert.ErrorContains(t, err, tc.err.Error())
+				assert.ErrorContains(t, err, tc.err[runtime.GOOS].Error())
 			} else {
 				assert.NoError(t, err)
 				assert.EqualValues(t, got, tc.out)
