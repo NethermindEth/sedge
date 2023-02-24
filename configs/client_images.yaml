@@ -1,7 +1,7 @@
 execution:
   geth:
     name: ethereum/client-go
-    version: v1.10.26
+    version: v1.11.2
   besu:
     name: hyperledger/besu
     version: 23.1.0
