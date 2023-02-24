@@ -71,6 +71,7 @@ func InitNetworksConfigs() {
 			RequireJWT:               true,
 			NetworkService:           "merge",
 			GenesisForkVersion:       "0x0000006f",
+			DefaultTTD:               "231707791542740786049188744689299064356246512",
 			DefaultCustomConfigSrc:   "https://github.com/gnosischain/configs/raw/main/chiado/config.yaml",
 			DefaultCustomGenesisSrc:  "https://github.com/gnosischain/configs/raw/main/chiado/genesis.ssz",
 			DefaultCustomDeployBlock: "0",
@@ -83,6 +84,7 @@ func InitNetworksConfigs() {
 			RequireJWT:         true,
 			NetworkService:     "merge",
 			GenesisForkVersion: "0x00000064",
+			DefaultTTD:         "8626000000000000000000058750000000000000000000",
 			DefaultECBootnodes: []string{
 				"enode://ea6d67eb3277d8ae9292fc700fa757ef6d2127c4db9712bcd5eb1341b1d937ac71cc2b15efe3a8496f4fc9fc12156d7ac73d82eb3c0f68928442116030b76f48@3.135.122.4:30303", "enode://c5e1e38709a2eb402557e82e071ccec1c6e2adedb01f7d6afdc80d25f7e9287f954fa9b742f01b1b74a5c532de9476afeb6efdcf5a683672a663204eadb15e45@3.17.46.220:30303",
 			},
