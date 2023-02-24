@@ -71,7 +71,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			}
 		}
 		executionClient.SetImageOrDefault(strings.Join(executionParts[1:], ":"))
-		// Patch Geth image if needed
+		// Patch Geth image if network needs TTD to be set
 		if executionClient.Name == "geth" && network != "mainnet" {
 			executionClient.Image = "ethereum/client-go:v1.10.26"
 		}
