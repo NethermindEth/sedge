@@ -64,16 +64,19 @@ func TestCli_FullNode(t *testing.T) {
 						GenerationData: generate.GenData{
 							Services: []string{"execution", "consensus", "validator"},
 							ExecutionClient: &clients.Client{
-								Name: "nethermind",
-								Type: "execution",
+								Name:  "nethermind",
+								Type:  "execution",
+								Image: configs.ClientImages.Execution.Nethermind.String(),
 							},
 							ConsensusClient: &clients.Client{
-								Name: "prysm",
-								Type: "consensus",
+								Name:  "prysm",
+								Type:  "consensus",
+								Image: configs.ClientImages.Consensus.Prysm.String(),
 							},
 							ValidatorClient: &clients.Client{
-								Name: "prysm",
-								Type: "validator",
+								Name:  "prysm",
+								Type:  "validator",
+								Image: configs.ClientImages.Validator.Prysm.String(),
 							},
 							Network:            "mainnet",
 							CheckpointSyncUrl:  "http://localhost:5052",
@@ -92,6 +95,10 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Withdrawal address", "", false).Return("0x00000007abca72jmd83jd8u3jd9kdn32j38abc", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
+					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"validator"},
+					}),
 					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 						ValidatorClient: "prysm",
 						Network:         NetworkMainnet,
@@ -132,12 +139,14 @@ func TestCli_FullNode(t *testing.T) {
 						GenerationData: generate.GenData{
 							Services: []string{"execution", "consensus"},
 							ExecutionClient: &clients.Client{
-								Name: "nethermind",
-								Type: "execution",
+								Name:  "nethermind",
+								Type:  "execution",
+								Image: configs.ClientImages.Execution.Nethermind.String(),
 							},
 							ConsensusClient: &clients.Client{
-								Name: "prysm",
-								Type: "consensus",
+								Name:  "prysm",
+								Type:  "consensus",
+								Image: configs.ClientImages.Consensus.Prysm.String(),
 							},
 							Network:           "mainnet",
 							CheckpointSyncUrl: "http://localhost:5052",
@@ -193,16 +202,19 @@ func TestCli_FullNode(t *testing.T) {
 						GenerationData: generate.GenData{
 							Services: []string{"execution", "consensus", "validator"},
 							ExecutionClient: &clients.Client{
-								Name: "nethermind",
-								Type: "execution",
+								Name:  "nethermind",
+								Type:  "execution",
+								Image: configs.ClientImages.Execution.Nethermind.String(),
 							},
 							ConsensusClient: &clients.Client{
-								Name: "prysm",
-								Type: "consensus",
+								Name:  "prysm",
+								Type:  "consensus",
+								Image: configs.ClientImages.Consensus.Prysm.String(),
 							},
 							ValidatorClient: &clients.Client{
-								Name: "prysm",
-								Type: "validator",
+								Name:  "prysm",
+								Type:  "validator",
+								Image: configs.ClientImages.Validator.Prysm.String(),
 							},
 							Network:                 NetworkCustom,
 							CheckpointSyncUrl:       "http://localhost:5052",
@@ -227,6 +239,10 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Withdrawal address", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
+					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"validator"},
+					}),
 					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 						ValidatorClient: "prysm",
 						Network:         "custom",
@@ -267,8 +283,9 @@ func TestCli_FullNode(t *testing.T) {
 						GenerationData: generate.GenData{
 							Services: []string{"execution"},
 							ExecutionClient: &clients.Client{
-								Name: "nethermind",
-								Type: "execution",
+								Name:  "nethermind",
+								Type:  "execution",
+								Image: configs.ClientImages.Execution.Nethermind.String(),
 							},
 							Network:     "mainnet",
 							MapAllPorts: true,
@@ -314,8 +331,9 @@ func TestCli_FullNode(t *testing.T) {
 						GenerationData: generate.GenData{
 							Services: []string{"execution"},
 							ExecutionClient: &clients.Client{
-								Name: "nethermind",
-								Type: "execution",
+								Name:  "nethermind",
+								Type:  "execution",
+								Image: configs.ClientImages.Execution.Nethermind.String(),
 							},
 							Network:             NetworkCustom,
 							MapAllPorts:         true,
@@ -366,8 +384,9 @@ func TestCli_FullNode(t *testing.T) {
 						GenerationData: generate.GenData{
 							Services: []string{"consensus"},
 							ConsensusClient: &clients.Client{
-								Name: "prysm",
-								Type: "consensus",
+								Name:  "prysm",
+								Type:  "consensus",
+								Image: configs.ClientImages.Consensus.Prysm.String(),
 							},
 							Network:           NetworkGoerli,
 							CheckpointSyncUrl: "http://localhost:5052",
@@ -414,8 +433,9 @@ func TestCli_FullNode(t *testing.T) {
 						GenerationData: generate.GenData{
 							Services: []string{"consensus"},
 							ConsensusClient: &clients.Client{
-								Name: "prysm",
-								Type: "consensus",
+								Name:  "prysm",
+								Type:  "consensus",
+								Image: configs.ClientImages.Consensus.Prysm.String(),
 							},
 							Network:                 NetworkCustom,
 							FeeRecipient:            "0x2d07a21ebadce0c13e8a91022a7e5732eb6bf5d5",
@@ -462,8 +482,9 @@ func TestCli_FullNode(t *testing.T) {
 						GenerationData: generate.GenData{
 							Services: []string{"validator"},
 							ValidatorClient: &clients.Client{
-								Name: "prysm",
-								Type: "validator",
+								Name:  "prysm",
+								Type:  "validator",
+								Image: configs.ClientImages.Validator.Prysm.String(),
 							},
 							Network:             "mainnet",
 							FeeRecipient:        "0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5",
@@ -479,6 +500,10 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Withdrawal address", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
+					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"validator"},
+					}),
 					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 						ValidatorClient: "prysm",
 						Network:         NetworkMainnet,
@@ -524,8 +549,9 @@ func TestCli_FullNode(t *testing.T) {
 						GenerationData: generate.GenData{
 							Services: []string{"validator"},
 							ValidatorClient: &clients.Client{
-								Name: "prysm",
-								Type: "validator",
+								Name:  "prysm",
+								Type:  "validator",
+								Image: configs.ClientImages.Validator.Prysm.String(),
 							},
 							Network:                 NetworkCustom,
 							FeeRecipient:            "0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5",
@@ -545,6 +571,10 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Withdrawal address", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
+					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"validator"},
+					}),
 					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 						ValidatorClient: "prysm",
 						Network:         NetworkCustom,

@@ -489,7 +489,14 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) e
 		}
 	}
 	log.Info("Importing validator keys into the validator client...")
-	err := a.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+	err := a.SetupContainers(actions.SetupContainersOptions{
+		GenerationPath: o.generationPath,
+		Services:       []string{"validator"},
+	})
+	if err != nil {
+		return err
+	}
+	err = a.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 		ValidatorClient: o.genData.ValidatorClient.Name,
 		Network:         o.genData.Network,
 		GenerationPath:  o.generationPath,
@@ -579,6 +586,7 @@ func selectExecutionClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 		Name: selectedExecutionClient,
 		Type: "execution",
 	}
+	o.genData.ExecutionClient.SetImageOrDefault("")
 	return nil
 }
 
@@ -606,6 +614,7 @@ func selectConsensusClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 		Name: selectedConsensusClient,
 		Type: "consensus",
 	}
+	o.genData.ConsensusClient.SetImageOrDefault("")
 	return nil
 }
 
@@ -633,6 +642,7 @@ func selectValidatorClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 		Name: selectedValidatorClient,
 		Type: "validator",
 	}
+	o.genData.ValidatorClient.SetImageOrDefault("")
 	return nil
 }
 
