@@ -768,9 +768,17 @@ func inputMevBoostEndpoint(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
-	// TODO add default relay URL value and remove it from the template
-	// TODO support multiple relay URLs
-	o.genData.RelayURL, err = p.Input("Relay URL", "", false)
+	var defaultValue []string
+	switch o.genData.Network {
+	case NetworkMainnet:
+		defaultValue = configs.MainnetRelayURLs()
+	case NetworkGoerli:
+		defaultValue = configs.GoerliRelayURLs()
+	case NetworkSepolia:
+		defaultValue = configs.SepoliaRelayURLs()
+	}
+	relayURLs, err := p.InputList("Relay URLs", defaultValue)
+	o.genData.RelayURL = strings.Join(relayURLs, ",")
 	return
 }
 

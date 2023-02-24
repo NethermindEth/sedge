@@ -17,6 +17,7 @@ package ui
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 )
@@ -32,6 +33,7 @@ type Prompter interface {
 	InputFilePath(prompt, defaultValue string, required bool) (result string, err error)
 	InputSecret(prompt string) (result string, err error)
 	EthAddress(prompt string, defaultValue string, required bool) (result string, err error)
+	InputList(prompt string, defaultValue []string) (result []string, err error)
 }
 
 func NewPrompter() Prompter {
@@ -128,5 +130,24 @@ func (p *prompter) EthAddress(prompt string, defaultValue string, required bool)
 		Default: defaultValue,
 	}
 	err = survey.AskOne(q, &result, options...)
+	return
+}
+
+func (p *prompter) InputList(prompt string, defaultValue []string) (result []string, err error) {
+	var text string
+	if len(defaultValue) > 0 {
+		prompt += " Default values are listed below."
+	}
+	q := &survey.Multiline{
+		Message: prompt,
+		Default: fmt.Sprintf("\n%s\n", strings.Join(defaultValue, "\n")),
+	}
+	err = survey.AskOne(q, &text)
+	for _, item := range strings.Split(text, "\n") {
+		item = strings.TrimSpace(item)
+		if item != "" {
+			result = append(result, item)
+		}
+	}
 	return
 }
