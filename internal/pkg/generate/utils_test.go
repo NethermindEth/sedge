@@ -19,6 +19,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/NethermindEth/sedge/test"
@@ -30,7 +31,7 @@ func TestParseCompose(t *testing.T) {
 	tcs := []struct {
 		name      string
 		pTestData string
-		err       error
+		err       map[string]error
 	}{
 		{
 			name:      "Valid compose file",
@@ -39,12 +40,20 @@ func TestParseCompose(t *testing.T) {
 		{
 			name:      "Invalid yml file",
 			pTestData: "invalid",
-			err:       errors.New("error parsing yml file, it seems is not a valid docker-compose script:"),
+			err: map[string]error{
+				"linux":   errors.New("error parsing yml file, it seems is not a valid docker-compose script"),
+				"darwin":  errors.New("error parsing yml file, it seems is not a valid docker-compose script"),
+				"windows": errors.New("error parsing yml file, it seems is not a valid docker-compose script"),
+			},
 		},
 		{
 			name:      "Without compose file",
 			pTestData: "no_compose",
-			err:       errors.New("no such file or directory"),
+			err: map[string]error{
+				"linux":   errors.New("no such file or directory"),
+				"darwin":  errors.New("no such file or directory"),
+				"windows": errors.New("The system cannot find the file specified."),
+			},
 		},
 		{
 			name:      "Empty compose file",
@@ -67,7 +76,7 @@ func TestParseCompose(t *testing.T) {
 			cd, err := ParseCompose(path)
 
 			if tc.err != nil {
-				assert.ErrorContains(t, err, tc.err.Error())
+				assert.ErrorContains(t, err, tc.err[runtime.GOOS].Error())
 			} else {
 				assert.NoError(t, err)
 				// Marshal to yaml and compare with existing file
