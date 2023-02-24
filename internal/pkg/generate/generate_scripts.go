@@ -399,7 +399,6 @@ func EnvFile(gd *GenData, at io.Writer) error {
 			gd.MevBoostEndpoint = fmt.Sprintf("%s:%v", configs.DefaultMevBoostEndpoint, gd.Ports["MevPort"])
 		}
 	}
-	// TODO: Use OS wise delimiter for these data structs
 	data := EnvData{
 		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		ElImage:                   imageOrEmpty(cls[execution]),
@@ -420,6 +419,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		Graffiti:                  gd.Graffiti,
 		RelayURL:                  gd.RelayURL,
 	}
+	// FIXME: Graffiti is <EL_name-CL_name> but is incorrect when the CL is different from the VL (validator client)
 
 	// Fix prysm rpc url
 	if cls[validator] != nil && cls[validator].Name == "prysm" {

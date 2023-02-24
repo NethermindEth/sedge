@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/NethermindEth/sedge/internal/crypto"
 
@@ -193,7 +194,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		return err
 	}
 
-	vlStartGracePeriod := configs.NetworkEpochTime(network)
+	vlStartGracePeriod := configs.NetworkEpochTime(network) * time.Duration(flags.waitEpoch)
 
 	// Generate docker-compose scripts
 	gd := generate.GenData{
