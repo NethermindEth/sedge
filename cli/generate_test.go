@@ -684,6 +684,36 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			nil,
 		),
+		*buildGenerateTestCase(
+			t,
+			"Full-node, waitEpoch set", "case_1",
+			GenCmdFlags{
+				feeRecipient: "0x0000000000000000000000000000000000000000",
+				waitEpoch:    5,
+			},
+			globalFlags{
+				network: "chiado",
+			},
+			subCmd{
+				name: "full-node",
+			},
+			nil),
+		*buildGenerateTestCase(
+			t,
+			"Validator, waitEpoch set", "case_1",
+			GenCmdFlags{
+				feeRecipient:    "0x0000000000000000000000000000000000000000",
+				waitEpoch:       50,
+				consensusApiUrl: "http://localhost:4000",
+			},
+			globalFlags{
+				network: "goerli",
+			},
+			subCmd{
+				name: "validator",
+				args: []string{"lodestar"},
+			},
+			nil),
 	}
 
 	for _, tc := range tcs {

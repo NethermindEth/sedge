@@ -11,16 +11,16 @@ jobs:
     name: Run unit tests
     strategy:
       matrix:
-        go: ["1.18.2"]
+        go: ["1.19"]
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go }}
 
