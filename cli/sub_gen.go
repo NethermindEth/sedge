@@ -60,6 +60,11 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 			return preValidationGenerateCmd(network, logging)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if flags.consensusName == "" {
+				flags.consensusName = flags.validatorName
+			} else if flags.validatorName == "" {
+				flags.validatorName = flags.consensusName
+			}
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{execution, consensus, validator})
 		},
 	}
