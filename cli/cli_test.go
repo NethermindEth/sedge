@@ -91,6 +91,12 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Withdrawal address", "", false).Return("0x00000007abca72jmd83jd8u3jd9kdn32j38abc", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
+					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+						ValidatorClient: "prysm",
+						Network:         NetworkMainnet,
+						GenerationPath:  generationPath,
+						From:            filepath.Join(generationPath, "keystores"),
+					}).Return(nil),
 					prompter.EXPECT().Confirm("Do you want to import slashing protection data?", false).Return(false, nil),
 					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
 				}
@@ -220,6 +226,16 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Withdrawal address", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
+					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+						ValidatorClient: "prysm",
+						Network:         "custom",
+						From:            filepath.Join(generationPath, "keystores"),
+						GenerationPath:  generationPath,
+						CustomConfig: actions.ImportValidatorKeysCustomOptions{
+							NetworkConfigPath: "testdata/networkConfig.json",
+							GenesisPath:       "testdata/genesis.json",
+						},
+					}).Return(nil),
 					prompter.EXPECT().Confirm("Do you want to import slashing protection data?", false).Return(false, nil),
 					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
 				}
@@ -462,6 +478,12 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Withdrawal address", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
+					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+						ValidatorClient: "prysm",
+						Network:         NetworkMainnet,
+						From:            filepath.Join(generationPath, "keystores"),
+						GenerationPath:  generationPath,
+					}).Return(nil),
 					prompter.EXPECT().Confirm("Do you want to import slashing protection data?", false).Return(false, nil),
 					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
 				}
@@ -522,6 +544,16 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Withdrawal address", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
+					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+						ValidatorClient: "prysm",
+						Network:         NetworkCustom,
+						From:            filepath.Join(generationPath, "keystores"),
+						GenerationPath:  generationPath,
+						CustomConfig: actions.ImportValidatorKeysCustomOptions{
+							NetworkConfigPath: "testdata/networkConfig.json",
+							GenesisPath:       "testdata/genesis.json",
+						},
+					}).Return(nil),
 					prompter.EXPECT().Confirm("Do you want to import slashing protection data?", false).Return(false, nil),
 					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
 				}

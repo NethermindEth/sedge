@@ -450,10 +450,11 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) e
 		); err != nil {
 			return err
 		}
+		o.keystorePath = filepath.Join(o.generationPath, "keystores")
 		if err := keystores.CreateKeystores(keystores.ValidatorKeysGenData{
 			Mnemonic:    o.keystoreMnemonic,
 			Passphrase:  o.keystorePassphrase,
-			OutputPath:  filepath.Join(o.generationPath, "keystores"),
+			OutputPath:  o.keystorePath,
 			MinIndex:    uint64(o.existingValidators),
 			MaxIndex:    uint64(o.existingValidators) + uint64(o.numberOfValidators),
 			NetworkName: o.genData.Network,
@@ -487,8 +488,22 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) e
 			log.Infof("Keystore folder %s is valid", o.keystorePath)
 		}
 	}
-	// TODO call validator import
-	log.Error("missing call to import validator keys")
+	log.Info("Importing validator keys into the validator client...")
+	err := a.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+		ValidatorClient: o.genData.ValidatorClient.Name,
+		Network:         o.genData.Network,
+		GenerationPath:  o.generationPath,
+		From:            o.keystorePath,
+		CustomConfig: actions.ImportValidatorKeysCustomOptions{
+			NetworkConfigPath: o.genData.CustomNetworkConfigPath,
+			GenesisPath:       o.genData.CustomGenesisPath,
+			DeployBlockPath:   o.genData.CustomDeployBlockPath,
+		},
+	})
+	if err != nil {
+		return err
+	}
+	log.Info("Validator keys imported successfully")
 	if err := confirmImportSlashingProtection(p, o); err != nil {
 		return err
 	}
