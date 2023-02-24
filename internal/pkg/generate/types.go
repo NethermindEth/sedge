@@ -136,9 +136,9 @@ func (d DockerComposeData) WithConsensusClient() bool {
 }
 
 type ComposeData struct {
-	Version  string    `yaml:"version"`
+	Version  string    `yaml:"version,omitempty"`
 	Services *Services `yaml:"services"`
-	Networks *Networks `yaml:"networks"`
+	Networks *Networks `yaml:"networks,omitempty"`
 }
 type Options struct {
 	MaxSize string `yaml:"max-size"`
@@ -158,7 +158,7 @@ type Execution struct {
 	Ports           []string `yaml:"ports"`
 	Expose          []int    `yaml:"expose"`
 	Command         []string `yaml:"command"`
-	Logging         *Logging `yaml:"logging"`
+	Logging         *Logging `yaml:"logging,omitempty"`
 }
 type Mevboost struct {
 	Image         string   `yaml:"image"`
@@ -177,7 +177,7 @@ type Consensus struct {
 	Ports           []string `yaml:"ports"`
 	Expose          []int    `yaml:"expose"`
 	Command         []string `yaml:"command"`
-	Logging         *Logging `yaml:"logging"`
+	Logging         *Logging `yaml:"logging,omitempty"`
 }
 type ValidatorBlocker struct {
 	Image   string `yaml:"image"`
@@ -197,22 +197,22 @@ type Validator struct {
 	Ports         []string   `yaml:"ports"`
 	Volumes       []string   `yaml:"volumes"`
 	Command       []string   `yaml:"command"`
-	Logging       *Logging   `yaml:"logging"`
+	Logging       *Logging   `yaml:"logging,omitempty"`
 }
 type ConfigConsensus struct {
 	ContainerName string   `yaml:"container_name"`
 	Image         string   `yaml:"image"`
 	Volumes       []string `yaml:"volumes"`
 	Command       []string `yaml:"command"`
-	Logging       *Logging `yaml:"logging"`
+	Logging       *Logging `yaml:"logging,omitempty"`
 }
 type Services struct {
-	Execution        *Execution        `yaml:"execution"`
-	Mevboost         *Mevboost         `yaml:"mevboost"`
-	Consensus        *Consensus        `yaml:"consensus"`
-	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker"`
-	Validator        *Validator        `yaml:"validator"`
-	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus"`
+	Execution        *Execution        `yaml:"execution,omitempty"`
+	Mevboost         *Mevboost         `yaml:"mevboost,omitempty"`
+	Consensus        *Consensus        `yaml:"consensus,omitempty"`
+	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker,omitempty"`
+	Validator        *Validator        `yaml:"validator,omitempty"`
+	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus,omitempty"`
 }
 type Sedge struct {
 	Name string `yaml:"name"`
