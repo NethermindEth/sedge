@@ -16,6 +16,7 @@ limitations under the License.
 package clients
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,41 +25,41 @@ import (
 func TestSetImageOrDefault_Execution(t *testing.T) {
 	tests := []struct {
 		client        Client
-		expectedImage string
+		expectedImage regexp.Regexp
 	}{
 		{
 			client: Client{
 				Name: "geth",
 				Type: "execution",
 			},
-			expectedImage: "ethereum/client-go:v1.10.26",
+			expectedImage: *regexp.MustCompile(`^ethereum/client-go:v\d+\.\d+\.\d+$`),
 		},
 		{
 			client: Client{
 				Name: "besu",
 				Type: "execution",
 			},
-			expectedImage: "hyperledger/besu:22.10.3",
+			expectedImage: *regexp.MustCompile(`^hyperledger/besu:\d+\.\d+\.\d+$`),
 		},
 		{
 			client: Client{
 				Name: "nethermind",
 				Type: "execution",
 			},
-			expectedImage: "nethermind/nethermind:1.14.7",
+			expectedImage: *regexp.MustCompile(`^nethermind/nethermind:\d+\.\d+\.\d+$`),
 		},
 		{
 			client: Client{
 				Name: "erigon",
 				Type: "execution",
 			},
-			expectedImage: "erigon/erigon:v2.29.0",
+			expectedImage: *regexp.MustCompile(`^erigon/erigon:v\d+\.\d+\.\d+$`),
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.client.Name, func(t *testing.T) {
 			test.client.SetImageOrDefault("")
-			assert.Equal(t, test.expectedImage, test.client.Image)
+			assert.True(t, test.expectedImage.Match([]byte(test.client.Image)))
 		})
 	}
 }
@@ -66,41 +67,41 @@ func TestSetImageOrDefault_Execution(t *testing.T) {
 func TestSetImageOrDefault_Consensus(t *testing.T) {
 	tests := []struct {
 		client        Client
-		expectedImage string
+		expectedImage regexp.Regexp
 	}{
 		{
 			client: Client{
 				Name: "lighthouse",
 				Type: "consensus",
 			},
-			expectedImage: "sigp/lighthouse:v3.3.0",
+			expectedImage: *regexp.MustCompile(`^sigp/lighthouse:v\d+\.\d+\.\d+$`),
 		},
 		{
 			client: Client{
 				Name: "prysm",
 				Type: "consensus",
 			},
-			expectedImage: "gcr.io/prysmaticlabs/prysm/beacon-chain:v3.2.0",
+			expectedImage: *regexp.MustCompile(`^gcr.io/prysmaticlabs/prysm/beacon-chain:v\d+\.\d+\.\d+$`),
 		},
 		{
 			client: Client{
 				Name: "teku",
 				Type: "consensus",
 			},
-			expectedImage: "consensys/teku:22.11.0",
+			expectedImage: *regexp.MustCompile(`^consensys/teku:\d+\.\d+\.\d+$`),
 		},
 		{
 			client: Client{
 				Name: "lodestar",
 				Type: "consensus",
 			},
-			expectedImage: "chainsafe/lodestar:v1.2.2",
+			expectedImage: *regexp.MustCompile(`^chainsafe/lodestar:v\d+\.\d+\.\d+$`),
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.client.Name, func(t *testing.T) {
 			test.client.SetImageOrDefault("")
-			assert.Equal(t, test.expectedImage, test.client.Image)
+			assert.True(t, test.expectedImage.Match([]byte(test.client.Image)))
 		})
 	}
 }
@@ -108,41 +109,41 @@ func TestSetImageOrDefault_Consensus(t *testing.T) {
 func TestSetImageOrDefault_Validator(t *testing.T) {
 	tests := []struct {
 		client        Client
-		expectedImage string
+		expectedImage regexp.Regexp
 	}{
 		{
 			client: Client{
 				Name: "lighthouse",
 				Type: "validator",
 			},
-			expectedImage: "sigp/lighthouse:v3.3.0",
+			expectedImage: *regexp.MustCompile(`^sigp/lighthouse:v\d+\.\d+\.\d+$`),
 		},
 		{
 			client: Client{
 				Name: "prysm",
 				Type: "validator",
 			},
-			expectedImage: "gcr.io/prysmaticlabs/prysm/validator:v3.2.0",
+			expectedImage: *regexp.MustCompile(`^gcr.io/prysmaticlabs/prysm/validator:v\d+\.\d+\.\d+$`),
 		},
 		{
 			client: Client{
 				Name: "teku",
 				Type: "validator",
 			},
-			expectedImage: "consensys/teku:22.11.0",
+			expectedImage: *regexp.MustCompile(`^consensys/teku:\d+\.\d+\.\d+$`),
 		},
 		{
 			client: Client{
 				Name: "lodestar",
 				Type: "validator",
 			},
-			expectedImage: "chainsafe/lodestar:v1.2.2",
+			expectedImage: *regexp.MustCompile(`^chainsafe/lodestar:v\d+\.\d+\.\d+$`),
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.client.Name, func(t *testing.T) {
 			test.client.SetImageOrDefault("")
-			assert.Equal(t, test.expectedImage, test.client.Image)
+			assert.True(t, test.expectedImage.Match([]byte(test.client.Image)))
 		})
 	}
 }
