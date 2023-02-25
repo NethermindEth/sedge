@@ -334,18 +334,24 @@ func TestGenerateDockerCompose(t *testing.T) {
 				// Check Consensus API URL is set and is valid
 				uri, err := url.ParseRequestURI(envData["CC_API_URL"])
 				assert.Nil(t, err)
+				var add_uri *url.URL
+				if tc.genData.ValidatorClient.Name == "prysm" {
+					add_uri, err = url.ParseRequestURI(envData["CC_ADD_API_URL"])
+					assert.Nil(t, err)
+				}
 				if tc.genData.ConsensusApiUrl != "" && tc.genData.ValidatorClient.Name != "prysm" {
-					assert.Equal(t, tc.genData.ConsensusApiUrl, uri.String())
+					assert.Equal(t, tc.genData.ConsensusApiUrl, uri.String(), "Consensus API URL is not valid: %s", uri.String())
 				} else if tc.genData.ConsensusApiUrl != "" && tc.genData.ValidatorClient.Name == "prysm" {
-					assert.Equal(t, prysmURL, uri.String())
+					assert.Equal(t, prysmURL, add_uri.String(), "Consensus Additional API URL is not valid: %s", uri.String())
 				} else {
 					var re *regexp.Regexp
 					if tc.genData.ConsensusClient.Name == "prysm" {
 						re = regexp.MustCompile(`consensus:[0-9]+`)
+						assert.True(t, re.MatchString(add_uri.String()), "Consensus Additional API URL is not valid: %s", uri.String())
 					} else {
 						re = regexp.MustCompile(`http:\/\/consensus:[0-9]+`)
+						assert.True(t, re.MatchString(uri.String()), "Consensus API URL is not valid: %s", uri.String())
 					}
-					assert.True(t, re.MatchString(uri.String()), "Consensus API URL is not valid: %s", uri.String())
 				}
 
 				// Check that the consensus-health service is set.
