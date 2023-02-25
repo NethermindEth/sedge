@@ -14,6 +14,7 @@
         start_period: 5m
       command: |-
         sh -c "
+          sleep 300
           while true; do
             response=$$(curl -s -o /dev/null -w \"%{http_code}\" $$CC_API_URL/eth/v1/node/health)
 
