@@ -381,13 +381,22 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		}
 	}
 	consensusApiUrl := gd.ConsensusApiUrl
-	var consensusAdditionalApiUrl string
+	consensusAdditionalApiUrl := consensusApiUrl
 	if consensusApiUrl == "" {
 		consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLAdditionalApi"])
 		consensusApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLApi"])
+
+		// Prysm urls must be without http:// or https://
+		if cls[validator] != nil && cls[validator].Name == "prysm" {
+			consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", "consensus", gd.Ports["CLAdditionalApi"])
+		}
 	} else {
 		if cls[consensus] != nil && cls[consensus].Name == "prysm" {
 			consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", "consensus", gd.Ports["CLAdditionalApi"])
+		} else if cls[validator] != nil && cls[validator].Name == "prysm" {
+			// Strip the http:// or https:// from the url
+			consensusAdditionalApiUrl = strings.TrimPrefix(consensusAdditionalApiUrl, "http://")
+			consensusAdditionalApiUrl = strings.TrimPrefix(consensusAdditionalApiUrl, "https://")
 		} else {
 			consensusAdditionalApiUrl = consensusApiUrl
 		}
@@ -431,11 +440,6 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		RelayURL:                  gd.RelayURL,
 	}
 	// FIXME: Graffiti is <EL_name-CL_name> but is incorrect when the CL is different from the VL (validator client)
-
-	// Fix prysm rpc url
-	if cls[validator] != nil && cls[validator].Name == "prysm" {
-		data.ConsensusAdditionalApiURL = fmt.Sprintf("%s:%d", "consensus", gd.Ports["CLAdditionalApi"])
-	}
 
 	// Save to writer
 	err = baseTmp.Execute(at, data)

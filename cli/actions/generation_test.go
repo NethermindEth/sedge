@@ -301,6 +301,30 @@ func TestGenerateDockerCompose(t *testing.T) {
 					assert.Equal(t, tc.genData.VLStartGracePeriod, uint(sleepTime))
 				}
 
+				// Prysm special case: remove http:// or https:// from the URL
+				prysmURL := tc.genData.ConsensusApiUrl
+				prysmURL = strings.TrimPrefix(prysmURL, "http://")
+				prysmURL = strings.TrimPrefix(prysmURL, "https://")
+
+				// Check Consensus API URL is set and is valid
+				uri, err := url.ParseRequestURI(envData["CC_API_URL"])
+				assert.Nil(t, err)
+				if tc.genData.ConsensusApiUrl != "" && tc.genData.ValidatorClient.Name != "prysm" {
+					assert.Equal(t, tc.genData.ConsensusApiUrl, uri.String())
+				} else if tc.genData.ConsensusApiUrl != "" && tc.genData.ValidatorClient.Name == "prysm" {
+					assert.Equal(t, prysmURL, uri.String())
+				} else {
+					var re *regexp.Regexp
+					if tc.genData.ConsensusClient.Name == "prysm" {
+						re = regexp.MustCompile(`consensus:[0-9]+`)
+					} else {
+						re = regexp.MustCompile(`http:\/\/consensus:[0-9]+`)
+					}
+					assert.True(t, re.MatchString(uri.String()), "Consensus API URL is not valid: %s", uri.String())
+				}
+
+				// TODO: Add execution URLs to test cases and check them, validate them
+
 				// Check that the consensus-health service is set.
 				assert.NotNil(t, cmpData.Services.ConsensusHealth)
 				// Check that the consensus-health image is set.
