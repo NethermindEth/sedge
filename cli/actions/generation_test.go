@@ -122,16 +122,20 @@ func TestGenerateDockerCompose(t *testing.T) {
 					genTestData{
 						name: fmt.Sprintf("consensus: %s, network: %s, only consensus", consensusCl, network),
 						genData: &generate.GenData{
-							ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
-							Network:         network,
+							ConsensusClient:  &clients.Client{Name: consensusCl, Type: "consensus"},
+							Network:          network,
+							ExecutionApiUrl:  "http://localhost:8545",
+							ExecutionAuthUrl: "http://localhost:8551",
 						},
 					},
 					genTestData{
-						name: fmt.Sprintf("consensus: %s, network: %s, only consensus with tag", consensusCl, network),
+						name: fmt.Sprintf("consensus: %s, network: %s, only consensus with tag, https", consensusCl, network),
 						genData: &generate.GenData{
-							ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
-							Network:         network,
-							ContainerTag:    "sampleTag",
+							ConsensusClient:  &clients.Client{Name: consensusCl, Type: "consensus"},
+							Network:          network,
+							ContainerTag:     "sampleTag",
+							ExecutionApiUrl:  "https://localhost:8545",
+							ExecutionAuthUrl: "https://localhost:8551",
 						},
 					},
 					genTestData{
@@ -140,6 +144,8 @@ func TestGenerateDockerCompose(t *testing.T) {
 							ConsensusClient:   &clients.Client{Name: consensusCl, Type: "consensus"},
 							Network:           network,
 							CheckpointSyncUrl: ckptSync,
+							ExecutionApiUrl:   "http://localhost:8545",
+							ExecutionAuthUrl:  "http://localhost:8551",
 						},
 					},
 					genTestData{
@@ -151,20 +157,12 @@ func TestGenerateDockerCompose(t *testing.T) {
 						},
 					},
 					genTestData{
-						name: fmt.Sprintf("validator: %s, network: %s, only validator, https", consensusCl, network),
-						genData: &generate.GenData{
-							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
-							Network:         network,
-							ConsensusApiUrl: "https://localhost:4000",
-						},
-					},
-					genTestData{
-						name: fmt.Sprintf("validator: %s, network: %s, only validator with tag", consensusCl, network),
+						name: fmt.Sprintf("validator: %s, network: %s, only validator with tag, https", consensusCl, network),
 						genData: &generate.GenData{
 							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
 							Network:         network,
 							ContainerTag:    "sampleTag",
-							ConsensusApiUrl: "http://localhost:4000",
+							ConsensusApiUrl: "https://localhost:4000",
 						},
 					},
 				)
@@ -285,6 +283,22 @@ func TestGenerateDockerCompose(t *testing.T) {
 				if tc.genData.CheckpointSyncUrl != "" {
 					assert.True(t, contains(t, cmpData.Services.Consensus.Command, tc.genData.CheckpointSyncUrl), "Checkpoint Sync URL not found in consensus service command: %s", cmpData.Services.Consensus.Command)
 				}
+
+				// Validate Execution API and AUTH URLs
+				apiEndpoint, authEndpoint := envData["EC_API_URL"], envData["EC_AUTH_URL"]
+				if tc.genData.ExecutionApiUrl != "" {
+					assert.Equal(t, tc.genData.ExecutionApiUrl, apiEndpoint, "Execution API URL is not valid %s", apiEndpoint)
+				} else {
+					re := regexp.MustCompile(`http:\/\/execution:[0-9]+`)
+					assert.True(t, re.MatchString(apiEndpoint), "Execution API URL is not valid %s", apiEndpoint)
+				}
+
+				if tc.genData.ExecutionAuthUrl != "" {
+					assert.Equal(t, tc.genData.ExecutionAuthUrl, authEndpoint, "Execution Auth URL is not valid %s", authEndpoint)
+				} else {
+					re := regexp.MustCompile(`http:\/\/execution:[0-9]+`)
+					assert.True(t, re.MatchString(authEndpoint), "Execution Auth URL is not valid %s", authEndpoint)
+				}
 			}
 
 			// Validate that Validator Client info matches the sample data
@@ -333,8 +347,6 @@ func TestGenerateDockerCompose(t *testing.T) {
 					}
 					assert.True(t, re.MatchString(uri.String()), "Consensus API URL is not valid: %s", uri.String())
 				}
-
-				// TODO: Add execution URLs to test cases and check them, validate them
 
 				// Check that the consensus-health service is set.
 				assert.NotNil(t, cmpData.Services.ConsensusHealth)
