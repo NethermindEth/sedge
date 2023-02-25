@@ -345,6 +345,10 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 		if combinedClients.Execution.Name == "geth" && flags.network != "mainnet" {
 			combinedClients.Execution.Image = "ethereum/client-go:v1.10.26"
 		}
+		// Patch Erigon image if network needs TTD to be set
+		if combinedClients.Execution.Name == "erigon" && network != "mainnet" {
+			combinedClients.Execution.Image = "thorax/erigon:v2.29.0"
+		}
 	}
 	if combinedClients.Consensus != nil {
 		combinedClients.Consensus.SetImageOrDefault(clientImages.consensus)
