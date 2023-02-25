@@ -2,6 +2,7 @@
 {{ define "env" }}
 # --- Global configuration ---
 NETWORK=custom
+HEALTHCHECK_CMD="(curl -s -o /dev/null -w \"%{http_code}\" -X GET http://consensus:4000/eth/v1/node/health | grep -q 200) || exit 1"
 {{template "execution" .}}
 {{template "consensus" .}}
 {{template "validator" .}}
