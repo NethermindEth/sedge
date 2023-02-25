@@ -1,0 +1,27 @@
+{{/* consensus-health.tmpl */}}
+{{ define "consensus-health" }}
+  consensus-health:
+      container_name: sedge-consensus-health
+      image:  alpine/curl:latest
+      networks:
+      - sedge
+      healthcheck:
+        test: ${HEALTHCHECK_CMD}
+        interval: 1m
+        retries: 5
+        start_period: 5m
+      command: |-
+        sh -c "
+          while true; do
+            response=$$(curl -s -o /dev/null -w \"%{http_code}\" http://consensus:4000/eth/v1/node/health)
+
+            if [ $$response -eq 200 ]; then
+              echo 'Endpoint is up!'
+              break
+            else
+              echo 'Endpoint is down, waiting 30 seconds before checking again...'
+              sleep 30
+            fi
+          done
+        "
+{{ end }}

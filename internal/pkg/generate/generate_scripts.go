@@ -176,15 +176,26 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 			return err
 		}
 	}
-	validatorBlockerTemplate := ""
+	validatorBlockerTemplate, consensusHealthTemplate := "", ""
 	if cls[validator] != nil {
 		validatorBlockerTemplate = "validator-blocker"
+		consensusHealthTemplate = "consensus-health"
 	} else {
 		validatorBlockerTemplate = "empty-validator-blocker"
+		consensusHealthTemplate = "empty-consensus-health"
 	}
 
 	// Parse validator-blocker template
 	tmp, err := templates.Services.ReadFile(strings.Join([]string{"services", validatorBlockerTemplate + ".tmpl"}, "/"))
+	if err != nil {
+		return err
+	}
+	if _, err = baseTmp.Parse(string(tmp)); err != nil {
+		return err
+	}
+
+	// Parse consensus-health template
+	tmp, err = templates.Services.ReadFile(strings.Join([]string{"services", consensusHealthTemplate + ".tmpl"}, "/"))
 	if err != nil {
 		return err
 	}

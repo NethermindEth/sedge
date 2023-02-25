@@ -245,8 +245,8 @@ func TestGenerateDockerCompose(t *testing.T) {
 			validateGeneration(t, samplePath)
 			cmpData, err := generate.ParseCompose(filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
 			require.Nil(t, err)
-			// envData, err := utils.ParseEnv(filepath.Join(samplePath, configs.DefaultEnvFileName))
-			// require.Nil(t, err)
+			envData, err := utils.ParseEnv(filepath.Join(samplePath, configs.DefaultEnvFileName))
+			require.Nil(t, err)
 
 			// Validate that Execution Client info matches the sample data
 			if tc.genData.ExecutionClient != nil {
@@ -300,6 +300,24 @@ func TestGenerateDockerCompose(t *testing.T) {
 					// Check that the sleep time is equal to the grace period
 					assert.Equal(t, tc.genData.VLStartGracePeriod, uint(sleepTime))
 				}
+
+				// Check that the consensus-health service is set.
+				assert.NotNil(t, cmpData.Services.ConsensusHealth)
+				// Check that the consensus-health image is set.
+				assert.Equal(t, "alpine/curl:latest", cmpData.Services.ConsensusHealth.Image)
+				// FIXME: Find a way to test the command. It gives sintax errors beacuse of the double $ sign to escape the $ signs. It works fine when running the command in docker compose.
+				// if runtime.GOOS != "windows" {
+				// 	// Check that the consensus-health bash command is valid
+				// 	command := cmpData.Services.ConsensusHealth.Command
+				// 	cmd := exec.Command("bash", "-c", command)
+				// 	outBuffer, errBuffer := new(bytes.Buffer), new(bytes.Buffer)
+				// 	cmd.Stdout = outBuffer
+				// 	cmd.Stderr = errBuffer
+				// 	cmd.Run()
+				// 	assert.Empty(t, errBuffer, "Consensus health command is invalid: %s", command)
+				// }
+				// Check that healthcheck command is set
+				assert.NotEmpty(t, envData["HEALTHCHECK_CMD"])
 			}
 		})
 	}
