@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -146,6 +147,15 @@ func TestGenerateDockerCompose(t *testing.T) {
 						genData: &generate.GenData{
 							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
 							Network:         network,
+							ConsensusApiUrl: "http://localhost:4000",
+						},
+					},
+					genTestData{
+						name: fmt.Sprintf("validator: %s, network: %s, only validator, https", consensusCl, network),
+						genData: &generate.GenData{
+							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
+							Network:         network,
+							ConsensusApiUrl: "https://localhost:4000",
 						},
 					},
 					genTestData{
@@ -154,6 +164,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
 							Network:         network,
 							ContainerTag:    "sampleTag",
+							ConsensusApiUrl: "http://localhost:4000",
 						},
 					},
 				)
@@ -340,8 +351,22 @@ func TestGenerateDockerCompose(t *testing.T) {
 				// 	cmd.Run()
 				// 	assert.Empty(t, errBuffer, "Consensus health command is invalid: %s", command)
 				// }
+
 				// Check that healthcheck command is set
 				assert.NotEmpty(t, envData["HEALTHCHECK_CMD"])
+				// Check that Consensus API URL from input is in the health check command
+				hckCMD := envData["HEALTHCHECK_CMD"]
+				// Regex to find the <URL> and <PORT> part in "http://<URL>:<PORT>/eth/v1/node/health" and should work for https as well
+				re = regexp.MustCompile(`http[s]?://[a-zA-Z0-9\-.]+:[0-9]+/eth/v1/node/health`)
+				endpoint := re.FindAllString(hckCMD, -1)[0]
+				endpoint = strings.Split(endpoint, "/eth/v1/node/health")[0]
+				if tc.genData.ConsensusApiUrl != "" {
+					assert.Equal(t, tc.genData.ConsensusApiUrl, endpoint, "Consensus API URL is not valid: %s", endpoint)
+				} else {
+					// Regex to assert that the endpoint is in the form consensus:<PORT>
+					re = regexp.MustCompile(`http[s]?://consensus:[0-9]+`)
+					assert.True(t, re.MatchString(endpoint), "Consensus API URL is not valid: %s", endpoint)
+				}
 			}
 		})
 	}
