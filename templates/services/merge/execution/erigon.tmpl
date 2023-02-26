@@ -22,7 +22,8 @@
     user: root
     command:
     - erigon{{if .TTD}}
-    - --override.terminaltotaldifficulty={{.TTD}}{{end}}
+    - --override.terminaltotaldifficulty={{.TTD}}{{end}}{{if eq .Network "mainnet"}}
+    - --externalcl{{end}}
     - --http
     - --http.addr=0.0.0.0
     - --http.port={{.ElApiPort}}
