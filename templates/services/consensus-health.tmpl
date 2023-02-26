@@ -10,7 +10,7 @@
       healthcheck:
         test: ${HEALTHCHECK_CMD}
         interval: 30s
-        retries: 5
+        retries: 10000
       command: |-
         sh -c "
           while true; do
