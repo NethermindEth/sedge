@@ -9,17 +9,16 @@
       - CC_API_URL=${CC_API_URL}
       healthcheck:
         test: ${HEALTHCHECK_CMD}
-        interval: 1m
+        interval: 30s
         retries: 5
-        start_period: 5m
       command: |-
         sh -c "
-          sleep 300
           while true; do
             response=$$(curl -s -o /dev/null -w \"%{http_code}\" $$CC_API_URL/eth/v1/node/health)
 
             if [ $$response -eq 200 ]; then
               echo 'Endpoint is up!'
+              sleep 1800 
               break
             else
               echo 'Endpoint is down, waiting 30 seconds before checking again...'
