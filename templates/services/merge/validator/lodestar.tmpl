@@ -3,7 +3,6 @@
   validator:
     container_name: sedge-validator-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     image: ${VL_IMAGE_VERSION}
-    restart: unless-stopped
     depends_on:
       validator-blocker:
         condition: service_completed_successfully{{if .WithConsensusClient}}
