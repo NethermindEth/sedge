@@ -196,7 +196,7 @@ func (cr *WindowsCMDRunner) RunCMD(cmd Command) (string, int, error) {
 	}
 
 	if err := exc.Start(); err != nil {
-		return out, err
+		return out, -1, err
 	}
 
 	err := exc.Wait()
