@@ -357,9 +357,9 @@ func TestGenerateDockerCompose(t *testing.T) {
 				if tc.genData.ConsensusClient != nil {
 					// Check that the consensus-health service is set.
 					assert.NotNil(t, cmpData.Services.ConsensusHealth)
+					// Check that the consensus-health image is set.
+					assert.Equal(t, "alpine/curl:latest", cmpData.Services.ConsensusHealth.Image)
 				}
-				// Check that the consensus-health image is set.
-				assert.Equal(t, "alpine/curl:latest", cmpData.Services.ConsensusHealth.Image)
 				// FIXME: Find a way to test the command. It gives sintax errors beacuse of the double $ sign to escape the $ signs. It works fine when running the command in docker compose.
 				// if runtime.GOOS != "windows" {
 				// 	// Check that the consensus-health bash command is valid
