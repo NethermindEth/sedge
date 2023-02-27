@@ -249,7 +249,7 @@ func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManage
 		},
 	})
 	log.Infof(configs.RunningCommand, buildCmd.Cmd)
-	if _, err = commandRunner.RunCMD(buildCmd); err != nil {
+	if _, _, err = commandRunner.RunCMD(buildCmd); err != nil {
 		return "", err
 	}
 	mounts := []mount.Mount{
@@ -311,7 +311,7 @@ func setupTekuValidatorImport(dockerClient client.APIClient, serviceManager serv
 		Tag:  "sedge/validator-import-teku",
 	})
 	log.Infof(configs.RunningCommand, buildCmd.Cmd)
-	if _, err := commandRunner.RunCMD(buildCmd); err != nil {
+	if _, _, err := commandRunner.RunCMD(buildCmd); err != nil {
 		return "", err
 	}
 	// Mounts

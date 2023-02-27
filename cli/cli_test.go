@@ -192,14 +192,14 @@ func buildCliTestCase(
 
 	// TODO: allow runner edition
 	tc.runner = &test.SimpleCMDRunner{
-		SRunCMD: func(c commands.Command) (string, error) {
+		SRunCMD: func(c commands.Command) (string, int, error) {
 			// For getContainerIP logic
 			if strings.Contains(c.Cmd, "ps --quiet") {
-				return "666", nil
+				return "666", 0, nil
 			} else if strings.Contains(c.Cmd, "docker inspect 666") {
-				return inspectOut, nil
+				return inspectOut, 0, nil
 			}
-			return "", nil
+			return "", 0, nil
 		},
 		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil

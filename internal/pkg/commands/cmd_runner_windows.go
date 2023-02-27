@@ -173,7 +173,7 @@ func (cr *WindowsCMDRunner) BuildOpenTextEditor(options OpenTextEditorOptions) C
 	return Command{Cmd: fmt.Sprintf("notepad %s", options.FilePath), IgnoreTerminal: true}
 }
 
-func (cr *WindowsCMDRunner) RunCMD(cmd Command) (string, error) {
+func (cr *WindowsCMDRunner) RunCMD(cmd Command) (string, int, error) {
 	var out string
 	r := strings.ReplaceAll(cmd.Cmd, "\n", "")
 
@@ -200,12 +200,13 @@ func (cr *WindowsCMDRunner) RunCMD(cmd Command) (string, error) {
 	}
 
 	err := exc.Wait()
+	exitCode := exc.ProcessState.ExitCode()
 	if cmd.GetOutput {
 		out = combinedOut.String()
 		out = strings.ReplaceAll(out, "\r", "") // Remove windows \r character
 	}
 
-	return out, err
+	return out, exitCode, err
 }
 
 func (cr *WindowsCMDRunner) RunScript(script ScriptFile) (string, error) {

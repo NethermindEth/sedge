@@ -176,7 +176,7 @@ func saveMnemonic(cmdRunner commands.CommandRunner, mnemonic string) error {
 	})
 	openTextEditorCmd.ForceNoSudo = true
 
-	_, err = cmdRunner.RunCMD(openTextEditorCmd)
+	_, _, err = cmdRunner.RunCMD(openTextEditorCmd)
 	if err != nil {
 		return fmt.Errorf(configs.ShowMnemonicError, err)
 	}

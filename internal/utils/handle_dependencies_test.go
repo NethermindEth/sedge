@@ -215,8 +215,8 @@ func TestInstallDependency(t *testing.T) {
 		{
 			dependency: "docker",
 			runner: &test.SimpleCMDRunner{
-				SRunCMD: func(c commands.Command) (string, error) {
-					return "", nil
+				SRunCMD: func(c commands.Command) (string, int, error) {
+					return "", 0, nil
 				},
 				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
@@ -227,8 +227,8 @@ func TestInstallDependency(t *testing.T) {
 		{
 			dependency: "docker-compose",
 			runner: &test.SimpleCMDRunner{
-				SRunCMD: func(c commands.Command) (string, error) {
-					return "", nil
+				SRunCMD: func(c commands.Command) (string, int, error) {
+					return "", 0, nil
 				},
 				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", fmt.Errorf("test unexpected error")
@@ -239,8 +239,8 @@ func TestInstallDependency(t *testing.T) {
 		{
 			dependency: "docker-comp0se",
 			runner: &test.SimpleCMDRunner{
-				SRunCMD: func(c commands.Command) (string, error) {
-					return "", nil
+				SRunCMD: func(c commands.Command) (string, int, error) {
+					return "", 0, nil
 				},
 				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
