@@ -481,8 +481,18 @@ func generateGraffiti(execution, consensus, validator *clients.Client) string {
 			}
 		}
 	}
-	return strings.Join([]string{strings.Join([]string{nameOrEmpty(execution), nameOrEmpty(consensus)}, "-"),
-		nameOrEmpty(validator)}, "-")
+	return joinIfNotEmpty(nameOrEmpty(execution), nameOrEmpty(consensus), nameOrEmpty(validator))
+}
+
+// joinIfNotEmpty joins the strings if they are not empty
+func joinIfNotEmpty(strs ...string) string {
+	var result []string
+	for _, str := range strs {
+		if str != "" {
+			result = append(result, str)
+		}
+	}
+	return strings.Join(result, "-")
 }
 
 // imageOrEmpty returns the image of the client if it is not nil, otherwise returns an empty string
