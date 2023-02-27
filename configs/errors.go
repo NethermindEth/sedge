@@ -113,6 +113,7 @@ const (
 	InvalidDeployBLock                = "invalid deploy block"
 	InvalidGenerationPath             = "invalid generation path %s: %v"
 	InvalidCkptSyncURL                = "invalid checkpoint sync url %s"
+	InvalidUrlFlag                    = "invalid url %s"
 	InvalidJWTSecret                  = "there is no jwtsecret file in the provided path %s"
 	InvalidService                    = "provided service %s is invalid"
 	GenPathErr                        = "error reading generation path: %w"

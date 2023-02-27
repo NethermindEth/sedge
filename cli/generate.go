@@ -142,6 +142,34 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		log.Warnf(configs.CheckpointUrlUsedWarning, flags.checkpointSyncUrl)
 	}
 
+	// Validate url flags
+	isValidUrl := func(input string) bool {
+		_, err := url.ParseRequestURI(input)
+		return err == nil
+	}
+	toValidate := []struct {
+		value string
+		check bool
+	}{
+		{
+			value: flags.executionApiUrl,
+			check: flags.executionApiUrl != "",
+		},
+		{
+			value: flags.executionAuthUrl,
+			check: flags.executionAuthUrl != "",
+		},
+		{
+			value: flags.consensusApiUrl,
+			check: flags.consensusApiUrl != "",
+		},
+	}
+	for _, urlFlag := range toValidate {
+		if urlFlag.check && !isValidUrl(urlFlag.value) {
+			return fmt.Errorf(configs.InvalidUrlFlag, urlFlag.value)
+		}
+	}
+
 	// Get all supported clients
 	c := clients.ClientInfo{Network: network}
 	clientsMap, errs := c.Clients(onlyClients(services))

@@ -320,6 +320,40 @@ func TestGenerateCmd(t *testing.T) {
 		),
 		*buildGenerateTestCase(
 			t,
+			"consensus Random client, invalid api url", "case_1",
+			GenCmdFlags{
+				executionAuthUrl: "http://localhost:8545",
+				executionApiUrl:  "localhost/8545",
+			},
+			globalFlags{
+				install: false,
+				logging: "",
+			},
+			subCmd{
+				name: "consensus",
+				args: []string{},
+			},
+			fmt.Errorf("invalid url %s", "localhost/8545"),
+		),
+		*buildGenerateTestCase(
+			t,
+			"consensus Random client, invalid auth url", "case_1",
+			GenCmdFlags{
+				executionAuthUrl: "localhost/8545",
+				executionApiUrl:  "http://localhost:8545",
+			},
+			globalFlags{
+				install: false,
+				logging: "",
+			},
+			subCmd{
+				name: "consensus",
+				args: []string{},
+			},
+			fmt.Errorf("invalid url %s", "localhost/8545"),
+		),
+		*buildGenerateTestCase(
+			t,
 			"Wrong sub command", "case_1",
 			GenCmdFlags{},
 			globalFlags{
@@ -714,6 +748,21 @@ func TestGenerateCmd(t *testing.T) {
 				args: []string{"lodestar"},
 			},
 			nil),
+		*buildGenerateTestCase(
+			t,
+			"Validator, invalid consensus api url", "case_1",
+			GenCmdFlags{
+				feeRecipient:    "0x0000000000000000000000000000000000000000",
+				consensusApiUrl: "localhost/4000",
+			},
+			globalFlags{
+				network: "goerli",
+			},
+			subCmd{
+				name: "validator",
+				args: []string{"lodestar"},
+			},
+			errors.New("invalid url localhost/4000")),
 	}
 
 	for _, tc := range tcs {
