@@ -3,6 +3,7 @@
 # --- Global configuration ---
 EL_NETWORK=xdai
 CL_NETWORK=gnosis
+HEALTHCHECK_CMD="(curl -s -o /dev/null -w \"%{http_code}\" -X GET {{.ConsensusApiURL}}/eth/v1/node/health | grep -q 200) || exit 1"
 {{template "execution" .}}
 {{template "consensus" .}}
 {{template "validator" .}}

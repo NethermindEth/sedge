@@ -9,11 +9,6 @@
     depends_on:{{if .Mev}}
       mevboost:
         condition: service_started{{end}}{{end}}
-    healthcheck:
-      test: "(curl -s -o /dev/null -w \"%{http_code}\" -X GET http://127.0.0.1:4000/eth/v1/node/health | grep -q 200) || exit 1"
-      interval: 5m
-      retries: 4032
-      start_period: 1m
     networks:
       - sedge
     volumes:

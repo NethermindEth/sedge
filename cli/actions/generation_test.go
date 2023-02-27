@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -121,16 +122,20 @@ func TestGenerateDockerCompose(t *testing.T) {
 					genTestData{
 						name: fmt.Sprintf("consensus: %s, network: %s, only consensus", consensusCl, network),
 						genData: &generate.GenData{
-							ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
-							Network:         network,
+							ConsensusClient:  &clients.Client{Name: consensusCl, Type: "consensus"},
+							Network:          network,
+							ExecutionApiUrl:  "http://localhost:8545",
+							ExecutionAuthUrl: "http://localhost:8551",
 						},
 					},
 					genTestData{
-						name: fmt.Sprintf("consensus: %s, network: %s, only consensus with tag", consensusCl, network),
+						name: fmt.Sprintf("consensus: %s, network: %s, only consensus with tag, https", consensusCl, network),
 						genData: &generate.GenData{
-							ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
-							Network:         network,
-							ContainerTag:    "sampleTag",
+							ConsensusClient:  &clients.Client{Name: consensusCl, Type: "consensus"},
+							Network:          network,
+							ContainerTag:     "sampleTag",
+							ExecutionApiUrl:  "https://localhost:8545",
+							ExecutionAuthUrl: "https://localhost:8551",
 						},
 					},
 					genTestData{
@@ -139,6 +144,8 @@ func TestGenerateDockerCompose(t *testing.T) {
 							ConsensusClient:   &clients.Client{Name: consensusCl, Type: "consensus"},
 							Network:           network,
 							CheckpointSyncUrl: ckptSync,
+							ExecutionApiUrl:   "http://localhost:8545",
+							ExecutionAuthUrl:  "http://localhost:8551",
 						},
 					},
 					genTestData{
@@ -146,14 +153,16 @@ func TestGenerateDockerCompose(t *testing.T) {
 						genData: &generate.GenData{
 							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
 							Network:         network,
+							ConsensusApiUrl: "http://localhost:4000",
 						},
 					},
 					genTestData{
-						name: fmt.Sprintf("validator: %s, network: %s, only validator with tag", consensusCl, network),
+						name: fmt.Sprintf("validator: %s, network: %s, only validator with tag, https", consensusCl, network),
 						genData: &generate.GenData{
 							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
 							Network:         network,
 							ContainerTag:    "sampleTag",
+							ConsensusApiUrl: "https://localhost:4000",
 						},
 					},
 				)
@@ -245,8 +254,8 @@ func TestGenerateDockerCompose(t *testing.T) {
 			validateGeneration(t, samplePath)
 			cmpData, err := generate.ParseCompose(filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
 			require.Nil(t, err)
-			// envData, err := utils.ParseEnv(filepath.Join(samplePath, configs.DefaultEnvFileName))
-			// require.Nil(t, err)
+			envData, err := utils.ParseEnv(filepath.Join(samplePath, configs.DefaultEnvFileName))
+			require.Nil(t, err)
 
 			// Validate that Execution Client info matches the sample data
 			if tc.genData.ExecutionClient != nil {
@@ -274,6 +283,22 @@ func TestGenerateDockerCompose(t *testing.T) {
 				if tc.genData.CheckpointSyncUrl != "" {
 					assert.True(t, contains(t, cmpData.Services.Consensus.Command, tc.genData.CheckpointSyncUrl), "Checkpoint Sync URL not found in consensus service command: %s", cmpData.Services.Consensus.Command)
 				}
+
+				// Validate Execution API and AUTH URLs
+				apiEndpoint, authEndpoint := envData["EC_API_URL"], envData["EC_AUTH_URL"]
+				if tc.genData.ExecutionApiUrl != "" {
+					assert.Equal(t, tc.genData.ExecutionApiUrl, apiEndpoint, "Execution API URL is not valid %s", apiEndpoint)
+				} else {
+					re := regexp.MustCompile(`http:\/\/execution:[0-9]+`)
+					assert.True(t, re.MatchString(apiEndpoint), "Execution API URL is not valid %s", apiEndpoint)
+				}
+
+				if tc.genData.ExecutionAuthUrl != "" {
+					assert.Equal(t, tc.genData.ExecutionAuthUrl, authEndpoint, "Execution Auth URL is not valid %s", authEndpoint)
+				} else {
+					re := regexp.MustCompile(`http:\/\/execution:[0-9]+`)
+					assert.True(t, re.MatchString(authEndpoint), "Execution Auth URL is not valid %s", authEndpoint)
+				}
 			}
 
 			// Validate that Validator Client info matches the sample data
@@ -299,6 +324,66 @@ func TestGenerateDockerCompose(t *testing.T) {
 				} else {
 					// Check that the sleep time is equal to the grace period
 					assert.Equal(t, tc.genData.VLStartGracePeriod, uint(sleepTime))
+				}
+
+				// Prysm special case: remove http:// or https:// from the URL
+				prysmURL := tc.genData.ConsensusApiUrl
+				prysmURL = strings.TrimPrefix(prysmURL, "http://")
+				prysmURL = strings.TrimPrefix(prysmURL, "https://")
+
+				// Check Consensus API URL is set and is valid
+				uri, err := url.ParseRequestURI(envData["CC_API_URL"])
+				assert.Nil(t, err)
+				var add_uri *url.URL
+				if tc.genData.ValidatorClient.Name == "prysm" {
+					add_uri, err = url.ParseRequestURI(envData["CC_ADD_API_URL"])
+					assert.Nil(t, err)
+				}
+				if tc.genData.ConsensusApiUrl != "" && tc.genData.ValidatorClient.Name != "prysm" {
+					assert.Equal(t, tc.genData.ConsensusApiUrl, uri.String(), "Consensus API URL is not valid: %s", uri.String())
+				} else if tc.genData.ConsensusApiUrl != "" && tc.genData.ValidatorClient.Name == "prysm" {
+					assert.Equal(t, prysmURL, add_uri.String(), "Consensus Additional API URL is not valid: %s", uri.String())
+				} else {
+					var re *regexp.Regexp
+					if tc.genData.ConsensusClient.Name == "prysm" {
+						re = regexp.MustCompile(`consensus:[0-9]+`)
+						assert.True(t, re.MatchString(add_uri.String()), "Consensus Additional API URL is not valid: %s", uri.String())
+					} else {
+						re = regexp.MustCompile(`http:\/\/consensus:[0-9]+`)
+						assert.True(t, re.MatchString(uri.String()), "Consensus API URL is not valid: %s", uri.String())
+					}
+				}
+
+				// Check that the consensus-health service is set.
+				assert.NotNil(t, cmpData.Services.ConsensusHealth)
+				// Check that the consensus-health image is set.
+				assert.Equal(t, "alpine/curl:latest", cmpData.Services.ConsensusHealth.Image)
+				// FIXME: Find a way to test the command. It gives sintax errors beacuse of the double $ sign to escape the $ signs. It works fine when running the command in docker compose.
+				// if runtime.GOOS != "windows" {
+				// 	// Check that the consensus-health bash command is valid
+				// 	command := cmpData.Services.ConsensusHealth.Command
+				// 	cmd := exec.Command("bash", "-c", command)
+				// 	outBuffer, errBuffer := new(bytes.Buffer), new(bytes.Buffer)
+				// 	cmd.Stdout = outBuffer
+				// 	cmd.Stderr = errBuffer
+				// 	cmd.Run()
+				// 	assert.Empty(t, errBuffer, "Consensus health command is invalid: %s", command)
+				// }
+
+				// Check that healthcheck command is set
+				assert.NotEmpty(t, envData["HEALTHCHECK_CMD"])
+				// Check that Consensus API URL from input is in the health check command
+				hckCMD := envData["HEALTHCHECK_CMD"]
+				// Regex to find the <URL> and <PORT> part in "http://<URL>:<PORT>/eth/v1/node/health" and should work for https as well
+				re = regexp.MustCompile(`http[s]?://[a-zA-Z0-9\-.]+:[0-9]+/eth/v1/node/health`)
+				endpoint := re.FindAllString(hckCMD, -1)[0]
+				endpoint = strings.Split(endpoint, "/eth/v1/node/health")[0]
+				if tc.genData.ConsensusApiUrl != "" {
+					assert.Equal(t, tc.genData.ConsensusApiUrl, endpoint, "Consensus API URL is not valid: %s", endpoint)
+				} else {
+					// Regex to assert that the endpoint is in the form consensus:<PORT>
+					re = regexp.MustCompile(`http[s]?://consensus:[0-9]+`)
+					assert.True(t, re.MatchString(endpoint), "Consensus API URL is not valid: %s", endpoint)
 				}
 			}
 		})

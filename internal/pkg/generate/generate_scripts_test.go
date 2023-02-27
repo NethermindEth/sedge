@@ -607,6 +607,7 @@ func TestValidateClients(t *testing.T) {
 }
 
 func TestEnvFileAndFlags(t *testing.T) {
+	// TODO: Improve this test as in the actions/generate tests
 	configs.InitNetworksConfigs()
 	tests := []struct {
 		Description string
@@ -686,7 +687,7 @@ func TestEnvFileAndFlags(t *testing.T) {
 					assert.Contains(t, str, "CC_API_URL="+endpointOrEmpty(tt.Data.ConsensusClient)+":")
 				} else {
 					if tt.Data.ConsensusClient.Name == "prysm" && tt.Data.ValidatorClient != nil {
-						assert.Contains(t, buffer.String(), "CC_API_URL=consensus:")
+						assert.Contains(t, buffer.String(), "CC_ADD_API_URL=consensus:")
 					} else {
 						assert.Contains(t, buffer.String(), "CC_API_URL="+tt.Data.ConsensusApiUrl)
 					}
