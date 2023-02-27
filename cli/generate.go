@@ -277,6 +277,14 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			}
 		}
 		executionClient.SetImageOrDefault(strings.Join(executionParts[1:], ":"))
+		// Patch Geth image if network needs TTD to be set
+		if executionClient.Name == "geth" && network != "mainnet" {
+			executionClient.Image = "ethereum/client-go:v1.10.26"
+		}
+		// Patch Erigon image if network needs TTD to be set
+		if executionClient.Name == "erigon" && network != "mainnet" {
+			executionClient.Image = "thorax/erigon:v2.29.0"
+		}
 		if err = clients.ValidateClient(executionClient, execution); err != nil {
 			return nil, err
 		}

@@ -587,6 +587,14 @@ func selectExecutionClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 		Type: "execution",
 	}
 	o.genData.ExecutionClient.SetImageOrDefault("")
+	// Patch Geth image if network needs TTD to be set
+	if o.genData.ExecutionClient.Name == "geth" && o.genData.Network == NetworkMainnet {
+		o.genData.ExecutionClient.Image = "ethereum/client-go:v1.10.26"
+	}
+	// Patch Erigon image if network needs TTD to be set
+	if o.genData.ExecutionClient.Name == "erigon" && o.genData.Network != "mainnet" {
+		o.genData.ExecutionClient.Image = "thorax/erigon:v2.29.0"
+	}
 	return nil
 }
 
