@@ -85,6 +85,7 @@ type DockerComposeData struct {
 	TTD                     string
 	XeeVersion              bool
 	Mev                     bool
+	MevBoostOnValidator     bool
 	MevPort                 uint16
 	MevImage                string
 	MevBoostEndpoint        string

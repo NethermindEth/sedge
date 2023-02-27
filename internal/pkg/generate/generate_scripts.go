@@ -179,9 +179,12 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	validatorBlockerTemplate, consensusHealthTemplate := "", ""
 	if cls[validator] != nil {
 		validatorBlockerTemplate = "validator-blocker"
-		consensusHealthTemplate = "consensus-health"
 	} else {
 		validatorBlockerTemplate = "empty-validator-blocker"
+	}
+	if cls[consensus] != nil {
+		consensusHealthTemplate = "consensus-health"
+	} else {
 		consensusHealthTemplate = "empty-consensus-health"
 	}
 
@@ -275,7 +278,8 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		Network:             gd.Network,
 		TTD:                 ttd,
 		XeeVersion:          xeeVersion,
-		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
+		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev),
+		MevBoostOnValidator: gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		MevPort:             gd.Ports["MevPort"],
 		MevBoostEndpoint:    gd.MevBoostEndpoint,
 		MevImage:            gd.MevImage,
