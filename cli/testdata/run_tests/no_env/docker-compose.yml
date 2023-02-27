@@ -64,12 +64,6 @@ services:
     depends_on:
       mevboost:
         condition: service_started
-    healthcheck:
-      test: (curl -s -o /dev/null -w "%{http_code}" -X GET http://127.0.0.1:4000/eth/v1/node/health
-        | grep -q 200) || exit 1
-      interval: 5m
-      retries: 4032
-      start_period: 1m
     networks:
     - sedge
     volumes:
@@ -109,6 +103,31 @@ services:
       options:
         max-size: 10m
         max-file: "10"
+  consensus-health:
+    container_name: sedge-consensus-health
+    image: alpine/curl:latest
+    networks:
+    - sedge
+    environment:
+    - CC_API_URL=${CC_API_URL}
+    healthcheck:
+      test: ${HEALTHCHECK_CMD}
+      interval: 30s
+      retries: 10000
+    command: |-
+      sh -c "
+        while true; do
+          response=$$(curl -s -o /dev/null -w \"%{http_code}\" $$CC_API_URL/eth/v1/node/health)
+          if [ $$response -eq 200 ]; then
+            echo 'Endpoint is up!'
+            sleep 1800
+            break
+          else
+            echo 'Endpoint is down, waiting 30 seconds before checking again...'
+            sleep 30
+          fi
+        done
+      "
   validator-blocker:
     image: busybox:latest
     command: |-
