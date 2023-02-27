@@ -333,7 +333,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf("invalid url %s", "localhost/8545"),
+			fmt.Errorf("invalid execution api url %s", "localhost/8545"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -350,7 +350,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf("invalid url %s", "localhost/8545"),
+			fmt.Errorf("invalid execution auth url %s", "localhost/8545"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -762,7 +762,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "validator",
 				args: []string{"lodestar"},
 			},
-			errors.New("invalid url localhost/4000")),
+			errors.New("invalid consensus api url localhost/4000")),
 	}
 
 	for _, tc := range tcs {

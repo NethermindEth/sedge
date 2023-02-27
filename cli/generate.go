@@ -148,25 +148,29 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		return err == nil
 	}
 	toValidate := []struct {
-		value string
-		check bool
+		flagName string
+		value    string
+		check    bool
 	}{
 		{
-			value: flags.executionApiUrl,
-			check: flags.executionApiUrl != "",
+			flagName: "execution api",
+			value:    flags.executionApiUrl,
+			check:    flags.executionApiUrl != "",
 		},
 		{
-			value: flags.executionAuthUrl,
-			check: flags.executionAuthUrl != "",
+			flagName: "execution auth",
+			value:    flags.executionAuthUrl,
+			check:    flags.executionAuthUrl != "",
 		},
 		{
-			value: flags.consensusApiUrl,
-			check: flags.consensusApiUrl != "",
+			flagName: "consensus api",
+			value:    flags.consensusApiUrl,
+			check:    flags.consensusApiUrl != "",
 		},
 	}
 	for _, urlFlag := range toValidate {
 		if urlFlag.check && !isValidUrl(urlFlag.value) {
-			return fmt.Errorf(configs.InvalidUrlFlag, urlFlag.value)
+			return fmt.Errorf(configs.InvalidUrlFlag, urlFlag.flagName, urlFlag.value)
 		}
 	}
 
