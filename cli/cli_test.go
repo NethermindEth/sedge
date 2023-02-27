@@ -475,6 +475,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Graffiti", "", false).Return("test graffiti", nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Enable MEV Boost?", false).Return(true, nil),
+					prompter.EXPECT().InputList("Relay URLs", configs.MainnetRelayURLs()).Return(configs.MainnetRelayURLs(), nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false).Return(generationPath, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
@@ -491,6 +492,7 @@ func TestCli_FullNode(t *testing.T) {
 							VLStartGracePeriod:  840000000000,
 							MevBoostOnValidator: true,
 							ConsensusApiUrl:     "http://localhost:5051",
+							RelayURL:            strings.Join(configs.MainnetRelayURLs(), ","),
 						},
 					})).Return(nil),
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
@@ -542,6 +544,11 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Graffiti", "", false).Return("test graffiti", nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Enable MEV Boost?", false).Return(true, nil),
+					prompter.EXPECT().InputList("Relay URLs", gomock.Len(0)).Return([]string{
+						"https://0xa7ab7a996c8584251c8f921da3170bdfd6ebc75d50f5ddc4050a6fdc77f2a3b5fce2cc750d0865e05d7228af97d69561@relay0.custom",
+						"https://0x9000009807ed12c1f08bf5e81c6da3ba8e3fc3d953898ce0102433094e5f22f21103ec057841fcb81978ed1ea0fa8246@relay1.custom",
+						"https://0xad0a8bb54365c2211cee576363f3a347089d2f07cf72679d16911d740262694caab62d7fd7483f27afd714ca0f1b9118@relay.2.custom",
+					}, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false).Return(generationPath, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
@@ -562,6 +569,11 @@ func TestCli_FullNode(t *testing.T) {
 							CustomGenesisPath:       "testdata/genesis.json",
 							CustomDeployBlock:       "2355021",
 							CCBootnodes:             &[]string{"enode://ccnode1", "enode://ccnode2"},
+							RelayURL: strings.Join([]string{
+								"https://0xa7ab7a996c8584251c8f921da3170bdfd6ebc75d50f5ddc4050a6fdc77f2a3b5fce2cc750d0865e05d7228af97d69561@relay0.custom",
+								"https://0x9000009807ed12c1f08bf5e81c6da3ba8e3fc3d953898ce0102433094e5f22f21103ec057841fcb81978ed1ea0fa8246@relay1.custom",
+								"https://0xad0a8bb54365c2211cee576363f3a347089d2f07cf72679d16911d740262694caab62d7fd7483f27afd714ca0f1b9118@relay.2.custom",
+							}, ","),
 						},
 					})).Return(nil),
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),

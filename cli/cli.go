@@ -288,8 +288,15 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 		inputValidatorGracePeriod,
 		inputFeeRecipient,
 		confirmEnableMEVBoost,
-		inputGenerationPath,
 	); err != nil {
+		return err
+	}
+	if o.genData.MevBoostOnValidator {
+		if err := inputRelayURL(p, o); err != nil {
+			return err
+		}
+	}
+	if err := inputGenerationPath(p, o); err != nil {
 		return err
 	}
 	if err := a.Generate(actions.GenerateOptions{
