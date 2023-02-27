@@ -41,9 +41,9 @@ var (
 )
 
 const (
-	depositDataFileName      = "deposit_data.json"
-	keystorePasswordFileName = "keystore_password.txt"
-	validatorKeysDirName     = "validator_keys"
+	DepositDataFileName      = "deposit_data.json"
+	KeystorePasswordFileName = "keystore_password.txt"
+	ValidatorKeysDirName     = "validator_keys"
 )
 
 func ValidateKeystoreDir(dir string) (errors []error) {
@@ -60,7 +60,7 @@ func ValidateKeystoreDir(dir string) (errors []error) {
 }
 
 func validateDepositDataFile(keystoreDirPath string) error {
-	depositDataFile, err := os.Stat(filepath.Join(keystoreDirPath, depositDataFileName))
+	depositDataFile, err := os.Stat(filepath.Join(keystoreDirPath, DepositDataFileName))
 	if err != nil || depositDataFile.IsDir() {
 		return ErrDepositDataNotFound
 	}
@@ -69,7 +69,7 @@ func validateDepositDataFile(keystoreDirPath string) error {
 }
 
 func validateKeystorePasswordFile(keystoreDirPath string) error {
-	keystorePasswordFileName, err := os.Stat(filepath.Join(keystoreDirPath, keystorePasswordFileName))
+	keystorePasswordFileName, err := os.Stat(filepath.Join(keystoreDirPath, KeystorePasswordFileName))
 	if err != nil || keystorePasswordFileName.IsDir() {
 		return ErrKeystorePasswordNotFound
 	}
@@ -77,7 +77,7 @@ func validateKeystorePasswordFile(keystoreDirPath string) error {
 }
 
 func validateValidatorKeysFolder(keystoreDirPath string) error {
-	validatorKeysDirPath := filepath.Join(keystoreDirPath, validatorKeysDirName)
+	validatorKeysDirPath := filepath.Join(keystoreDirPath, ValidatorKeysDirName)
 	validatorKeysFolder, err := os.Stat(validatorKeysDirPath)
 	if err != nil || !validatorKeysFolder.IsDir() {
 		return ErrValidatorKeysDirNotFound

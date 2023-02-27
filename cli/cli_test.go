@@ -24,6 +24,7 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	"github.com/NethermindEth/sedge/internal/pkg/keystores/testdata"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
 	"github.com/golang/mock/gomock"
@@ -172,8 +173,10 @@ func TestCli_FullNode(t *testing.T) {
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter) {
 				generationPath := t.TempDir()
 				testData := t.TempDir()
-
-				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
+				keystoreDir, err := keystore_test_data.SetupTestDataDir(t)
+				if err != nil {
+					t.Error(err)
+				}
 
 				callsSequence := []*gomock.Call{
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(5, nil),
@@ -233,12 +236,8 @@ func TestCli_FullNode(t *testing.T) {
 							JWTSecretPath:           filepath.Join(testData, "jwt"),
 						},
 					})).Return(nil),
-					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
-					prompter.EXPECT().Select("Select mnemonic source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
-					prompter.EXPECT().Select("Select passphrase source", "", []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}).Return(0, nil),
-					prompter.EXPECT().Input("Withdrawal address", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
-					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
-					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
+					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(1, nil),
+					prompter.EXPECT().Input("Keystore path", "", true).Return(keystoreDir, nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
 						GenerationPath: generationPath,
 						Services:       []string{"validator"},
@@ -246,7 +245,7 @@ func TestCli_FullNode(t *testing.T) {
 					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 						ValidatorClient: "prysm",
 						Network:         "custom",
-						From:            filepath.Join(generationPath, "keystores"),
+						From:            keystoreDir,
 						GenerationPath:  generationPath,
 						CustomConfig: actions.ImportValidatorKeysCustomOptions{
 							NetworkConfigPath: "testdata/networkConfig.json",

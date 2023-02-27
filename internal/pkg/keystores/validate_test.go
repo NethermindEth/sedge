@@ -89,11 +89,11 @@ func setupEmptyDir(t *testing.T) (string, error) {
 func setupTestDataDir(t *testing.T) (string, error) {
 	t.Helper()
 	dir := t.TempDir()
-	depositDataContent, err := testdata.ReadFile(path.Join("testdata/valid", depositDataFileName))
+	depositDataContent, err := testdata.ReadFile(path.Join("testdata/valid", DepositDataFileName))
 	if err != nil {
 		return "", err
 	}
-	if f, err := os.Create(filepath.Join(dir, depositDataFileName)); err != nil {
+	if f, err := os.Create(filepath.Join(dir, DepositDataFileName)); err != nil {
 		return "", err
 	} else {
 		if _, err := f.Write(depositDataContent); err != nil {
@@ -101,11 +101,11 @@ func setupTestDataDir(t *testing.T) (string, error) {
 		}
 		f.Close()
 	}
-	keystorePasswordContent, err := testdata.ReadFile(path.Join("testdata/valid", keystorePasswordFileName))
+	keystorePasswordContent, err := testdata.ReadFile(path.Join("testdata/valid", KeystorePasswordFileName))
 	if err != nil {
 		return "", err
 	}
-	if f, err := os.Create(filepath.Join(dir, keystorePasswordFileName)); err != nil {
+	if f, err := os.Create(filepath.Join(dir, KeystorePasswordFileName)); err != nil {
 		return "", err
 	} else {
 		if _, err := f.Write(keystorePasswordContent); err != nil {
@@ -113,16 +113,16 @@ func setupTestDataDir(t *testing.T) (string, error) {
 		}
 		f.Close()
 	}
-	validatorKeysDir, err := testdata.ReadDir(path.Join("testdata/valid", validatorKeysDirName))
+	validatorKeysDir, err := testdata.ReadDir(path.Join("testdata/valid", ValidatorKeysDirName))
 	if err != nil {
 		return "", err
 	}
-	os.MkdirAll(filepath.Join(dir, validatorKeysDirName), 0o755)
+	os.MkdirAll(filepath.Join(dir, ValidatorKeysDirName), 0o755)
 	for _, source := range validatorKeysDir {
-		if dest, err := os.Create(filepath.Join(dir, validatorKeysDirName, source.Name())); err != nil {
+		if dest, err := os.Create(filepath.Join(dir, ValidatorKeysDirName, source.Name())); err != nil {
 			return "", err
 		} else {
-			sourceContent, err := testdata.ReadFile(path.Join("testdata/valid", validatorKeysDirName, source.Name()))
+			sourceContent, err := testdata.ReadFile(path.Join("testdata/valid", ValidatorKeysDirName, source.Name()))
 			if err != nil {
 				return "", err
 			}
@@ -145,7 +145,7 @@ func setupTestDataDirWithInvalidKeyFile(t *testing.T) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if dest, err := os.Create(filepath.Join(dir, validatorKeysDirName, "keystore-m_12381_3600_5_0_0.json")); err != nil {
+	if dest, err := os.Create(filepath.Join(dir, ValidatorKeysDirName, "keystore-m_12381_3600_5_0_0.json")); err != nil {
 		return "", err
 	} else {
 		if _, err := dest.Write(invalidKeyFileContent); err != nil {
