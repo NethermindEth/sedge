@@ -272,6 +272,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 
 	data := DockerComposeData{
 		Services:            gd.Services,
+		Network:             gd.Network,
 		TTD:                 ttd,
 		XeeVersion:          xeeVersion,
 		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
