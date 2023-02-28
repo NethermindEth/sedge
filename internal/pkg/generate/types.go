@@ -126,11 +126,20 @@ type DockerComposeData struct {
 	ContainerTag            string
 }
 
-// WithConsensusClient returns true if the consensus client is explicitly required
-// by the user, with the --run-clients flag.
+// WithConsensusClient returns true if the consensus client is set
 func (d DockerComposeData) WithConsensusClient() bool {
 	for _, service := range d.Services {
 		if service == consensus {
+			return true
+		}
+	}
+	return false
+}
+
+// WithValidatorClient returns true if the validator client is set
+func (d DockerComposeData) WithValidatorClient() bool {
+	for _, service := range d.Services {
+		if service == validator {
 			return true
 		}
 	}
