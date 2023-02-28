@@ -33,7 +33,7 @@ type Prompter interface {
 	InputFilePath(prompt, defaultValue string, required bool) (result string, err error)
 	InputSecret(prompt string) (result string, err error)
 	EthAddress(prompt string, defaultValue string, required bool) (result string, err error)
-	InputList(prompt string, defaultValue []string) (result []string, err error)
+	InputList(prompt string, defaultValue []string, validator func([]string) error) (result []string, err error)
 }
 
 func NewPrompter() Prompter {
@@ -133,16 +133,32 @@ func (p *prompter) EthAddress(prompt string, defaultValue string, required bool)
 	return
 }
 
-func (p *prompter) InputList(prompt string, defaultValue []string) (result []string, err error) {
-	var text string
+func (p *prompter) InputList(prompt string, defaultValue []string, validator func([]string) error) (result []string, err error) {
+	var (
+		text            string
+		defaultValueStr string
+		options         []survey.AskOpt
+	)
 	if len(defaultValue) > 0 {
 		prompt += " Default values are listed below."
+		defaultValueStr = fmt.Sprintf("\n%s\n", strings.Join(defaultValue, "\n"))
 	}
 	q := &survey.Multiline{
 		Message: prompt,
-		Default: fmt.Sprintf("\n%s\n", strings.Join(defaultValue, "\n")),
+		Default: defaultValueStr,
 	}
-	err = survey.AskOne(q, &text)
+	if validator != nil {
+		f := func(val interface{}) error {
+			if input, ok := val.(string); ok {
+				if err := validator(strings.Split(input, "\n")); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+		options = append(options, survey.WithValidator(f))
+	}
+	err = survey.AskOne(q, &text, options...)
 	for _, item := range strings.Split(text, "\n") {
 		item = strings.TrimSpace(item)
 		if item != "" {

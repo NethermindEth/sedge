@@ -16,6 +16,7 @@ limitations under the License.
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"regexp"
@@ -26,7 +27,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var reAddr = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
+var (
+	reAddr                   = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
+	regexBootNode            = regexp.MustCompile(`^enode:\/\/[0-9a-fA-F]{128}@.*:[1-9][0-9]*$`)
+	ErrInvalidBootNode       = errors.New("invalid boot node")
+	ErrDuplicatedBootNode    = errors.New("duplicated boot node")
+)
 
 /*
 SkipLines :
@@ -212,4 +218,20 @@ func Filter[K any](list []K, filter func(K) bool) []K {
 	}
 
 	return list[:n]
+}
+
+// BootNodesValidator validates a list of boot nodes and returns an error if any
+// of them is invalid.
+func BootNodesValidator(bootNodes []string) error {
+	set := make(map[string]struct{})
+	for _, bootNode := range bootNodes {
+		if _, ok := set[bootNode]; ok {
+			return fmt.Errorf("%w: %s", ErrDuplicatedBootNode, bootNode)
+		}
+		if !regexBootNode.MatchString(bootNode) {
+			return fmt.Errorf("%w: %s", ErrInvalidBootNode, bootNode)
+		}
+		set[bootNode] = struct{}{}
+	}
+	return nil
 }

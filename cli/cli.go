@@ -755,22 +755,20 @@ func inputCustomDeployBlock(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputExecutionBootNodes(p ui.Prompter, o *CliCmdOptions) (err error) {
-	bootNodesInput, err := p.Input("Execution boot nodes", "", false)
+	bootNodesInput, err := p.InputList("Execution boot nodes", []string{}, utils.BootNodesValidator)
 	if err != nil {
 		return err
 	}
-	bootNodesList := strings.Split(bootNodesInput, ",")
-	o.genData.ECBootnodes = &bootNodesList
+	o.genData.ECBootnodes = &bootNodesInput
 	return nil
 }
 
 func inputConsensusBootNodes(p ui.Prompter, o *CliCmdOptions) (err error) {
-	bootNodesInput, err := p.Input("Consensus boot nodes", "", false)
+	bootNodesInput, err := p.InputList("Consensus boot nodes", []string{}, utils.BootNodesValidator)
 	if err != nil {
 		return err
 	}
-	bootNodesList := strings.Split(bootNodesInput, ",")
-	o.genData.CCBootnodes = &bootNodesList
+	o.genData.CCBootnodes = &bootNodesInput
 	return nil
 }
 
@@ -795,7 +793,8 @@ func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 	case NetworkSepolia:
 		defaultValue = configs.SepoliaRelayURLs()
 	}
-	relayURLs, err := p.InputList("Relay URLs", defaultValue)
+	// TODO: add validation
+	relayURLs, err := p.InputList("Relay URLs", defaultValue, nil)
 	o.genData.RelayURL = strings.Join(relayURLs, ",")
 	return
 }
