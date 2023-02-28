@@ -20,6 +20,7 @@ services:
       - -relays
       - ${RELAY_URL}{{end}}
 {{template "consensus" .}}
+{{template "consensus-health" .}}
 {{template "validator-blocker" .}}
 {{template "validator" .}}
 

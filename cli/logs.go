@@ -71,10 +71,15 @@ func LogsCmd(cmdRunner commands.CommandRunner) *cobra.Command {
 			})
 
 			log.Debugf(configs.RunningCommand, logsCMD.Cmd)
-			if _, err := cmdRunner.RunCMD(logsCMD); err != nil {
+			_, exitCode, err := cmdRunner.RunCMD(logsCMD)
+			if exitCode == 130 {
+				// A job with exit code 130 was terminated with signal 2 (SIGINT on most systems).
+				// Process interrupted by user (Ctrl+C)
+				return nil
+			}
+			if err != nil {
 				return fmt.Errorf(configs.GettingLogsError, strings.Join(services, " "), err)
 			}
-
 			return nil
 		},
 	}

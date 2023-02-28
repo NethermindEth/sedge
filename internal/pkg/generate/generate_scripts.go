@@ -176,15 +176,26 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 			return err
 		}
 	}
-	validatorBlockerTemplate := ""
+	validatorBlockerTemplate, consensusHealthTemplate := "", ""
 	if cls[validator] != nil {
 		validatorBlockerTemplate = "validator-blocker"
+		consensusHealthTemplate = "consensus-health"
 	} else {
 		validatorBlockerTemplate = "empty-validator-blocker"
+		consensusHealthTemplate = "empty-consensus-health"
 	}
 
 	// Parse validator-blocker template
 	tmp, err := templates.Services.ReadFile(strings.Join([]string{"services", validatorBlockerTemplate + ".tmpl"}, "/"))
+	if err != nil {
+		return err
+	}
+	if _, err = baseTmp.Parse(string(tmp)); err != nil {
+		return err
+	}
+
+	// Parse consensus-health template
+	tmp, err = templates.Services.ReadFile(strings.Join([]string{"services", consensusHealthTemplate + ".tmpl"}, "/"))
 	if err != nil {
 		return err
 	}
@@ -261,6 +272,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 
 	data := DockerComposeData{
 		Services:            gd.Services,
+		Network:             gd.Network,
 		TTD:                 ttd,
 		XeeVersion:          xeeVersion,
 		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
@@ -370,13 +382,22 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		}
 	}
 	consensusApiUrl := gd.ConsensusApiUrl
-	var consensusAdditionalApiUrl string
+	consensusAdditionalApiUrl := consensusApiUrl
 	if consensusApiUrl == "" {
 		consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLAdditionalApi"])
 		consensusApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLApi"])
+
+		// Prysm urls must be without http:// or https://
+		if cls[validator] != nil && cls[validator].Name == "prysm" {
+			consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", "consensus", gd.Ports["CLAdditionalApi"])
+		}
 	} else {
 		if cls[consensus] != nil && cls[consensus].Name == "prysm" {
 			consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", "consensus", gd.Ports["CLAdditionalApi"])
+		} else if cls[validator] != nil && cls[validator].Name == "prysm" {
+			// Strip the http:// or https:// from the url
+			consensusAdditionalApiUrl = strings.TrimPrefix(consensusAdditionalApiUrl, "http://")
+			consensusAdditionalApiUrl = strings.TrimPrefix(consensusAdditionalApiUrl, "https://")
 		} else {
 			consensusAdditionalApiUrl = consensusApiUrl
 		}
@@ -399,6 +420,12 @@ func EnvFile(gd *GenData, at io.Writer) error {
 			gd.MevBoostEndpoint = fmt.Sprintf("%s:%v", configs.DefaultMevBoostEndpoint, gd.Ports["MevPort"])
 		}
 	}
+
+	graffiti := gd.Graffiti
+	if graffiti == "" {
+		graffiti = generateGraffiti(gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient)
+	}
+
 	data := EnvData{
 		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		ElImage:                   imageOrEmpty(cls[execution]),
@@ -416,14 +443,8 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ExecutionEngineName:       nameOrEmpty(cls[execution]),
 		ConsensusClientName:       nameOrEmpty(cls[consensus]),
 		KeystoreDir:               "./" + configs.KeystoreDir,
-		Graffiti:                  gd.Graffiti,
+		Graffiti:                  graffiti,
 		RelayURL:                  gd.RelayURL,
-	}
-	// FIXME: Graffiti is <EL_name-CL_name> but is incorrect when the CL is different from the VL (validator client)
-
-	// Fix prysm rpc url
-	if cls[validator] != nil && cls[validator].Name == "prysm" {
-		data.ConsensusAdditionalApiURL = fmt.Sprintf("%s:%d", "consensus", gd.Ports["CLAdditionalApi"])
 	}
 
 	// Save to writer
@@ -449,6 +470,29 @@ func nameOrEmpty(cls *clients.Client) string {
 		return cls.Name
 	}
 	return ""
+}
+
+// generateGraffiti generates a graffiti string based on the execution, consensus and validator clients
+func generateGraffiti(execution, consensus, validator *clients.Client) string {
+	if consensus != nil && execution != nil {
+		if validator != nil {
+			if consensus.Name == validator.Name {
+				return strings.Join([]string{nameOrEmpty(execution), nameOrEmpty(consensus)}, "-")
+			}
+		}
+	}
+	return joinIfNotEmpty(nameOrEmpty(execution), nameOrEmpty(consensus), nameOrEmpty(validator))
+}
+
+// joinIfNotEmpty joins the strings if they are not empty
+func joinIfNotEmpty(strs ...string) string {
+	var result []string
+	for _, str := range strs {
+		if str != "" {
+			result = append(result, str)
+		}
+	}
+	return strings.Join(result, "-")
 }
 
 // imageOrEmpty returns the image of the client if it is not nil, otherwise returns an empty string

@@ -58,9 +58,9 @@ func TestSetupContainers(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			commandRunner := &test.SimpleCMDRunner{
-				SRunCMD: func(c commands.Command) (string, error) {
+				SRunCMD: func(c commands.Command) (string, int, error) {
 					assert.Contains(t, []string{tc.expectedBuildCmd, tc.expectedPullCmd, tc.expectedCreateCmd}, c.Cmd)
-					return "", nil
+					return "", 0, nil
 				},
 			}
 			sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{
