@@ -245,7 +245,7 @@ func checkRunDependencies(cmdRunner commands.CommandRunner, generationPath strin
 	})
 	psCMD.GetOutput = true
 	log.Infof(configs.RunningCommand, psCMD.Cmd)
-	if _, err := cmdRunner.RunCMD(psCMD); err != nil {
+	if _, _, err := cmdRunner.RunCMD(psCMD); err != nil {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
 	}
 	// Check that compose plugin is installed with docker running 'docker compose ps'
@@ -254,7 +254,7 @@ func checkRunDependencies(cmdRunner commands.CommandRunner, generationPath strin
 	})
 	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
 	dockerComposePsCMD.GetOutput = true
-	_, err := cmdRunner.RunCMD(dockerComposePsCMD)
+	_, _, err := cmdRunner.RunCMD(dockerComposePsCMD)
 	if err != nil {
 		return fmt.Errorf(configs.DockerComposeOffError, err)
 	}
@@ -268,7 +268,7 @@ func buildImages(cmdRunner commands.CommandRunner, services []string, generation
 		Services: services,
 	})
 	log.Infof(configs.RunningCommand, buildCmd.Cmd)
-	if _, err := cmdRunner.RunCMD(buildCmd); err != nil {
+	if _, _, err := cmdRunner.RunCMD(buildCmd); err != nil {
 		return fmt.Errorf(configs.CommandError, buildCmd.Cmd, err)
 	}
 	return nil
@@ -281,14 +281,14 @@ func downloadImages(cmdRunner commands.CommandRunner, services []string, generat
 		Services: services,
 	})
 	log.Infof(configs.RunningCommand, pullCmd.Cmd)
-	if _, err := cmdRunner.RunCMD(pullCmd); err != nil {
+	if _, _, err := cmdRunner.RunCMD(pullCmd); err != nil {
 		return fmt.Errorf(configs.CommandError, pullCmd.Cmd, err)
 	}
 	return nil
 }
 
 func createContainers(cmdRunner commands.CommandRunner, services []string, generationPath string) error {
-	if _, err := cmdRunner.RunCMD(cmdRunner.BuildDockerComposeCreateCMD(commands.DockerComposeCreateOptions{
+	if _, _, err := cmdRunner.RunCMD(cmdRunner.BuildDockerComposeCreateCMD(commands.DockerComposeCreateOptions{
 		Path:     filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 		Services: services,
 	})); err != nil {
@@ -321,7 +321,7 @@ func runAndShowContainers(cmdRunner commands.CommandRunner, services []string, f
 		Services: services,
 	})
 	log.Infof(configs.RunningCommand, upCMD.Cmd)
-	if _, err := cmdRunner.RunCMD(upCMD); err != nil {
+	if _, _, err := cmdRunner.RunCMD(upCMD); err != nil {
 		return fmt.Errorf(configs.CommandError, upCMD.Cmd, err)
 	}
 
@@ -331,7 +331,7 @@ func runAndShowContainers(cmdRunner commands.CommandRunner, services []string, f
 		FilterRunning: true,
 	})
 	log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
-	if _, err := cmdRunner.RunCMD(dcpsCMD); err != nil {
+	if _, _, err := cmdRunner.RunCMD(dcpsCMD); err != nil {
 		return fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
 	}
 

@@ -170,7 +170,7 @@ func (cr *UnixCMDRunner) BuildOpenTextEditor(options OpenTextEditorOptions) Comm
 	return Command{Cmd: fmt.Sprintf("less %s", options.FilePath)}
 }
 
-func (cr *UnixCMDRunner) RunCMD(cmd Command) (string, error) {
+func (cr *UnixCMDRunner) RunCMD(cmd Command) (string, int, error) {
 	if cr.RunWithSudo && !cmd.ForceNoSudo {
 		log.Debug(`Running command with sudo.`)
 		cmd.Cmd = fmt.Sprintf("sudo %s", cmd.Cmd)
