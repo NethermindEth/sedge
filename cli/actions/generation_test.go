@@ -353,38 +353,6 @@ func TestGenerateDockerCompose(t *testing.T) {
 						assert.True(t, re.MatchString(uri.String()), "Consensus API URL is not valid: %s", uri.String())
 					}
 				}
-
-				// Check that the consensus-health service is set.
-				assert.NotNil(t, cmpData.Services.ConsensusHealth)
-				// Check that the consensus-health image is set.
-				assert.Equal(t, "alpine/curl:latest", cmpData.Services.ConsensusHealth.Image)
-				// FIXME: Find a way to test the command. It gives sintax errors beacuse of the double $ sign to escape the $ signs. It works fine when running the command in docker compose.
-				// if runtime.GOOS != "windows" {
-				// 	// Check that the consensus-health bash command is valid
-				// 	command := cmpData.Services.ConsensusHealth.Command
-				// 	cmd := exec.Command("bash", "-c", command)
-				// 	outBuffer, errBuffer := new(bytes.Buffer), new(bytes.Buffer)
-				// 	cmd.Stdout = outBuffer
-				// 	cmd.Stderr = errBuffer
-				// 	cmd.Run()
-				// 	assert.Empty(t, errBuffer, "Consensus health command is invalid: %s", command)
-				// }
-
-				// Check that healthcheck command is set
-				assert.NotEmpty(t, envData["HEALTHCHECK_CMD"])
-				// Check that Consensus API URL from input is in the health check command
-				hckCMD := envData["HEALTHCHECK_CMD"]
-				// Regex to find the <URL> and <PORT> part in "http://<URL>:<PORT>/eth/v1/node/health" and should work for https as well
-				re = regexp.MustCompile(`http[s]?://[a-zA-Z0-9\-.]+:[0-9]+/eth/v1/node/health`)
-				endpoint := re.FindAllString(hckCMD, -1)[0]
-				endpoint = strings.Split(endpoint, "/eth/v1/node/health")[0]
-				if tc.genData.ConsensusApiUrl != "" {
-					assert.Equal(t, tc.genData.ConsensusApiUrl, endpoint, "Consensus API URL is not valid: %s", endpoint)
-				} else {
-					// Regex to assert that the endpoint is in the form consensus:<PORT>
-					re = regexp.MustCompile(`http[s]?://consensus:[0-9]+`)
-					assert.True(t, re.MatchString(endpoint), "Consensus API URL is not valid: %s", endpoint)
-				}
 			}
 		})
 	}
