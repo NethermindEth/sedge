@@ -50,7 +50,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Confirm("Do you want to set up a validator?", false).Return(true, nil),
 					prompter.EXPECT().Input("Mev-Boost image", "flashbots/mev-boost:latest", false).Return("flashbots/mev-boost:latest", nil),
-					prompter.EXPECT().InputList("Relay URLs", configs.MainnetRelayURLs(), nil).Return(configs.MainnetRelayURLs(), nil),
+					prompter.EXPECT().InputList("Relay URLs", configs.MainnetRelayURLs(), gomock.AssignableToTypeOf(utils.RelayURLsValidator)).Return(configs.MainnetRelayURLs(), nil),
 					prompter.EXPECT().Select("Select execution client", "", []string{"besu", "erigon", "geth", "nethermind", "randomize"}).Return(3, nil),
 					prompter.EXPECT().Select("Select consensus client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().Select("Select validator client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),

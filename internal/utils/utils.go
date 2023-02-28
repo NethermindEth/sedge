@@ -28,10 +28,16 @@ import (
 )
 
 var (
-	reAddr                   = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
-	regexBootNode            = regexp.MustCompile(`^enode:\/\/[0-9a-fA-F]{128}@.*:[1-9][0-9]*$`)
-	ErrInvalidBootNode       = errors.New("invalid boot node")
-	ErrDuplicatedBootNode    = errors.New("duplicated boot node")
+	reAddr        = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
+	regexBootNode = regexp.MustCompile(`^enode:\/\/[0-9a-fA-F]{128}@.*:[1-9][0-9]*$`)
+	regexRelayURL = regexp.MustCompile(`^(https|http)://0x[0-9a-fA-F].+@.+$`)
+)
+
+var (
+	ErrInvalidBootNode    = errors.New("invalid boot node")
+	ErrDuplicatedBootNode = errors.New("duplicated boot node")
+	ErrInvalidRelayURL    = errors.New("invalid relay url")
+	ErrDuplicatedRelayURL = errors.New("duplicated relay url")
 )
 
 /*
@@ -232,6 +238,22 @@ func BootNodesValidator(bootNodes []string) error {
 			return fmt.Errorf("%w: %s", ErrInvalidBootNode, bootNode)
 		}
 		set[bootNode] = struct{}{}
+	}
+	return nil
+}
+
+// RelayURLsValidator validates a list of relay URLs and returns an error if any
+// of them is invalid.
+func RelayURLsValidator(relayURL []string) error {
+	set := make(map[string]struct{})
+	for _, relayURL := range relayURL {
+		if _, ok := set[relayURL]; ok {
+			return fmt.Errorf("%w: %s", ErrDuplicatedRelayURL, relayURL)
+		}
+		if !regexRelayURL.MatchString(relayURL) {
+			return fmt.Errorf("%w: %s", ErrInvalidRelayURL, relayURL)
+		}
+		set[relayURL] = struct{}{}
 	}
 	return nil
 }

@@ -793,8 +793,7 @@ func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 	case NetworkSepolia:
 		defaultValue = configs.SepoliaRelayURLs()
 	}
-	// TODO: add validation
-	relayURLs, err := p.InputList("Relay URLs", defaultValue, nil)
+	relayURLs, err := p.InputList("Relay URLs", defaultValue, utils.RelayURLsValidator)
 	o.genData.RelayURL = strings.Join(relayURLs, ",")
 	return
 }
