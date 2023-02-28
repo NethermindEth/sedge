@@ -18,7 +18,6 @@ package cli
 import (
 	"fmt"
 	"io"
-	"net/url"
 	"os"
 	"path/filepath"
 	"time"
@@ -66,6 +65,8 @@ type GenCmdFlags struct {
 	executionAuthUrl  string
 	consensusApiUrl   string
 	waitEpoch         int
+	customEnodes      *[]string
+	customEnrs        *[]string
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -111,7 +112,7 @@ func validateNetwork(network string) error {
 	return nil
 }
 
-func preValidationGenerateCmd(network, logging string) error {
+func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error {
 	// Validate network
 	err := validateNetwork(network)
 	if err != nil {
@@ -123,6 +124,83 @@ func preValidationGenerateCmd(network, logging string) error {
 		return err
 	}
 
+	// Validate url flags
+	singleUriValidator := func(uriType string, validator func([]string) (string, bool)) func([]string) error {
+		return func(value []string) error {
+			badUri, valid := validator(value)
+			if !valid {
+				return fmt.Errorf(configs.InvalidUrlFlag, uriType, badUri)
+			}
+			return nil
+		}
+	}
+
+	type uriData struct {
+		value     []string
+		check     bool
+		validator func([]string) error
+	}
+	toValidate := []uriData{
+		{
+			value:     []string{flags.executionApiUrl},
+			check:     flags.executionApiUrl != "",
+			validator: singleUriValidator("execution api", utils.UriValidator),
+		},
+		{
+			value:     []string{flags.executionAuthUrl},
+			check:     flags.executionAuthUrl != "",
+			validator: singleUriValidator("execution auth", utils.UriValidator),
+		},
+		{
+			value:     []string{flags.consensusApiUrl},
+			check:     flags.consensusApiUrl != "",
+			validator: singleUriValidator("consensus api", utils.UriValidator),
+		},
+		{
+			value:     []string{flags.relayURL},
+			check:     flags.relayURL != "",
+			validator: singleUriValidator("relay", utils.UriValidator),
+		},
+		{
+			value:     []string{flags.mevBoostUrl},
+			check:     flags.mevBoostUrl != "",
+			validator: singleUriValidator("mev-boost endpoint", utils.UriValidator),
+		},
+		{
+			value:     []string{flags.checkpointSyncUrl},
+			check:     flags.checkpointSyncUrl != "",
+			validator: singleUriValidator("checkpoint sync", utils.UriValidator),
+		},
+	}
+	if flags.fallbackEL != nil {
+		toValidate = append(toValidate, uriData{
+			value:     *flags.fallbackEL,
+			check:     len(*flags.fallbackEL) > 0,
+			validator: singleUriValidator("fallback execution", utils.UriValidator),
+		})
+	}
+	if flags.customEnodes != nil {
+		toValidate = append(toValidate, uriData{
+			value:     *flags.customEnodes,
+			check:     len(*flags.customEnodes) > 0,
+			validator: utils.ENodesValidator,
+		})
+	}
+	if flags.customEnrs != nil {
+		toValidate = append(toValidate, uriData{
+			value:     *flags.customEnrs,
+			check:     len(*flags.customEnrs) > 0,
+			validator: utils.ENRValidator,
+		})
+	}
+	for _, uri := range toValidate {
+		if uri.check {
+			if err := uri.validator(uri.value); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -130,48 +208,6 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	// Warn if ports are being exposed
 	if flags.mapAllPorts {
 		log.Warn(configs.MapAllPortsWarning)
-	}
-
-	// Warn if checkpoint url used
-	if flags.checkpointSyncUrl != "" {
-		// Check checkpoint url is a valid URL
-		_, err := url.ParseRequestURI(flags.checkpointSyncUrl)
-		if err != nil {
-			return fmt.Errorf(configs.InvalidCkptSyncURL, flags.checkpointSyncUrl)
-		}
-		log.Warnf(configs.CheckpointUrlUsedWarning, flags.checkpointSyncUrl)
-	}
-
-	// Validate url flags
-	isValidUrl := func(input string) bool {
-		_, err := url.ParseRequestURI(input)
-		return err == nil
-	}
-	toValidate := []struct {
-		flagName string
-		value    string
-		check    bool
-	}{
-		{
-			flagName: "execution api",
-			value:    flags.executionApiUrl,
-			check:    flags.executionApiUrl != "",
-		},
-		{
-			flagName: "execution auth",
-			value:    flags.executionAuthUrl,
-			check:    flags.executionAuthUrl != "",
-		},
-		{
-			flagName: "consensus api",
-			value:    flags.consensusApiUrl,
-			check:    flags.consensusApiUrl != "",
-		},
-	}
-	for _, urlFlag := range toValidate {
-		if urlFlag.check && !isValidUrl(urlFlag.value) {
-			return fmt.Errorf(configs.InvalidUrlFlag, urlFlag.flagName, urlFlag.value)
-		}
 	}
 
 	// Get all supported clients
