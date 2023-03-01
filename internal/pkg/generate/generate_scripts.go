@@ -399,6 +399,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		relayURLs = strings.Join(gd.RelayURLs, ",")
 	}
 	data := EnvData{
+		Services:                  gd.Services,
 		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		ElImage:                   imageOrEmpty(cls[execution]),
 		ElDataDir:                 "./" + configs.ExecutionDir,
