@@ -412,6 +412,8 @@ func TestGenerateDockerCompose(t *testing.T) {
 					validatorBlockerCtName = validatorBlockerCtName + "-" + tc.genData.ContainerTag
 				}
 				assert.Equal(t, validatorBlockerCtName, cmpData.Services.ValidatorBlocker.ContainerName)
+				// Check that validator-blocker command is not empty
+				assert.NotEmpty(t, cmpData.Services.ValidatorBlocker.Command)
 
 				// Check that mev-boost service is not set when validator only
 				_, mev := envData["MEV"]
