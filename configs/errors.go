@@ -113,6 +113,9 @@ const (
 	InvalidDeployBLock                = "invalid deploy block"
 	InvalidGenerationPath             = "invalid generation path %s: %v"
 	InvalidCkptSyncURL                = "invalid checkpoint sync url %s"
+	InvalidUrlFlag                    = "invalid %s url %s. URL must be in the format http(s)://<host>:<port>/<api>/<endpoint>/... or http://<host>/<api>/<endpoint>/..."
+	InvalidEnode                      = "invalid enode %s. Bootnode must be in the format enode://<node id>@<host>:<port>"
+	InvalidEnr                        = "invalid enr %s. ENR must be in the format enr:<base64 encoded string>"
 	InvalidJWTSecret                  = "there is no jwtsecret file in the provided path %s"
 	InvalidService                    = "provided service %s is invalid"
 	GenPathErr                        = "error reading generation path: %w"
@@ -126,4 +129,5 @@ const (
 	ServicesNotFoundErr               = "services not found in the docker-compose script"
 	MissingVersionErr                 = "docker-compose script is missing version"
 	InvalidComposeErr                 = "provided docker-compose script is invalid: %w"
+	ErrDuplicatedBootNode             = "duplicated boot node"
 )

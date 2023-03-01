@@ -36,7 +36,7 @@ type EnvData struct {
 	ConsensusClientName       string
 	KeystoreDir               string
 	Graffiti                  string
-	RelayURL                  string
+	RelayURLs                 string
 }
 
 // GenData : Struct Data object for script's generation
@@ -49,13 +49,13 @@ type GenData struct {
 	CheckpointSyncUrl       string
 	FeeRecipient            string
 	JWTSecretPath           string
-	FallbackELUrls          *[]string
+	FallbackELUrls          []string
 	ElExtraFlags            *[]string
 	ClExtraFlags            *[]string
 	VlExtraFlags            *[]string
 	MapAllPorts             bool
 	Mev                     bool
-	RelayURL                string
+	RelayURLs               []string
 	MevImage                string
 	MevBoostService         bool
 	MevBoostEndpoint        string
@@ -63,8 +63,8 @@ type GenData struct {
 	Ports                   map[string]uint16
 	Graffiti                string
 	LoggingDriver           string
-	ECBootnodes             *[]string
-	CCBootnodes             *[]string
+	ECBootnodes             []string
+	CCBootnodes             []string
 	CustomTTD               string
 	CustomChainSpecPath     string
 	CustomNetworkConfigPath string
@@ -106,7 +106,6 @@ type DockerComposeData struct {
 	ClExtraFlags            []string
 	VlExtraFlags            []string
 	ECBootnodes             string
-	ECBootnodesList         []string
 	CCBootnodes             string
 	CCBootnodesList         []string
 	MapAllPorts             bool
