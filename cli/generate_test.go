@@ -280,7 +280,7 @@ func TestGenerateCmd(t *testing.T) {
 			"full-node Random clients, relay-urls, single relay", "case_1",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
-				relayURLs:    []string{"https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,"},
+				relayURLs:    []string{"https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net"},
 			},
 			globalFlags{
 				install: false,
@@ -919,7 +919,7 @@ func TestGenerateCmd(t *testing.T) {
 		),
 		*buildGenerateTestCase(
 			t,
-			"MevBoost custom relay url", "case_1",
+			"MevBoost custom relay urls", "case_1",
 			GenCmdFlags{
 				relayURLs: []string{"https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net", "https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money"},
 			},

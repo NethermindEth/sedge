@@ -297,6 +297,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		VlExtraFlags:        arrayOrEmpty(gd.VlExtraFlags),
 		ECBootnodes:         strings.Join(ecBootnodes, ","),
 		CCBootnodes:         strings.Join(ccBootnodes, ","),
+		CCBootnodesList:     ccBootnodes,
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,

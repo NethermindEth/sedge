@@ -106,6 +106,7 @@ type DockerComposeData struct {
 	VlExtraFlags            []string
 	ECBootnodes             string
 	CCBootnodes             string
+	CCBootnodesList         []string
 	MapAllPorts             bool
 	SplittedNetwork         bool
 	ClCheckpointSyncUrl     bool
