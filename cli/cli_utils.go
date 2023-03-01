@@ -404,7 +404,7 @@ type CustomFlags struct {
 	customNetworkConfig string
 	customGenesis       string
 	customDeployBlock   string
-	customEnodes        *[]string
+	customEnodes        []string
 	customEnrs          *[]string
 }
 

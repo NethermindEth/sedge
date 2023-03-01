@@ -245,12 +245,8 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	// Check for Bootnode nodes
-	var ecBootnodes []string
-	if gd.ECBootnodes != nil {
-		ecBootnodes = *gd.ECBootnodes
-	}
-	if len(ecBootnodes) == 0 {
-		ecBootnodes = configs.NetworksConfigs()[gd.Network].DefaultECBootnodes
+	if len(gd.ECBootnodes) == 0 {
+		gd.ECBootnodes = configs.NetworksConfigs()[gd.Network].DefaultECBootnodes
 	}
 	var mevSupported bool
 	if cls[validator] != nil {
@@ -295,9 +291,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ElExtraFlags:        arrayOrEmpty(gd.ElExtraFlags),
 		ClExtraFlags:        arrayOrEmpty(gd.ClExtraFlags),
 		VlExtraFlags:        arrayOrEmpty(gd.VlExtraFlags),
-		ECBootnodesList:     ecBootnodes,
+		ECBootnodesList:     gd.ECBootnodes,
 		CCBootnodesList:     ccBootnodes,
-		ECBootnodes:         strings.Join(ecBootnodes, ","),
+		ECBootnodes:         strings.Join(gd.ECBootnodes, ","),
 		CCBootnodes:         strings.Join(ccBootnodes, ","),
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     splittedNetwork,

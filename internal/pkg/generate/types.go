@@ -63,7 +63,7 @@ type GenData struct {
 	Ports                   map[string]uint16
 	Graffiti                string
 	LoggingDriver           string
-	ECBootnodes             *[]string
+	ECBootnodes             []string
 	CCBootnodes             *[]string
 	CustomTTD               string
 	CustomChainSpecPath     string

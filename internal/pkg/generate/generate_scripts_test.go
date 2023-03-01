@@ -151,15 +151,11 @@ var checkECBootnodesOnExecution = func(t *testing.T, data *GenData, compose, env
 	if err != nil {
 		return err
 	}
-	var ecBootnodes []string
-	if data.ECBootnodes != nil {
-		ecBootnodes = *data.ECBootnodes
+	if len(data.ECBootnodes) == 0 {
+		data.ECBootnodes = configs.NetworksConfigs()[data.Network].DefaultECBootnodes
 	}
-	if len(ecBootnodes) == 0 {
-		ecBootnodes = configs.NetworksConfigs()[data.Network].DefaultECBootnodes
-	}
-	if len(ecBootnodes) != 0 {
-		bootnodes := strings.Join(ecBootnodes, ",")
+	if len(data.ECBootnodes) != 0 {
+		bootnodes := strings.Join(data.ECBootnodes, ",")
 		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "besu" {
 			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--bootnodes="+bootnodes)
 		}
@@ -510,7 +506,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 							GenerationData: &GenData{
 								Services:        []string{execution, consensus},
 								ExecutionClient: &clients.Client{Name: executionCl},
-								ECBootnodes:     &[]string{"enode:1", "enode:2", "enode:3"},
+								ECBootnodes:     []string{"enode:1", "enode:2", "enode:3"},
 								ConsensusClient: &clients.Client{Name: consensusCl},
 								Network:         network,
 							},
