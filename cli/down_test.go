@@ -56,8 +56,8 @@ func buildDownTestCase(t *testing.T, caseName string, isErr bool) *downCmdTestCa
 
 	// TODO: allow runner edition
 	tc.runner = &test.SimpleCMDRunner{
-		SRunCMD: func(c commands.Command) (string, error) {
-			return "", nil
+		SRunCMD: func(c commands.Command) (string, int, error) {
+			return "", 0, nil
 		},
 		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
@@ -99,11 +99,11 @@ func TestDown_Error(t *testing.T) {
 	// docker compose ps error, PreCheck error
 	desc := "docker compose ps error, PreCheck error"
 	runner := &test.SimpleCMDRunner{
-		SRunCMD: func(c commands.Command) (string, error) {
+		SRunCMD: func(c commands.Command) (string, int, error) {
 			if strings.Contains(c.Cmd, "docker compose") && strings.Contains(c.Cmd, "ps") {
-				return "", errors.New("runner error")
+				return "", 1, errors.New("runner error")
 			}
-			return "", nil
+			return "", 0, nil
 		},
 		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
@@ -125,11 +125,11 @@ func TestDown_Error(t *testing.T) {
 	// docker compose ps --status running error, Check Containers error
 	desc = "docker compose ps --status running error, Check Containers error"
 	runner = &test.SimpleCMDRunner{
-		SRunCMD: func(c commands.Command) (string, error) {
+		SRunCMD: func(c commands.Command) (string, int, error) {
 			if strings.Contains(c.Cmd, "docker compose") && strings.Contains(c.Cmd, "ps") && strings.Contains(c.Cmd, "--filter status=running") {
-				return "", errors.New("runner error")
+				return "", 1, errors.New("runner error")
 			}
-			return "", nil
+			return "", 0, nil
 		},
 		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
@@ -150,11 +150,11 @@ func TestDown_Error(t *testing.T) {
 	// docker compose down error
 	desc = "docker compose down error"
 	runner = &test.SimpleCMDRunner{
-		SRunCMD: func(c commands.Command) (string, error) {
+		SRunCMD: func(c commands.Command) (string, int, error) {
 			if strings.Contains(c.Cmd, "docker compose") && strings.Contains(c.Cmd, "down") {
-				return "", errors.New("runner error")
+				return "", 1, errors.New("runner error")
 			}
-			return "", nil
+			return "", 0, nil
 		},
 		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
@@ -175,8 +175,8 @@ func TestDown_Error(t *testing.T) {
 	// Generation path error
 	desc = "Generation path error"
 	runner = &test.SimpleCMDRunner{
-		SRunCMD: func(c commands.Command) (string, error) {
-			return "", nil
+		SRunCMD: func(c commands.Command) (string, int, error) {
+			return "", 0, nil
 		},
 		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil
