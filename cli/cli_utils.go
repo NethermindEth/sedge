@@ -176,13 +176,13 @@ func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliC
 	if !ok {
 		val.Name = flags.validatorName
 	}
-	if !utils.Contains(*flags.services, execution) && len(*flags.services) > 0 && (*flags.services)[0] != "all" {
+	if !utils.Contains(flags.services, execution) && len(flags.services) > 0 && flags.services[0] != "all" {
 		exec = nil
 	}
-	if !utils.Contains(*flags.services, consensus) && len(*flags.services) > 0 && (*flags.services)[0] != "all" {
+	if !utils.Contains(flags.services, consensus) && len(flags.services) > 0 && flags.services[0] != "all" {
 		cons = nil
 	}
-	if !utils.Contains(*flags.services, validator) && len(*flags.services) > 0 && (*flags.services)[0] != "all" ||
+	if !utils.Contains(flags.services, validator) && len(flags.services) > 0 && flags.services[0] != "all" ||
 		flags.noValidator {
 		val = nil
 	}
@@ -211,12 +211,12 @@ func runScriptOrExit(cmdRunner commands.CommandRunner, flags *CliCmdFlags) (err 
 	log.Infof(configs.InstructionsFor, "running docker-compose script")
 	upCMD := cmdRunner.BuildDockerComposeUpCMD(commands.DockerComposeUpOptions{
 		Path:     filepath.Join(flags.generationPath, configs.DefaultDockerComposeScriptName),
-		Services: *flags.services,
+		Services: flags.services,
 	})
 	fmt.Printf("\n%s\n\n", upCMD.Cmd)
 
 	prompt := promptui.Prompt{
-		Label:     fmt.Sprintf("Run the script with the selected services %s", strings.Join(*flags.services, ", ")),
+		Label:     fmt.Sprintf("Run the script with the selected services %s", strings.Join(flags.services, ", ")),
 		IsConfirm: true,
 		Default:   "Y",
 	}
@@ -226,10 +226,10 @@ func runScriptOrExit(cmdRunner commands.CommandRunner, flags *CliCmdFlags) (err 
 		os.Exit(0)
 	}
 
-	if err := buildContainers(cmdRunner, *flags.services, flags.generationPath); err != nil {
+	if err := buildContainers(cmdRunner, flags.services, flags.generationPath); err != nil {
 		return err
 	}
-	if err = runAndShowContainers(cmdRunner, *flags.services, flags); err != nil {
+	if err = runAndShowContainers(cmdRunner, flags.services, flags); err != nil {
 		return err
 	}
 
