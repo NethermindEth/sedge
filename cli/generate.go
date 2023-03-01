@@ -129,7 +129,7 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 		return func(value []string) error {
 			badUri, valid := validator(value)
 			if !valid {
-				return fmt.Errorf(configs.InvalidUrlFlag, uriType, badUri)
+				return fmt.Errorf(configs.InvalidUrlFlagError, uriType, badUri)
 			}
 			return nil
 		}
