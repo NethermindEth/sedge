@@ -275,7 +275,7 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag stri
 	// Mock ContainerCreate
 	dockerClient.EXPECT().
 		ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), slashingCtName).
-		Return(container.ContainerCreateCreatedBody{ID: slashingCtId}, nil).
+		Return(container.CreateResponse{ID: slashingCtId}, nil).
 		Times(1)
 	// Mock ContainerStart
 	dockerClient.EXPECT().
@@ -287,8 +287,8 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag stri
 		Return(nil).
 		Times(1)
 	// Mock ContainerWait
-	exitCh := make(chan container.ContainerWaitOKBody, 1)
-	exitCh <- container.ContainerWaitOKBody{
+	exitCh := make(chan container.WaitResponse, 1)
+	exitCh <- container.WaitResponse{
 		StatusCode: 0,
 	}
 	dockerClient.EXPECT().
