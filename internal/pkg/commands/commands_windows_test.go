@@ -51,7 +51,7 @@ func TestRunCmd(t *testing.T) {
 	for _, input := range inputs {
 		descr := fmt.Sprintf("RunCmd(%s,%t)", input.cmd, input.getOutput)
 
-		got, err := runner.RunCMD(Command{
+		got, _, err := runner.RunCMD(Command{
 			Cmd:       input.cmd,
 			GetOutput: input.getOutput,
 		})

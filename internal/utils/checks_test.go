@@ -90,8 +90,8 @@ func TestPreCheck(t *testing.T) {
 			caseTestDataDir: "case_1",
 			path:            t.TempDir(),
 			runner: &test.SimpleCMDRunner{
-				SRunCMD: func(c commands.Command) (string, error) {
-					return "", nil
+				SRunCMD: func(c commands.Command) (string, int, error) {
+					return "", 0, nil
 				},
 				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
@@ -106,8 +106,8 @@ func TestPreCheck(t *testing.T) {
 			caseTestDataDir: "case_1",
 			path:            t.TempDir(),
 			runner: &test.SimpleCMDRunner{
-				SRunCMD: func(c commands.Command) (string, error) {
-					return "", nil
+				SRunCMD: func(c commands.Command) (string, int, error) {
+					return "", 0, nil
 				},
 				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
@@ -120,8 +120,8 @@ func TestPreCheck(t *testing.T) {
 			caseTestDataDir: "case_2",
 			path:            t.TempDir(),
 			runner: &test.SimpleCMDRunner{
-				SRunCMD: func(c commands.Command) (string, error) {
-					return "", nil
+				SRunCMD: func(c commands.Command) (string, int, error) {
+					return "", 0, nil
 				},
 				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
@@ -134,8 +134,8 @@ func TestPreCheck(t *testing.T) {
 			caseTestDataDir: "case_1",
 			path:            t.TempDir(),
 			runner: &test.SimpleCMDRunner{
-				SRunCMD: func(c commands.Command) (string, error) {
-					return "", fmt.Errorf("test unknown error")
+				SRunCMD: func(c commands.Command) (string, int, error) {
+					return "", 1, fmt.Errorf("test unknown error")
 				},
 				SRunBash: func(bs commands.ScriptFile) (string, error) {
 					return "", nil
@@ -198,13 +198,13 @@ func buildCheckContainersTestCase(t *testing.T, caseName string, isErr bool) *ch
 	tc := checkContainersTC{}
 	tc.path = dcPath
 	tc.runner = &test.SimpleCMDRunner{
-		SRunCMD: func(c commands.Command) (string, error) {
+		SRunCMD: func(c commands.Command) (string, int, error) {
 			if strings.Contains(c.Cmd, "docker compose") && strings.Contains(c.Cmd, "ps") {
 				tc.psRunned += 1
 				_, err := os.Lstat(filepath.Join(dcPath, configs.DefaultDockerComposeScriptName))
-				return "", err
+				return "", 1, err
 			}
-			return "", nil
+			return "", 0, nil
 		},
 		SRunBash: func(bs commands.ScriptFile) (string, error) {
 			return "", nil

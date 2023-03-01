@@ -127,6 +127,44 @@ func TestGenerateEnvFile(t *testing.T) {
 			},
 		},
 		{
+			name: "Check Graffiti, no graffiti set, name from execution-validator",
+			data: &GenData{
+				ValidatorClient: &clients.Client{Name: "prysm"},
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				Network:         "mainnet",
+			},
+			fieldsToCheck: map[string]string{
+				"GRAFFITI":     "nethermind-prysm",
+				"KEYSTORE_DIR": "./keystore",
+			},
+		},
+		{
+			name: "Check Graffiti, no graffiti set, name from execution-consensus, consensus=validator",
+			data: &GenData{
+				ValidatorClient: &clients.Client{Name: "prysm"},
+				ConsensusClient: &clients.Client{Name: "prysm"},
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				Network:         "mainnet",
+			},
+			fieldsToCheck: map[string]string{
+				"GRAFFITI":     "nethermind-prysm",
+				"KEYSTORE_DIR": "./keystore",
+			},
+		},
+		{
+			name: "Check Graffiti, no graffiti set, name from execution-consensus, consensus!=validator",
+			data: &GenData{
+				ValidatorClient: &clients.Client{Name: "lodestar"},
+				ConsensusClient: &clients.Client{Name: "prysm"},
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				Network:         "mainnet",
+			},
+			fieldsToCheck: map[string]string{
+				"GRAFFITI":     "nethermind-prysm-lodestar",
+				"KEYSTORE_DIR": "./keystore",
+			},
+		},
+		{
 			name: "Check validator Graffiti and keystore",
 			data: &GenData{
 				ValidatorClient: &clients.Client{Name: "prysm"},

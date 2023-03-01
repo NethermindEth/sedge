@@ -35,7 +35,7 @@ func (s *sedgeActions) SetupContainers(options SetupContainersOptions) error {
 		Services: options.Services,
 	})
 	log.Infof(configs.RunningCommand, buildCmd.Cmd)
-	if _, err := s.commandRunner.RunCMD(buildCmd); err != nil {
+	if _, _, err := s.commandRunner.RunCMD(buildCmd); err != nil {
 		return err
 	}
 	pullCmd := s.commandRunner.BuildDockerComposePullCMD(commands.DockerComposePullOptions{
@@ -43,7 +43,7 @@ func (s *sedgeActions) SetupContainers(options SetupContainersOptions) error {
 		Services: options.Services,
 	})
 	log.Infof(configs.RunningCommand, pullCmd.Cmd)
-	if _, err := s.commandRunner.RunCMD(pullCmd); err != nil {
+	if _, _, err := s.commandRunner.RunCMD(pullCmd); err != nil {
 		return err
 	}
 	createCmd := s.commandRunner.BuildDockerComposeCreateCMD(commands.DockerComposeCreateOptions{
@@ -51,7 +51,7 @@ func (s *sedgeActions) SetupContainers(options SetupContainersOptions) error {
 		Services: options.Services,
 	})
 	log.Infof(configs.RunningCommand, createCmd.Cmd)
-	if _, err := s.commandRunner.RunCMD(createCmd); err != nil {
+	if _, _, err := s.commandRunner.RunCMD(createCmd); err != nil {
 		return err
 	}
 	return nil
