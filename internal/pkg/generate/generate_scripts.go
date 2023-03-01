@@ -176,12 +176,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 			return err
 		}
 	}
-	validatorBlockerTemplate := ""
-	if cls[validator] != nil {
-		validatorBlockerTemplate = "validator-blocker"
-	} else {
-		validatorBlockerTemplate = "empty-validator-blocker"
-	}
+	validatorBlockerTemplate := "validator-blocker"
 
 	// Parse validator-blocker template
 	tmp, err := templates.Services.ReadFile(strings.Join([]string{"services", validatorBlockerTemplate + ".tmpl"}, "/"))
@@ -264,7 +259,8 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		Network:             gd.Network,
 		TTD:                 ttd,
 		XeeVersion:          xeeVersion,
-		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
+		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev),
+		MevBoostOnValidator: gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		MevPort:             gd.Ports["MevPort"],
 		MevBoostEndpoint:    gd.MevBoostEndpoint,
 		MevImage:            gd.MevImage,

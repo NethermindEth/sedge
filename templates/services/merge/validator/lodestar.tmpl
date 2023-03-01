@@ -26,7 +26,7 @@
       - --metrics.address=0.0.0.0
       - --metrics.port={{.VlMetricsPort}}{{with .FeeRecipient}}
       - --suggestedFeeRecipient=${CC_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
-      - --{{$flag}}{{end}}{{if .Mev}}
+      - --{{$flag}}{{end}}{{if .MevBoostOnValidator}}
       - --builder=true{{end}}
       - --graffiti=${GRAFFITI}{{if .LoggingDriver}}
     logging:
