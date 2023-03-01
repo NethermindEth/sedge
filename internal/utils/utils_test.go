@@ -23,6 +23,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/NethermindEth/sedge/configs"
 )
 
 func TestSkipLines(t *testing.T) {
@@ -361,6 +363,71 @@ func TestUriValidator(t *testing.T) {
 			}
 			if !got && !Contains(tc.in, uri) {
 				t.Errorf("UriValidator(%s) returned a different uri that provided; expected: %s, got: %s", tc.in, tc.in, uri)
+			}
+		})
+	}
+}
+
+func TestENodesValidator(t *testing.T) {
+	tcs := []struct {
+		name string
+		in   []string
+		want error
+	}{
+		{
+			"good enodes",
+			[]string{
+				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
+				"enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30303",
+				"enode://715171f50508aba88aecd1250af392a45a330af91d7b90701c436b618c86aaa1589c9184561907bebbb56439b8f8787bc01f49a7c77276c58c1b09822d75e8e8@@52.231.165.108:30303",
+				"enode://5d6d7cd20d6da4bb83a1d28cadb5d409b64edf314c0335df658c1a54e32c7c4a7ab7823d57c39b6a757556e68ff1df17c748b698544a55cb488b52479a92b60f@the-second-most-cool-enode:666",
+			},
+			nil,
+		},
+		{
+			"bad enode",
+			[]string{
+				"enode://0x0f6b",
+			},
+			fmt.Errorf(configs.InvalidEnodeError, "enode://0x0f6b"),
+		},
+		{
+			"bad enode",
+			[]string{
+				"enode://2b252ab6a1d0f971d9722cb839a42cb81db019ba44c08754628ab4a823487071b5695317c8ccd085219c3a03af063495b2f1da8d18218da2d6a82981b45e6ffc@the-most-cool-enode",
+			},
+			fmt.Errorf(configs.InvalidEnodeError, "enode://2b252ab6a1d0f971d9722cb839a42cb81db019ba44c08754628ab4a823487071b5695317c8ccd085219c3a03af063495b2f1da8d18218da2d6a82981b45e6ffc@the-most-cool-enode"),
+		},
+		{
+			"bad enode",
+			[]string{
+				"enode://4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166",
+			},
+			fmt.Errorf(configs.InvalidEnodeError, "enode://4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166"),
+		},
+		{
+			"bad enode",
+			[]string{
+				"enode:4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166",
+				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
+			},
+			fmt.Errorf(configs.InvalidEnodeError, "enode:4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166"),
+		},
+	}
+
+	for i, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Helper()
+			t.Logf("Test case %d: %s", i+1, tc.name)
+
+			got := ENodesValidator(tc.in)
+
+			if err := CheckErr("ENodesValidator", tc.want != nil, got); err != nil {
+				t.Error(err)
+			}
+
+			if got != nil && tc.want != nil && got.Error() != tc.want.Error() {
+				t.Errorf("ENodesValidator(%s) returned a different error; expected: %s, got: %s", tc.in, tc.want, got)
 			}
 		})
 	}
