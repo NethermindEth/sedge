@@ -35,9 +35,23 @@ func TestDockerComposeData_WithConsensusClient(t *testing.T) {
 			want: true,
 		},
 		{
+			name: "with consensus client",
+			data: DockerComposeData{
+				Services: []string{"consensus"},
+			},
+			want: true,
+		},
+		{
 			name: "without consensus client",
 			data: DockerComposeData{
 				Services: []string{"execution", "validator"},
+			},
+			want: false,
+		},
+		{
+			name: "without consensus client",
+			data: DockerComposeData{
+				Services: []string{"execution"},
 			},
 			want: false,
 		},
@@ -52,6 +66,56 @@ func TestDockerComposeData_WithConsensusClient(t *testing.T) {
 	for _, tC := range tests {
 		t.Run(tC.name, func(t *testing.T) {
 			out := tC.data.WithConsensusClient()
+			assert.Equal(t, out, tC.want)
+		})
+	}
+}
+
+func TestDockerComposeData_WithValidatorClient(t *testing.T) {
+	tests := []struct {
+		name string
+		data DockerComposeData
+		want bool
+	}{
+		{
+			name: "with validator client",
+			data: DockerComposeData{
+				Services: []string{"execution", "consensus", "validator"},
+			},
+			want: true,
+		},
+		{
+			name: "with validator client",
+			data: DockerComposeData{
+				Services: []string{"validator"},
+			},
+			want: true,
+		},
+		{
+			name: "without validator client",
+			data: DockerComposeData{
+				Services: []string{"execution", "consensus"},
+			},
+			want: false,
+		},
+		{
+			name: "without validator client",
+			data: DockerComposeData{
+				Services: []string{"execution"},
+			},
+			want: false,
+		},
+		{
+			name: "with nil services",
+			data: DockerComposeData{
+				Services: nil,
+			},
+			want: false,
+		},
+	}
+	for _, tC := range tests {
+		t.Run(tC.name, func(t *testing.T) {
+			out := tC.data.WithValidatorClient()
 			assert.Equal(t, out, tC.want)
 		})
 	}

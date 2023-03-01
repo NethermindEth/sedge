@@ -108,6 +108,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 						name: fmt.Sprintf("execution: %s, network: %s, only execution", executionCl, network),
 						genData: &generate.GenData{
 							ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
+							Services:        []string{"execution"},
 							Network:         network,
 						},
 					},
@@ -115,6 +116,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 						name: fmt.Sprintf("execution: %s, network: %s, only execution with tag", executionCl, network),
 						genData: &generate.GenData{
 							ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
+							Services:        []string{"execution"},
 							Network:         network,
 							ContainerTag:    "sampleTag",
 						},
@@ -123,6 +125,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 						name: fmt.Sprintf("consensus: %s, network: %s, only consensus", consensusCl, network),
 						genData: &generate.GenData{
 							ConsensusClient:  &clients.Client{Name: consensusCl, Type: "consensus"},
+							Services:         []string{"consensus"},
 							Network:          network,
 							ExecutionApiUrl:  "http://localhost:8545",
 							ExecutionAuthUrl: "http://localhost:8551",
@@ -132,6 +135,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 						name: fmt.Sprintf("consensus: %s, network: %s, only consensus with tag, https", consensusCl, network),
 						genData: &generate.GenData{
 							ConsensusClient:  &clients.Client{Name: consensusCl, Type: "consensus"},
+							Services:         []string{"consensus"},
 							Network:          network,
 							ContainerTag:     "sampleTag",
 							ExecutionApiUrl:  "https://localhost:8545",
@@ -142,6 +146,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 						name: fmt.Sprintf("consensus: %s, network: %s, only consensus with custom Checkpoint sync URL", consensusCl, network),
 						genData: &generate.GenData{
 							ConsensusClient:   &clients.Client{Name: consensusCl, Type: "consensus"},
+							Services:          []string{"consensus"},
 							Network:           network,
 							CheckpointSyncUrl: ckptSync,
 							ExecutionApiUrl:   "http://localhost:8545",
@@ -152,6 +157,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 						name: fmt.Sprintf("validator: %s, network: %s, only validator", consensusCl, network),
 						genData: &generate.GenData{
 							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
+							Services:        []string{"validator"},
 							Network:         network,
 							ConsensusApiUrl: "http://localhost:4000",
 						},
@@ -160,6 +166,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 						name: fmt.Sprintf("validator: %s, network: %s, only validator with tag, https", consensusCl, network),
 						genData: &generate.GenData{
 							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
+							Services:        []string{"validator"},
 							Network:         network,
 							ContainerTag:    "sampleTag",
 							ConsensusApiUrl: "https://localhost:4000",
@@ -174,6 +181,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
 								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
 								ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
+								Services:        []string{"execution", "consensus", "validator"},
 								Network:         network,
 							},
 						},
@@ -183,6 +191,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
 								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
 								ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
+								Services:        []string{"execution", "consensus", "validator"},
 								Network:         network,
 								ContainerTag:    "sampleTag",
 							},
@@ -193,6 +202,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 								ExecutionClient:    &clients.Client{Name: executionCl, Type: "execution"},
 								ConsensusClient:    &clients.Client{Name: consensusCl, Type: "consensus"},
 								ValidatorClient:    &clients.Client{Name: consensusCl, Type: "validator"},
+								Services:           []string{"execution", "consensus", "validator"},
 								Network:            network,
 								ContainerTag:       "sampleTag",
 								VLStartGracePeriod: uint(gracePeriod.Abs()),
@@ -204,6 +214,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 							genData: &generate.GenData{
 								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
 								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
+								Services:        []string{"execution", "consensus"},
 								Network:         network,
 							},
 						},
@@ -212,6 +223,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 							genData: &generate.GenData{
 								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
 								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
+								Services:        []string{"execution", "consensus"},
 								Network:         network,
 								ContainerTag:    "sampleTag",
 							},
@@ -299,6 +311,11 @@ func TestGenerateDockerCompose(t *testing.T) {
 					re := regexp.MustCompile(`http:\/\/execution:[0-9]+`)
 					assert.True(t, re.MatchString(authEndpoint), "Execution Auth URL is not valid %s", authEndpoint)
 				}
+
+				// Check that the consensus-health service is not set if there isn't any validator.
+				if tc.genData.ValidatorClient == nil {
+					assert.Nil(t, cmpData.Services.ConsensusHealth)
+				}
 			}
 
 			// Validate that Validator Client info matches the sample data
@@ -354,12 +371,10 @@ func TestGenerateDockerCompose(t *testing.T) {
 					}
 				}
 
-				if tc.genData.ConsensusClient != nil {
-					// Check that the consensus-health service is set.
-					assert.NotNil(t, cmpData.Services.ConsensusHealth)
-					// Check that the consensus-health image is set.
-					assert.Equal(t, "alpine/curl:latest", cmpData.Services.ConsensusHealth.Image)
-				}
+				// Check that the consensus-health service is set.
+				assert.NotNil(t, cmpData.Services.ConsensusHealth)
+				// Check that the consensus-health image is set.
+				assert.Equal(t, "alpine/curl:latest", cmpData.Services.ConsensusHealth.Image)
 				// FIXME: Find a way to test the command. It gives sintax errors beacuse of the double $ sign to escape the $ signs. It works fine when running the command in docker compose.
 				// if runtime.GOOS != "windows" {
 				// 	// Check that the consensus-health bash command is valid
@@ -403,6 +418,7 @@ func TestFolderCreationOnCompose(t *testing.T) {
 		ExecutionClient: clientsMap["execution"]["nethermind"],
 		ConsensusClient: clientsMap["consensus"]["lighthouse"],
 		ValidatorClient: clientsMap["consensus"]["lighthouse"],
+		Services:        []string{"execution", "consensus", "validator"},
 		Network:         "mainnet",
 		JWTSecretPath:   samplePath,
 	}
