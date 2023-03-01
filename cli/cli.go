@@ -68,6 +68,8 @@ type CliCmdFlags struct {
 	logging            string
 	slashingProtection string
 	containerTag       string
+	customEnodes       []string
+	customEnrs         []string
 }
 
 type clientImages struct {

@@ -55,7 +55,7 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			return preValidationGenerateCmd(network, logging)
+			return preValidationGenerateCmd(network, logging, &flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if flags.consensusName == "" {
@@ -74,6 +74,7 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
 	cmd.Flags().BoolVar(&flags.noMev, "no-mev-boost", false, "Not use mev-boost if supported")
 	cmd.Flags().StringVarP(&flags.mevImage, "mev-boost-image", "m", "", "Custom docker image to use for Mev Boost. Example: 'sedge generate full-node --mev-boost-image flashbots/mev-boost:latest-portable'")
+	cmd.Flags().StringSliceVar(&flags.relayURLs, "relay-urls", []string{}, "List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate full-node --relay-url=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money")
 	cmd.Flags().BoolVar(&flags.noValidator, "no-validator", false, "Exclude the validator from the full node setup. Designed for execution and consensus nodes setup without a validator node. Exclude also the validator from other flags. If set, mev-boost will not be used.")
 	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 	cmd.Flags().StringVar(&flags.graffiti, "graffiti", "", "Graffiti to be used by the validator")
@@ -117,11 +118,7 @@ func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			err := preValidationGenerateCmd(network, logging)
-			if err != nil {
-				return err
-			}
-			return nil
+			return preValidationGenerateCmd(network, logging, &flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{execution})
@@ -166,7 +163,7 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			return preValidationGenerateCmd(network, logging)
+			return preValidationGenerateCmd(network, logging, &flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{consensus})
@@ -224,7 +221,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			return preValidationGenerateCmd(network, logging)
+			return preValidationGenerateCmd(network, logging, &flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			flags.noMev = true
@@ -259,14 +256,14 @@ func MevBoostSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		Long:  "Generate a docker-compose and an environment file with a mev-boost node configuration",
 		Args:  cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return preValidationGenerateCmd(network, logging)
+			return preValidationGenerateCmd(network, logging, &flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{mevBoost})
 		},
 	}
 	// Bind flags
-	cmd.Flags().StringVar(&flags.relayURL, "relay-url", "", "Relay URL used to connect to mev relay.")
+	cmd.Flags().StringSliceVar(&flags.relayURLs, "relay-urls", []string{}, "List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate mevboost --relay-url=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money")
 	cmd.Flags().StringVarP(&flags.mevImage, "mev-boost-image", "m", "", "Custom docker image to use for Mev Boost. Example: 'sedge generate mevboost --mev-boost-image flashbots/mev-boost:latest-portable'")
 	cmd.Flags().SortFlags = false
 	return cmd

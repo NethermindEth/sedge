@@ -228,12 +228,12 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ttd = configs.NetworksConfigs()[gd.Network].DefaultTTD
 	}
 
-	// Check for CC Bootnode nodes
+	// Check for CL Bootnode nodes
 	if len(gd.CCBootnodes) == 0 {
 		gd.CCBootnodes = configs.NetworksConfigs()[gd.Network].DefaultCCBootnodes
 	}
 
-	// Check for Bootnode nodes
+	// Check for EL Bootnode nodes
 	if len(gd.ECBootnodes) == 0 {
 		gd.ECBootnodes = configs.NetworksConfigs()[gd.Network].DefaultECBootnodes
 	}
@@ -281,10 +281,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ElExtraFlags:        gd.ElExtraFlags,
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
-		ECBootnodesList:     gd.ECBootnodes,
-		CCBootnodesList:     gd.CCBootnodes,
 		ECBootnodes:         strings.Join(gd.ECBootnodes, ","),
 		CCBootnodes:         strings.Join(gd.CCBootnodes, ","),
+		CCBootnodesList:     gd.CCBootnodes,
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
@@ -404,6 +403,10 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		graffiti = generateGraffiti(gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient)
 	}
 
+	var relayURLs string
+	if gd.RelayURLs != nil {
+		relayURLs = strings.Join(gd.RelayURLs, ",")
+	}
 	data := EnvData{
 		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		ElImage:                   imageOrEmpty(cls[execution]),
@@ -422,7 +425,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ConsensusClientName:       nameOrEmpty(cls[consensus]),
 		KeystoreDir:               "./" + configs.KeystoreDir,
 		Graffiti:                  graffiti,
-		RelayURL:                  gd.RelayURL,
+		RelayURLs:                 relayURLs,
 	}
 
 	// Save to writer
