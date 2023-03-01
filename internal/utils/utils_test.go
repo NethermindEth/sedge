@@ -280,3 +280,88 @@ func TestFilter(t *testing.T) {
 		})
 	}
 }
+
+func TestUriValidator(t *testing.T) {
+	tcs := []struct {
+		name string
+		in   []string
+		want bool
+	}{
+		{
+			"good uris",
+			[]string{
+				"http://localhost:8545",
+				"https://localhost:8545",
+				"https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net",
+				"https://boost-relay.flashbots.net",
+				"https://localhost:8545/api/v1/eth1",
+				"https://localhost:8545/api/v1/eth1,.{}",
+				"https://nethermind/api/v1/eth1",
+				"http://sedge",
+				"https://192.168.0.1",
+			},
+			true,
+		},
+		{
+			"good uri",
+			[]string{"http://banana/api/monkey/[spliat]"},
+			true,
+		},
+		{
+			"bad uri",
+			[]string{"https://192.168.0.1:8545", "localhost:8545", "https:/boost-relay.flashbots.net"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{"localhost:8545"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{"localhost/545"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{"https:/boost-relay.flashbots.net"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{"htp://localhost:8545"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{"./8080"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{"44.33.55.66:8080"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{""},
+			false,
+		},
+	}
+
+	for i, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Helper()
+			t.Logf("Test case %d: %s", i+1, tc.name)
+
+			uri, got := UriValidator(tc.in)
+
+			if got != tc.want {
+				t.Errorf("UriValidator(%s) failed; expected: %v, got: %v. Bad uri: %s", tc.in, tc.want, got, uri)
+			}
+			if !got && !Contains(tc.in, uri) {
+				t.Errorf("UriValidator(%s) returned a different uri that provided; expected: %s, got: %s", tc.in, tc.in, uri)
+			}
+		})
+	}
+}
