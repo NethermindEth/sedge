@@ -318,14 +318,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	return nil
 }
 
-// arrayOrEmpty returns an empty array if the input is nil, otherwise returns the input
-func arrayOrEmpty(array *[]string) []string {
-	if array == nil {
-		return []string{}
-	}
-	return *array
-}
-
 // EnvFile generates a .env file with the provided GenData
 func EnvFile(gd *GenData, at io.Writer) error {
 	rawBaseTmp, err := templates.Envs.ReadFile(strings.Join([]string{"envs", gd.Network, "env_base.tmpl"}, "/"))
