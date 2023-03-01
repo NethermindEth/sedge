@@ -163,6 +163,16 @@ func TestGenerateDockerCompose(t *testing.T) {
 						},
 					},
 					genTestData{
+						name: fmt.Sprintf("validator: %s, network: %s, only validator, mev-boost on", consensusCl, network),
+						genData: &generate.GenData{
+							ValidatorClient:     &clients.Client{Name: consensusCl, Type: "validator"},
+							Services:            []string{"validator"},
+							Network:             network,
+							ConsensusApiUrl:     "http://localhost:4000",
+							MevBoostOnValidator: true,
+						},
+					},
+					genTestData{
 						name: fmt.Sprintf("validator: %s, network: %s, only validator with tag, https", consensusCl, network),
 						genData: &generate.GenData{
 							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
@@ -183,6 +193,17 @@ func TestGenerateDockerCompose(t *testing.T) {
 								ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
 								Services:        []string{"execution", "consensus", "validator"},
 								Network:         network,
+								Mev:             true,
+							},
+						},
+						genTestData{
+							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s, network: %s, all, no mev-boost", executionCl, consensusCl, consensusCl, network),
+							genData: &generate.GenData{
+								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
+								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
+								ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
+								Services:        []string{"execution", "consensus", "validator"},
+								Network:         network,
 							},
 						},
 						genTestData{
@@ -194,6 +215,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 								Services:        []string{"execution", "consensus", "validator"},
 								Network:         network,
 								ContainerTag:    "sampleTag",
+								Mev:             true,
 							},
 						},
 						genTestData{
@@ -273,11 +295,18 @@ func TestGenerateDockerCompose(t *testing.T) {
 			if tc.genData.ExecutionClient != nil {
 				// Check that the execution service is set.
 				assert.NotNil(t, cmpData.Services.Execution)
+				// Check that the execution container image is set.
+				assert.NotEmpty(t, cmpData.Services.Execution.Image)
 				// Check that the execution container name contains the tag.
 				if tc.genData.ContainerTag == "" {
 					assert.Equal(t, services.DefaultSedgeExecutionClient, cmpData.Services.Execution.ContainerName)
 				} else {
 					assert.Equal(t, services.DefaultSedgeExecutionClient+"-sampleTag", cmpData.Services.Execution.ContainerName)
+				}
+
+				// Check that mev-boost service is not set when execution only
+				if tc.genData.ValidatorClient == nil && tc.genData.ConsensusClient == nil {
+					assert.Nil(t, cmpData.Services.Mevboost)
 				}
 			}
 
@@ -285,6 +314,8 @@ func TestGenerateDockerCompose(t *testing.T) {
 			if tc.genData.ConsensusClient != nil {
 				// Check that the consensus service is set.
 				assert.NotNil(t, cmpData.Services.Consensus)
+				// Check that the consensus container image is set.
+				assert.NotEmpty(t, cmpData.Services.Consensus.Image)
 				// Check that the consensus container name contains the tag.
 				if tc.genData.ContainerTag == "" {
 					assert.Equal(t, services.DefaultSedgeConsensusClient, cmpData.Services.Consensus.ContainerName)
@@ -315,6 +346,11 @@ func TestGenerateDockerCompose(t *testing.T) {
 				// Check that the consensus-health service is not set if there isn't any validator.
 				if tc.genData.ValidatorClient == nil {
 					assert.Nil(t, cmpData.Services.ConsensusHealth)
+				}
+
+				// Check that mev-boost service is not set when consensus only
+				if tc.genData.ExecutionClient == nil && tc.genData.ConsensusClient == nil {
+					assert.Nil(t, cmpData.Services.Mevboost)
 				}
 			}
 
@@ -401,6 +437,19 @@ func TestGenerateDockerCompose(t *testing.T) {
 					// Regex to assert that the endpoint is in the form consensus:<PORT>
 					re = regexp.MustCompile(`http[s]?://consensus:[0-9]+`)
 					assert.True(t, re.MatchString(endpoint), "Consensus API URL is not valid: %s", endpoint)
+				}
+
+				// Check that mev-boost service is not set when validator only
+				_, mev := envData["MEV"]
+				if tc.genData.ExecutionClient == nil && tc.genData.ConsensusClient == nil {
+					assert.Nil(t, cmpData.Services.Mevboost)
+				} else if mev && tc.genData.Mev { // Check that mev-boost service is set when full-node and mev is enabled
+					// Check that mev-boost service is set
+					assert.NotNil(t, cmpData.Services.Mevboost)
+					// Check that mev-boost image is set
+					assert.Equal(t, "flashbots/mev-boost:latest", cmpData.Services.Mevboost.Image)
+					// Check that mev-boost entrypoint is set
+					assert.NotEmpty(t, cmpData.Services.Mevboost.Entrypoint)
 				}
 			}
 		})
