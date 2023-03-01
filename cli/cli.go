@@ -38,8 +38,7 @@ import (
 )
 
 const (
-	slashingImportFile                        = "slashing-import.json"
-	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mevboost"
+	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mev-boost"
 )
 
 type CliCmdFlags struct {
