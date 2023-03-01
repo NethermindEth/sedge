@@ -194,7 +194,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ClExtraFlags:            flags.clExtraFlags,
 		VlExtraFlags:            flags.vlExtraFlags,
 		MapAllPorts:             flags.mapAllPorts,
-		Mev:                     !flags.noMev && utils.Contains(services, validator) && !flags.noValidator,
+		Mev:                     !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
 		MevImage:                flags.mevImage,
 		LoggingDriver:           configs.GetLoggingDriver(logging),
 		RelayURL:                flags.relayURL,

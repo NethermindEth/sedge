@@ -227,6 +227,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			return preValidationGenerateCmd(network, logging)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			flags.noMev = true
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{validator})
 		},
 	}
