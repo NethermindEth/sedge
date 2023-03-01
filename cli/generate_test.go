@@ -341,7 +341,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "full-node",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlag, "relay", "https:/boost-relay.flashbots.net"),
+			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "https:/boost-relay.flashbots.net"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -358,7 +358,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "full-node",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlag, "relay", "boost-relay.flashbots.net"),
+			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "boost-relay.flashbots.net"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -446,7 +446,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlag, "checkpoint sync", "./8080"),
+			fmt.Errorf(configs.InvalidUrlFlagError, "checkpoint sync", "./8080"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -464,7 +464,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlag, "checkpoint sync", "44.33.55.66:8080"),
+			fmt.Errorf(configs.InvalidUrlFlagError, "checkpoint sync", "44.33.55.66:8080"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -481,7 +481,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlag, "execution api", "localhost/8545"),
+			fmt.Errorf(configs.InvalidUrlFlagError, "execution api", "localhost/8545"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -498,7 +498,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlag, "execution api", "localhost:8545"),
+			fmt.Errorf(configs.InvalidUrlFlagError, "execution api", "localhost:8545"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -515,7 +515,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlag, "execution auth", "htp://localhost:4000"),
+			fmt.Errorf(configs.InvalidUrlFlagError, "execution auth", "htp://localhost:4000"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -569,7 +569,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlag, "mev-boost endpoint", "mev-boost:3000"),
+			fmt.Errorf(configs.InvalidUrlFlagError, "mev-boost endpoint", "mev-boost:3000"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -587,7 +587,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlag, "mev-boost endpoint", "htp://mev-boost:3000"),
+			fmt.Errorf(configs.InvalidUrlFlagError, "mev-boost endpoint", "htp://mev-boost:3000"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -641,7 +641,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidEnr, "enr:Iq4QMCTfIMXnow27baRUb35Q8iiFHSIDBJh6hQM5Axohhf4b6Kr_cOCu0htQ5WvVqKvFgY28893DHAg8gnBAXsAVqmGAX53x8JggmlkgnY0gmlwhLKAlv6Jc2VjcDI1NmsxoQK6S-Cii_KmfFdUJL2TANL3ksaKUnNXvTCv1tLwXs0QgIN1ZHCCIyk"),
+			fmt.Errorf(configs.InvalidEnrError, "enr:Iq4QMCTfIMXnow27baRUb35Q8iiFHSIDBJh6hQM5Axohhf4b6Kr_cOCu0htQ5WvVqKvFgY28893DHAg8gnBAXsAVqmGAX53x8JggmlkgnY0gmlwhLKAlv6Jc2VjcDI1NmsxoQK6S-Cii_KmfFdUJL2TANL3ksaKUnNXvTCv1tLwXs0QgIN1ZHCCIyk"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -659,7 +659,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidEnr, "enr-Iq4QMCTfIMXnow27baRUb35Q8iiFHSIDBJh6hQM5Axohhf4b6Kr_cOCu0htQ5WvVqKvFgY28893DHAg8gnBAXsAVqmGAX53x8JggmlkgnY0gmlwhLKAlv6Jc2VjcDI1NmsxoQK6S-Cii_KmfFdUJL2TANL3ksaKUnNXvTCv1tLwXs0QgIN1ZHCCIyk"),
+			fmt.Errorf(configs.InvalidEnrError, "enr-Iq4QMCTfIMXnow27baRUb35Q8iiFHSIDBJh6hQM5Axohhf4b6Kr_cOCu0htQ5WvVqKvFgY28893DHAg8gnBAXsAVqmGAX53x8JggmlkgnY0gmlwhLKAlv6Jc2VjcDI1NmsxoQK6S-Cii_KmfFdUJL2TANL3ksaKUnNXvTCv1tLwXs0QgIN1ZHCCIyk"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -951,7 +951,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "mevboost",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlag, "relay", "https:/boost-relay.flashbots.net"),
+			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "https:/boost-relay.flashbots.net"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -969,7 +969,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "mevboost",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlag, "relay", "boost-relay.flashbots.net"),
+			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "boost-relay.flashbots.net"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -1057,7 +1057,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "execution",
 				args: []string{"nethermind"},
 			},
-			fmt.Errorf(configs.InvalidEnode, "enode:3.135.122.4:30303"),
+			fmt.Errorf(configs.InvalidEnodeError, "enode:3.135.122.4:30303"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -1075,7 +1075,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "execution",
 				args: []string{"nethermind"},
 			},
-			fmt.Errorf(configs.InvalidEnode, "enode://@3.135.122.4:30303"),
+			fmt.Errorf(configs.InvalidEnodeError, "enode://@3.135.122.4:30303"),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -1250,7 +1250,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "validator",
 				args: []string{"lodestar"},
 			},
-			fmt.Errorf(configs.InvalidUrlFlag, "consensus api", "localhost/4000")),
+			fmt.Errorf(configs.InvalidUrlFlagError, "consensus api", "localhost/4000")),
 		*buildGenerateTestCase(
 			t,
 			"Validator, invalid consensus api url", "case_1",
@@ -1265,7 +1265,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "validator",
 				args: []string{"teku"},
 			},
-			fmt.Errorf(configs.InvalidUrlFlag, "consensus api", "htp://localhost:4000")),
+			fmt.Errorf(configs.InvalidUrlFlagError, "consensus api", "htp://localhost:4000")),
 		*buildGenerateTestCase(
 			t,
 			"Validator, invalid consensus api url", "case_1",
@@ -1280,7 +1280,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "validator",
 				args: []string{"lodestar"},
 			},
-			fmt.Errorf(configs.InvalidUrlFlag, "consensus api", "localhost:4000")),
+			fmt.Errorf(configs.InvalidUrlFlagError, "consensus api", "localhost:4000")),
 		*buildGenerateTestCase(
 			t,
 			"Validator, valid consensus api url", "case_1",
