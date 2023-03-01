@@ -176,14 +176,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 			return err
 		}
 	}
-	validatorBlockerTemplate, consensusHealthTemplate := "", ""
-	if cls[validator] != nil {
-		validatorBlockerTemplate = "validator-blocker"
-		consensusHealthTemplate = "consensus-health"
-	} else {
-		validatorBlockerTemplate = "empty-validator-blocker"
-		consensusHealthTemplate = "empty-consensus-health"
-	}
+	validatorBlockerTemplate, consensusHealthTemplate := "validator-blocker", "consensus-health"
 
 	// Parse validator-blocker template
 	tmp, err := templates.Services.ReadFile(strings.Join([]string{"services", validatorBlockerTemplate + ".tmpl"}, "/"))
@@ -267,7 +260,8 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		Network:             gd.Network,
 		TTD:                 ttd,
 		XeeVersion:          xeeVersion,
-		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
+		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev),
+		MevBoostOnValidator: gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		MevPort:             gd.Ports["MevPort"],
 		MevBoostEndpoint:    gd.MevBoostEndpoint,
 		MevImage:            gd.MevImage,
