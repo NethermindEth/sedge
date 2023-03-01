@@ -56,10 +56,10 @@ type GenCmdFlags struct {
 	jwtPath           string
 	graffiti          string
 	mapAllPorts       bool
-	fallbackEL        *[]string
-	elExtraFlags      *[]string
-	clExtraFlags      *[]string
-	vlExtraFlags      *[]string
+	fallbackEL        []string
+	elExtraFlags      []string
+	clExtraFlags      []string
+	vlExtraFlags      []string
 	relayURL          string
 	mevBoostUrl       string
 	executionApiUrl   string

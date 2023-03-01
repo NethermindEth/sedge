@@ -49,10 +49,10 @@ type GenData struct {
 	CheckpointSyncUrl       string
 	FeeRecipient            string
 	JWTSecretPath           string
-	FallbackELUrls          *[]string
-	ElExtraFlags            *[]string
-	ClExtraFlags            *[]string
-	VlExtraFlags            *[]string
+	FallbackELUrls          []string
+	ElExtraFlags            []string
+	ClExtraFlags            []string
+	VlExtraFlags            []string
 	MapAllPorts             bool
 	Mev                     bool
 	RelayURL                string

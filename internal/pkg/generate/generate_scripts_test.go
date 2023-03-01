@@ -235,11 +235,7 @@ var checkExtraFlagsOnExecution = func(t *testing.T, data *GenData, compose, env 
 	}
 
 	if composeData.Services.Execution != nil {
-		var extraFlags []string
-		if data.ElExtraFlags != nil {
-			extraFlags = *data.ElExtraFlags
-		}
-		for _, flag := range extraFlags {
+		for _, flag := range data.ElExtraFlags {
 			assert.True(t, utils.Contains(composeData.Services.Execution.Command, "--"+flag))
 		}
 	} else {
@@ -426,7 +422,7 @@ func TestGenerateComposeServices(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				Services:        []string{execution},
 				Network:         "mainnet",
-				ElExtraFlags:    &[]string{"extra", "flag"},
+				ElExtraFlags:    []string{"extra", "flag"},
 			},
 			CheckFunctions: []CheckFunc{checkExtraFlagsOnExecution},
 		},
