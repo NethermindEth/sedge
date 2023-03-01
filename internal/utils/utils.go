@@ -249,7 +249,7 @@ func ENodesValidator(bootNodes []string) error {
 		set[bootNode] = struct{}{}
 	}
 	return nil
-} // TODO: Add tests to avoid regression (partially covered by Generate cmd tests with good test cases)
+}
 
 // ENRValidator validates a list of CL boot nodes and returns an error if any
 // of them is invalid.
@@ -265,4 +265,4 @@ func ENRValidator(bootNodes []string) error {
 		set[bootNode] = struct{}{}
 	}
 	return nil
-} // TODO: Add tests to avoid regression (partially covered by Generate cmd tests with good test cases)
+}
