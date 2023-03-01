@@ -788,7 +788,7 @@ func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 	relayURLs, err := p.InputList("Relay URLs", defaultValue, func(list []string) error {
 		badUri, ok := utils.UriValidator(list)
 		if !ok {
-			return fmt.Errorf(configs.InvalidUrlFlag, "relay", badUri)
+			return fmt.Errorf(configs.InvalidUrlFlagError, "relay", badUri)
 		}
 		return nil
 	})

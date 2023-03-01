@@ -25,7 +25,6 @@ import (
 	"testing"
 
 	"github.com/NethermindEth/sedge/configs"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestSkipLines(t *testing.T) {
@@ -284,133 +283,214 @@ func TestFilter(t *testing.T) {
 	}
 }
 
-func TestENodesValidator(t *testing.T) {
+func TestUriValidator(t *testing.T) {
 	tcs := []struct {
-		name      string
-		in        []string
-		withError bool
-		contains  string
+		name string
+		in   []string
+		want bool
 	}{
 		{
-			"Good boot nodes",
+			"good uris",
 			[]string{
-				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
-				"enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30303",
-				"enode://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303",
+				"http://localhost:8545",
+				"https://localhost:8545",
+				"https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net",
+				"https://boost-relay.flashbots.net",
+				"https://localhost:8545/api/v1/eth1",
+				"https://localhost:8545/api/v1/eth1,.{}",
+				"https://nethermind/api/v1/eth1",
+				"http://sedge",
+				"https://192.168.0.1",
 			},
+			true,
+		},
+		{
+			"good uri",
+			[]string{"http://banana/api/monkey/[spliat]"},
+			true,
+		},
+		{
+			"bad uri",
+			[]string{"https://192.168.0.1:8545", "localhost:8545", "https:/boost-relay.flashbots.net"},
 			false,
-			"",
 		},
 		{
-			"Repeated boot node",
-			[]string{
-				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
-				"enode://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303",
-				"enode://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303",
-			},
-			true,
-			configs.ErrDuplicatedBootNode,
+			"bad uri",
+			[]string{"localhost:8545"},
+			false,
 		},
 		{
-			"Invalid scheme",
-			[]string{
-				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
-				"enide://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303",
-			},
-			true,
-			fmt.Sprintf(configs.InvalidEnode, "enide://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303"),
+			"bad uri",
+			[]string{"localhost/545"},
+			false,
 		},
 		{
-			"Invalid public key, too short",
-			[]string{
-				"enode://5fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30303",
-				"enode://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303",
-			},
-			true,
-			fmt.Sprintf(configs.InvalidEnode, "enode://5fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30303"),
+			"bad uri",
+			[]string{"https:/boost-relay.flashbots.net"},
+			false,
 		},
 		{
-			"Invalid public key, too long",
-			[]string{
-				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
-				"enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de00000000000@3.209.45.79:30303",
-			},
-			true,
-			fmt.Sprintf(configs.InvalidEnode, "enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de00000000000@3.209.45.79:30303"),
+			"bad uri",
+			[]string{"htp://localhost:8545"},
+			false,
 		},
 		{
-			"Invalid public key, invalid hex",
-			[]string{
-				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
-				"enode://z499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303",
-			},
-			true,
-			fmt.Sprintf(configs.InvalidEnode, "enode://z499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303"),
+			"bad uri",
+			[]string{"./8080"},
+			false,
 		},
 		{
-			"Invalid port",
-			[]string{
-				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
-				"enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30b303",
-			},
-			true,
-			fmt.Sprintf(configs.InvalidEnode, "enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30b303"),
+			"bad uri",
+			[]string{"44.33.55.66:8080"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{""},
+			false,
 		},
 	}
-	for _, tc := range tcs {
+
+	for i, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			got := ENodesValidator(tc.in)
-			if tc.withError {
-				assert.Contains(t, got.Error(), tc.contains)
-			} else {
-				assert.NoError(t, got)
+			t.Helper()
+			t.Logf("Test case %d: %s", i+1, tc.name)
+
+			uri, got := UriValidator(tc.in)
+
+			if got != tc.want {
+				t.Errorf("UriValidator(%s) failed; expected: %v, got: %v. Bad uri: %s", tc.in, tc.want, got, uri)
+			}
+			if !got && !Contains(tc.in, uri) {
+				t.Errorf("UriValidator(%s) returned a different uri that provided; expected: %s, got: %s", tc.in, tc.in, uri)
 			}
 		})
 	}
 }
 
-func TestRelayURLsValidator(t *testing.T) {
+func TestENodesValidator(t *testing.T) {
 	tcs := []struct {
-		name       string
-		in         []string
-		invalidUri string
-		valid      bool
+		name string
+		in   []string
+		want error
 	}{
 		{
-			"Valid relay URL",
+			"good enodes",
 			[]string{
-				"https://0xad0a8bb54565c2211cee576363f3a347089d2f07cf72679d16911d740262694cadb62d7fd7483f27afd714ca0f1b9118@bloxroute.ethical.blxrbdn.com",
-				"https://0xafa4c6985aa049fb79dd37010438cfebeb0f2bd42b115b89dd678dab0670c1de38da0c4e9138c9290a398ecd9a0b3110@builder-relay-goerli.flashbots.net",
-				"https://0x821f2a65afb70e7f2e820a925a9b4c80a159620582c1766b1b09729fec178b11ea22abb3a51f07b288be815a1a2ff516@bloxroute.max-profit.builder.goerli.blxrbdn.com",
-				"https://0x8f7b17a74569b7a57e9bdafd2e159380759f5dc3ccbd4bf600414147e8c4e1dc6ebada83c0139ac15850eb6c975e82d0@builder-relay-goerli.blocknative.com",
-				"https://0xb1d229d9c21298a87846c7022ebeef277dfc321fe674fa45312e20b5b6c400bfde9383f801848d7837ed5fc449083a12@relay-goerli.edennetwork.io",
-				"https://0xb1559beef7b5ba3127485bbbb090362d9f497ba64e177ee2c8e7db74746306efad687f2cf8574e38d70067d40ef136dc@relay-stag.ultrasound.money",
+				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
+				"enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30303",
+				"enode://715171f50508aba88aecd1250af392a45a330af91d7b90701c436b618c86aaa1589c9184561907bebbb56439b8f8787bc01f49a7c77276c58c1b09822d75e8e8@@52.231.165.108:30303",
+				"enode://5d6d7cd20d6da4bb83a1d28cadb5d409b64edf314c0335df658c1a54e32c7c4a7ab7823d57c39b6a757556e68ff1df17c748b698544a55cb488b52479a92b60f@the-second-most-cool-enode:666",
 			},
-			"",
-			true,
+			nil,
 		},
 		{
-			"Invalid relay URL, invalid scheme",
-			[]string{"htt://0xad0a8bb54565c2211cee576363f3a347089d2f07cf72679d16911d740262694cadb62d7fd7483f27afd714ca0f1b9118@bloxroute.ethical.blxrbdn.com"},
-			"htt://0xad0a8bb54565c2211cee576363f3a347089d2f07cf72679d16911d740262694cadb62d7fd7483f27afd714ca0f1b9118@bloxroute.ethical.blxrbdn.com",
-			false,
+			"bad enode",
+			[]string{
+				"enode://0x0f6b",
+			},
+			fmt.Errorf(configs.InvalidEnodeError, "enode://0x0f6b"),
 		},
 		{
-			"Invalid relay URL, without domain",
-			[]string{"https://0xad0a8bb54565c2211cee576363f3a347089d2f07cf72679d16911d740262694cadb62d7fd7483f27afd714ca0f1b9118@"},
-			"https://0xad0a8bb54565c2211cee576363f3a347089d2f07cf72679d16911d740262694cadb62d7fd7483f27afd714ca0f1b9118@",
-			false,
+			"bad enode",
+			[]string{
+				"enode://2b252ab6a1d0f971d9722cb839a42cb81db019ba44c08754628ab4a823487071b5695317c8ccd085219c3a03af063495b2f1da8d18218da2d6a82981b45e6ffc@the-most-cool-enode",
+			},
+			fmt.Errorf(configs.InvalidEnodeError, "enode://2b252ab6a1d0f971d9722cb839a42cb81db019ba44c08754628ab4a823487071b5695317c8ccd085219c3a03af063495b2f1da8d18218da2d6a82981b45e6ffc@the-most-cool-enode"),
+		},
+		{
+			"bad enode",
+			[]string{
+				"enode://4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166",
+			},
+			fmt.Errorf(configs.InvalidEnodeError, "enode://4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166"),
+		},
+		{
+			"bad enode",
+			[]string{
+				"enode:4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166",
+				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
+			},
+			fmt.Errorf(configs.InvalidEnodeError, "enode:4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166"),
 		},
 	}
-	for _, tc := range tcs {
+
+	for i, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			got, ok := UriValidator(tc.in)
-			if tc.valid {
-				assert.True(t, ok)
-				assert.Empty(t, got)
-			} else {
-				assert.False(t, ok)
-				assert.Equal(t, tc.invalidUri, got)
+			t.Helper()
+			t.Logf("Test case %d: %s", i+1, tc.name)
+
+			got := ENodesValidator(tc.in)
+
+			if err := CheckErr("ENodesValidator", tc.want != nil, got); err != nil {
+				t.Error(err)
+			}
+
+			if got != nil && tc.want != nil && got.Error() != tc.want.Error() {
+				t.Errorf("ENodesValidator(%s) returned a different error; expected: %s, got: %s", tc.in, tc.want, got)
+			}
+		})
+	}
+}
+
+func TestENRValidator(t *testing.T) {
+	tcs := []struct {
+		name string
+		in   []string
+		want error
+	}{
+		{
+			"good enrs",
+			[]string{
+				"enr:-LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo", "enr:-KG4QCIzJZTY_fs_2vqWEatJL9RrtnPwDCv-jRBuO5FQ2qBrfJubWOWazri6s9HsyZdu-fRUfEzkebhf1nvO42_FVzwDhGV0aDKQed8EKAAAECD__________4JpZIJ2NIJpcISHtbYziXNlY3AyNTZrMaED4m9AqVs6F32rSCGsjtYcsyfQE2K8nDiGmocUY_iq-TSDdGNwgiMog3VkcIIjKA", "enr:-Ku4QFmUkNp0g9bsLX2PfVeIyT-9WO-PZlrqZBNtEyofOOfLMScDjaTzGxIb1Ns9Wo5Pm_8nlq-SZwcQfTH2cgO-s88Bh2F0dG5ldHOIAAAAAAAAAACEZXRoMpDkvpOTAAAQIP__________gmlkgnY0gmlwhBLf22SJc2VjcDI1NmsxoQLV_jMOIxKbjHFKgrkFvwDvpexo6Nd58TK5k7ss4Vt0IoN1ZHCCG1g",
+				"enr:-LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNH",
+			},
+			nil,
+		},
+		{
+			"bad enr",
+			[]string{
+				"enr:LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo",
+			},
+			fmt.Errorf(configs.InvalidEnrError, "enr:LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo"),
+		},
+		{
+			"bad enr",
+			[]string{
+				"enr-LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo",
+			},
+			fmt.Errorf(configs.InvalidEnrError, "enr-LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo"),
+		},
+		{
+			"bad enr",
+			[]string{
+				"en:-LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo",
+			},
+			fmt.Errorf(configs.InvalidEnrError, "en:-LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo"),
+		},
+		{
+			"bad enr",
+			[]string{
+				"enrLK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo",
+				"enr:-LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo",
+			},
+			fmt.Errorf(configs.InvalidEnrError, "enrLK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo"),
+		},
+	}
+
+	for i, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Helper()
+			t.Logf("Test case %d: %s", i+1, tc.name)
+
+			got := ENRValidator(tc.in)
+
+			if err := CheckErr("ENRValidator", tc.want != nil, got); err != nil {
+				t.Error(err)
+			}
+
+			if got != nil && tc.want != nil && got.Error() != tc.want.Error() {
+				t.Errorf("ENRValidator(%s) returned a different error; expected: %s, got: %s", tc.in, tc.want, got)
 			}
 		})
 	}

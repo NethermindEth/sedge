@@ -244,7 +244,7 @@ func ENodesValidator(bootNodes []string) error {
 			return fmt.Errorf("%s: %s", configs.ErrDuplicatedBootNode, bootNode)
 		}
 		if !regexEnode.MatchString(bootNode) {
-			return fmt.Errorf(configs.InvalidEnode, bootNode)
+			return fmt.Errorf(configs.InvalidEnodeError, bootNode)
 		}
 		set[bootNode] = struct{}{}
 	}
@@ -260,9 +260,9 @@ func ENRValidator(bootNodes []string) error {
 			return fmt.Errorf("%s: %s", configs.ErrDuplicatedBootNode, bootNode)
 		}
 		if !regexEnr.MatchString(bootNode) {
-			return fmt.Errorf(configs.InvalidEnr, bootNode)
+			return fmt.Errorf(configs.InvalidEnrError, bootNode)
 		}
 		set[bootNode] = struct{}{}
 	}
 	return nil
-} // TODO: Add tests to avoid regression (partially covered by Generate cmd tests with good test cases)
+}
