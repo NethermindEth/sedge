@@ -64,7 +64,7 @@ type GenData struct {
 	Graffiti                string
 	LoggingDriver           string
 	ECBootnodes             []string
-	CCBootnodes             *[]string
+	CCBootnodes             []string
 	CustomTTD               string
 	CustomChainSpecPath     string
 	CustomNetworkConfigPath string

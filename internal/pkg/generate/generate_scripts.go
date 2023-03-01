@@ -236,12 +236,8 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	// Check for CC Bootnode nodes
-	var ccBootnodes []string
-	if gd.CCBootnodes != nil {
-		ccBootnodes = *gd.CCBootnodes
-	}
-	if len(ccBootnodes) == 0 {
-		ccBootnodes = configs.NetworksConfigs()[gd.Network].DefaultCCBootnodes
+	if len(gd.CCBootnodes) == 0 {
+		gd.CCBootnodes = configs.NetworksConfigs()[gd.Network].DefaultCCBootnodes
 	}
 
 	// Check for Bootnode nodes
@@ -292,9 +288,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ClExtraFlags:        arrayOrEmpty(gd.ClExtraFlags),
 		VlExtraFlags:        arrayOrEmpty(gd.VlExtraFlags),
 		ECBootnodesList:     gd.ECBootnodes,
-		CCBootnodesList:     ccBootnodes,
+		CCBootnodesList:     gd.CCBootnodes,
 		ECBootnodes:         strings.Join(gd.ECBootnodes, ","),
-		CCBootnodes:         strings.Join(ccBootnodes, ","),
+		CCBootnodes:         strings.Join(gd.CCBootnodes, ","),
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,

@@ -91,20 +91,16 @@ var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env
 	if err != nil {
 		return err
 	}
-	var ccBootnodes []string
-	if data.CCBootnodes != nil {
-		ccBootnodes = *data.CCBootnodes
+	if len(data.CCBootnodes) == 0 {
+		data.CCBootnodes = configs.NetworksConfigs()[data.Network].DefaultCCBootnodes
 	}
-	if len(ccBootnodes) == 0 {
-		ccBootnodes = configs.NetworksConfigs()[data.Network].DefaultCCBootnodes
-	}
-	if len(ccBootnodes) != 0 {
-		bootnodes := strings.Join(ccBootnodes, ",")
+	if len(data.CCBootnodes) != 0 {
+		bootnodes := strings.Join(data.CCBootnodes, ",")
 		if composeData.Services.Consensus != nil && data.ConsensusClient.Name == "lighthouse" {
 			checkFlagOnCommands(t, composeData.Services.Consensus.Command, "--boot-nodes="+bootnodes)
 		}
 		if composeData.Services.Consensus != nil && data.ConsensusClient.Name == "prysm" {
-			for _, bNode := range ccBootnodes {
+			for _, bNode := range data.CCBootnodes {
 				checkFlagOnCommands(t, composeData.Services.Consensus.Command, "--bootstrap-node="+bNode)
 			}
 		}
@@ -112,7 +108,7 @@ var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env
 			checkFlagOnCommands(t, composeData.Services.Consensus.Command, "--p2p-discovery-bootnodes="+bootnodes)
 		}
 		if composeData.Services.Consensus != nil && data.ConsensusClient.Name == "lodestar" {
-			for _, bNode := range ccBootnodes {
+			for _, bNode := range data.CCBootnodes {
 				checkFlagOnCommands(t, composeData.Services.Consensus.Command, "--bootnodes="+bNode)
 			}
 		}
@@ -517,7 +513,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 							GenerationData: &GenData{
 								Services:        []string{consensus},
 								ConsensusClient: &clients.Client{Name: consensusCl},
-								CCBootnodes:     &[]string{"enr:1", "enr:2"},
+								CCBootnodes:     []string{"enr:1", "enr:2"},
 								Network:         network,
 							},
 							CheckFunctions: []CheckFunc{defaultFunc, checkCCBootnodesOnConsensus},

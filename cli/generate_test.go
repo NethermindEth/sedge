@@ -138,8 +138,8 @@ func (flags *GenCmdFlags) argsList() []string {
 	if len(flags.customEnodes) != 0 {
 		s = append(s, "--execution-bootnodes", strings.Join(flags.customEnodes, ","))
 	}
-	if flags.customEnrs != nil && len(*flags.customEnrs) != 0 {
-		s = append(s, "--consensus-bootnodes", strings.Join(*flags.customEnrs, ","))
+	if len(flags.customEnrs) != 0 {
+		s = append(s, "--consensus-bootnodes", strings.Join(flags.customEnrs, ","))
 	}
 	return s
 }

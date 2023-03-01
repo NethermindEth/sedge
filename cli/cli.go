@@ -143,7 +143,7 @@ Finally, it will run the generated docker-compose script.`,
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
 	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
 	cmd.Flags().StringSliceVar(&flags.customEnodes, "execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
-	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
+	cmd.Flags().StringSliceVar(&flags.customEnrs, "consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
 	cmd.Flags().StringVar(&flags.slashingProtection, "slashing-protection", "", "Path to the file with slashing protection interchange data (EIP-3076)")
 	cmd.PersistentFlags().StringVar(&flags.containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.")
 	cmd.Flags().SortFlags = false

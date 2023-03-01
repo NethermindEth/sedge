@@ -89,7 +89,7 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
 	cmd.Flags().IntVar(&flags.waitEpoch, "wait-epoch", 1, "Number of epochs to wait before starting and restarting of the validator client.")
 	cmd.Flags().StringSliceVar(&flags.customEnodes, "execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
-	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
+	cmd.Flags().StringSliceVar(&flags.customEnrs, "consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
 	cmd.Flags().SortFlags = false
 	return cmd
 }
@@ -185,7 +185,7 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
 	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
-	flags.customEnrs = cmd.Flags().StringSlice("consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
+	cmd.Flags().StringSliceVar(&flags.customEnrs, "consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
 	err := cmd.MarkFlagRequired("execution-api-url")
 	if err != nil {
 		return nil
