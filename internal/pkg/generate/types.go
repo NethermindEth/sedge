@@ -190,8 +190,9 @@ type Consensus struct {
 	Logging         *Logging `yaml:"logging,omitempty"`
 }
 type ValidatorBlocker struct {
-	Image   string `yaml:"image"`
-	Command string `yaml:"command"`
+	Image         string `yaml:"image"`
+	ContainerName string `yaml:"container_name"`
+	Command       string `yaml:"command"`
 }
 type ValidatorImportDependsOn struct {
 	Condition string `yaml:"condition"`

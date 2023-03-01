@@ -404,6 +404,14 @@ func TestGenerateDockerCompose(t *testing.T) {
 
 				// Check that validator-blocker service is set
 				assert.NotNil(t, cmpData.Services.ValidatorBlocker)
+				// Check that validator-blocker image is set
+				assert.Equal(t, "yauritux/busybox-curl:latest", cmpData.Services.ValidatorBlocker.Image)
+				// Check that validator-blocker container name is set properly
+				validatorBlockerCtName := "sedge-validator-blocker"
+				if tc.genData.ContainerTag != "" {
+					validatorBlockerCtName = validatorBlockerCtName + "-" + tc.genData.ContainerTag
+				}
+				assert.Equal(t, validatorBlockerCtName, cmpData.Services.ValidatorBlocker.ContainerName)
 
 				// Check that mev-boost service is not set when validator only
 				_, mev := envData["MEV"]
