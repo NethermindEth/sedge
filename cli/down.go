@@ -53,7 +53,7 @@ func DownCmd(cmdRunner commands.CommandRunner) *cobra.Command {
 			})
 
 			log.Debugf(configs.RunningCommand, downCMD.Cmd)
-			if _, err := cmdRunner.RunCMD(downCMD); err != nil {
+			if _, _, err := cmdRunner.RunCMD(downCMD); err != nil {
 				return fmt.Errorf(configs.CommandError, downCMD.Cmd, err)
 			}
 

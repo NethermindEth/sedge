@@ -42,7 +42,7 @@ The output of the command.
 b. error
 Error if any
 */
-func runCmd(cmd string, getOutput bool) (out string, err error) {
+func runCmd(cmd string, getOutput bool) (out string, exitCode int, err error) {
 	r := strings.ReplaceAll(cmd, "\n", "")
 	spl := strings.Split(r, " ")
 	c, args := spl[0], spl[1:]
@@ -66,6 +66,7 @@ func runCmd(cmd string, getOutput bool) (out string, err error) {
 	}
 	// Return this error at the end as we need to check if the output from stderr is to be returned
 	err = exc.Wait()
+	exitCode = exc.ProcessState.ExitCode()
 
 	if getOutput {
 		out = combinedOut.String()

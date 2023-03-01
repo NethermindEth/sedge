@@ -75,7 +75,7 @@ func PreCheck(cmdRunner commands.CommandRunner, generationPath string) error {
 	dockerPsCMD := cmdRunner.BuildDockerPSCMD(commands.DockerPSOptions{All: true})
 	log.Debugf(configs.RunningCommand, dockerPsCMD.Cmd)
 	dockerPsCMD.GetOutput = true
-	_, err := cmdRunner.RunCMD(dockerPsCMD)
+	_, _, err := cmdRunner.RunCMD(dockerPsCMD)
 	if err != nil {
 		return fmt.Errorf(configs.DockerEngineOffError, err)
 	}
@@ -91,7 +91,7 @@ func PreCheck(cmdRunner commands.CommandRunner, generationPath string) error {
 	dockerComposePsCMD := cmdRunner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{Path: file})
 	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
 	dockerComposePsCMD.GetOutput = true
-	_, err = cmdRunner.RunCMD(dockerComposePsCMD)
+	_, _, err = cmdRunner.RunCMD(dockerComposePsCMD)
 	if err != nil {
 		return fmt.Errorf(configs.DockerComposeOffError, err)
 	}
@@ -122,7 +122,7 @@ func CheckContainers(cmdRunner commands.CommandRunner, generationPath string) (s
 	})
 	log.Debugf(configs.RunningCommand, psCMD.Cmd)
 	psCMD.GetOutput = true
-	rawServices, err := cmdRunner.RunCMD(psCMD)
+	rawServices, _, err := cmdRunner.RunCMD(psCMD)
 	if err != nil || rawServices == "\n" {
 		if rawServices == "\n" && err == nil {
 			err = fmt.Errorf(configs.DockerComposePsReturnedEmptyError)

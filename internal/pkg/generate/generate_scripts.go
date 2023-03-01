@@ -420,6 +420,12 @@ func EnvFile(gd *GenData, at io.Writer) error {
 			gd.MevBoostEndpoint = fmt.Sprintf("%s:%v", configs.DefaultMevBoostEndpoint, gd.Ports["MevPort"])
 		}
 	}
+
+	graffiti := gd.Graffiti
+	if graffiti == "" {
+		graffiti = generateGraffiti(gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient)
+	}
+
 	var relayURLs string
 	if gd.RelayURLs != nil {
 		relayURLs = strings.Join(*gd.RelayURLs, ",")
@@ -441,10 +447,9 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ExecutionEngineName:       nameOrEmpty(cls[execution]),
 		ConsensusClientName:       nameOrEmpty(cls[consensus]),
 		KeystoreDir:               "./" + configs.KeystoreDir,
-		Graffiti:                  gd.Graffiti,
+		Graffiti:                  graffiti,
 		RelayURL:                  relayURLs,
 	}
-	// FIXME: Graffiti is <EL_name-CL_name> but is incorrect when the CL is different from the VL (validator client)
 
 	// Save to writer
 	err = baseTmp.Execute(at, data)
@@ -469,6 +474,29 @@ func nameOrEmpty(cls *clients.Client) string {
 		return cls.Name
 	}
 	return ""
+}
+
+// generateGraffiti generates a graffiti string based on the execution, consensus and validator clients
+func generateGraffiti(execution, consensus, validator *clients.Client) string {
+	if consensus != nil && execution != nil {
+		if validator != nil {
+			if consensus.Name == validator.Name {
+				return strings.Join([]string{nameOrEmpty(execution), nameOrEmpty(consensus)}, "-")
+			}
+		}
+	}
+	return joinIfNotEmpty(nameOrEmpty(execution), nameOrEmpty(consensus), nameOrEmpty(validator))
+}
+
+// joinIfNotEmpty joins the strings if they are not empty
+func joinIfNotEmpty(strs ...string) string {
+	var result []string
+	for _, str := range strs {
+		if str != "" {
+			result = append(result, str)
+		}
+	}
+	return strings.Join(result, "-")
 }
 
 // imageOrEmpty returns the image of the client if it is not nil, otherwise returns an empty string

@@ -34,6 +34,6 @@ func (s *sedgeActions) RunContainers(options RunContainersOptions) error {
 		Services: options.Services,
 	})
 	log.Infof(configs.RunningCommand, upCmd.Cmd)
-	_, err := s.commandRunner.RunCMD(upCmd)
+	_, _, err := s.commandRunner.RunCMD(upCmd)
 	return err
 }
