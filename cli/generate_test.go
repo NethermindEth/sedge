@@ -105,8 +105,8 @@ func (flags *GenCmdFlags) argsList() []string {
 	if flags.mevImage != "" {
 		s = append(s, "--mev-boost-image", flags.mevImage)
 	}
-	if flags.relayURL != "" {
-		s = append(s, "--relay-url", flags.relayURL)
+	if flags.relayURLs != nil && len(*flags.relayURLs) != 0 {
+		s = append(s, "--relay-url", strings.Join(*flags.relayURLs, ","))
 	}
 	if flags.mevBoostUrl != "" {
 		s = append(s, "--mev-boost-url", flags.mevBoostUrl)
@@ -280,7 +280,7 @@ func TestGenerateCmd(t *testing.T) {
 			"full-node Random clients, relay-url", "case_1",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
-				relayURL:     "https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net",
+				relayURLs:    &[]string{"https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net"},
 			},
 			globalFlags{
 				install: false,
@@ -297,7 +297,7 @@ func TestGenerateCmd(t *testing.T) {
 			"full-node Random clients, relay-url", "case_1",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
-				relayURL:     "https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net",
+				relayURLs:    &[]string{"https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net"},
 			},
 			globalFlags{
 				install: false,
@@ -314,7 +314,7 @@ func TestGenerateCmd(t *testing.T) {
 			"full-node Random clients, relay-url", "case_1",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
-				relayURL:     "https://@boost-relay.flashbots.net",
+				relayURLs:    &[]string{"https://@boost-relay.flashbots.net"},
 			},
 			globalFlags{
 				install: false,
@@ -331,7 +331,7 @@ func TestGenerateCmd(t *testing.T) {
 			"full-node Random clients, invalid relay-url", "case_1",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
-				relayURL:     "https:/boost-relay.flashbots.net",
+				relayURLs:    &[]string{"https:/boost-relay.flashbots.net"},
 			},
 			globalFlags{
 				install: false,
@@ -348,7 +348,7 @@ func TestGenerateCmd(t *testing.T) {
 			"full-node Random clients, invalid relay-url", "case_1",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
-				relayURL:     "boost-relay.flashbots.net",
+				relayURLs:    &[]string{"boost-relay.flashbots.net"},
 			},
 			globalFlags{
 				install: false,
@@ -885,7 +885,7 @@ func TestGenerateCmd(t *testing.T) {
 			t,
 			"MevBoost custom relay url", "case_1",
 			GenCmdFlags{
-				relayURL: "https://boost-relay.flashbots.net,",
+				relayURLs: &[]string{`"https://boost-relay.flashbots.net,"`},
 			},
 			globalFlags{
 				install:        false,
@@ -903,7 +903,7 @@ func TestGenerateCmd(t *testing.T) {
 			t,
 			"MevBoost custom relay url", "case_1",
 			GenCmdFlags{
-				relayURL: "http://@boost-relay.flashbots.net,",
+				relayURLs: &[]string{`"http://@boost-relay.flashbots.net,"`},
 			},
 			globalFlags{
 				install:        false,
@@ -921,7 +921,7 @@ func TestGenerateCmd(t *testing.T) {
 			t,
 			"MevBoost custom relay url", "case_1",
 			GenCmdFlags{
-				relayURL: "https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,",
+				relayURLs: &[]string{`"https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,"`},
 			},
 			globalFlags{
 				install:        false,
@@ -939,7 +939,7 @@ func TestGenerateCmd(t *testing.T) {
 			t,
 			"MevBoost invalid custom relay url", "case_1",
 			GenCmdFlags{
-				relayURL: "https:/boost-relay.flashbots.net",
+				relayURLs: &[]string{"https:/boost-relay.flashbots.net"},
 			},
 			globalFlags{
 				install:        false,
@@ -957,7 +957,7 @@ func TestGenerateCmd(t *testing.T) {
 			t,
 			"MevBoost invalid custom relay url", "case_1",
 			GenCmdFlags{
-				relayURL: "boost-relay.flashbots.net",
+				relayURLs: &[]string{"boost-relay.flashbots.net"},
 			},
 			globalFlags{
 				install:        false,

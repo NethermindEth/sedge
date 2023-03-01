@@ -59,7 +59,7 @@ type GenCmdFlags struct {
 	elExtraFlags      *[]string
 	clExtraFlags      *[]string
 	vlExtraFlags      *[]string
-	relayURL          string
+	relayURLs         *[]string
 	mevBoostUrl       string
 	executionApiUrl   string
 	executionAuthUrl  string
@@ -157,11 +157,6 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 			validator: singleUriValidator("consensus api", utils.UriValidator),
 		},
 		{
-			value:     []string{flags.relayURL},
-			check:     flags.relayURL != "",
-			validator: singleUriValidator("relay", utils.UriValidator),
-		},
-		{
 			value:     []string{flags.mevBoostUrl},
 			check:     flags.mevBoostUrl != "",
 			validator: singleUriValidator("mev-boost endpoint", utils.UriValidator),
@@ -186,6 +181,13 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 			check:     len(flags.customEnrs) > 0,
 			validator: utils.ENRValidator,
 		},
+	}
+	if flags.relayURLs != nil {
+		toValidate = append(toValidate, uriData{
+			value:     *flags.relayURLs,
+			check:     len(*flags.relayURLs) > 0,
+			validator: singleUriValidator("relay", utils.UriValidator),
+		})
 	}
 	for _, uri := range toValidate {
 		if uri.check {
@@ -259,7 +261,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		Mev:                     !flags.noMev && utils.Contains(services, validator) && !flags.noValidator,
 		MevImage:                flags.mevImage,
 		LoggingDriver:           configs.GetLoggingDriver(logging),
-		RelayURL:                flags.relayURL,
+		RelayURLs:               flags.relayURLs,
 		MevBoostService:         utils.Contains(services, mevBoost),
 		MevBoostEndpoint:        flags.mevBoostUrl,
 		Services:                services,

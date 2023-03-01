@@ -55,7 +55,7 @@ type GenData struct {
 	VlExtraFlags            *[]string
 	MapAllPorts             bool
 	Mev                     bool
-	RelayURL                string
+	RelayURLs               *[]string
 	MevImage                string
 	MevBoostService         bool
 	MevBoostEndpoint        string

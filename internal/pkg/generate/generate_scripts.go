@@ -420,6 +420,10 @@ func EnvFile(gd *GenData, at io.Writer) error {
 			gd.MevBoostEndpoint = fmt.Sprintf("%s:%v", configs.DefaultMevBoostEndpoint, gd.Ports["MevPort"])
 		}
 	}
+	var relayURLs string
+	if gd.RelayURLs != nil {
+		relayURLs = strings.Join(*gd.RelayURLs, ",")
+	}
 	data := EnvData{
 		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		ElImage:                   imageOrEmpty(cls[execution]),
@@ -438,7 +442,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ConsensusClientName:       nameOrEmpty(cls[consensus]),
 		KeystoreDir:               "./" + configs.KeystoreDir,
 		Graffiti:                  gd.Graffiti,
-		RelayURL:                  gd.RelayURL,
+		RelayURL:                  relayURLs,
 	}
 	// FIXME: Graffiti is <EL_name-CL_name> but is incorrect when the CL is different from the VL (validator client)
 

@@ -96,7 +96,7 @@ func TestGenerateEnvFile(t *testing.T) {
 				ValidatorClient: &clients.Client{Name: "teku"},
 				Network:         "mainnet",
 				Mev:             true,
-				RelayURL:        "https://sample.relay",
+				RelayURLs:       &[]string{"https://sample.relay"},
 			},
 			fieldsToCheck: map[string]string{
 				"RELAY_URL": "https://sample.relay",
@@ -189,7 +189,7 @@ func TestMissingEnvVars(t *testing.T) {
 			data: &GenData{
 				ValidatorClient: &clients.Client{Name: "teku"},
 				Network:         "mainnet",
-				RelayURL:        "https://sample.relay",
+				RelayURLs:       &[]string{"https://sample.relay"},
 			},
 			fieldsToCheck: []string{
 				"RELAY_URL",
