@@ -189,20 +189,10 @@ type Consensus struct {
 	Command         []string `yaml:"command"`
 	Logging         *Logging `yaml:"logging,omitempty"`
 }
-type ConsensusHealth struct {
-	Image       string       `yaml:"image"`
-	Command     string       `yaml:"command"`
-	Healthcheck *Healthcheck `yaml:"healthcheck"`
-}
-type Healthcheck struct {
-	Test     string `yaml:"test"`
-	Interval string `yaml:"interval"`
-	Timeout  string `yaml:"timeout"`
-	Retries  uint   `yaml:"retries"`
-}
 type ValidatorBlocker struct {
-	Image   string `yaml:"image"`
-	Command string `yaml:"command"`
+	Image         string `yaml:"image"`
+	ContainerName string `yaml:"container_name"`
+	Command       string `yaml:"command"`
 }
 type ValidatorImportDependsOn struct {
 	Condition string `yaml:"condition"`
@@ -231,7 +221,6 @@ type Services struct {
 	Execution        *Execution        `yaml:"execution,omitempty"`
 	Mevboost         *Mevboost         `yaml:"mevboost,omitempty"`
 	Consensus        *Consensus        `yaml:"consensus,omitempty"`
-	ConsensusHealth  *ConsensusHealth  `yaml:"consensus-health,omitempty"`
 	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker,omitempty"`
 	Validator        *Validator        `yaml:"validator,omitempty"`
 	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus,omitempty"`

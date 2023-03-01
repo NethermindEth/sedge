@@ -103,38 +103,25 @@ services:
       options:
         max-size: 10m
         max-file: "10"
-  consensus-health:
-    container_name: sedge-consensus-health
-    image: alpine/curl:latest
+  validator-blocker:
+    image: yauritux/busybox-curl:latest
     networks:
     - sedge
-    environment:
-    - CC_API_URL=${CC_API_URL}
-    healthcheck:
-      test: ${HEALTHCHECK_CMD}
-      interval: 30s
-      retries: 10000
     command: |-
       sh -c "
+        echo 'Waiting 420 seconds of grace period before starting the validator';
+        sleep 420;
+        echo 'Done';
         while true; do
-          response=$$(curl -s -o /dev/null -w \"%{http_code}\" $$CC_API_URL/eth/v1/node/health)
+          response=$$(curl -s -o /dev/null -w \"%{http_code}\" ${CC_API_URL}/eth/v1/node/health)
           if [ $$response -eq 200 ]; then
             echo 'Endpoint is up!'
-            sleep 1800
             break
           else
             echo 'Endpoint is down, waiting 30 seconds before checking again...'
             sleep 30
           fi
         done
-      "
-  validator-blocker:
-    image: busybox:latest
-    command: |-
-      sh -c "
-        echo 'Waiting 420 seconds of grace period before starting the validator';
-        sleep 420;
-        echo 'Done';
       "
   validator-import:
     container_name: validator-import-client
