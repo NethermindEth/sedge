@@ -2,11 +2,23 @@
 {{ define "validator-blocker" }}
   validator-blocker:
     container_name: sedge-validator-blocker{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
-    image: busybox:latest
+    image: yauritux/busybox-curl:latest
+    networks:
+    - sedge
     command: >
       sh -c "
         echo 'Waiting {{ .VLStartGracePeriod }} seconds of grace period before starting the validator';
         sleep {{ .VLStartGracePeriod }};
         echo 'Done';
+        while true; do
+          response=$$(curl -s -o /dev/null -w \"%{http_code}\" ${CC_API_URL}/eth/v1/node/health)
+          if [ $$response -eq 200 ]; then
+            echo 'Endpoint is up!'
+            break
+          else
+            echo 'Endpoint is down, waiting 30 seconds before checking again...'
+            sleep 30
+          fi
+        done
       "
 {{ end }}

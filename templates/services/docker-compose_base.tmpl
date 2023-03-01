@@ -21,7 +21,6 @@ services:
       - ${RELAY_URL}{{end}}
 {{template "consensus" .}}
 {{ if .WithValidatorClient}}
-{{template "consensus-health" .}}
 {{template "validator-blocker" .}}{{end}}
 {{template "validator" .}}
 
