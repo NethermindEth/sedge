@@ -176,14 +176,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 			return err
 		}
 	}
-	validatorBlockerTemplate, consensusHealthTemplate := "", ""
-	if cls[validator] != nil {
-		validatorBlockerTemplate = "validator-blocker"
-		consensusHealthTemplate = "consensus-health"
-	} else {
-		validatorBlockerTemplate = "empty-validator-blocker"
-		consensusHealthTemplate = "empty-consensus-health"
-	}
+	validatorBlockerTemplate, consensusHealthTemplate := "validator-blocker", "consensus-health"
 
 	// Parse validator-blocker template
 	tmp, err := templates.Services.ReadFile(strings.Join([]string{"services", validatorBlockerTemplate + ".tmpl"}, "/"))
@@ -235,19 +228,19 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ttd = configs.NetworksConfigs()[gd.Network].DefaultTTD
 	}
 
-	// Check for CC Bootnode nodes
+	// Check for CL Bootnode nodes
 	var ccBootnodes []string
 	if gd.CCBootnodes != nil {
-		ccBootnodes = *gd.CCBootnodes
+		ccBootnodes = gd.CCBootnodes
 	}
 	if len(ccBootnodes) == 0 {
 		ccBootnodes = configs.NetworksConfigs()[gd.Network].DefaultCCBootnodes
 	}
 
-	// Check for Bootnode nodes
+	// Check for EL Bootnode nodes
 	var ecBootnodes []string
 	if gd.ECBootnodes != nil {
-		ecBootnodes = *gd.ECBootnodes
+		ecBootnodes = gd.ECBootnodes
 	}
 	if len(ecBootnodes) == 0 {
 		ecBootnodes = configs.NetworksConfigs()[gd.Network].DefaultECBootnodes
@@ -275,7 +268,8 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		Network:             gd.Network,
 		TTD:                 ttd,
 		XeeVersion:          xeeVersion,
-		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
+		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev),
+		MevBoostOnValidator: gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		MevPort:             gd.Ports["MevPort"],
 		MevBoostEndpoint:    gd.MevBoostEndpoint,
 		MevImage:            gd.MevImage,
@@ -291,14 +285,13 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ClApiPort:           gd.Ports["CLApi"],
 		ClAdditionalApiPort: gd.Ports["CLAdditionalApi"],
 		VlMetricsPort:       gd.Ports["VLMetrics"],
-		FallbackELUrls:      arrayOrEmpty(gd.FallbackELUrls),
+		FallbackELUrls:      gd.FallbackELUrls,
 		ElExtraFlags:        arrayOrEmpty(gd.ElExtraFlags),
 		ClExtraFlags:        arrayOrEmpty(gd.ClExtraFlags),
 		VlExtraFlags:        arrayOrEmpty(gd.VlExtraFlags),
-		ECBootnodesList:     ecBootnodes,
-		CCBootnodesList:     ccBootnodes,
 		ECBootnodes:         strings.Join(ecBootnodes, ","),
 		CCBootnodes:         strings.Join(ccBootnodes, ","),
+		CCBootnodesList:     ccBootnodes,
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
@@ -426,6 +419,10 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		graffiti = generateGraffiti(gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient)
 	}
 
+	var relayURLs string
+	if gd.RelayURLs != nil {
+		relayURLs = strings.Join(gd.RelayURLs, ",")
+	}
 	data := EnvData{
 		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		ElImage:                   imageOrEmpty(cls[execution]),
@@ -444,7 +441,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ConsensusClientName:       nameOrEmpty(cls[consensus]),
 		KeystoreDir:               "./" + configs.KeystoreDir,
 		Graffiti:                  graffiti,
-		RelayURL:                  gd.RelayURL,
+		RelayURLs:                 relayURLs,
 	}
 
 	// Save to writer

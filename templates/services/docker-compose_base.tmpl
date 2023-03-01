@@ -20,8 +20,9 @@ services:
       - -relays
       - ${RELAY_URL}{{end}}
 {{template "consensus" .}}
+{{ if .WithValidatorClient}}
 {{template "consensus-health" .}}
-{{template "validator-blocker" .}}
+{{template "validator-blocker" .}}{{end}}
 {{template "validator" .}}
 
 networks:

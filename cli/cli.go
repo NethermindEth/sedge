@@ -755,21 +755,13 @@ func inputCustomDeployBlock(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputExecutionBootNodes(p ui.Prompter, o *CliCmdOptions) (err error) {
-	bootNodesInput, err := p.InputList("Execution boot nodes", []string{}, utils.BootNodesValidator)
-	if err != nil {
-		return err
-	}
-	o.genData.ECBootnodes = &bootNodesInput
-	return nil
+	o.genData.ECBootnodes, err = p.InputList("Execution boot nodes", []string{}, utils.ENodesValidator)
+	return
 }
 
 func inputConsensusBootNodes(p ui.Prompter, o *CliCmdOptions) (err error) {
-	bootNodesInput, err := p.InputList("Consensus boot nodes", []string{}, utils.BootNodesValidator)
-	if err != nil {
-		return err
-	}
-	o.genData.CCBootnodes = &bootNodesInput
-	return nil
+	o.genData.CCBootnodes, err = p.InputList("Consensus boot nodes", []string{}, utils.ENRValidator)
+	return
 }
 
 func inputMevImage(p ui.Prompter, o *CliCmdOptions) (err error) {
@@ -793,8 +785,14 @@ func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 	case NetworkSepolia:
 		defaultValue = configs.SepoliaRelayURLs()
 	}
-	relayURLs, err := p.InputList("Relay URLs", defaultValue, utils.RelayURLsValidator)
-	o.genData.RelayURL = strings.Join(relayURLs, ",")
+	relayURLs, err := p.InputList("Relay URLs", defaultValue, func(list []string) error {
+		badUri, ok := utils.UriValidator(list)
+		if !ok {
+			return fmt.Errorf(configs.InvalidUrlFlag, "relay", badUri)
+		}
+		return nil
+	})
+	o.genData.RelayURLs = relayURLs
 	return
 }
 

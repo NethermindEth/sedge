@@ -93,7 +93,7 @@ var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env
 	}
 	var ccBootnodes []string
 	if data.CCBootnodes != nil {
-		ccBootnodes = *data.CCBootnodes
+		ccBootnodes = data.CCBootnodes
 	}
 	if len(ccBootnodes) == 0 {
 		ccBootnodes = configs.NetworksConfigs()[data.Network].DefaultCCBootnodes
@@ -153,7 +153,7 @@ var checkECBootnodesOnExecution = func(t *testing.T, data *GenData, compose, env
 	}
 	var ecBootnodes []string
 	if data.ECBootnodes != nil {
-		ecBootnodes = *data.ECBootnodes
+		ecBootnodes = data.ECBootnodes
 	}
 	if len(ecBootnodes) == 0 {
 		ecBootnodes = configs.NetworksConfigs()[data.Network].DefaultECBootnodes
@@ -510,7 +510,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 							GenerationData: &GenData{
 								Services:        []string{execution, consensus},
 								ExecutionClient: &clients.Client{Name: executionCl},
-								ECBootnodes:     &[]string{"enode:1", "enode:2", "enode:3"},
+								ECBootnodes:     []string{"enode:1", "enode:2", "enode:3"},
 								ConsensusClient: &clients.Client{Name: consensusCl},
 								Network:         network,
 							},
@@ -521,7 +521,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 							GenerationData: &GenData{
 								Services:        []string{consensus},
 								ConsensusClient: &clients.Client{Name: consensusCl},
-								CCBootnodes:     &[]string{"enr:1", "enr:2"},
+								CCBootnodes:     []string{"enr:1", "enr:2"},
 								Network:         network,
 							},
 							CheckFunctions: []CheckFunc{defaultFunc, checkCCBootnodesOnConsensus},

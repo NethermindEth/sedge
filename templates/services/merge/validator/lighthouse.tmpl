@@ -30,7 +30,7 @@
       - --metrics
       - --metrics-port={{.VlMetricsPort}}
       - --metrics-address=0.0.0.0{{range $flag := .VlExtraFlags}}
-      - --{{$flag}}{{end}}{{if .Mev}}
+      - --{{$flag}}{{end}}{{if .MevBoostOnValidator}}
       - --builder-proposals{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}

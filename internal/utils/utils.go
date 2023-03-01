@@ -16,9 +16,9 @@ limitations under the License.
 package utils
 
 import (
-	"errors"
 	"fmt"
 	"net"
+	"net/url"
 	"regexp"
 	"sort"
 	"strings"
@@ -28,16 +28,9 @@ import (
 )
 
 var (
-	reAddr        = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
-	regexBootNode = regexp.MustCompile(`^enode:\/\/[0-9a-fA-F]{128}@.*:[1-9][0-9]*$`)
-	regexRelayURL = regexp.MustCompile(`^(https|http)://0x[0-9a-fA-F].+@.+$`)
-)
-
-var (
-	ErrInvalidBootNode    = errors.New("invalid boot node")
-	ErrDuplicatedBootNode = errors.New("duplicated boot node")
-	ErrInvalidRelayURL    = errors.New("invalid relay url")
-	ErrDuplicatedRelayURL = errors.New("duplicated relay url")
+	reAddr     = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
+	regexEnode = regexp.MustCompile(`^enode:\/\/[0-9a-fA-F]{128}@.*:[1-9][0-9]*$`)
+	regexEnr   = regexp.MustCompile(`enr:-.*$`)
 )
 
 /*
@@ -226,34 +219,50 @@ func Filter[K any](list []K, filter func(K) bool) []K {
 	return list[:n]
 }
 
-// BootNodesValidator validates a list of boot nodes and returns an error if any
+// UriValidator validates a URI and returns true if it is valid.
+func UriValidator(input []string) (string, bool) {
+	for _, uri := range input {
+		u, err := url.Parse(uri)
+		if err != nil {
+			return uri, false
+		}
+		wrongScheme := u.Scheme != "http" && u.Scheme != "https"
+
+		if wrongScheme || u.Host == "" {
+			return uri, false
+		}
+	}
+	return "", true
+}
+
+// ENodesValidator validates a list of EL boot nodes and returns an error if any
 // of them is invalid.
-func BootNodesValidator(bootNodes []string) error {
+func ENodesValidator(bootNodes []string) error {
 	set := make(map[string]struct{})
 	for _, bootNode := range bootNodes {
 		if _, ok := set[bootNode]; ok {
-			return fmt.Errorf("%w: %s", ErrDuplicatedBootNode, bootNode)
+			return fmt.Errorf("%s: %s", configs.ErrDuplicatedBootNode, bootNode)
 		}
-		if !regexBootNode.MatchString(bootNode) {
-			return fmt.Errorf("%w: %s", ErrInvalidBootNode, bootNode)
+		if !regexEnode.MatchString(bootNode) {
+			return fmt.Errorf(configs.InvalidEnode, bootNode)
 		}
 		set[bootNode] = struct{}{}
 	}
 	return nil
 }
 
-// RelayURLsValidator validates a list of relay URLs and returns an error if any
+// ENRValidator validates a list of CL boot nodes and returns an error if any
 // of them is invalid.
-func RelayURLsValidator(relayURL []string) error {
+func ENRValidator(bootNodes []string) error {
 	set := make(map[string]struct{})
-	for _, relayURL := range relayURL {
-		if _, ok := set[relayURL]; ok {
-			return fmt.Errorf("%w: %s", ErrDuplicatedRelayURL, relayURL)
+	for _, bootNode := range bootNodes {
+		if _, ok := set[bootNode]; ok {
+			return fmt.Errorf("%s: %s", configs.ErrDuplicatedBootNode, bootNode)
 		}
-		if !regexRelayURL.MatchString(relayURL) {
-			return fmt.Errorf("%w: %s", ErrInvalidRelayURL, relayURL)
+		if !regexEnr.MatchString(bootNode) {
+			return fmt.Errorf(configs.InvalidEnr, bootNode)
 		}
-		set[relayURL] = struct{}{}
+		set[bootNode] = struct{}{}
 	}
 	return nil
-}
+} // TODO: Add tests to avoid regression (partially covered by Generate cmd tests with good test cases)

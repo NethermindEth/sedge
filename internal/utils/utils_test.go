@@ -24,6 +24,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/NethermindEth/sedge/configs"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -283,11 +284,12 @@ func TestFilter(t *testing.T) {
 	}
 }
 
-func TestBootNodesValidator(t *testing.T) {
+func TestENodesValidator(t *testing.T) {
 	tcs := []struct {
-		name string
-		in   []string
-		want error
+		name      string
+		in        []string
+		withError bool
+		contains  string
 	}{
 		{
 			"Good boot nodes",
@@ -296,7 +298,8 @@ func TestBootNodesValidator(t *testing.T) {
 				"enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30303",
 				"enode://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303",
 			},
-			nil,
+			false,
+			"",
 		},
 		{
 			"Repeated boot node",
@@ -305,7 +308,8 @@ func TestBootNodesValidator(t *testing.T) {
 				"enode://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303",
 				"enode://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303",
 			},
-			ErrDuplicatedBootNode,
+			true,
+			configs.ErrDuplicatedBootNode,
 		},
 		{
 			"Invalid scheme",
@@ -313,7 +317,8 @@ func TestBootNodesValidator(t *testing.T) {
 				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
 				"enide://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303",
 			},
-			ErrInvalidBootNode,
+			true,
+			fmt.Sprintf(configs.InvalidEnode, "enide://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303"),
 		},
 		{
 			"Invalid public key, too short",
@@ -321,7 +326,8 @@ func TestBootNodesValidator(t *testing.T) {
 				"enode://5fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30303",
 				"enode://8499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303",
 			},
-			ErrInvalidBootNode,
+			true,
+			fmt.Sprintf(configs.InvalidEnode, "enode://5fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30303"),
 		},
 		{
 			"Invalid public key, too long",
@@ -329,7 +335,8 @@ func TestBootNodesValidator(t *testing.T) {
 				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
 				"enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de00000000000@3.209.45.79:30303",
 			},
-			ErrInvalidBootNode,
+			true,
+			fmt.Sprintf(configs.InvalidEnode, "enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de00000000000@3.209.45.79:30303"),
 		},
 		{
 			"Invalid public key, invalid hex",
@@ -337,7 +344,8 @@ func TestBootNodesValidator(t *testing.T) {
 				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
 				"enode://z499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303",
 			},
-			ErrInvalidBootNode,
+			true,
+			fmt.Sprintf(configs.InvalidEnode, "enode://z499da03c47d637b20eee24eec3c356c9a2e6148d6fe25ca195c7949ab8ec2c03e3556126b0d7ed644675e78c4318b08691b7b57de10e5f0d40d05b09238fa0a@52.187.207.27:30303"),
 		},
 		{
 			"Invalid port",
@@ -345,14 +353,15 @@ func TestBootNodesValidator(t *testing.T) {
 				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
 				"enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30b303",
 			},
-			ErrInvalidBootNode,
+			true,
+			fmt.Sprintf(configs.InvalidEnode, "enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30b303"),
 		},
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			got := BootNodesValidator(tc.in)
-			if tc.want != nil {
-				assert.ErrorIs(t, got, tc.want)
+			got := ENodesValidator(tc.in)
+			if tc.withError {
+				assert.Contains(t, got.Error(), tc.contains)
 			} else {
 				assert.NoError(t, got)
 			}
@@ -362,9 +371,10 @@ func TestBootNodesValidator(t *testing.T) {
 
 func TestRelayURLsValidator(t *testing.T) {
 	tcs := []struct {
-		name string
-		in   []string
-		want error
+		name       string
+		in         []string
+		invalidUri string
+		valid      bool
 	}{
 		{
 			"Valid relay URL",
@@ -376,36 +386,31 @@ func TestRelayURLsValidator(t *testing.T) {
 				"https://0xb1d229d9c21298a87846c7022ebeef277dfc321fe674fa45312e20b5b6c400bfde9383f801848d7837ed5fc449083a12@relay-goerli.edennetwork.io",
 				"https://0xb1559beef7b5ba3127485bbbb090362d9f497ba64e177ee2c8e7db74746306efad687f2cf8574e38d70067d40ef136dc@relay-stag.ultrasound.money",
 			},
-			nil,
+			"",
+			true,
 		},
 		{
 			"Invalid relay URL, invalid scheme",
 			[]string{"htt://0xad0a8bb54565c2211cee576363f3a347089d2f07cf72679d16911d740262694cadb62d7fd7483f27afd714ca0f1b9118@bloxroute.ethical.blxrbdn.com"},
-			ErrInvalidRelayURL,
-		},
-		{
-			"Invalid relay URL, invalid public key",
-			[]string{"https://ad0a8bb54565c2211cee576363f3a347089d2f07cf72679d16911d740262694cadb62d7fd7483f27afd714ca0f1b9118@bloxroute.ethical.blxrbdn.com"},
-			ErrInvalidRelayURL,
-		},
-		{
-			"Invalid relay URL, without public key",
-			[]string{"https://@bloxroute.ethical.blxrbdn.com"},
-			ErrInvalidRelayURL,
+			"htt://0xad0a8bb54565c2211cee576363f3a347089d2f07cf72679d16911d740262694cadb62d7fd7483f27afd714ca0f1b9118@bloxroute.ethical.blxrbdn.com",
+			false,
 		},
 		{
 			"Invalid relay URL, without domain",
 			[]string{"https://0xad0a8bb54565c2211cee576363f3a347089d2f07cf72679d16911d740262694cadb62d7fd7483f27afd714ca0f1b9118@"},
-			ErrInvalidRelayURL,
+			"https://0xad0a8bb54565c2211cee576363f3a347089d2f07cf72679d16911d740262694cadb62d7fd7483f27afd714ca0f1b9118@",
+			false,
 		},
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			got := RelayURLsValidator(tc.in)
-			if tc.want != nil {
-				assert.ErrorIs(t, got, tc.want)
+			got, ok := UriValidator(tc.in)
+			if tc.valid {
+				assert.True(t, ok)
+				assert.Empty(t, got)
 			} else {
-				assert.NoError(t, got)
+				assert.False(t, ok)
+				assert.Equal(t, tc.invalidUri, got)
 			}
 		})
 	}

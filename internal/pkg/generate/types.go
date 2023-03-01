@@ -36,7 +36,7 @@ type EnvData struct {
 	ConsensusClientName       string
 	KeystoreDir               string
 	Graffiti                  string
-	RelayURL                  string
+	RelayURLs                 string
 }
 
 // GenData : Struct Data object for script's generation
@@ -49,13 +49,13 @@ type GenData struct {
 	CheckpointSyncUrl       string
 	FeeRecipient            string
 	JWTSecretPath           string
-	FallbackELUrls          *[]string
+	FallbackELUrls          []string
 	ElExtraFlags            *[]string
 	ClExtraFlags            *[]string
 	VlExtraFlags            *[]string
 	MapAllPorts             bool
 	Mev                     bool
-	RelayURL                string
+	RelayURLs               []string
 	MevImage                string
 	MevBoostService         bool
 	MevBoostEndpoint        string
@@ -63,8 +63,8 @@ type GenData struct {
 	Ports                   map[string]uint16
 	Graffiti                string
 	LoggingDriver           string
-	ECBootnodes             *[]string
-	CCBootnodes             *[]string
+	ECBootnodes             []string
+	CCBootnodes             []string
 	CustomTTD               string
 	CustomChainSpecPath     string
 	CustomNetworkConfigPath string
@@ -85,6 +85,7 @@ type DockerComposeData struct {
 	TTD                     string
 	XeeVersion              bool
 	Mev                     bool
+	MevBoostOnValidator     bool
 	MevPort                 uint16
 	MevImage                string
 	MevBoostEndpoint        string
@@ -105,7 +106,6 @@ type DockerComposeData struct {
 	ClExtraFlags            []string
 	VlExtraFlags            []string
 	ECBootnodes             string
-	ECBootnodesList         []string
 	CCBootnodes             string
 	CCBootnodesList         []string
 	MapAllPorts             bool
@@ -125,11 +125,20 @@ type DockerComposeData struct {
 	ContainerTag            string
 }
 
-// WithConsensusClient returns true if the consensus client is explicitly required
-// by the user, with the --run-clients flag.
+// WithConsensusClient returns true if the consensus client is set
 func (d DockerComposeData) WithConsensusClient() bool {
 	for _, service := range d.Services {
 		if service == consensus {
+			return true
+		}
+	}
+	return false
+}
+
+// WithValidatorClient returns true if the validator client is set
+func (d DockerComposeData) WithValidatorClient() bool {
+	for _, service := range d.Services {
+		if service == validator {
 			return true
 		}
 	}
