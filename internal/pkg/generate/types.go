@@ -19,6 +19,7 @@ import "github.com/NethermindEth/sedge/internal/pkg/clients"
 
 // EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
 type EnvData struct {
+	Services                  []string
 	Mev                       bool
 	ElImage                   string
 	ElDataDir                 string
@@ -140,6 +141,16 @@ func (d DockerComposeData) WithConsensusClient() bool {
 func (d DockerComposeData) WithValidatorClient() bool {
 	for _, service := range d.Services {
 		if service == validator {
+			return true
+		}
+	}
+	return false
+}
+
+// WithMevBoostClient returns true if the Mev-Boost client is set
+func (d EnvData) WithMevBoostClient() bool {
+	for _, service := range d.Services {
+		if service == mevBoost {
 			return true
 		}
 	}

@@ -82,6 +82,7 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check RELAY_URL",
 			data: &GenData{
+				Services:        []string{consensus, validator, execution, mevBoost},
 				ValidatorClient: &clients.Client{Name: "prysm"},
 				Network:         "mainnet",
 				Mev:             true,
@@ -93,6 +94,7 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check set of RELAY_URL",
 			data: &GenData{
+				Services:        []string{consensus, validator, execution, mevBoost},
 				ValidatorClient: &clients.Client{Name: "teku"},
 				Network:         "mainnet",
 				Mev:             true,
@@ -181,6 +183,20 @@ func TestGenerateEnvFile(t *testing.T) {
 				"CL_NETWORK": "gnosis",
 			},
 		},
+		{
+			name: "Check RELAY_URL is set if mev is set",
+			data: &GenData{
+				Network:         "mainnet",
+				Services:        []string{consensus, validator, execution, mevBoost},
+				ConsensusClient: &clients.Client{Name: "teku"},
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				ValidatorClient: &clients.Client{Name: "prysm"},
+				Mev:             true,
+			},
+			fieldsToCheck: map[string]string{
+				"RELAY_URL": "https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -211,6 +227,18 @@ func TestMissingEnvVars(t *testing.T) {
 		Error         error
 		fieldsToCheck []string
 	}{
+		{
+			name: "Check RELAY_URL",
+			data: &GenData{
+				Services:        []string{consensus, validator, execution},
+				ConsensusClient: &clients.Client{Name: "teku"},
+				Network:         "mainnet",
+				Mev:             true,
+			},
+			fieldsToCheck: []string{
+				"RELAY_URL",
+			},
+		},
 		{
 			name: "Check RELAY_URL",
 			data: &GenData{
