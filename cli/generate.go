@@ -55,7 +55,7 @@ type GenCmdFlags struct {
 	jwtPath           string
 	graffiti          string
 	mapAllPorts       bool
-	fallbackEL        *[]string
+	fallbackEL        []string
 	elExtraFlags      *[]string
 	clExtraFlags      *[]string
 	vlExtraFlags      *[]string
@@ -65,8 +65,8 @@ type GenCmdFlags struct {
 	executionAuthUrl  string
 	consensusApiUrl   string
 	waitEpoch         int
-	customEnodes      *[]string
-	customEnrs        *[]string
+	customEnodes      []string
+	customEnrs        []string
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -171,27 +171,21 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 			check:     flags.checkpointSyncUrl != "",
 			validator: singleUriValidator("checkpoint sync", utils.UriValidator),
 		},
-	}
-	if flags.fallbackEL != nil {
-		toValidate = append(toValidate, uriData{
-			value:     *flags.fallbackEL,
-			check:     len(*flags.fallbackEL) > 0,
+		{
+			value:     flags.fallbackEL,
+			check:     len(flags.fallbackEL) > 0,
 			validator: singleUriValidator("fallback execution", utils.UriValidator),
-		})
-	}
-	if flags.customEnodes != nil {
-		toValidate = append(toValidate, uriData{
-			value:     *flags.customEnodes,
-			check:     len(*flags.customEnodes) > 0,
+		},
+		{
+			value:     flags.customEnodes,
+			check:     len(flags.customEnodes) > 0,
 			validator: utils.ENodesValidator,
-		})
-	}
-	if flags.customEnrs != nil {
-		toValidate = append(toValidate, uriData{
-			value:     *flags.customEnrs,
-			check:     len(*flags.customEnrs) > 0,
+		},
+		{
+			value:     flags.customEnrs,
+			check:     len(flags.customEnrs) > 0,
 			validator: utils.ENRValidator,
-		})
+		},
 	}
 	for _, uri := range toValidate {
 		if uri.check {

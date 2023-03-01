@@ -49,7 +49,7 @@ type GenData struct {
 	CheckpointSyncUrl       string
 	FeeRecipient            string
 	JWTSecretPath           string
-	FallbackELUrls          *[]string
+	FallbackELUrls          []string
 	ElExtraFlags            *[]string
 	ClExtraFlags            *[]string
 	VlExtraFlags            *[]string
@@ -63,8 +63,8 @@ type GenData struct {
 	Ports                   map[string]uint16
 	Graffiti                string
 	LoggingDriver           string
-	ECBootnodes             *[]string
-	CCBootnodes             *[]string
+	ECBootnodes             []string
+	CCBootnodes             []string
 	CustomTTD               string
 	CustomChainSpecPath     string
 	CustomNetworkConfigPath string
