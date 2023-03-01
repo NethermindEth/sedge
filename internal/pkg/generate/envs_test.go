@@ -87,7 +87,7 @@ func TestGenerateEnvFile(t *testing.T) {
 				Mev:             true,
 			},
 			fieldsToCheck: map[string]string{
-				"RELAY_URL": "https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net",
+				"RELAY_URLS": "https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net",
 			},
 		},
 		{
@@ -96,10 +96,10 @@ func TestGenerateEnvFile(t *testing.T) {
 				ValidatorClient: &clients.Client{Name: "teku"},
 				Network:         "mainnet",
 				Mev:             true,
-				RelayURLs:       &[]string{"https://sample.relay"},
+				RelayURLs:       []string{"https://sample.relay", "https://sample.relay2"},
 			},
 			fieldsToCheck: map[string]string{
-				"RELAY_URL": "https://sample.relay",
+				"RELAY_URLS": "https://sample.relay,https://sample.relay2",
 			},
 		},
 		{
@@ -165,6 +165,7 @@ func TestGenerateEnvFile(t *testing.T) {
 }
 
 // Test some env vars doesn't exist
+// TODO: add more tests cases
 func TestMissingEnvVars(t *testing.T) {
 	configs.InitNetworksConfigs()
 	tests := []struct {
@@ -181,7 +182,7 @@ func TestMissingEnvVars(t *testing.T) {
 				Mev:             true,
 			},
 			fieldsToCheck: []string{
-				"RELAY_URL",
+				"RELAY_URLS",
 			},
 		},
 		{
@@ -189,10 +190,10 @@ func TestMissingEnvVars(t *testing.T) {
 			data: &GenData{
 				ValidatorClient: &clients.Client{Name: "teku"},
 				Network:         "mainnet",
-				RelayURLs:       &[]string{"https://sample.relay"},
+				RelayURLs:       []string{"https://sample.relay", "https://sample.relay2"},
 			},
 			fieldsToCheck: []string{
-				"RELAY_URL",
+				"RELAY_URLS",
 			},
 		},
 	}

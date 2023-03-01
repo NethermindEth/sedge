@@ -59,7 +59,7 @@ type GenCmdFlags struct {
 	elExtraFlags      *[]string
 	clExtraFlags      *[]string
 	vlExtraFlags      *[]string
-	relayURLs         *[]string
+	relayURLs         []string
 	mevBoostUrl       string
 	executionApiUrl   string
 	executionAuthUrl  string
@@ -167,6 +167,11 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 			validator: singleUriValidator("checkpoint sync", utils.UriValidator),
 		},
 		{
+			value:     flags.relayURLs,
+			check:     len(flags.relayURLs) > 0,
+			validator: singleUriValidator("relay", utils.UriValidator),
+		},
+		{
 			value:     flags.fallbackEL,
 			check:     len(flags.fallbackEL) > 0,
 			validator: singleUriValidator("fallback execution", utils.UriValidator),
@@ -181,13 +186,6 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 			check:     len(flags.customEnrs) > 0,
 			validator: utils.ENRValidator,
 		},
-	}
-	if flags.relayURLs != nil {
-		toValidate = append(toValidate, uriData{
-			value:     *flags.relayURLs,
-			check:     len(*flags.relayURLs) > 0,
-			validator: singleUriValidator("relay", utils.UriValidator),
-		})
 	}
 	for _, uri := range toValidate {
 		if uri.check {

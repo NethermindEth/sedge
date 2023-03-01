@@ -235,7 +235,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ttd = configs.NetworksConfigs()[gd.Network].DefaultTTD
 	}
 
-	// Check for CC Bootnode nodes
+	// Check for CL Bootnode nodes
 	var ccBootnodes []string
 	if gd.CCBootnodes != nil {
 		ccBootnodes = gd.CCBootnodes
@@ -244,7 +244,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ccBootnodes = configs.NetworksConfigs()[gd.Network].DefaultCCBootnodes
 	}
 
-	// Check for Bootnode nodes
+	// Check for EL Bootnode nodes
 	var ecBootnodes []string
 	if gd.ECBootnodes != nil {
 		ecBootnodes = gd.ECBootnodes
@@ -295,8 +295,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ElExtraFlags:        arrayOrEmpty(gd.ElExtraFlags),
 		ClExtraFlags:        arrayOrEmpty(gd.ClExtraFlags),
 		VlExtraFlags:        arrayOrEmpty(gd.VlExtraFlags),
-		ECBootnodesList:     ecBootnodes,
-		CCBootnodesList:     ccBootnodes,
 		ECBootnodes:         strings.Join(ecBootnodes, ","),
 		CCBootnodes:         strings.Join(ccBootnodes, ","),
 		MapAllPorts:         gd.MapAllPorts,
@@ -422,7 +420,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	}
 	var relayURLs string
 	if gd.RelayURLs != nil {
-		relayURLs = strings.Join(*gd.RelayURLs, ",")
+		relayURLs = strings.Join(gd.RelayURLs, ",")
 	}
 	data := EnvData{
 		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
@@ -442,7 +440,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ConsensusClientName:       nameOrEmpty(cls[consensus]),
 		KeystoreDir:               "./" + configs.KeystoreDir,
 		Graffiti:                  gd.Graffiti,
-		RelayURL:                  relayURLs,
+		RelayURLs:                 relayURLs,
 	}
 	// FIXME: Graffiti is <EL_name-CL_name> but is incorrect when the CL is different from the VL (validator client)
 
