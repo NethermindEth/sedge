@@ -402,6 +402,9 @@ func TestGenerateDockerCompose(t *testing.T) {
 					}
 				}
 
+				// Check that validator-blocker service is set
+				assert.NotNil(t, cmpData.Services.ValidatorBlocker)
+
 				// Check that mev-boost service is not set when validator only
 				_, mev := envData["MEV"]
 				if tc.genData.ExecutionClient == nil && tc.genData.ConsensusClient == nil {
