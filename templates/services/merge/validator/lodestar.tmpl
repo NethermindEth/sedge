@@ -11,15 +11,15 @@
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/data/validator{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
     command: 
       - validator
       - --preset=${VL_LODESTAR_PRESET}{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       - --paramsFile=/network_config/config.yml{{end}}{{else}}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
-      - --dataDir=/data/validator
-      - --logFile=/data/validator/logs/validator.log
+      - --dataDir=/data
+      - --logFile=/data/logs/validator.log
       - --logFileLevel=${VL_LOG_LEVEL}
       - --server=${CC_API_URL}
       - --metrics=true

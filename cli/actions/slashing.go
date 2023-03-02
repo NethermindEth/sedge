@@ -94,8 +94,8 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 		cmd = []string{
 			"validator", "slashing-protection", "import",
 			"--network", options.Network,
-			"--dataDir", "/data/validator",
-			"--file", "/data/validator/slashing-import.json",
+			"--dataDir", "/data",
+			"--file", "/data/slashing-import.json",
 		}
 	case "teku":
 		cmd = []string{
