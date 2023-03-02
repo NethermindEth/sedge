@@ -187,7 +187,6 @@ func buildGenerateTestCase(
 func TestGenerateCmd(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
-	configs.InitNetworksConfigs()
 	tcs := []generateCmdTestCase{
 		*buildGenerateTestCase(
 			t,
@@ -1371,7 +1370,6 @@ func TestGenerateCmd(t *testing.T) {
 }
 
 func TestGeneratePathCases(t *testing.T) {
-	configs.InitNetworksConfigs()
 	// Silence logger
 	log.SetOutput(io.Discard)
 

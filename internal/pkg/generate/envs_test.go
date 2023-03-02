@@ -49,7 +49,6 @@ func retrieveEnvData(t *testing.T, reader io.Reader) map[string]string {
 
 // TestGenerateEnvFile tests the generation of the .env file
 func TestGenerateEnvFile(t *testing.T) {
-	configs.InitNetworksConfigs()
 	tests := []struct {
 		name          string
 		data          *GenData
@@ -246,7 +245,6 @@ func TestGenerateEnvFile(t *testing.T) {
 // Test some env vars doesn't exist
 // TODO: add more tests cases
 func TestMissingEnvVars(t *testing.T) {
-	configs.InitNetworksConfigs()
 	tests := []struct {
 		name          string
 		data          *GenData

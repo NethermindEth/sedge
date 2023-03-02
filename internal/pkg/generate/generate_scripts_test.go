@@ -392,7 +392,6 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 }
 
 func TestGenerateComposeServices(t *testing.T) {
-	configs.InitNetworksConfigs()
 	tests := []genTestData{
 		{
 			Description: "Test generation of compose services",
@@ -524,7 +523,6 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 
 // TestValidateClients tests the validation of clients
 func TestValidateClients(t *testing.T) {
-	configs.InitNetworksConfigs()
 	tests := []struct {
 		Description string
 		Data        *GenData
@@ -596,7 +594,6 @@ func TestValidateClients(t *testing.T) {
 
 func TestEnvFileAndFlags(t *testing.T) {
 	// TODO: Improve this test as in the actions/generate tests
-	configs.InitNetworksConfigs()
 	tests := []struct {
 		Description string
 		Data        *GenData
@@ -686,7 +683,6 @@ func TestEnvFileAndFlags(t *testing.T) {
 }
 
 func TestCleanGeneratedFiles(t *testing.T) {
-	configs.InitNetworksConfigs()
 	tests := []struct {
 		Description string
 		Data        *GenData

@@ -6,12 +6,10 @@ import (
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli/actions"
-	"github.com/NethermindEth/sedge/configs"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateJwtSecrets(t *testing.T) {
-	configs.InitNetworksConfigs()
 	tempDir := t.TempDir()
 	tests := []struct {
 		name    string

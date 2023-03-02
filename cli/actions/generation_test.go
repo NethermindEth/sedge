@@ -256,7 +256,6 @@ func TestGenerateDockerCompose(t *testing.T) {
 		}
 	}
 
-	configs.InitNetworksConfigs()
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			samplePath := t.TempDir()
@@ -435,7 +434,6 @@ func TestGenerateDockerCompose(t *testing.T) {
 func TestFolderCreationOnCompose(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
-	configs.InitNetworksConfigs()
 	samplePath := t.TempDir() + "test"
 	c := clients.ClientInfo{Network: "mainnet"}
 	clientsMap, _ := c.Clients([]string{"execution", "consensus"})

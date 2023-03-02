@@ -31,8 +31,6 @@ import (
 )
 
 func TestCli_FullNode(t *testing.T) {
-	configs.InitNetworksConfigs()
-
 	tests := []struct {
 		name  string
 		setup func(*testing.T, *sedge_mocks.MockSedgeActions, *sedge_mocks.MockPrompter)

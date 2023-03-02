@@ -23,7 +23,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
 	"github.com/NethermindEth/sedge/internal/ui"
@@ -93,7 +92,6 @@ func TestKeysCmd(t *testing.T) {
 	// TODO: allow to test error programs
 	// Silence logger
 	log.SetOutput(io.Discard)
-	configs.InitNetworksConfigs()
 	tcs := []keysCmdTestCase{
 		*buildKeysTestCase(t, "Mainnet", "case_1", "mainnet", 0, 1, false),
 		*buildKeysTestCase(t, "Bigger number", "case_1", "sepolia", 0, 100, false),

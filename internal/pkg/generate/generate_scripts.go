@@ -280,7 +280,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
 		LoggingDriver:       gd.LoggingDriver,
 		VLStartGracePeriod:  gd.VLStartGracePeriod,
-		CustomNetwork:       gd.Network == configs.CustomNetwork.Name, // Used custom templates
+		CustomNetwork:       gd.Network == configs.NetworkCustom, // Used custom templates
 		CustomConsensusConfigs: gd.CustomNetworkConfigPath != "" ||
 			gd.CustomGenesisPath != "" ||
 			gd.CustomDeployBlockPath != "", // Have custom configs paths
