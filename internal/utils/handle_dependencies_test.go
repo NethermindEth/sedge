@@ -286,7 +286,7 @@ func TestDependenciesSupported(t *testing.T) {
 			unsupported:  []string{"wR0n9"},
 		},
 		{
-			name:         "Anything supported in linux and windows",
+			name:         "Nothing supported in darwin and windows",
 			os:           []string{"darwin", "windows"},
 			dependencies: []string{"docker", "wR0n9"},
 			supported:    []string{},
