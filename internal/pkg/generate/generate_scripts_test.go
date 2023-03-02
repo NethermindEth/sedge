@@ -215,7 +215,7 @@ var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader)
 			assert.Equal(t, "sedge-mev-boost", composeData.Services.Mevboost.ContainerName)
 			assert.Equal(t, "on-failure", composeData.Services.Mevboost.Restart)
 		} else {
-			return errors.New("mevboost service is not present")
+			return errors.New("mev-boost service is not present")
 		}
 	}
 

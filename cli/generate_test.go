@@ -876,7 +876,7 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			subCmd{
-				name: "mevboost",
+				name: "mev-boost",
 				args: []string{},
 			},
 			nil,
@@ -894,7 +894,7 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			subCmd{
-				name: "mevboost",
+				name: "mev-boost",
 				args: []string{},
 			},
 			nil,
@@ -912,7 +912,7 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			subCmd{
-				name: "mevboost",
+				name: "mev-boost",
 				args: []string{},
 			},
 			nil,
@@ -930,7 +930,7 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			subCmd{
-				name: "mevboost",
+				name: "mev-boost",
 				args: []string{},
 			},
 			nil,
@@ -948,7 +948,7 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			subCmd{
-				name: "mevboost",
+				name: "mev-boost",
 				args: []string{},
 			},
 			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "https:/boost-relay.flashbots.net"),
@@ -966,7 +966,7 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			subCmd{
-				name: "mevboost",
+				name: "mev-boost",
 				args: []string{},
 			},
 			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "boost-relay.flashbots.net"),
@@ -982,10 +982,10 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			subCmd{
-				name: "mevboost",
+				name: "mev-boost",
 				args: []string{"wrong"},
 			},
-			errors.New("unknown command \"wrong\" for \"sedge generate mevboost\""),
+			errors.New("unknown command \"wrong\" for \"sedge generate mev-boost\""),
 		),
 		*buildGenerateTestCase(
 			t,

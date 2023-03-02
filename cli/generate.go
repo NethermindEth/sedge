@@ -44,7 +44,7 @@ var (
 )
 
 const (
-	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mevboost"
+	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mev-boost"
 )
 
 type CustomFlags struct {

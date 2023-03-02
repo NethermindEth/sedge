@@ -30,7 +30,7 @@ Available Commands:
   consensus   Generate a consensus node config
   execution   Generate a execution node config
   full-node   Generate a full node config, with or without a validator
-  mevboost    Generate a mev-boost node config
+  mev-boost    Generate a mev-boost node config
   validator   Generate a validator node config
 
 Flags:
@@ -211,16 +211,16 @@ Global Flags:
 #### MevBoost
 
 ```
-$ sedge generate mevboost -h
+$ sedge generate mev-boost -h
 Generate a docker-compose and an environment file with a mev-boost node configuration
 
 Usage:
-  sedge generate mevboost [flags]
+  sedge generate mev-boost [flags]
 
 Flags:
       --relay-url string         Relay URL used to connect to mev relay.
-  -m, --mev-boost-image string   Custom docker image to use for Mev Boost. Example: 'sedge generate mevboost --mev-boost-image flashbots/mev-boost:latest-portable'
-  -h, --help                     help for mevboost
+  -m, --mev-boost-image string   Custom docker image to use for Mev Boost. Example: 'sedge generate mev-boost --mev-boost-image flashbots/mev-boost:latest-portable'
+  -h, --help                     help for mev-boost
 
 Global Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.

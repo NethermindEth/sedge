@@ -15,7 +15,11 @@ limitations under the License.
 */
 package generate
 
-import "github.com/NethermindEth/sedge/internal/pkg/clients"
+import (
+	"fmt"
+
+	"github.com/NethermindEth/sedge/internal/pkg/clients"
+)
 
 // EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
 type EnvData struct {
@@ -148,6 +152,7 @@ func (d DockerComposeData) WithValidatorClient() bool {
 
 // WithMevBoostClient returns true if the Mev-Boost client is set
 func (d EnvData) WithMevBoostClient() bool {
+	fmt.Printf("d.Services: %v", d.Services)
 	for _, service := range d.Services {
 		if service == mevBoost {
 			return true
@@ -230,7 +235,7 @@ type ConfigConsensus struct {
 }
 type Services struct {
 	Execution        *Execution        `yaml:"execution,omitempty"`
-	Mevboost         *Mevboost         `yaml:"mevboost,omitempty"`
+	Mevboost         *Mevboost         `yaml:"mev-boost,omitempty"`
 	Consensus        *Consensus        `yaml:"consensus,omitempty"`
 	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker,omitempty"`
 	Validator        *Validator        `yaml:"validator,omitempty"`

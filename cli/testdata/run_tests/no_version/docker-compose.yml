@@ -41,7 +41,7 @@ services:
       options:
         max-size: 10m
         max-file: "10"
-  mevboost:
+  mev-boost:
     image: flashbots/mev-boost:latest
     networks:
     - sedge
@@ -61,7 +61,7 @@ services:
     restart: unless-stopped
     image: ${CC_IMAGE_VERSION}
     depends_on:
-      mevboost:
+      mev-boost:
         condition: service_started
     networks:
     - sedge
@@ -96,7 +96,7 @@ services:
     - --metrics-port=5054
     - --metrics-address=0.0.0.0
     - --checkpoint-sync-url=${CHECKPOINT_SYNC_URL}
-    - --builder=http://mevboost:18550
+    - --builder=http://mev-boost:18550
     logging:
       driver: json-file
       options:

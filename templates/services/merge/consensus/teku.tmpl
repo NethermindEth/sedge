@@ -7,7 +7,7 @@
     restart: unless-stopped
     image: ${CC_IMAGE_VERSION}{{if .Mev}}
     depends_on:{{if .Mev}}
-      mevboost:
+      mev-boost:
         condition: service_started{{end}}{{end}}
     networks:
       - sedge

@@ -23,7 +23,7 @@ import (
 
 // All the strings that are needed for debugging and info logging, and constant strings.
 const (
-	DefaultMevBoostEndpoint       = "http://mevboost"
+	DefaultMevBoostEndpoint       = "http://mev-boost"
 	DefaultEnvFileName            = ".env"
 	CheckingDependencies          = "Checking dependencies: %s"
 	DependenciesPending           = "pending dependencies: %s"
