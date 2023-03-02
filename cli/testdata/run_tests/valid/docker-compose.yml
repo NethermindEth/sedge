@@ -55,7 +55,7 @@ services:
     - -${NETWORK}
     - -relay-check
     - -relays
-    - ${RELAY_URL}
+    - ${RELAY_URLS}
   consensus:
     stop_grace_period: 30s
     container_name: consensus-client

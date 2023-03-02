@@ -80,7 +80,7 @@ func TestGenerateEnvFile(t *testing.T) {
 			},
 		},
 		// { // TODO: Uncomment when the refactor CLI PR is merged and default relays can be get from the config, this way we can test the default relays
-		// 	name: "Check RELAY_URL",
+		// 	name: "Check RELAY_URLS",
 		// 	data: &GenData{
 		// 		ValidatorClient: &clients.Client{Name: "prysm"},
 		// 		Network:         "mainnet",
@@ -91,7 +91,7 @@ func TestGenerateEnvFile(t *testing.T) {
 		// 	},
 		// },
 		{
-			name: "Check set of RELAY_URL, mainnet",
+			name: "Check set of RELAY_URLS, mainnet",
 			data: &GenData{
 				Services:        []string{consensus, validator, execution, mevBoost},
 				ValidatorClient: &clients.Client{Name: "teku"},
@@ -104,7 +104,7 @@ func TestGenerateEnvFile(t *testing.T) {
 			},
 		},
 		{
-			name: "Check set of RELAY_URL, goerli",
+			name: "Check set of RELAY_URLS, goerli",
 			data: &GenData{
 				Services:        []string{consensus, validator, execution, mevBoost},
 				ValidatorClient: &clients.Client{Name: "prysm"},
@@ -117,7 +117,7 @@ func TestGenerateEnvFile(t *testing.T) {
 			},
 		},
 		{
-			name: "Check set of RELAY_URL, sepolia",
+			name: "Check set of RELAY_URLS, sepolia",
 			data: &GenData{
 				Services:        []string{consensus, validator, execution, mevBoost},
 				ValidatorClient: &clients.Client{Name: "lodestar"},
@@ -209,7 +209,7 @@ func TestGenerateEnvFile(t *testing.T) {
 			},
 		},
 		{
-			name: "Check RELAY_URL is set if mev is set",
+			name: "Check RELAY_URLS is set if mev is set",
 			data: &GenData{
 				Network:         "mainnet",
 				Services:        []string{consensus, validator, execution, mevBoost},
@@ -254,7 +254,7 @@ func TestMissingEnvVars(t *testing.T) {
 		fieldsToCheck []string
 	}{
 		{
-			name: "Check RELAY_URL",
+			name: "Check RELAY_URLS",
 			data: &GenData{
 				Services:        []string{consensus, validator, execution},
 				ConsensusClient: &clients.Client{Name: "teku"},
@@ -262,11 +262,11 @@ func TestMissingEnvVars(t *testing.T) {
 				Mev:             true,
 			},
 			fieldsToCheck: []string{
-				"RELAY_URL",
+				"RELAY_URLS",
 			},
 		},
 		{
-			name: "Check RELAY_URL",
+			name: "Check RELAY_URLS",
 			data: &GenData{
 				ConsensusClient: &clients.Client{Name: "teku"},
 				Network:         "mainnet",
@@ -277,7 +277,7 @@ func TestMissingEnvVars(t *testing.T) {
 			},
 		},
 		{
-			name: "Check set of RELAY_URL",
+			name: "Check set of RELAY_URLS",
 			data: &GenData{
 				ValidatorClient: &clients.Client{Name: "teku"},
 				Network:         "mainnet",
