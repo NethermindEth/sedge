@@ -144,10 +144,10 @@ func (flags *CliCmdFlags) argsList() []string {
 		s = append(s, "--fee-recipient", flags.feeRecipient)
 	}
 	if flags.services != nil {
-		if len(*flags.services) == 0 {
+		if len(flags.services) == 0 {
 			s = append(s, "--run-client none")
 		} else {
-			s = append(s, "--run-clients", strings.Join(*flags.services, ","))
+			s = append(s, "--run-clients", strings.Join(flags.services, ","))
 		}
 	}
 	if flags.generationPath != "" {
@@ -224,7 +224,7 @@ func TestCliCmd(t *testing.T) {
 			"Random clients", "case_1",
 			CliCmdFlags{
 				yes:      true,
-				services: &[]string{execution, consensus},
+				services: []string{execution, consensus},
 			},
 			false,
 			false,
@@ -237,7 +237,7 @@ func TestCliCmd(t *testing.T) {
 				executionName: "nethermind",
 				consensusName: "lighthouse",
 				validatorName: "lighthouse",
-				services:      &[]string{execution, consensus},
+				services:      []string{execution, consensus},
 			},
 			false,
 			false,
@@ -249,7 +249,7 @@ func TestCliCmd(t *testing.T) {
 				yes:           true,
 				executionName: "nethermind",
 				validatorName: "lighthouse",
-				services:      &[]string{execution, consensus},
+				services:      []string{execution, consensus},
 			},
 			false,
 			false,
@@ -261,7 +261,7 @@ func TestCliCmd(t *testing.T) {
 				yes:           true,
 				executionName: "nethermind",
 				consensusName: "lighthouse",
-				services:      &[]string{execution, consensus},
+				services:      []string{execution, consensus},
 			},
 			false,
 			false,
@@ -274,7 +274,7 @@ func TestCliCmd(t *testing.T) {
 				executionName: "nethermind",
 				consensusName: "lighthouse",
 				network:       "mainnet",
-				services:      &[]string{execution, consensus},
+				services:      []string{execution, consensus},
 			},
 			false,
 			false,
@@ -287,7 +287,7 @@ func TestCliCmd(t *testing.T) {
 				executionName: "nethermind",
 				consensusName: "lighthouse",
 				network:       "sedge",
-				services:      &[]string{execution, consensus},
+				services:      []string{execution, consensus},
 			},
 			true,
 			true,
@@ -316,7 +316,7 @@ func TestCliCmd(t *testing.T) {
 			"--run-client none, execution, ambiguos error", "case_1",
 			CliCmdFlags{
 				yes:      true,
-				services: &[]string{execution, "none"},
+				services: []string{execution, "none"},
 			},
 			true,
 			true,
@@ -336,7 +336,7 @@ func TestCliCmd(t *testing.T) {
 			"--run-client all, validator, ambiguos error", "case_1",
 			CliCmdFlags{
 				yes:      true,
-				services: &[]string{validator, "all"},
+				services: []string{validator, "all"},
 			},
 			true,
 			true,
@@ -346,7 +346,7 @@ func TestCliCmd(t *testing.T) {
 			"--run-client all, validator, ambiguos error", "case_1",
 			CliCmdFlags{
 				yes:      true,
-				services: &[]string{validator, "all"},
+				services: []string{validator, "all"},
 			},
 			true,
 			true,
@@ -357,7 +357,7 @@ func TestCliCmd(t *testing.T) {
 			CliCmdFlags{
 				yes:      true,
 				network:  "test",
-				services: &[]string{execution, consensus},
+				services: []string{execution, consensus},
 			},
 			true,
 			true,

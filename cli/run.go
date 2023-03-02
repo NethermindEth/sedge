@@ -32,7 +32,7 @@ func RunCmd(sedgeActions actions.SedgeActions) *cobra.Command {
 	// Flags
 	var (
 		generationPath string
-		services       *[]string
+		services       []string
 	)
 
 	cmd := &cobra.Command{
@@ -63,12 +63,12 @@ func RunCmd(sedgeActions actions.SedgeActions) *cobra.Command {
 					// }
 
 					// Check if provided services are valid
-					if len(*services) > 0 {
+					if len(services) > 0 {
 						actualServices, err := loadServices(path)
 						if err != nil {
 							return err
 						}
-						for _, service := range *services {
+						for _, service := range services {
 							if !utils.Contains(actualServices, service) {
 								return fmt.Errorf(configs.InvalidService, service)
 							}
@@ -95,14 +95,14 @@ func RunCmd(sedgeActions actions.SedgeActions) *cobra.Command {
 			}
 			err := sedgeActions.SetupContainers(actions.SetupContainersOptions{
 				GenerationPath: generationPath,
-				Services:       *services,
+				Services:       services,
 			})
 			if err != nil {
 				return fmt.Errorf(configs.SetupContainersErr, err)
 			}
 			err = sedgeActions.RunContainers(actions.RunContainersOptions{
 				GenerationPath: generationPath,
-				Services:       *services,
+				Services:       services,
 			})
 			if err != nil {
 				return fmt.Errorf(configs.StartingContainersErr, err)
@@ -113,7 +113,7 @@ func RunCmd(sedgeActions actions.SedgeActions) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data")
-	services = cmd.Flags().StringSlice("services", []string{}, "List of services to run. If this flag is not provided, all services will run.")
+	cmd.Flags().StringSliceVar(&services, "services", []string{}, "List of services to run. If this flag is not provided, all services will run.")
 	return cmd
 }
 

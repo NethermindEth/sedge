@@ -56,9 +56,9 @@ type GenCmdFlags struct {
 	graffiti          string
 	mapAllPorts       bool
 	fallbackEL        []string
-	elExtraFlags      *[]string
-	clExtraFlags      *[]string
-	vlExtraFlags      *[]string
+	elExtraFlags      []string
+	clExtraFlags      []string
+	vlExtraFlags      []string
 	relayURLs         []string
 	mevBoostUrl       string
 	executionApiUrl   string

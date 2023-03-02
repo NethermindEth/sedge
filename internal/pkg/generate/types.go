@@ -51,9 +51,9 @@ type GenData struct {
 	FeeRecipient            string
 	JWTSecretPath           string
 	FallbackELUrls          []string
-	ElExtraFlags            *[]string
-	ClExtraFlags            *[]string
-	VlExtraFlags            *[]string
+	ElExtraFlags            []string
+	ClExtraFlags            []string
+	VlExtraFlags            []string
 	MapAllPorts             bool
 	Mev                     bool
 	RelayURLs               []string

@@ -59,11 +59,11 @@ type CliCmdFlags struct {
 	run                bool
 	yes                bool
 	mapAllPorts        bool
-	services           *[]string
+	services           []string
 	fallbackEL         []string
-	elExtraFlags       *[]string
-	clExtraFlags       *[]string
-	vlExtraFlags       *[]string
+	elExtraFlags       []string
+	clExtraFlags       []string
+	vlExtraFlags       []string
 	logging            string
 	slashingProtection string
 	containerTag       string
@@ -132,11 +132,11 @@ Finally, it will run the generated docker-compose script.`,
 	cmd.Flags().BoolVarP(&flags.run, "run", "r", false, "Run the generated docker-compose scripts without asking")
 	cmd.Flags().BoolVarP(&flags.yes, "yes", "y", false, "Shortcut for 'sedge cli -r -i --run'. Run without prompts")
 	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
-	flags.services = cmd.Flags().StringSlice("run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all, none. The 'all' and 'none' option must be used alone. Example: 'sedge cli -r --run-clients=consensus,validator'")
+	cmd.Flags().StringSliceVar(&flags.services, "run-clients", []string{execution, consensus}, "Run only the specified clients. Possible values: execution, consensus, validator, all, none. The 'all' and 'none' option must be used alone. Example: 'sedge cli -r --run-clients=consensus,validator'")
 	cmd.Flags().StringSliceVar(&flags.fallbackEL, "fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge cli -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
-	flags.elExtraFlags = cmd.Flags().StringArray("el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge cli --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	flags.clExtraFlags = cmd.Flags().StringArray("cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge cli --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	flags.vlExtraFlags = cmd.Flags().StringArray("vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringArrayVar(&flags.elExtraFlags, "el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge cli --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringArrayVar(&flags.clExtraFlags, "cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge cli --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringArrayVar(&flags.vlExtraFlags, "vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge cli --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringVar(&flags.logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
 	cmd.Flags().StringVar(&flags.customTTD, "custom-ttd", "", "Custom Terminal Total Difficulty to use for the execution client")
 	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
@@ -159,30 +159,30 @@ func preRunCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags) (*clien
 	}
 
 	// Validate run-clients flag
-	if utils.Contains(*flags.services, "all") {
-		if len(*flags.services) == 1 {
+	if utils.Contains(flags.services, "all") {
+		if len(flags.services) == 1 {
 			// all used correctly
 			// TODO: avoid edit flags
-			flags.services = &[]string{execution, consensus, validator}
+			flags.services = []string{execution, consensus, validator}
 		} else {
 			// Ambiguous value
-			return nil, fmt.Errorf(configs.RunClientsFlagAmbiguousError, *flags.services)
+			return nil, fmt.Errorf(configs.RunClientsFlagAmbiguousError, flags.services)
 		}
-	} else if utils.Contains(*flags.services, "none") {
-		if len(*flags.services) == 1 {
+	} else if utils.Contains(flags.services, "none") {
+		if len(flags.services) == 1 {
 			// all used correctly
 			// TODO: avoid edit flags
-			flags.services = &[]string{}
+			flags.services = []string{}
 		} else {
 			// Ambiguous value
-			return nil, fmt.Errorf(configs.RunClientsFlagAmbiguousError, *flags.services)
+			return nil, fmt.Errorf(configs.RunClientsFlagAmbiguousError, flags.services)
 		}
-	} else if !utils.ContainsOnly(*flags.services, []string{execution, consensus, validator}) {
-		return nil, fmt.Errorf(configs.RunClientsError, strings.Join(*flags.services, ","), strings.Join([]string{execution, consensus, validator}, ","))
+	} else if !utils.ContainsOnly(flags.services, []string{execution, consensus, validator}) {
+		return nil, fmt.Errorf(configs.RunClientsError, strings.Join(flags.services, ","), strings.Join([]string{execution, consensus, validator}, ","))
 	}
 	// Exclude validator from run-clients if no-validator flag is set
-	if flags.noValidator && utils.Contains(*flags.services, validator) {
-		*flags.services = utils.Filter(*flags.services, func(s string) bool {
+	if flags.noValidator && utils.Contains(flags.services, validator) {
+		flags.services = utils.Filter(flags.services, func(s string) bool {
 			return s != validator
 		})
 	}
@@ -365,7 +365,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 
 	// Generate docker-compose scripts
 	gd := &generate.GenData{
-		Services:                *flags.services,
+		Services:                flags.services,
 		ExecutionClient:         combinedClients.Execution,
 		ConsensusClient:         combinedClients.Consensus,
 		ValidatorClient:         combinedClients.Validator,
@@ -406,16 +406,16 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 	ui.PrintFileContent(cmd.OutOrStdout(), filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
 
 	// If --run-clients=none was set then exit and don't run anything
-	if len(*flags.services) == 0 {
+	if len(flags.services) == 0 {
 		log.Info(configs.HappyStaking2)
 		return nil
 	}
 
 	if flags.run {
-		if err := buildContainers(cmdRunner, *flags.services, flags.generationPath); err != nil {
+		if err := buildContainers(cmdRunner, flags.services, flags.generationPath); err != nil {
 			return []error{err}
 		}
-		if utils.Contains(*flags.services, "validator") {
+		if utils.Contains(flags.services, "validator") {
 			keysPath, err := filepath.Abs(filepath.Join(flags.generationPath, "keystore"))
 			if err != nil {
 				return []error{err}
@@ -463,7 +463,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 				return []error{err}
 			}
 		}
-		if err = runAndShowContainers(cmdRunner, *flags.services, flags); err != nil {
+		if err = runAndShowContainers(cmdRunner, flags.services, flags); err != nil {
 			return []error{err}
 		}
 	} else {
