@@ -187,7 +187,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Custom deploy block", "", false).Return("2355021", nil),
 					prompter.EXPECT().InputList("Execution boot nodes", gomock.Len(0), gomock.AssignableToTypeOf(utils.ENodesValidator)).Return([]string{"enode://ecnode1", "enode://ecnode2"}, nil),
 					prompter.EXPECT().InputList("Consensus boot nodes", gomock.Len(0), gomock.AssignableToTypeOf(utils.ENRValidator)).Return([]string{"enode://ccnode1", "enode://ccnode2"}, nil),
-					prompter.EXPECT().Select("Select execution client", "", []string{"besu", "nethermind", "randomize"}).Return(1, nil),
+					prompter.EXPECT().Select("Select execution client", "", []string{"nethermind", "randomize"}).Return(0, nil),
 					prompter.EXPECT().Select("Select consensus client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().Select("Select validator client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
@@ -316,7 +316,7 @@ func TestCli_FullNode(t *testing.T) {
 				callsSequence := []*gomock.Call{
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(5, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(1, nil),
-					prompter.EXPECT().Select("Select execution client", "", []string{"besu", "nethermind", "randomize"}).Return(1, nil),
+					prompter.EXPECT().Select("Select execution client", "", []string{"nethermind", "randomize"}).Return(0, nil),
 					prompter.EXPECT().InputFilePath("Custom ChainSpec", "", true).Return("testdata/chainSpec.json", nil),
 					prompter.EXPECT().Input("Custom TTD (Terminal Total Difficulty)", "", false).Return("58750000000000", nil),
 					prompter.EXPECT().InputList("Execution boot nodes", gomock.Len(0), gomock.AssignableToTypeOf(utils.ENodesValidator)).Return([]string{"enode://ecnode1", "enode://ecnode2"}, nil),
