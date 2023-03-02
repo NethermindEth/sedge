@@ -33,7 +33,7 @@ type ServiceManager interface {
 	Stop(service string) error
 	Start(service string) error
 	IsRunning(service string) (bool, error)
-	Wait(service string, condition container.WaitCondition) (<-chan container.ContainerWaitOKBody, <-chan error)
+	Wait(service string, condition container.WaitCondition) (<-chan container.WaitResponse, <-chan error)
 	ContainerId(service string) (string, error)
 }
 

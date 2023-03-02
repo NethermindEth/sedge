@@ -436,7 +436,7 @@ func runCliCmd(cmd *cobra.Command, args []string, flags *CliCmdFlags, clientImag
 			if err := runAndShowContainers(cmdRunner, []string{"validator-import"}, flags); err != nil {
 				return []error{err}
 			}
-			exitCode, err := func(exitCh <-chan dockerct.ContainerWaitOKBody, errCh <-chan error) (int64, error) {
+			exitCode, err := func(exitCh <-chan dockerct.WaitResponse, errCh <-chan error) (int64, error) {
 				for {
 					select {
 					case exitOk := <-exitCh:
