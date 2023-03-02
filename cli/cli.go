@@ -273,7 +273,6 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 			inputCustomNetworkConfig,
 			inputCustomGenesis,
 			inputCustomDeployBlock,
-			inputConsensusBootNodes,
 		); err != nil {
 			return err
 		}
