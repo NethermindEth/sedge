@@ -53,8 +53,6 @@ type CustomFlags struct {
 	customNetworkConfig string
 	customGenesis       string
 	customDeployBlock   string
-	customEnodes        *[]string
-	customEnrs          *[]string
 }
 
 // GenCmdFlags is a struct that holds the flags of the generate command
@@ -250,12 +248,6 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		log.Warn(configs.EmptyFeeRecipientError)
 	}
 
-	// Get custom networks configs
-	customNetworkConfigsData, err := loadCustomNetworksConfig(&flags.CustomFlags, network, generationPath)
-	if err != nil {
-		return err
-	}
-
 	vlStartGracePeriod := configs.NetworkEpochTime(network) * time.Duration(flags.waitEpoch)
 
 	// Generate docker-compose scripts
@@ -287,11 +279,11 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ECBootnodes:             flags.customEnodes,
 		CCBootnodes:             flags.customEnrs,
 		CustomTTD:               flags.customTTD,
-		CustomChainSpecPath:     customNetworkConfigsData.ChainSpecPath,
-		CustomNetworkConfigPath: customNetworkConfigsData.NetworkConfigPath,
-		CustomGenesisPath:       customNetworkConfigsData.NetworkGenesisPath,
+		CustomChainSpecPath:     flags.CustomFlags.customChainSpec,
+		CustomNetworkConfigPath: flags.CustomFlags.customNetworkConfig,
+		CustomGenesisPath:       flags.CustomFlags.customGenesis,
 		CustomDeployBlock:       flags.customDeployBlock,
-		CustomDeployBlockPath:   customNetworkConfigsData.NetworkDeployBlockPath,
+		CustomDeployBlockPath:   flags.CustomFlags.customDeployBlock,
 		MevBoostOnValidator:     flags.mevBoostOnVal,
 		ContainerTag:            containerTag,
 	}
@@ -467,103 +459,4 @@ func handleJWTSecret(generationPath string) (string, error) {
 
 	log.Info(configs.JWTSecretGenerated)
 	return jwtPath, nil
-}
-
-type customNetworkConfigsData struct {
-	ChainSpecPath          string
-	NetworkConfigPath      string
-	NetworkGenesisPath     string
-	NetworkDeployBlockPath string
-}
-
-func loadCustomNetworksConfig(flags *CustomFlags, network, generationPath string) (customNetworkConfigsData, error) {
-	var customNetworkConfigsData customNetworkConfigsData
-	var chainSpecSrc, networkConfigSrc, genesisSrc, deployBlock string
-
-	networkData, ok := configs.NetworksConfigs()[network]
-	if !ok {
-		return customNetworkConfigsData, fmt.Errorf(configs.UnknownNetworkError, network)
-	}
-
-	eval := func(value, def string) string {
-		if value != "" {
-			return value
-		}
-		return def
-	}
-	chainSpecSrc = eval(flags.customChainSpec, networkData.DefaultCustomChainSpecSrc)
-	networkConfigSrc = eval(flags.customNetworkConfig, networkData.DefaultCustomConfigSrc)
-	genesisSrc = eval(flags.customGenesis, networkData.DefaultCustomGenesisSrc)
-	deployBlock = eval(flags.customDeployBlock, networkData.DefaultCustomDeployBlock)
-
-	// Check if any custom config is needed
-	if chainSpecSrc == "" && networkConfigSrc == "" && genesisSrc == "" && deployBlock == "" {
-		return customNetworkConfigsData, nil
-	}
-
-	destFolder := filepath.Join(generationPath, configs.CustomNetworkConfigsFolder)
-	if _, err := os.Stat(destFolder); err != nil {
-		if os.IsNotExist(err) {
-			err = os.Mkdir(destFolder, os.ModePerm)
-			if err != nil {
-				return customNetworkConfigsData, err
-			}
-		} else {
-			return customNetworkConfigsData, err
-		}
-	}
-
-	if chainSpecSrc != "" {
-		customNetworkConfigsData.ChainSpecPath = filepath.Join(destFolder, configs.ExecutionNetworkConfigFileName)
-		log.Info(configs.GettingCustomChainSpec)
-		err := utils.DownloadOrCopy(chainSpecSrc, customNetworkConfigsData.ChainSpecPath, true)
-		if err != nil {
-			return customNetworkConfigsData, err
-		}
-		customNetworkConfigsData.ChainSpecPath, err = filepath.Abs(customNetworkConfigsData.ChainSpecPath)
-		if err != nil {
-			return customNetworkConfigsData, err
-		}
-	}
-
-	if networkConfigSrc != "" {
-		customNetworkConfigsData.NetworkConfigPath = filepath.Join(destFolder, configs.ConsensusNetworkConfigFileName)
-		log.Info(configs.GettingCustomNetworkConfig)
-		err := utils.DownloadOrCopy(networkConfigSrc, customNetworkConfigsData.NetworkConfigPath, true)
-		if err != nil {
-			return customNetworkConfigsData, err
-		}
-		customNetworkConfigsData.NetworkConfigPath, err = filepath.Abs(customNetworkConfigsData.NetworkConfigPath)
-		if err != nil {
-			return customNetworkConfigsData, err
-		}
-	}
-
-	if genesisSrc != "" {
-		customNetworkConfigsData.NetworkGenesisPath = filepath.Join(destFolder, configs.ConsensusNetworkGenesisFileName)
-		log.Info(configs.GettingCustomGenesis)
-		err := utils.DownloadOrCopy(genesisSrc, customNetworkConfigsData.NetworkGenesisPath, true)
-		if err != nil {
-			return customNetworkConfigsData, err
-		}
-		customNetworkConfigsData.NetworkGenesisPath, err = filepath.Abs(customNetworkConfigsData.NetworkGenesisPath)
-		if err != nil {
-			return customNetworkConfigsData, err
-		}
-	}
-
-	if deployBlock != "" {
-		customNetworkConfigsData.NetworkDeployBlockPath = filepath.Join(destFolder, configs.ConsensusNetworkDeployBlockFileName)
-		log.Info(configs.WritingCustomDeployBlock)
-		err := os.WriteFile(customNetworkConfigsData.NetworkDeployBlockPath, []byte(deployBlock), os.ModePerm)
-		if err != nil {
-			return customNetworkConfigsData, fmt.Errorf(configs.ErrorWritingDeployBlockFile, customNetworkConfigsData.NetworkDeployBlockPath, err)
-		}
-		customNetworkConfigsData.NetworkDeployBlockPath, err = filepath.Abs(customNetworkConfigsData.NetworkDeployBlockPath)
-		if err != nil {
-			return customNetworkConfigsData, err
-		}
-	}
-
-	return customNetworkConfigsData, nil
 }

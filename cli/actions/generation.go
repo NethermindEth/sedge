@@ -38,6 +38,21 @@ func (s *sedgeActions) Generate(options GenerateOptions) error {
 		}
 	}
 
+	// Setup custom configs files if needed
+	customConfigsPaths, err := generate.CustomNetworkConfigs(options.GenerationPath, options.GenerationData.Network, generate.CustomConfigsSources{
+		ChainSpecSrc:     options.GenerationData.CustomChainSpecPath,
+		NetworkConfigSrc: options.GenerationData.CustomNetworkConfigPath,
+		GenesisSrc:       options.GenerationData.CustomGenesisPath,
+		DeployBlockSrc:   options.GenerationData.CustomDeployBlockPath,
+	})
+	if err != nil {
+		return err
+	}
+	options.GenerationData.CustomChainSpecPath = customConfigsPaths.ChainSpecPath
+	options.GenerationData.CustomNetworkConfigPath = customConfigsPaths.NetworkConfigPath
+	options.GenerationData.CustomGenesisPath = customConfigsPaths.GenesisPath
+	options.GenerationData.CustomDeployBlockPath = customConfigsPaths.DeployBlockPath
+
 	log.Info(configs.GeneratingDockerComposeScript)
 	// open output file
 	out, err := os.Create(filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName))
