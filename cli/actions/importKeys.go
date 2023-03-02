@@ -234,6 +234,9 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 }
 
 func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, commandRunner commands.CommandRunner, options ImportValidatorKeysOptions) (string, error) {
+	if options.Network == "chiado" {
+		options.Network = "custom"
+	}
 	// Init build context
 	contextDir, err := lighthouse.InitContext()
 	if err != nil {
