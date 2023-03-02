@@ -104,6 +104,9 @@ using docker compose command behind the scenes.
 			if err := selectNodeType(p, o); err != nil {
 				return err
 			}
+			if err := inputGenerationPath(p, o); err != nil {
+				return err
+			}
 			switch o.nodeType {
 			case NodeTypeFullNode:
 				return setupFullNode(p, o, actions)
@@ -169,10 +172,7 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) erro
 			return err
 		}
 	}
-	if err := runPromptActions(p, o,
-		confirmExposeAllPorts,
-		inputGenerationPath,
-	); err != nil {
+	if err := confirmExposeAllPorts(p, o); err != nil {
 		return err
 	}
 	if err := setupJWT(p, o, false); err != nil {
@@ -204,10 +204,7 @@ func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 			return err
 		}
 	}
-	if err := runPromptActions(p, o,
-		confirmExposeAllPorts,
-		inputGenerationPath,
-	); err != nil {
+	if err := confirmExposeAllPorts(p, o); err != nil {
 		return err
 	}
 	if err := setupJWT(p, o, true); err != nil {
@@ -251,7 +248,6 @@ func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 		inputExecutionAuthUrl,
 		inputFeeRecipient,
 		confirmExposeAllPorts,
-		inputGenerationPath,
 	); err != nil {
 		return err
 	}
@@ -288,7 +284,6 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 		inputValidatorGracePeriod,
 		inputFeeRecipient,
 		confirmEnableMEVBoost,
-		inputGenerationPath,
 	); err != nil {
 		return err
 	}
