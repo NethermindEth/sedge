@@ -1,9 +1,8 @@
 {{/* docker-compose_base.tmpl */}}
 {{ define "env" }}
 # --- Global configuration ---
-NETWORK=goerli{{if .Mev}}
+NETWORK=goerli{{if .WithMevBoostClient}}
 RELAY_URLS={{.RelayURLs}}{{end}}
-HEALTHCHECK_CMD="(curl -s -o /dev/null -w \"%{http_code}\" -X GET {{.ConsensusApiURL}}/eth/v1/node/health | grep -q 200) || exit 1"
 {{template "execution" .}}
 {{template "consensus" .}}
 {{template "validator" .}}

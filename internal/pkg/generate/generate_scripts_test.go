@@ -91,20 +91,16 @@ var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env
 	if err != nil {
 		return err
 	}
-	var ccBootnodes []string
-	if data.CCBootnodes != nil {
-		ccBootnodes = data.CCBootnodes
+	if len(data.CCBootnodes) == 0 {
+		data.CCBootnodes = configs.NetworksConfigs()[data.Network].DefaultCCBootnodes
 	}
-	if len(ccBootnodes) == 0 {
-		ccBootnodes = configs.NetworksConfigs()[data.Network].DefaultCCBootnodes
-	}
-	if len(ccBootnodes) != 0 {
-		bootnodes := strings.Join(ccBootnodes, ",")
+	if len(data.CCBootnodes) != 0 {
+		bootnodes := strings.Join(data.CCBootnodes, ",")
 		if composeData.Services.Consensus != nil && data.ConsensusClient.Name == "lighthouse" {
 			checkFlagOnCommands(t, composeData.Services.Consensus.Command, "--boot-nodes="+bootnodes)
 		}
 		if composeData.Services.Consensus != nil && data.ConsensusClient.Name == "prysm" {
-			for _, bNode := range ccBootnodes {
+			for _, bNode := range data.CCBootnodes {
 				checkFlagOnCommands(t, composeData.Services.Consensus.Command, "--bootstrap-node="+bNode)
 			}
 		}
@@ -112,7 +108,7 @@ var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env
 			checkFlagOnCommands(t, composeData.Services.Consensus.Command, "--p2p-discovery-bootnodes="+bootnodes)
 		}
 		if composeData.Services.Consensus != nil && data.ConsensusClient.Name == "lodestar" {
-			for _, bNode := range ccBootnodes {
+			for _, bNode := range data.CCBootnodes {
 				checkFlagOnCommands(t, composeData.Services.Consensus.Command, "--bootnodes="+bNode)
 			}
 		}
@@ -151,15 +147,11 @@ var checkECBootnodesOnExecution = func(t *testing.T, data *GenData, compose, env
 	if err != nil {
 		return err
 	}
-	var ecBootnodes []string
-	if data.ECBootnodes != nil {
-		ecBootnodes = data.ECBootnodes
+	if len(data.ECBootnodes) == 0 {
+		data.ECBootnodes = configs.NetworksConfigs()[data.Network].DefaultECBootnodes
 	}
-	if len(ecBootnodes) == 0 {
-		ecBootnodes = configs.NetworksConfigs()[data.Network].DefaultECBootnodes
-	}
-	if len(ecBootnodes) != 0 {
-		bootnodes := strings.Join(ecBootnodes, ",")
+	if len(data.ECBootnodes) != 0 {
+		bootnodes := strings.Join(data.ECBootnodes, ",")
 		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "besu" {
 			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--bootnodes="+bootnodes)
 		}
@@ -243,11 +235,7 @@ var checkExtraFlagsOnExecution = func(t *testing.T, data *GenData, compose, env 
 	}
 
 	if composeData.Services.Execution != nil {
-		var extraFlags []string
-		if data.ElExtraFlags != nil {
-			extraFlags = *data.ElExtraFlags
-		}
-		for _, flag := range extraFlags {
+		for _, flag := range data.ElExtraFlags {
 			assert.True(t, utils.Contains(composeData.Services.Execution.Command, "--"+flag))
 		}
 	} else {
@@ -434,7 +422,7 @@ func TestGenerateComposeServices(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				Services:        []string{execution},
 				Network:         "mainnet",
-				ElExtraFlags:    &[]string{"extra", "flag"},
+				ElExtraFlags:    []string{"extra", "flag"},
 			},
 			CheckFunctions: []CheckFunc{checkExtraFlagsOnExecution},
 		},

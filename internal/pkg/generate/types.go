@@ -19,6 +19,7 @@ import "github.com/NethermindEth/sedge/internal/pkg/clients"
 
 // EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
 type EnvData struct {
+	Services                  []string
 	Mev                       bool
 	ElImage                   string
 	ElDataDir                 string
@@ -50,9 +51,9 @@ type GenData struct {
 	FeeRecipient            string
 	JWTSecretPath           string
 	FallbackELUrls          []string
-	ElExtraFlags            *[]string
-	ClExtraFlags            *[]string
-	VlExtraFlags            *[]string
+	ElExtraFlags            []string
+	ClExtraFlags            []string
+	VlExtraFlags            []string
 	MapAllPorts             bool
 	Mev                     bool
 	RelayURLs               []string
@@ -145,6 +146,16 @@ func (d DockerComposeData) WithValidatorClient() bool {
 	return false
 }
 
+// WithMevBoostClient returns true if the Mev-Boost client is set
+func (d EnvData) WithMevBoostClient() bool {
+	for _, service := range d.Services {
+		if service == mevBoost {
+			return true
+		}
+	}
+	return false
+}
+
 type ComposeData struct {
 	Version  string    `yaml:"version,omitempty"`
 	Services *Services `yaml:"services"`
@@ -189,20 +200,10 @@ type Consensus struct {
 	Command         []string `yaml:"command"`
 	Logging         *Logging `yaml:"logging,omitempty"`
 }
-type ConsensusHealth struct {
-	Image       string       `yaml:"image"`
-	Command     string       `yaml:"command"`
-	Healthcheck *Healthcheck `yaml:"healthcheck"`
-}
-type Healthcheck struct {
-	Test     string `yaml:"test"`
-	Interval string `yaml:"interval"`
-	Timeout  string `yaml:"timeout"`
-	Retries  uint   `yaml:"retries"`
-}
 type ValidatorBlocker struct {
-	Image   string `yaml:"image"`
-	Command string `yaml:"command"`
+	Image         string `yaml:"image"`
+	ContainerName string `yaml:"container_name"`
+	Command       string `yaml:"command"`
 }
 type ValidatorImportDependsOn struct {
 	Condition string `yaml:"condition"`
@@ -231,7 +232,6 @@ type Services struct {
 	Execution        *Execution        `yaml:"execution,omitempty"`
 	Mevboost         *Mevboost         `yaml:"mevboost,omitempty"`
 	Consensus        *Consensus        `yaml:"consensus,omitempty"`
-	ConsensusHealth  *ConsensusHealth  `yaml:"consensus-health,omitempty"`
 	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker,omitempty"`
 	Validator        *Validator        `yaml:"validator,omitempty"`
 	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus,omitempty"`

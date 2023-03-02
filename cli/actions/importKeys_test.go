@@ -342,7 +342,7 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 	// Mock ContainerCreate
 	dockerClient.EXPECT().
 		ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), services.ServiceCtValidatorImport).
-		Return(container.ContainerCreateCreatedBody{ID: validatorImportCtId}, nil).
+		Return(container.CreateResponse{ID: validatorImportCtId}, nil).
 		Times(1)
 	// Mock ContainerStart
 	dockerClient.EXPECT().
@@ -354,8 +354,8 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 		Return(nil).
 		Times(1)
 	// Mock ContainerWait
-	exitCh := make(chan container.ContainerWaitOKBody, 1)
-	exitCh <- container.ContainerWaitOKBody{
+	exitCh := make(chan container.WaitResponse, 1)
+	exitCh <- container.WaitResponse{
 		StatusCode: 0,
 	}
 	dockerClient.EXPECT().
@@ -406,7 +406,7 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 	// Mock ContainerCreate
 	dockerClient.EXPECT().
 		ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), services.ServiceCtValidatorImport).
-		Return(container.ContainerCreateCreatedBody{ID: validatorImportCtId}, nil).
+		Return(container.CreateResponse{ID: validatorImportCtId}, nil).
 		Times(1)
 	// Mock ContainerStart
 	dockerClient.EXPECT().
@@ -418,8 +418,8 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 		Return(nil).
 		Times(1)
 	// Mock ContainerWait
-	exitCh := make(chan container.ContainerWaitOKBody, 1)
-	exitCh <- container.ContainerWaitOKBody{
+	exitCh := make(chan container.WaitResponse, 1)
+	exitCh <- container.WaitResponse{
 		StatusCode: 1,
 	}
 	dockerClient.EXPECT().

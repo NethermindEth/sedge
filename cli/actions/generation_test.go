@@ -343,11 +343,6 @@ func TestGenerateDockerCompose(t *testing.T) {
 					assert.True(t, re.MatchString(authEndpoint), "Execution Auth URL is not valid %s", authEndpoint)
 				}
 
-				// Check that the consensus-health service is not set if there isn't any validator.
-				if tc.genData.ValidatorClient == nil {
-					assert.Nil(t, cmpData.Services.ConsensusHealth)
-				}
-
 				// Check that mev-boost service is not set when consensus only
 				if tc.genData.ExecutionClient == nil && tc.genData.ConsensusClient == nil {
 					assert.Nil(t, cmpData.Services.Mevboost)
@@ -407,37 +402,18 @@ func TestGenerateDockerCompose(t *testing.T) {
 					}
 				}
 
-				// Check that the consensus-health service is set.
-				assert.NotNil(t, cmpData.Services.ConsensusHealth)
-				// Check that the consensus-health image is set.
-				assert.Equal(t, "alpine/curl:latest", cmpData.Services.ConsensusHealth.Image)
-				// FIXME: Find a way to test the command. It gives sintax errors beacuse of the double $ sign to escape the $ signs. It works fine when running the command in docker compose.
-				// if runtime.GOOS != "windows" {
-				// 	// Check that the consensus-health bash command is valid
-				// 	command := cmpData.Services.ConsensusHealth.Command
-				// 	cmd := exec.Command("bash", "-c", command)
-				// 	outBuffer, errBuffer := new(bytes.Buffer), new(bytes.Buffer)
-				// 	cmd.Stdout = outBuffer
-				// 	cmd.Stderr = errBuffer
-				// 	cmd.Run()
-				// 	assert.Empty(t, errBuffer, "Consensus health command is invalid: %s", command)
-				// }
-
-				// Check that healthcheck command is set
-				assert.NotEmpty(t, envData["HEALTHCHECK_CMD"])
-				// Check that Consensus API URL from input is in the health check command
-				hckCMD := envData["HEALTHCHECK_CMD"]
-				// Regex to find the <URL> and <PORT> part in "http://<URL>:<PORT>/eth/v1/node/health" and should work for https as well
-				re = regexp.MustCompile(`http[s]?://[a-zA-Z0-9\-.]+:[0-9]+/eth/v1/node/health`)
-				endpoint := re.FindAllString(hckCMD, -1)[0]
-				endpoint = strings.Split(endpoint, "/eth/v1/node/health")[0]
-				if tc.genData.ConsensusApiUrl != "" {
-					assert.Equal(t, tc.genData.ConsensusApiUrl, endpoint, "Consensus API URL is not valid: %s", endpoint)
-				} else {
-					// Regex to assert that the endpoint is in the form consensus:<PORT>
-					re = regexp.MustCompile(`http[s]?://consensus:[0-9]+`)
-					assert.True(t, re.MatchString(endpoint), "Consensus API URL is not valid: %s", endpoint)
+				// Check that validator-blocker service is set
+				assert.NotNil(t, cmpData.Services.ValidatorBlocker)
+				// Check that validator-blocker image is set
+				assert.Equal(t, "yauritux/busybox-curl:latest", cmpData.Services.ValidatorBlocker.Image)
+				// Check that validator-blocker container name is set properly
+				validatorBlockerCtName := "sedge-validator-blocker"
+				if tc.genData.ContainerTag != "" {
+					validatorBlockerCtName = validatorBlockerCtName + "-" + tc.genData.ContainerTag
 				}
+				assert.Equal(t, validatorBlockerCtName, cmpData.Services.ValidatorBlocker.ContainerName)
+				// Check that validator-blocker command is not empty
+				assert.NotEmpty(t, cmpData.Services.ValidatorBlocker.Command)
 
 				// Check that mev-boost service is not set when validator only
 				_, mev := envData["MEV"]

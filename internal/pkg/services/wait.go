@@ -21,6 +21,6 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
-func (s *serviceManager) Wait(service string, condition container.WaitCondition) (<-chan container.ContainerWaitOKBody, <-chan error) {
+func (s *serviceManager) Wait(service string, condition container.WaitCondition) (<-chan container.WaitResponse, <-chan error) {
 	return s.dockerClient.ContainerWait(context.Background(), service, condition)
 }

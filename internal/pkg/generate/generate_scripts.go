@@ -176,19 +176,10 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 			return err
 		}
 	}
-	validatorBlockerTemplate, consensusHealthTemplate := "validator-blocker", "consensus-health"
+	validatorBlockerTemplate := "validator-blocker"
 
 	// Parse validator-blocker template
 	tmp, err := templates.Services.ReadFile(strings.Join([]string{"services", validatorBlockerTemplate + ".tmpl"}, "/"))
-	if err != nil {
-		return err
-	}
-	if _, err = baseTmp.Parse(string(tmp)); err != nil {
-		return err
-	}
-
-	// Parse consensus-health template
-	tmp, err = templates.Services.ReadFile(strings.Join([]string{"services", consensusHealthTemplate + ".tmpl"}, "/"))
 	if err != nil {
 		return err
 	}
@@ -229,21 +220,13 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	// Check for CL Bootnode nodes
-	var ccBootnodes []string
-	if gd.CCBootnodes != nil {
-		ccBootnodes = gd.CCBootnodes
-	}
-	if len(ccBootnodes) == 0 {
-		ccBootnodes = configs.NetworksConfigs()[gd.Network].DefaultCCBootnodes
+	if len(gd.CCBootnodes) == 0 {
+		gd.CCBootnodes = configs.NetworksConfigs()[gd.Network].DefaultCCBootnodes
 	}
 
 	// Check for EL Bootnode nodes
-	var ecBootnodes []string
-	if gd.ECBootnodes != nil {
-		ecBootnodes = gd.ECBootnodes
-	}
-	if len(ecBootnodes) == 0 {
-		ecBootnodes = configs.NetworksConfigs()[gd.Network].DefaultECBootnodes
+	if len(gd.ECBootnodes) == 0 {
+		gd.ECBootnodes = configs.NetworksConfigs()[gd.Network].DefaultECBootnodes
 	}
 	var mevSupported bool
 	if cls[validator] != nil {
@@ -286,12 +269,12 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ClAdditionalApiPort: gd.Ports["CLAdditionalApi"],
 		VlMetricsPort:       gd.Ports["VLMetrics"],
 		FallbackELUrls:      gd.FallbackELUrls,
-		ElExtraFlags:        arrayOrEmpty(gd.ElExtraFlags),
-		ClExtraFlags:        arrayOrEmpty(gd.ClExtraFlags),
-		VlExtraFlags:        arrayOrEmpty(gd.VlExtraFlags),
-		ECBootnodes:         strings.Join(ecBootnodes, ","),
-		CCBootnodes:         strings.Join(ccBootnodes, ","),
-		CCBootnodesList:     ccBootnodes,
+		ElExtraFlags:        gd.ElExtraFlags,
+		ClExtraFlags:        gd.ClExtraFlags,
+		VlExtraFlags:        gd.VlExtraFlags,
+		ECBootnodes:         strings.Join(gd.ECBootnodes, ","),
+		CCBootnodes:         strings.Join(gd.CCBootnodes, ","),
+		CCBootnodesList:     gd.CCBootnodes,
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
@@ -317,14 +300,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	return nil
-}
-
-// arrayOrEmpty returns an empty array if the input is nil, otherwise returns the input
-func arrayOrEmpty(array *[]string) []string {
-	if array == nil {
-		return []string{}
-	}
-	return *array
 }
 
 // EnvFile generates a .env file with the provided GenData
@@ -424,6 +399,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		relayURLs = strings.Join(gd.RelayURLs, ",")
 	}
 	data := EnvData{
+		Services:                  gd.Services,
 		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		ElImage:                   imageOrEmpty(cls[execution]),
 		ElDataDir:                 "./" + configs.ExecutionDir,

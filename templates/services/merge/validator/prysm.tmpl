@@ -5,9 +5,7 @@
     image: ${VL_IMAGE_VERSION}
     depends_on: 
       validator-blocker:
-        condition: service_completed_successfully{{if .WithConsensusClient}}
-      consensus-health:
-        condition: service_healthy{{end}}
+        condition: service_completed_successfully
     networks:
       - sedge
     ports:
