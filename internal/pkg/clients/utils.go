@@ -66,7 +66,7 @@ var EmptyClientsListError = errors.New("empty clients list")
 // RandomClientName returns a random client name from a list of clients
 func RandomClientName(clients []string) (client string, err error) {
 	if len(clients) == 0 {
-		return client, ErrEmptyClientsList
+		return client, EmptyClientsListError
 	}
 
 	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(clients))))
