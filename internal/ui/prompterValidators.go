@@ -17,9 +17,12 @@ package ui
 
 import (
 	"errors"
+	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/NethermindEth/sedge/internal/utils"
 )
@@ -27,6 +30,7 @@ import (
 var (
 	ErrInvalidEthereumAddress = errors.New("invalid ethereum address")
 	ErrInvalidInt64String     = errors.New("invalid int64 string")
+	ErrInvalidFileExtension   = errors.New("invalid file extension")
 )
 
 func EthAddressValidator(ans interface{}) error {
@@ -61,4 +65,18 @@ func Int64Validator(ans interface{}) error {
 		}
 	}
 	return nil
+}
+
+func fileExtensionValidator(extensions []string) func(ans interface{}) error {
+	return func(ans interface{}) error {
+		if input, ok := ans.(string); ok {
+			input := strings.ToLower(input)
+			for _, ext := range extensions {
+				if filepath.Ext(input) == ext {
+					return nil
+				}
+			}
+		}
+		return fmt.Errorf("%w: %s, must be one of these: %s", ErrInvalidFileExtension, ans, strings.Join(extensions, ", "))
+	}
 }

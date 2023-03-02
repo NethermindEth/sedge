@@ -725,7 +725,7 @@ func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputCustomNetworkConfig(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomNetworkConfigPath, err = p.InputFilePath("Custom network config file path", "", true)
+	o.genData.CustomNetworkConfigPath, err = p.InputFilePath("Custom network config file path", "", true, ".yml", ".yaml")
 	return
 }
 
