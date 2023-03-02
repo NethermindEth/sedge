@@ -118,6 +118,7 @@ func validateResultClient(client Client, clients ClientMap) bool {
 	return false
 }
 
+// HACKME: Change this test to use fuzzy tests
 func TestRandomClientName(t *testing.T) {
 	tests := []struct {
 		name    string
