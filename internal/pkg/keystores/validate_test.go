@@ -56,6 +56,71 @@ func TestValidateKeystoreDir(t *testing.T) {
 				ErrInvalidKeystoreFileSchema,
 			},
 		},
+		{
+			name: "valid keystore dir, but without deposit_data.json",
+			setup: func(t *testing.T) (string, error) {
+				dir, err := setupTestDataDir(t)
+				if err != nil {
+					return "", err
+				}
+				if err := os.Remove(filepath.Join(dir, DepositDataFileName)); err != nil {
+					return "", err
+				}
+				return dir, nil
+			},
+			expected: []error{
+				ErrDepositDataNotFound,
+			},
+		},
+		{
+			"valid keystore dir, but without keystore_password.txt",
+			func(t *testing.T) (string, error) {
+				dir, err := setupTestDataDir(t)
+				if err != nil {
+					return "", err
+				}
+				if err := os.Remove(filepath.Join(dir, KeystorePasswordFileName)); err != nil {
+					return "", err
+				}
+				return dir, nil
+			},
+			[]error{
+				ErrKeystorePasswordNotFound,
+			},
+		},
+		{
+			"valid keystore dir, but without validator_keys dir",
+			func(t *testing.T) (string, error) {
+				dir, err := setupTestDataDir(t)
+				if err != nil {
+					return "", err
+				}
+				if err := os.RemoveAll(filepath.Join(dir, ValidatorKeysDirName)); err != nil {
+					return "", err
+				}
+				return dir, nil
+			},
+			[]error{
+				ErrValidatorKeysDirNotFound,
+			},
+		},
+		{
+			"valid keystore dir, but with empty validator_keys dir",
+			func(t *testing.T) (string, error) {
+				dir, err := setupTestDataDir(t)
+				if err != nil {
+					return "", err
+				}
+				if err := os.RemoveAll(filepath.Join(dir, ValidatorKeysDirName)); err != nil {
+					return "", err
+				}
+				os.MkdirAll(filepath.Join(dir, ValidatorKeysDirName), 0o755)
+				return dir, nil
+			},
+			[]error{
+				ErrValidatorKeysDirWithoutKeystores,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
