@@ -31,6 +31,7 @@ type Prompter interface {
 	Input(prompt, defaultValue string, required bool) (result string, err error)
 	InputInt64(prompt string, defaultValue int64) (result int64, err error)
 	InputFilePath(prompt, defaultValue string, required bool, fileExtensions ...string) (result string, err error)
+	InputURL(prompt, defaultValue string, required bool) (result string, err error)
 	InputSecret(prompt string) (result string, err error)
 	EthAddress(prompt string, defaultValue string, required bool) (result string, err error)
 	InputList(prompt string, defaultValue []string, validator func([]string) error) (result []string, err error)
@@ -87,6 +88,23 @@ func (p *prompter) InputFilePath(prompt, defaultValue string, required bool, fil
 	}
 	if len(fileExtensions) > 0 {
 		options = append(options, survey.WithValidator(fileExtensionValidator(fileExtensions)))
+	}
+	q := &survey.Input{
+		Message: prompt,
+	}
+	if defaultValue != "" {
+		q.Default = defaultValue
+	}
+	err = survey.AskOne(q, &result, options...)
+	return
+}
+
+func (p *prompter) InputURL(prompt, defaultValue string, required bool) (result string, err error) {
+	options := []survey.AskOpt{
+		survey.WithValidator(URLValidator),
+	}
+	if required {
+		options = append(options, survey.WithValidator(survey.Required))
 	}
 	q := &survey.Input{
 		Message: prompt,

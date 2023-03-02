@@ -18,6 +18,7 @@ package ui
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -31,6 +32,7 @@ var (
 	ErrInvalidEthereumAddress = errors.New("invalid ethereum address")
 	ErrInvalidInt64String     = errors.New("invalid int64 string")
 	ErrInvalidFileExtension   = errors.New("invalid file extension")
+	ErrInvalidURL             = errors.New("invalid URL")
 )
 
 func EthAddressValidator(ans interface{}) error {
@@ -48,6 +50,19 @@ func FilePathValidator(ans interface{}) error {
 		}
 		if fileInfo.IsDir() {
 			return errors.New("is a directory not a file")
+		}
+	}
+	return nil
+}
+
+func URLValidator(ans interface{}) error {
+	if str, ok := ans.(string); ok {
+		u, err := url.ParseRequestURI(str)
+		if err != nil {
+			return fmt.Errorf("%w: %s", ErrInvalidURL, err.Error())
+		}
+		if u.Scheme != "http" && u.Scheme != "https" {
+			return fmt.Errorf("%w: %s", ErrInvalidURL, "scheme must be http or https")
 		}
 	}
 	return nil

@@ -880,6 +880,6 @@ func inputExecutionAuthUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputConsensusAPIUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.ConsensusApiUrl, err = p.Input("Consensus API URL", "", false)
+	o.genData.ConsensusApiUrl, err = p.InputURL("Consensus API URL", "", false)
 	return
 }
