@@ -394,10 +394,17 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		graffiti = generateGraffiti(gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient)
 	}
 
-	var relayURLs string
-	if gd.RelayURLs != nil {
-		relayURLs = strings.Join(gd.RelayURLs, ",")
+	if len(gd.RelayURLs) == 0 {
+		switch gd.Network {
+		case "mainnet":
+			gd.RelayURLs = configs.MainnetRelayURLs()
+		case "goerli":
+			gd.RelayURLs = configs.GoerliRelayURLs()
+		case "sepolia":
+			gd.RelayURLs = configs.SepoliaRelayURLs()
+		}
 	}
+
 	data := EnvData{
 		Services:                  gd.Services,
 		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
@@ -417,7 +424,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ConsensusClientName:       nameOrEmpty(cls[consensus]),
 		KeystoreDir:               "./" + configs.KeystoreDir,
 		Graffiti:                  graffiti,
-		RelayURLs:                 relayURLs,
+		RelayURLs:                 strings.Join(gd.RelayURLs, ","),
 	}
 
 	// Save to writer

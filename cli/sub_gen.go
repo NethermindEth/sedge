@@ -19,7 +19,6 @@ import (
 	"errors"
 
 	"github.com/NethermindEth/sedge/cli/actions"
-	"github.com/NethermindEth/sedge/configs"
 	"github.com/spf13/cobra"
 )
 
@@ -261,16 +260,6 @@ func MevBoostSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		Long:  "Generate a docker-compose and an environment file with a mev-boost node configuration",
 		Args:  cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			if len(flags.relayURLs) == 0 {
-				switch network {
-				case NetworkMainnet:
-					flags.relayURLs = configs.MainnetRelayURLs()
-				case NetworkGoerli:
-					flags.relayURLs = configs.GoerliRelayURLs()
-				case NetworkSepolia:
-					flags.relayURLs = configs.SepoliaRelayURLs()
-				}
-			}
 			return preValidationGenerateCmd(network, logging, &flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
