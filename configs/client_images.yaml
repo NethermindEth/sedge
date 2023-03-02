@@ -10,14 +10,14 @@ execution:
     version: 1.17.0
   erigon:
     name: thorax/erigon
-    version: v2.38.0
+    version: v2.39.0
 consensus:
   lighthouse:
     name: sigp/lighthouse
     version: v3.5.0
   lodestar:
     name: chainsafe/lodestar
-    version: v1.4.3
+    version: v1.5.0
   teku:
     name: consensys/teku
     version: 23.2.0
@@ -30,7 +30,7 @@ validator:
     version: v3.5.0
   lodestar:
     name: chainsafe/lodestar
-    version: v1.4.3
+    version: v1.5.0
   teku:
     name: consensys/teku
     version: 23.2.0
