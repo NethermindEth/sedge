@@ -491,7 +491,7 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) e
 	log.Info("Importing validator keys into the validator client...")
 	err := a.SetupContainers(actions.SetupContainersOptions{
 		GenerationPath: o.generationPath,
-		Services:       []string{"validator"},
+		Services:       []string{validator},
 	})
 	if err != nil {
 		return err

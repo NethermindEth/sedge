@@ -5,7 +5,6 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -51,7 +50,7 @@ the importation.`,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			validatorClient = args[0]
 		},
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			options := actions.ImportValidatorKeysOptions{
 				ValidatorClient: validatorClient,
 				Network:         network,
@@ -65,10 +64,14 @@ the importation.`,
 					DeployBlockPath:   customDeployBlock,
 				},
 			}
-			err := sedgeActions.ImportValidatorKeys(options)
+			err := sedgeActions.SetupContainers(actions.SetupContainersOptions{
+				GenerationPath: generationPath,
+				Services:       []string{validator},
+			})
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
+			return sedgeActions.ImportValidatorKeys(options)
 		},
 	}
 

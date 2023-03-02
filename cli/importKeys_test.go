@@ -52,13 +52,18 @@ func TestImportKeys_NumberOfArguments(t *testing.T) {
 
 func TestImportKeys_ArgsAndFlags(t *testing.T) {
 	tests := []struct {
-		name            string
-		args            []string
-		expectedOptions actions.ImportValidatorKeysOptions
+		name              string
+		args              []string
+		expectedSetupOpts actions.SetupContainersOptions
+		expectedOptions   actions.ImportValidatorKeysOptions
 	}{
 		{
 			name: "no flags",
 			args: []string{"lighthouse"},
+			expectedSetupOpts: actions.SetupContainersOptions{
+				GenerationPath: configs.DefaultAbsSedgeDataPath,
+				Services:       []string{validator},
+			},
 			expectedOptions: actions.ImportValidatorKeysOptions{
 				ValidatorClient: "lighthouse",
 				Network:         "mainnet",
@@ -74,6 +79,10 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 				"--from", "/tmp/keystore",
 				"--path", "/tmp/sedge",
 				"--start-validator",
+			},
+			expectedSetupOpts: actions.SetupContainersOptions{
+				GenerationPath: "/tmp/sedge",
+				Services:       []string{validator},
 			},
 			expectedOptions: actions.ImportValidatorKeysOptions{
 				ValidatorClient: "prysm",
@@ -92,6 +101,10 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 				"-p", "/tmp/sedge",
 				"--stop-validator",
 			},
+			expectedSetupOpts: actions.SetupContainersOptions{
+				GenerationPath: "/tmp/sedge",
+				Services:       []string{validator},
+			},
 			expectedOptions: actions.ImportValidatorKeysOptions{
 				ValidatorClient: "teku",
 				Network:         "goerli",
@@ -107,6 +120,10 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 				"--custom-config", "/tmp/config",
 				"--custom-genesis", "/tmp/genesis",
 				"--custom-deploy-block", "custom-deploy-block",
+			},
+			expectedSetupOpts: actions.SetupContainersOptions{
+				GenerationPath: configs.DefaultAbsSedgeDataPath,
+				Services:       []string{validator},
 			},
 			expectedOptions: actions.ImportValidatorKeysOptions{
 				ValidatorClient: "lighthouse",
@@ -125,7 +142,10 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			actions := sedge_mocks.NewMockSedgeActions(gomock.NewController(t))
 
-			actions.EXPECT().ImportValidatorKeys(tt.expectedOptions).Times(1)
+			gomock.InOrder(
+				actions.EXPECT().SetupContainers(tt.expectedSetupOpts).Times(1),
+				actions.EXPECT().ImportValidatorKeys(tt.expectedOptions).Times(1),
+			)
 
 			cmd := ImportKeysCmd(actions)
 			cmd.SetArgs(tt.args)
