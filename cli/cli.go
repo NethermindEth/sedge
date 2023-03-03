@@ -735,17 +735,26 @@ func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func inputCustomNetworkConfig(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.CustomNetworkConfigPath, err = p.InputFilePath("Custom network config file path", "", true, ".yml", ".yaml")
-	return
+	if err != nil {
+		return err
+	}
+	return absPathInPlace(&o.genData.CustomNetworkConfigPath)
 }
 
 func inputCustomChainSpec(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.CustomChainSpecPath, err = p.InputFilePath("File path or url to use as custom network chainSpec for execution client", "", true)
-	return
+	if err != nil {
+		return err
+	}
+	return absPathInPlace(&o.genData.CustomChainSpecPath)
 }
 
 func inputCustomGenesis(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.CustomGenesisPath, err = p.InputFilePath("File path or URL to use as custom network genesis for consensus client", "", true)
-	return
+	if err != nil {
+		return err
+	}
+	return absPathInPlace(&o.genData.CustomGenesisPath)
 }
 
 func inputCustomTTD(p ui.Prompter, o *CliCmdOptions) (err error) {
@@ -775,7 +784,7 @@ func inputMevImage(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputMevBoostEndpoint(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.MevBoostEndpoint, err = p.Input("Mev-Boost endpoint", "", false)
+	o.genData.MevBoostEndpoint, err = p.InputURL("Mev-Boost endpoint", "", false)
 	return
 }
 
@@ -807,7 +816,7 @@ func inputGraffiti(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func inputCheckpointSyncURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 	// Default value is set in the template
-	o.genData.CheckpointSyncUrl, err = p.Input("Checkpoint sync URL", "", false)
+	o.genData.CheckpointSyncUrl, err = p.InputURL("Checkpoint sync URL", "", false)
 	return
 }
 
@@ -827,25 +836,37 @@ func inputValidatorGracePeriod(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func inputGenerationPath(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.generationPath, err = p.Input("Generation path", configs.DefaultAbsSedgeDataPath, false)
+	if err != nil {
+		return err
+	}
 	if o.generationPath == "" {
 		o.generationPath = configs.DefaultAbsSedgeDataPath
 	}
-	return
+	return absPathInPlace(&o.generationPath)
 }
 
 func inputJWTPath(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.JWTSecretPath, err = p.InputFilePath("JWT path", "", true)
-	return
+	if err != nil {
+		return err
+	}
+	return absPathInPlace(&o.genData.JWTSecretPath)
 }
 
 func inputKeystoreMnemonicPath(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.keystoreMnemonicPath, err = p.InputFilePath("Mnemonic path", "", true)
-	return
+	if err != nil {
+		return err
+	}
+	return absPathInPlace(&o.keystoreMnemonicPath)
 }
 
 func inputKeystorePassphrasePath(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.keystorePassphrasePath, err = p.InputFilePath("Passphrase path", "", true)
-	return
+	if err != nil {
+		return err
+	}
+	return absPathInPlace(&o.keystorePassphrasePath)
 }
 
 func inputKeystorePassphrase(p ui.Prompter, o *CliCmdOptions) (err error) {
@@ -870,25 +891,40 @@ func inputNumberOfExistingValidators(p ui.Prompter, o *CliCmdOptions) (err error
 
 func inputKeystorePath(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.keystorePath, err = p.Input("Keystore path", "", true)
-	return
+	if err != nil {
+		return err
+	}
+	return absPathInPlace(&o.keystorePath)
 }
 
 func inputImportSlashingProtectionFrom(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.slashingProtectionFrom, err = p.InputFilePath("Interchange slashing protection file", "", true)
-	return
+	if err != nil {
+		return err
+	}
+	return absPathInPlace(&o.slashingProtectionFrom)
 }
 
 func inputExecutionAPIUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.ExecutionApiUrl, err = p.Input("Execution API URL", "", false)
+	o.genData.ExecutionApiUrl, err = p.InputURL("Execution API URL", "", false)
 	return
 }
 
 func inputExecutionAuthUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.ExecutionAuthUrl, err = p.Input("Execution Auth API URL", "", false)
+	o.genData.ExecutionAuthUrl, err = p.InputURL("Execution Auth API URL", "", false)
 	return
 }
 
 func inputConsensusAPIUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.ConsensusApiUrl, err = p.InputURL("Consensus API URL", "", false)
 	return
+}
+
+func absPathInPlace(path *string) error {
+	absPath, err := filepath.Abs(*path)
+	if err != nil {
+		return err
+	}
+	*path = absPath
+	return nil
 }
