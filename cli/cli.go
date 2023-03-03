@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	eth2 "github.com/protolambda/zrnt/eth2/configs"
 
@@ -811,7 +812,7 @@ func inputValidatorGracePeriod(p ui.Prompter, o *CliCmdOptions) (err error) {
 	if err != nil {
 		return err
 	}
-	o.genData.VLStartGracePeriod = uint(epochs * int64(configs.NetworkEpochTime(o.genData.Network)))
+	o.genData.VLStartGracePeriod = uint((configs.NetworkEpochTime(o.genData.Network) * time.Duration(epochs)).Seconds())
 	return nil
 }
 
