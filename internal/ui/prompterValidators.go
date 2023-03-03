@@ -77,6 +77,7 @@ func Int64Validator(ans interface{}) error {
 	return nil
 }
 
+// TODO: Write unit tests
 func fileExtensionValidator(extensions []string) func(ans interface{}) error {
 	return func(ans interface{}) error {
 		if input, ok := ans.(string); ok {

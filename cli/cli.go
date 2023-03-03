@@ -746,7 +746,7 @@ func inputCustomNetworkConfig(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputCustomChainSpec(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomChainSpecPath, err = p.InputFilePath("File path or url to use as custom network chainSpec for execution client", "", true)
+	o.genData.CustomChainSpecPath, err = p.InputFilePath("File path or url to use as custom network chainSpec for execution client", "", true, ".json")
 	if err != nil {
 		return err
 	}
@@ -754,7 +754,7 @@ func inputCustomChainSpec(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputCustomGenesis(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomGenesisPath, err = p.InputFilePath("File path or URL to use as custom network genesis for consensus client", "", true)
+	o.genData.CustomGenesisPath, err = p.InputFilePath("File path or URL to use as custom network genesis for consensus client", "", true, ".ssz")
 	if err != nil {
 		return err
 	}
@@ -902,7 +902,7 @@ func inputKeystorePath(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputImportSlashingProtectionFrom(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.slashingProtectionFrom, err = p.InputFilePath("Interchange slashing protection file", "", true)
+	o.slashingProtectionFrom, err = p.InputFilePath("Interchange slashing protection file", "", true, ".json")
 	if err != nil {
 		return err
 	}
