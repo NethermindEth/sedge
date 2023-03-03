@@ -741,7 +741,7 @@ func inputCustomChainSpec(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputCustomGenesis(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomGenesisPath, err = p.InputFilePath("Custom Genesis", "", true)
+	o.genData.CustomGenesisPath, err = p.InputFilePath("File path or URL to use as custom network genesis for consensus client", "", true)
 	return
 }
 
