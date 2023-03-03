@@ -23,7 +23,7 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
-	"github.com/NethermindEth/sedge/internal/pkg/keystores/testdata"
+	keystore_test_data "github.com/NethermindEth/sedge/internal/pkg/keystores/testdata"
 	"github.com/NethermindEth/sedge/internal/utils"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
@@ -59,7 +59,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select consensus client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().Select("Select validator client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
-					prompter.EXPECT().Input("Graffiti to by used by the validator (press enter to skip it)", "", false).Return("test graffiti", nil),
+					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false).Return("test graffiti", nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", "", false).Return("http://checkpoint.sync", nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
@@ -181,7 +181,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select consensus client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().Select("Select validator client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
-					prompter.EXPECT().Input("Graffiti to by used by the validator (press enter to skip it)", "", false).Return("test graffiti", nil),
+					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false).Return("test graffiti", nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", "", false).Return("http://checkpoint.sync", nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
@@ -419,7 +419,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false).Return(generationPath, nil),
 					prompter.EXPECT().Select("Select validator client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().InputURL("Consensus API URL", "", false).Return("http://localhost:5051", nil),
-					prompter.EXPECT().Input("Graffiti to by used by the validator (press enter to skip it)", "", false).Return("test graffiti", nil),
+					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false).Return("test graffiti", nil),
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Enable MEV Boost?", false).Return(true, nil),
@@ -477,7 +477,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().InputFilePath("File path or URL to use as custom network genesis for consensus client", "", true).Return("testdata/genesis.json", nil),
 					prompter.EXPECT().Input("Custom deploy block", "", false).Return("2355021", nil),
 					prompter.EXPECT().InputURL("Consensus API URL", "", false).Return("http://localhost:5051", nil),
-					prompter.EXPECT().Input("Graffiti to by used by the validator (press enter to skip it)", "", false).Return("test graffiti", nil),
+					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false).Return("test graffiti", nil),
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Enable MEV Boost?", false).Return(true, nil),
