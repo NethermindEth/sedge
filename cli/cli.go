@@ -18,6 +18,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -455,6 +456,24 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) e
 			return err
 		}
 		o.keystorePath = filepath.Join(o.generationPath, "keystore")
+		// Check if file exists
+		if f, err := os.Stat(o.keystorePath); err == nil {
+			if f.IsDir() {
+				overwrite, err := p.Confirm(fmt.Sprintf("%s already exists. Do you want to overwrite it?", o.keystorePath), false)
+				if err != nil {
+					return err
+				}
+				if overwrite {
+					if err := os.RemoveAll(o.keystorePath); err != nil {
+						return err
+					}
+				} else {
+					return fmt.Errorf("%s already exists", o.keystorePath)
+				}
+			} else {
+				return fmt.Errorf("%s is not a directory", o.keystorePath)
+			}
+		}
 		if err := keystores.CreateKeystores(keystores.ValidatorKeysGenData{
 			Mnemonic:    o.keystoreMnemonic,
 			Passphrase:  o.keystorePassphrase,

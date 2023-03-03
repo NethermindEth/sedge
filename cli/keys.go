@@ -43,27 +43,54 @@ type KeysCmdFlags struct {
 
 func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 	var (
-		flags      KeysCmdFlags
-		passphrase string
-		mnemonic   string
+		flags        KeysCmdFlags
+		passphrase   string
+		mnemonic     string
+		keystorePath string
 	)
 	// Cmd declaration
 	cmd := &cobra.Command{
 		Use:   "keys [flags]",
 		Short: "Generate keystore folder",
 		Long:  "Generate keystore folder using the eth2.0-deposit-cli tool",
-		PreRun: func(cmd *cobra.Command, args []string) {
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			// Build keystores path
+			keystorePath = filepath.Join(flags.path, "keystore")
+			keystoreAbsPath, err := filepath.Abs(keystorePath)
+			if err != nil {
+				return err
+			}
+			keystorePath = keystoreAbsPath
+			// Check if file exists
+			if f, err := os.Stat(keystorePath); err == nil {
+				if f.IsDir() {
+					overwrite, err := p.Confirm(fmt.Sprintf("%s already exists. Do you want to overwrite it?", keystorePath), false)
+					if err != nil {
+						return err
+					}
+					if overwrite {
+						if err := os.RemoveAll(keystorePath); err != nil {
+							return err
+						}
+					} else {
+						return fmt.Errorf("%s already exists", keystorePath)
+					}
+				} else {
+					return fmt.Errorf("%s is not a directory", keystorePath)
+				}
+			}
 			// Validate network
 			if err := configs.NetworkCheck(flags.network); err != nil {
 				log.Fatal(err.Error())
 			}
 			// Ensure that path is absolute
-			log.Debugf("Path to keystore file: %s", flags.path)
+			log.Debugf("Path to keystore folder: %s", flags.path)
 			absPath, err := filepath.Abs(flags.path)
 			if err != nil {
 				log.Fatalf(configs.InvalidVolumePathError, err)
 			}
 			flags.path = absPath
+			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			// TODO: allow usage of withdrawal address
@@ -125,8 +152,6 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 				}
 				flags.numberVal = numberVal
 			}
-
-			keystorePath := filepath.Join(flags.path, "keystore")
 
 			data := keystores.ValidatorKeysGenData{
 				Mnemonic:    mnemonic,
