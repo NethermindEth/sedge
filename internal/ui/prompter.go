@@ -47,7 +47,7 @@ func (p *prompter) Select(message, defaultValue string, options []string) (resul
 	q := &survey.Select{
 		Message:  message,
 		Options:  options,
-		PageSize: 5,
+		PageSize: 10,
 	}
 	if defaultValue != "" {
 		q.Default = defaultValue
