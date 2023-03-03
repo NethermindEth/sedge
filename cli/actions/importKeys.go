@@ -3,7 +3,6 @@ package actions
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"path/filepath"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -101,7 +100,7 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		return fmt.Errorf("%w: %s", UnsupportedValidatorClientError, options.ValidatorClient)
 	}
 	log.Info("Importing validator keys")
-	runErr := runAndWait(s.dockerClient, s.serviceManager, ctID)
+	runErr := runAndWaitImportKeys(s.dockerClient, s.serviceManager, ctID)
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
 		log.Info("The validator container is being restarted")
@@ -351,7 +350,7 @@ func setupTekuValidatorImport(dockerClient client.APIClient, serviceManager serv
 	return ct.ID, nil
 }
 
-func runAndWait(dockerClient client.APIClient, serviceManager services.ServiceManager, ctID string) error {
+func runAndWaitImportKeys(dockerClient client.APIClient, serviceManager services.ServiceManager, ctID string) error {
 	log.Debugf("import keys container id: %s", ctID)
 	ctExit, errChan := serviceManager.Wait(services.ServiceCtValidatorImport, container.WaitConditionNextExit)
 	log.Info("The keys import container is starting")
@@ -361,11 +360,11 @@ func runAndWait(dockerClient client.APIClient, serviceManager services.ServiceMa
 	for {
 		select {
 		case exitResult := <-ctExit:
+			logs, err := serviceManager.ContainerLogs(ctID, "Import keys")
+			if err != nil {
+				return err
+			}
 			if exitResult.StatusCode != 0 {
-				logs, err := containerLogs(dockerClient, ctID)
-				if err != nil {
-					return err
-				}
 				return newValidatorImportCtBadExitCodeError(ctID, exitResult.StatusCode, logs)
 			}
 			return deleteContainer(dockerClient, ctID)
@@ -373,18 +372,4 @@ func runAndWait(dockerClient client.APIClient, serviceManager services.ServiceMa
 			return exitErr
 		}
 	}
-}
-
-func containerLogs(dockerClient client.APIClient, ctID string) (string, error) {
-	logReader, err := dockerClient.ContainerLogs(context.Background(), ctID, types.ContainerLogsOptions{
-		ShowStdout: true,
-		ShowStderr: true,
-		Follow:     false,
-	})
-	if err != nil {
-		return "", err
-	}
-	defer logReader.Close()
-	logs, err := ioutil.ReadAll(logReader)
-	return string(logs), err
 }

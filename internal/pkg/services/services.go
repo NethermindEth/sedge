@@ -35,6 +35,7 @@ type ServiceManager interface {
 	IsRunning(service string) (bool, error)
 	Wait(service string, condition container.WaitCondition) (<-chan container.WaitResponse, <-chan error)
 	ContainerId(service string) (string, error)
+	ContainerLogs(ctID, service string) (string, error)
 }
 
 func NewServiceManager(dockerClient client.APIClient) ServiceManager {

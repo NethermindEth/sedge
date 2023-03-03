@@ -17,8 +17,10 @@ package actions_test
 
 import (
 	"errors"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli/actions"
@@ -294,6 +296,11 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag stri
 	dockerClient.EXPECT().
 		ContainerWait(gomock.Any(), slashingCtName, container.WaitConditionNextExit).
 		Return(exitCh, make(chan error)).
+		Times(1)
+	// Mock container logs
+	dockerClient.EXPECT().
+		ContainerLogs(gomock.Any(), slashingCtId, gomock.Any()).
+		Return(ioutil.NopCloser(strings.NewReader("logs")), nil).
 		Times(1)
 	// Mock ContainerRemove
 	dockerClient.EXPECT().

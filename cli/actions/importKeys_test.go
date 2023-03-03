@@ -362,6 +362,11 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 		ContainerWait(gomock.Any(), services.ServiceCtValidatorImport, container.WaitConditionNextExit).
 		Return(exitCh, make(chan error)).
 		Times(1)
+	// Mock container logs
+	dockerClient.EXPECT().
+		ContainerLogs(gomock.Any(), validatorImportCtId, gomock.Any()).
+		Return(ioutil.NopCloser(strings.NewReader("logs")), nil).
+		Times(1)
 	// Mock ContainerRemove
 	dockerClient.EXPECT().
 		ContainerRemove(gomock.Any(), validatorImportCtId, types.ContainerRemoveOptions{}).
