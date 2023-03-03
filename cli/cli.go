@@ -515,7 +515,6 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) e
 	if err != nil {
 		return err
 	}
-	log.Info("Validator keys imported successfully")
 	if err := confirmImportSlashingProtection(p, o); err != nil {
 		return err
 	}
