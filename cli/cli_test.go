@@ -47,6 +47,33 @@ func TestCli_FullNode(t *testing.T) {
 			name: "full node with validator mainnet",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter) {
 				generationPath := t.TempDir()
+				genData := generate.GenData{
+					Services: []string{"execution", "consensus", "validator"},
+					ExecutionClient: &clients.Client{
+						Name:  "nethermind",
+						Type:  "execution",
+						Image: configs.ClientImages.Execution.Nethermind.String(),
+					},
+					ConsensusClient: &clients.Client{
+						Name:  "prysm",
+						Type:  "consensus",
+						Image: configs.ClientImages.Consensus.Prysm.String(),
+					},
+					ValidatorClient: &clients.Client{
+						Name:  "prysm",
+						Type:  "validator",
+						Image: configs.ClientImages.Validator.Prysm.String(),
+					},
+					Network:            "mainnet",
+					CheckpointSyncUrl:  "http://checkpoint.sync",
+					FeeRecipient:       "0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5",
+					MapAllPorts:        true,
+					Graffiti:           "test graffiti",
+					VLStartGracePeriod: 840,
+					Mev:                true,
+					MevImage:           "flashbots/mev-boost:latest",
+					RelayURLs:          configs.MainnetRelayURLs(),
+				}
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(0, nil),
@@ -64,36 +91,11 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
+
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
-						GenerationData: generate.GenData{
-							Services: []string{"execution", "consensus", "validator"},
-							ExecutionClient: &clients.Client{
-								Name:  "nethermind",
-								Type:  "execution",
-								Image: configs.ClientImages.Execution.Nethermind.String(),
-							},
-							ConsensusClient: &clients.Client{
-								Name:  "prysm",
-								Type:  "consensus",
-								Image: configs.ClientImages.Consensus.Prysm.String(),
-							},
-							ValidatorClient: &clients.Client{
-								Name:  "prysm",
-								Type:  "validator",
-								Image: configs.ClientImages.Validator.Prysm.String(),
-							},
-							Network:            "mainnet",
-							CheckpointSyncUrl:  "http://checkpoint.sync",
-							FeeRecipient:       "0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5",
-							MapAllPorts:        true,
-							Graffiti:           "test graffiti",
-							VLStartGracePeriod: 840,
-							Mev:                true,
-							MevImage:           "flashbots/mev-boost:latest",
-							RelayURLs:          configs.MainnetRelayURLs(),
-						},
-					})).Return(nil),
+						GenerationData: genData,
+					})).Return(genData, nil),
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					prompter.EXPECT().Select("Select mnemonic source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					prompter.EXPECT().Select("Select passphrase source", "", []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}).Return(0, nil),
@@ -119,6 +121,24 @@ func TestCli_FullNode(t *testing.T) {
 			name: "full node without validator mainnet",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter) {
 				generationPath := t.TempDir()
+				genData := generate.GenData{
+					Services: []string{"execution", "consensus"},
+					ExecutionClient: &clients.Client{
+						Name:  "nethermind",
+						Type:  "execution",
+						Image: configs.ClientImages.Execution.Nethermind.String(),
+					},
+					ConsensusClient: &clients.Client{
+						Name:  "prysm",
+						Type:  "consensus",
+						Image: configs.ClientImages.Consensus.Prysm.String(),
+					},
+					Network:           "mainnet",
+					CheckpointSyncUrl: "http://checkpoint.sync",
+					FeeRecipient:      "0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5",
+					MapAllPorts:       true,
+					Mev:               true,
+				}
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
@@ -132,25 +152,8 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
-						GenerationData: generate.GenData{
-							Services: []string{"execution", "consensus"},
-							ExecutionClient: &clients.Client{
-								Name:  "nethermind",
-								Type:  "execution",
-								Image: configs.ClientImages.Execution.Nethermind.String(),
-							},
-							ConsensusClient: &clients.Client{
-								Name:  "prysm",
-								Type:  "consensus",
-								Image: configs.ClientImages.Consensus.Prysm.String(),
-							},
-							Network:           "mainnet",
-							CheckpointSyncUrl: "http://checkpoint.sync",
-							FeeRecipient:      "0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5",
-							MapAllPorts:       true,
-							Mev:               true,
-						},
-					})).Return(nil),
+						GenerationData: genData,
+					})).Return(genData, nil),
 					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
 				)
 			},
@@ -164,7 +167,39 @@ func TestCli_FullNode(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-
+				genData := generate.GenData{
+					Services: []string{"execution", "consensus", "validator"},
+					ExecutionClient: &clients.Client{
+						Name:  "nethermind",
+						Type:  "execution",
+						Image: configs.ClientImages.Execution.Nethermind.String(),
+					},
+					ConsensusClient: &clients.Client{
+						Name:  "prysm",
+						Type:  "consensus",
+						Image: configs.ClientImages.Consensus.Prysm.String(),
+					},
+					ValidatorClient: &clients.Client{
+						Name:  "prysm",
+						Type:  "validator",
+						Image: configs.ClientImages.Validator.Prysm.String(),
+					},
+					Network:                 NetworkCustom,
+					CheckpointSyncUrl:       "http://checkpoint.sync",
+					FeeRecipient:            "0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5",
+					MapAllPorts:             true,
+					Graffiti:                "test graffiti",
+					VLStartGracePeriod:      840,
+					Mev:                     true,
+					CustomNetworkConfigPath: absPathOrFail(t, "testdata/networkConfig.yml"),
+					CustomChainSpecPath:     absPathOrFail(t, "testdata/chainSpec.json"),
+					CustomGenesisPath:       absPathOrFail(t, "testdata/genesis.json"),
+					CustomTTD:               "58750000000000",
+					CustomDeployBlock:       "2355021",
+					ECBootnodes:             []string{"enode://ecnode1", "enode://ecnode2"},
+					CCBootnodes:             []string{"enode://ccnode1", "enode://ccnode2"},
+					JWTSecretPath:           filepath.Join(testData, "jwt"),
+				}
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(5, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
@@ -189,40 +224,8 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().InputFilePath("JWT path", "", true).Return(filepath.Join(testData, "jwt"), nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
-						GenerationData: generate.GenData{
-							Services: []string{"execution", "consensus", "validator"},
-							ExecutionClient: &clients.Client{
-								Name:  "nethermind",
-								Type:  "execution",
-								Image: configs.ClientImages.Execution.Nethermind.String(),
-							},
-							ConsensusClient: &clients.Client{
-								Name:  "prysm",
-								Type:  "consensus",
-								Image: configs.ClientImages.Consensus.Prysm.String(),
-							},
-							ValidatorClient: &clients.Client{
-								Name:  "prysm",
-								Type:  "validator",
-								Image: configs.ClientImages.Validator.Prysm.String(),
-							},
-							Network:                 NetworkCustom,
-							CheckpointSyncUrl:       "http://checkpoint.sync",
-							FeeRecipient:            "0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5",
-							MapAllPorts:             true,
-							Graffiti:                "test graffiti",
-							VLStartGracePeriod:      840,
-							Mev:                     true,
-							CustomNetworkConfigPath: absPathOrFail(t, "testdata/networkConfig.yml"),
-							CustomChainSpecPath:     absPathOrFail(t, "testdata/chainSpec.json"),
-							CustomGenesisPath:       absPathOrFail(t, "testdata/genesis.json"),
-							CustomTTD:               "58750000000000",
-							CustomDeployBlock:       "2355021",
-							ECBootnodes:             []string{"enode://ecnode1", "enode://ecnode2"},
-							CCBootnodes:             []string{"enode://ccnode1", "enode://ccnode2"},
-							JWTSecretPath:           filepath.Join(testData, "jwt"),
-						},
-					})).Return(nil),
+						GenerationData: genData,
+					})).Return(genData, nil),
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(1, nil),
 					prompter.EXPECT().Input("Keystore path", "", true).Return(keystoreDir, nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
@@ -248,6 +251,16 @@ func TestCli_FullNode(t *testing.T) {
 			name: "execution node",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter) {
 				generationPath := t.TempDir()
+				genData := generate.GenData{
+					Services: []string{"execution"},
+					ExecutionClient: &clients.Client{
+						Name:  "nethermind",
+						Type:  "execution",
+						Image: configs.ClientImages.Execution.Nethermind.String(),
+					},
+					Network:     "mainnet",
+					MapAllPorts: true,
+				}
 
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(0, nil),
@@ -258,17 +271,8 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(2, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
-						GenerationData: generate.GenData{
-							Services: []string{"execution"},
-							ExecutionClient: &clients.Client{
-								Name:  "nethermind",
-								Type:  "execution",
-								Image: configs.ClientImages.Execution.Nethermind.String(),
-							},
-							Network:     "mainnet",
-							MapAllPorts: true,
-						},
-					})).Return(nil),
+						GenerationData: genData,
+					})).Return(genData, nil),
 					prompter.EXPECT().Confirm("Run services now?", false).Return(true, nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
 						GenerationPath: generationPath,
@@ -285,7 +289,19 @@ func TestCli_FullNode(t *testing.T) {
 			name: "execution node, custom network",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter) {
 				generationPath := t.TempDir()
-
+				genData := generate.GenData{
+					Services: []string{"execution"},
+					ExecutionClient: &clients.Client{
+						Name:  "nethermind",
+						Type:  "execution",
+						Image: configs.ClientImages.Execution.Nethermind.String(),
+					},
+					Network:             NetworkCustom,
+					MapAllPorts:         true,
+					CustomChainSpecPath: absPathOrFail(t, "testdata/chainSpec.json"),
+					CustomTTD:           "58750000000000",
+					ECBootnodes:         []string{"enode://ecnode1", "enode://ecnode2"},
+				}
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(5, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(1, nil),
@@ -298,20 +314,8 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
-						GenerationData: generate.GenData{
-							Services: []string{"execution"},
-							ExecutionClient: &clients.Client{
-								Name:  "nethermind",
-								Type:  "execution",
-								Image: configs.ClientImages.Execution.Nethermind.String(),
-							},
-							Network:             NetworkCustom,
-							MapAllPorts:         true,
-							CustomChainSpecPath: absPathOrFail(t, "testdata/chainSpec.json"),
-							CustomTTD:           "58750000000000",
-							ECBootnodes:         []string{"enode://ecnode1", "enode://ecnode2"},
-						},
-					})).Return(nil),
+						GenerationData: genData,
+					})).Return(genData, nil),
 					prompter.EXPECT().Confirm("Run services now?", false).Return(true, nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
 						GenerationPath: generationPath,
@@ -328,6 +332,21 @@ func TestCli_FullNode(t *testing.T) {
 			name: "consensus node",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter) {
 				generationPath := t.TempDir()
+				genData := generate.GenData{
+					Services: []string{"consensus"},
+					ConsensusClient: &clients.Client{
+						Name:  "prysm",
+						Type:  "consensus",
+						Image: configs.ClientImages.Consensus.Prysm.String(),
+					},
+					Network:           NetworkGoerli,
+					CheckpointSyncUrl: "http://checkpoint.sync",
+					FeeRecipient:      "0x2d07a21ebadde0c13e8b91022a7e5732eb6bf5d5",
+					MapAllPorts:       true,
+					ExecutionApiUrl:   "http://execution:5051",
+					ExecutionAuthUrl:  "http://execution:5051",
+					MevBoostEndpoint:  "http://mev-boost:3030",
+				}
 
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(1, nil),
@@ -343,22 +362,8 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
-						GenerationData: generate.GenData{
-							Services: []string{"consensus"},
-							ConsensusClient: &clients.Client{
-								Name:  "prysm",
-								Type:  "consensus",
-								Image: configs.ClientImages.Consensus.Prysm.String(),
-							},
-							Network:           NetworkGoerli,
-							CheckpointSyncUrl: "http://checkpoint.sync",
-							FeeRecipient:      "0x2d07a21ebadde0c13e8b91022a7e5732eb6bf5d5",
-							MapAllPorts:       true,
-							ExecutionApiUrl:   "http://execution:5051",
-							ExecutionAuthUrl:  "http://execution:5051",
-							MevBoostEndpoint:  "http://mev-boost:3030",
-						},
-					})).Return(nil),
+						GenerationData: genData,
+					})).Return(genData, nil),
 					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
 				)
 			},
@@ -367,7 +372,23 @@ func TestCli_FullNode(t *testing.T) {
 			name: "consensus node, custom network",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter) {
 				generationPath := t.TempDir()
-
+				genData := generate.GenData{
+					Services: []string{"consensus"},
+					ConsensusClient: &clients.Client{
+						Name:  "prysm",
+						Type:  "consensus",
+						Image: configs.ClientImages.Consensus.Prysm.String(),
+					},
+					Network:                 NetworkCustom,
+					FeeRecipient:            "0x2d07a21ebadce0c13e8a91022a7e5732eb6bf5d5",
+					MapAllPorts:             true,
+					ExecutionApiUrl:         "http://localhost:5051",
+					ExecutionAuthUrl:        "http://localhost:5051",
+					CustomNetworkConfigPath: absPathOrFail(t, "testdata/networkConfig.yaml"),
+					CustomGenesisPath:       absPathOrFail(t, "testdata/genesis.json"),
+					CustomDeployBlock:       "2355021",
+					CCBootnodes:             []string{"enode://ccnode1", "enode://ccnode2"},
+				}
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(5, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
@@ -384,24 +405,8 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
-						GenerationData: generate.GenData{
-							Services: []string{"consensus"},
-							ConsensusClient: &clients.Client{
-								Name:  "prysm",
-								Type:  "consensus",
-								Image: configs.ClientImages.Consensus.Prysm.String(),
-							},
-							Network:                 NetworkCustom,
-							FeeRecipient:            "0x2d07a21ebadce0c13e8a91022a7e5732eb6bf5d5",
-							MapAllPorts:             true,
-							ExecutionApiUrl:         "http://localhost:5051",
-							ExecutionAuthUrl:        "http://localhost:5051",
-							CustomNetworkConfigPath: absPathOrFail(t, "testdata/networkConfig.yaml"),
-							CustomGenesisPath:       absPathOrFail(t, "testdata/genesis.json"),
-							CustomDeployBlock:       "2355021",
-							CCBootnodes:             []string{"enode://ccnode1", "enode://ccnode2"},
-						},
-					})).Return(nil),
+						GenerationData: genData,
+					})).Return(genData, nil),
 					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
 				)
 			},
@@ -412,6 +417,20 @@ func TestCli_FullNode(t *testing.T) {
 				generationPath := t.TempDir()
 
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
+				genData := generate.GenData{
+					Services: []string{"validator"},
+					ValidatorClient: &clients.Client{
+						Name:  "prysm",
+						Type:  "validator",
+						Image: configs.ClientImages.Validator.Prysm.String(),
+					},
+					Network:             "mainnet",
+					FeeRecipient:        "0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5",
+					Graffiti:            "test graffiti",
+					VLStartGracePeriod:  840,
+					MevBoostOnValidator: true,
+					ConsensusApiUrl:     "http://localhost:5051",
+				}
 
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(0, nil),
@@ -425,21 +444,8 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Confirm("Enable MEV Boost?", false).Return(true, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
-						GenerationData: generate.GenData{
-							Services: []string{"validator"},
-							ValidatorClient: &clients.Client{
-								Name:  "prysm",
-								Type:  "validator",
-								Image: configs.ClientImages.Validator.Prysm.String(),
-							},
-							Network:             "mainnet",
-							FeeRecipient:        "0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5",
-							Graffiti:            "test graffiti",
-							VLStartGracePeriod:  840,
-							MevBoostOnValidator: true,
-							ConsensusApiUrl:     "http://localhost:5051",
-						},
-					})).Return(nil),
+						GenerationData: genData,
+					})).Return(genData, nil),
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					prompter.EXPECT().Select("Select mnemonic source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					prompter.EXPECT().Select("Select passphrase source", "", []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}).Return(0, nil),
@@ -467,6 +473,23 @@ func TestCli_FullNode(t *testing.T) {
 				generationPath := t.TempDir()
 
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
+				genData := generate.GenData{
+					Services: []string{"validator"},
+					ValidatorClient: &clients.Client{
+						Name:  "prysm",
+						Type:  "validator",
+						Image: configs.ClientImages.Validator.Prysm.String(),
+					},
+					Network:                 NetworkCustom,
+					FeeRecipient:            "0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5",
+					Graffiti:                "test graffiti",
+					VLStartGracePeriod:      840,
+					MevBoostOnValidator:     true,
+					ConsensusApiUrl:         "http://localhost:5051",
+					CustomNetworkConfigPath: absPathOrFail(t, "testdata/networkConfig.yml"),
+					CustomGenesisPath:       absPathOrFail(t, "testdata/genesis.json"),
+					CustomDeployBlock:       "2355021",
+				}
 
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(5, nil),
@@ -483,24 +506,8 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Confirm("Enable MEV Boost?", false).Return(true, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
-						GenerationData: generate.GenData{
-							Services: []string{"validator"},
-							ValidatorClient: &clients.Client{
-								Name:  "prysm",
-								Type:  "validator",
-								Image: configs.ClientImages.Validator.Prysm.String(),
-							},
-							Network:                 NetworkCustom,
-							FeeRecipient:            "0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5",
-							Graffiti:                "test graffiti",
-							VLStartGracePeriod:      840,
-							MevBoostOnValidator:     true,
-							ConsensusApiUrl:         "http://localhost:5051",
-							CustomNetworkConfigPath: absPathOrFail(t, "testdata/networkConfig.yml"),
-							CustomGenesisPath:       absPathOrFail(t, "testdata/genesis.json"),
-							CustomDeployBlock:       "2355021",
-						},
-					})).Return(nil),
+						GenerationData: genData,
+					})).Return(genData, nil),
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					prompter.EXPECT().Select("Select mnemonic source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					prompter.EXPECT().Select("Select passphrase source", "", []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}).Return(0, nil),

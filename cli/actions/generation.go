@@ -29,12 +29,12 @@ type GenerateOptions struct {
 	GenerationPath string
 }
 
-func (s *sedgeActions) Generate(options GenerateOptions) error {
+func (s *sedgeActions) Generate(options GenerateOptions) (generate.GenData, error) {
 	// Create scripts directory if not exists
 	if _, err := os.Stat(options.GenerationPath); os.IsNotExist(err) {
 		err = os.MkdirAll(options.GenerationPath, 0o755)
 		if err != nil {
-			return err
+			return options.GenerationData, err
 		}
 	}
 
@@ -46,7 +46,7 @@ func (s *sedgeActions) Generate(options GenerateOptions) error {
 		DeployBlockSrc:   options.GenerationData.CustomDeployBlockPath,
 	})
 	if err != nil {
-		return err
+		return options.GenerationData, err
 	}
 	options.GenerationData.CustomChainSpecPath = customConfigsPaths.ChainSpecPath
 	options.GenerationData.CustomNetworkConfigPath = customConfigsPaths.NetworkConfigPath
@@ -57,12 +57,12 @@ func (s *sedgeActions) Generate(options GenerateOptions) error {
 	// open output file
 	out, err := os.Create(filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName))
 	if err != nil {
-		return err
+		return options.GenerationData, err
 	}
 	defer out.Close()
 	err = generate.ComposeFile(&options.GenerationData, out)
 	if err != nil {
-		return err
+		return options.GenerationData, err
 	}
 	log.Info(configs.GeneratedDockerComposeScript)
 
@@ -70,21 +70,21 @@ func (s *sedgeActions) Generate(options GenerateOptions) error {
 	// open output file
 	outEnv, err := os.Create(filepath.Join(options.GenerationPath, configs.DefaultEnvFileName))
 	if err != nil {
-		return err
+		return options.GenerationData, err
 	}
 	defer outEnv.Close()
 	err = generate.EnvFile(&options.GenerationData, outEnv)
 	if err != nil {
-		return err
+		return options.GenerationData, err
 	}
 	log.Info(configs.GeneratedEnvFile)
 
 	log.Info(configs.CleaningGeneratedFiles)
 	err = generate.CleanGenerated(options.GenerationPath)
 	if err != nil {
-		return err
+		return options.GenerationData, err
 	}
 	log.Info(configs.CleanedGeneratedFiles)
 
-	return nil
+	return options.GenerationData, nil
 }

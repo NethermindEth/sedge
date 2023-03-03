@@ -125,7 +125,7 @@ using docker compose command behind the scenes.
 	return cmd
 }
 
-func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) (err error) {
 	o.genData.Services = []string{"execution", "consensus"}
 	if err := confirmWithValidator(p, o); err != nil {
 		return err
@@ -183,16 +183,17 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) erro
 	// Set constant values
 	o.genData.Mev = true
 	// Call generate action
-	if err := a.Generate(actions.GenerateOptions{
+	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
 		GenerationPath: o.generationPath,
-	}); err != nil {
+	})
+	if err != nil {
 		return err
 	}
 	return postGenerate(p, o, a)
 }
 
-func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) (err error) {
 	o.genData.Services = []string{"execution"}
 	if err := selectExecutionClient(p, o); err != nil {
 		return err
@@ -212,16 +213,17 @@ func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 	if err := setupJWT(p, o, true); err != nil {
 		return err
 	}
-	if err := a.Generate(actions.GenerateOptions{
+	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
 		GenerationPath: o.generationPath,
-	}); err != nil {
+	})
+	if err != nil {
 		return err
 	}
 	return postGenerate(p, o, a)
 }
 
-func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) (err error) {
 	o.genData.Services = []string{"consensus"}
 	if err := selectConsensusClient(p, o); err != nil {
 		return err
@@ -256,16 +258,17 @@ func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 	if err := setupJWT(p, o, true); err != nil {
 		return err
 	}
-	if err := a.Generate(actions.GenerateOptions{
+	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
 		GenerationPath: o.generationPath,
-	}); err != nil {
+	})
+	if err != nil {
 		return err
 	}
 	return postGenerate(p, o, a)
 }
 
-func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) (err error) {
 	o.genData.Services = []string{"validator"}
 	if err := selectValidatorClient(p, o); err != nil {
 		return err
@@ -288,10 +291,11 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 	); err != nil {
 		return err
 	}
-	if err := a.Generate(actions.GenerateOptions{
+	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
 		GenerationPath: o.generationPath,
-	}); err != nil {
+	})
+	if err != nil {
 		return err
 	}
 	return postGenerate(p, o, a)

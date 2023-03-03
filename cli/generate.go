@@ -287,7 +287,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		MevBoostOnValidator:     flags.mevBoostOnVal,
 		ContainerTag:            containerTag,
 	}
-	err = sedgeAction.Generate(actions.GenerateOptions{
+	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,
 		GenerationPath: generationPath,
 	})

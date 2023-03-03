@@ -17,6 +17,7 @@ package actions
 
 import (
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/docker/docker/client"
 )
@@ -29,7 +30,7 @@ type SedgeActions interface {
 	SetupContainers(SetupContainersOptions) error
 	RunContainers(RunContainersOptions) error
 	ManageDependencies(ManageDependenciesOptions) error
-	Generate(GenerateOptions) error
+	Generate(GenerateOptions) (generate.GenData, error)
 	CreateJWTSecrets(CreateJWTSecretOptions) (string, error)
 	ImportValidatorKeys(ImportValidatorKeysOptions) error
 }

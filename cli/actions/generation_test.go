@@ -275,7 +275,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 				tc.genData.ValidatorClient.SetImageOrDefault("")
 			}
 
-			err := sedgeAction.Generate(actions.GenerateOptions{
+			_, err := sedgeAction.Generate(actions.GenerateOptions{
 				GenerationData: tc.genData,
 				GenerationPath: samplePath,
 			})
@@ -451,7 +451,7 @@ func TestFolderCreationOnCompose(t *testing.T) {
 
 	sedgeAction := newAction(t, nil)
 
-	err := sedgeAction.Generate(actions.GenerateOptions{
+	_, err := sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: sampleData,
 		GenerationPath: samplePath,
 	})
