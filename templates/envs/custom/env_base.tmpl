@@ -2,8 +2,9 @@
 {{ define "env" }}
 # --- Global configuration ---
 NETWORK=custom
-{{template "execution" .}}{{if .FeeRecipient}}
-CC_FEE_RECIPIENT={{.FeeRecipient}}{{end}}
+{{if .FeeRecipient}}
+FEE_RECIPIENT={{.FeeRecipient}}{{end}}
+{{template "execution" .}}
 {{template "consensus" .}}
 {{template "validator" .}}
 {{ end }}

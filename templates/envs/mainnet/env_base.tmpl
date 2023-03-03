@@ -2,9 +2,9 @@
 {{ define "env" }}
 # --- Global configuration ---
 NETWORK=mainnet{{if .WithMevBoostClient}}
-RELAY_URLS={{.RelayURLs}}{{end}}
-{{template "execution" .}}{{if .FeeRecipient}}
-CC_FEE_RECIPIENT={{.FeeRecipient}}{{end}}
+RELAY_URLS={{.RelayURLs}}{{end}}{{if .FeeRecipient}}
+FEE_RECIPIENT={{.FeeRecipient}}{{end}}
+{{template "execution" .}}
 {{template "consensus" .}}
 {{template "validator" .}}
 {{ end }}
