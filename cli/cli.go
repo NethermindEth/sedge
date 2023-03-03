@@ -810,7 +810,7 @@ func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputGraffiti(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.Graffiti, err = p.Input("Graffiti to by used by the validator (press enter to skip it)", "", false)
+	o.genData.Graffiti, err = p.Input("Graffiti to be used by the validator (press enter to skip it)", "", false)
 	return
 }
 
