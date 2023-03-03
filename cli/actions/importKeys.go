@@ -197,7 +197,6 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 	}
 	cmd := []string{
 		"validator", "import",
-		"--preset", preset,
 		"--dataDir", "/data",
 		"--importKeystores=/keystore/validator_keys",
 		"--importKeystoresPassword=/keystore/keystore_password.txt",
@@ -211,6 +210,7 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 		cmd = append(cmd, "--paramsFile=/network_config/config.yaml")
 	} else {
 		cmd = append(cmd, "--network", options.Network)
+		cmd = append(cmd, "--preset", preset)
 	}
 	log.Debugf("Creating %s container", services.ServiceCtValidatorImport)
 	ct, err := dockerClient.ContainerCreate(context.Background(),
