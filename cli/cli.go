@@ -761,12 +761,12 @@ func inputCustomGenesis(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputCustomTTD(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomTTD, err = p.Input("Custom TTD (Terminal Total Difficulty)", "", false, ui.DigitsStringValidator)
+	o.genData.CustomTTD, err = p.Input("Custom TTD (Terminal Total Difficulty)", "0", false, ui.DigitsStringValidator)
 	return
 }
 
 func inputCustomDeployBlock(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomDeployBlock, err = p.Input("Custom deploy block", "", false, ui.DigitsStringValidator)
+	o.genData.CustomDeployBlock, err = p.Input("Custom deploy block", "0", false, ui.DigitsStringValidator)
 	return
 }
 

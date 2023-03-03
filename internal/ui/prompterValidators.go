@@ -32,10 +32,10 @@ var (
 	ErrInvalidInt64String     = errors.New("invalid int64 string")
 	ErrInvalidFileExtension   = errors.New("invalid file extension")
 	ErrInvalidURL             = errors.New("invalid URL")
-	ErrInvalidDigitString     = errors.New("invalid number, must be a string of digits")
+	ErrInvalidDigitString     = errors.New("invalid number")
 )
 
-var digitsString = regexp.MustCompile("^[0-9]+$")
+var digitsString = regexp.MustCompile("^0$|^[1-9][0-9]*$")
 
 func EthAddressValidator(address string) error {
 	if !utils.IsAddress(address) {
