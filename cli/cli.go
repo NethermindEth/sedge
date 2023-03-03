@@ -100,13 +100,12 @@ be asked to run the generated setup or not. If you chose to run the setup, it wi
 using docker compose command behind the scenes.
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := selectNetwork(p, o); err != nil {
-				return err
-			}
-			if err := selectNodeType(p, o); err != nil {
-				return err
-			}
-			if err := inputGenerationPath(p, o); err != nil {
+			if err := runPromptActions(p, o,
+				selectNetwork,
+				selectNodeType,
+				inputGenerationPath,
+				inputContainerTag,
+			); err != nil {
 				return err
 			}
 			switch o.nodeType {
@@ -920,6 +919,11 @@ func inputExecutionAuthUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func inputConsensusAPIUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.ConsensusApiUrl, err = p.InputURL("Consensus API URL", "", false)
+	return
+}
+
+func inputContainerTag(p ui.Prompter, o *CliCmdOptions) (err error) {
+	o.genData.ContainerTag, err = p.Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil)
 	return
 }
 
