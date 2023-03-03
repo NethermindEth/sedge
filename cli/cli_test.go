@@ -100,7 +100,7 @@ func TestCli_FullNode(t *testing.T) {
 						ValidatorClient: "prysm",
 						Network:         NetworkMainnet,
 						GenerationPath:  generationPath,
-						From:            filepath.Join(generationPath, "keystores"),
+						From:            filepath.Join(generationPath, "keystore"),
 					}).Return(nil),
 					prompter.EXPECT().Confirm("Do you want to import slashing protection data?", false).Return(false, nil),
 					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
@@ -445,7 +445,7 @@ func TestCli_FullNode(t *testing.T) {
 					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 						ValidatorClient: "prysm",
 						Network:         NetworkMainnet,
-						From:            filepath.Join(generationPath, "keystores"),
+						From:            filepath.Join(generationPath, "keystore"),
 						GenerationPath:  generationPath,
 					}).Return(nil),
 					prompter.EXPECT().Confirm("Do you want to import slashing protection data?", false).Return(false, nil),
@@ -506,7 +506,7 @@ func TestCli_FullNode(t *testing.T) {
 					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 						ValidatorClient: "prysm",
 						Network:         NetworkCustom,
-						From:            filepath.Join(generationPath, "keystores"),
+						From:            filepath.Join(generationPath, "keystore"),
 						GenerationPath:  generationPath,
 						CustomConfig: actions.ImportValidatorKeysCustomOptions{
 							NetworkConfigPath: "testdata/networkConfig.yml",

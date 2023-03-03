@@ -71,6 +71,7 @@ type CliCmdOptions struct {
 	keystorePath             string
 	keystoreMnemonicSource   string
 	keystoreMnemonic         string
+	keystoreMnemonicPath     string
 	keystorePassphraseSource string
 	keystorePassphrasePath   string
 	keystorePassphrase       string
@@ -418,6 +419,11 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) e
 			if err := inputKeystoreMnemonicPath(p, o); err != nil {
 				return err
 			}
+			if mnemonic, err := readFileContent(o.keystoreMnemonicPath); err != nil {
+				return err
+			} else {
+				o.keystoreMnemonic = mnemonic
+			}
 		}
 		// Get the passphrase
 		if err := selectKeystorePassphraseSource(p, o); err != nil {
@@ -445,7 +451,7 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) e
 		); err != nil {
 			return err
 		}
-		o.keystorePath = filepath.Join(o.generationPath, "keystores")
+		o.keystorePath = filepath.Join(o.generationPath, "keystore")
 		if err := keystores.CreateKeystores(keystores.ValidatorKeysGenData{
 			Mnemonic:    o.keystoreMnemonic,
 			Passphrase:  o.keystorePassphrase,
@@ -817,7 +823,6 @@ func inputValidatorGracePeriod(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputGenerationPath(p ui.Prompter, o *CliCmdOptions) (err error) {
-	// TODO: show default value in the prompt
 	o.generationPath, err = p.Input("Generation path", configs.DefaultAbsSedgeDataPath, false)
 	if o.generationPath == "" {
 		o.generationPath = configs.DefaultAbsSedgeDataPath
@@ -831,12 +836,12 @@ func inputJWTPath(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputKeystoreMnemonicPath(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.keystoreMnemonic, err = p.InputFilePath("Mnemonic path", "", true)
+	o.keystoreMnemonicPath, err = p.InputFilePath("Mnemonic path", "", true)
 	return
 }
 
 func inputKeystorePassphrasePath(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.keystorePassphrasePath, err = p.Input("Passphrase path", "", true)
+	o.keystorePassphrasePath, err = p.InputFilePath("Passphrase path", "", true)
 	return
 }
 
