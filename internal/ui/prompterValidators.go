@@ -18,7 +18,6 @@ package ui
 import (
 	"errors"
 	"fmt"
-	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -57,12 +56,8 @@ func FilePathValidator(ans interface{}) error {
 
 func URLValidator(ans interface{}) error {
 	if str, ok := ans.(string); ok {
-		u, err := url.ParseRequestURI(str)
-		if err != nil {
-			return fmt.Errorf("%w: %s", ErrInvalidURL, err.Error())
-		}
-		if u.Scheme != "http" && u.Scheme != "https" {
-			return fmt.Errorf("%w: %s", ErrInvalidURL, "scheme must be http or https")
+		if _, ok := utils.UriValidator([]string{str}); !ok {
+			return ErrInvalidURL
 		}
 	}
 	return nil
