@@ -582,6 +582,7 @@ func selectExecutionClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 			return err
 		}
 		selectedExecutionClient = randomName
+		log.Info("Random execution client selected: ", selectedExecutionClient)
 	}
 	o.genData.ExecutionClient = &clients.Client{
 		Name: selectedExecutionClient,
@@ -618,6 +619,7 @@ func selectConsensusClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 			return err
 		}
 		selectedConsensusClient = randomName
+		log.Info("Random consensus client selected: ", selectedConsensusClient)
 	}
 	o.genData.ConsensusClient = &clients.Client{
 		Name: selectedConsensusClient,
@@ -646,6 +648,7 @@ func selectValidatorClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 			return err
 		}
 		selectedValidatorClient = randomName
+		log.Info("Random validator client selected: ", selectedValidatorClient)
 	}
 	o.genData.ValidatorClient = &clients.Client{
 		Name: selectedValidatorClient,
