@@ -736,7 +736,7 @@ func inputCustomNetworkConfig(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputCustomChainSpec(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomChainSpecPath, err = p.InputFilePath("Custom ChainSpec", "", true)
+	o.genData.CustomChainSpecPath, err = p.InputFilePath("File path or url to use as custom network chainSpec for execution client", "", true)
 	return
 }
 
