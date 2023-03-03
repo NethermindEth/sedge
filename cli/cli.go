@@ -830,7 +830,7 @@ func inputJWTPath(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputKeystoreMnemonicPath(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.keystoreMnemonic, err = p.Input("Mnemonic path", "", true)
+	o.keystoreMnemonic, err = p.InputFilePath("Mnemonic path", "", true)
 	return
 }
 
