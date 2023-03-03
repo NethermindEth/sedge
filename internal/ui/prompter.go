@@ -171,7 +171,14 @@ func (p *prompter) InputList(prompt string, defaultValue []string, validator fun
 	if validator != nil {
 		f := func(val interface{}) error {
 			if input, ok := val.(string); ok {
-				if err := validator(strings.Split(input, "\n")); err != nil {
+				var toValidate []string
+				for _, item := range strings.Split(input, "\n") {
+					item = strings.TrimSpace(item)
+					if item != "" {
+						toValidate = append(toValidate, item)
+					}
+				}
+				if err := validator(toValidate); err != nil {
 					return err
 				}
 			}
