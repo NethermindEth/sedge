@@ -26,7 +26,7 @@ import (
 func TestEthAddressValidator(t *testing.T) {
 	tests := []struct {
 		name  string
-		input interface{}
+		input string
 		want  error
 	}{
 		{

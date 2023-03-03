@@ -24,6 +24,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	keystore_test_data "github.com/NethermindEth/sedge/internal/pkg/keystores/testdata"
+	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
@@ -78,15 +79,15 @@ func TestCli_FullNode(t *testing.T) {
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
-					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false).Return(generationPath, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Confirm("Do you want to set up a validator?", false).Return(true, nil),
-					prompter.EXPECT().Input("Mev-Boost image", "flashbots/mev-boost:latest", false).Return("flashbots/mev-boost:latest", nil),
+					prompter.EXPECT().Input("Mev-Boost image", "flashbots/mev-boost:latest", false, nil).Return("flashbots/mev-boost:latest", nil),
 					prompter.EXPECT().InputList("Relay URLs", configs.MainnetRelayURLs(), gomock.AssignableToTypeOf(func([]string) error { return nil })).Return(configs.MainnetRelayURLs(), nil),
 					prompter.EXPECT().Select("Select execution client", "", []string{"besu", "erigon", "geth", "nethermind", "randomize"}).Return(3, nil),
 					prompter.EXPECT().Select("Select consensus client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().Select("Select validator client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
-					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false).Return("test graffiti", nil),
+					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false, nil).Return("test graffiti", nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", "", false).Return("http://checkpoint.sync", nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
@@ -99,7 +100,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					prompter.EXPECT().Select("Select mnemonic source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					prompter.EXPECT().Select("Select passphrase source", "", []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}).Return(0, nil),
-					prompter.EXPECT().Input("Withdrawal address", "", false).Return("0x00000007abca72jmd83jd8u3jd9kdn32j38abc", nil),
+					prompter.EXPECT().Input("Withdrawal address", "", false, gomock.AssignableToTypeOf(ui.EthAddressValidator)).Return("0x00000007abca72jmd83jd8u3jd9kdn32j38abc", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
@@ -142,7 +143,7 @@ func TestCli_FullNode(t *testing.T) {
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
-					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false).Return(generationPath, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Confirm("Do you want to set up a validator?", false).Return(false, nil),
 					prompter.EXPECT().Select("Select execution client", "", []string{"besu", "erigon", "geth", "nethermind", "randomize"}).Return(3, nil),
 					prompter.EXPECT().Select("Select consensus client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
@@ -203,20 +204,20 @@ func TestCli_FullNode(t *testing.T) {
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(5, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
-					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false).Return(generationPath, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Confirm("Do you want to set up a validator?", false).Return(true, nil),
 					prompter.EXPECT().InputFilePath("Custom network config file path", "", true, ".yml", ".yaml").Return("testdata/networkConfig.yml", nil),
 					prompter.EXPECT().InputFilePath("File path or url to use as custom network chainSpec for execution client", "", true, ".json").Return("testdata/chainSpec.json", nil),
 					prompter.EXPECT().InputFilePath("File path or URL to use as custom network genesis for consensus client", "", true, ".ssz").Return("testdata/genesis.ssz", nil),
-					prompter.EXPECT().Input("Custom TTD (Terminal Total Difficulty)", "", false).Return("58750000000000", nil),
-					prompter.EXPECT().Input("Custom deploy block", "", false).Return("2355021", nil),
+					prompter.EXPECT().Input("Custom TTD (Terminal Total Difficulty)", "", false, gomock.AssignableToTypeOf(ui.DigitsStringValidator)).Return("58750000000000", nil),
+					prompter.EXPECT().Input("Custom deploy block", "", false, gomock.AssignableToTypeOf(ui.DigitsStringValidator)).Return("2355021", nil),
 					prompter.EXPECT().InputList("Execution boot nodes", gomock.Len(0), gomock.AssignableToTypeOf(utils.ENodesValidator)).Return([]string{"enode://ecnode1", "enode://ecnode2"}, nil),
 					prompter.EXPECT().InputList("Consensus boot nodes", gomock.Len(0), gomock.AssignableToTypeOf(utils.ENRValidator)).Return([]string{"enode://ccnode1", "enode://ccnode2"}, nil),
 					prompter.EXPECT().Select("Select execution client", "", []string{"nethermind", "randomize"}).Return(0, nil),
 					prompter.EXPECT().Select("Select consensus client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().Select("Select validator client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
-					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false).Return("test graffiti", nil),
+					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false, nil).Return("test graffiti", nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", "", false).Return("http://checkpoint.sync", nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
@@ -227,7 +228,7 @@ func TestCli_FullNode(t *testing.T) {
 						GenerationData: genData,
 					})).Return(genData, nil),
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(1, nil),
-					prompter.EXPECT().Input("Keystore path", "", true).Return(keystoreDir, nil),
+					prompter.EXPECT().Input("Keystore path", "", true, nil).Return(keystoreDir, nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
 						GenerationPath: generationPath,
 						Services:       []string{"validator"},
@@ -265,7 +266,7 @@ func TestCli_FullNode(t *testing.T) {
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(1, nil),
-					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false).Return(generationPath, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Select("Select execution client", "", []string{"besu", "erigon", "geth", "nethermind", "randomize"}).Return(3, nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(2, nil),
@@ -305,10 +306,10 @@ func TestCli_FullNode(t *testing.T) {
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(5, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(1, nil),
-					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false).Return(generationPath, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Select("Select execution client", "", []string{"nethermind", "randomize"}).Return(0, nil),
 					prompter.EXPECT().InputFilePath("File path or url to use as custom network chainSpec for execution client", "", true, ".json").Return("testdata/chainSpec.json", nil),
-					prompter.EXPECT().Input("Custom TTD (Terminal Total Difficulty)", "", false).Return("58750000000000", nil),
+					prompter.EXPECT().Input("Custom TTD (Terminal Total Difficulty)", "", false, gomock.AssignableToTypeOf(ui.DigitsStringValidator)).Return("58750000000000", nil),
 					prompter.EXPECT().InputList("Execution boot nodes", gomock.Len(0), gomock.AssignableToTypeOf(utils.ENodesValidator)).Return([]string{"enode://ecnode1", "enode://ecnode2"}, nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
@@ -351,7 +352,7 @@ func TestCli_FullNode(t *testing.T) {
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(1, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
-					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false).Return(generationPath, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Select("Select consensus client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", "", false).Return("http://checkpoint.sync", nil),
 					prompter.EXPECT().InputURL("Mev-Boost endpoint", "", false).Return("http://mev-boost:3030", nil),
@@ -392,11 +393,11 @@ func TestCli_FullNode(t *testing.T) {
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(5, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
-					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false).Return(generationPath, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Select("Select consensus client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().InputFilePath("Custom network config file path", "", true, ".yml", ".yaml").Return("testdata/networkConfig.yaml", nil),
 					prompter.EXPECT().InputFilePath("File path or URL to use as custom network genesis for consensus client", "", true, ".ssz").Return("testdata/genesis.json", nil),
-					prompter.EXPECT().Input("Custom deploy block", "", false).Return("2355021", nil),
+					prompter.EXPECT().Input("Custom deploy block", "", false, gomock.AssignableToTypeOf(ui.DigitsStringValidator)).Return("2355021", nil),
 					prompter.EXPECT().InputList("Consensus boot nodes", gomock.Len(0), gomock.AssignableToTypeOf(utils.ENRValidator)).Return([]string{"enode://ccnode1", "enode://ccnode2"}, nil), // TODO: add real enr values
 					prompter.EXPECT().InputURL("Execution API URL", "", false).Return("http://localhost:5051", nil),
 					prompter.EXPECT().InputURL("Execution Auth API URL", "", false).Return("http://localhost:5051", nil),
@@ -435,10 +436,10 @@ func TestCli_FullNode(t *testing.T) {
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(3, nil),
-					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false).Return(generationPath, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Select("Select validator client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().InputURL("Consensus API URL", "", false).Return("http://localhost:5051", nil),
-					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false).Return("test graffiti", nil),
+					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false, nil).Return("test graffiti", nil),
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Enable MEV Boost?", false).Return(true, nil),
@@ -449,7 +450,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					prompter.EXPECT().Select("Select mnemonic source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					prompter.EXPECT().Select("Select passphrase source", "", []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}).Return(0, nil),
-					prompter.EXPECT().Input("Withdrawal address", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
+					prompter.EXPECT().Input("Withdrawal address", "", false, gomock.AssignableToTypeOf(ui.EthAddressValidator)).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
@@ -494,13 +495,13 @@ func TestCli_FullNode(t *testing.T) {
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(5, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(3, nil),
-					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false).Return(generationPath, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Select("Select validator client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().InputFilePath("Custom network config file path", "", true, ".yml", ".yaml").Return("testdata/networkConfig.yml", nil),
 					prompter.EXPECT().InputFilePath("File path or URL to use as custom network genesis for consensus client", "", true, ".ssz").Return("testdata/genesis.json", nil),
-					prompter.EXPECT().Input("Custom deploy block", "", false).Return("2355021", nil),
+					prompter.EXPECT().Input("Custom deploy block", "", false, gomock.AssignableToTypeOf(ui.DigitsStringValidator)).Return("2355021", nil),
 					prompter.EXPECT().InputURL("Consensus API URL", "", false).Return("http://localhost:5051", nil),
-					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false).Return("test graffiti", nil),
+					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false, nil).Return("test graffiti", nil),
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Enable MEV Boost?", false).Return(true, nil),
@@ -511,7 +512,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					prompter.EXPECT().Select("Select mnemonic source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					prompter.EXPECT().Select("Select passphrase source", "", []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}).Return(0, nil),
-					prompter.EXPECT().Input("Withdrawal address", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
+					prompter.EXPECT().Input("Withdrawal address", "", false, gomock.AssignableToTypeOf(ui.EthAddressValidator)).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{

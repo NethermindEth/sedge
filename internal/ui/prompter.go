@@ -28,7 +28,7 @@ import (
 type Prompter interface {
 	Select(message string, defaultValue string, options []string) (int, error)
 	Confirm(string, bool) (bool, error)
-	Input(prompt, defaultValue string, required bool) (result string, err error)
+	Input(prompt, defaultValue string, required bool, validator func(string) error) (result string, err error)
 	InputInt64(prompt string, defaultValue int64) (result int64, err error)
 	InputFilePath(prompt, defaultValue string, required bool, fileExtensions ...string) (result string, err error)
 	InputURL(prompt, defaultValue string, required bool) (result string, err error)
@@ -64,10 +64,15 @@ func (p *prompter) Confirm(question string, defaultValue bool) (answer bool, err
 	return
 }
 
-func (p *prompter) Input(prompt, defaultValue string, required bool) (result string, err error) {
+func (p *prompter) Input(prompt, defaultValue string, required bool, validator func(string) error) (result string, err error) {
 	options := make([]survey.AskOpt, 0)
 	if required {
 		options = append(options, survey.WithValidator(survey.Required))
+	}
+	if validator != nil {
+		options = append(options, survey.WithValidator(func(ans interface{}) error {
+			return validator(ans.(string))
+		}))
 	}
 	q := &survey.Input{
 		Message: prompt,
@@ -141,7 +146,9 @@ func (p *prompter) InputInt64(prompt string, defaultValue int64) (result int64, 
 
 func (p *prompter) EthAddress(prompt string, defaultValue string, required bool) (result string, err error) {
 	options := []survey.AskOpt{
-		survey.WithValidator(EthAddressValidator),
+		survey.WithValidator(func(ans interface{}) error {
+			return EthAddressValidator(ans.(string))
+		}),
 	}
 	if required {
 		options = append(options, survey.WithValidator(survey.Required))

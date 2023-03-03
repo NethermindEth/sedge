@@ -762,12 +762,12 @@ func inputCustomGenesis(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputCustomTTD(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomTTD, err = p.Input("Custom TTD (Terminal Total Difficulty)", "", false)
+	o.genData.CustomTTD, err = p.Input("Custom TTD (Terminal Total Difficulty)", "", false, ui.DigitsStringValidator)
 	return
 }
 
 func inputCustomDeployBlock(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomDeployBlock, err = p.Input("Custom deploy block", "", false)
+	o.genData.CustomDeployBlock, err = p.Input("Custom deploy block", "", false, ui.DigitsStringValidator)
 	return
 }
 
@@ -783,7 +783,7 @@ func inputConsensusBootNodes(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func inputMevImage(p ui.Prompter, o *CliCmdOptions) (err error) {
 	// Default value is set in the template
-	o.genData.MevImage, err = p.Input("Mev-Boost image", "flashbots/mev-boost:latest", false)
+	o.genData.MevImage, err = p.Input("Mev-Boost image", "flashbots/mev-boost:latest", false, nil)
 	return
 }
 
@@ -814,7 +814,7 @@ func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputGraffiti(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.Graffiti, err = p.Input("Graffiti to be used by the validator (press enter to skip it)", "", false)
+	o.genData.Graffiti, err = p.Input("Graffiti to be used by the validator (press enter to skip it)", "", false, nil)
 	return
 }
 
@@ -839,7 +839,7 @@ func inputValidatorGracePeriod(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputGenerationPath(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.generationPath, err = p.Input("Generation path", configs.DefaultAbsSedgeDataPath, false)
+	o.generationPath, err = p.Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil)
 	if err != nil {
 		return err
 	}
@@ -879,7 +879,7 @@ func inputKeystorePassphrase(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputWithdrawalAddress(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.withdrawalAddress, err = p.Input("Withdrawal address", "", false)
+	o.withdrawalAddress, err = p.Input("Withdrawal address", "", false, ui.EthAddressValidator)
 	return
 }
 
@@ -894,7 +894,7 @@ func inputNumberOfExistingValidators(p ui.Prompter, o *CliCmdOptions) (err error
 }
 
 func inputKeystorePath(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.keystorePath, err = p.Input("Keystore path", "", true)
+	o.keystorePath, err = p.Input("Keystore path", "", true, nil)
 	if err != nil {
 		return err
 	}

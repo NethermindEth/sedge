@@ -32,10 +32,13 @@ var (
 	ErrInvalidInt64String     = errors.New("invalid int64 string")
 	ErrInvalidFileExtension   = errors.New("invalid file extension")
 	ErrInvalidURL             = errors.New("invalid URL")
+	ErrInvalidDigitString     = errors.New("invalid number, must be a string of digits")
 )
 
-func EthAddressValidator(ans interface{}) error {
-	if str, ok := ans.(string); ok && !utils.IsAddress(str) {
+var digitsString = regexp.MustCompile("^[0-9]+$")
+
+func EthAddressValidator(address string) error {
+	if !utils.IsAddress(address) {
 		return ErrInvalidEthereumAddress
 	}
 	return nil
@@ -90,4 +93,13 @@ func fileExtensionValidator(extensions []string) func(ans interface{}) error {
 		}
 		return fmt.Errorf("%w: %s, must be one of these: %s", ErrInvalidFileExtension, ans, strings.Join(extensions, ", "))
 	}
+}
+
+// TODO: add unit tests
+// DigitsStringValidator validates that the input is a valid string with only digits
+func DigitsStringValidator(ttd string) error {
+	if !digitsString.MatchString(ttd) {
+		return ErrInvalidDigitString
+	}
+	return nil
 }
