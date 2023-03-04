@@ -225,6 +225,9 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 		},
 		&container.HostConfig{
 			VolumesFrom: []string{validatorContainerName},
+			LogConfig: container.LogConfig{
+				Type: "json-file",
+			},
 		},
 		&network.NetworkingConfig{},
 		&v1.Platform{},

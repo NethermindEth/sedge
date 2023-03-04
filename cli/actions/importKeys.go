@@ -339,6 +339,9 @@ func setupTekuValidatorImport(dockerClient client.APIClient, serviceManager serv
 		&container.HostConfig{
 			Mounts:      mounts,
 			VolumesFrom: []string{services.DefaultSedgeValidatorClient},
+			LogConfig: container.LogConfig{
+				Type: "json-file",
+			},
 		},
 		&network.NetworkingConfig{},
 		&v1.Platform{},
