@@ -1,10 +1,11 @@
 package services
 
 import (
+	"bytes"
 	"context"
-	"io/ioutil"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/pkg/stdcopy"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -20,9 +21,12 @@ func (s *serviceManager) ContainerLogs(ctID, service string) (string, error) {
 		return "", err
 	}
 	defer logReader.Close()
-	logs, err := ioutil.ReadAll(logReader)
+
+	var logs bytes.Buffer
+	written, err := stdcopy.StdCopy(&logs, &logs, logReader)
+	log.Debug("Logs written %d bytes", written)
 	if err == nil {
-		log.Debugf("%s container logs: %s", service, string(logs))
+		log.Debugf("%s container logs: %s", service, logs.String())
 	}
-	return string(logs), err
+	return logs.String(), err
 }
