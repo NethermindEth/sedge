@@ -835,8 +835,7 @@ func inputGraffiti(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputCheckpointSyncURL(p ui.Prompter, o *CliCmdOptions) (err error) {
-	// Default value is set in the template
-	o.genData.CheckpointSyncUrl, err = p.InputURL("Checkpoint sync URL", "", false)
+	o.genData.CheckpointSyncUrl, err = p.InputURL("Checkpoint sync URL", configs.NetworksConfigs()[o.genData.Network].CheckpointSyncURL, false)
 	return
 }
 
