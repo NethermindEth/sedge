@@ -37,6 +37,17 @@ type ImportValidatorKeysCustomOptions struct {
 }
 
 func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) error {
+	// Ensure paths are absolute
+	if absFrom, err := filepath.Abs(options.From); err != nil {
+		return err
+	} else {
+		options.From = absFrom
+	}
+	if absGenerationPath, err := filepath.Abs(options.GenerationPath); err != nil {
+		return err
+	} else {
+		options.GenerationPath = absGenerationPath
+	}
 	validatorCtName := services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 	// Check validator container exists
 	_, err := s.serviceManager.ContainerId(validatorCtName)
