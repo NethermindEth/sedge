@@ -359,7 +359,7 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 		StatusCode: 0,
 	}
 	dockerClient.EXPECT().
-		ContainerWait(gomock.Any(), services.ServiceCtValidatorImport, container.WaitConditionNextExit).
+		ContainerWait(gomock.Any(), validatorImportCtId, container.WaitConditionNextExit).
 		Return(exitCh, make(chan error)).
 		Times(1)
 	// Mock container logs
@@ -428,7 +428,7 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 		StatusCode: 1,
 	}
 	dockerClient.EXPECT().
-		ContainerWait(gomock.Any(), services.ServiceCtValidatorImport, container.WaitConditionNextExit).
+		ContainerWait(gomock.Any(), validatorImportCtId, container.WaitConditionNextExit).
 		Return(exitCh, make(chan error)).
 		Times(1)
 	// Mock container logs

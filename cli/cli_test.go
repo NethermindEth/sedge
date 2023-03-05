@@ -113,6 +113,7 @@ func TestCli_FullNode(t *testing.T) {
 						Network:         NetworkMainnet,
 						GenerationPath:  generationPath,
 						From:            filepath.Join(generationPath, "keystore"),
+						ContainerTag:    "tag",
 					}).Return(nil),
 					prompter.EXPECT().Confirm("Do you want to import slashing protection data?", false).Return(false, nil),
 					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
@@ -243,6 +244,7 @@ func TestCli_FullNode(t *testing.T) {
 						Network:         "custom",
 						From:            keystoreDir,
 						GenerationPath:  generationPath,
+						ContainerTag:    "tag",
 						CustomConfig: actions.ImportValidatorKeysCustomOptions{
 							NetworkConfigPath: absPathOrFail(t, "testdata/networkConfig.yml"),
 							GenesisPath:       absPathOrFail(t, "testdata/genesis.ssz"),
@@ -477,6 +479,7 @@ func TestCli_FullNode(t *testing.T) {
 						Network:         NetworkMainnet,
 						From:            filepath.Join(generationPath, "keystore"),
 						GenerationPath:  generationPath,
+						ContainerTag:    "tag",
 					}).Return(nil),
 					prompter.EXPECT().Confirm("Do you want to import slashing protection data?", false).Return(false, nil),
 					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
@@ -541,6 +544,7 @@ func TestCli_FullNode(t *testing.T) {
 						Network:         NetworkCustom,
 						From:            filepath.Join(generationPath, "keystore"),
 						GenerationPath:  generationPath,
+						ContainerTag:    "tag",
 						CustomConfig: actions.ImportValidatorKeysCustomOptions{
 							NetworkConfigPath: absPathOrFail(t, "testdata/networkConfig.yml"),
 							GenesisPath:       absPathOrFail(t, "testdata/genesis.json"),

@@ -16,8 +16,6 @@ limitations under the License.
 package generate
 
 import (
-	"fmt"
-
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 )
 
@@ -152,7 +150,6 @@ func (d DockerComposeData) WithValidatorClient() bool {
 
 // WithMevBoostClient returns true if the Mev-Boost client is set
 func (d EnvData) WithMevBoostClient() bool {
-	fmt.Printf("d.Services: %v", d.Services)
 	for _, service := range d.Services {
 		if service == mevBoost {
 			return true

@@ -120,6 +120,7 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 				"--custom-config", "/tmp/config",
 				"--custom-genesis", "/tmp/genesis",
 				"--custom-deploy-block", "custom-deploy-block",
+				"--container-tag", "test-tag",
 			},
 			expectedSetupOpts: actions.SetupContainersOptions{
 				GenerationPath: configs.DefaultAbsSedgeDataPath,
@@ -130,6 +131,7 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 				Network:         "mainnet",
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
 				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "keystore"),
+				ContainerTag:    "test-tag",
 				CustomConfig: actions.ImportValidatorKeysCustomOptions{
 					NetworkConfigPath: "/tmp/config",
 					GenesisPath:       "/tmp/genesis",

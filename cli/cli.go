@@ -524,6 +524,7 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) e
 		Network:         o.genData.Network,
 		GenerationPath:  o.generationPath,
 		From:            o.keystorePath,
+		ContainerTag:    o.genData.ContainerTag,
 		CustomConfig: actions.ImportValidatorKeysCustomOptions{
 			NetworkConfigPath: o.genData.CustomNetworkConfigPath,
 			GenesisPath:       o.genData.CustomGenesisPath,

@@ -58,6 +58,7 @@ the importation.`,
 				StartValidator:  startValidator,
 				From:            from,
 				GenerationPath:  generationPath,
+				ContainerTag:    containerTag,
 				CustomConfig: actions.ImportValidatorKeysCustomOptions{
 					NetworkConfigPath: customConfigPath,
 					GenesisPath:       customGenesisPath,
@@ -80,6 +81,7 @@ the importation.`,
 	cmd.Flags().BoolVar(&startValidator, "start-validator", false, "starts the validator client after import, regardless of the state the validator was in before")
 	cmd.Flags().BoolVar(&stopValidator, "stop-validator", false, "stops the validator client after import, regardless of the state the validator was in before")
 	cmd.Flags().StringVar(&from, "from", filepath.Join(configs.DefaultAbsSedgeDataPath, "keystore"), "path to the validator keys, must follow the EIP-2335: BLS12-381 Keystore standard")
+	cmd.PersistentFlags().StringVar(&containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.")
 	cmd.Flags().StringVar(&customConfigPath, "custom-config", "", "file path or url to use as custom network config.")
 	cmd.Flags().StringVar(&customGenesisPath, "custom-genesis", "", "file path or url to use as custom network genesis.")
 	cmd.Flags().StringVar(&customDeployBlock, "custom-deploy-block", "", "custom network deploy block.")
