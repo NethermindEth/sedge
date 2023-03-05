@@ -234,7 +234,7 @@ func TestCli_FullNode(t *testing.T) {
 						GenerationData: genData,
 					})).Return(genData, nil),
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(1, nil),
-					prompter.EXPECT().Input("Keystore path", "", true, nil).Return(keystoreDir, nil),
+					prompter.EXPECT().Input("Keystore path", filepath.Join(generationPath, "keystore"), true, nil).Return(keystoreDir, nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
 						GenerationPath: generationPath,
 						Services:       []string{"validator"},

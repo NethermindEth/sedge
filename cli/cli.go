@@ -912,7 +912,7 @@ func inputNumberOfExistingValidators(p ui.Prompter, o *CliCmdOptions) (err error
 }
 
 func inputKeystorePath(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.keystorePath, err = p.Input("Keystore path", "", true, nil)
+	o.keystorePath, err = p.Input("Keystore path", filepath.Join(o.generationPath, "keystore"), true, nil)
 	if err != nil {
 		return err
 	}
