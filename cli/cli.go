@@ -65,6 +65,7 @@ type CliCmdOptions struct {
 	generationPath           string
 	nodeType                 string
 	withValidator            bool
+	withMevBoost             bool
 	importSlashingProtection bool
 	slashingProtectionFrom   string
 	jwtSourceType            string
@@ -146,11 +147,17 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) (err
 	if o.withValidator {
 		o.genData.Services = append(o.genData.Services, "validator")
 		if configs.SupportsMEVBoost(o.genData.Network) {
-			if err := runPromptActions(p, o,
-				inputMevImage,
-				inputRelayURL,
-			); err != nil {
+			if err := confirmEnableMEVBoost(p, o); err != nil {
 				return err
+			}
+			o.genData.Mev = o.withMevBoost
+			if o.withMevBoost {
+				if err := runPromptActions(p, o,
+					inputMevImage,
+					inputRelayURL,
+				); err != nil {
+					return err
+				}
 			}
 		}
 		if err := runPromptActions(p, o,
@@ -180,8 +187,6 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) (err
 	if err := setupJWT(p, o, false); err != nil {
 		return err
 	}
-	// Set constant values
-	o.genData.Mev = true
 	// Call generate action
 	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
@@ -291,6 +296,7 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 	); err != nil {
 		return err
 	}
+	o.genData.MevBoostOnValidator = o.withMevBoost
 	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
 		GenerationPath: o.generationPath,
@@ -751,7 +757,7 @@ func confirmInstallDependencies(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.MevBoostOnValidator, err = p.Confirm("Enable MEV Boost?", false)
+	o.withMevBoost, err = p.Confirm("Enable MEV Boost?", false)
 	return
 }
 

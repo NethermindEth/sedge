@@ -83,6 +83,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
 					prompter.EXPECT().Confirm("Do you want to set up a validator?", false).Return(true, nil),
+					prompter.EXPECT().Confirm("Enable MEV Boost?", false).Return(true, nil),
 					prompter.EXPECT().Input("Mev-Boost image", "flashbots/mev-boost:latest", false, nil).Return("flashbots/mev-boost:latest", nil),
 					prompter.EXPECT().InputList("Relay URLs", configs.MainnetRelayURLs(), gomock.AssignableToTypeOf(func([]string) error { return nil })).Return(configs.MainnetRelayURLs(), nil),
 					prompter.EXPECT().Select("Select execution client", "", []string{"besu", "erigon", "geth", "nethermind", "randomize"}).Return(3, nil),
@@ -140,7 +141,6 @@ func TestCli_FullNode(t *testing.T) {
 					CheckpointSyncUrl: "http://checkpoint.sync",
 					FeeRecipient:      "0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5",
 					MapAllPorts:       true,
-					Mev:               true,
 					ContainerTag:      "tag",
 				}
 				gomock.InOrder(
@@ -195,7 +195,6 @@ func TestCli_FullNode(t *testing.T) {
 					MapAllPorts:             true,
 					Graffiti:                "test graffiti",
 					VLStartGracePeriod:      840,
-					Mev:                     true,
 					CustomNetworkConfigPath: absPathOrFail(t, "testdata/networkConfig.yml"),
 					CustomChainSpecPath:     absPathOrFail(t, "testdata/chainSpec.json"),
 					CustomGenesisPath:       absPathOrFail(t, "testdata/genesis.ssz"),
