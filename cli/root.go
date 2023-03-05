@@ -52,7 +52,7 @@ func checkVersion() {
 	// Check version
 	ok, err := utils.IsLatestVersion()
 	if err != nil {
-		log.Warnf("%s %e", configs.UnableToCheckVersion, err)
+		log.Warnf("%s %v", configs.UnableToCheckVersion, err)
 	} else if !ok {
 		log.Warnf("%s %s", configs.NeedVersionUpdate, utils.CurrentVersion())
 	} else {
