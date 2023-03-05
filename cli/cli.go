@@ -817,15 +817,7 @@ func inputMevBoostEndpoint(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
-	var defaultValue []string
-	switch o.genData.Network {
-	case NetworkMainnet:
-		defaultValue = configs.MainnetRelayURLs()
-	case NetworkGoerli:
-		defaultValue = configs.GoerliRelayURLs()
-	case NetworkSepolia:
-		defaultValue = configs.SepoliaRelayURLs()
-	}
+	var defaultValue []string = configs.NetworksConfigs()[o.genData.Network].RelayURLs
 	relayURLs, err := p.InputList("Insert relay URLs if you don't want to use the default values listed below", defaultValue, func(list []string) error {
 		badUri, ok := utils.UriValidator(list)
 		if !ok {

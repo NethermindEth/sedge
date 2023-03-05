@@ -397,14 +397,11 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	}
 
 	if len(gd.RelayURLs) == 0 {
-		switch gd.Network {
-		case "mainnet":
-			gd.RelayURLs = configs.MainnetRelayURLs()
-		case "goerli":
-			gd.RelayURLs = configs.GoerliRelayURLs()
-		case "sepolia":
-			gd.RelayURLs = configs.SepoliaRelayURLs()
-		}
+		gd.RelayURLs = configs.NetworksConfigs()[gd.Network].RelayURLs
+	}
+
+	if gd.CheckpointSyncUrl == "" {
+		gd.CheckpointSyncUrl = configs.NetworksConfigs()[gd.Network].CheckpointSyncURL
 	}
 
 	data := EnvData{
@@ -427,6 +424,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		KeystoreDir:               "./" + configs.KeystoreDir,
 		Graffiti:                  graffiti,
 		RelayURLs:                 strings.Join(gd.RelayURLs, ","),
+		CheckpointSyncUrl:         gd.CheckpointSyncUrl,
 	}
 
 	// Save to writer

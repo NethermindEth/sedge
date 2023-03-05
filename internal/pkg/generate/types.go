@@ -40,6 +40,7 @@ type EnvData struct {
 	KeystoreDir               string
 	Graffiti                  string
 	RelayURLs                 string
+	CheckpointSyncUrl         string
 }
 
 // GenData : Struct Data object for script's generation

@@ -10,5 +10,5 @@ CC_IMAGE_VERSION={{.CcImage}}
 CC_DATA_DIR={{.CcDataDir}}
 CC_LODESTAR_PRESET=mainnet
 CC_JWT_SECRET_PATH={{.JWTSecretPath}}
-CHECKPOINT_SYNC_URL=https://beaconstate.ethstaker.cc
+{{if .CheckpointSyncUrl}}CHECKPOINT_SYNC_URL={{.CheckpointSyncUrl}}{{end}}
 {{ end }}

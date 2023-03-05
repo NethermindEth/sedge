@@ -9,5 +9,5 @@ CC_INSTANCE_NAME=Teku
 CC_IMAGE_VERSION={{.CcImage}}
 CC_DATA_DIR={{.CcDataDir}}
 CC_JWT_SECRET_PATH={{.JWTSecretPath}}
-CHECKPOINT_SYNC_URL=https://goerli.checkpoint-sync.ethpandaops.io
+{{if .CheckpointSyncUrl}}CHECKPOINT_SYNC_URL={{.CheckpointSyncUrl}}{{end}}
 {{ end }}
