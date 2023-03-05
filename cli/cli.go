@@ -737,7 +737,7 @@ func selectKeystorePassphraseSource(p ui.Prompter, o *CliCmdOptions) error {
 }
 
 func confirmWithValidator(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.withValidator, err = p.Confirm("Do you want to set up a validator?", false)
+	o.withValidator, err = p.Confirm("Do you want to set up a validator?", true)
 	return
 }
 
