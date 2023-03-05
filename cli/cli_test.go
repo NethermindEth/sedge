@@ -85,7 +85,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Confirm("Do you want to set up a validator?", false).Return(true, nil),
 					prompter.EXPECT().Confirm("Enable MEV Boost?", false).Return(true, nil),
 					prompter.EXPECT().Input("Mev-Boost image", "flashbots/mev-boost:latest", false, nil).Return("flashbots/mev-boost:latest", nil),
-					prompter.EXPECT().InputList("Relay URLs", configs.MainnetRelayURLs(), gomock.AssignableToTypeOf(func([]string) error { return nil })).Return(configs.MainnetRelayURLs(), nil),
+					prompter.EXPECT().InputList("Insert relay URLs if you don't want to use the default values listed below", configs.MainnetRelayURLs(), gomock.AssignableToTypeOf(func([]string) error { return nil })).Return(configs.MainnetRelayURLs(), nil),
 					prompter.EXPECT().Select("Select execution client", "", []string{"besu", "erigon", "geth", "nethermind", "randomize"}).Return(3, nil),
 					prompter.EXPECT().Select("Select consensus client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),
 					prompter.EXPECT().Select("Select validator client", "", []string{"lighthouse", "lodestar", "prysm", "teku", "randomize"}).Return(2, nil),

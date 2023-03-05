@@ -826,7 +826,7 @@ func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 	case NetworkSepolia:
 		defaultValue = configs.SepoliaRelayURLs()
 	}
-	relayURLs, err := p.InputList("Relay URLs", defaultValue, func(list []string) error {
+	relayURLs, err := p.InputList("Insert relay URLs if you don't want to use the default values listed below", defaultValue, func(list []string) error {
 		badUri, ok := utils.UriValidator(list)
 		if !ok {
 			return fmt.Errorf(configs.InvalidUrlFlagError, "relay", badUri)
