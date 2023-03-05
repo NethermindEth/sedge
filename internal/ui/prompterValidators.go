@@ -59,8 +59,8 @@ func FilePathValidator(ans interface{}) error {
 
 func URLValidator(ans interface{}) error {
 	if str, ok := ans.(string); ok {
-		if _, ok := utils.UriValidator([]string{str}); !ok {
-			return ErrInvalidURL
+		if invalidURL, ok := utils.UriValidator([]string{str}); !ok {
+			return fmt.Errorf("%w: %s", ErrInvalidURL, invalidURL)
 		}
 	}
 	return nil
