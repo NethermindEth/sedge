@@ -24,7 +24,7 @@ func (s *serviceManager) ContainerLogs(ctID, service string) (string, error) {
 
 	var logs bytes.Buffer
 	written, err := stdcopy.StdCopy(&logs, &logs, logReader)
-	log.Debug("Logs written %d bytes", written)
+	log.Debugf("Logs written %d bytes", written)
 	if err == nil {
 		log.Debugf("%s container logs: %s", service, logs.String())
 	}
