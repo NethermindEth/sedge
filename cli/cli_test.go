@@ -50,7 +50,7 @@ func TestCli_FullNode(t *testing.T) {
 	ETHClients["validator"] = append(ETHClients["validator"], "randomize")
 
 	GnosisClients := map[string][]string{
-		"execution": []string{"nethermind"},
+		"execution": {"nethermind"},
 		"consensus": utils.Filter(clients.AllClients["consensus"], func(c string) bool { return c != "prysm" }),
 		"validator": utils.Filter(clients.AllClients["validator"], func(c string) bool { return c != "prysm" }),
 	}
