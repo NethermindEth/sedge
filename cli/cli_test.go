@@ -49,7 +49,7 @@ func TestCli_FullNode(t *testing.T) {
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter) {
 				generationPath := t.TempDir()
 				genData := generate.GenData{
-					Services: []string{"execution", "consensus", "validator"},
+					Services: []string{"execution", "consensus", "validator", "mev-boost"},
 					ExecutionClient: &clients.Client{
 						Name:  "nethermind",
 						Type:  "execution",

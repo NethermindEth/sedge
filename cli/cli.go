@@ -150,7 +150,10 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) (err
 			if err := confirmEnableMEVBoost(p, o); err != nil {
 				return err
 			}
-			o.genData.Mev = o.withMevBoost
+			if o.withMevBoost {
+				o.genData.Mev = o.withMevBoost
+				o.genData.Services = append(o.genData.Services, "mev-boost")
+			}
 			if o.withMevBoost {
 				if err := runPromptActions(p, o,
 					inputMevImage,
