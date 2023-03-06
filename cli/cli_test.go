@@ -83,7 +83,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
 					prompter.EXPECT().Confirm("Do you want to set up a validator?", true).Return(true, nil),
-					prompter.EXPECT().Confirm("Enable MEV Boost?", false).Return(true, nil),
+					prompter.EXPECT().Confirm("Enable MEV Boost?", true).Return(true, nil),
 					prompter.EXPECT().Input("Mev-Boost image", "flashbots/mev-boost:latest", false, nil).Return("flashbots/mev-boost:latest", nil),
 					prompter.EXPECT().InputList("Insert relay URLs if you don't want to use the default values listed below", configs.NetworksConfigs()[NetworkMainnet].RelayURLs, gomock.AssignableToTypeOf(func([]string) error { return nil })).Return(configs.NetworksConfigs()[NetworkMainnet].RelayURLs, nil),
 					prompter.EXPECT().Select("Select execution client", "", []string{"besu", "erigon", "geth", "nethermind", "randomize"}).Return(3, nil),
@@ -233,7 +233,7 @@ func TestCli_FullNode(t *testing.T) {
 						GenerationData: genData,
 					})).Return(genData, nil),
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(1, nil),
-					prompter.EXPECT().Input("Keystore path", filepath.Join(generationPath, "keystore"), true, nil).Return(keystoreDir, nil),
+					prompter.EXPECT().InputDirPath("Keystore path", filepath.Join(generationPath, "keystore"), true).Return(keystoreDir, nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
 						GenerationPath: generationPath,
 						Services:       []string{"validator"},
@@ -458,7 +458,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false, nil).Return("test graffiti", nil),
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5", nil),
-					prompter.EXPECT().Confirm("Enable MEV Boost?", false).Return(true, nil),
+					prompter.EXPECT().Confirm("Enable MEV Boost?", true).Return(true, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
 						GenerationData: genData,

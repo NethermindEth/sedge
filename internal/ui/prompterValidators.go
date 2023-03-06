@@ -57,6 +57,17 @@ func FilePathValidator(ans interface{}) error {
 	return nil
 }
 
+func DirPathValidator(ans string) error {
+	fileInfo, err := os.Stat(ans)
+	if err != nil {
+		return err
+	}
+	if !fileInfo.IsDir() {
+		return errors.New("is a file not a directory")
+	}
+	return nil
+}
+
 func URLValidator(ans interface{}) error {
 	if str, ok := ans.(string); ok {
 		if invalidURL, ok := utils.UriValidator([]string{str}); !ok {
