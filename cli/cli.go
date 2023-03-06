@@ -292,11 +292,15 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 		inputGraffiti,
 		inputValidatorGracePeriod,
 		inputFeeRecipient,
-		confirmEnableMEVBoost,
 	); err != nil {
 		return err
 	}
-	o.genData.MevBoostOnValidator = o.withMevBoost
+	if configs.SupportsMEVBoost(o.genData.Network) {
+		if err := confirmEnableMEVBoost(p, o); err != nil {
+			return err
+		}
+		o.genData.MevBoostOnValidator = o.withMevBoost
+	}
 	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
 		GenerationPath: o.generationPath,

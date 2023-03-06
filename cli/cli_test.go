@@ -502,7 +502,6 @@ func TestCli_FullNode(t *testing.T) {
 					FeeRecipient:            "0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5",
 					Graffiti:                "test graffiti",
 					VLStartGracePeriod:      840,
-					MevBoostOnValidator:     true,
 					ConsensusApiUrl:         "http://localhost:5051",
 					CustomNetworkConfigPath: absPathOrFail(t, "testdata/networkConfig.yml"),
 					CustomGenesisPath:       absPathOrFail(t, "testdata/genesis.json"),
@@ -523,7 +522,6 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false, nil).Return("test graffiti", nil),
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5", nil),
-					prompter.EXPECT().Confirm("Enable MEV Boost?", false).Return(true, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
 						GenerationData: genData,
