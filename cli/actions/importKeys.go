@@ -396,10 +396,12 @@ func runAndWaitImportKeys(dockerClient client.APIClient, serviceManager services
 			if err != nil {
 				return err
 			}
+			if err = deleteContainer(dockerClient, ctID); err != nil {
+				return err
+			}
 			if exitResult.StatusCode != 0 {
 				return newValidatorImportCtBadExitCodeError(ctID, exitResult.StatusCode, logs)
 			}
-			return deleteContainer(dockerClient, ctID)
 		case exitErr := <-errChan:
 			return exitErr
 		}
