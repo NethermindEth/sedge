@@ -404,8 +404,13 @@ func postGenerate(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error
 		}); err != nil {
 			return err
 		}
-		// TODO: Final tips
-		log.Error("show final tips")
+		if o.withValidator {
+			log.Info(configs.HappyStakingRun)
+		} else {
+			log.Infof(configs.HappySedgingRun, o.generationPath)
+		}
+	} else {
+		log.Infof(configs.HappySedgingNoRun, o.generationPath)
 	}
 	return nil
 }
