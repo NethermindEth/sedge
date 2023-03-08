@@ -2,7 +2,10 @@ package actions
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"os"
+	"os/signal"
 	"path/filepath"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -19,6 +22,8 @@ import (
 	"github.com/otiai10/copy"
 	log "github.com/sirupsen/logrus"
 )
+
+var ErrInterrupted = errors.New("interrupt")
 
 type ImportValidatorKeysOptions struct {
 	ValidatorClient string
@@ -389,6 +394,8 @@ func runAndWaitImportKeys(dockerClient client.APIClient, serviceManager services
 	if err := dockerClient.ContainerStart(context.Background(), ctID, types.ContainerStartOptions{}); err != nil {
 		return err
 	}
+	osSignals := make(chan os.Signal, 1)
+	signal.Notify(osSignals, os.Interrupt)
 	for {
 		select {
 		case exitResult := <-ctExit:
@@ -403,6 +410,14 @@ func runAndWaitImportKeys(dockerClient client.APIClient, serviceManager services
 				return newValidatorImportCtBadExitCodeError(ctID, exitResult.StatusCode, logs)
 			}
 			return nil
+		case <-osSignals:
+			if err := stopContainer(dockerClient, ctID); err != nil {
+				return err
+			}
+			if err := deleteContainer(dockerClient, ctID); err != nil {
+				return err
+			}
+			return ErrInterrupted
 		case exitErr := <-errChan:
 			return exitErr
 		}

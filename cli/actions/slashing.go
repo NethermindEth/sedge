@@ -18,6 +18,8 @@ package actions
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
 	"path"
 	"path/filepath"
 
@@ -242,6 +244,8 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 	if err := dockerClient.ContainerStart(context.Background(), ct.ID, types.ContainerStartOptions{}); err != nil {
 		return err
 	}
+	osSignals := make(chan os.Signal, 1)
+	signal.Notify(osSignals, os.Interrupt)
 	for {
 		select {
 		case exitResult := <-ctExit:
@@ -257,6 +261,14 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 			}
 			log.Info("The slashing container ends successfully.")
 			return nil
+		case <-osSignals:
+			if err := stopContainer(dockerClient, ct.ID); err != nil {
+				return err
+			}
+			if err := deleteContainer(dockerClient, ct.ID); err != nil {
+				return err
+			}
+			return ErrInterrupted
 		case exitErr := <-errChan:
 			return exitErr
 		}
@@ -265,8 +277,17 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 
 func deleteContainer(dockerClient client.APIClient, container string) error {
 	log.Debugf("Removing container %s", container)
-	if err := dockerClient.ContainerRemove(context.Background(), container, types.ContainerRemoveOptions{}); err != nil {
+	if err := dockerClient.ContainerRemove(context.Background(), container, types.ContainerRemoveOptions{}); err != nil && !client.IsErrNotFound(err) {
 		return fmt.Errorf("error removing container %s: %w", container, err)
+	}
+	return nil
+}
+
+func stopContainer(dockerClient client.APIClient, ctID string) error {
+	log.Debugf("Stopping container %s", ctID)
+	wait := 30
+	if err := dockerClient.ContainerStop(context.Background(), ctID, container.StopOptions{Timeout: &wait}); err != nil && !client.IsErrNotFound(err) {
+		return fmt.Errorf("error stopping container %s: %w", ctID, err)
 	}
 	return nil
 }
