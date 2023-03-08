@@ -16,6 +16,7 @@ limitations under the License.
 package cli
 
 import (
+	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -244,8 +245,16 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	}
 
 	// Generate jwt secrets if needed
-	if flags.jwtPath, err = generateJWTSecret(flags.jwtPath); err != nil {
-		return err
+	if flags.jwtPath == "" {
+		flags.jwtPath, err = handleJWTSecret(generationPath)
+		if err != nil {
+			return err
+		}
+	} else {
+		flags.jwtPath, err = loadJWTSecret(flags.jwtPath)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Warning if no fee recipient is set
@@ -422,28 +431,13 @@ func initGenPath(path string) error {
 	return nil
 }
 
-func generateJWTSecret(jwtPath string) (string, error) {
-	// Generate JWT secret if necessary
-	var err error
-	if jwtPath == "" && configs.NetworksConfigs()[network].RequireJWT {
-		if jwtPath, err = handleJWTSecret(generationPath); err != nil {
-			return jwtPath, err
-		}
-	} else if filepath.IsAbs(jwtPath) { // Ensure jwtPath is absolute
-		if f, err := os.Stat(jwtPath); os.IsNotExist(err) || !f.Mode().IsRegular() {
-			return jwtPath, fmt.Errorf(configs.InvalidJWTSecret, jwtPath)
-		}
-		if jwtPath, err = filepath.Abs(jwtPath); err != nil {
-			return jwtPath, err
-		}
-	}
-	return jwtPath, nil
-}
-
 func handleJWTSecret(generationPath string) (string, error) {
 	log.Info(configs.GeneratingJWTSecret)
+	if !filepath.IsAbs(generationPath) {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, fmt.Errorf("generation path must be absolute"))
+	}
 
-	jwtscret, err := crypto.GenerateJWTSecret()
+	jwtSecret, err := crypto.GenerateJWTSecret()
 	if err != nil {
 		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
@@ -457,11 +451,36 @@ func handleJWTSecret(generationPath string) (string, error) {
 		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	err = os.WriteFile(jwtPath, []byte(jwtscret), 0o755)
+	err = os.WriteFile(jwtPath, []byte(jwtSecret), 0o755)
 	if err != nil {
 		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
 	log.Info(configs.JWTSecretGenerated)
 	return jwtPath, nil
+}
+
+func loadJWTSecret(from string) (absFrom string, err error) {
+	// Ensure from is absolute
+	absFrom, err = filepath.Abs(from)
+	if err != nil {
+		return
+	}
+	// Check if file exists
+	if f, err := os.Stat(absFrom); os.IsNotExist(err) || !f.Mode().IsRegular() {
+		return "", fmt.Errorf("jwt secret file does not exist")
+	}
+	// Validate hex string
+	jwtSecret, err := os.ReadFile(absFrom)
+	if err != nil {
+		return "", fmt.Errorf("could not read jwt secret file")
+	}
+	decodedJWT, err := hex.DecodeString(string(jwtSecret))
+	if err != nil {
+		return "", fmt.Errorf("jwt secret is not a valid hex string")
+	}
+	if len(decodedJWT) != 32 {
+		return "", fmt.Errorf("jwt secret must be 32 bytes long")
+	}
+	return
 }

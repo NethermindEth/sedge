@@ -93,6 +93,7 @@ func TestCli_FullNode(t *testing.T) {
 					MevImage:           "flashbots/mev-boost:latest",
 					RelayURLs:          configs.NetworksConfigs()[NetworkMainnet].RelayURLs,
 					ContainerTag:       "tag",
+					JWTSecretPath:      filepath.Join(generationPath, "jwtsecret"),
 				}
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
 				gomock.InOrder(
@@ -160,6 +161,7 @@ func TestCli_FullNode(t *testing.T) {
 					FeeRecipient:      "0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5",
 					MapAllPorts:       true,
 					ContainerTag:      "tag",
+					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
 				}
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(0, nil),
@@ -329,6 +331,7 @@ func TestCli_FullNode(t *testing.T) {
 					CustomTTD:           "58750000000000",
 					ECBootnodes:         []string{"enode://ecnode1", "enode://ecnode2"},
 					ContainerTag:        "tag",
+					JWTSecretPath:       filepath.Join(generationPath, "jwtsecret"),
 				}
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(5, nil),
@@ -376,6 +379,7 @@ func TestCli_FullNode(t *testing.T) {
 					ExecutionAuthUrl:  "http://execution:5051",
 					MevBoostEndpoint:  "http://mev-boost:3030",
 					ContainerTag:      "tag",
+					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
 				}
 
 				gomock.InOrder(
@@ -420,6 +424,7 @@ func TestCli_FullNode(t *testing.T) {
 					CustomDeployBlock:       "2355021",
 					CCBootnodes:             []string{"enode://ccnode1", "enode://ccnode2"},
 					ContainerTag:            "tag",
+					JWTSecretPath:           filepath.Join(generationPath, "jwtsecret"),
 				}
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom}).Return(5, nil),
