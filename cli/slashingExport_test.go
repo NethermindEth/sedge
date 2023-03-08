@@ -18,6 +18,7 @@ package cli_test
 import (
 	"errors"
 	"io"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -67,6 +68,15 @@ func TestSlashingExport_Params(t *testing.T) {
 
 	customDir := t.TempDir()
 	outDir := t.TempDir()
+
+	t.Cleanup(func() {
+		if err := os.RemoveAll(customDir); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.RemoveAll(outDir); err != nil {
+			t.Fatal(err)
+		}
+	})
 
 	tests := []struct {
 		name          string
