@@ -16,6 +16,7 @@ limitations under the License.
 package cli
 
 import (
+	"io"
 	"path/filepath"
 	"testing"
 
@@ -29,6 +30,7 @@ import (
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
 	"github.com/golang/mock/gomock"
+	log "github.com/sirupsen/logrus"
 )
 
 func absPathOrFail(t *testing.T, path string) string {
@@ -40,6 +42,9 @@ func absPathOrFail(t *testing.T, path string) string {
 }
 
 func TestCli_FullNode(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
 	ETHClients := map[string][]string{
 		"execution": clients.AllClients["execution"],
 		"consensus": clients.AllClients["consensus"],

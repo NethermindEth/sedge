@@ -71,14 +71,6 @@ func TestSlashingImport_Params(t *testing.T) {
 	if _, err := os.Create(filepath.Join(from, "slashing_protection.json")); err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() {
-		if err := os.RemoveAll(from); err != nil {
-			t.Fatal(err)
-		}
-		if err := os.RemoveAll(customDir); err != nil {
-			t.Fatal(err)
-		}
-	})
 
 	tests := []struct {
 		name          string

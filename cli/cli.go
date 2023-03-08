@@ -559,6 +559,7 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) e
 			Network:         o.genData.Network,
 			GenerationPath:  o.generationPath,
 			From:            o.slashingProtectionFrom,
+			ContainerTag:    o.genData.ContainerTag,
 		})
 		if err != nil {
 			return err
@@ -924,7 +925,7 @@ func inputKeystorePath(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputImportSlashingProtectionFrom(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.slashingProtectionFrom, err = p.InputFilePath("Interchange slashing protection file", "", true, ".json")
+	o.slashingProtectionFrom, err = p.InputFilePath("Interchange slashing protection file path", "", true, ".json")
 	if err != nil {
 		return err
 	}
