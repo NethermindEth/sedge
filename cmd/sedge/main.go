@@ -70,6 +70,8 @@ func main() {
 		cli.ImportKeysCmd(sedgeActions),
 		cli.GenerateCmd(sedgeActions),
 	)
+	sedgeCmd.SilenceErrors = true
+	sedgeCmd.SilenceUsage = true
 	if err := sedgeCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
