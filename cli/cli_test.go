@@ -116,7 +116,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
 					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false, gomock.AssignableToTypeOf(ui.GraffitiValidator)).Return("test graffiti", nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("http://checkpoint.sync", nil),
-					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
+					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address", "", true).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
@@ -126,7 +126,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					prompter.EXPECT().Select("Select mnemonic source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					prompter.EXPECT().Select("Select passphrase source", "", []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}).Return(0, nil),
-					prompter.EXPECT().Input("Withdrawal address", "", false, gomock.AssignableToTypeOf(ui.EthAddressValidator)).Return("0x00000007abca72jmd83jd8u3jd9kdn32j38abc", nil),
+					prompter.EXPECT().Input("Withdrawal address", "", false, gomock.AssignableToTypeOf(func(s string) error { return ui.EthAddressValidator(s, true) })).Return("0x00000007abca72jmd83jd8u3jd9kdn32j38abc", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
@@ -177,7 +177,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
 					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(1, nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("http://checkpoint.sync", nil),
-					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
+					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
@@ -249,7 +249,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
 					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false, gomock.AssignableToTypeOf(ui.GraffitiValidator)).Return("test graffiti", nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", "", false).Return("http://checkpoint.sync", nil),
-					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
+					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address", "", true).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(1, nil),
 					prompter.EXPECT().InputFilePath("JWT path", "", true).Return(filepath.Join(testData, "jwt"), nil),
@@ -397,7 +397,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().InputURL("Mev-Boost endpoint", "", false).Return("http://mev-boost:3030", nil),
 					prompter.EXPECT().InputURL("Execution API URL", "", false).Return("http://execution:5051", nil),
 					prompter.EXPECT().InputURL("Execution Auth API URL", "", false).Return("http://execution:5051", nil),
-					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a21ebadde0c13e8b91022a7e5732eb6bf5d5", nil),
+					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e8b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
@@ -443,7 +443,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().InputList("Consensus boot nodes", gomock.Len(0), gomock.AssignableToTypeOf(utils.ENRValidator)).Return([]string{"enode://ccnode1", "enode://ccnode2"}, nil), // TODO: add real enr values
 					prompter.EXPECT().InputURL("Execution API URL", "", false).Return("http://localhost:5051", nil),
 					prompter.EXPECT().InputURL("Execution Auth API URL", "", false).Return("http://localhost:5051", nil),
-					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a21ebadce0c13e8a91022a7e5732eb6bf5d5", nil),
+					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadce0c13e8a91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
@@ -485,7 +485,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().InputURL("Consensus API URL", "", false).Return("http://localhost:5051", nil),
 					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false, gomock.AssignableToTypeOf(ui.GraffitiValidator)).Return("test graffiti", nil),
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
-					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5", nil),
+					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address", "", true).Return("0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Enable MEV Boost?", true).Return(true, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
@@ -494,7 +494,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					prompter.EXPECT().Select("Select mnemonic source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					prompter.EXPECT().Select("Select passphrase source", "", []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}).Return(0, nil),
-					prompter.EXPECT().Input("Withdrawal address", "", false, gomock.AssignableToTypeOf(ui.EthAddressValidator)).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
+					prompter.EXPECT().Input("Withdrawal address", "", false, gomock.AssignableToTypeOf(func(s string) error { return ui.EthAddressValidator(s, true) })).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
@@ -549,7 +549,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().InputURL("Consensus API URL", "", false).Return("http://localhost:5051", nil),
 					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false, gomock.AssignableToTypeOf(ui.GraffitiValidator)).Return("test graffiti", nil),
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
-					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address.", "", true).Return("0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5", nil),
+					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address", "", true).Return("0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5", nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
 						GenerationData: genData,
@@ -557,7 +557,7 @@ func TestCli_FullNode(t *testing.T) {
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					prompter.EXPECT().Select("Select mnemonic source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					prompter.EXPECT().Select("Select passphrase source", "", []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}).Return(0, nil),
-					prompter.EXPECT().Input("Withdrawal address", "", false, gomock.AssignableToTypeOf(ui.EthAddressValidator)).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
+					prompter.EXPECT().Input("Withdrawal address", "", false, gomock.AssignableToTypeOf(func(s string) error { return ui.EthAddressValidator(s, true) })).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{

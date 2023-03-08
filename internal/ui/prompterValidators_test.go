@@ -25,9 +25,10 @@ import (
 
 func TestEthAddressValidator(t *testing.T) {
 	tests := []struct {
-		name  string
-		input string
-		want  error
+		name       string
+		input      string
+		allowEmpty bool
+		want       error
 	}{
 		{
 			name:  "valid address",
@@ -50,14 +51,20 @@ func TestEthAddressValidator(t *testing.T) {
 			want:  ErrInvalidEthereumAddress,
 		},
 		{
-			name:  "empty string",
+			name:       "empty string, allowed",
+			input:      "",
+			want:       nil,
+			allowEmpty: true,
+		},
+		{
+			name:  "empty string, disallowed",
 			input: "",
 			want:  ErrInvalidEthereumAddress,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := EthAddressValidator(tt.input)
+			got := EthAddressValidator(tt.input, tt.allowEmpty)
 			if tt.want != nil {
 				assert.ErrorIs(t, tt.want, got)
 			} else {

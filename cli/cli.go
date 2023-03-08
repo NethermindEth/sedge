@@ -853,7 +853,7 @@ func inputCheckpointSyncURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address.", "", true)
+	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address", "", true)
 	return
 }
 
