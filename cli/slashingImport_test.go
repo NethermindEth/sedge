@@ -183,22 +183,24 @@ func TestSlashingImport_Params(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Setup
-			func() {
-				if tt.customDir {
-					customDir := t.TempDir()
-					tt.actionOptions.GenerationPath = customDir
-					tt.actionOptions.From = filepath.Join(customDir, "slashing_protection.json")
-					tt.args = append(tt.args, "--path", customDir)
+			if tt.customDir {
+				customDir := t.TempDir()
+				tt.actionOptions.GenerationPath = customDir
+				tt.actionOptions.From = filepath.Join(customDir, "slashing_protection.json")
+				tt.args = append(tt.args, "--path", customDir)
+			}
+			if tt.from {
+				from := t.TempDir()
+				var file *os.File
+				var err error
+
+				if file, err = os.Create(filepath.Join(from, "slashing_protection.json")); err != nil {
+					t.Fatal(err)
 				}
-				if tt.from {
-					from := t.TempDir()
-					if _, err := os.Create(filepath.Join(from, "slashing_protection.json")); err != nil {
-						t.Fatal(err)
-					}
-					tt.actionOptions.From = filepath.Join(from, "slashing_protection.json")
-					tt.args = append(tt.args, "--from", filepath.Join(from, "slashing_protection.json"))
-				}
-			}()
+				defer file.Close()
+				tt.actionOptions.From = filepath.Join(from, "slashing_protection.json")
+				tt.args = append(tt.args, "--from", filepath.Join(from, "slashing_protection.json"))
+			}
 
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
