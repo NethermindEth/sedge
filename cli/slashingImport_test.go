@@ -18,6 +18,7 @@ package cli_test
 import (
 	"errors"
 	"io"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -64,6 +65,12 @@ func TestSlashingImport_ValidatorIsRequired(t *testing.T) {
 func TestSlashingImport_Params(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
+
+	customDir := t.TempDir()
+	from := t.TempDir()
+	if _, err := os.Create(filepath.Join(from, "slashing-data.json")); err != nil {
+		t.Fatal(err)
+	}
 
 	tests := []struct {
 		name          string
@@ -132,50 +139,50 @@ func TestSlashingImport_Params(t *testing.T) {
 		},
 		{
 			name: "path flag",
-			args: []string{"teku", "--path", filepath.Join("custom", "dir")},
+			args: []string{"teku", "--path", customDir},
 			actionOptions: actions.SlashingImportOptions{
 				ValidatorClient: "teku",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
-				GenerationPath:  filepath.Join("custom", "dir"),
-				From:            filepath.Join("custom", "dir", "slashing-export.json"),
+				GenerationPath:  customDir,
+				From:            filepath.Join(customDir, "slashing-export.json"),
 			},
 		},
 		{
 			name: "path shorthand flag",
-			args: []string{"teku", "-p", filepath.Join("custom", "dir")},
+			args: []string{"teku", "-p", customDir},
 			actionOptions: actions.SlashingImportOptions{
 				ValidatorClient: "teku",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
-				GenerationPath:  filepath.Join("custom", "dir"),
-				From:            filepath.Join("custom", "dir", "slashing-export.json"),
+				GenerationPath:  customDir,
+				From:            filepath.Join(customDir, "slashing-export.json"),
 			},
 		},
 		{
 			name: "from flag",
-			args: []string{"lodestar", "--from", filepath.Join("custom", "from", "file.json")},
+			args: []string{"lodestar", "--from", filepath.Join(from, "slashing-data.json")},
 			actionOptions: actions.SlashingImportOptions{
 				ValidatorClient: "lodestar",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join("custom", "from", "file.json"),
+				From:            filepath.Join(from, "slashing-data.json"),
 			},
 		},
 		{
 			name: "from shorthand flag",
-			args: []string{"lodestar", "-f", filepath.Join("custom", "from", "file.json")},
+			args: []string{"lodestar", "-f", filepath.Join(from, "slashing-data.json")},
 			actionOptions: actions.SlashingImportOptions{
 				ValidatorClient: "lodestar",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join("custom", "from", "file.json"),
+				From:            filepath.Join(from, "slashing-data.json"),
 			},
 		},
 	}

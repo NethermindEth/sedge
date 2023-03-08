@@ -65,6 +65,9 @@ func TestSlashingExport_Params(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
 
+	customDir := t.TempDir()
+	outDir := t.TempDir()
+
 	tests := []struct {
 		name          string
 		args          []string
@@ -132,50 +135,50 @@ func TestSlashingExport_Params(t *testing.T) {
 		},
 		{
 			name: "path flag",
-			args: []string{"teku", "--path", filepath.Join("custom", "dir")},
+			args: []string{"teku", "--path", customDir},
 			actionOptions: actions.SlashingExportOptions{
 				ValidatorClient: "teku",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
-				GenerationPath:  filepath.Join("custom", "dir"),
-				Out:             filepath.Join("custom", "dir", "slashing_export.json"),
+				GenerationPath:  customDir,
+				Out:             filepath.Join(customDir, "slashing_export.json"),
 			},
 		},
 		{
 			name: "path shorthand flag",
-			args: []string{"teku", "-p", filepath.Join("custom", "dir")},
+			args: []string{"teku", "-p", customDir},
 			actionOptions: actions.SlashingExportOptions{
 				ValidatorClient: "teku",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
-				GenerationPath:  filepath.Join("custom", "dir"),
-				Out:             filepath.Join("custom", "dir", "slashing_export.json"),
+				GenerationPath:  customDir,
+				Out:             filepath.Join(customDir, "slashing_export.json"),
 			},
 		},
 		{
 			name: "out flag",
-			args: []string{"lodestar", "--out", filepath.Join("custom", "out", "file.json")},
+			args: []string{"lodestar", "--out", filepath.Join(outDir, "file.json")},
 			actionOptions: actions.SlashingExportOptions{
 				ValidatorClient: "lodestar",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				Out:             filepath.Join("custom", "out", "file.json"),
+				Out:             filepath.Join(outDir, "file.json"),
 			},
 		},
 		{
 			name: "out shorthand flag",
-			args: []string{"lodestar", "-o", filepath.Join("custom", "out", "file.json")},
+			args: []string{"lodestar", "-o", filepath.Join(outDir, "file.json")},
 			actionOptions: actions.SlashingExportOptions{
 				ValidatorClient: "lodestar",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				Out:             filepath.Join("custom", "out", "file.json"),
+				Out:             filepath.Join(outDir, "file.json"),
 			},
 		},
 	}

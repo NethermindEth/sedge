@@ -17,6 +17,8 @@ package cli
 
 import (
 	"errors"
+	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/NethermindEth/sedge/cli/actions"
@@ -69,8 +71,15 @@ sedge slashing-import --from slashing-data.json --start-validator lighthouse`,
 			return nil
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if f, err := os.Stat(generationPath); os.IsNotExist(err) || !f.IsDir() {
+				return fmt.Errorf("generation path %s does not exist or is not a directory", generationPath)
+			}
 			if from == "" {
 				from = filepath.Join(generationPath, "slashing-export.json")
+			} else {
+				if f, err := os.Stat(from); os.IsNotExist(err) || f.IsDir() {
+					return fmt.Errorf("slashing protection data file %s does not exist or is a directory", from)
+				}
 			}
 			if err := configs.NetworkCheck(network); err != nil {
 				return err
