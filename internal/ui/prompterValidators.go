@@ -38,7 +38,10 @@ var (
 
 var digitsString = regexp.MustCompile("^0$|^[1-9][0-9]*$")
 
-func EthAddressValidator(address string) error {
+func EthAddressValidator(address string, allowEmpty bool) error {
+	if allowEmpty && address == "" {
+		return nil
+	}
 	if !utils.IsAddress(address) {
 		return ErrInvalidEthereumAddress
 	}

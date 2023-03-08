@@ -179,7 +179,7 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) (err
 			selectExecutionClient,
 			selectConsensusClient,
 			inputCheckpointSyncURL,
-			inputFeeRecipient,
+			inputFeeRecipientNoValidator,
 		); err != nil {
 			return err
 		}
@@ -258,7 +258,7 @@ func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 	if err := runPromptActions(p, o,
 		inputExecutionAPIUrl,
 		inputExecutionAuthUrl,
-		inputFeeRecipient,
+		inputFeeRecipientNoValidator,
 		confirmExposeAllPorts,
 	); err != nil {
 		return err
@@ -857,6 +857,11 @@ func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
 	return
 }
 
+func inputFeeRecipientNoValidator(p ui.Prompter, o *CliCmdOptions) (err error) {
+	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false)
+	return
+}
+
 func inputValidatorGracePeriod(p ui.Prompter, o *CliCmdOptions) (err error) {
 	epochs, err := p.InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", 1)
 	if err != nil {
@@ -907,7 +912,7 @@ func inputKeystorePassphrase(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputWithdrawalAddress(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.withdrawalAddress, err = p.Input("Withdrawal address", "", false, ui.EthAddressValidator)
+	o.withdrawalAddress, err = p.Input("Withdrawal address", "", false, func(s string) error { return ui.EthAddressValidator(s, true) })
 	return
 }
 
