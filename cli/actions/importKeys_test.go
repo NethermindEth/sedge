@@ -436,6 +436,11 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 		ContainerLogs(gomock.Any(), validatorImportCtId, gomock.Any()).
 		Return(ioutil.NopCloser(strings.NewReader("logs")), nil).
 		Times(1)
+	// Mock ContainerRemove
+	dockerClient.EXPECT().
+		ContainerRemove(gomock.Any(), validatorImportCtId, types.ContainerRemoveOptions{}).
+		Return(nil).
+		Times(1)
 
 	return dockerClient
 }

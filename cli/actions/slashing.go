@@ -256,6 +256,7 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 				return fmt.Errorf(`%w: slashing protection container with id %s ends with status code %d. Here are the logs for more details: %s`, ValidatorImportCtBadExitCodeError, ct.ID, exitResult.StatusCode, logs)
 			}
 			log.Info("The slashing container ends successfully.")
+			return nil
 		case exitErr := <-errChan:
 			return exitErr
 		}

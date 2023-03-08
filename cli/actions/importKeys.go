@@ -402,6 +402,7 @@ func runAndWaitImportKeys(dockerClient client.APIClient, serviceManager services
 			if exitResult.StatusCode != 0 {
 				return newValidatorImportCtBadExitCodeError(ctID, exitResult.StatusCode, logs)
 			}
+			return nil
 		case exitErr := <-errChan:
 			return exitErr
 		}
