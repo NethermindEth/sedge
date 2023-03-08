@@ -68,7 +68,7 @@ func TestSlashingImport_Params(t *testing.T) {
 
 	customDir := t.TempDir()
 	from := t.TempDir()
-	if _, err := os.Create(filepath.Join(from, "slashing-data.json")); err != nil {
+	if _, err := os.Create(filepath.Join(from, "slashing_protection.json")); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
@@ -94,7 +94,7 @@ func TestSlashingImport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing-export.json"),
+				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
@@ -106,7 +106,7 @@ func TestSlashingImport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing-export.json"),
+				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
@@ -118,7 +118,7 @@ func TestSlashingImport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing-export.json"),
+				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
@@ -130,7 +130,7 @@ func TestSlashingImport_Params(t *testing.T) {
 				StopValidator:   true,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing-export.json"),
+				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
@@ -142,7 +142,7 @@ func TestSlashingImport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  true,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing-export.json"),
+				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
@@ -154,7 +154,7 @@ func TestSlashingImport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  customDir,
-				From:            filepath.Join(customDir, "slashing-export.json"),
+				From:            filepath.Join(customDir, "slashing_protection.json"),
 			},
 		},
 		{
@@ -166,31 +166,31 @@ func TestSlashingImport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  customDir,
-				From:            filepath.Join(customDir, "slashing-export.json"),
+				From:            filepath.Join(customDir, "slashing_protection.json"),
 			},
 		},
 		{
 			name: "from flag",
-			args: []string{"lodestar", "--from", filepath.Join(from, "slashing-data.json")},
+			args: []string{"lodestar", "--from", filepath.Join(from, "slashing_protection.json")},
 			actionOptions: actions.SlashingImportOptions{
 				ValidatorClient: "lodestar",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join(from, "slashing-data.json"),
+				From:            filepath.Join(from, "slashing_protection.json"),
 			},
 		},
 		{
 			name: "from shorthand flag",
-			args: []string{"lodestar", "-f", filepath.Join(from, "slashing-data.json")},
+			args: []string{"lodestar", "-f", filepath.Join(from, "slashing_protection.json")},
 			actionOptions: actions.SlashingImportOptions{
 				ValidatorClient: "lodestar",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join(from, "slashing-data.json"),
+				From:            filepath.Join(from, "slashing_protection.json"),
 			},
 		},
 	}

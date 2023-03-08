@@ -460,6 +460,7 @@ func handleJWTSecret(generationPath string) (string, error) {
 	return jwtPath, nil
 }
 
+// TODO: Add unit tests
 func loadJWTSecret(from string) (absFrom string, err error) {
 	// Ensure from is absolute
 	absFrom, err = filepath.Abs(from)

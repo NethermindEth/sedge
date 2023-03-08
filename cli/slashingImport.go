@@ -75,7 +75,7 @@ sedge slashing-import --from slashing-data.json --start-validator lighthouse`,
 				return fmt.Errorf("generation path %s does not exist or is not a directory", generationPath)
 			}
 			if from == "" {
-				from = filepath.Join(generationPath, "slashing-export.json")
+				from = filepath.Join(generationPath, "slashing_protection.json")
 			} else {
 				if f, err := os.Stat(from); os.IsNotExist(err) || f.IsDir() {
 					return fmt.Errorf("slashing protection data file %s does not exist or is a directory", from)
@@ -109,7 +109,7 @@ sedge slashing-import --from slashing-data.json --start-validator lighthouse`,
 	cmd.Flags().BoolVar(&startValidator, "start-validator", false, "starts the validator client after import, regardless of the state the validator was in before")
 	cmd.Flags().BoolVar(&stopValidator, "stop-validator", false, "stops the validator client after import, regardless of the state the validator was in before")
 	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "path to the generation directory")
-	cmd.Flags().StringVarP(&from, "from", "f", "", "path to the JSON file in the EIP-3076 format with the slashing protection data to import (default: <generation-dir>/slashing_export.json)")
+	cmd.Flags().StringVarP(&from, "from", "f", "", "path to the JSON file in the EIP-3076 format with the slashing protection data to import (default: <generation-dir>/slashing_protection.json)")
 	cmd.PersistentFlags().StringVar(&containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.")
 	return cmd
 }

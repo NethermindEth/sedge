@@ -73,7 +73,7 @@ sedge slashing-export --out slashing-data.json --start-validator lighthouse`,
 				return fmt.Errorf("generation path %s does not exist or is not a directory", generationPath)
 			}
 			if out == "" {
-				out = filepath.Join(generationPath, "slashing_export.json")
+				out = filepath.Join(generationPath, "slashing_protection.json")
 			}
 			if err := configs.NetworkCheck(network); err != nil {
 				return err
@@ -103,7 +103,7 @@ sedge slashing-export --out slashing-data.json --start-validator lighthouse`,
 	cmd.Flags().BoolVar(&startValidator, "start-validator", false, "starts the validator client after export, regardless of the state the validator was in before")
 	cmd.Flags().BoolVar(&stopValidator, "stop-validator", false, "stops the validator client after export, regardless of the state the validator was in before")
 	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "path to the generation directory")
-	cmd.Flags().StringVarP(&out, "out", "o", "", `path to write slashing protection data (default "[GENERATION_PATH]/slashing_export.json")`)
+	cmd.Flags().StringVarP(&out, "out", "o", "", `path to write slashing protection data (default "[GENERATION_PATH]/slashing_protection.json")`)
 	cmd.PersistentFlags().StringVar(&containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.")
 	return cmd
 }

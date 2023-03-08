@@ -34,7 +34,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const SlashingImportFile string = "slashing-import.json"
+const SlashingImportFile string = "slashing_protection.json"
 
 type SlashingImportOptions struct {
 	ValidatorClient string
@@ -83,28 +83,28 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 			"--accept-terms-of-use",
 			"--" + options.Network,
 			"--datadir=/data",
-			"--slashing-protection-json-file=/data/slashing-import.json",
+			"--slashing-protection-json-file=/data/slashing_protection.json",
 		}
 	case "lighthouse":
 		cmd = []string{
 			"lighthouse", "account", "validator", "slashing-protection", "import",
 			"--network", options.Network,
 			"--datadir", "/data",
-			"/data/slashing-import.json",
+			"/data/slashing_protection.json",
 		}
 	case "lodestar":
 		cmd = []string{
 			"validator", "slashing-protection", "import",
 			"--network", options.Network,
 			"--dataDir", "/data",
-			"--file", "/data/slashing-import.json",
+			"--file", "/data/slashing_protection.json",
 		}
 	case "teku":
 		cmd = []string{
 			"slashing-protection",
 			"import",
 			"--data-path=/data",
-			"--from=/data/slashing-import.json",
+			"--from=/data/slashing_protection.json",
 		}
 	default:
 		return fmt.Errorf("%w: %s", UnsupportedValidatorClientError, options.ValidatorClient)

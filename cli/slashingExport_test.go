@@ -92,7 +92,7 @@ func TestSlashingExport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				Out:             filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_export.json"),
+				Out:             filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
@@ -104,7 +104,7 @@ func TestSlashingExport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				Out:             filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_export.json"),
+				Out:             filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
@@ -116,7 +116,7 @@ func TestSlashingExport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				Out:             filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_export.json"),
+				Out:             filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
@@ -128,7 +128,7 @@ func TestSlashingExport_Params(t *testing.T) {
 				StopValidator:   true,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				Out:             filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_export.json"),
+				Out:             filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
@@ -140,7 +140,7 @@ func TestSlashingExport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  true,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				Out:             filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_export.json"),
+				Out:             filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
@@ -152,7 +152,7 @@ func TestSlashingExport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  customDir,
-				Out:             filepath.Join(customDir, "slashing_export.json"),
+				Out:             filepath.Join(customDir, "slashing_protection.json"),
 			},
 		},
 		{
@@ -164,7 +164,7 @@ func TestSlashingExport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  customDir,
-				Out:             filepath.Join(customDir, "slashing_export.json"),
+				Out:             filepath.Join(customDir, "slashing_protection.json"),
 			},
 		},
 		{

@@ -16,6 +16,7 @@ limitations under the License.
 package cli
 
 import (
+	"io"
 	"path/filepath"
 	"testing"
 
@@ -23,10 +24,14 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestImportKeys_NumberOfArguments(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
 	tests := []struct {
 		name string
 		args []string
@@ -51,6 +56,9 @@ func TestImportKeys_NumberOfArguments(t *testing.T) {
 }
 
 func TestImportKeys_ArgsAndFlags(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
 	tests := []struct {
 		name              string
 		args              []string
