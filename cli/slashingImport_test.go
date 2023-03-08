@@ -66,16 +66,12 @@ func TestSlashingImport_Params(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
 
-	customDir := t.TempDir()
-	from := t.TempDir()
-	if _, err := os.Create(filepath.Join(from, "slashing_protection.json")); err != nil {
-		t.Fatal(err)
-	}
-
 	tests := []struct {
 		name          string
 		args          []string
 		actionOptions actions.SlashingImportOptions
+		customDir     bool
+		from          bool
 	}{
 		{
 			name: "validator argument",
@@ -139,55 +135,71 @@ func TestSlashingImport_Params(t *testing.T) {
 		},
 		{
 			name: "path flag",
-			args: []string{"teku", "--path", customDir},
+			args: []string{"teku"},
 			actionOptions: actions.SlashingImportOptions{
 				ValidatorClient: "teku",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
-				GenerationPath:  customDir,
-				From:            filepath.Join(customDir, "slashing_protection.json"),
 			},
+			customDir: true,
 		},
 		{
 			name: "path shorthand flag",
-			args: []string{"teku", "-p", customDir},
+			args: []string{"teku"},
 			actionOptions: actions.SlashingImportOptions{
 				ValidatorClient: "teku",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
-				GenerationPath:  customDir,
-				From:            filepath.Join(customDir, "slashing_protection.json"),
 			},
+			customDir: true,
 		},
 		{
 			name: "from flag",
-			args: []string{"lodestar", "--from", filepath.Join(from, "slashing_protection.json")},
+			args: []string{"lodestar"},
 			actionOptions: actions.SlashingImportOptions{
 				ValidatorClient: "lodestar",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join(from, "slashing_protection.json"),
 			},
+			from: true,
 		},
 		{
 			name: "from shorthand flag",
-			args: []string{"lodestar", "-f", filepath.Join(from, "slashing_protection.json")},
+			args: []string{"lodestar"},
 			actionOptions: actions.SlashingImportOptions{
 				ValidatorClient: "lodestar",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join(from, "slashing_protection.json"),
 			},
+			from: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Setup
+			func() {
+				if tt.customDir {
+					customDir := t.TempDir()
+					tt.actionOptions.GenerationPath = customDir
+					tt.actionOptions.From = filepath.Join(customDir, "slashing_protection.json")
+					tt.args = append(tt.args, "--path", customDir)
+				}
+				if tt.from {
+					from := t.TempDir()
+					if _, err := os.Create(filepath.Join(from, "slashing_protection.json")); err != nil {
+						t.Fatal(err)
+					}
+					tt.actionOptions.From = filepath.Join(from, "slashing_protection.json")
+					tt.args = append(tt.args, "--from", filepath.Join(from, "slashing_protection.json"))
+				}
+			}()
+
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
