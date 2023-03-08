@@ -130,4 +130,5 @@ const (
 	MissingVersionErr                 = "docker-compose script is missing version"
 	InvalidComposeErr                 = "provided docker-compose script is invalid: %w"
 	ErrDuplicatedBootNode             = "duplicated boot node"
+	ErrGraffitiLength                 = "graffiti must have 16 characters at most. Provided graffiti %s has %d characters"
 )

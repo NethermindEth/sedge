@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/utils"
 )
 
@@ -111,6 +112,14 @@ func fileExtensionValidator(extensions []string) func(ans interface{}) error {
 func DigitsStringValidator(ttd string) error {
 	if !digitsString.MatchString(ttd) {
 		return ErrInvalidDigitString
+	}
+	return nil
+}
+
+// TODO: add unit tests
+func GraffitiValidator(str string) error {
+	if len(str) > 16 {
+		return fmt.Errorf(configs.ErrGraffitiLength, str, len(str))
 	}
 	return nil
 }

@@ -1221,6 +1221,34 @@ func TestGenerateCmd(t *testing.T) {
 			nil),
 		*buildGenerateTestCase(
 			t,
+			"Full-node, valid Graffiti", "case_1",
+			GenCmdFlags{
+				feeRecipient: "0x0000000000000000000000000000000000000000",
+				graffiti:     "sedge-graffiti",
+			},
+			globalFlags{
+				network: "gnosis",
+			},
+			subCmd{
+				name: "full-node",
+			},
+			nil),
+		*buildGenerateTestCase(
+			t,
+			"Full-node, Graffiti too long", "case_1",
+			GenCmdFlags{
+				feeRecipient: "0x0000000000000000000000000000000000000000",
+				graffiti:     "sedge-graffiti-sedge",
+			},
+			globalFlags{
+				network: "gnosis",
+			},
+			subCmd{
+				name: "full-node",
+			},
+			fmt.Errorf(configs.ErrGraffitiLength, "sedge-graffiti-sedge", 20)),
+		*buildGenerateTestCase(
+			t,
 			"Validator, waitEpoch set", "case_1",
 			GenCmdFlags{
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
@@ -1331,6 +1359,38 @@ func TestGenerateCmd(t *testing.T) {
 			GenCmdFlags{
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
 				consensusApiUrl: "https://localhost:8000/api/endpoint",
+			},
+			globalFlags{
+				network: "mainnet",
+			},
+			subCmd{
+				name: "validator",
+				args: []string{"lodestar"},
+			},
+			nil),
+		*buildGenerateTestCase(
+			t,
+			"Validator, graffiti too long", "case_1",
+			GenCmdFlags{
+				feeRecipient:    "0x0000000000000000000000000000000000000000",
+				consensusApiUrl: "https://localhost:8000/api/endpoint{}",
+				graffiti:        "sedge-graffiti-sedge",
+			},
+			globalFlags{
+				network: "goerli",
+			},
+			subCmd{
+				name: "validator",
+				args: []string{"teku"},
+			},
+			fmt.Errorf(configs.ErrGraffitiLength, "sedge-graffiti-sedge", 20)),
+		*buildGenerateTestCase(
+			t,
+			"Validator, valid graffiti", "case_1",
+			GenCmdFlags{
+				feeRecipient:    "0x0000000000000000000000000000000000000000",
+				consensusApiUrl: "https://localhost:8000/api/endpoint",
+				graffiti:        "sedge-graffiti",
 			},
 			globalFlags{
 				network: "mainnet",

@@ -210,6 +210,11 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 		}
 	}
 
+	// Validate Graffiti flag
+	if len(flags.graffiti) > 16 {
+		return fmt.Errorf(configs.ErrGraffitiLength, flags.graffiti, len(flags.graffiti))
+	}
+
 	return nil
 }
 
