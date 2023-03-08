@@ -40,6 +40,9 @@ func RunCmd(sedgeActions actions.SedgeActions) *cobra.Command {
 		Short: "Run services",
 		Long:  "Run all the generated services",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) != 0 {
+				return fmt.Errorf(configs.ErrCMDArgsNotSupported, "run")
+			}
 			var found bool
 
 			if err := filepath.Walk(generationPath, func(path string, info os.FileInfo, err error) error {

@@ -131,4 +131,5 @@ const (
 	InvalidComposeErr                 = "provided docker-compose script is invalid: %w"
 	ErrDuplicatedBootNode             = "duplicated boot node"
 	ErrGraffitiLength                 = "graffiti must have 16 characters at most. Provided graffiti %s has %d characters"
+	ErrCMDArgsNotSupported            = "command %s does not support arguments. Please use flags instead"
 )

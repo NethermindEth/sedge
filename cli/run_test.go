@@ -47,30 +47,31 @@ func TestRun(t *testing.T) {
 		name      string
 		pTestData string
 		args      cmdArgs
+		extraArgs []string
 		preRunErr error
 		depsErr   bool
 		setupErr  bool
 		runErr    bool
 	}{
 		{
-			name:      "Valid args and valid docker-compose",
+			name:      "Valid flags and valid docker-compose",
 			pTestData: "valid",
 			args:      cmdArgs{services: []string{"execution", "consensus"}},
 		},
 		{
-			name:      "Valid args, bad docker-compose, no services",
+			name:      "Valid flags, bad docker-compose, no services",
 			pTestData: "no_services",
 			args:      cmdArgs{services: []string{"execution", "consensus"}},
 			preRunErr: fmt.Errorf(configs.GenPathErr, emptyErr),
 		},
 		{
-			name:      "Valid args, bad docker-compose, empty services, yaml schema error",
+			name:      "Valid flags, bad docker-compose, empty services, yaml schema error",
 			pTestData: "bad_services",
 			args:      cmdArgs{services: []string{"execution", "consensus"}},
 			preRunErr: fmt.Errorf(configs.InvalidComposeErr, emptyErr),
 		},
 		{
-			name:      "Valid args, bad docker-compose, no version",
+			name:      "Valid flags, bad docker-compose, no version",
 			pTestData: "no_version",
 			args:      cmdArgs{services: []string{"execution", "consensus"}}, // Leave error commented in case we add a version check
 			// preRunErr: fmt.Errorf(configs.MissingVersionErr),
@@ -121,6 +122,12 @@ func TestRun(t *testing.T) {
 			args:      cmdArgs{services: []string{"execution", "consensus"}},
 			runErr:    true,
 		},
+		{
+			name:      "Args provided",
+			pTestData: "valid",
+			extraArgs: []string{"extra"},
+			preRunErr: fmt.Errorf(configs.ErrCMDArgsNotSupported, "run"),
+		},
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
@@ -141,6 +148,9 @@ func TestRun(t *testing.T) {
 				args = append(args, strings.Join(tc.args.services, ","))
 			} else {
 				tc.args.services = []string{}
+			}
+			if len(tc.extraArgs) > 0 {
+				args = append(args, tc.extraArgs...)
 			}
 			t.Logf("Running test with args: %v", args)
 
