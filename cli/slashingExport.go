@@ -82,7 +82,14 @@ sedge slashing-export --out slashing-data.json --start-validator lighthouse`,
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := sedgeActions.ExportSlashingInterchangeData(actions.SlashingExportOptions{
+			err := sedgeActions.SetupContainers(actions.SetupContainersOptions{
+				GenerationPath: generationPath,
+				Services:       []string{validator},
+			})
+			if err != nil {
+				return err
+			}
+			err = sedgeActions.ExportSlashingInterchangeData(actions.SlashingExportOptions{
 				ValidatorClient: validatorClient,
 				Network:         network,
 				StopValidator:   stopValidator,

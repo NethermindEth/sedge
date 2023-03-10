@@ -205,10 +205,16 @@ func TestSlashingImport_Params(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			actions := sedge_mocks.NewMockSedgeActions(ctrl)
-			actions.EXPECT().ImportSlashingInterchangeData(tt.actionOptions).Times(1)
+			mockActions := sedge_mocks.NewMockSedgeActions(ctrl)
+			gomock.InOrder(
+				mockActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
+					GenerationPath: tt.actionOptions.GenerationPath,
+					Services:       []string{"validator"},
+				}).Return(nil).Times(1),
+				mockActions.EXPECT().ImportSlashingInterchangeData(tt.actionOptions).Times(1),
+			)
 
-			slashingImportCmd := cli.SlashingImportCmd(actions)
+			slashingImportCmd := cli.SlashingImportCmd(mockActions)
 			slashingImportCmd.SetArgs(tt.args)
 			slashingImportCmd.SetOutput(io.Discard)
 			err := slashingImportCmd.Execute()
@@ -245,12 +251,18 @@ func TestSlashingImport_Errors(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			actions := sedge_mocks.NewMockSedgeActions(ctrl)
+			mockActions := sedge_mocks.NewMockSedgeActions(ctrl)
 			if tt.run {
-				actions.EXPECT().ImportSlashingInterchangeData(gomock.Any()).Return(errors.New("action error")).Times(1)
+				gomock.InOrder(
+					mockActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
+						GenerationPath: configs.DefaultAbsSedgeDataPath,
+						Services:       []string{"validator"},
+					}).Return(nil).Times(1),
+					mockActions.EXPECT().ImportSlashingInterchangeData(gomock.Any()).Return(errors.New("action error")).Times(1),
+				)
 			}
 
-			slashingImportCmd := cli.SlashingImportCmd(actions)
+			slashingImportCmd := cli.SlashingImportCmd(mockActions)
 			slashingImportCmd.SetArgs(tt.args)
 			slashingImportCmd.SetOutput(io.Discard)
 			err := slashingImportCmd.Execute()
