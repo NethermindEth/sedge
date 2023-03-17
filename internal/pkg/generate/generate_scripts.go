@@ -237,7 +237,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 	// If consensus is running with the validator, and the MevBoostEndpoint is not set, set it to the default value
 	if cls[consensus] != nil && cls[validator] != nil && gd.MevBoostEndpoint == "" && gd.Mev {
-		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ConsensusClient.Name)
+		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient.Name)
 		if err != nil {
 			return err
 		}
@@ -380,7 +380,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	}
 	// If consensus is running with the validator, and the MevBoostEndpoint is not set, set it to the default value
 	if cls[consensus] != nil && cls[validator] != nil && gd.MevBoostEndpoint == "" && gd.Mev {
-		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ConsensusClient.Name)
+		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient.Name)
 		if err != nil {
 			return err
 		}

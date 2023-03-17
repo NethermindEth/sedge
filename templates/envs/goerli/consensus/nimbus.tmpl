@@ -1,0 +1,14 @@
+{{/* nimbus.tmpl */}}
+{{ define "consensus" }}
+# --- Consensus Layer - Beacon Node - configuration ---
+CC_PEER_COUNT=50
+CC_LOG_LEVEL=info
+EC_API_URL={{.ExecutionApiURL}}
+EC_AUTH_URL={{.ExecutionAuthURL}}
+CC_INSTANCE_NAME=Nimbus
+CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}statusim/nimbus-eth2:amd64-latest{{end}}
+CC_DATA_DIR={{.CcDataDir}}
+CC_JWT_SECRET_PATH={{.JWTSecretPath}}
+CC_FEE_RECIPIENT={{.FeeRecipient}}
+CHECKPOINT_SYNC_URL=https://goerli.beaconstate.ethstaker.cc/
+{{ end }}

@@ -339,18 +339,18 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 						},
 						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyConsensus},
 					},
-					genTestData{
-						Description: fmt.Sprintf(baseDescription+"validator: %s, network: %s, only validator", consensusCl, network),
-						GenerationData: &GenData{
-							ValidatorClient: &clients.Client{Name: consensusCl},
-							Network:         network,
-							Services:        []string{validator},
-						},
-						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyValidator},
-					},
 				)
 				if utils.Contains(validatorClients, consensusCl) {
 					tests = append(tests,
+						genTestData{
+							Description: fmt.Sprintf(baseDescription+"validator: %s, network: %s, only validator", consensusCl, network),
+							GenerationData: &GenData{
+								ValidatorClient: &clients.Client{Name: consensusCl},
+								Network:         network,
+								Services:        []string{validator},
+							},
+							CheckFunctions: []CheckFunc{defaultFunc, checkOnlyValidator},
+						},
 						genTestData{
 							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, all", executionCl, consensusCl, consensusCl, network),
 							GenerationData: &GenData{

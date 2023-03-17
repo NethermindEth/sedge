@@ -33,7 +33,7 @@ import (
 )
 
 func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error) {
-	var executionClient, consensusClient *clients.Client
+	var executionClient, consensusClient, validatorClient *clients.Client
 	var combinedClients clients.Clients
 
 	executionClient, err := clients.RandomChoice(allClients[execution])
@@ -44,11 +44,12 @@ func randomizeClients(allClients clients.OrderedClients) (clients.Clients, error
 	if err != nil {
 		return combinedClients, err
 	}
+	validatorClient, err = clients.RandomChoice(allClients[validator])
 
 	combinedClients = clients.Clients{
 		Execution: executionClient,
 		Consensus: consensusClient,
-		Validator: consensusClient,
+		Validator: validatorClient,
 	}
 	return combinedClients, nil
 }
@@ -161,7 +162,11 @@ func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliC
 	} else if flags.validatorName == "" {
 		log.Warn(configs.ValidatorClientNotSpecifiedWarn)
 		// TODO: avoid flag edition
-		flags.validatorName = flags.consensusName
+		if flags.consensusName == "nimbus" {
+			flags.validatorName = randomizedClients.Validator.Name
+		} else {
+			flags.validatorName = flags.consensusName
+		}
 	}
 
 	exec, ok := allClients[execution][flags.executionName]
@@ -174,7 +179,9 @@ func validateClients(allClients clients.OrderedClients, w io.Writer, flags *CliC
 	}
 	val, ok := allClients[validator][flags.validatorName]
 	if !ok {
-		val.Name = flags.validatorName
+		val = &clients.Client{
+			Name: flags.validatorName,
+		}
 	}
 	if !utils.Contains(flags.services, execution) && len(flags.services) > 0 && flags.services[0] != "all" {
 		exec = nil
