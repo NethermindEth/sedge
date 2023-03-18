@@ -104,6 +104,13 @@ func (cr *SimpleCMDRunner) BuildDockerComposePSCMD(options commands.DockerCompos
 	return r.BuildDockerComposePSCMD(options)
 }
 
+func (cr *SimpleCMDRunner) BuildDockerComposeVersionCMD() commands.Command {
+	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
+		RunAsAdmin: false,
+	})
+	return r.BuildDockerComposeVersionCMD()
+}
+
 func (cr *SimpleCMDRunner) BuildDockerComposeLogsCMD(options commands.DockerComposeLogsOptions) commands.Command {
 	r := commands.NewCMDRunner(commands.CMDRunnerOptions{
 		RunAsAdmin: false,

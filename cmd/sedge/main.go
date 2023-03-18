@@ -21,6 +21,7 @@ import (
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/docker/docker/client"
@@ -46,28 +47,29 @@ func main() {
 	// Docker service
 	serviceManager := services.NewServiceManager(dockerClient)
 
+	depsMgr := dependencies.NewDependenciesManager()
+
 	// Init Sedge Actions
 	sdgOpts := actions.SedgeActionsOptions{
 		DockerClient:   dockerClient,
 		ServiceManager: serviceManager,
 		CommandRunner:  cmdRunner,
-		DepsHandlers:   actions.NewDependenciesHandlers(),
 	}
 	sedgeActions := actions.NewSedgeActions(sdgOpts)
 
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
-		cli.CliCmd(prompt, sedgeActions),
+		cli.CliCmd(prompt, sedgeActions, depsMgr),
 		cli.KeysCmd(cmdRunner, prompt),
-		cli.DownCmd(cmdRunner),
+		cli.DownCmd(cmdRunner, sedgeActions, depsMgr),
 		cli.ClientsCmd(),
 		cli.NetworksCmd(),
-		cli.LogsCmd(cmdRunner),
+		cli.LogsCmd(cmdRunner, sedgeActions, depsMgr),
 		cli.VersionCmd(),
-		cli.SlashingExportCmd(sedgeActions),
-		cli.SlashingImportCmd(sedgeActions),
-		cli.RunCmd(sedgeActions),
-		cli.ImportKeysCmd(sedgeActions),
+		cli.SlashingExportCmd(sedgeActions, depsMgr),
+		cli.SlashingImportCmd(sedgeActions, depsMgr),
+		cli.RunCmd(sedgeActions, depsMgr),
+		cli.ImportKeysCmd(sedgeActions, depsMgr),
 		cli.GenerateCmd(sedgeActions),
 	)
 	sedgeCmd.SilenceErrors = true

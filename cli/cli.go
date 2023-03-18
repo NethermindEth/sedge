@@ -26,6 +26,7 @@ import (
 	eth2 "github.com/protolambda/zrnt/eth2/configs"
 
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/ui"
 
@@ -83,7 +84,7 @@ type CliCmdOptions struct {
 	installDependencies      bool
 }
 
-func CliCmd(p ui.Prompter, actions actions.SedgeActions) *cobra.Command {
+func CliCmd(p ui.Prompter, actions actions.SedgeActions, depsMgr dependencies.DependenciesManager) *cobra.Command {
 	o := new(CliCmdOptions)
 	cmd := &cobra.Command{
 		Use:   "cli",
@@ -112,13 +113,13 @@ using docker compose command behind the scenes.
 			}
 			switch o.nodeType {
 			case NodeTypeFullNode:
-				return setupFullNode(p, o, actions)
+				return setupFullNode(p, o, actions, depsMgr)
 			case NodeTypeExecution:
-				return setupExecutionNode(p, o, actions)
+				return setupExecutionNode(p, o, actions, depsMgr)
 			case NodeTypeConsensus:
-				return setupConsensusNode(p, o, actions)
+				return setupConsensusNode(p, o, actions, depsMgr)
 			case NodeTypeValidator:
-				return setupValidatorNode(p, o, actions)
+				return setupValidatorNode(p, o, actions, depsMgr)
 			}
 			return nil
 		},
@@ -126,7 +127,7 @@ using docker compose command behind the scenes.
 	return cmd
 }
 
-func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) (err error) {
+func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager) (err error) {
 	o.genData.Services = []string{"execution", "consensus"}
 	if err := confirmWithValidator(p, o); err != nil {
 		return err
@@ -198,10 +199,10 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) (err
 	if err != nil {
 		return err
 	}
-	return postGenerate(p, o, a)
+	return postGenerate(p, o, a, depsManager)
 }
 
-func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) (err error) {
+func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager) (err error) {
 	o.genData.Services = []string{"execution"}
 	if err := selectExecutionClient(p, o); err != nil {
 		return err
@@ -228,10 +229,10 @@ func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 	if err != nil {
 		return err
 	}
-	return postGenerate(p, o, a)
+	return postGenerate(p, o, a, depsManager)
 }
 
-func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) (err error) {
+func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager) (err error) {
 	o.genData.Services = []string{"consensus"}
 	if err := selectConsensusClient(p, o); err != nil {
 		return err
@@ -273,10 +274,10 @@ func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 	if err != nil {
 		return err
 	}
-	return postGenerate(p, o, a)
+	return postGenerate(p, o, a, depsManager)
 }
 
-func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) (err error) {
+func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager) (err error) {
 	o.genData.Services = []string{"validator"}
 	if err := selectValidatorClient(p, o); err != nil {
 		return err
@@ -311,7 +312,7 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions)
 	if err != nil {
 		return err
 	}
-	return postGenerate(p, o, a)
+	return postGenerate(p, o, a, depsManager)
 }
 
 func setupJWT(p ui.Prompter, o *CliCmdOptions, skip bool) error {
@@ -343,34 +344,10 @@ func setupJWT(p ui.Prompter, o *CliCmdOptions, skip bool) error {
 	return nil
 }
 
-func postGenerate(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+func postGenerate(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsMgr dependencies.DependenciesManager) error {
 	if o.withValidator || o.nodeType == NodeTypeValidator {
-		if err := generateKeystore(p, o, a); err != nil {
+		if err := generateKeystore(p, o, a, depsMgr); err != nil {
 			return err
-		}
-	}
-	pendingDependencies := utils.CheckDependencies([]string{"docker"})
-	if len(pendingDependencies) > 0 {
-		supported, unsupported := utils.DependenciesSupported(pendingDependencies)
-		if len(unsupported) > 0 {
-			log.Warnf("unsupported install dependencies %s", strings.Join(unsupported, " "))
-			return nil
-		}
-		if err := confirmInstallDependencies(p, o); err != nil {
-			return err
-		}
-		if !o.installDependencies {
-			for _, s := range supported {
-				if err := utils.ShowInstructions(a.GetCommandRunner(), s); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-		for _, s := range supported {
-			if err := utils.InstallDependency(a.GetCommandRunner(), s); err != nil {
-				return err
-			}
 		}
 	}
 	var services []string
@@ -392,6 +369,9 @@ func postGenerate(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error
 		return err
 	}
 	if run {
+		if err := checkCLIDependencies(p, o, a, depsMgr); err != nil {
+			return err
+		}
 		if err := a.SetupContainers(actions.SetupContainersOptions{
 			GenerationPath: o.generationPath,
 			Services:       services,
@@ -415,7 +395,7 @@ func postGenerate(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error
 	return nil
 }
 
-func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) error {
+func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsMgr dependencies.DependenciesManager) error {
 	if err := selectKeystoreSource(p, o); err != nil {
 		return err
 	}
@@ -529,6 +509,9 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) e
 			log.Infof("Keystore folder %s is valid", o.keystorePath)
 		}
 	}
+	if err := checkCLIDependencies(p, o, a, depsMgr); err != nil {
+		return err
+	}
 	log.Info("Importing validator keys into the validator client...")
 	err := a.SetupContainers(actions.SetupContainersOptions{
 		GenerationPath: o.generationPath,
@@ -571,6 +554,45 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions) e
 		}
 	}
 	return nil
+}
+
+func checkCLIDependencies(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsMgr dependencies.DependenciesManager) error {
+	_, pendingDependencies := depsMgr.Check([]string{dependencies.Docker})
+	if len(pendingDependencies) > 0 {
+		supported, unsupported, err := depsMgr.Supported(pendingDependencies)
+		if err != nil {
+			if errors.Is(err, dependencies.ErrUnsupportedInstallForOS) {
+				log.Warnf(err.Error())
+				return nil
+			} else {
+				return err
+			}
+		}
+		if len(unsupported) > 0 {
+			log.Warnf("unsupported install dependencies %s", strings.Join(unsupported, " "))
+			return nil
+		}
+		if err := confirmInstallDependencies(p, o); err != nil {
+			return err
+		}
+		if !o.installDependencies {
+			for _, s := range supported {
+				if err := depsMgr.ShowInstructions(s); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+		for _, s := range supported {
+			if err := depsMgr.Install(a.GetCommandRunner(), s); err != nil {
+				return err
+			}
+		}
+	}
+	if err := depsMgr.DockerEngineIsOn(); err != nil {
+		return err
+	}
+	return depsMgr.DockerComposeIsInstalled()
 }
 
 type promptAction func(ui.Prompter, *CliCmdOptions) error

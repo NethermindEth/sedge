@@ -22,10 +22,11 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/spf13/cobra"
 )
 
-func SlashingExportCmd(sedgeActions actions.SedgeActions) *cobra.Command {
+func SlashingExportCmd(sedgeActions actions.SedgeActions, depsMgr dependencies.DependenciesManager) *cobra.Command {
 	// Flags
 	var (
 		validatorClient string
@@ -79,7 +80,10 @@ sedge slashing-export --out slashing-data.json --start-validator lighthouse`,
 				return err
 			}
 			validatorClient = args[0]
-			return nil
+			if err := checkDependencies(depsMgr, true, "docker"); err != nil {
+				return err
+			}
+			return sedgeActions.ValidateDockerComposeFile(filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := sedgeActions.SetupContainers(actions.SetupContainersOptions{

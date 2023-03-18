@@ -29,24 +29,22 @@ type SedgeActions interface {
 	ExportSlashingInterchangeData(SlashingExportOptions) error
 	SetupContainers(SetupContainersOptions) error
 	RunContainers(RunContainersOptions) error
-	ManageDependencies(ManageDependenciesOptions) error
 	Generate(GenerateOptions) (generate.GenData, error)
 	CreateJWTSecrets(CreateJWTSecretOptions) (string, error)
 	ImportValidatorKeys(ImportValidatorKeysOptions) error
+	ValidateDockerComposeFile(path string, services ...string) error
 }
 
 type sedgeActions struct {
 	dockerClient   client.APIClient
 	serviceManager services.ServiceManager
 	commandRunner  commands.CommandRunner
-	depsHandlers   DependenciesHandlers
 }
 
 type SedgeActionsOptions struct {
 	DockerClient   client.APIClient
 	ServiceManager services.ServiceManager
 	CommandRunner  commands.CommandRunner
-	DepsHandlers   DependenciesHandlers
 }
 
 func NewSedgeActions(options SedgeActionsOptions) SedgeActions {
@@ -54,7 +52,6 @@ func NewSedgeActions(options SedgeActionsOptions) SedgeActions {
 		dockerClient:   options.DockerClient,
 		serviceManager: options.ServiceManager,
 		commandRunner:  options.CommandRunner,
-		depsHandlers:   options.DepsHandlers,
 	}
 }
 

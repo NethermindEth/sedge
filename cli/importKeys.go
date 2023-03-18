@@ -5,10 +5,11 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/spf13/cobra"
 )
 
-func ImportKeysCmd(sedgeActions actions.SedgeActions) *cobra.Command {
+func ImportKeysCmd(sedgeActions actions.SedgeActions, depsMgr dependencies.DependenciesManager) *cobra.Command {
 	// Flags
 	var (
 		validatorClient   string
@@ -47,8 +48,12 @@ the importation.`,
 			}
 			return nil
 		},
-		PreRun: func(cmd *cobra.Command, args []string) {
+		PreRunE: func(cmd *cobra.Command, args []string) error {
 			validatorClient = args[0]
+			if err := checkDependencies(depsMgr, true, dependencies.Docker); err != nil {
+				return err
+			}
+			return sedgeActions.ValidateDockerComposeFile(filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options := actions.ImportValidatorKeysOptions{

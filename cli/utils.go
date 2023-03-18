@@ -16,12 +16,40 @@ limitations under the License.
 package cli
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"strings"
+
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
+	"github.com/NethermindEth/sedge/internal/utils"
+)
+
+var (
+	ErrComposeFileNotFound = errors.New("docker-compose file not found")
+	ErrMissingDependencies = errors.New("missing dependencies")
 )
 
 func readFileContent(path string) (string, error) {
 	raw, err := os.ReadFile(path)
 	content := strings.TrimSpace(strings.TrimSuffix(string(raw), "\n"))
 	return content, err
+}
+
+func checkDependencies(depsManager dependencies.DependenciesManager, dockerCompose bool, dependencies ...string) error {
+	_, pending := depsManager.Check(dependencies)
+	if len(pending) > 0 {
+		return fmt.Errorf("%w: %s", ErrMissingDependencies, strings.Join(pending, ", "))
+	}
+	if utils.Contains(dependencies, "docker") {
+		if err := depsManager.DockerEngineIsOn(); err != nil {
+			return err
+		}
+	}
+	if dockerCompose {
+		if err := depsManager.DockerComposeIsInstalled(); err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -22,6 +22,7 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
@@ -47,7 +48,7 @@ func TestImportKeys_NumberOfArguments(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := ImportKeysCmd(nil)
+			cmd := ImportKeysCmd(nil, nil)
 			cmd.SetArgs(tt.args)
 			err := cmd.Execute()
 			assert.ErrorIs(t, err, ErrInvalidNumberOfArguments)
@@ -151,13 +152,18 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			actions := sedge_mocks.NewMockSedgeActions(gomock.NewController(t))
+			depsMgr := sedge_mocks.NewMockDependenciesManager(gomock.NewController(t))
 
 			gomock.InOrder(
+				depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil).Times(1),
+				depsMgr.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+				depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+				actions.EXPECT().ValidateDockerComposeFile(filepath.Join(tt.expectedSetupOpts.GenerationPath, "docker-compose.yml")).Return(nil).Times(1),
 				actions.EXPECT().SetupContainers(tt.expectedSetupOpts).Times(1),
 				actions.EXPECT().ImportValidatorKeys(tt.expectedOptions).Times(1),
 			)
 
-			cmd := ImportKeysCmd(actions)
+			cmd := ImportKeysCmd(actions, depsMgr)
 			cmd.SetArgs(tt.args)
 			err := cmd.Execute()
 			assert.NoError(t, err)

@@ -128,7 +128,7 @@ func TestRandomClientName(t *testing.T) {
 		{
 			name:    "empty",
 			clients: []string{},
-			err:     EmptyClientsListError,
+			err:     ErrEmptyClientsList,
 		},
 		{
 			name:    "one",

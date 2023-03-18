@@ -25,6 +25,7 @@ import (
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
@@ -52,13 +53,16 @@ func TestSlashingImport_ValidatorIsRequired(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {})
-
-		slashingImportCmd := cli.SlashingImportCmd(nil)
-		slashingImportCmd.SetArgs(tt.args)
-		slashingImportCmd.SetOutput(io.Discard)
-		err := slashingImportCmd.Execute()
-		assert.ErrorIs(t, err, tt.expectedErr)
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
+			slashingImportCmd := cli.SlashingImportCmd(nil, depsMgr)
+			slashingImportCmd.SetArgs(tt.args)
+			slashingImportCmd.SetOutput(io.Discard)
+			err := slashingImportCmd.Execute()
+			assert.ErrorIs(t, err, tt.expectedErr)
+		})
 	}
 }
 
@@ -206,7 +210,12 @@ func TestSlashingImport_Params(t *testing.T) {
 			defer ctrl.Finish()
 
 			mockActions := sedge_mocks.NewMockSedgeActions(ctrl)
+			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
 			gomock.InOrder(
+				depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker, dependencies.DockerCompose}, nil).Times(1),
+				depsMgr.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+				depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+				mockActions.EXPECT().ValidateDockerComposeFile(filepath.Join(tt.actionOptions.GenerationPath, "docker-compose.yml")).Return(nil).Times(1),
 				mockActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
 					GenerationPath: tt.actionOptions.GenerationPath,
 					Services:       []string{"validator"},
@@ -214,7 +223,7 @@ func TestSlashingImport_Params(t *testing.T) {
 				mockActions.EXPECT().ImportSlashingInterchangeData(tt.actionOptions).Times(1),
 			)
 
-			slashingImportCmd := cli.SlashingImportCmd(mockActions)
+			slashingImportCmd := cli.SlashingImportCmd(mockActions, depsMgr)
 			slashingImportCmd.SetArgs(tt.args)
 			slashingImportCmd.SetOutput(io.Discard)
 			err := slashingImportCmd.Execute()
@@ -252,8 +261,14 @@ func TestSlashingImport_Errors(t *testing.T) {
 			defer ctrl.Finish()
 
 			mockActions := sedge_mocks.NewMockSedgeActions(ctrl)
+			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
+
 			if tt.run {
 				gomock.InOrder(
+					depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker, dependencies.DockerCompose}, nil).Times(1),
+					depsMgr.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+					mockActions.EXPECT().ValidateDockerComposeFile(filepath.Join(configs.DefaultAbsSedgeDataPath, configs.DefaultDockerComposeScriptName)).Return(nil).Times(1),
 					mockActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
 						GenerationPath: configs.DefaultAbsSedgeDataPath,
 						Services:       []string{"validator"},
@@ -262,7 +277,7 @@ func TestSlashingImport_Errors(t *testing.T) {
 				)
 			}
 
-			slashingImportCmd := cli.SlashingImportCmd(mockActions)
+			slashingImportCmd := cli.SlashingImportCmd(mockActions, depsMgr)
 			slashingImportCmd.SetArgs(tt.args)
 			slashingImportCmd.SetOutput(io.Discard)
 			err := slashingImportCmd.Execute()

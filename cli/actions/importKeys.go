@@ -115,7 +115,7 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		}
 		ctID = tekuCtID
 	default:
-		return fmt.Errorf("%w: %s", UnsupportedValidatorClientError, options.ValidatorClient)
+		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
 	log.Info("Importing validator keys")
 	runErr := runAndWaitImportKeys(s.dockerClient, s.serviceManager, ctID)
@@ -269,7 +269,7 @@ func setupLighthouseValidatorImport(dockerClient client.APIClient, commandRunner
 	// Init build context
 	contextDir, err := lighthouse.InitContext()
 	if err != nil {
-		return "", fmt.Errorf("%w: %s", CreatingContextDirError, err.Error())
+		return "", fmt.Errorf("%w: %s", ErrCreatingContextDir, err.Error())
 	}
 	// Build image
 	buildCmd := commandRunner.BuildDockerBuildCMD(commands.DockerBuildOptions{

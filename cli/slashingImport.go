@@ -23,12 +23,13 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/spf13/cobra"
 )
 
 var ErrInvalidNumberOfArguments = errors.New("invalid number of arguments")
 
-func SlashingImportCmd(sedgeActions actions.SedgeActions) *cobra.Command {
+func SlashingImportCmd(sedgeActions actions.SedgeActions, depsMgr dependencies.DependenciesManager) *cobra.Command {
 	// Flags
 	var (
 		validatorClient string
@@ -48,14 +49,12 @@ Import Slashing Protection Interchange Format (EIP-3076) data. This command assu
 that the validator client container exists, stopped or not and that its database
 is already initialized. The validator database is initialized if the validator is
 running or has already run but is stopped, and also after importing the validator keys.
-
 This command stops the validator client during the importing process due to the
 validator database being locked while it's running but leaves the validator client
 in the same state in which it was found. That means if the validator is running/stopped
 before the import, then the validator will be running/stopped after the command
 is executed, regardless of whether the export fails or not. To force a different
 behavior use --start-validator and --stop-validator flags.
-
 The [validator] is a required argument used to specify which validator client, from
 all supported by Sedge (lighthouse, lodestar, prysm or teku), is used to import the
 Slashing Protection data. This is necessary because each client has its own way to
@@ -85,7 +84,10 @@ sedge slashing-import --from slashing-data.json --start-validator lighthouse`,
 				return err
 			}
 			validatorClient = args[0]
-			return nil
+			if err := checkDependencies(depsMgr, true, dependencies.Docker); err != nil {
+				return err
+			}
+			return sedgeActions.ValidateDockerComposeFile(filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := sedgeActions.SetupContainers(actions.SetupContainersOptions{

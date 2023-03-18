@@ -122,6 +122,10 @@ func (cr *UnixCMDRunner) BuildDockerComposeLogsCMD(options DockerComposeLogsOpti
 	return Command{Cmd: command}
 }
 
+func (cr *UnixCMDRunner) BuildDockerComposeVersionCMD() Command {
+	return Command{Cmd: "docker compose version"}
+}
+
 func (cr *UnixCMDRunner) BuildDockerBuildCMD(options DockerBuildOptions) Command {
 	command := "docker build"
 	if len(options.Tag) > 0 {

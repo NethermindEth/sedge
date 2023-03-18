@@ -107,7 +107,7 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 			"--from=/data/slashing_protection.json",
 		}
 	default:
-		return fmt.Errorf("%w: %s", UnsupportedValidatorClientError, options.ValidatorClient)
+		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
 	log.Infof("Importing slashing data to client %s from %s", options.ValidatorClient, options.From)
 	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd, validatorContainerName, slashingContainerName); err != nil {
@@ -189,7 +189,7 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 			"--to=/data/slashing_protection.json",
 		}
 	default:
-		return fmt.Errorf("%w: %s", UnsupportedValidatorClientError, options.ValidatorClient)
+		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
 	log.Infof("Exporting slashing data from client %s", options.ValidatorClient)
 	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd, validatorContainerName, slashingContainerName); err != nil {
@@ -257,7 +257,7 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 				return err
 			}
 			if exitResult.StatusCode != 0 {
-				return fmt.Errorf(`%w: slashing protection container with id %s ends with status code %d. Here are the logs for more details: %s`, ValidatorImportCtBadExitCodeError, ct.ID, exitResult.StatusCode, logs)
+				return fmt.Errorf(`%w: slashing protection container with id %s ends with status code %d. Here are the logs for more details: %s`, ErrValidatorImportCtBadExitCode, ct.ID, exitResult.StatusCode, logs)
 			}
 			log.Info("The slashing container ends successfully.")
 			return nil

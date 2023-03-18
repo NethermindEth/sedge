@@ -147,7 +147,7 @@ func TestImportKeys_UnsupportedClient(t *testing.T) {
 				From:            from,
 				GenerationPath:  generationPath,
 			})
-			assert.ErrorIs(t, err, actions.UnsupportedValidatorClientError)
+			assert.ErrorIs(t, err, actions.ErrUnsupportedValidatorClient)
 		})
 	}
 }
@@ -262,7 +262,7 @@ func TestImportKeys_UnexpectedExitCode(t *testing.T) {
 		From:            from,
 		GenerationPath:  generationPath,
 	})
-	assert.ErrorIs(t, err, actions.ValidatorImportCtBadExitCodeError)
+	assert.ErrorIs(t, err, actions.ErrValidatorImportCtBadExitCode)
 }
 
 //go:embed testdata/keystore

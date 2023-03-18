@@ -23,6 +23,7 @@ import (
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
@@ -56,11 +57,11 @@ func TestCli(t *testing.T) {
 
 	tests := []struct {
 		name  string
-		setup func(*testing.T, *sedge_mocks.MockSedgeActions, *sedge_mocks.MockPrompter)
+		setup func(*testing.T, *sedge_mocks.MockSedgeActions, *sedge_mocks.MockPrompter, *sedge_mocks.MockDependenciesManager)
 	}{
 		{
 			name: "full node with validator mainnet",
-			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter) {
+			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
 				genData := generate.GenData{
 					Services: []string{"execution", "consensus", "validator", "mev-boost"},
@@ -120,6 +121,9 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Input("Withdrawal address", "", false, gomock.AssignableToTypeOf(func(s string) error { return ui.EthAddressValidator(s, true) })).Return("0x00000007abca72jmd83jd8u3jd9kdn32j38abc", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
+					depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil),
+					depsMgr.EXPECT().DockerEngineIsOn().Return(nil),
+					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
 						GenerationPath: generationPath,
 						Services:       []string{"validator"},
@@ -138,7 +142,7 @@ func TestCli(t *testing.T) {
 		},
 		{
 			name: "full node without validator mainnet",
-			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter) {
+			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
 				genData := generate.GenData{
 					Services: []string{"execution", "consensus"},
@@ -181,7 +185,7 @@ func TestCli(t *testing.T) {
 		},
 		{
 			name: "execution node",
-			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter) {
+			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
 				genData := generate.GenData{
 					Services: []string{"execution"},
@@ -208,6 +212,9 @@ func TestCli(t *testing.T) {
 						GenerationData: genData,
 					})).Return(genData, nil),
 					prompter.EXPECT().Confirm("Run services now?", false).Return(true, nil),
+					depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil),
+					depsMgr.EXPECT().DockerEngineIsOn().Return(nil),
+					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
 						GenerationPath: generationPath,
 						Services:       []string{"execution"},
@@ -221,7 +228,7 @@ func TestCli(t *testing.T) {
 		},
 		{
 			name: "consensus node",
-			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter) {
+			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
 				genData := generate.GenData{
 					Services: []string{"consensus"},
@@ -264,7 +271,7 @@ func TestCli(t *testing.T) {
 		},
 		{
 			name: "validator mainnet",
-			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter) {
+			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
 
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
@@ -305,6 +312,9 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Input("Withdrawal address", "", false, gomock.AssignableToTypeOf(func(s string) error { return ui.EthAddressValidator(s, true) })).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
+					depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil),
+					depsMgr.EXPECT().DockerEngineIsOn().Return(nil),
+					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
 						GenerationPath: generationPath,
 						Services:       []string{"validator"},
@@ -328,11 +338,12 @@ func TestCli(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			sedgeActions := sedge_mocks.NewMockSedgeActions(ctrl)
 			prompter := sedge_mocks.NewMockPrompter(ctrl)
+			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
 			defer ctrl.Finish()
 
-			tt.setup(t, sedgeActions, prompter)
+			tt.setup(t, sedgeActions, prompter, depsMgr)
 
-			c := CliCmd(prompter, sedgeActions)
+			c := CliCmd(prompter, sedgeActions, depsMgr)
 			c.Execute()
 		})
 	}

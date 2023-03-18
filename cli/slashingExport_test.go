@@ -25,6 +25,7 @@ import (
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
@@ -53,7 +54,10 @@ func TestSlashingExport_ValidatorIsRequired(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			slashingExportCmd := cli.SlashingExportCmd(nil)
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
+			slashingExportCmd := cli.SlashingExportCmd(nil, depsMgr)
 			slashingExportCmd.SetArgs(tt.args)
 			slashingExportCmd.SetOutput(io.Discard)
 			err := slashingExportCmd.Execute()
@@ -198,7 +202,12 @@ func TestSlashingExport_Params(t *testing.T) {
 			defer ctrl.Finish()
 
 			mockActions := sedge_mocks.NewMockSedgeActions(ctrl)
+			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
 			gomock.InOrder(
+				depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker, dependencies.DockerCompose}, nil).Times(1),
+				depsMgr.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+				depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+				mockActions.EXPECT().ValidateDockerComposeFile(filepath.Join(tt.actionOptions.GenerationPath, "docker-compose.yml")).Return(nil).Times(1),
 				mockActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
 					GenerationPath: tt.actionOptions.GenerationPath,
 					Services:       []string{"validator"},
@@ -206,7 +215,7 @@ func TestSlashingExport_Params(t *testing.T) {
 				mockActions.EXPECT().ExportSlashingInterchangeData(tt.actionOptions).Times(1),
 			)
 
-			slashingExportCmd := cli.SlashingExportCmd(mockActions)
+			slashingExportCmd := cli.SlashingExportCmd(mockActions, depsMgr)
 			slashingExportCmd.SetArgs(tt.args)
 			slashingExportCmd.SetOutput(io.Discard)
 			err := slashingExportCmd.Execute()
@@ -221,21 +230,24 @@ func TestSlashingExport_Errors(t *testing.T) {
 	log.SetOutput(io.Discard)
 
 	tests := []struct {
-		name string
-		args []string
-		run  bool
-		err  error
+		name   string
+		args   []string
+		run    bool
+		err    error
+		checks bool
 	}{
 		{
-			name: "invalid network",
-			args: []string{"lighthouse", "--network", "invalid_network"},
-			err:  errors.New("invalid network: invalid_network"),
+			name:   "invalid network",
+			args:   []string{"lighthouse", "--network", "invalid_network"},
+			err:    errors.New("invalid network: invalid_network"),
+			checks: false,
 		},
 		{
-			name: "action error",
-			args: []string{"lighthouse"},
-			run:  true,
-			err:  errors.New("action error"),
+			name:   "action error",
+			args:   []string{"lighthouse"},
+			run:    true,
+			err:    errors.New("action error"),
+			checks: true,
 		},
 	}
 	for _, tt := range tests {
@@ -244,6 +256,13 @@ func TestSlashingExport_Errors(t *testing.T) {
 			defer ctrl.Finish()
 
 			mockActions := sedge_mocks.NewMockSedgeActions(ctrl)
+			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
+			if tt.checks {
+				depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker, dependencies.DockerCompose}, nil).Times(1)
+				depsMgr.EXPECT().DockerEngineIsOn().Return(nil).Times(1)
+				depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1)
+				mockActions.EXPECT().ValidateDockerComposeFile(filepath.Join(configs.DefaultAbsSedgeDataPath, "docker-compose.yml")).Return(nil).Times(1)
+			}
 			if tt.run {
 				mockActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
 					GenerationPath: configs.DefaultAbsSedgeDataPath,
@@ -252,7 +271,7 @@ func TestSlashingExport_Errors(t *testing.T) {
 				mockActions.EXPECT().ExportSlashingInterchangeData(gomock.Any()).Return(errors.New("action error")).Times(1)
 			}
 
-			slashingExportCmd := cli.SlashingExportCmd(mockActions)
+			slashingExportCmd := cli.SlashingExportCmd(mockActions, depsMgr)
 			slashingExportCmd.SetArgs(tt.args)
 			slashingExportCmd.SetOutput(io.Discard)
 			err := slashingExportCmd.Execute()
