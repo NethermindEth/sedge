@@ -1,0 +1,156 @@
+---
+sidebar_position: 7
+id: restart-validator
+---
+
+# Restarting a Validator
+
+## Validator flow
+
+When Sedge starts to run, it will automatically start the Consensus and the Execution nodes, but, Validator node will not start automatically.
+
+At the moment that you run `docker compose up validator` or you run a setup that includes a Validator, the Validator node will wait for:
+1. The Consensus client to be up and Synced
+2. Wait for 1 Epoch (using the `validator-blocker` service).
+
+After that, the Validator will start to produce blocks.
+
+## Restarting the Validator
+
+:::caution
+
+The solutions to these problems, needs to be done manually for the user, and it is you don't do it, it can incur on penalties for your node.
+
+:::
+
+if docker daemon restarts (due to a machine reboot, for example), the docker compose services with a restart policy will
+restart, but the depends_on policy won’t retake effect. The depends_on policy only takes effect after a docker compose
+up (for the reboot case). This means the Validator can’t set a restart policy until we run down and up after a reboot
+for it to now incur in any slashing.
+
+### Solution
+
+To solve this problem, we found two workarounds:
+- Create a `systemd service`
+- Create a `contrab job`
+
+Both of those solutions will run after the reboot and will run the `docker compose up validator` command.
+
+#### Systemd service
+
+You can use the following steps to automatically run `docker-compose up` when your machine restarts:
+
+1. Create a systemd service file with the following content:
+
+```
+[Unit]
+Description=Docker Compose Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+WorkingDirectory=/path/to/docker-compose/file
+ExecStart=/usr/local/bin/docker-compose up -d
+
+[Install]
+WantedBy=multi-user.target
+
+```
+
+Replace `/path/to/docker-compose/file` with the actual path to your `docker-compose.yml` file. You may also need to adjust the `ExecStart` path if your `docker-compose` binary is located elsewhere.
+
+1. Save the file as `/etc/systemd/system/docker-compose.service`.
+2. Reload the systemd daemon:
+
+```
+sudo systemctl daemon-reload
+
+```
+
+3. Enable the service to start automatically at boot:
+
+```
+sudo systemctl enable docker-compose.service
+
+```
+
+4. Start the service:
+
+```
+sudo systemctl start docker-compose.service
+
+```
+
+5. After completing these steps, `docker-compose up` will automatically run when your machine restarts. You can check the status of the service with:
+
+```
+sudo systemctl status docker-compose.service
+
+```
+
+:::info
+
+If you need to stop the service, you can use the following command:
+```
+sudo systemctl stop docker-compose.service
+```
+:::
+
+#### Crontab job
+
+To create a cron job that automatically runs docker-compose up on system reboot, you should first create a shell script
+that runs the necessary commands, and then set up a cron job to execute the script at system startup.
+
+Here's how to do it:
+1. Create a shell script:
+Open a terminal and navigate to the directory where your docker-compose.yml file is located. Then, create a new shell script file:
+
+```bash
+touch start-docker-compose.sh
+```
+
+2. Open the file with a text editor:
+```bash
+nano start-docker-compose.sh
+```
+
+3. Add the following content to the script:
+
+```
+#!/bin/bash
+# Change to the directory containing the docker-compose.yml file
+cd /path/to/your/docker-compose/directory
+
+# Load environment variables, if any
+source .env
+
+# Start the Docker Compose services
+/usr/local/bin/docker-compose up -d
+```
+
+:::note
+Replace /path/to/your/docker-compose/directory with the actual path of the directory containing your docker-compose.yml
+file. Save and exit the text editor.
+:::
+
+3. Make the script executable:
+```bash
+chmod +x start-docker-compose.sh
+```
+
+5. Set up a cron job:
+Edit the system-wide crontab file:
+```
+sudo crontab -e
+```
+
+Add the following line at the end of the file:
+```
+@reboot /path/to/your/docker-compose/directory/start-docker-compose.sh
+```
+
+Replace /path/to/your/docker-compose/directory with the actual path of the directory containing your docker-compose.yml
+file and start-docker-compose.sh script. Save and exit the text editor.
+
+Now, the cron job will automatically run docker-compose up on system reboot.
