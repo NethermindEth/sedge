@@ -50,6 +50,12 @@ Use "sedge generate [command] --help" for more information about a command.
 
 #### Full-Node
 
+:::caution
+
+You should use `--fee-recipient` flag to set the fee recipient address if your setup includes a **validator**. If you don't set it, your priority fee earnings will be deposited into a burn address.
+
+:::
+
 ```
 $ sedge generate full-node -h
 Generate a docker-compose and an environment file with a full node configuration.
@@ -171,6 +177,12 @@ Global Flags:
 ```
 
 #### Validator
+
+:::caution
+
+You should use `--fee-recipient` flag to set the fee recipient address. If you don't set it, your priority fee earnings will be deposited into a burn address.
+
+:::
 
 ```
 $ sedge generate validator -h
