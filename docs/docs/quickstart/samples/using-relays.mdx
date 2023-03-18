@@ -1,0 +1,68 @@
+---
+sidebar_position: 5
+id: using-relays
+---
+
+# Using custom MEV Relays
+
+## What is a MEV Relay?
+
+MEV (Maximal Extractable Value) relays on Ethereum are tools or services designed to help miners and other network
+participants capture the value generated from ordering and selecting transactions within a block. MEV is the measure
+of the total value that miners can extract by reordering, censoring, or including specific transactions in the blocks
+they propose.
+
+MEV relays are important because they help create a more efficient and fair environment for transaction ordering in
+Ethereum. They consist of two main components:
+
+1. MEV Relay: This is the infrastructure that aggregates and organizes the transaction bundles submitted by users and
+other network participants. It collects, sorts, and communicates the information required to optimize the transaction
+ordering and selection process.
+
+2. MEV Strategies: These are algorithms or strategies created by developers, traders, and other ecosystem participants.
+They are designed to identify and capture MEV opportunities by optimizing transaction ordering and inclusion in a block.
+The strategies can involve arbitrage, liquidations, or other DeFi-related opportunities that have value.
+
+MEV relays help in reducing the negative effects of MEV on Ethereum, such as network congestion and gas price manipulation.
+They also promote a more competitive and transparent ecosystem for capturing MEV, benefiting both miners and users.
+Some popular MEV relays include Flashbots and KeeperDAO, which offer tools and services for miners and other network
+participants to capture MEV efficiently.
+
+## How MEV Relays Work
+
+MEV relays are blockchain services that help users transfer their transactions faster by paying a small fee to miners. They work by:
+
+1. Users send their transactions to the MEV relay instead of directly to the network.
+
+2. The MEV relay then bundles multiple transactions together into a single block proposal.
+
+3. This block proposal is sent to miners, who can choose to include it in a block in exchange for the fees from the
+bundled transactions.
+
+4. Miners who include the MEV relay's block proposal earn the fees from all the bundled transactions. Users get
+their transactions processed faster.
+
+5. The MEV relay takes a small cut of the fees for providing this bundling service.
+
+This allows users to circumvent the normal transaction queue and have their transactions processed faster by leveraging
+the fees they pay. Miners are incentivized to include these block proposals because they earn higher fees. MEV relays
+provide a market-based solution to prioritize certain transactions.
+
+The downside is that MEV relays centralize transaction ordering and bundling to some extent. They also raise the barrier
+to direct transaction inclusion for regular users. But they do help improve overall block space utilization and
+transaction speeds.
+
+## How to connect a MEV Relay with Sedge
+
+By default, if MEV is supported by the network, Sedge will connect to mev relay by default. If you want to connect to a
+specific MEV relay, you can do so by specifying the flag that might depend on the command you are using, but will look
+like:
+1. Generating a full node:
+```
+sedge generate full-node --relay-urls=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money
+```
+
+2. Generating a mev-boost node:
+```
+sedge generate mev-boost --relay-urls=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money
+```
