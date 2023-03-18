@@ -39,21 +39,21 @@ Downloading any binary from the internet comes with the risk of downloading file
 
   > Replace `<VERSION>` with the desired version number, e.g 0.1.2; `<OS>` with your OS, e.g linux; and `<ARCH>` with your architecture, e.g amd64.
 
-1. Open a console or terminal instance on the directory in which you downloaded the binary. 
+1. Open a console or terminal instance on the directory in which you downloaded the binary.
 1. Set binary as executable executing `chmod +x <binary>` in the terminal. Replace `<binary>` with the name of the downloaded binary.
 1. Run Sedge `./sedge --help` to check if the executable is ok. The `.` represents the current directory (where your terminal session is pointing to)
 1. (Optional) Put the binary in your [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) with `cp <binary> /usr/local/bin/sedge` so you can execute Sedge from any directory using the terminal. Try `sedge --help` now.
 ## Using Homebrew
 
-First install the Homebrew package manager using the [official install script](https://brew.sh/) located on their homepage. 
+First install the Homebrew package manager using the [official install script](https://brew.sh/) located on their homepage.
 
-After installing Homebrew, you are ready to install Sedge by tapping into the official Sedge repository and installing it: 
+After installing Homebrew, you are ready to install Sedge by tapping into the official Sedge repository and installing it:
 
 ```
 brew install nethermindeth/sedge/sedge
 ```
 
-If you want to update Sedge, you can use the following commands: 
+If you want to update Sedge, you can use the following commands:
 ```
 brew update
 brew upgrade sedge
@@ -97,7 +97,18 @@ Changes made to a profile file may not apply until the next time you log into yo
 :::
 
 ## Build from source
-    
+:::tip
+
+If you want to install Sedge in a Linux machine, we recommend you tu install some meta-packages to make the build process easier. You can install them with the following command in some of the major platforms:
+
+Ubuntu and Debian based: `sudo apt-get install build-essential`
+
+Arch: `sudo pacman -S base-devel`
+
+Alpine: `sudo apk add alpine-sdk`
+
+:::
+
 With this method, you generate the binary manually (need Go installed) downloading and compiling the source code:
 
 ```
