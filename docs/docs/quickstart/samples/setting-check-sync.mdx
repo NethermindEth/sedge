@@ -1,0 +1,39 @@
+---
+id: setting-checkpoint-sync
+sidebar_position: 8
+---
+
+# Setting Checkpoint Sync
+
+## Overview
+
+Checkpoint sync, also known as "synchronization with checkpoints" or "checkpoint-based syncing," is a method of
+synchronizing the blockchain by using predefined checkpoints in the blockchain. This approach is designed to
+speed up the synchronization process and reduce the amount of data that needs to be downloaded, verified, and stored by
+nodes.
+
+In a traditional full sync, a node downloads and verifies every block and its associated transactions from the genesis
+block (the first block in the blockchain) to the most recent block. This can be a slow and resource-intensive process,
+especially as the blockchain grows in size over time.
+
+In a checkpoint sync, nodes use predetermined checkpoints in the blockchain history. These checkpoints are block headers
+that have been agreed upon by the Ethereum community as trustworthy and have been hardcoded into the client software.
+When a node performs a checkpoint sync, it downloads and verifies the data starting from the most recent checkpoint,
+rather than the genesis block. This significantly reduces the amount of data the node has to download and process,
+making synchronization faster and more efficient.
+
+It's important to note that checkpoint syncs rely on trust in the checkpoint data, which could be a potential point of
+centralization. However, the checkpoints are generally chosen from well-known and verified block headers, reducing the
+risk of a malicious checkpoint being introduced.
+
+Checkpoint sync is one of several synchronization methods that Ethereum clients can use, including full sync, fast sync,
+and snap sync. Each method offers a trade-off between speed, security, and resource usage.
+
+## Setting Checkpoint Sync
+
+Each network has set a default checkpoint sync url on Sedge. You can set the checkpoint sync url to a custom url using
+the `--checkpoint-sync-url` flag. For example, to set the checkpoint sync url to `https://example.com/checkpoint.json`, run:
+
+```
+sedge generate full-node --checkpoint-sync-url https://example.com/checkpoint.json
+```
