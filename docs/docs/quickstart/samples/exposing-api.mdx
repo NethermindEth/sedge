@@ -60,3 +60,19 @@ Exposing the ports of your node to the internet is a security risk.
 Only expose the ports you need, and make sure to secure them properly.
 
 :::
+
+## Exposing only ports of Consensus or Execution nodes
+
+If you want to only expose one of the ports of those nodes, you will need to do it one by one.
+
+For example, if you want to expose the ports of your consensus node, you will need to do the following:
+
+```
+sedge generate consensus <mandatory-flags> --map-all
+```
+
+In the same case for a Execution node, if you want to expose the ports, you will need to do the following:
+
+```
+sedge generate execution --map-all
+```
