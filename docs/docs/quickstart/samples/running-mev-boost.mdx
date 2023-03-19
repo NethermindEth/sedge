@@ -1,0 +1,42 @@
+---
+id: running-mev-boost-node
+sidebar_position: 10
+---
+
+# Running a MEV-boost node
+
+## What is a MEV-boost node
+
+A MEV-Boost node is a type of node in the Ethereum blockchain ecosystem that is designed to maximize the profits that
+can be earned through "Maximal Extractable Value" (MEV). MEV is the total amount of value that can be extracted from a
+given set of transactions, including any potential profits from front-running, back-running, or other types of
+transaction reordering.
+
+MEV-Boost nodes are specifically optimized to identify and execute profitable MEV strategies on the blockchain. They
+use specialized software and algorithms to scan the blockchain for opportunities to extract value, such as identifying
+arbitrage opportunities between different decentralized exchanges or identifying transactions that can be front-run for
+profit.
+
+## Running a MEV-boost node using Sedge
+
+Sedge can be used to run a MEV-boost node, running only one node, or alongside a full Ethereum node.
+
+### Running a MEV-boost node alone
+
+You can run a MEV-boost node alone, connecting to a default Relay url, or setting your own.
+There is a example of how to generate a MEV-boost node using Sedge:
+
+```
+sedge generate mevboost
+```
+
+### Running a MEV-boost node alongside a full Ethereum node
+
+By default, if you generate a full node using Sedge, if the selected network support MEV, it will also generate a MEV-boost
+node.
+
+You can override that config, and not running the MEV-boost node, by setting the `--no-mev-boost` flag, for example:
+
+```
+sedge generate full-node --no-mev-boost
+```
