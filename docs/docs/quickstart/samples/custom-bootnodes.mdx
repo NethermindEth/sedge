@@ -1,7 +1,7 @@
 ---
 id: custom-bootnodes
 sidebar_position: 3
-
+---
 
 # Using custom Bootnodes
 
@@ -26,12 +26,12 @@ addresses to new nodes.
 Sedge supports the use of custom bootnodes, which can be useful for testing and development purposes. To use custom
 bootnodes on the Execution Client, you can specify the `--execution-bootnodes` flag when starting Sedge. For example:
 
-```bash
+```
 sedge generate full-node --execution-bootnodes enode://<bootnode-enode-url1>,enode://<bootnode-enode-ur2>,enode://<bootnode-enode-ur3>
 ```
 If you want to modify the Consensus Client bootnodes, you can specify the `--consensus-bootnodes` flag when starting Sedge. For example:
 
-```bash
+```
 sedge generate full-node --consensus-bootnodes enr:-<bootnode-enr-1>,enr:-<bootnode-enr-2>,enr:-<bootnode-enr-3>
 ```
 
