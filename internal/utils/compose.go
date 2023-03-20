@@ -23,6 +23,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// TODO: Add unit tests
 // LoadDockerComposeServices get the services from a Sedge valid docker-compose script
 func LoadDockerComposeServices(path string) ([]string, error) {
 	type servicesMap struct {

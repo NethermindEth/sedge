@@ -47,6 +47,7 @@ func main() {
 	// Docker service
 	serviceManager := services.NewServiceManager(dockerClient)
 
+	// Init dependencies manager
 	depsMgr := dependencies.NewDependenciesManager()
 
 	// Init Sedge Actions
