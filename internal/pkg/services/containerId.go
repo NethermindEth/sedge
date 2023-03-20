@@ -19,23 +19,23 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 )
 
-func (s *serviceManager) ContainerId(service string) (string, error) {
+func (s *serviceManager) ContainerId(name string) (string, error) {
 	containers, err := s.dockerClient.ContainerList(context.Background(), types.ContainerListOptions{
 		All:     true,
-		Filters: filters.NewArgs(filters.Arg("name", service)),
+		Filters: filters.NewArgs(filters.Arg("name", name)),
 	})
 	if err != nil {
 		return "", err
 	}
-	if len(containers) == 0 {
-		return "", fmt.Errorf("%w: %s", ErrContainerNotFound, service)
+	for _, c := range containers {
+		if utils.Contains(c.Names, "/"+name) {
+			return c.ID, nil
+		}
 	}
-	if len(containers) > 1 {
-		return "", fmt.Errorf("%w: %s", ErrMultipleContainers, service)
-	}
-	return containers[0].ID, nil
+	return "", fmt.Errorf("%w: %s", ErrContainerNotFound, name)
 }

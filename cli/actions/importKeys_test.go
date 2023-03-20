@@ -317,7 +317,10 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
-			{ID: validatorCtId},
+			{
+				ID:    validatorCtId,
+				Names: []string{"name-0", "/" + services.DefaultSedgeValidatorClient, "name-2"},
+			},
 		}, nil)
 	// Mock ContainerInspect
 	inspectCall := dockerClient.EXPECT().
@@ -390,7 +393,10 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
-			{ID: validatorCtId},
+			{
+				ID:    validatorCtId,
+				Names: []string{"/" + services.DefaultSedgeValidatorClient},
+			},
 		}, nil)
 	// Mock ContainerInspect
 	dockerClient.EXPECT().

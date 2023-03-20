@@ -102,7 +102,10 @@ func checkValidatorFailureHelper(t *testing.T, ctrl *gomock.Controller, wantErro
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
-			{ID: "validatorctid"},
+			{
+				ID:    "validatorctid",
+				Names: []string{"/" + services.DefaultSedgeValidatorClient},
+			},
 		}, nil).
 		Times(1)
 	dockerClient.EXPECT().
@@ -148,7 +151,10 @@ func validatorStopFailureHelper(t *testing.T, ctrl *gomock.Controller) actions.S
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
-			{ID: validatorCtId},
+			{
+				ID:    validatorCtId,
+				Names: []string{"/" + services.DefaultSedgeValidatorClient},
+			},
 		}, nil).
 		Times(1)
 	dockerClient.EXPECT().
@@ -254,7 +260,10 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag stri
 			Filters: filters.NewArgs(filters.Arg("name", validatorContainerName)),
 		}).
 		Return([]types.Container{
-			{ID: validatorCtId},
+			{
+				ID:    validatorCtId,
+				Names: []string{"/" + validatorContainerName},
+			},
 		}, nil).
 		Times(1)
 	// Mock ContainerInspect
@@ -381,7 +390,10 @@ func unsupportedClientsHelper(t *testing.T, ctrl *gomock.Controller) actions.Sed
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
-			{ID: validatorCtId},
+			{
+				ID:    validatorCtId,
+				Names: []string{"/" + services.DefaultSedgeValidatorClient, "name-0"},
+			},
 		}, nil).
 		Times(1)
 	// Mock ContainerInspect
