@@ -25,10 +25,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/utils"
 )
 
-var (
-	ErrComposeFileNotFound = errors.New("docker-compose file not found")
-	ErrMissingDependencies = errors.New("missing dependencies")
-)
+var ErrMissingDependencies = errors.New("missing dependencies")
 
 func readFileContent(path string) (string, error) {
 	raw, err := os.ReadFile(path)
