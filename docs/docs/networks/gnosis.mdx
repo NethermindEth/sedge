@@ -34,20 +34,20 @@ Validating the Gnosis Beacon Chain requires 1
 
 :::
 
-### Running a Full Node
+### Generating a Full Node
 
-For running a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge cli`. For example:
+To generate a setup of a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge generate full-node`. For example:
 
 ```bash
-sedge cli --no-validator --network=gnosis
+sedge generate full-node --no-validator --network=gnosis
 ```
 
-### Running a Validator
+### Running a Full Node with a Validator
 
-For running a validator with random clients, you need to omit the `--no-validator` flag. For example:
+To generate a setup of a validator with random clients, you need to omit the `--no-validator` flag. For example:
 
 ```bash
-sedge cli --network=gnosis
+sedge generate full-node --network=gnosis
 ```
 
 ### Create keystore for validator
@@ -56,6 +56,14 @@ To create a keystore for a validator, you need to run the following command:
 
 ```bash
 sedge keys --network gnosis
+```
+
+### Running your setup
+
+Once you have generated your setup, you can run it with the following command:
+
+```
+sedge run
 ```
 
 ## Consensus Clients Requirements
