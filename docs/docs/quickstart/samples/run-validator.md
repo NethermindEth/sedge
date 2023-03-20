@@ -15,7 +15,7 @@ If you don't have Sedge in your PATH, just open your Terminal on the folder whic
 
 :::
 
-Setup your keys running the following command from your Terminal:
+Set up your keys running the following command from your Terminal:
 
 ```
 sedge keys

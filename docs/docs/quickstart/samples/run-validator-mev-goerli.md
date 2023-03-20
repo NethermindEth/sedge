@@ -17,8 +17,22 @@ If you don't have Sedge in your PATH, just open your Terminal on the folder whic
 
 Run the following command from your Terminal to setup a Teku consensus and validator nodes on Goerli with a random execution client:
 
+Set up your keys running the following command from your Terminal:
+
 ```
-sedge cli --network goerli -c teku
+sedge keys --network goerli
+```
+
+Run the following command from your Terminal to generate your setup on Goerli:
+
+```
+sedge generate full-node --network goerli -c teku 
+```
+
+After that, you just need to run your setup with the following command:
+
+```
+sedge run
 ```
 
 The `--network` flag allow you to choose the target network for the setup. To check out supported networks run `sedge networks`. Default network is mainnet.
