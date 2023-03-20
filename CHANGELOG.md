@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for PPA packaging (apt install).
 - Added flag `--container-tag` to add a suffix to sedge containers name.
 - Support the new command `import-key` to import validator keys in an existing configuration.
+- New command to check dependencies: `sedge deps check`
+- New command to install dependencies: `sedge deps install`
+- All the commands that needs dependencies will check if they are installed
+  as a pre-requisite. If not, the command will fail and suggest to run `sedge deps check`.
 
 ### Changed
 
