@@ -64,7 +64,7 @@ func dependenciesInstallCommand(depsMgr dependencies.DependenciesManager) *cobra
 		Short: "Install dependencies",
 		Long: `
 Checks if docker is installed in the host machine. If not, it will try to install it.
-Installation are only supported on Linux.`,
+Installation is only supported on Linux.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			installed, pending := depsMgr.Check(deps)
 			for _, dep := range installed {
