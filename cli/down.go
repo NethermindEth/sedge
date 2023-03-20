@@ -39,6 +39,7 @@ func DownCmd(cmdRunner commands.CommandRunner, a actions.SedgeActions, depsMgr d
 		Long:  `Shutdown sedge running containers using docker compose CLI. Shortcut for 'docker compose -f <script> down'`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := checkDependencies(depsMgr, true, dependencies.Docker); err != nil {
+				log.Error("Failed to check dependencies. Run 'sedge deps check' to check dependencies")
 				return err
 			}
 			return a.ValidateDockerComposeFile(filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))

@@ -23,6 +23,7 @@ import (
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -81,6 +82,7 @@ sedge slashing-export --out slashing-data.json --start-validator lighthouse`,
 			}
 			validatorClient = args[0]
 			if err := checkDependencies(depsMgr, true, "docker"); err != nil {
+				log.Error("Failed to check dependencies. Run 'sedge deps check' to check dependencies")
 				return err
 			}
 			return sedgeActions.ValidateDockerComposeFile(filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))

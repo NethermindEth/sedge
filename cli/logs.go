@@ -45,6 +45,7 @@ func LogsCmd(cmdRunner commands.CommandRunner, sedgeActions actions.SedgeActions
 	By default will run 'docker compose -f <script> logs --follow <service>'`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := checkDependencies(depsMgr, true, dependencies.Docker); err != nil {
+				log.Error("Failed to check dependencies. Run 'sedge deps check' to check dependencies")
 				return err
 			}
 			return sedgeActions.ValidateDockerComposeFile(filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))

@@ -22,6 +22,7 @@ import (
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -41,6 +42,7 @@ func RunCmd(sedgeActions actions.SedgeActions, depsMgr dependencies.Dependencies
 				return fmt.Errorf(configs.ErrCMDArgsNotSupported, "run")
 			}
 			if err := checkDependencies(depsMgr, true, dependencies.Docker); err != nil {
+				log.Error("Failed to check dependencies. Run 'sedge deps check' to check dependencies")
 				return err
 			}
 			return sedgeActions.ValidateDockerComposeFile(filepath.Join(generationPath, configs.DefaultDockerComposeScriptName), services...)
