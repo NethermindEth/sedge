@@ -2,6 +2,7 @@ package cli
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	log "github.com/sirupsen/logrus"
@@ -48,7 +49,7 @@ Also checks if the docker engine is running`,
 				checksOk = checksOk && checkOk
 			}
 			if !checksOk {
-				return ErrMissingDependencies
+				return fmt.Errorf("%w. To install dependencies if supported run: 'sedge deps install'", ErrMissingDependencies)
 			} else {
 				log.Info("All dependencies are installed and running")
 			}
