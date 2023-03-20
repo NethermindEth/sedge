@@ -35,7 +35,7 @@ import (
 type DependenciesManager interface {
 	Supported(dependencies []string) (supported []string, unsupported []string, err error)
 	Check(dependencies []string) (installed []string, pending []string)
-	Install(cmdRunner commands.CommandRunner, dependency string) error
+	Install(dependency string) error
 	ShowInstructions(dependency string) error
 	DockerEngineIsOn() error
 	DockerComposeIsInstalled() error
@@ -45,8 +45,10 @@ type dependenciesManager struct {
 	cmdRunner commands.CommandRunner
 }
 
-func NewDependenciesManager() DependenciesManager {
-	return &dependenciesManager{}
+func NewDependenciesManager(cmdRunner commands.CommandRunner) DependenciesManager {
+	return &dependenciesManager{
+		cmdRunner: cmdRunner,
+	}
 }
 
 // Supported returns the supported and unsupported dependencies of the given list
@@ -80,7 +82,7 @@ func (d *dependenciesManager) Check(dependencies []string) (installed []string, 
 }
 
 // Install installs the dependency on the host machine
-func (d *dependenciesManager) Install(cmdRunner commands.CommandRunner, dependency string) error {
+func (d *dependenciesManager) Install(dependency string) error {
 	scriptPath, err := getScriptPath(dependency)
 	if err != nil {
 		return err
@@ -98,7 +100,7 @@ func (d *dependenciesManager) Install(cmdRunner commands.CommandRunner, dependen
 		GetOutput: false,
 		Data:      struct{}{},
 	}
-	_, err = cmdRunner.RunScript(script)
+	_, err = d.cmdRunner.RunScript(script)
 	return err
 }
 

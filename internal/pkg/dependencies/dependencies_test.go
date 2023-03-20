@@ -61,7 +61,7 @@ func TestDependenciesManager_Supported(t *testing.T) {
 			if !contains(tc.os, runtime.GOOS) {
 				t.Skipf("Test not supported in %s", runtime.GOOS)
 			}
-			depsMgr := NewDependenciesManager()
+			depsMgr := NewDependenciesManager(nil)
 			gotSupported, gotUnsupported, gotErr := depsMgr.Supported(tc.dependencies)
 			assert.NoError(t, gotErr)
 			assert.Len(t, gotSupported, len(tc.supported))
@@ -108,7 +108,7 @@ func TestDependenciesManager_ShowInstructions(t *testing.T) {
 			if !contains(tc.os, runtime.GOOS) {
 				t.Skipf("Test not supported in %s", runtime.GOOS)
 			}
-			depsMgr := NewDependenciesManager()
+			depsMgr := NewDependenciesManager(nil)
 			err := depsMgr.ShowInstructions(tc.dependency)
 			if tc.isErr && err == nil {
 				t.Errorf("ShowInstructions(%s) expected to fail.", tc.dependency)
@@ -169,8 +169,11 @@ func TestDependenciesManager_Install(t *testing.T) {
 
 	for _, tc := range tcs {
 		descr := fmt.Sprintf("InstallDependency(%s)", tc.dependency)
-		depsMgr := NewDependenciesManager()
-		err := depsMgr.Install(tc.runner, tc.dependency)
+		cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{
+			RunAsAdmin: false,
+		})
+		depsMgr := NewDependenciesManager(cmdRunner)
+		err := depsMgr.Install(tc.dependency)
 		if tc.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
 		} else if !tc.isErr && err != nil {

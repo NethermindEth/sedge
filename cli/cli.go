@@ -584,7 +584,7 @@ func checkCLIDependencies(p ui.Prompter, o *CliCmdOptions, a actions.SedgeAction
 			return nil
 		}
 		for _, s := range supported {
-			if err := depsMgr.Install(a.GetCommandRunner(), s); err != nil {
+			if err := depsMgr.Install(s); err != nil {
 				return err
 			}
 		}
