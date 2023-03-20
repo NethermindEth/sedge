@@ -7,7 +7,7 @@ id: run-validator
 
 This guide shows you how to setup and run a validator on Mainnet using random execution, consensus, and validator clients; configuring Sedge to run without any prompts or confirmations, and to install dependencies automatically if missing.
 
-First make sure you have Sedge installed and in your PATH following the [installation guide](install-guide.mdx).
+First make sure you have Sedge installed and in your PATH following the [installation guide](quickstart/install-guide.mdx).
 
 :::tip
 

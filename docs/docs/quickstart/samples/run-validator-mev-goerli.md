@@ -1,13 +1,13 @@
 ---
 sidebar_position: 6
-id: run-teku-mev-boost
+id: run-mev-boost-goerli
 ---
 
 # Run a validator with mev-boost on Goerli
 
 This guide shows you how to setup and run a validator using [Teku](https://github.com/Consensys/teku/) as consensus layer, with a random execution client, and mev-boost.
 
-First make sure you have Sedge installed and in your PATH following the [installation guide](install-guide.mdx).
+First make sure you have Sedge installed and in your PATH following the [installation guide](quickstart/install-guide.mdx).
 
 :::tip
 
