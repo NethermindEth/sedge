@@ -9,6 +9,7 @@ sidebar_position: 1
 - **Staking**. You can use Sedge to set up and deploy an Ethereum or a Gnosis full node, including a validator node and nodes with mev-boost. Sedge's on-premise setup design favors solo stakers but can also be integrated with other staking solutions.
 - **Automated testing**. If you need to set up nodes very often to test your application or node, you can integrate Sedge to an automated solution and make use of Sedge as a one-click tool with which you can quickly set up a full node in just a single step. This can be the case for protocol and dapps developers.
 - **API and Checkpoint Sync endpoints**. Sedge allows you to set up a full node without a validator so that you can use this node to either expose the execution JSON-RPC API or the Beacon Chain HTTP API, or expose a [Checkpoint Sync](concepts/checkpoint-sync.md) endpoint.
+- **Migrate a Setup**. If you need to migrate your nodes from one place to other, or change the clients, Sedge can handle your keys for you, and import any needed information.
 
 > Whether or not you choose to set up a node with a validator, and whether or not you are exposing the API, you are contributing to the network, which is great!
 
