@@ -5,25 +5,31 @@ id: by-yourself
 
 # Manage the setup stack by yourself
 
-Once you use `sedge cli` to generate the `docker-compose.yml` file, you can handle it by yourself. This guide show you how. 
+Once you use `sedge cli` or `sedge generate` to generate the `docker-compose.yml` file, you can handle it by yourself. This guide will show you how.
 
-There are several reasons why you would need to manage the setup after using Sedge for generating the setup files. You might want to modify the `.env` or `docker-compose.yml` file to change the setup configuration, or simply copy these files to another machine. Currently, Sedge runs the docker compose stack that was just generated, there is no way of using Sedge to run an arbitrary `docker-compose.yml`. You can still use `sedge logs` and `sedge down` on any `docker-compose.yml` though. 
+There are several reasons why you would need to manage the setup after using Sedge for generating the setup files. You
+might want to modify the `.env` or `docker-compose.yml` file to change the setup configuration, or simply copy these
+files to another machine. Currently, Sedge runs the docker compose stack that was just generated using `sedge run`. You
+can use `sedge logs` and `sedge down` on any `docker-compose.yml`.
 
 :::caution
 
-Each time you execute `sedge cli` to generate the docker-compose file, that file and all modified files under the `sedge-data` directory will be overwritten.
+Each time you execute `sedge cli` or `sedge generate` to generate the docker-compose file, that file and all modified
+files under the `sedge-data` directory will be overwritten.
 
 :::
 
 :::tip
 
-You can point to a different generation path by using the `--path` option. This is useful if you want to generate the files in a different directory, or if you want to generate multiple setups.
+You can point to a different generation path by using the `--path` option. This is useful if you want to generate the
+files in a different directory, or if you want to generate multiple setups.
 
 :::
 
 ## Execute the setup
 
-Once generated the docker-compose file, you can modify either the environment variables in the `.env` file or the `docker-compose.yml` under the `sedge-data` directory.
+Once generated the docker-compose file, you can modify either the environment variables in the `.env` file or the
+`docker-compose.yml` under the `sedge-data` directory.
 
 After that, you can run the following command to start the setup from the `sedge-data` directory:
 
