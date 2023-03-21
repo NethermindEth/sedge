@@ -89,8 +89,7 @@ func CliCmd(p ui.Prompter, actions actions.SedgeActions, depsMgr dependencies.De
 	cmd := &cobra.Command{
 		Use:   "cli",
 		Short: "generate a node setup interactively",
-		Long: `
-This command will guide you through the process of setting up one of these node types:
+		Long: `This command will guide you through the process of setting up one of these node types:
 
 - Full Node (execution + consensus + validator)
 - Full Node without Validator (execution + consensus)
