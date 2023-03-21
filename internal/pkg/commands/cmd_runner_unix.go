@@ -185,5 +185,5 @@ func (cr *UnixCMDRunner) RunCMD(cmd Command) (string, int, error) {
 }
 
 func (cr *UnixCMDRunner) RunScript(script ScriptFile) (string, error) {
-	return executeBashScript(script)
+	return executeBashScript(script, cr.RunWithSudo)
 }
