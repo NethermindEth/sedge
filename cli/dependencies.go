@@ -28,8 +28,7 @@ func dependenciesCheckCommand(depsMgr dependencies.DependenciesManager) *cobra.C
 	cmd := &cobra.Command{
 		Use:   "check",
 		Short: "Check dependencies",
-		Long: `
-Checks if the following dependencies are installed on the host machine:
+		Long: `Checks if the following dependencies are installed on the host machine:
 	- docker
 	- docker compose
 
@@ -63,8 +62,7 @@ func dependenciesInstallCommand(depsMgr dependencies.DependenciesManager) *cobra
 	cmd := &cobra.Command{
 		Use:   "install",
 		Short: "Install dependencies",
-		Long: `
-Checks if docker is installed in the host machine. If not, it will try to install it.
+		Long: `Checks if docker is installed in the host machine. If not, it will try to install it.
 Installation is only supported on Linux.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			installed, pending := depsMgr.Check(deps)
