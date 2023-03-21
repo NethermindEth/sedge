@@ -1,23 +1,21 @@
 ---
 sidebar_position: 7
-id: restart-validator
+id: setup-validator
 ---
 
-# Restarting a Validator
+# Setting up a Validator
 
-If your
+By default, when you set up a full node, it will wait until:
 
-## Validator flow
-
-When Sedge starts to run, it will automatically start the Consensus and the Execution nodes, but, Validator node will not start automatically.
-
-At the moment that you run `docker compose up validator` or you run a setup that includes a Validator, the Validator node will wait for:
 1. The Consensus client to be up and synced.
 2. Wait for 1 Epoch (using the `validator-blocker` service).
 
 After that, the Validator will start to produce blocks.
 
-## Restarting the Validator
+## Restarting a Validator
+
+If for any reason your setup is restarted, the `validator` will not start automatically. You will need to run it manually,
+because otherwise, it will not wait until the `Consensus client` is up and synced, so, it might cause some slashing issues.
 
 :::caution
 
@@ -25,7 +23,7 @@ The solutions to these problems, needs to be done manually for the user, and it 
 
 :::
 
-if docker daemon restarts (due to a machine reboot, for example), the docker compose services with a restart policy will
+If docker daemon restarts (due to a machine reboot, for example), the docker compose services with a restart policy will
 restart, but the depends_on policy won’t retake effect. The depends_on policy only takes effect after a docker compose
 up (for the reboot case). This means the Validator can’t set a restart policy until we run down and up after a reboot
 for it to now incur in any slashing.
