@@ -14,9 +14,9 @@
       - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
     command: 
-      - validator
-      - --preset=${VL_LODESTAR_PRESET}{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - validator{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       - --paramsFile=/network_config/config.yml{{end}}{{else}}
+      - --preset=${VL_LODESTAR_PRESET}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --dataDir=/data
       - --logFile=/data/logs/validator.log
@@ -25,7 +25,7 @@
       - --metrics=true
       - --metrics.address=0.0.0.0
       - --metrics.port={{.VlMetricsPort}}{{with .FeeRecipient}}
-      - --suggestedFeeRecipient=${CC_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
+      - --suggestedFeeRecipient=${FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .MevBoostOnValidator}}
       - --builder=true{{end}}
       - --graffiti=${GRAFFITI}{{if .LoggingDriver}}

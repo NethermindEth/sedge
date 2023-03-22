@@ -26,7 +26,7 @@
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
       - --metrics-port={{.VlMetricsPort}}{{with .FeeRecipient}}
-      - --validators-proposer-default-fee-recipient=${CC_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
+      - --validators-proposer-default-fee-recipient=${FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .MevBoostOnValidator}}
       - --validators-proposer-blinded-blocks-enabled=true
       - --validators-builder-registration-default-enabled=true

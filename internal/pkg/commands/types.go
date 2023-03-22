@@ -89,7 +89,7 @@ type DockerComposePsOptions struct {
 	Path string
 	// Services : use with --services to display services
 	Services bool
-	// Quiet : use with --quietto display only IDs
+	// Quiet : use with --quiet to display only IDs
 	Quiet bool
 	// ServiceName: Service argument
 	ServiceName string

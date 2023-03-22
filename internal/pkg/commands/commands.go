@@ -30,6 +30,8 @@ type CommandRunner interface {
 
 	BuildDockerComposeLogsCMD(options DockerComposeLogsOptions) Command
 
+	BuildDockerComposeVersionCMD() Command
+
 	BuildDockerBuildCMD(options DockerBuildOptions) Command
 
 	BuildDockerPullCMD(options DockerBuildOptions) Command

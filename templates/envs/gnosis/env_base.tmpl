@@ -3,6 +3,8 @@
 # --- Global configuration ---
 EL_NETWORK=xdai
 CL_NETWORK=gnosis
+{{if .FeeRecipient}}
+FEE_RECIPIENT={{.FeeRecipient}}{{end}}
 {{template "execution" .}}
 {{template "consensus" .}}
 {{template "validator" .}}

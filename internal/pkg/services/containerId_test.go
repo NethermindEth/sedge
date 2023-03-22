@@ -28,28 +28,68 @@ import (
 )
 
 func TestContainerId(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
-	defer ctrl.Finish()
-
-	wantId := "container-id"
-	containerName := "container-name"
-
-	dockerClient.EXPECT().
-		ContainerList(gomock.Any(), types.ContainerListOptions{
-			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", containerName)),
-		}).
-		Return([]types.Container{
-			{
-				ID: wantId,
+	ctName := "container-name"
+	tests := []struct {
+		name       string
+		containers []types.Container
+		wantId     string
+		err        error
+	}{
+		{
+			name: "container found",
+			containers: []types.Container{
+				{
+					ID:    "other-id",
+					Names: []string{"other-name"},
+				},
+				{
+					ID:    "container-id",
+					Names: []string{"/" + ctName},
+				},
 			},
-		}, nil).
-		Times(1)
-	serviceManager := services.NewServiceManager(dockerClient)
-	id, err := serviceManager.ContainerId(containerName)
-	assert.Nil(t, err)
-	assert.Equal(t, wantId, id)
+			wantId: "container-id",
+			err:    nil,
+		},
+		{
+			name:       "container not found, no containers",
+			containers: []types.Container{},
+			wantId:     "",
+			err:        services.ErrContainerNotFound,
+		},
+		{
+			name: "container found, no exact match",
+			containers: []types.Container{
+				{
+					ID:    "other-id",
+					Names: []string{"other-name"},
+				},
+				{
+					ID:    "container-id",
+					Names: []string{ctName + "-2", ctName + "-3"},
+				},
+			},
+			wantId: "",
+			err:    services.ErrContainerNotFound,
+		},
+	}
+	for _, tt := range tests {
+		ctrl := gomock.NewController(t)
+		dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
+		defer ctrl.Finish()
+
+		dockerClient.EXPECT().
+			ContainerList(gomock.Any(), types.ContainerListOptions{
+				All:     true,
+				Filters: filters.NewArgs(filters.Arg("name", ctName)),
+			}).
+			Return(tt.containers, nil).
+			Times(1)
+		serviceManager := services.NewServiceManager(dockerClient)
+		id, err := serviceManager.ContainerId(ctName)
+		assert.ErrorIs(t, err, tt.err)
+		assert.Equal(t, tt.wantId, id)
+
+	}
 }
 
 func TestContainerIdError(t *testing.T) {
@@ -90,25 +130,5 @@ func TestContainerIdNotFound(t *testing.T) {
 	serviceManager := services.NewServiceManager(dockerClient)
 	id, err := serviceManager.ContainerId(containerName)
 	assert.ErrorIs(t, err, services.ErrContainerNotFound)
-	assert.Equal(t, "", id)
-}
-
-func TestContainerIdMultiple(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
-	defer ctrl.Finish()
-
-	containerName := "container-name"
-
-	dockerClient.EXPECT().
-		ContainerList(gomock.Any(), types.ContainerListOptions{
-			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", containerName)),
-		}).
-		Return(make([]types.Container, 2), nil).
-		Times(1)
-	serviceManager := services.NewServiceManager(dockerClient)
-	id, err := serviceManager.ContainerId(containerName)
-	assert.ErrorIs(t, err, services.ErrMultipleContainers)
 	assert.Equal(t, "", id)
 }

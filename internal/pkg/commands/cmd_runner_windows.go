@@ -125,6 +125,10 @@ func (cr *WindowsCMDRunner) BuildDockerComposeLogsCMD(options DockerComposeLogsO
 	return Command{Cmd: command}
 }
 
+func (cr *WindowsCMDRunner) BuildDockerComposeVersionCMD() Command {
+	return Command{Cmd: "docker compose version"}
+}
+
 func (cr *WindowsCMDRunner) BuildDockerBuildCMD(options DockerBuildOptions) Command {
 	command := "docker build"
 	if len(options.Tag) > 0 {

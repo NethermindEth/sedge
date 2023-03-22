@@ -30,7 +30,7 @@ func TestDockerComposeData_WithConsensusClient(t *testing.T) {
 		{
 			name: "with consensus client",
 			data: DockerComposeData{
-				Services: []string{"execution", "consensus", "validator", "mevboost"},
+				Services: []string{"execution", "consensus", "validator", "mev-boost"},
 			},
 			want: true,
 		},
@@ -51,7 +51,7 @@ func TestDockerComposeData_WithConsensusClient(t *testing.T) {
 		{
 			name: "without consensus client",
 			data: DockerComposeData{
-				Services: []string{"execution", "mevboost"},
+				Services: []string{"execution", "mev-boost"},
 			},
 			want: false,
 		},
@@ -80,7 +80,7 @@ func TestDockerComposeData_WithValidatorClient(t *testing.T) {
 		{
 			name: "with validator client",
 			data: DockerComposeData{
-				Services: []string{"execution", "consensus", "validator", "mevboost"},
+				Services: []string{"execution", "consensus", "validator", "mev-boost"},
 			},
 			want: true,
 		},
@@ -94,7 +94,7 @@ func TestDockerComposeData_WithValidatorClient(t *testing.T) {
 		{
 			name: "without validator client",
 			data: DockerComposeData{
-				Services: []string{"execution", "consensus", "mevboost"},
+				Services: []string{"execution", "consensus", "mev-boost"},
 			},
 			want: false,
 		},
@@ -135,7 +135,7 @@ func TestDockerComposeData_WithMevBoostClient(t *testing.T) {
 			want: true,
 		},
 		{
-			name: "with mevboost client",
+			name: "with mev-boost client",
 			data: EnvData{
 				Services: []string{"mev-boost"},
 			},

@@ -13,12 +13,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package prompts
+package clients
 
-type Prompt interface {
-	Passphrase() string
-	ExistingVal() int64
-	NumberVal() int64
-	Eth1Withdrawal() (string, error)
-	FeeRecipient() (string, error)
+var AllClients map[string][]string = map[string][]string{
+	"execution": {
+		"nethermind",
+		"geth",
+		"erigon",
+		"besu",
+	},
+	"consensus": {
+		"lighthouse",
+		"prysm",
+		"teku",
+		"lodestar",
+	},
+	"validator": {
+		"lighthouse",
+		"prysm",
+		"teku",
+		"lodestar",
+	},
 }

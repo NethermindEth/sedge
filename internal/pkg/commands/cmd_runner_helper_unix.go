@@ -89,13 +89,18 @@ The output of the script.
 b. error
 Error if any
 */
-func executeBashScript(script ScriptFile) (out string, err error) {
+func executeBashScript(script ScriptFile, runWithSudo bool) (out string, err error) {
 	var scriptBuffer, combinedOut bytes.Buffer
 	if err = script.Tmp.Execute(&scriptBuffer, script.Data); err != nil {
 		return
 	}
 
-	cmd := exec.Command("bash")
+	var cmd *exec.Cmd
+	if runWithSudo {
+		cmd = exec.Command("sudo", "bash")
+	} else {
+		cmd = exec.Command("bash")
+	}
 
 	// Prepare pipes for stdin, stdout and stderr
 	stdin, err := cmd.StdinPipe()

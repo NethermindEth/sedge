@@ -17,15 +17,14 @@ package cli_test
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
 	"github.com/golang/mock/gomock"
@@ -33,168 +32,159 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type cmdArgs struct {
-	path     string
-	services []string
-}
-
 func TestRun(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
-	emptyErr := errors.New("")
 
 	tcs := []struct {
-		name      string
-		pTestData string
-		args      cmdArgs
-		preRunErr error
-		depsErr   bool
-		setupErr  bool
-		runErr    bool
+		name  string
+		args  []string
+		setup func(*testing.T, *sedge_mocks.MockDependenciesManager, *sedge_mocks.MockSedgeActions) string
+		err   string
 	}{
 		{
-			name:      "Valid args and valid docker-compose",
-			pTestData: "valid",
-			args:      cmdArgs{services: []string{"execution", "consensus"}},
+			name: "Valid flags and valid docker-compose",
+			args: []string{"--services", "execution,consensus"},
+			setup: func(t *testing.T, d *sedge_mocks.MockDependenciesManager, a *sedge_mocks.MockSedgeActions) (generationPath string) {
+				generationPath = t.TempDir()
+				err := test.PrepareTestCaseDir(filepath.Join("testdata", "run_tests", "valid"), generationPath)
+				if err != nil {
+					t.Fatalf("Error setting up test case: %v", err)
+				}
+				gomock.InOrder(
+					d.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil).Times(1),
+					d.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+					d.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+					a.EXPECT().ValidateDockerComposeFile(filepath.Join(generationPath, "docker-compose.yml"), []string{"execution", "consensus"}).Return(nil).Times(1),
+					a.EXPECT().SetupContainers(actions.SetupContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"execution", "consensus"},
+					}).Return(nil).Times(1),
+					a.EXPECT().RunContainers(actions.RunContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"execution", "consensus"},
+					}).Return(nil).Times(1),
+				)
+				return
+			},
 		},
 		{
-			name:      "Valid args, bad docker-compose, no services",
-			pTestData: "no_services",
-			args:      cmdArgs{services: []string{"execution", "consensus"}},
-			preRunErr: fmt.Errorf(configs.GenPathErr, emptyErr),
+			name: "Valid flags, bad docker-compose",
+			args: []string{"--services", "execution,consensus"},
+			setup: func(t *testing.T, d *sedge_mocks.MockDependenciesManager, a *sedge_mocks.MockSedgeActions) (generationPath string) {
+				generationPath = t.TempDir()
+				err := test.PrepareTestCaseDir(filepath.Join("testdata", "run_tests", "no_services"), generationPath)
+				if err != nil {
+					t.Fatalf("Error setting up test case: %v", err)
+				}
+				gomock.InOrder(
+					d.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil).Times(1),
+					d.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+					d.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+					a.EXPECT().ValidateDockerComposeFile(filepath.Join(generationPath, "docker-compose.yml"), []string{"execution", "consensus"}).Return(errors.New("bad docker-compose")).Times(1),
+				)
+				return
+			},
+			err: "bad docker-compose",
 		},
 		{
-			name:      "Valid args, bad docker-compose, empty services, yaml schema error",
-			pTestData: "bad_services",
-			args:      cmdArgs{services: []string{"execution", "consensus"}},
-			preRunErr: fmt.Errorf(configs.InvalidComposeErr, emptyErr),
+			name: "With args",
+			args: []string{"arg"},
+			setup: func(t *testing.T, d *sedge_mocks.MockDependenciesManager, a *sedge_mocks.MockSedgeActions) (generationPath string) {
+				return configs.DefaultAbsSedgeDataPath
+			},
+			err: "command run does not support arguments. Please use flags instead",
 		},
 		{
-			name:      "Valid args, bad docker-compose, no version",
-			pTestData: "no_version",
-			args:      cmdArgs{services: []string{"execution", "consensus"}}, // Leave error commented in case we add a version check
-			// preRunErr: fmt.Errorf(configs.MissingVersionErr),
+			name: "Without docker",
+			args: []string{"--services", "execution,consensus"},
+			setup: func(t *testing.T, d *sedge_mocks.MockDependenciesManager, a *sedge_mocks.MockSedgeActions) (generationPath string) {
+				generationPath = t.TempDir()
+				err := test.PrepareTestCaseDir(filepath.Join("testdata", "run_tests", "valid"), generationPath)
+				if err != nil {
+					t.Fatalf("Error setting up test case: %v", err)
+				}
+				gomock.InOrder(
+					d.EXPECT().Check([]string{dependencies.Docker}).Return(nil, []string{dependencies.Docker}).Times(1),
+				)
+				return
+			},
+			err: "missing dependencies: docker",
 		},
 		{
-			name:      "Bad compose path",
-			args:      cmdArgs{path: "bad_path"},
-			preRunErr: fmt.Errorf(configs.ComposeNotFoundErr, emptyErr),
+			name: "Error setting up containers",
+			args: []string{"--services", "execution,consensus"},
+			setup: func(t *testing.T, d *sedge_mocks.MockDependenciesManager, a *sedge_mocks.MockSedgeActions) (generationPath string) {
+				generationPath = t.TempDir()
+				err := test.PrepareTestCaseDir(filepath.Join("testdata", "run_tests", "valid"), generationPath)
+				if err != nil {
+					t.Fatalf("Error setting up test case: %v", err)
+				}
+				gomock.InOrder(
+					d.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil).Times(1),
+					d.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+					d.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+					a.EXPECT().ValidateDockerComposeFile(filepath.Join(generationPath, "docker-compose.yml"), []string{"execution", "consensus"}).Return(nil).Times(1),
+					a.EXPECT().SetupContainers(actions.SetupContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"execution", "consensus"},
+					}).Return(errors.New("setup error")).Times(1),
+				)
+				return
+			},
+			err: "error setting up service containers: setup error",
 		},
 		{
-			name:      "Valid docker-compose, bad services",
-			pTestData: "valid",
-			args:      cmdArgs{services: []string{"bad_service"}},
-			preRunErr: fmt.Errorf(configs.InvalidService, "bad_service"),
-		},
-		{
-			name:      "Without env file",
-			pTestData: "no_env",
-			args:      cmdArgs{services: []string{"execution", "consensus"}},
-			preRunErr: fmt.Errorf(configs.InvalidComposeErr, emptyErr),
-		},
-		{
-			name:      "No compose file in path",
-			pTestData: "no_compose",
-			args:      cmdArgs{services: []string{"execution", "consensus"}},
-			preRunErr: fmt.Errorf(configs.ComposeNotFoundErr, emptyErr),
-		},
-		{
-			name:      "Valid docker-compose, no services provided",
-			pTestData: "valid",
-			args:      cmdArgs{},
-		},
-		{
-			name:      "Dependencies error",
-			pTestData: "valid",
-			args:      cmdArgs{services: []string{"execution", "consensus"}},
-			depsErr:   true,
-		},
-		{
-			name:      "Setup error",
-			pTestData: "valid",
-			args:      cmdArgs{services: []string{"execution", "consensus"}},
-			setupErr:  true,
-		},
-		{
-			name:      "Run error",
-			pTestData: "valid",
-			args:      cmdArgs{services: []string{"execution", "consensus"}},
-			runErr:    true,
+			name: "Error running containers",
+			args: []string{"--services", "execution,consensus"},
+			setup: func(t *testing.T, d *sedge_mocks.MockDependenciesManager, a *sedge_mocks.MockSedgeActions) (generationPath string) {
+				generationPath = t.TempDir()
+				err := test.PrepareTestCaseDir(filepath.Join("testdata", "run_tests", "valid"), generationPath)
+				if err != nil {
+					t.Fatalf("Error setting up test case: %v", err)
+				}
+				gomock.InOrder(
+					d.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil).Times(1),
+					d.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+					d.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+					a.EXPECT().ValidateDockerComposeFile(filepath.Join(generationPath, "docker-compose.yml"), []string{"execution", "consensus"}).Return(nil).Times(1),
+					a.EXPECT().SetupContainers(actions.SetupContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"execution", "consensus"},
+					}).Return(nil).Times(1),
+					a.EXPECT().RunContainers(actions.RunContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"execution", "consensus"},
+					}).Return(errors.New("run error")).Times(1),
+				)
+				return
+			},
+			err: "error starting service containers: run error",
 		},
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			// Setup
-			if tc.pTestData != "" {
-				tmp := t.TempDir()
-				err := test.PrepareTestCaseDir(filepath.Join("testdata", "run_tests", tc.pTestData), tmp)
-				if err != nil {
-					t.Fatalf("Error setting up test case: %v", err)
-				}
-				if tc.args.path == "" {
-					tc.args.path = tmp
-				}
-			}
-			args := []string{"--path", tc.args.path}
-			if len(tc.args.services) > 0 {
-				args = append(args, "--services")
-				args = append(args, strings.Join(tc.args.services, ","))
-			} else {
-				tc.args.services = []string{}
-			}
-			t.Logf("Running test with args: %v", args)
-
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
 			mActions := sedge_mocks.NewMockSedgeActions(ctrl)
-			if tc.preRunErr == nil {
-				if tc.depsErr {
-					mActions.EXPECT().ManageDependencies(gomock.Any()).Return(errors.New(configs.DependencyErr)).Times(1)
-				} else {
-					mActions.EXPECT().ManageDependencies(gomock.Any()).Return(nil).Times(1)
+			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
+			generationPath := tc.setup(t, depsMgr, mActions)
 
-					sopts := actions.SetupContainersOptions{
-						GenerationPath: tc.args.path,
-						Services:       tc.args.services,
-					}
-					if tc.setupErr {
-						mActions.EXPECT().SetupContainers(sopts).Return(errors.New(configs.SetupContainersErr)).Times(1)
-					} else {
-						mActions.EXPECT().SetupContainers(sopts).Return(nil).Times(1)
+			args := []string{"--path", generationPath}
+			args = append(args, tc.args...)
 
-						ropts := actions.RunContainersOptions{
-							GenerationPath: tc.args.path,
-							Services:       tc.args.services,
-						}
-						if tc.runErr {
-							mActions.EXPECT().RunContainers(ropts).Return(errors.New(configs.StartingContainersErr)).Times(1)
-						} else {
-							mActions.EXPECT().RunContainers(ropts).Return(nil).Times(1)
-						}
-					}
-				}
-			}
+			t.Logf("Running test with args: %v", args)
 
-			runCmd := cli.RunCmd(mActions)
+			runCmd := cli.RunCmd(mActions, depsMgr)
 			runCmd.SetArgs(args)
 			runCmd.SetOutput(io.Discard)
 			err := runCmd.Execute()
 
-			if tc.preRunErr != nil {
-				assert.ErrorContains(t, err, tc.preRunErr.Error())
-			} else if !tc.depsErr && !tc.setupErr && !tc.runErr {
+			if tc.err != "" {
+				assert.EqualError(t, err, tc.err)
+			} else {
 				assert.NoError(t, err)
-			}
-
-			if tc.depsErr {
-				assert.ErrorContains(t, err, fmt.Errorf(configs.DependencyErr, emptyErr).Error())
-			}
-			if tc.setupErr {
-				assert.ErrorContains(t, err, fmt.Errorf(configs.SetupContainersErr, emptyErr).Error())
-			}
-			if tc.runErr {
-				assert.ErrorContains(t, err, fmt.Errorf(configs.StartingContainersErr, emptyErr).Error())
 			}
 		})
 	}

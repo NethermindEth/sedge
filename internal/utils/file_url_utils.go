@@ -47,17 +47,16 @@ func HandleUrlOrPath(
 	handleUrl func(url string) error,
 	handlePath func(path string) error,
 ) error {
+	if _, err := os.Stat(src); err == nil {
+		return handlePath(src)
+	}
 	uri, err := url.ParseRequestURI(src)
 	if err != nil {
 		return fmt.Errorf(configs.InvalidFilePathOrUrl, src)
 	}
-
 	if uri.Scheme == "http" || uri.Scheme == "https" {
 		return handleUrl(src)
-	} else if _, err := os.Stat(src); err == nil {
-		return handlePath(src)
 	}
-
 	return fmt.Errorf(configs.InvalidFilePathOrUrl, src)
 }
 
@@ -146,7 +145,7 @@ func DownloadOrCopy(src, dest string, autoremove bool) error {
 	if err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf(configs.ErrorCheckingFile, dest, err)
 	} else if err == nil && !autoremove {
-		return fmt.Errorf(configs.DestFileAlreadyExist, src)
+		return fmt.Errorf(configs.DestFileAlreadyExist, dest)
 	}
 
 	destFile, err := os.Create(dest)
