@@ -3,7 +3,7 @@ id: migrate-setup
 sidebar_position: 11
 ---
 
-# Migrate from other setup
+# Migrate from another setup
 
 If you already have a setup running and want to migrate it to a new server, change the client you are using, or upgrade
 your node, you are in the right place.
@@ -37,7 +37,8 @@ If you already have keys, you can copy them to the new setup. The keys are usual
 
 Otherwise, you can use your mnemonic to generate the keys, using the same `sedge keys` command.
 
-3. Import keys, either by copying them to the new setup or using the one generated in the previous step.
+3. Import keys, either by copying them to the new setup or using the one generated in the previous step. The format of
+the keys should follow the EIP-2335 standard.
 
 ```bash
 sedge import-key
@@ -77,13 +78,14 @@ You can follow the next steps to make the migration:
 sedge generate full-node --path new-path
 ```
 
-2. You can either copy the keystore folder from your previous setup, or generate the keys again using the mnemonic
+2. You can either import the keystore folder from your previous setup, or generate the keys again using the mnemonic.
+In this case we will use the `sedge import-key` command.
 
 ```
-cp -r ./sedge-data/keystore ./new-path/keystore
+sedge import-key --from [old-keystore-dir]
 ```
 
-3. Export the slashing protection data from the previous setup
+3. Export the slashing protection data from the previous setup.
 
 ```bash
 sedge slashing-export --out slashing-data.json [validator]
@@ -91,7 +93,7 @@ sedge slashing-export --out slashing-data.json [validator]
 
 You will need to provide the validator client you are using in your previous setup, in order to export the slashing data.
 
-4. Import the slashing protection data to the new setup
+4. Import the slashing protection data to the new setup.
 
 ```bash
 sedge slashing-import --from slashing-data.json [validator]

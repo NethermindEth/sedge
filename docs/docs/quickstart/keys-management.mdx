@@ -1,6 +1,6 @@
 ---
 id: keys-management
-sidebar_position: 11
+sidebar_position: 8
 ---
 
 # Key Management
@@ -35,8 +35,8 @@ Import keys refers to the process of adding a validator's private key to a clien
 into the client software's keystore, which is a directory that stores the private keys of all validators that are
 currently active on the network.
 
-Import validator client keys, use the 'from' flag to specify the keys location,
-and make sure that follows the EIP-2335: BLS12-381 Keystore standard. This command
+Import validator client keys, use the `--from` flag to specify the keys location,
+and make sure that follows the [EIP-2335: BLS12-381 Keystore standard](https://eips.ethereum.org/EIPS/eip-2335). This command
 assumes that the validator client container exists, stopped or not.
 
 This command stops the validator client during the importing process due to the
@@ -44,7 +44,7 @@ validator database being locked while it's running but leaves the validator clie
 in the same state in which it was found. That means if the validator is running/stopped
 before the import, then the validator will be running/stopped after the command
 is executed, regardless of whether the export fails or not. To force a different
-behavior use --start-validator and --stop-validator flags.
+behavior use `--start-validator` and `--stop-validator` flags.
 
 ## Slashing protection
 
@@ -72,7 +72,7 @@ remains secure and reliable.
 
 The `sedge slashing-import [flags] [validator]` command is used to import slashing protection data from a JSON file into the validator client.
 
-The JSON file must be in the format specified by the EIP-3076: Slashing Protection Interchange Format standard.
+The JSON file must be in the format specified by the [EIP-3076: Slashing Protection Interchange Format](https://eips.ethereum.org/EIPS/eip-3076) standard.
 
 This command assumes that the validator client container exists, stopped or not and that its database
 is already initialized. The validator database is initialized if the validator is
@@ -83,7 +83,7 @@ validator database being locked while it's running but leaves the validator clie
 in the same state in which it was found. That means if the validator is running/stopped
 before the import, then the validator will be running/stopped after the command
 is executed, regardless of whether the export fails or not. To force a different
-behavior use --start-validator and --stop-validator flags.
+behavior use `--start-validator` and `--stop-validator` flags.
 
 The `[validator]` is a required argument used to specify which validator client, from
 all supported by Sedge (lighthouse, lodestar, prysm or teku), is used to import the
@@ -100,7 +100,7 @@ sedge slashing-import --from slashing-data.json --start-validator lighthouse
 ### Slashing export
 
 The `sedge slashing-export [flags] [validator]` command is used to export slashing protection data from the validator
-client into a JSON file.
+client into a JSON file, following the [EIP-3076: Slashing Protection Interchange Format](https://eips.ethereum.org/EIPS/eip-3076) standard.
 
 This command assumes
 that the validator client container exists, stopped or not and that its database
@@ -113,7 +113,7 @@ validator database being locked while it's running but leaves the validator clie
 in the same state in which it was found. That means if the validator is running/stopped
 before the export, then the validator will be running/stopped after the command
 is executed, regardless of whether the export fails or not. To force a different
-behavior use --start-validator and --stop-validator flags.
+behavior use `--start-validator` and `--stop-validator` flags.
 
 The `[validator]` is a required argument used to specify which validator client, from
 all supported by Sedge (lighthouse, lodestar, prysm or teku), is used to exporting
