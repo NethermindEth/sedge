@@ -5,9 +5,6 @@ id: complete-guide
 
 
 
-
-
-
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
@@ -41,20 +38,20 @@ First open a console in the Home directory. Then use `curl` or `wget` to downloa
 want to use another installation method:
 
 <Tabs groupId="download-cmds">
-    <TabItem value="curl" label="curl">
+  <TabItem value="curl" label="curl">
 
-        ```
-        curl -L https://github.com/NethermindEth/sedge/releases/download/0.1.2/sedge-v0.1.2-linux-amd64 --output sedge
-        ```
+  ```
+  curl -L https://github.com/NethermindEth/sedge/releases/download/0.1.2/sedge-v0.1.2-linux-amd64 --output sedge
+  ```
 
-    </TabItem>
-    <TabItem value="wget" label="wget">
+  </TabItem>
+  <TabItem value="wget" label="wget">
 
-        ```
-        wget https://github.com/NethermindEth/sedge/releases/download/0.1.2/sedge-v0.1.2-linux-amd64 -O sedge
-        ```
+  ```
+  wget https://github.com/NethermindEth/sedge/releases/download/0.1.2/sedge-v0.1.2-linux-amd64 -O sedge
+  ```
 
-    </TabItem>
+  </TabItem>
 </Tabs>
 
 
@@ -117,81 +114,6 @@ You can learn more about `sedge cli` if you check [here in our documentation](/d
 
 :::
 
-Running the `sedge cli`, you can expect something like this:
-
-```
-$ sedge cli
-2023-03-20 21:54:08 -- [INFO] [Logger Init] Log level: info
-2023-03-20 21:54:08 -- [INFO] You are running the latest version of sedge. Version:  v0.6.0
-? Select network goerli
-? Select node type full-node
-? Generation path /root/sedge-data
-? Container tag, sedge will add to each container and the network, a suffix with the tag
-? Do you want to set up a validator? Yes
-? Enable MEV Boost? Yes
-? Mev-Boost image flashbots/mev-boost:latest
-? Insert relay URLs if you don't want to use the default values listed below Default values are listed below. (
-https://0xafa4c6985aa049fb79dd37010438cfebeb0f2bd42b115b89dd678dab0670c1de38da0c4e9138c9290a398ecd9a0b3110@builder-relay-goerli.flashbots.net
-https://0x821f2a65afb70e7f2e820a925a9b4c80a159620582c1766b1b09729fec178b11ea22abb3a51f07b288be815a1a2ff516@bloxroute.max-profit.builder.goerli.blxrbdn.com
-? Insert relay URLs if you don't want to use the default values listed below Default values are listed below.
-
-https://0xafa4c6985aa049fb79dd37010438cfebeb0f2bd42b115b89dd678dab0670c1de38da0c4e9138c9290a398ecd9a0b3110@builder-relay-goerli.flashbots.net
-https://0x821f2a65afb70e7f2e820a925a9b4c80a159620582c1766b1b09729fec178b11ea22abb3a51f07b288be815a1a2ff516@bloxroute.max-profit.builder.goerli.blxrbdn.com
-https://0x8f7b17a74569b7a57e9bdafd2e159380759f5dc3ccbd4bf600414147e8c4e1dc6ebada83c0139ac15850eb6c975e82d0@builder-relay-goerli.blocknative.com
-https://0xb1d229d9c21298a87846c7022ebeef277dfc321fe674fa45312e20b5b6c400bfde9383f801848d7837ed5fc449083a12@relay-goerli.edennetwork.io
-https://0xb1559beef7b5ba3127485bbbb090362d9f497ba64e177ee2c8e7db74746306efad687f2cf8574e38d70067d40ef136dc@relay-stag.ultrasound.money
-
-? Select execution client nethermind
-? Select consensus client prysm
-? Select validator client prysm
-? Validator grace period. This is the number of epochs the validator will wait for security reasons before starting 2
-? Graffiti to be used by the validator (press enter to skip it) neth-prysm
-? Checkpoint sync URL https://goerli.checkpoint-sync.ethpandaops.io
-? Please enter the Fee Recipient address 0xEf8801eaf234ff82801821FFe2d78D60a0237F97
-? Do you want to expose all ports? No
-? Select JWT source create
-2023-03-20 21:54:51 -- [INFO] Generating JWT secret for client authentication
-2023-03-20 21:54:51 -- [INFO] JWT secret generated
-2023-03-20 21:54:51 -- [INFO] Generating docker-compose script for current selection of clients
-2023-03-20 21:54:51 -- [INFO] Generated docker-compose script for current selection of clients
-2023-03-20 21:54:51 -- [INFO] Generating environment file for current selection of clients
-2023-03-20 21:54:51 -- [INFO] Generated environment file for current selection of clients
-2023-03-20 21:54:51 -- [INFO] Cleaning generated docker-compose and environment files
-2023-03-20 21:54:51 -- [INFO] Cleaned generated files
-? Select keystore source create
-? Select mnemonic source create
-? Select passphrase source random
-? Withdrawal address 0xB26FCB9D0bf72F881dCfa9E4Eb3B23fB75Ae9A15
-? Number of validators 20
-? Existing validators. This number will be used as the initial index for the generated keystores. 3
-2023-03-20 21:55:12 -- [INFO] Generating keystores...
-2023-03-20 21:55:12 -- [INFO] Keystores generated successfully
-2023-03-20 21:55:13 -- [INFO] Importing validator keys into the validator client...
-2023-03-20 21:55:13 -- [INFO] Setting up containers
-2023-03-20 21:55:13 -- [INFO] Running command: docker compose -f /root/sedge-data/docker-compose.yml build validator
-2023-03-20 21:55:13 -- [INFO] Running command: docker compose -f /root/sedge-data/docker-compose.yml pull validator
-[+] Running 1/1
- ⠿ validator Pulled                                                                                                                                                                                                                                                                                                                                                                                                                    0.5s
-2023-03-20 21:55:13 -- [INFO] Running command: docker compose -f /root/sedge-data/docker-compose.yml create validator
-[+] Running 2/0
- ⠿ Container sedge-validator-blocker  Created                                                                                                                                                                                                                                                                                                                                                                                          0.0s
- ⠿ Container sedge-validator-client   Created                                                                                                                                                                                                                                                                                                                                                                                          0.0s
-2023-03-20 21:55:13 -- [INFO] Importing validator keys
-2023-03-20 21:55:13 -- [INFO] The keys import container is starting
-2023-03-20 21:55:17 -- [INFO] Validator keys imported successfully
-? Interchange slashing protection file path slashing_protection.json
-2023-03-20 21:55:43 -- [INFO] Importing slashing data to client prysm from /root/slashing_protection.json
-2023-03-20 21:55:43 -- [INFO] The slashing protection container is starting...
-2023-03-20 21:55:43 -- [INFO] The slashing container ends successfully.
-? Run services now? No
-2023-03-20 21:55:48 -- [INFO]
-Your setup is ready. You can run it anytime using the 'sedge run --path /root/sedge-data' command. Feel free to explore the files and make changes, although Sedge is not accountable for any misbehavior or issue caused by any modification done to the setup. Stay tuned for more updates and features!
-
-Happy Sedging!
-```
-
-It might defer according to your selection.
-
 #### 2.2. Non-interactive setup
 
 If you want to run the non-interactive mode, you will need to run only two commands, and provide the set of arguments needed for each command.
@@ -209,7 +131,7 @@ sedge keys
 :::info
 
 You can learn more about `sedge keys` if you check [here in our documentation](/docs/commands/keys), and more about
-[key management](/docs/quickstart/key-management.mdx) .
+[key management](/docs/quickstart/keys-management.mdx) .
 
 :::
 
