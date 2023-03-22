@@ -147,7 +147,7 @@ func TestImportKeys_UnsupportedClient(t *testing.T) {
 				From:            from,
 				GenerationPath:  generationPath,
 			})
-			assert.ErrorIs(t, err, actions.UnsupportedValidatorClientError)
+			assert.ErrorIs(t, err, actions.ErrUnsupportedValidatorClient)
 		})
 	}
 }
@@ -262,7 +262,7 @@ func TestImportKeys_UnexpectedExitCode(t *testing.T) {
 		From:            from,
 		GenerationPath:  generationPath,
 	})
-	assert.ErrorIs(t, err, actions.ValidatorImportCtBadExitCodeError)
+	assert.ErrorIs(t, err, actions.ErrValidatorImportCtBadExitCode)
 }
 
 //go:embed testdata/keystore
@@ -317,7 +317,10 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
-			{ID: validatorCtId},
+			{
+				ID:    validatorCtId,
+				Names: []string{"name-0", "/" + services.DefaultSedgeValidatorClient, "name-2"},
+			},
 		}, nil)
 	// Mock ContainerInspect
 	inspectCall := dockerClient.EXPECT().
@@ -359,8 +362,13 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 		StatusCode: 0,
 	}
 	dockerClient.EXPECT().
-		ContainerWait(gomock.Any(), services.ServiceCtValidatorImport, container.WaitConditionNextExit).
+		ContainerWait(gomock.Any(), validatorImportCtId, container.WaitConditionNextExit).
 		Return(exitCh, make(chan error)).
+		Times(1)
+	// Mock container logs
+	dockerClient.EXPECT().
+		ContainerLogs(gomock.Any(), validatorImportCtId, gomock.Any()).
+		Return(ioutil.NopCloser(strings.NewReader("logs")), nil).
 		Times(1)
 	// Mock ContainerRemove
 	dockerClient.EXPECT().
@@ -385,7 +393,10 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
-			{ID: validatorCtId},
+			{
+				ID:    validatorCtId,
+				Names: []string{"/" + services.DefaultSedgeValidatorClient},
+			},
 		}, nil)
 	// Mock ContainerInspect
 	dockerClient.EXPECT().
@@ -423,13 +434,18 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 		StatusCode: 1,
 	}
 	dockerClient.EXPECT().
-		ContainerWait(gomock.Any(), services.ServiceCtValidatorImport, container.WaitConditionNextExit).
+		ContainerWait(gomock.Any(), validatorImportCtId, container.WaitConditionNextExit).
 		Return(exitCh, make(chan error)).
 		Times(1)
 	// Mock container logs
 	dockerClient.EXPECT().
 		ContainerLogs(gomock.Any(), validatorImportCtId, gomock.Any()).
 		Return(ioutil.NopCloser(strings.NewReader("logs")), nil).
+		Times(1)
+	// Mock ContainerRemove
+	dockerClient.EXPECT().
+		ContainerRemove(gomock.Any(), validatorImportCtId, types.ContainerRemoveOptions{}).
+		Return(nil).
 		Times(1)
 
 	return dockerClient

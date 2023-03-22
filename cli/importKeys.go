@@ -5,11 +5,12 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-func ImportKeysCmd(sedgeActions actions.SedgeActions) *cobra.Command {
+func ImportKeysCmd(sedgeActions actions.SedgeActions, depsMgr dependencies.DependenciesManager) *cobra.Command {
 	// Flags
 	var (
 		validatorClient   string
@@ -48,10 +49,15 @@ the importation.`,
 			}
 			return nil
 		},
-		PreRun: func(cmd *cobra.Command, args []string) {
+		PreRunE: func(cmd *cobra.Command, args []string) error {
 			validatorClient = args[0]
+			if err := checkDependencies(depsMgr, true, dependencies.Docker); err != nil {
+				log.Error("Failed to check dependencies. Run 'sedge deps check' to check dependencies")
+				return err
+			}
+			return sedgeActions.ValidateDockerComposeFile(filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
 		},
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			options := actions.ImportValidatorKeysOptions{
 				ValidatorClient: validatorClient,
 				Network:         network,
@@ -59,16 +65,21 @@ the importation.`,
 				StartValidator:  startValidator,
 				From:            from,
 				GenerationPath:  generationPath,
+				ContainerTag:    containerTag,
 				CustomConfig: actions.ImportValidatorKeysCustomOptions{
 					NetworkConfigPath: customConfigPath,
 					GenesisPath:       customGenesisPath,
 					DeployBlockPath:   customDeployBlock,
 				},
 			}
-			err := sedgeActions.ImportValidatorKeys(options)
+			err := sedgeActions.SetupContainers(actions.SetupContainersOptions{
+				GenerationPath: generationPath,
+				Services:       []string{validator},
+			})
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
+			return sedgeActions.ImportValidatorKeys(options)
 		},
 	}
 
@@ -77,6 +88,7 @@ the importation.`,
 	cmd.Flags().BoolVar(&startValidator, "start-validator", false, "starts the validator client after import, regardless of the state the validator was in before")
 	cmd.Flags().BoolVar(&stopValidator, "stop-validator", false, "stops the validator client after import, regardless of the state the validator was in before")
 	cmd.Flags().StringVar(&from, "from", filepath.Join(configs.DefaultAbsSedgeDataPath, "keystore"), "path to the validator keys, must follow the EIP-2335: BLS12-381 Keystore standard")
+	cmd.PersistentFlags().StringVar(&containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.")
 	cmd.Flags().StringVar(&customConfigPath, "custom-config", "", "file path or url to use as custom network config.")
 	cmd.Flags().StringVar(&customGenesisPath, "custom-genesis", "", "file path or url to use as custom network genesis.")
 	cmd.Flags().StringVar(&customDeployBlock, "custom-deploy-block", "", "custom network deploy block.")

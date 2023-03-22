@@ -6,14 +6,14 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 )
 
-func TestBootNodes_Uniqueness(t *testing.T) {
-	bootNodesSet := make(map[string]struct{})
+func TestENRs_Uniqueness(t *testing.T) {
+	enrSet := make(map[string]struct{})
 	for _, network := range configs.NetworksConfigs() {
-		for _, bootNode := range network.DefaultCCBootnodes {
-			if _, ok := bootNodesSet[bootNode]; ok {
-				t.Errorf("Boot node %s is duplicated", bootNode)
+		for _, enr := range network.DefaultCCBootnodes {
+			if _, ok := enrSet[enr]; ok {
+				t.Errorf("ENR '%s' is duplicated", enr)
 			} else {
-				bootNodesSet[bootNode] = struct{}{}
+				enrSet[enr] = struct{}{}
 			}
 		}
 	}

@@ -21,18 +21,18 @@ import (
 )
 
 var (
-	UnsupportedValidatorClientError   = errors.New("unsupported validator client")
-	CreatingContextDirError           = errors.New("error creating context dir")
-	ValidatorImportCtBadExitCodeError = errors.New("validator import container exited with non-zero exit code")
-	UnknownLodestarPresetError        = errors.New("unknown lodestar preset")
-	NetworkNotFoundError              = errors.New("network not found")
+	ErrUnsupportedValidatorClient   = errors.New("unsupported validator client")
+	ErrCreatingContextDir           = errors.New("error creating context dir")
+	ErrValidatorImportCtBadExitCode = errors.New("validator import container exited with non-zero exit code")
+	ErrUnknownLodestarPreset        = errors.New("unknown lodestar preset")
+	ErrNetworkNotFound              = errors.New("network not found")
 )
 
 func newValidatorImportCtBadExitCodeError(ctId string, exitCode int64, logs string) error {
 	return fmt.Errorf(`%w: validator-import service container with id %s ends with status code %d. Here are the logs for more details:
-%s`, ValidatorImportCtBadExitCodeError, ctId, exitCode, logs)
+%s`, ErrValidatorImportCtBadExitCode, ctId, exitCode, logs)
 }
 
 func newUnknownLodestarPresetError(network string) error {
-	return fmt.Errorf("%w for network %s", UnknownLodestarPresetError, network)
+	return fmt.Errorf("%w for network %s", ErrUnknownLodestarPreset, network)
 }

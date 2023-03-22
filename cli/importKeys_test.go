@@ -16,17 +16,23 @@ limitations under the License.
 package cli
 
 import (
+	"io"
 	"path/filepath"
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestImportKeys_NumberOfArguments(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
 	tests := []struct {
 		name string
 		args []string
@@ -42,7 +48,7 @@ func TestImportKeys_NumberOfArguments(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := ImportKeysCmd(nil)
+			cmd := ImportKeysCmd(nil, nil)
 			cmd.SetArgs(tt.args)
 			err := cmd.Execute()
 			assert.ErrorIs(t, err, ErrInvalidNumberOfArguments)
@@ -51,14 +57,22 @@ func TestImportKeys_NumberOfArguments(t *testing.T) {
 }
 
 func TestImportKeys_ArgsAndFlags(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
 	tests := []struct {
-		name            string
-		args            []string
-		expectedOptions actions.ImportValidatorKeysOptions
+		name              string
+		args              []string
+		expectedSetupOpts actions.SetupContainersOptions
+		expectedOptions   actions.ImportValidatorKeysOptions
 	}{
 		{
 			name: "no flags",
 			args: []string{"lighthouse"},
+			expectedSetupOpts: actions.SetupContainersOptions{
+				GenerationPath: configs.DefaultAbsSedgeDataPath,
+				Services:       []string{validator},
+			},
 			expectedOptions: actions.ImportValidatorKeysOptions{
 				ValidatorClient: "lighthouse",
 				Network:         "mainnet",
@@ -74,6 +88,10 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 				"--from", "/tmp/keystore",
 				"--path", "/tmp/sedge",
 				"--start-validator",
+			},
+			expectedSetupOpts: actions.SetupContainersOptions{
+				GenerationPath: "/tmp/sedge",
+				Services:       []string{validator},
 			},
 			expectedOptions: actions.ImportValidatorKeysOptions{
 				ValidatorClient: "prysm",
@@ -92,6 +110,10 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 				"-p", "/tmp/sedge",
 				"--stop-validator",
 			},
+			expectedSetupOpts: actions.SetupContainersOptions{
+				GenerationPath: "/tmp/sedge",
+				Services:       []string{validator},
+			},
 			expectedOptions: actions.ImportValidatorKeysOptions{
 				ValidatorClient: "teku",
 				Network:         "goerli",
@@ -107,12 +129,18 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 				"--custom-config", "/tmp/config",
 				"--custom-genesis", "/tmp/genesis",
 				"--custom-deploy-block", "custom-deploy-block",
+				"--container-tag", "test-tag",
+			},
+			expectedSetupOpts: actions.SetupContainersOptions{
+				GenerationPath: configs.DefaultAbsSedgeDataPath,
+				Services:       []string{validator},
 			},
 			expectedOptions: actions.ImportValidatorKeysOptions{
 				ValidatorClient: "lighthouse",
 				Network:         "mainnet",
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
 				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "keystore"),
+				ContainerTag:    "test-tag",
 				CustomConfig: actions.ImportValidatorKeysCustomOptions{
 					NetworkConfigPath: "/tmp/config",
 					GenesisPath:       "/tmp/genesis",
@@ -124,10 +152,18 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			actions := sedge_mocks.NewMockSedgeActions(gomock.NewController(t))
+			depsMgr := sedge_mocks.NewMockDependenciesManager(gomock.NewController(t))
 
-			actions.EXPECT().ImportValidatorKeys(tt.expectedOptions).Times(1)
+			gomock.InOrder(
+				depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil).Times(1),
+				depsMgr.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+				depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+				actions.EXPECT().ValidateDockerComposeFile(filepath.Join(tt.expectedSetupOpts.GenerationPath, "docker-compose.yml")).Return(nil).Times(1),
+				actions.EXPECT().SetupContainers(tt.expectedSetupOpts).Times(1),
+				actions.EXPECT().ImportValidatorKeys(tt.expectedOptions).Times(1),
+			)
 
-			cmd := ImportKeysCmd(actions)
+			cmd := ImportKeysCmd(actions, depsMgr)
 			cmd.SetArgs(tt.args)
 			err := cmd.Execute()
 			assert.NoError(t, err)

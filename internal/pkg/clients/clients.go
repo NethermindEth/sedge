@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/templates"
 	log "github.com/sirupsen/logrus"
 )
@@ -49,10 +50,19 @@ func (c ClientInfo) SupportedClients(clientType string) (clientsNames []string, 
 		return
 	}
 
+	supported := make([]string, 0)
 	for _, file := range files {
-		clientsNames = append(clientsNames, strings.TrimSuffix(file.Name(), ".tmpl"))
+		name := strings.TrimSuffix(file.Name(), ".tmpl")
+		supported = append(supported, name)
 	}
 
+	clientsNames = make([]string, len(AllClients[clientType]))
+	copy(clientsNames, AllClients[clientType])
+	for _, name := range clientsNames {
+		if !utils.Contains(supported, name) {
+			clientsNames = utils.Filter(clientsNames, func(c string) bool { return c != name })
+		}
+	}
 	return clientsNames, nil
 }
 

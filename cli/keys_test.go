@@ -23,10 +23,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NethermindEth/sedge/cli/prompts"
-	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
+	"github.com/NethermindEth/sedge/internal/ui"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
 	"github.com/golang/mock/gomock"
@@ -42,7 +41,7 @@ type keysCmdTestCase struct {
 	existingVal    int64
 	numVal         int64
 	runner         commands.CommandRunner
-	prompt         prompts.Prompt
+	prompt         ui.Prompter
 	fdOut          *bytes.Buffer
 	isErr          bool
 }
@@ -83,7 +82,7 @@ func buildKeysTestCase(t *testing.T, caseName, caseDataPath, caseNetwork string,
 	tc.existingVal = existing
 	tc.numVal = num
 	tc.runner = &test.SimpleCMDRunner{} // TODO: mock this
-	tc.prompt = prompts.NewPromptCli()
+	tc.prompt = ui.NewPrompter()
 	tc.fdOut = new(bytes.Buffer)
 	tc.isErr = isErr
 	return &tc
@@ -93,7 +92,6 @@ func TestKeysCmd(t *testing.T) {
 	// TODO: allow to test error programs
 	// Silence logger
 	log.SetOutput(io.Discard)
-	configs.InitNetworksConfigs()
 	tcs := []keysCmdTestCase{
 		*buildKeysTestCase(t, "Mainnet", "case_1", "mainnet", 0, 1, false),
 		*buildKeysTestCase(t, "Bigger number", "case_1", "sepolia", 0, 100, false),
@@ -133,12 +131,12 @@ func TestKeysCmd_RandomPassphrase(t *testing.T) {
 
 	t.Run("no passphrase prompt when random-passphrase flag is used", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		prompt := sedge_mocks.NewMockPrompt(ctrl)
+		prompt := sedge_mocks.NewMockPrompter(ctrl)
 		defer ctrl.Finish()
 
 		prompt.
 			EXPECT().
-			Passphrase().
+			InputSecret(gomock.Any()).
 			Times(0)
 
 		rootCmd := RootCmd()

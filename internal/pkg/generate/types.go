@@ -15,7 +15,9 @@ limitations under the License.
 */
 package generate
 
-import "github.com/NethermindEth/sedge/internal/pkg/clients"
+import (
+	"github.com/NethermindEth/sedge/internal/pkg/clients"
+)
 
 // EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
 type EnvData struct {
@@ -38,6 +40,7 @@ type EnvData struct {
 	KeystoreDir               string
 	Graffiti                  string
 	RelayURLs                 string
+	CheckpointSyncUrl         string
 }
 
 // GenData : Struct Data object for script's generation
@@ -230,7 +233,7 @@ type ConfigConsensus struct {
 }
 type Services struct {
 	Execution        *Execution        `yaml:"execution,omitempty"`
-	Mevboost         *Mevboost         `yaml:"mevboost,omitempty"`
+	Mevboost         *Mevboost         `yaml:"mev-boost,omitempty"`
 	Consensus        *Consensus        `yaml:"consensus,omitempty"`
 	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker,omitempty"`
 	Validator        *Validator        `yaml:"validator,omitempty"`

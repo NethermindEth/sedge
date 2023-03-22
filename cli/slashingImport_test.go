@@ -18,12 +18,14 @@ package cli_test
 import (
 	"errors"
 	"io"
+	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
@@ -51,13 +53,16 @@ func TestSlashingImport_ValidatorIsRequired(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {})
-
-		slashingImportCmd := cli.SlashingImportCmd(nil)
-		slashingImportCmd.SetArgs(tt.args)
-		slashingImportCmd.SetOutput(io.Discard)
-		err := slashingImportCmd.Execute()
-		assert.ErrorIs(t, err, tt.expectedErr)
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
+			slashingImportCmd := cli.SlashingImportCmd(nil, depsMgr)
+			slashingImportCmd.SetArgs(tt.args)
+			slashingImportCmd.SetOutput(io.Discard)
+			err := slashingImportCmd.Execute()
+			assert.ErrorIs(t, err, tt.expectedErr)
+		})
 	}
 }
 
@@ -69,6 +74,8 @@ func TestSlashingImport_Params(t *testing.T) {
 		name          string
 		args          []string
 		actionOptions actions.SlashingImportOptions
+		customDir     bool
+		from          bool
 	}{
 		{
 			name: "validator argument",
@@ -79,7 +86,7 @@ func TestSlashingImport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing-export.json"),
+				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
@@ -91,7 +98,7 @@ func TestSlashingImport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing-export.json"),
+				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
@@ -103,7 +110,7 @@ func TestSlashingImport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing-export.json"),
+				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
@@ -115,7 +122,7 @@ func TestSlashingImport_Params(t *testing.T) {
 				StopValidator:   true,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing-export.json"),
+				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
@@ -127,67 +134,96 @@ func TestSlashingImport_Params(t *testing.T) {
 				StopValidator:   false,
 				StartValidator:  true,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing-export.json"),
+				From:            filepath.Join(configs.DefaultAbsSedgeDataPath, "slashing_protection.json"),
 			},
 		},
 		{
 			name: "path flag",
-			args: []string{"teku", "--path", filepath.Join("custom", "dir")},
+			args: []string{"teku"},
 			actionOptions: actions.SlashingImportOptions{
 				ValidatorClient: "teku",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
-				GenerationPath:  filepath.Join("custom", "dir"),
-				From:            filepath.Join("custom", "dir", "slashing-export.json"),
 			},
+			customDir: true,
 		},
 		{
 			name: "path shorthand flag",
-			args: []string{"teku", "-p", filepath.Join("custom", "dir")},
+			args: []string{"teku"},
 			actionOptions: actions.SlashingImportOptions{
 				ValidatorClient: "teku",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
-				GenerationPath:  filepath.Join("custom", "dir"),
-				From:            filepath.Join("custom", "dir", "slashing-export.json"),
 			},
+			customDir: true,
 		},
 		{
 			name: "from flag",
-			args: []string{"lodestar", "--from", filepath.Join("custom", "from", "file.json")},
+			args: []string{"lodestar"},
 			actionOptions: actions.SlashingImportOptions{
 				ValidatorClient: "lodestar",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join("custom", "from", "file.json"),
 			},
+			from: true,
 		},
 		{
 			name: "from shorthand flag",
-			args: []string{"lodestar", "-f", filepath.Join("custom", "from", "file.json")},
+			args: []string{"lodestar"},
 			actionOptions: actions.SlashingImportOptions{
 				ValidatorClient: "lodestar",
 				Network:         "mainnet",
 				StopValidator:   false,
 				StartValidator:  false,
 				GenerationPath:  configs.DefaultAbsSedgeDataPath,
-				From:            filepath.Join("custom", "from", "file.json"),
 			},
+			from: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Setup
+			if tt.customDir {
+				customDir := t.TempDir()
+				tt.actionOptions.GenerationPath = customDir
+				tt.actionOptions.From = filepath.Join(customDir, "slashing_protection.json")
+				tt.args = append(tt.args, "--path", customDir)
+			}
+			if tt.from {
+				from := t.TempDir()
+				var file *os.File
+				var err error
+
+				if file, err = os.Create(filepath.Join(from, "slashing_protection.json")); err != nil {
+					t.Fatal(err)
+				}
+				defer file.Close()
+				tt.actionOptions.From = filepath.Join(from, "slashing_protection.json")
+				tt.args = append(tt.args, "--from", filepath.Join(from, "slashing_protection.json"))
+			}
+
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			actions := sedge_mocks.NewMockSedgeActions(ctrl)
-			actions.EXPECT().ImportSlashingInterchangeData(tt.actionOptions).Times(1)
+			mockActions := sedge_mocks.NewMockSedgeActions(ctrl)
+			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
+			gomock.InOrder(
+				depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker, dependencies.DockerCompose}, nil).Times(1),
+				depsMgr.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+				depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+				mockActions.EXPECT().ValidateDockerComposeFile(filepath.Join(tt.actionOptions.GenerationPath, "docker-compose.yml")).Return(nil).Times(1),
+				mockActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
+					GenerationPath: tt.actionOptions.GenerationPath,
+					Services:       []string{"validator"},
+				}).Return(nil).Times(1),
+				mockActions.EXPECT().ImportSlashingInterchangeData(tt.actionOptions).Times(1),
+			)
 
-			slashingImportCmd := cli.SlashingImportCmd(actions)
+			slashingImportCmd := cli.SlashingImportCmd(mockActions, depsMgr)
 			slashingImportCmd.SetArgs(tt.args)
 			slashingImportCmd.SetOutput(io.Discard)
 			err := slashingImportCmd.Execute()
@@ -224,12 +260,24 @@ func TestSlashingImport_Errors(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			actions := sedge_mocks.NewMockSedgeActions(ctrl)
+			mockActions := sedge_mocks.NewMockSedgeActions(ctrl)
+			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
+
 			if tt.run {
-				actions.EXPECT().ImportSlashingInterchangeData(gomock.Any()).Return(errors.New("action error")).Times(1)
+				gomock.InOrder(
+					depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker, dependencies.DockerCompose}, nil).Times(1),
+					depsMgr.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+					mockActions.EXPECT().ValidateDockerComposeFile(filepath.Join(configs.DefaultAbsSedgeDataPath, configs.DefaultDockerComposeScriptName)).Return(nil).Times(1),
+					mockActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
+						GenerationPath: configs.DefaultAbsSedgeDataPath,
+						Services:       []string{"validator"},
+					}).Return(nil).Times(1),
+					mockActions.EXPECT().ImportSlashingInterchangeData(gomock.Any()).Return(errors.New("action error")).Times(1),
+				)
 			}
 
-			slashingImportCmd := cli.SlashingImportCmd(actions)
+			slashingImportCmd := cli.SlashingImportCmd(mockActions, depsMgr)
 			slashingImportCmd.SetArgs(tt.args)
 			slashingImportCmd.SetOutput(io.Discard)
 			err := slashingImportCmd.Execute()

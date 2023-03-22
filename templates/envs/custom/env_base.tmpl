@@ -2,6 +2,8 @@
 {{ define "env" }}
 # --- Global configuration ---
 NETWORK=custom
+{{if .FeeRecipient}}
+FEE_RECIPIENT={{.FeeRecipient}}{{end}}
 {{template "execution" .}}
 {{template "consensus" .}}
 {{template "validator" .}}

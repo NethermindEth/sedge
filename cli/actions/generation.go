@@ -25,29 +25,44 @@ import (
 )
 
 type GenerateOptions struct {
-	GenerationData *generate.GenData
+	GenerationData generate.GenData
 	GenerationPath string
 }
 
-func (s *sedgeActions) Generate(options GenerateOptions) error {
+func (s *sedgeActions) Generate(options GenerateOptions) (generate.GenData, error) {
 	// Create scripts directory if not exists
 	if _, err := os.Stat(options.GenerationPath); os.IsNotExist(err) {
 		err = os.MkdirAll(options.GenerationPath, 0o755)
 		if err != nil {
-			return err
+			return options.GenerationData, err
 		}
 	}
+
+	// Setup custom configs files if needed
+	customConfigsPaths, err := generate.CustomNetworkConfigs(options.GenerationPath, options.GenerationData.Network, generate.CustomConfigsSources{
+		ChainSpecSrc:     options.GenerationData.CustomChainSpecPath,
+		NetworkConfigSrc: options.GenerationData.CustomNetworkConfigPath,
+		GenesisSrc:       options.GenerationData.CustomGenesisPath,
+		DeployBlockSrc:   options.GenerationData.CustomDeployBlockPath,
+	})
+	if err != nil {
+		return options.GenerationData, err
+	}
+	options.GenerationData.CustomChainSpecPath = customConfigsPaths.ChainSpecPath
+	options.GenerationData.CustomNetworkConfigPath = customConfigsPaths.NetworkConfigPath
+	options.GenerationData.CustomGenesisPath = customConfigsPaths.GenesisPath
+	options.GenerationData.CustomDeployBlockPath = customConfigsPaths.DeployBlockPath
 
 	log.Info(configs.GeneratingDockerComposeScript)
 	// open output file
 	out, err := os.Create(filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName))
 	if err != nil {
-		return err
+		return options.GenerationData, err
 	}
 	defer out.Close()
-	err = generate.ComposeFile(options.GenerationData, out)
+	err = generate.ComposeFile(&options.GenerationData, out)
 	if err != nil {
-		return err
+		return options.GenerationData, err
 	}
 	log.Info(configs.GeneratedDockerComposeScript)
 
@@ -55,21 +70,21 @@ func (s *sedgeActions) Generate(options GenerateOptions) error {
 	// open output file
 	outEnv, err := os.Create(filepath.Join(options.GenerationPath, configs.DefaultEnvFileName))
 	if err != nil {
-		return err
+		return options.GenerationData, err
 	}
 	defer outEnv.Close()
-	err = generate.EnvFile(options.GenerationData, outEnv)
+	err = generate.EnvFile(&options.GenerationData, outEnv)
 	if err != nil {
-		return err
+		return options.GenerationData, err
 	}
 	log.Info(configs.GeneratedEnvFile)
 
 	log.Info(configs.CleaningGeneratedFiles)
 	err = generate.CleanGenerated(options.GenerationPath)
 	if err != nil {
-		return err
+		return options.GenerationData, err
 	}
 	log.Info(configs.CleanedGeneratedFiles)
 
-	return nil
+	return options.GenerationData, nil
 }

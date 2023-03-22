@@ -16,11 +16,15 @@ limitations under the License.
 package cli
 
 import (
+	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
+
+	"github.com/NethermindEth/sedge/internal/crypto"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
@@ -39,6 +43,18 @@ var (
 	logging        string
 	containerTag   string
 )
+
+const (
+	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mev-boost"
+)
+
+type CustomFlags struct {
+	customTTD           string
+	customChainSpec     string
+	customNetworkConfig string
+	customGenesis       string
+	customDeployBlock   string
+}
 
 // GenCmdFlags is a struct that holds the flags of the generate command
 type GenCmdFlags struct {
@@ -94,7 +110,7 @@ You can generate:
 	cmd.AddCommand(ValidatorSubCmd(sedgeAction))
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
 
-	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultSedgeDataFolderName, "generation path for sedge data. Default is sedge-data")
+	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
 	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, etc.")
 	cmd.PersistentFlags().StringVar(&logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
 	cmd.PersistentFlags().StringVar(&containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.")
@@ -195,6 +211,11 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 		}
 	}
 
+	// Validate Graffiti flag
+	if len(flags.graffiti) > 16 {
+		return fmt.Errorf(configs.ErrGraffitiLength, flags.graffiti, len(flags.graffiti))
+	}
+
 	return nil
 }
 
@@ -224,19 +245,21 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	}
 
 	// Generate jwt secrets if needed
-	if flags.jwtPath, err = generateJWTSecret(flags.jwtPath); err != nil {
-		return err
+	if flags.jwtPath == "" {
+		flags.jwtPath, err = handleJWTSecret(generationPath)
+		if err != nil {
+			return err
+		}
+	} else {
+		flags.jwtPath, err = loadJWTSecret(flags.jwtPath)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Warning if no fee recipient is set
 	if flags.feeRecipient == "" {
 		log.Warn(configs.EmptyFeeRecipientError)
-	}
-
-	// Get custom networks configs
-	customNetworkConfigsData, err := LoadCustomNetworksConfig(&flags.CustomFlags, network, generationPath)
-	if err != nil {
-		return err
 	}
 
 	vlStartGracePeriod := configs.NetworkEpochTime(network) * time.Duration(flags.waitEpoch)
@@ -270,16 +293,16 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ECBootnodes:             flags.customEnodes,
 		CCBootnodes:             flags.customEnrs,
 		CustomTTD:               flags.customTTD,
-		CustomChainSpecPath:     customNetworkConfigsData.ChainSpecPath,
-		CustomNetworkConfigPath: customNetworkConfigsData.NetworkConfigPath,
-		CustomGenesisPath:       customNetworkConfigsData.NetworkGenesisPath,
+		CustomChainSpecPath:     flags.CustomFlags.customChainSpec,
+		CustomNetworkConfigPath: flags.CustomFlags.customNetworkConfig,
+		CustomGenesisPath:       flags.CustomFlags.customGenesis,
 		CustomDeployBlock:       flags.customDeployBlock,
-		CustomDeployBlockPath:   customNetworkConfigsData.NetworkDeployBlockPath,
+		CustomDeployBlockPath:   flags.CustomFlags.customDeployBlock,
 		MevBoostOnValidator:     flags.mevBoostOnVal,
 		ContainerTag:            containerTag,
 	}
-	err = sedgeAction.Generate(actions.GenerateOptions{
-		GenerationData: &gd,
+	_, err = sedgeAction.Generate(actions.GenerateOptions{
+		GenerationData: gd,
 		GenerationPath: generationPath,
 	})
 	if err != nil {
@@ -303,6 +326,90 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	return nil
 }
 
+func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
+	var executionClient, consensusClient, validatorClient *clients.Client
+	var err error
+
+	// execution client
+	if utils.Contains(services, execution) {
+		executionParts := strings.Split(flags.executionName, ":")
+		executionClient, err = clients.RandomChoice(allClients[execution])
+		if err != nil {
+			return nil, err
+		}
+		if flags.executionName != "" {
+			executionClient.Name = executionParts[0]
+			if len(executionParts) > 1 {
+				log.Warn(configs.CustomExecutionImagesWarning)
+				executionClient.Image = strings.Join(executionParts[1:], ":")
+			}
+		}
+		executionClient.SetImageOrDefault(strings.Join(executionParts[1:], ":"))
+		// Patch Geth image if network needs TTD to be set
+		if executionClient.Name == "geth" && network != "mainnet" {
+			executionClient.Image = "ethereum/client-go:v1.10.26"
+		}
+		// Patch Erigon image if network needs TTD to be set
+		if executionClient.Name == "erigon" && network != "mainnet" {
+			executionClient.Image = "thorax/erigon:v2.29.0"
+		}
+		if err = clients.ValidateClient(executionClient, execution); err != nil {
+			return nil, err
+		}
+	} else {
+		executionClient = nil
+	}
+	// consensus client
+	if utils.Contains(services, consensus) {
+		consensusParts := strings.Split(flags.consensusName, ":")
+		consensusClient, err = clients.RandomChoice(allClients[consensus])
+		if err != nil {
+			return nil, err
+		}
+		if flags.consensusName != "" {
+			consensusClient.Name = consensusParts[0]
+			if len(consensusParts) > 1 {
+				log.Warn(configs.CustomConsensusImagesWarning)
+				consensusClient.Image = strings.Join(consensusParts[1:], ":")
+			}
+		}
+		consensusClient.SetImageOrDefault(strings.Join(consensusParts[1:], ":"))
+		if err = clients.ValidateClient(consensusClient, consensus); err != nil {
+			return nil, err
+		}
+	} else {
+		consensusClient = nil
+	}
+	// validator client
+	if utils.Contains(services, validator) && !flags.noValidator {
+		validatorParts := strings.Split(flags.validatorName, ":")
+		validatorClient, err = clients.RandomChoice(allClients[validator])
+		if err != nil {
+			return nil, err
+		}
+		if flags.validatorName != "" {
+			validatorClient.Name = validatorParts[0]
+			if len(validatorParts) > 1 {
+				log.Warn(configs.CustomValidatorImagesWarning)
+				validatorClient.Image = strings.Join(validatorParts[1:], ":")
+
+			}
+		}
+		validatorClient.SetImageOrDefault(strings.Join(validatorParts[1:], ":"))
+		if err = clients.ValidateClient(validatorClient, validator); err != nil {
+			return nil, err
+		}
+	} else {
+		validatorClient = nil
+	}
+
+	return &clients.Clients{
+		Execution: executionClient,
+		Consensus: consensusClient,
+		Validator: validatorClient,
+	}, err
+}
+
 func onlyClients(services []string) []string {
 	newServices := make([]string, 0)
 	for _, service := range services {
@@ -324,20 +431,57 @@ func initGenPath(path string) error {
 	return nil
 }
 
-func generateJWTSecret(jwtPath string) (string, error) {
-	// Generate JWT secret if necessary
-	var err error
-	if jwtPath == "" && configs.NetworksConfigs()[network].RequireJWT {
-		if jwtPath, err = handleJWTSecret(generationPath); err != nil {
-			return jwtPath, err
-		}
-	} else if filepath.IsAbs(jwtPath) { // Ensure jwtPath is absolute
-		if f, err := os.Stat(jwtPath); os.IsNotExist(err) || !f.Mode().IsRegular() {
-			return jwtPath, fmt.Errorf(configs.InvalidJWTSecret, jwtPath)
-		}
-		if jwtPath, err = filepath.Abs(jwtPath); err != nil {
-			return jwtPath, err
-		}
+func handleJWTSecret(generationPath string) (string, error) {
+	log.Info(configs.GeneratingJWTSecret)
+	if !filepath.IsAbs(generationPath) {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, fmt.Errorf("generation path must be absolute"))
 	}
+
+	jwtSecret, err := crypto.GenerateJWTSecret()
+	if err != nil {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	jwtPath, err := filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+	if err != nil {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(jwtPath), 0o755); err != nil {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	err = os.WriteFile(jwtPath, []byte(jwtSecret), 0o755)
+	if err != nil {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	log.Info(configs.JWTSecretGenerated)
 	return jwtPath, nil
+}
+
+// TODO: Add unit tests
+func loadJWTSecret(from string) (absFrom string, err error) {
+	// Ensure from is absolute
+	absFrom, err = filepath.Abs(from)
+	if err != nil {
+		return
+	}
+	// Check if file exists
+	if f, err := os.Stat(absFrom); os.IsNotExist(err) || !f.Mode().IsRegular() {
+		return "", fmt.Errorf("jwt secret file does not exist")
+	}
+	// Validate hex string
+	jwtSecret, err := os.ReadFile(absFrom)
+	if err != nil {
+		return "", fmt.Errorf("could not read jwt secret file")
+	}
+	decodedJWT, err := hex.DecodeString(string(jwtSecret))
+	if err != nil {
+		return "", fmt.Errorf("jwt secret is not a valid hex string")
+	}
+	if len(decodedJWT) != 32 {
+		return "", fmt.Errorf("jwt secret must be 32 bytes long")
+	}
+	return
 }

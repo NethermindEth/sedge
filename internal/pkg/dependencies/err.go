@@ -13,6 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package prompts
+package dependencies
 
-//go:generate mockgen -package=sedge_mocks -destination=../../mocks/prompt.go github.com/NethermindEth/sedge/cli/prompts Prompt
+import "errors"
+
+var (
+	ErrDependencyNotInstalled   = errors.New("dependency not installed")
+	ErrUnsupportedDependency    = errors.New("unsupported dependency")
+	ErrUnsupportedInstallForOS  = errors.New("unsupported installation for OS")
+	ErrDockerEngineIsNotRunning = errors.New("docker engine is not running")
+)

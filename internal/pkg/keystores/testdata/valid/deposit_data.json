@@ -1,0 +1,67 @@
+[
+    {
+        "account": "m/12381/3600/0/0/0",
+        "amount": 32000000000,
+        "deposit_cli_version": "2.3.0",
+        "deposit_data_root": "02944d1a6b15be8340946236445bcd7e28e437be7a03f7728a54e97ba2c71049",
+        "deposit_message_root": "2796637abc6bb201f275ba3705d866fe59201d003019a39fbc0ebd357a30b9e7",
+        "fork_version": "00000000",
+        "network_name": "mainnet",
+        "pubkey": "aa7ac0da6df78b5c6a331c55189ef0b43402ed117e29b544e9df79dfe95ed7c581d6becfd87c013de5a0fbed7c3fcc62",
+        "signature": "808a0c631fde069560f2ce06b266bc92c033dd4beeee0ab648f58ea4c00ba83ba48b1c80f6267996108e6ee87bf1172016430fcb35f3af510f8dc86f92fe38c19749e6cd5ea9640d5a92f76896974930d356cdb59990f9882bd64bbf52089ea6",
+        "version": 1,
+        "withdrawal_credentials": "004b79650a5850b6bf7c09b479966e13da5efe98871940e9becaaa907f9ff54a"
+    },
+    {
+        "account": "m/12381/3600/1/0/0",
+        "amount": 32000000000,
+        "deposit_cli_version": "2.3.0",
+        "deposit_data_root": "213ad342a147018ae3ca86970d2caa756ffddad1437561aad85dee293a5e8f1e",
+        "deposit_message_root": "64487de8cab51f3a3395c47249cbe6b92fe916b51aff9deab46c65eea0b57093",
+        "fork_version": "00000000",
+        "network_name": "mainnet",
+        "pubkey": "974cc6972660aad3c15918099560a984fd637282a2b1d03760dbc856a32e380f11c18812096a6669b81eae477d400ba0",
+        "signature": "98ce815314faed513eef70573870b8e3eb87f4cfb676838bc60d298df7d820bdb70d094e32f2c318aba608a5ba352bbc0913babbabd7a526df8b53c667212dca94cc09a67bedbaa063ea4019e95d42fa7b750e8127e8b78b1c29310d1b00ecce",
+        "version": 1,
+        "withdrawal_credentials": "00561915940db82894b85df0002f4f76cd1fc74857f344cf4785f0e251408485"
+    },
+    {
+        "account": "m/12381/3600/2/0/0",
+        "amount": 32000000000,
+        "deposit_cli_version": "2.3.0",
+        "deposit_data_root": "302ee9475d1c99ed18c6a58a34d7586f64d96847b5d2665b7731d4e789562de8",
+        "deposit_message_root": "79baafdda15cabda758c4570d91341819db478ff79900c4b3927e19b587993f9",
+        "fork_version": "00000000",
+        "network_name": "mainnet",
+        "pubkey": "ad6501d84df3b68c9cf3e2db803bbe5ad6fdc3fa930851d44e276a647e33abef608967fffcce26f315b08b4cd72d610c",
+        "signature": "85c37ebd038b90a7178d00e43b28ec556b75178af5bae9c8f32a01748c928417f5d9113b783aa56fc7f070012dfd4f240f2d9428908ac9f1d014c13ea433d533b4b60111d73d99933670477af8211e15b2c11bce0e00a741f504ea5c944e9ef7",
+        "version": 1,
+        "withdrawal_credentials": "0061c4441f380136d34b79b26c02f377c1ef07b40c7ce8193ec5558161148fe9"
+    },
+    {
+        "account": "m/12381/3600/3/0/0",
+        "amount": 32000000000,
+        "deposit_cli_version": "2.3.0",
+        "deposit_data_root": "a916d197f45d8b201e0ea7a6b4f2fade562cc7516410d8ee3d257b11569d20b0",
+        "deposit_message_root": "cdfb7c0aee44808c405d043fa2317c017dca5610fa474ce4b4d5abcaf9c80833",
+        "fork_version": "00000000",
+        "network_name": "mainnet",
+        "pubkey": "947de7e5c41ed25101c00a6928d0e61c22ac3346be783980d5aa38ca0c9eef17979903498f3e81cb732dd749488b1a62",
+        "signature": "80305f3363d4b5841bc64fb53e1a2822b6ce2ed100961519e75d1b24b2a33e7e958254c9728cd8cc8493747955c7ed08186039ebb3dbf3cd219c0d04620f7305f1421779a941ffd6c741c0e0e85c5a514527fb9a2ac2ffe23262741675665170",
+        "version": 1,
+        "withdrawal_credentials": "00686bd99a6f196a0840bd9518a1261b376556f1221aacffef6b597ba9502c9f"
+    },
+    {
+        "account": "m/12381/3600/4/0/0",
+        "amount": 32000000000,
+        "deposit_cli_version": "2.3.0",
+        "deposit_data_root": "3dbe99ea9af927298f1a9e06a0a5667411481c49d0f902a34b91256721ef6f03",
+        "deposit_message_root": "79a9d435617a1c897e415fe9f96986811ef1437064ae2fac6e55c3daa418e80f",
+        "fork_version": "00000000",
+        "network_name": "mainnet",
+        "pubkey": "ae8ad8408d8d201368217ce3beacb231b7cbc50624b89634c77bf56f36a249545776be38f2c549fba60bdf95282dc60f",
+        "signature": "b42d97c2b25ed2fd494d9ec77dcb993518dc6bc82616e0fe9831727565ef227ea274fbf01bdc7ecb61a669243758495b0c2895ff9137e0967b1e13244a1f426fbc678efc50416eb14c794d4e409682cadc0aa43fa1e2084a81a42d296e4ba339",
+        "version": 1,
+        "withdrawal_credentials": "009fdfcd7dfce62d68733d214753e84981a7efa98fd7d0ad155ae8b2d4669f48"
+    }
+]

@@ -207,16 +207,13 @@ returns :-
 a. []K
 Filtered list
 */
-func Filter[K any](list []K, filter func(K) bool) []K {
-	n := 0
+func Filter[T any](list []T, filter func(T) bool) (ret []T) {
 	for _, v := range list {
 		if filter(v) {
-			list[n] = v
-			n++
+			ret = append(ret, v)
 		}
 	}
-
-	return list[:n]
+	return
 }
 
 // UriValidator validates a URI and returns true if it is valid.

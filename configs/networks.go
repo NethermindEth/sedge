@@ -64,3 +64,8 @@ func NetworkEpochTime(network string) time.Duration {
 		return 7 * time.Minute
 	}
 }
+
+func SupportsMEVBoost(network string) bool {
+	out, ok := networksConfigs[network]
+	return ok && out.SupportsMEVBoost
+}
