@@ -572,22 +572,24 @@ func checkCLIDependencies(p ui.Prompter, o *CliCmdOptions, a actions.SedgeAction
 			log.Warnf("unsupported install dependencies %s", strings.Join(unsupported, " "))
 			return nil
 		}
-		if err := confirmInstallDependencies(p, o); err != nil {
-			return err
-		}
+		// FIXME: There is an issue with the cli command and sudo permissions. Sedge deps install don't have this issue. This should be investigated and solved before uncommenting the commented code below.
+		// if err := confirmInstallDependencies(p, o); err != nil {
+		// 	return err
+		// }
+		o.installDependencies = false
 		if !o.installDependencies {
 			for _, s := range supported {
 				if err := depsMgr.ShowInstructions(s); err != nil {
 					return err
 				}
 			}
-			return nil
+			return fmt.Errorf("%w: %s. To install dependencies if supported run: 'sedge deps install", ErrMissingDependencies, strings.Join(pendingDependencies, ", "))
 		}
-		for _, s := range supported {
-			if err := depsMgr.Install(s); err != nil {
-				return err
-			}
-		}
+		// for _, s := range supported {
+		// 	if err := depsMgr.Install(s); err != nil {
+		// 		return err
+		// 	}
+		// }
 	}
 	if err := depsMgr.DockerEngineIsOn(); err != nil {
 		return err
