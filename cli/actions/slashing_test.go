@@ -17,8 +17,10 @@ package actions_test
 
 import (
 	"errors"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli/actions"
@@ -100,7 +102,10 @@ func checkValidatorFailureHelper(t *testing.T, ctrl *gomock.Controller, wantErro
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
-			{ID: "validatorctid"},
+			{
+				ID:    "validatorctid",
+				Names: []string{"/" + services.DefaultSedgeValidatorClient},
+			},
 		}, nil).
 		Times(1)
 	dockerClient.EXPECT().
@@ -146,7 +151,10 @@ func validatorStopFailureHelper(t *testing.T, ctrl *gomock.Controller) actions.S
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
-			{ID: validatorCtId},
+			{
+				ID:    validatorCtId,
+				Names: []string{"/" + services.DefaultSedgeValidatorClient},
+			},
 		}, nil).
 		Times(1)
 	dockerClient.EXPECT().
@@ -252,7 +260,10 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag stri
 			Filters: filters.NewArgs(filters.Arg("name", validatorContainerName)),
 		}).
 		Return([]types.Container{
-			{ID: validatorCtId},
+			{
+				ID:    validatorCtId,
+				Names: []string{"/" + validatorContainerName},
+			},
 		}, nil).
 		Times(1)
 	// Mock ContainerInspect
@@ -295,6 +306,11 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag stri
 		ContainerWait(gomock.Any(), slashingCtName, container.WaitConditionNextExit).
 		Return(exitCh, make(chan error)).
 		Times(1)
+	// Mock container logs
+	dockerClient.EXPECT().
+		ContainerLogs(gomock.Any(), slashingCtId, gomock.Any()).
+		Return(ioutil.NopCloser(strings.NewReader("logs")), nil).
+		Times(1)
 	// Mock ContainerRemove
 	dockerClient.EXPECT().
 		ContainerRemove(gomock.Any(), slashingCtId, types.ContainerRemoveOptions{}).
@@ -326,7 +342,7 @@ func TestSlashingImport_UnsupportedClient(t *testing.T) {
 				GenerationPath:  generationPath,
 				From:            from,
 			})
-			assert.ErrorIs(t, err, actions.UnsupportedValidatorClientError)
+			assert.ErrorIs(t, err, actions.ErrUnsupportedValidatorClient)
 			assert.FileExists(t, copiedFile)
 			copiedData, err := os.ReadFile(copiedFile)
 			if err != nil {
@@ -356,7 +372,7 @@ func TestSlashingExport_UnsupportedClient(t *testing.T) {
 				GenerationPath:  generationPath,
 				Out:             out,
 			})
-			assert.ErrorIs(t, err, actions.UnsupportedValidatorClientError)
+			assert.ErrorIs(t, err, actions.ErrUnsupportedValidatorClient)
 			assert.NoFileExists(t, out)
 		})
 	}
@@ -374,7 +390,10 @@ func unsupportedClientsHelper(t *testing.T, ctrl *gomock.Controller) actions.Sed
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
-			{ID: validatorCtId},
+			{
+				ID:    validatorCtId,
+				Names: []string{"/" + services.DefaultSedgeValidatorClient, "name-0"},
+			},
 		}, nil).
 		Times(1)
 	// Mock ContainerInspect

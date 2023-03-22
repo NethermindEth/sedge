@@ -1,7 +1,8 @@
 {{/* docker-compose_base.tmpl */}}
 {{ define "env" }}
 # --- Global configuration ---
-NETWORK=chiado
+NETWORK=chiado{{if .FeeRecipient}}
+FEE_RECIPIENT={{.FeeRecipient}}{{end}}
 {{template "execution" .}}
 {{template "consensus" .}}
 {{template "validator" .}}

@@ -13,8 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package actions
+package dependencies
 
-//go:generate mockgen -package=sedge_mocks -destination=../../mocks/sedgeActions.go github.com/NethermindEth/sedge/cli/actions SedgeActions
-
-//go:generate mockgen -package=sedge_mocks -destination=../../mocks/depsHandler.go github.com/NethermindEth/sedge/cli/actions DependenciesHandlers
+const (
+	Docker        = "docker"
+	DockerCompose = "docker-compose"
+)

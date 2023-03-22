@@ -19,37 +19,38 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"
 )
 
-type DownCmdFlags struct {
-	path string
-}
-
-func DownCmd(cmdRunner commands.CommandRunner) *cobra.Command {
+func DownCmd(cmdRunner commands.CommandRunner, a actions.SedgeActions, depsMgr dependencies.DependenciesManager) *cobra.Command {
 	// Flags
-	var flags DownCmdFlags
+	var generationPath string
 	// Build command
 	cmd := &cobra.Command{
 		Use:   "down [flags]",
 		Short: "Shutdown sedge running containers",
 		Long:  `Shutdown sedge running containers using docker compose CLI. Shortcut for 'docker compose -f <script> down'`,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := utils.PreCheck(cmdRunner, flags.path); err != nil {
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := checkDependencies(depsMgr, true, dependencies.Docker); err != nil {
+				log.Error("Failed to check dependencies. Run 'sedge deps check' to check dependencies")
 				return err
 			}
-
-			if _, err := utils.CheckContainers(cmdRunner, flags.path); err != nil {
+			return a.ValidateDockerComposeFile(filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if _, err := utils.CheckContainers(cmdRunner, generationPath); err != nil {
 				return err
 			}
 
 			downCMD := cmdRunner.BuildDockerComposeDownCMD(commands.DockerComposeDownOptions{
-				Path: filepath.Join(flags.path, configs.DefaultDockerComposeScriptName),
+				Path: filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 			})
 
 			log.Debugf(configs.RunningCommand, downCMD.Cmd)
@@ -61,6 +62,6 @@ func DownCmd(cmdRunner commands.CommandRunner) *cobra.Command {
 		},
 	}
 	// Bind flags
-	cmd.Flags().StringVarP(&flags.path, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data")
+	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data")
 	return cmd
 }

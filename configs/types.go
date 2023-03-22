@@ -32,4 +32,7 @@ type NetworkConfig struct {
 	DefaultCustomConfigSrc    string
 	DefaultCustomGenesisSrc   string
 	DefaultCustomDeployBlock  string
+	SupportsMEVBoost          bool
+	CheckpointSyncURL         string
+	RelayURLs                 []string
 }

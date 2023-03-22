@@ -5,7 +5,7 @@ version: "3.9"
 services:
 {{template "execution" .}}
 {{if .Mev}}
-  mevboost:
+  mev-boost:
     image: {{if .MevImage}}{{.MevImage}}{{else}}flashbots/mev-boost:latest{{end}}
     networks:
       - sedge
@@ -18,7 +18,7 @@ services:
       - -{{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
       - -relay-check
       - -relays
-      - ${RELAY_URL}{{end}}
+      - ${RELAY_URLS}{{end}}
 {{template "consensus" .}}
 {{ if .WithValidatorClient}}
 {{template "validator-blocker" .}}{{end}}

@@ -16,6 +16,7 @@ limitations under the License.
 package actions
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -26,6 +27,7 @@ import (
 type RunContainersOptions struct {
 	GenerationPath string
 	Services       []string
+	SkipDockerPs   bool
 }
 
 func (s *sedgeActions) RunContainers(options RunContainersOptions) error {
@@ -35,5 +37,19 @@ func (s *sedgeActions) RunContainers(options RunContainersOptions) error {
 	})
 	log.Infof(configs.RunningCommand, upCmd.Cmd)
 	_, _, err := s.commandRunner.RunCMD(upCmd)
-	return err
+	if err != nil {
+		return fmt.Errorf(configs.CommandError, upCmd.Cmd, err)
+	}
+	if !options.SkipDockerPs {
+		// Run docker compose ps --filter status=running to show script running containers
+		dcpsCMD := s.commandRunner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{
+			Path:          filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName),
+			FilterRunning: true,
+		})
+		log.Infof(configs.RunningCommand, dcpsCMD.Cmd)
+		if _, _, err := s.commandRunner.RunCMD(dcpsCMD); err != nil {
+			return fmt.Errorf(configs.CommandError, dcpsCMD.Cmd, err)
+		}
+	}
+	return nil
 }

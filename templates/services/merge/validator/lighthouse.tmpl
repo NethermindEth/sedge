@@ -24,7 +24,7 @@
       - --graffiti=${GRAFFITI}
       - --debug-level=${VL_LOG_LEVEL}
       - --validators-dir=/data/validators{{with .FeeRecipient}}
-      - --suggested-fee-recipient=${CC_FEE_RECIPIENT}{{end}}
+      - --suggested-fee-recipient=${FEE_RECIPIENT}{{end}}
       - --metrics
       - --metrics-port={{.VlMetricsPort}}
       - --metrics-address=0.0.0.0{{range $flag := .VlExtraFlags}}

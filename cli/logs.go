@@ -20,22 +20,22 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"
 )
 
-type LogsCmdFlags struct {
-	path string
-	tail int
-}
-
-func LogsCmd(cmdRunner commands.CommandRunner) *cobra.Command {
+func LogsCmd(cmdRunner commands.CommandRunner, sedgeActions actions.SedgeActions, depsMgr dependencies.DependenciesManager) *cobra.Command {
 	// Flags
-	var flags LogsCmdFlags
+	var (
+		generationPath string
+		tail           int
+	)
 	// Build command
 	cmd := &cobra.Command{
 		Use:   "logs [flags] [services]",
@@ -43,18 +43,20 @@ func LogsCmd(cmdRunner commands.CommandRunner) *cobra.Command {
 		Long: `Get running container logs using docker-compose CLI. If no services are provided, the logs of all running services will be displayed.
 	
 	By default will run 'docker compose -f <script> logs --follow <service>'`,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := checkDependencies(depsMgr, true, dependencies.Docker); err != nil {
+				log.Error("Failed to check dependencies. Run 'sedge deps check' to check dependencies")
+				return err
+			}
+			return sedgeActions.ValidateDockerComposeFile(filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var err error
-			if err = utils.PreCheck(cmdRunner, flags.path); err != nil {
+			rawServices, err := utils.CheckContainers(cmdRunner, generationPath)
+			if err != nil {
 				return err
 			}
 
-			var rawServices string
-			if rawServices, err = utils.CheckContainers(cmdRunner, flags.path); err != nil {
-				return err
-			}
-
-			file := filepath.Join(flags.path, configs.DefaultDockerComposeScriptName)
+			file := filepath.Join(generationPath, configs.DefaultDockerComposeScriptName)
 			// Get logs from docker compose script services
 			services := strings.Split(rawServices, "\n")
 			// Remove empty string resulting of spliting the last blank line of rawServices
@@ -66,8 +68,8 @@ func LogsCmd(cmdRunner commands.CommandRunner) *cobra.Command {
 			logsCMD := cmdRunner.BuildDockerComposeLogsCMD(commands.DockerComposeLogsOptions{
 				Path:     file,
 				Services: services,
-				Follow:   flags.tail == 0,
-				Tail:     flags.tail,
+				Follow:   tail == 0,
+				Tail:     tail,
 			})
 
 			log.Debugf(configs.RunningCommand, logsCMD.Cmd)
@@ -84,8 +86,8 @@ func LogsCmd(cmdRunner commands.CommandRunner) *cobra.Command {
 		},
 	}
 	// Bind flags
-	cmd.Flags().StringVarP(&flags.path, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data")
-	cmd.Flags().IntVarP(&flags.tail, "tail", "t", 0, "Tail the number of desired logs. If not set, or set to 0, logs are followed.")
+	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data")
+	cmd.Flags().IntVarP(&tail, "tail", "t", 0, "Tail the number of desired logs. If not set, or set to 0, logs are followed.")
 
 	return cmd
 }

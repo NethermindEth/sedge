@@ -2,8 +2,10 @@ package actions
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
+	"os/signal"
 	"path/filepath"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -21,6 +23,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var ErrInterrupted = errors.New("interrupt")
+
 type ImportValidatorKeysOptions struct {
 	ValidatorClient string
 	Network         string
@@ -28,6 +32,7 @@ type ImportValidatorKeysOptions struct {
 	StartValidator  bool
 	From            string
 	GenerationPath  string
+	ContainerTag    string
 	CustomConfig    ImportValidatorKeysCustomOptions
 }
 type ImportValidatorKeysCustomOptions struct {
@@ -37,19 +42,31 @@ type ImportValidatorKeysCustomOptions struct {
 }
 
 func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) error {
+	// Ensure paths are absolute
+	if absFrom, err := filepath.Abs(options.From); err != nil {
+		return err
+	} else {
+		options.From = absFrom
+	}
+	if absGenerationPath, err := filepath.Abs(options.GenerationPath); err != nil {
+		return err
+	} else {
+		options.GenerationPath = absGenerationPath
+	}
+	validatorCtName := services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 	// Check validator container exists
-	_, err := s.serviceManager.ContainerId(services.DefaultSedgeValidatorClient)
+	_, err := s.serviceManager.ContainerId(validatorCtName)
 	if err != nil {
 		return err
 	}
-	previouslyRunning, err := s.serviceManager.IsRunning(services.DefaultSedgeValidatorClient)
+	previouslyRunning, err := s.serviceManager.IsRunning(validatorCtName)
 	if err != nil {
 		return err
 	}
 	// Stop validator
 	if previouslyRunning {
 		log.Info("Stopping validator client")
-		if err := s.serviceManager.Stop(services.DefaultSedgeValidatorClient); err != nil {
+		if err := s.serviceManager.Stop(validatorCtName); err != nil {
 			return err
 		}
 	}
@@ -86,26 +103,26 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		}
 		ctID = lodestarCtID
 	case "lighthouse":
-		lighthouseCtID, err := setupLighthouseValidatorImport(s.dockerClient, s.serviceManager, s.commandRunner, options)
+		lighthouseCtID, err := setupLighthouseValidatorImport(s.dockerClient, s.commandRunner, options)
 		if err != nil {
 			return err
 		}
 		ctID = lighthouseCtID
 	case "teku":
-		tekuCtID, err := setupTekuValidatorImport(s.dockerClient, s.serviceManager, s.commandRunner, options)
+		tekuCtID, err := setupTekuValidatorImport(s.dockerClient, s.commandRunner, options)
 		if err != nil {
 			return err
 		}
 		ctID = tekuCtID
 	default:
-		return fmt.Errorf("%w: %s", UnsupportedValidatorClientError, options.ValidatorClient)
+		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
 	log.Info("Importing validator keys")
-	runErr := runAndWait(s.dockerClient, s.serviceManager, ctID)
+	runErr := runAndWaitImportKeys(s.dockerClient, s.serviceManager, ctID)
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
 		log.Info("The validator container is being restarted")
-		if err := s.serviceManager.Start(services.DefaultSedgeValidatorClient); err != nil {
+		if err := s.serviceManager.Start(validatorCtName); err != nil {
 			return err
 		}
 	}
@@ -120,7 +137,11 @@ func isDefaultKeysPath(generationPath, from string) bool {
 }
 
 func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, options ImportValidatorKeysOptions) (string, error) {
-	validatorImage, err := serviceManager.Image(services.DefaultSedgeValidatorClient)
+	var (
+		validatorCtName       = services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
+		validatorImportCtName = services.ContainerNameWithTag(services.ServiceCtValidatorImport, options.ContainerTag)
+	)
+	validatorImage, err := serviceManager.Image(validatorCtName)
 	if err != nil {
 		return "", err
 	}
@@ -153,7 +174,7 @@ func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceMa
 	} else {
 		cmd = append(cmd, "--"+options.Network)
 	}
-	log.Debugf("Creating %s container", services.ServiceCtValidatorImport)
+	log.Debugf("Creating %s container", validatorImportCtName)
 	ct, err := dockerClient.ContainerCreate(context.Background(),
 		&container.Config{
 			Image: validatorImage,
@@ -161,11 +182,11 @@ func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceMa
 		},
 		&container.HostConfig{
 			Mounts:      mounts,
-			VolumesFrom: []string{services.DefaultSedgeValidatorClient},
+			VolumesFrom: []string{validatorCtName},
 		},
 		&network.NetworkingConfig{},
 		&v1.Platform{},
-		services.ServiceCtValidatorImport,
+		validatorImportCtName,
 	)
 	if err != nil {
 		return "", err
@@ -174,7 +195,11 @@ func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceMa
 }
 
 func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, options ImportValidatorKeysOptions) (string, error) {
-	validatorImage, err := serviceManager.Image(services.DefaultSedgeValidatorClient)
+	var (
+		validatorCtName       = services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
+		validatorImportCtName = services.ContainerNameWithTag(services.ServiceCtValidatorImport, options.ContainerTag)
+	)
+	validatorImage, err := serviceManager.Image(validatorCtName)
 	if err != nil {
 		return "", err
 	}
@@ -198,7 +223,6 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 	}
 	cmd := []string{
 		"validator", "import",
-		"--preset", preset,
 		"--dataDir", "/data",
 		"--importKeystores=/keystore/validator_keys",
 		"--importKeystoresPassword=/keystore/keystore_password.txt",
@@ -212,8 +236,9 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 		cmd = append(cmd, "--paramsFile=/network_config/config.yaml")
 	} else {
 		cmd = append(cmd, "--network", options.Network)
+		cmd = append(cmd, "--preset", preset)
 	}
-	log.Debugf("Creating %s container", services.ServiceCtValidatorImport)
+	log.Debugf("Creating %s container", validatorImportCtName)
 	ct, err := dockerClient.ContainerCreate(context.Background(),
 		&container.Config{
 			Image: validatorImage,
@@ -221,11 +246,11 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 		},
 		&container.HostConfig{
 			Mounts:      mounts,
-			VolumesFrom: []string{services.DefaultSedgeValidatorClient},
+			VolumesFrom: []string{validatorCtName},
 		},
 		&network.NetworkingConfig{},
 		&v1.Platform{},
-		services.ServiceCtValidatorImport,
+		validatorImportCtName,
 	)
 	if err != nil {
 		return "", err
@@ -233,11 +258,18 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 	return ct.ID, nil
 }
 
-func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, commandRunner commands.CommandRunner, options ImportValidatorKeysOptions) (string, error) {
+func setupLighthouseValidatorImport(dockerClient client.APIClient, commandRunner commands.CommandRunner, options ImportValidatorKeysOptions) (string, error) {
+	var (
+		validatorCtName       = services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
+		validatorImportCtName = services.ContainerNameWithTag(services.ServiceCtValidatorImport, options.ContainerTag)
+	)
+	if options.Network == "chiado" {
+		options.Network = "custom"
+	}
 	// Init build context
 	contextDir, err := lighthouse.InitContext()
 	if err != nil {
-		return "", fmt.Errorf("%w: %s", CreatingContextDirError, err.Error())
+		return "", fmt.Errorf("%w: %s", ErrCreatingContextDir, err.Error())
 	}
 	// Build image
 	buildCmd := commandRunner.BuildDockerBuildCMD(commands.DockerBuildOptions{
@@ -280,18 +312,18 @@ func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManage
 			Target: "/network_config/deploy_block.txt",
 		})
 	}
-	log.Debugf("Creating %s container", services.ServiceCtValidatorImport)
+	log.Debugf("Creating %s container", validatorImportCtName)
 	ct, err := dockerClient.ContainerCreate(context.Background(),
 		&container.Config{
 			Image: "sedge/validator-import-lighthouse",
 		},
 		&container.HostConfig{
 			Mounts:      mounts,
-			VolumesFrom: []string{services.DefaultSedgeValidatorClient},
+			VolumesFrom: []string{validatorCtName},
 		},
 		&network.NetworkingConfig{},
 		&v1.Platform{},
-		services.ServiceCtValidatorImport,
+		validatorImportCtName,
 	)
 	if err != nil {
 		return "", err
@@ -299,7 +331,11 @@ func setupLighthouseValidatorImport(dockerClient client.APIClient, serviceManage
 	return ct.ID, nil
 }
 
-func setupTekuValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, commandRunner commands.CommandRunner, options ImportValidatorKeysOptions) (string, error) {
+func setupTekuValidatorImport(dockerClient client.APIClient, commandRunner commands.CommandRunner, options ImportValidatorKeysOptions) (string, error) {
+	var (
+		validatorCtName       = services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
+		validatorImportCtName = services.ContainerNameWithTag(services.ServiceCtValidatorImport, options.ContainerTag)
+	)
 	// Init build context
 	contextDir, err := teku.InitContext()
 	if err != nil {
@@ -329,18 +365,21 @@ func setupTekuValidatorImport(dockerClient client.APIClient, serviceManager serv
 			Target: "/network_config/config.yml",
 		})
 	}
-	log.Debugf("Creating %s container", services.ServiceCtValidatorImport)
+	log.Debugf("Creating %s container", validatorImportCtName)
 	ct, err := dockerClient.ContainerCreate(context.Background(),
 		&container.Config{
 			Image: "sedge/validator-import-teku",
 		},
 		&container.HostConfig{
 			Mounts:      mounts,
-			VolumesFrom: []string{services.DefaultSedgeValidatorClient},
+			VolumesFrom: []string{validatorCtName},
+			LogConfig: container.LogConfig{
+				Type: "json-file",
+			},
 		},
 		&network.NetworkingConfig{},
 		&v1.Platform{},
-		services.ServiceCtValidatorImport,
+		validatorImportCtName,
 	)
 	if err != nil {
 		return "", err
@@ -348,40 +387,39 @@ func setupTekuValidatorImport(dockerClient client.APIClient, serviceManager serv
 	return ct.ID, nil
 }
 
-func runAndWait(dockerClient client.APIClient, serviceManager services.ServiceManager, ctID string) error {
+func runAndWaitImportKeys(dockerClient client.APIClient, serviceManager services.ServiceManager, ctID string) error {
 	log.Debugf("import keys container id: %s", ctID)
-	ctExit, errChan := serviceManager.Wait(services.ServiceCtValidatorImport, container.WaitConditionNextExit)
+	ctExit, errChan := serviceManager.Wait(ctID, container.WaitConditionNextExit)
 	log.Info("The keys import container is starting")
 	if err := dockerClient.ContainerStart(context.Background(), ctID, types.ContainerStartOptions{}); err != nil {
 		return err
 	}
+	osSignals := make(chan os.Signal, 1)
+	signal.Notify(osSignals, os.Interrupt)
 	for {
 		select {
 		case exitResult := <-ctExit:
+			logs, err := serviceManager.ContainerLogs(ctID, "Import keys")
+			if err != nil {
+				return err
+			}
+			if err = deleteContainer(dockerClient, ctID); err != nil {
+				return err
+			}
 			if exitResult.StatusCode != 0 {
-				logs, err := containerLogs(dockerClient, ctID)
-				if err != nil {
-					return err
-				}
 				return newValidatorImportCtBadExitCodeError(ctID, exitResult.StatusCode, logs)
 			}
-			return deleteContainer(dockerClient, ctID)
+			return nil
+		case <-osSignals:
+			if err := stopContainer(dockerClient, ctID); err != nil {
+				return err
+			}
+			if err := deleteContainer(dockerClient, ctID); err != nil {
+				return err
+			}
+			return ErrInterrupted
 		case exitErr := <-errChan:
 			return exitErr
 		}
 	}
-}
-
-func containerLogs(dockerClient client.APIClient, ctID string) (string, error) {
-	logReader, err := dockerClient.ContainerLogs(context.Background(), ctID, types.ContainerLogsOptions{
-		ShowStdout: true,
-		ShowStderr: true,
-		Follow:     false,
-	})
-	if err != nil {
-		return "", err
-	}
-	defer logReader.Close()
-	logs, err := ioutil.ReadAll(logReader)
-	return string(logs), err
 }

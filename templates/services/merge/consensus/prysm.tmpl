@@ -41,7 +41,7 @@
       - --execution-endpoint=${EC_AUTH_URL}{{range $url := .FallbackELUrls}}
       - --fallback-web3provider={{$url}}{{end}}
       - --accept-terms-of-use{{with .FeeRecipient}}
-      - --suggested-fee-recipient=${CC_FEE_RECIPIENT}{{end}}
+      - --suggested-fee-recipient=${FEE_RECIPIENT}{{end}}
       - --monitoring-host=0.0.0.0
       - --monitoring-port={{.ClMetricsPort}}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
       - --checkpoint-sync-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}

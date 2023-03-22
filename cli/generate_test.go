@@ -187,7 +187,6 @@ func buildGenerateTestCase(
 func TestGenerateCmd(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
-	configs.InitNetworksConfigs()
 	tcs := []generateCmdTestCase{
 		*buildGenerateTestCase(
 			t,
@@ -876,7 +875,7 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			subCmd{
-				name: "mevboost",
+				name: "mev-boost",
 				args: []string{},
 			},
 			nil,
@@ -894,7 +893,7 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			subCmd{
-				name: "mevboost",
+				name: "mev-boost",
 				args: []string{},
 			},
 			nil,
@@ -912,7 +911,7 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			subCmd{
-				name: "mevboost",
+				name: "mev-boost",
 				args: []string{},
 			},
 			nil,
@@ -930,7 +929,7 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			subCmd{
-				name: "mevboost",
+				name: "mev-boost",
 				args: []string{},
 			},
 			nil,
@@ -948,7 +947,7 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			subCmd{
-				name: "mevboost",
+				name: "mev-boost",
 				args: []string{},
 			},
 			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "https:/boost-relay.flashbots.net"),
@@ -966,7 +965,7 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			subCmd{
-				name: "mevboost",
+				name: "mev-boost",
 				args: []string{},
 			},
 			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "boost-relay.flashbots.net"),
@@ -982,10 +981,10 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			subCmd{
-				name: "mevboost",
+				name: "mev-boost",
 				args: []string{"wrong"},
 			},
-			errors.New("unknown command \"wrong\" for \"sedge generate mevboost\""),
+			errors.New("unknown command \"wrong\" for \"sedge generate mev-boost\""),
 		),
 		*buildGenerateTestCase(
 			t,
@@ -1222,6 +1221,34 @@ func TestGenerateCmd(t *testing.T) {
 			nil),
 		*buildGenerateTestCase(
 			t,
+			"Full-node, valid Graffiti", "case_1",
+			GenCmdFlags{
+				feeRecipient: "0x0000000000000000000000000000000000000000",
+				graffiti:     "sedge-graffiti",
+			},
+			globalFlags{
+				network: "gnosis",
+			},
+			subCmd{
+				name: "full-node",
+			},
+			nil),
+		*buildGenerateTestCase(
+			t,
+			"Full-node, Graffiti too long", "case_1",
+			GenCmdFlags{
+				feeRecipient: "0x0000000000000000000000000000000000000000",
+				graffiti:     "sedge-graffiti-sedge",
+			},
+			globalFlags{
+				network: "gnosis",
+			},
+			subCmd{
+				name: "full-node",
+			},
+			fmt.Errorf(configs.ErrGraffitiLength, "sedge-graffiti-sedge", 20)),
+		*buildGenerateTestCase(
+			t,
 			"Validator, waitEpoch set", "case_1",
 			GenCmdFlags{
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
@@ -1341,6 +1368,38 @@ func TestGenerateCmd(t *testing.T) {
 				args: []string{"lodestar"},
 			},
 			nil),
+		*buildGenerateTestCase(
+			t,
+			"Validator, graffiti too long", "case_1",
+			GenCmdFlags{
+				feeRecipient:    "0x0000000000000000000000000000000000000000",
+				consensusApiUrl: "https://localhost:8000/api/endpoint{}",
+				graffiti:        "sedge-graffiti-sedge",
+			},
+			globalFlags{
+				network: "goerli",
+			},
+			subCmd{
+				name: "validator",
+				args: []string{"teku"},
+			},
+			fmt.Errorf(configs.ErrGraffitiLength, "sedge-graffiti-sedge", 20)),
+		*buildGenerateTestCase(
+			t,
+			"Validator, valid graffiti", "case_1",
+			GenCmdFlags{
+				feeRecipient:    "0x0000000000000000000000000000000000000000",
+				consensusApiUrl: "https://localhost:8000/api/endpoint",
+				graffiti:        "sedge-graffiti",
+			},
+			globalFlags{
+				network: "mainnet",
+			},
+			subCmd{
+				name: "validator",
+				args: []string{"lodestar"},
+			},
+			nil),
 	}
 
 	// TODO: Add test cases for Execution fallback urls
@@ -1371,7 +1430,6 @@ func TestGenerateCmd(t *testing.T) {
 }
 
 func TestGeneratePathCases(t *testing.T) {
-	configs.InitNetworksConfigs()
 	// Silence logger
 	log.SetOutput(io.Discard)
 

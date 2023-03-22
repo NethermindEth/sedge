@@ -9,7 +9,6 @@ CC_INSTANCE_NAME=Lodestar
 CC_IMAGE_VERSION={{.CcImage}}
 CC_DATA_DIR={{.CcDataDir}}
 CC_JWT_SECRET_PATH={{.JWTSecretPath}}
-CC_FEE_RECIPIENT={{.FeeRecipient}}
 CC_LODESTAR_PRESET=mainnet
-CHECKPOINT_SYNC_URL=https://sepolia.checkpoint-sync.ethdevops.io
+{{if .CheckpointSyncUrl}}CHECKPOINT_SYNC_URL={{.CheckpointSyncUrl}}{{end}}
 {{ end }}

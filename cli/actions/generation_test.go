@@ -64,7 +64,7 @@ func contains(t *testing.T, list []string, str string) bool {
 
 type genTestData struct {
 	name    string
-	genData *generate.GenData
+	genData generate.GenData
 }
 
 // Test that the generated compose file with dump data is generated correctly
@@ -106,7 +106,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 				tests = append(tests,
 					genTestData{
 						name: fmt.Sprintf("execution: %s, network: %s, only execution", executionCl, network),
-						genData: &generate.GenData{
+						genData: generate.GenData{
 							ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
 							Services:        []string{"execution"},
 							Network:         network,
@@ -114,7 +114,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 					},
 					genTestData{
 						name: fmt.Sprintf("execution: %s, network: %s, only execution with tag", executionCl, network),
-						genData: &generate.GenData{
+						genData: generate.GenData{
 							ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
 							Services:        []string{"execution"},
 							Network:         network,
@@ -123,7 +123,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 					},
 					genTestData{
 						name: fmt.Sprintf("consensus: %s, network: %s, only consensus", consensusCl, network),
-						genData: &generate.GenData{
+						genData: generate.GenData{
 							ConsensusClient:  &clients.Client{Name: consensusCl, Type: "consensus"},
 							Services:         []string{"consensus"},
 							Network:          network,
@@ -133,7 +133,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 					},
 					genTestData{
 						name: fmt.Sprintf("consensus: %s, network: %s, only consensus with tag, https", consensusCl, network),
-						genData: &generate.GenData{
+						genData: generate.GenData{
 							ConsensusClient:  &clients.Client{Name: consensusCl, Type: "consensus"},
 							Services:         []string{"consensus"},
 							Network:          network,
@@ -144,7 +144,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 					},
 					genTestData{
 						name: fmt.Sprintf("consensus: %s, network: %s, only consensus with custom Checkpoint sync URL", consensusCl, network),
-						genData: &generate.GenData{
+						genData: generate.GenData{
 							ConsensusClient:   &clients.Client{Name: consensusCl, Type: "consensus"},
 							Services:          []string{"consensus"},
 							Network:           network,
@@ -155,7 +155,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 					},
 					genTestData{
 						name: fmt.Sprintf("validator: %s, network: %s, only validator", consensusCl, network),
-						genData: &generate.GenData{
+						genData: generate.GenData{
 							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
 							Services:        []string{"validator"},
 							Network:         network,
@@ -164,7 +164,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 					},
 					genTestData{
 						name: fmt.Sprintf("validator: %s, network: %s, only validator, mev-boost on", consensusCl, network),
-						genData: &generate.GenData{
+						genData: generate.GenData{
 							ValidatorClient:     &clients.Client{Name: consensusCl, Type: "validator"},
 							Services:            []string{"validator"},
 							Network:             network,
@@ -174,7 +174,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 					},
 					genTestData{
 						name: fmt.Sprintf("validator: %s, network: %s, only validator with tag, https", consensusCl, network),
-						genData: &generate.GenData{
+						genData: generate.GenData{
 							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
 							Services:        []string{"validator"},
 							Network:         network,
@@ -187,7 +187,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 					tests = append(tests,
 						genTestData{
 							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s, network: %s, all", executionCl, consensusCl, consensusCl, network),
-							genData: &generate.GenData{
+							genData: generate.GenData{
 								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
 								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
 								ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
@@ -198,7 +198,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 						},
 						genTestData{
 							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s, network: %s, all, no mev-boost", executionCl, consensusCl, consensusCl, network),
-							genData: &generate.GenData{
+							genData: generate.GenData{
 								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
 								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
 								ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
@@ -208,7 +208,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 						},
 						genTestData{
 							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s, network: %s, all, with tag", executionCl, consensusCl, consensusCl, network),
-							genData: &generate.GenData{
+							genData: generate.GenData{
 								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
 								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
 								ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
@@ -220,7 +220,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 						},
 						genTestData{
 							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s, network: %s, all, waitEpoch set and custom Checkpoint Sync URL", executionCl, consensusCl, consensusCl, network),
-							genData: &generate.GenData{
+							genData: generate.GenData{
 								ExecutionClient:    &clients.Client{Name: executionCl, Type: "execution"},
 								ConsensusClient:    &clients.Client{Name: consensusCl, Type: "consensus"},
 								ValidatorClient:    &clients.Client{Name: consensusCl, Type: "validator"},
@@ -233,7 +233,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 						},
 						genTestData{
 							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, network),
-							genData: &generate.GenData{
+							genData: generate.GenData{
 								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
 								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
 								Services:        []string{"execution", "consensus"},
@@ -242,7 +242,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 						},
 						genTestData{
 							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s, network: %s, no validator, with tag", executionCl, consensusCl, consensusCl, network),
-							genData: &generate.GenData{
+							genData: generate.GenData{
 								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
 								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
 								Services:        []string{"execution", "consensus"},
@@ -256,7 +256,6 @@ func TestGenerateDockerCompose(t *testing.T) {
 		}
 	}
 
-	configs.InitNetworksConfigs()
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			samplePath := t.TempDir()
@@ -276,7 +275,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 				tc.genData.ValidatorClient.SetImageOrDefault("")
 			}
 
-			err := sedgeAction.Generate(actions.GenerateOptions{
+			_, err := sedgeAction.Generate(actions.GenerateOptions{
 				GenerationData: tc.genData,
 				GenerationPath: samplePath,
 			})
@@ -435,11 +434,10 @@ func TestGenerateDockerCompose(t *testing.T) {
 func TestFolderCreationOnCompose(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
-	configs.InitNetworksConfigs()
 	samplePath := t.TempDir() + "test"
 	c := clients.ClientInfo{Network: "mainnet"}
 	clientsMap, _ := c.Clients([]string{"execution", "consensus"})
-	sampleData := &generate.GenData{
+	sampleData := generate.GenData{
 		ExecutionClient: clientsMap["execution"]["nethermind"],
 		ConsensusClient: clientsMap["consensus"]["lighthouse"],
 		ValidatorClient: clientsMap["consensus"]["lighthouse"],
@@ -453,7 +451,7 @@ func TestFolderCreationOnCompose(t *testing.T) {
 
 	sedgeAction := newAction(t, nil)
 
-	err := sedgeAction.Generate(actions.GenerateOptions{
+	_, err := sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: sampleData,
 		GenerationPath: samplePath,
 	})

@@ -35,7 +35,7 @@
       - --terminal-total-difficulty-override={{.TTD}}{{end}}
       - --logFile=/var/lib/lodestart/consensus/logs/beacon.log 
       - --logFileLevel=${CC_LOG_LEVEL}{{with .FeeRecipient}}
-      - --suggestedFeeRecipient=${CC_FEE_RECIPIENT}{{end}}
+      - --suggestedFeeRecipient=${FEE_RECIPIENT}{{end}}
       - --port={{.ClDiscoveryPort}}
       - --rest=true
       - --rest.address=0.0.0.0
