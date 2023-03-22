@@ -5,7 +5,14 @@ id: down
 
 # Down
 
-Running `sedge down` will shut down running containers using docker compose CLI.
+Running `sedge down` will stop and remove containers using the docker compose CLI.
+
+::note
+
+This action doesn't remove client data-dir inside the sedge directory. Could be reused if you restart the service again
+using `sedge run`.
+
+:::
 
 ## Help
 
