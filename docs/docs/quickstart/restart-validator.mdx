@@ -10,6 +10,12 @@ By default, when you set up a full node, it will wait until:
 1. The Consensus client to be up and synced.
 2. Wait for 1 Epoch (using the `validator-blocker` service).
 
+::note
+
+You can set the number of epoch to wait using the flag `--wait-epoch int` on the generate command, the default value is 1.
+
+:::
+
 After that, the Validator will start to produce blocks.
 
 ## Restarting a Validator

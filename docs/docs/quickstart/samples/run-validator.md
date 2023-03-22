@@ -1,9 +1,9 @@
 ---
-sidebar_position: 5
+sidebar_position: 1
 id: run-validator
 ---
 
-# Run a validator on Mainnet with one click
+# Run a validator on Mainnet
 
 This guide shows you how to setup and run a validator on Mainnet using random execution, consensus, and validator clients.
 
@@ -11,17 +11,11 @@ First make sure you have Sedge installed and in your PATH following the [install
 
 :::tip
 
-If you don't have Sedge in your PATH, just open your Terminal on the folder which Sedge's executable / binary is and run `./sedge` instead of only `sedge`.
+If you don't have Sedge in your PATH, just open your terminal on the folder which Sedge's executable / binary is and run `./sedge` instead of only `sedge`.
 
 :::
 
-Set up your keys running the following command from your Terminal:
-
-```
-sedge keys
-```
-
-Run the following command from your Terminal to generate your setup on Mainnet (default network):
+Run the following command from your terminal to generate your setup on Mainnet (default network):
 
 ```
 sedge generate full-node
@@ -31,6 +25,18 @@ As an alternative way, you can provide a fee recipient address:
 
 ```
 sedge generate full-node --fee-recipient <your_address>
+```
+
+Set up your keys running the following command from your terminal:
+
+```
+sedge keys
+```
+
+Import the keys that you just generate in the command above using the following command:
+
+```
+sedge import-key
 ```
 
 After that, you just need to run your setup with the following command:

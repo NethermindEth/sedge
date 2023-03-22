@@ -1,5 +1,5 @@
 ---
-sidebar_position: 6
+sidebar_position: 2
 id: run-mev-boost-goerli
 ---
 
@@ -11,22 +11,26 @@ First make sure you have Sedge installed and in your PATH following the [install
 
 :::tip
 
-If you don't have Sedge in your PATH, just open your Terminal on the folder which Sedge's executable / binary is and run `./sedge` instead of only `sedge`.
+If you don't have Sedge in your PATH, just open your terminal on the folder which Sedge's executable / binary is and run `./sedge` instead of only `sedge`.
 
 :::
 
-Run the following command from your Terminal to setup a Teku consensus and validator nodes on Goerli with a random execution client:
+Run the following command from your terminal to set up a Teku consensus and validator nodes on Goerli with a random execution client:
 
-Set up your keys running the following command from your Terminal:
+```
+sedge generate full-node --network goerli -c teku 
+```
+
+Set up your keys running the following command from your terminal:
 
 ```
 sedge keys --network goerli
 ```
 
-Run the following command from your Terminal to generate your setup on Goerli:
+Import the keys that you just generate in the command above using the following command:
 
 ```
-sedge generate full-node --network goerli -c teku 
+sedge import-key
 ```
 
 After that, you just need to run your setup with the following command:
