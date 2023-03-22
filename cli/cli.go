@@ -471,8 +471,10 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, d
 				return fmt.Errorf("%s is not a directory", o.keystorePath)
 			}
 		}
+
+		// TODO: Create an Action for keystore generation
 		log.Info("Generating keystores...")
-		if err := keystores.CreateKeystores(keystores.ValidatorKeysGenData{
+		data := keystores.ValidatorKeysGenData{
 			Mnemonic:    o.keystoreMnemonic,
 			Passphrase:  o.keystorePassphrase,
 			OutputPath:  o.keystorePath,
@@ -485,10 +487,16 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, d
 			Insecure:            false,
 			AmountGwei:          uint64(eth2.Mainnet.MAX_EFFECTIVE_BALANCE),
 			AsJsonList:          true,
-		}); err != nil {
+		}
+		if err := keystores.CreateKeystores(data); err != nil {
 			return err
 		}
-		log.Info("Keystores generated successfully")
+		log.Info(configs.KeystoresGenerated)
+		log.Info(configs.GeneratingDepositData)
+		if err := keystores.CreateDepositData(data); err != nil {
+			log.Fatal(err)
+		}
+		log.Info(configs.DepositDataGenerated)
 	case SourceTypeExisting:
 		if err := inputKeystorePath(p, o); err != nil {
 			return err
