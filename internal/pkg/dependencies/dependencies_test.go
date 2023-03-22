@@ -169,10 +169,7 @@ func TestDependenciesManager_Install(t *testing.T) {
 
 	for _, tc := range tcs {
 		descr := fmt.Sprintf("InstallDependency(%s)", tc.dependency)
-		cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{
-			RunAsAdmin: false,
-		})
-		depsMgr := NewDependenciesManager(cmdRunner)
+		depsMgr := NewDependenciesManager(tc.runner)
 		err := depsMgr.Install(tc.dependency)
 		if tc.isErr && err == nil {
 			t.Errorf("%s expected to fail", descr)
