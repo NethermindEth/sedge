@@ -11,7 +11,7 @@ sidebar_position: 1
 - **API and Checkpoint Sync endpoints**. Sedge allows you to set up a full node without a validator so that you can use this node to either expose the execution JSON-RPC API or the Beacon Chain HTTP API, or expose a Checkpoint Sync endpoint.
 - **Migrate a Setup**. If you need to migrate your nodes from one place to other, or change the clients, Sedge can handle your keys for you, and import any needed information.
 
-> Whether or not you choose to set up a node with a validator, and whether or not you are exposing the API, you are contributing to the network, which is great!
+> Whether or not you choose to set up a node with a validator and whether or not you are exposing the API, you are contributing to the network, which is excellent!
 
 :::caution Disclaimer
 
@@ -27,9 +27,9 @@ Users acknowledge that no warranty is being made of a successful installation. S
 
 ## Why you should try Sedge
 
-Sedge is a tool that focuses on ease of use and, as such, lowers the entry barrier for non-technical users. With Sedge, you can run a node or a validator on Ethereum with little to no technical background and set it all up in less than 5 minutes! Don't know which client to choose? No problem! Let Sedge choose it for you.
+Sedge is a tool that focuses on ease of use and, as such, lowers the entry barrier for non-technical users. With Sedge, you can run a node or a validator on Ethereum with little to no technical background and set it all up in less than 5 minutes! Need to know which client to choose? No problem! Let Sedge choose it for you.
 
-If you have enough technical knowledge, you can also take advantage of Sedge and its features. You can generate the setup files, modify them according to your needs, and integrate Sedge with other solutions.
+With enough technical knowledge, you can also take advantage of Sedge and its features. You can generate the setup files, modify them according to your needs, and integrate Sedge with other solutions.
 
-The Sedge codebase design allows us to create many features and support you with setting up a single node or a full node, cross-platform support, alerting mechanisms, support for other networks, and much more. [Stay tuned](https://twitter.com/nethermindeth) to find out when they’re shipped!
+The Sedge codebase design allows us to create many features and support you with setting up a single node or a full node, cross-platform support, alerting mechanisms, support for other networks, and much more. [Stay tuned](https://twitter.com/nethermindeth) to find out when they're shipped!
 

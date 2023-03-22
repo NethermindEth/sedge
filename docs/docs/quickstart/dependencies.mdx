@@ -12,26 +12,26 @@ Sedge requires only [Docker](https://www.docker.com) with the [Docker Compose](h
 
 ## Checking dependencies
 
-### Using sedge deps check
-
-Running `sedge deps check` will check if all the dependencies are installed and running.
+You can use `sedge deps check` to check if all the dependencies are installed and running.
 
 ```bash
 sedge deps check
 ```
+
+## Installing dependencies
 
 <Tabs groupId="operating-systems">
   <TabItem value="linux" label="Linux">
 
 ### Using sedge deps install
 
-If some of the dependencies are missing, you can install them using Sedge, if you run the following command:
+If some of the dependencies are missing, you can install them using Sedge, provided you run the following command:
 
 ```
 sedge deps install
 ```
 
-With that command, Sedge will install the required dependencies using predefined [scripts](https://github.com/NethermindEth/sedge/tree/main/templates/setup/linux/docker) (Only for Linux). Sedge will show you in every step what is going to execute.
+With the above command, Sedge will install the required dependencies using predefined [scripts](https://github.com/NethermindEth/sedge/tree/main/templates/setup/linux/docker).
 
 Supported Linux flavours for dependency installation:
 
@@ -41,8 +41,8 @@ Supported Linux flavours for dependency installation:
 | Debian         | 11, 10, 9, 8               | 11, 10                 |
 | Fedora         | 35, 34                     |   -                    |
 | CentOS         | 8                          |   -                    |
-| Arch           | -                          | yes                    |
-| Amazon Linux 2 | -                          | yes                    |
+| Arch           | -                          | -                      |
+| Amazon Linux 2 | -                          | -                      |
 | Alpine         | 3.15, 3.14, 3.14.3         |   -                    |
 
 ### Using Docker official instructions
@@ -51,33 +51,33 @@ Check and follow the [official instructions](https://docs.docker.com/engine/inst
 
 ### Docker Desktop
 
-[Docker Desktop](https://docs.docker.com/desktop/) is an easy-to-install application with a GUI that comes with Docker Engine and Docker Compose (what Sedge needs). Is available on Windows, MacOS and Linux. To install Docker Desktop follow the [official instructions](https://docs.docker.com/desktop/install/linux-install/).
+[Docker Desktop](https://docs.docker.com/desktop/) is an easy-to-install application with a GUI that comes with Docker Engine and Docker Compose (what Sedge needs). It is available on Windows, MacOS, and Linux. To install Docker Desktop follow the [official instructions](https://docs.docker.com/desktop/install/linux-install/).
 
 :::note
 
-You may notice that, for the Sedge's dependency installation feature on Linux, we are still using the classic Docker Engine setup along with the Compose plugin. This is because we found it more convenient for servers in the cloud. Also is still recommended to install docker using specific instructions for every Linux distribution. This may change in the future.
+We are still using the classic Docker Engine setup and the Compose plugin for Sedge's dependency installation feature on Linux. This is because we found it more convenient for servers in the cloud. Also, installing Docker using specific instructions for every Linux distribution is still recommended. This may change in the future.
 
 :::
 
 </TabItem>
     <TabItem value="mac" label="macOS">
 
-For macOS you need to install Docker Desktop. Follow installing instructions for Mac [here](https://docs.docker.com/desktop/install/mac-install/).
+For macOS, you need to install Docker Desktop. Follow installing instructions for Mac [here](https://docs.docker.com/desktop/install/mac-install/).
 
 :::info
 
-Apple silicon chip (M1) is supported
+Apple silicon chip (M1) is supported.
 
 :::
 
   </TabItem>
     <TabItem value="windows" label="Windows">
 
-For Windows you need to install Docker Desktop. Follow installing instructions for Windows [here](https://docs.docker.com/desktop/windows/wsl/).
+For Windows, you need to install Docker Desktop. Follow installing instructions for Windows [here](https://docs.docker.com/desktop/windows/wsl/).
 
 :::note
 
-Ideally, you should have Docker Desktop with backend on WSL2. This is the recommended setup for Windows.
+Ideally, it would be best if you had Docker Desktop with backend on WSL2. This is the recommended setup for Windows.
 
 :::
 

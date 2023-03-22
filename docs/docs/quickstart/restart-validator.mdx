@@ -3,70 +3,70 @@ sidebar_position: 7
 id: setup-validator
 ---
 
-# Setting up a Validator
+# Restarting the Validator
 
-By default, when you set up a full node, it will wait until:
+By default, when you set up a full node, the Validator container will wait for the following conditions to be met:
 
-1. The Consensus client to be up and synced.
-2. Wait for 1 Epoch (using the `validator-blocker` service).
+1. The Consensus client is up and synced.
+2. Wait for 1 Epoch at least (using the `validator-blocker` service of the `docker-compose.yml` script).
 
-::note
+:::note
 
-You can set the number of epoch to wait using the flag `--wait-epoch int` on the generate command, the default value is 1.
+You can set the number of epochs to wait using the flag `--wait-epoch <number>` on the generate command, the default value is 1.
 
 :::
 
-After that, the Validator will start to produce blocks.
+After that, the Validator container will launch.
 
 ## Restarting a Validator
 
 If for any reason your setup is restarted, the `validator` will not start automatically. You will need to run it manually,
-because otherwise, it will not wait until the `Consensus client` is up and synced, so, it might cause some slashing issues.
+because otherwise, it will not wait for the above conditions to be met, therefore, the restart might cause some slashing issues.
 
 :::caution
 
-The solutions to these problems, needs to be done manually for the user, and it is you don't do it, it can incur on penalties for your node.
+You need to restart the validator manually; if you instead configure the docker compose service to restart automatically, this can incur severe penalties for your node.
 
 :::
 
-If docker daemon restarts (due to a machine reboot, for example), the docker compose services with a restart policy will
-restart, but the depends_on policy won’t retake effect. The depends_on policy only takes effect after a docker compose
-up (for the reboot case). This means the Validator can’t set a restart policy until we run down and up after a reboot
+If the docker daemon restarts (due to a machine reboot, for example), the docker compose services with a restart policy will
+restart, but the `depends_on` policy won’t retake effect. The `depends_on` policy only takes effect after a docker compose
+up (for the reboot case). This means the Validator can’t set a restart policy until we run `down` and `up` after a reboot
 for it to now incur in any slashing.
 
-### Solution
+## Solution (Only for Unix-based systems)
 
 To solve this problem, we found two workarounds:
 - Create a `systemd service`
-- Create a `contrab job`
+- Create a `crontab job`
 
-Both of those solutions will run after the reboot and will run the `docker compose up validator` command.
+Both of those solutions will run after a reboot and will run the `docker compose up validator` command.
 
-#### Systemd service
+### Systemd service
 
-You can use the following steps to automatically run `docker-compose up` when your machine restarts:
+You can use the following steps to automatically run `docker compose up validator` when your machine restarts:
 
 1. Create a systemd service file with the following content:
 
 ```
 [Unit]
-Description=Docker Compose Service
+Description=Validator Restart Service
 Requires=docker.service
 After=docker.service
 
 [Service]
 Restart=always
 WorkingDirectory=/path/to/docker-compose/file
-ExecStart=/usr/local/bin/docker-compose up -d
+ExecStart=/usr/local/bin/docker compose up -d validator
 
 [Install]
 WantedBy=multi-user.target
 
 ```
 
-Replace `/path/to/docker-compose/file` with the actual path to your `docker-compose.yml` file. You may also need to adjust the `ExecStart` path if your `docker-compose` binary is located elsewhere.
+Replace `/path/to/docker-compose/file` with the actual path to your `docker-compose.yml` file. You may also need to adjust the `ExecStart` path if your `docker` binary is located elsewhere.
 
-1. Save the file as `/etc/systemd/system/docker-compose.service`.
+1. Save the file as `/etc/systemd/system/validator-restart.service`.
 2. Reload the systemd daemon:
 
 ```
@@ -77,21 +77,21 @@ sudo systemctl daemon-reload
 3. Enable the service to start automatically at boot:
 
 ```
-sudo systemctl enable docker-compose.service
+sudo systemctl enable validator-restart.service
 
 ```
 
 4. Start the service:
 
 ```
-sudo systemctl start docker-compose.service
+sudo systemctl start validator-restart.service
 
 ```
 
-5. After completing these steps, `docker-compose up` will automatically run when your machine restarts. You can check the status of the service with:
+5. After completing these steps, `docker compose up validator` will automatically run when your machine restarts. You can check the status of the service with:
 
 ```
-sudo systemctl status docker-compose.service
+sudo systemctl status validator-restart.service
 
 ```
 
@@ -99,18 +99,18 @@ sudo systemctl status docker-compose.service
 
 If you need to stop the service, you can use the following command:
 ```
-sudo systemctl stop docker-compose.service
+sudo systemctl stop validator-restart.service
 ```
 :::
 
-#### Crontab job
+### Crontab job
 
-To create a cron job that automatically runs docker-compose up on system reboot, you should first create a shell script
+To create a cron job that automatically runs `docker compose up validator` on system reboot, you should first create a shell script
 that runs the necessary commands, and then set up a cron job to execute the script at system startup.
 
 Here's how to do it:
 1. Create a shell script:
-Open a terminal and navigate to the directory where your docker-compose.yml file is located. Then, create a new shell script file:
+Open a terminal and navigate to the directory where your `docker-compose.yml` file is located. Then, create a new shell script file:
 
 ```bash
 touch start-docker-compose.sh
@@ -131,12 +131,12 @@ cd /path/to/your/docker-compose/directory
 # Load environment variables, if any
 source .env
 
-# Start the Docker Compose services
-/usr/local/bin/docker-compose up -d
+# Start the Docker Compose service
+docker compose up -d validator
 ```
 
 :::note
-Replace /path/to/your/docker-compose/directory with the actual path of the directory containing your docker-compose.yml
+Replace /path/to/your/docker-compose/directory with the actual path of the directory containing your `docker-compose.yml`
 file. Save and exit the text editor.
 :::
 
@@ -146,17 +146,17 @@ chmod +x start-docker-compose.sh
 ```
 
 5. Set up a cron job:
-Edit the system-wide crontab file:
+
+Run the following command to edit the system-wide crontab file:
 ```
 sudo crontab -e
 ```
 
 Add the following line at the end of the file:
 ```
-@reboot /path/to/your/docker-compose/directory/start-docker-compose.sh
+@reboot /path/to/your/script/directory/start-docker-compose.sh
 ```
 
-Replace /path/to/your/docker-compose/directory with the actual path of the directory containing your docker-compose.yml
-file and start-docker-compose.sh script. Save and exit the text editor.
+Replace `/path/to/your/script/directory` with the actual path of the directory containing your `start-docker-compose.sh` script. Save and exit the text editor.
 
-Now, the cron job will automatically run docker-compose up on system reboot.
+Now, the cron job will automatically run `docker compose up -d validator` on system reboot.
