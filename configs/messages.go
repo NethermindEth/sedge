@@ -18,7 +18,7 @@ package configs
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 // All the strings that are needed for debugging and info logging, and constant strings.
@@ -123,5 +123,5 @@ func init() {
 		// notest
 		fmt.Println(err)
 	}
-	DefaultAbsSedgeDataPath = path.Join(cwd, DefaultSedgeDataFolderName)
+	DefaultAbsSedgeDataPath = filepath.Join(cwd, DefaultSedgeDataFolderName)
 }
