@@ -2,6 +2,7 @@
 #exit when any command fails
 set -e
 cd /home/runner/work/sedge/sedge/sedge
+go generate ./...
 mkdir -p build/package/debian/src/github.com/NethermindEth/sedge/
 rsync -aq . build/package/debian/src/github.com/NethermindEth/sedge/ --exclude build/ --exclude .git/ --exclude docs/
 cd build/package/debian/src/github.com/NethermindEth/sedge/ && go mod vendor
