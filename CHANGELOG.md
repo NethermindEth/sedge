@@ -7,36 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.0.0] - 2023-3-23
+
 ### Added
 
-- Documentation for all supported networks and clients.
-- Support for custom networks.
-- When generating new mnemonic, show it without a trace.
+- Add `generate` command to generate only an execution, consensus, or validator setup code.
 - Support import slashing protection interchange data [EIP-3076](https://eips.ethereum.org/EIPS/eip-3076)
   while running the setup with the `cli` command or with the new command `slashing-import`.
 - Support export slashing protection interchange data [EIP-3076](https://eips.ethereum.org/EIPS/eip-3076)
   with the new command `slashing-export`.
 - Support the new command `run`, used to run all the services generated.
 - Support for PPA packaging (apt install).
-- Added flag `--container-tag` to add a suffix to sedge containers name.
+- Add flag `--container-tag` to add a suffix to sedge containers name.
 - Support the new command `import-key` to import validator keys in an existing configuration.
 - New command to check dependencies: `sedge deps check`
 - New command to install dependencies: `sedge deps install`
 - All the commands that needs dependencies will check if they are installed
   as a pre-requisite. If not, the command will fail and suggest to run `sedge deps check`.
+- Documentation for all supported networks and clients.
+- Add guides and descriptions for new commands in the Documentation.
+- When generating new mnemonic, show it without a trace in the Terminal.
 
 ### Changed
 
-- Updated Checkpoint Sync Url for Goerli.
-- Updated installation script for docker and docker compose in Linux flavours.
-- Use newed created action for JWT secret handling.
+- Improved test coverage
+- Updated client versions
+- Refactor `sedge cli` command to use the new sedge actions in a more interactive way.
+- Rename sedge data directory name to `sedge-data` instead of `docker-compose-scripts`.
+- Update mev-boost relay URLs.
 - Fixed validator restart failure. Validator never restarts, but has a better and safer start-up method:
   - Validator waits a grace period (2 epochs) before starting.
-  - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint returns with the HTTP code 200 in the newly added `consensus-health` docker-compose service with the docker-compose `healthcheck` condition so that the validator waits for the consensus be healthy. This replace the older track sync method.
+  - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint returns with the HTTP code 200 in the newly added `validator-blocker` docker-compose service. This replace the older track sync method.
+- Updated installation script for docker and docker compose in Linux flavours.
+- Updated Checkpoint Sync Url for Goerli.
+- Use new created action for JWT secret handling.
 - Removed `v` from the tag on release scripts. Now we should use `Tag=v1.0.0` instead of `Tag=1.0.0`.
-- Rename sedge data directory name to `sedge-data` instead of `docker-compose-scripts`.
-- Refactor `sedge cli` command to use the new sedge actions in a more interactive way.
-- Update mev-boost relay URLs.
 
 ### Removed
 
