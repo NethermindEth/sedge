@@ -109,7 +109,7 @@ You can learn more about `sedge cli` if you check [here in our documentation](/d
 
 #### 2.2 Non-interactive setup
 
-If you want to run the non-interactive mode, you will need to run only two commands, and provide the set of arguments needed for each command.
+If you want to run the non-interactive mode, you will need to run only four commands (two if you are not running a validator and you don't need the validator keystore), and provide the set of arguments needed for each command.
 1. `sedge generate`
 2. `sedge keys`
 3. `sedge import-key`
@@ -148,6 +148,12 @@ Running the `sedge keys` command will generate a keystore folder with validator 
 ```bash
 sedge keys
 ```
+
+:::caution Disclaimer
+
+Users acknowledge that generating the keystore for any network is an unaudited feature of Sedge. Nethermind provides this feature on an ‘as is’ basis and makes no warranties regarding its proper functioning. The use of this feature is at the user’s own risk - Nethermind excludes all liability for any malfunction or loss of money that may occur as the result of an unexpected behavior during the keystore generation.
+
+:::
 
 :::info
 
