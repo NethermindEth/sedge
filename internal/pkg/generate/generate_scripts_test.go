@@ -129,9 +129,6 @@ var checkTTDOnExecution = func(t *testing.T, data *GenData, compose, env io.Read
 		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "besu" {
 			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--override-genesis-config=terminalTotalDifficulty="+customTTD)
 		}
-		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "erigon" {
-			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--override.terminaltotaldifficulty="+customTTD)
-		}
 		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "nethermind" {
 			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--Merge.TerminalTotalDifficulty="+customTTD)
 		}
@@ -487,7 +484,6 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 								ConsensusClient: &clients.Client{Name: consensusCl},
 								ValidatorClient: &clients.Client{Name: consensusCl},
 								Network:         network,
-								CustomTTD:       "sample_ttd",
 								Services:        []string{execution, consensus, validator},
 							},
 							CheckFunctions: []CheckFunc{checkTTDOnExecution, defaultFunc, checkECBootnodesOnExecution},
