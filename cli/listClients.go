@@ -17,7 +17,6 @@ limitations under the License.
 package cli
 
 import (
-	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
@@ -31,10 +30,12 @@ func ClientsCmd() *cobra.Command {
 		Use:   "clients",
 		Short: "List supported clients",
 		Long:  `List supported clients for execution and consensus engines`,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := runListClientsCmd(cmd, args); err != nil {
-				log.Fatal(err)
+				return err
 			}
+
+			return nil
 		},
 	}
 	return cmd
@@ -56,13 +57,6 @@ func runListClientsCmd(cmd *cobra.Command, args []string) error {
 		}
 		ui.WriteListClientsTable(cmd.OutOrStdout(), data)
 	}
-
-	log.Infof("Listing clients provided in configuration file\n")
-	data, err := buildData(configs.ConfigClients)
-	if err != nil {
-		return err
-	}
-	ui.WriteListClientsTable(cmd.OutOrStdout(), data)
 
 	return nil
 }

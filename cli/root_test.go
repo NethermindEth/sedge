@@ -16,26 +16,19 @@ limitations under the License.
 package cli
 
 import (
-	"path/filepath"
+	"io"
 	"testing"
 
-	"github.com/NethermindEth/sedge/test"
+	log "github.com/sirupsen/logrus"
 )
 
-func resetRootCmd() {
-	cfgFile = ""
-}
-
 func TestRootCmdExecute(t *testing.T) {
-	configPath := t.TempDir()
-	t.Cleanup(resetRootCmd)
-	err := test.PrepareTestCaseDir(filepath.Join(".", "testdata", "root_test", "config"), configPath)
-	if err != nil {
-		t.Errorf("Can't create config file: %v", err)
-	}
+	// Silence logger
+	log.SetOutput(io.Discard)
+	loggingLevel := t.TempDir()
 
 	rootCmd := RootCmd()
-	rootCmd.SetArgs([]string{"--config", configPath})
+	rootCmd.SetArgs([]string{"--log-level", loggingLevel})
 
 	if err := rootCmd.Execute(); err != nil {
 		t.Errorf("rootCmd.Execute() failed: %v", err)

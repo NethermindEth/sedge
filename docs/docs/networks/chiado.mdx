@@ -1,0 +1,140 @@
+---
+sidebar_position: 5
+id: chiado
+---
+
+# Chiado
+
+Chiado is a Gnosis Chain tesnet. Gnosis Chain is an EVM based Ethereum sidechain that is designed to be a platform for
+decentralized prediction markets.
+
+## Supported Execution Clients
+- [Nethermind](https://docs.nethermind.io/)
+
+## Supported Consensus Clients
+- [Lighthouse](https://lighthouse-book.sigmaprime.io/)
+- [Lodestar](https://chainsafe.github.io/lodestar/)
+- [Teku](https://docs.teku.consensys.net/en/latest/)
+
+## Supported Validator Clients
+- [Lighthouse](https://lighthouse-book.sigmaprime.io/)
+- [Lodestar](https://chainsafe.github.io/lodestar/)
+- [Teku](https://docs.teku.consensys.net/en/latest/)
+
+## Run a Validator or a Full Node
+
+Validators and Full Nodes protect the network by validating transactions and blocks. They are the backbone of the
+network and are responsible for the security of the network. This guide shows you how to use Sedge to set up a full node or a validator on Chiado, a Gnosis testnet.
+
+:::info
+
+Validating the Gnosis Beacon Chain requires 1
+[GNO](https://docs.gnosischain.com/about/tokens/gno) per validator process.
+
+:::
+
+### Generating a Full Node
+
+To generate a setup of a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge generate full-node`. For example:
+
+```bash
+sedge generate full-node --no-validator --network=chiado
+```
+
+### Generating a Full Node with a Validator
+
+To generate a setup of a validator with random clients, you need to omit the `--no-validator` flag. For example:
+
+```bash
+sedge generate full-node --network=chiado
+```
+
+### Create keystore for validator
+
+To create a keystore for a validator, you need to run the following command:
+
+```bash
+sedge keys --network chiado
+```
+
+### Running your setup
+
+Once you have generated your setup, you can run it with the following command:
+
+```
+sedge run
+```
+
+## Consensus Clients Requirements
+
+:::tip
+
+The hardware requirements you are about to see are for Gnosis. Chiado is a lighter network, the following requirements can be considered as minimum for a full node in Chiado:
+- 2 CPU cores
+- 4 GB RAM
+- 160 GB SDD
+
+:::
+
+### Lighthouse Client
+#### Lighthouse Minimum
+
+- Dual-core CPU, 2015 or newer
+- 8 GB RAM
+- 500 GB SSD
+- 10 Mb/s download, 5 Mb/s upload broadband connection
+
+#### Lighthouse Recommended
+
+- Quad-core AMD Ryzen, Intel Broadwell, ARMv8 or newer
+- 16 GB RAM
+- 1 TB SSD
+- 100 Mb/s download, 20 Mb/s upload broadband connection
+
+### Teku Client
+#### Teku Minimum
+
+- Dual Core CPU, i5-760 or AMD FX-8100 or better
+- 8 GB RAM
+- 500 GB SSD
+- 1 Mb/s broadband connection
+
+#### Teku Recommended
+
+- Quad core CPU, Intel Core i7–4770 or AMD FX-8310 or better
+- 16 GB RAM
+- 1 TB SSD
+- 10 Mb/s broadband connection
+
+:::tip
+
+We recommend using `Lighthouse` or `Teku` while using Sedge for Chiado as they are the most stable and tested clients.
+
+:::
+
+For a more detailed description, you can look at the [Beacon Chain Node Requirements](https://docs.gnosischain.com/node/consensus-layer-validator#beacon-chain-node-requirements) in the Gnosis Chain documentation.
+
+## Execution Client Requirements
+
+### Nethermind Client
+- OS: Ubuntu
+- CPU: 2 cores
+- RAM: 8GB
+- Disk: 500gb SSD
+
+For a more detailed description, you can look at the [Guide for Run a Gnosis Execution Layer Node](https://docs.gnosischain.com/node/execution-layer-validator)
+
+## Useful data
+
+- Native (fee) token: `Chiado-xDAI`
+- Staking token: `Chiado-GNO`
+- Chain ID: `10200`
+
+- [Gnosis Chain Documentation](https://docs.gnosischain.com/)
+- [Chiado Execution Explorer](https://blockscout.chiadochain.net/)
+- [Chiado Beacon Explorer](https://beacon.chiadochain.net/)
+- [Chiado Faucet](https://gnosisfaucet.com/)
+- [Execution Layer RPC (Archival)](https://rpc.eu-central-2.gateway.fm/v3/gnosis/archival/chiado)
+- [Execution Layer RPC](https://rpc.chiadochain.net)
+- [EthStats](https://ethstats.chiadochain.net/)
+- [Fork Monitor](https://forkmon.chiadochain.net/)

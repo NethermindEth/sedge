@@ -2,7 +2,7 @@
 {{ define "execution" }}
   execution:
     stop_grace_period: 30m
-    container_name: execution-client
+    container_name: sedge-execution-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
     image: ${EC_IMAGE_VERSION}
     networks:
@@ -21,13 +21,13 @@
       - {{.ElAuthPort}}
     user: root
     command:
-    - erigon{{with .TTD}}
-    - --override.terminaltotaldifficulty=${TTD}{{end}}
+    - --externalcl
     - --http
     - --http.addr=0.0.0.0
     - --http.port={{.ElApiPort}}
     - --txpool.disable
-    - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
+    - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}{{if .ECBootnodes}}
+    - --bootnodes={{.ECBootnodes}}{{end}}
     - --authrpc.addr=0.0.0.0
     - --authrpc.port={{.ElAuthPort}}
     - --authrpc.vhosts=*

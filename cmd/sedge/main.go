@@ -16,12 +16,16 @@ limitations under the License.
 package main
 
 import (
-	"os"
 	"runtime"
 
 	"github.com/NethermindEth/sedge/cli"
-	"github.com/NethermindEth/sedge/cli/prompts"
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
+	"github.com/NethermindEth/sedge/internal/pkg/services"
+	"github.com/NethermindEth/sedge/internal/ui"
+	"github.com/docker/docker/client"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -29,19 +33,50 @@ func main() {
 	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{
 		RunAsAdmin: runtime.GOOS == "linux",
 	})
+
 	// Prompt used to interact with the user input
-	prompt := prompts.NewPromptCli()
+	prompt := ui.NewPrompter()
+
+	// Docker client
+	dockerClient, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer dockerClient.Close()
+
+	// Docker service
+	serviceManager := services.NewServiceManager(dockerClient)
+
+	// Init dependencies manager
+	depsMgr := dependencies.NewDependenciesManager(cmdRunner)
+
+	// Init Sedge Actions
+	sdgOpts := actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+		CommandRunner:  cmdRunner,
+	}
+	sedgeActions := actions.NewSedgeActions(sdgOpts)
+
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
-		cli.CliCmd(cmdRunner, prompt),
-		cli.KeysCmd(prompt),
-		cli.DownCmd(cmdRunner),
+		cli.CliCmd(prompt, sedgeActions, depsMgr),
+		cli.KeysCmd(cmdRunner, prompt),
+		cli.DownCmd(cmdRunner, sedgeActions, depsMgr),
 		cli.ClientsCmd(),
 		cli.NetworksCmd(),
-		cli.LogsCmd(cmdRunner),
+		cli.LogsCmd(cmdRunner, sedgeActions, depsMgr),
 		cli.VersionCmd(),
+		cli.SlashingExportCmd(sedgeActions, depsMgr),
+		cli.SlashingImportCmd(sedgeActions, depsMgr),
+		cli.RunCmd(sedgeActions, depsMgr),
+		cli.ImportKeysCmd(sedgeActions, depsMgr),
+		cli.GenerateCmd(sedgeActions),
+		cli.DependenciesCommand(depsMgr),
 	)
+	sedgeCmd.SilenceErrors = true
+	sedgeCmd.SilenceUsage = true
 	if err := sedgeCmd.Execute(); err != nil {
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }

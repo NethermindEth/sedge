@@ -1,37 +1,10 @@
 {{/* prysm.tmpl */}}
 {{ define "validator" }}
-  validator-import:
-    image: ${VL_IMAGE_VERSION}{{with .VlCustomCfg}}
-    depends_on:
-      config_consensus:
-        condition: service_completed_successfully{{end}}
-    networks:
-      - sedge
-    container_name: validator-import-client
-    volumes:
-      - ${VL_DATA_DIR}:/data
-      - ${KEYSTORE_DIR}:/keystore{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}{{end}}
-    command: |{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
-      --chain-config-file=/network_config/config.yml{{end}}{{else}}
-      --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
-      accounts import
-      --accept-terms-of-use
-      --keys-dir=/keystore/validator_keys
-      --wallet-dir=/data/wallet
-      --wallet-password-file=/keystore/keystore_password.txt
-      --account-password-file=/keystore/keystore_password.txt{{if .LoggingDriver}}
-    logging:
-      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
-      options:
-        max-size: "10m"
-        max-file: "10"{{end}}{{end}}
-
   validator:
-    container_name: validator-client
+    container_name: sedge-validator-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     image: ${VL_IMAGE_VERSION}
     depends_on: 
-      validator-import:
+      validator-blocker:
         condition: service_completed_successfully
     networks:
       - sedge
@@ -39,24 +12,23 @@
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
       - ${VL_DATA_DIR}:/data
-      - ${KEYSTORE_DIR}/keystore_password.txt:/keystore/keystore_password.txt{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}{{end}}
+      - ${KEYSTORE_DIR}/keystore_password.txt:/keystore/keystore_password.txt{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
     command:
       - --datadir=/data
       - --wallet-dir=/data/wallet
-      - --wallet-password-file=/keystore/keystore_password.txt{{if .VlCustomCfg}}{{if .VlRemoteCfg}}
+      - --wallet-password-file=/keystore/keystore_password.txt{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       - --chain-config-file=/network_config/config.yml{{end}}{{else}}
       - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
-      - --beacon-rpc-provider=${CC_API_URL}
+      - --beacon-rpc-provider=${CC_ADD_API_URL}
       - --graffiti=${GRAFFITI}
       - --verbosity=${VL_LOG_LEVEL}
       - --accept-terms-of-use
       - --monitoring-host=0.0.0.0
       - --monitoring-port={{.VlMetricsPort}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{with .FeeRecipient}}
-      - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}{{if .Mev}}
-      - --enable-builder
-      - --enable-validator-registration{{end}}{{if .LoggingDriver}}
+      - --suggested-fee-recipient=${FEE_RECIPIENT}{{end}}{{if .MevBoostOnValidator}}
+      - --enable-builder{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:

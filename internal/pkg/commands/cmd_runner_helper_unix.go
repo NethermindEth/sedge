@@ -42,7 +42,7 @@ The output of the command.
 b. error
 Error if any
 */
-func runCmd(cmd string, getOutput bool) (out string, err error) {
+func runCmd(cmd string, getOutput bool) (out string, exitCode int, err error) {
 	r := strings.ReplaceAll(cmd, "\n", "")
 	spl := strings.Split(r, " ")
 	c, args := spl[0], spl[1:]
@@ -66,6 +66,7 @@ func runCmd(cmd string, getOutput bool) (out string, err error) {
 	}
 	// Return this error at the end as we need to check if the output from stderr is to be returned
 	err = exc.Wait()
+	exitCode = exc.ProcessState.ExitCode()
 
 	if getOutput {
 		out = combinedOut.String()
@@ -88,13 +89,18 @@ The output of the script.
 b. error
 Error if any
 */
-func executeBashScript(script ScriptFile) (out string, err error) {
+func executeBashScript(script ScriptFile, runWithSudo bool) (out string, err error) {
 	var scriptBuffer, combinedOut bytes.Buffer
 	if err = script.Tmp.Execute(&scriptBuffer, script.Data); err != nil {
 		return
 	}
 
-	cmd := exec.Command("bash")
+	var cmd *exec.Cmd
+	if runWithSudo {
+		cmd = exec.Command("sudo", "bash")
+	} else {
+		cmd = exec.Command("bash")
+	}
 
 	// Prepare pipes for stdin, stdout and stderr
 	stdin, err := cmd.StdinPipe()

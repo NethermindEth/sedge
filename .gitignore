@@ -4,7 +4,7 @@ vendor
 
 .idea/
 
-/docker-compose-scripts/
+/sedge-data/
 
 coverage/*
 
@@ -13,3 +13,7 @@ coverage/*
 .DS_Store
 
 build/sedge
+
+courtney/
+
+mocks/

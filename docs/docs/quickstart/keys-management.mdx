@@ -1,0 +1,129 @@
+---
+id: keys-management
+sidebar_position: 8
+---
+
+# Key Management
+
+To become a validator on Ethereum PoS, an individual or entity needs to meet certain requirements, such as:
+
+1. Holding a minimum of 32 ETH, which will be staked as collateral.
+2. Running or participating in a validator client software (e.g., Prysm, Lighthouse, Teku).
+3. Generating a validator key pair, which consists of a private key and a public key.
+
+The validator's private key is crucial because it allows the validator to sign messages, propose new blocks, and attest
+to the validity of other blocks. Importing the validator's private key into the client software is an essential step for
+participating in Ethereum 2.0's PoS consensus mechanism.
+
+When importing the private key, it's important to ensure the security of the key, as losing it or having it compromised
+would result in potential loss of staked funds and control over the validator. Validators should follow best practices
+for securely managing and storing their private keys.
+
+## sedge keys
+
+The `sedge keys` command is used to generate the validators keys, it will use a mnemonic that already exists or generate
+a new random one. The same happens with the passphrase, if it is not provided, it will be generated randomly.
+
+It can be used at any time, since that command does not require any generated file.
+
+Once generated the keys, they can be imported using the `sedge import-key` command.
+
+
+## sedge import-key
+
+Import keys refers to the process of adding a validator's private key to a client software. The private key is imported
+into the client software's keystore, which is a directory that stores the private keys of all validators that are
+currently active on the network.
+
+Import validator client keys, use the `--from` flag to specify the keys location,
+and make sure that follows the [EIP-2335: BLS12-381 Keystore standard](https://eips.ethereum.org/EIPS/eip-2335). This command
+assumes that the validator client container exists, stopped or not.
+
+This command stops the validator client during the importing process due to the
+validator database being locked while it's running but leaves the validator client
+in the same state in which it was found. That means if the validator is running/stopped
+before the import, then the validator will be running/stopped after the command
+is executed, regardless of whether the export fails or not. To force a different
+behavior use `--start-validator` and `--stop-validator` flags.
+
+## Slashing protection
+
+Slashing protection is a mechanism in the Ethereum blockchain that is designed to prevent validators in the network from
+being punished for unintentional mistakes that could potentially harm the network.
+
+In the context of the Ethereum 2.0 network, validators are responsible for verifying transactions and creating new blocks.
+Validators are required to put up a certain amount of cryptocurrency (in this case, ether) as a deposit in order to
+participate in the network.
+
+If a validator behaves maliciously or makes a mistake that harms the network, their deposit may be slashed, meaning that
+a portion of their deposit is taken away as a penalty. This is intended to incentive validators to act in the best
+interest of the network and to discourage malicious behavior.
+
+However, in some cases, validators may be unfairly penalized if they experience technical issues, such as a network
+outage or a hardware failure. Slashing protection mechanisms are designed to minimize the risk of these kinds of
+unintentional mistakes resulting in a validator's deposit being slashed.
+
+There are several mechanisms for slashing protection in Ethereum 2.0, including the use of redundancy and
+backup systems, as well as penalties that are only applied in cases where there is clear evidence of malicious behavior.
+These mechanisms are intended to encourage validators to participate in the network and to ensure that the network
+remains secure and reliable.
+
+### Slashing import
+
+The `sedge slashing-import [flags] [validator]` command is used to import slashing protection data from a JSON file into the validator client.
+
+The JSON file must be in the format specified by the [EIP-3076: Slashing Protection Interchange Format](https://eips.ethereum.org/EIPS/eip-3076) standard.
+
+This command assumes that the validator client container exists, stopped or not and that its database
+is already initialized. The validator database is initialized if the validator is
+running or has already run but is stopped, and also after importing the validator keys.
+
+This command stops the validator client during the importing process due to the
+validator database being locked while it's running but leaves the validator client
+in the same state in which it was found. That means if the validator is running/stopped
+before the import, then the validator will be running/stopped after the command
+is executed, regardless of whether the export fails or not. To force a different
+behavior use `--start-validator` and `--stop-validator` flags.
+
+The `[validator]` is a required argument used to specify which validator client, from
+all supported by Sedge (lighthouse, lodestar, prysm or teku), is used to import the
+Slashing Protection data. This is necessary because each client has its own way to
+achieve the importation.
+
+Examples:
+```
+sedge slashing-import --from slashing-data.json prysm
+sedge slashing-import --from slashing-data.json --stop-validator lodestar
+sedge slashing-import --from slashing-data.json --start-validator lighthouse
+```
+
+### Slashing export
+
+The `sedge slashing-export [flags] [validator]` command is used to export slashing protection data from the validator
+client into a JSON file, following the [EIP-3076: Slashing Protection Interchange Format](https://eips.ethereum.org/EIPS/eip-3076) standard.
+
+This command assumes
+that the validator client container exists, stopped or not and that its database
+is already initialized. Take in mind that the validator client generates slashing
+protection data after some time running, so for some clients export slashing protection
+data just after start the client could produce some errors.
+
+This command stops the validator client during the exporting process due to the
+validator database being locked while it's running but leaves the validator client
+in the same state in which it was found. That means if the validator is running/stopped
+before the export, then the validator will be running/stopped after the command
+is executed, regardless of whether the export fails or not. To force a different
+behavior use `--start-validator` and `--stop-validator` flags.
+
+The `[validator]` is a required argument used to specify which validator client, from
+all supported by Sedge (lighthouse, lodestar, prysm or teku), is used to exporting
+the Slashing Protection data. This is necessary because each client has its own way
+to achieve the exportation.
+
+
+Examples:
+```
+sedge slashing-export --out slashing-data.json prysm
+sedge slashing-export --out slashing-data.json --stop-validator lodestar
+sedge slashing-export --out slashing-data.json --start-validator lighthouse
+```

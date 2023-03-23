@@ -1,0 +1,67 @@
+---
+sidebar_position: 3
+id: sepolia
+---
+
+# Sepolia
+
+Sepolia is a permissioned Ethereum test network. Along Goerli, it is one of the testnets that is maintained after The Merge. The initial version of Sepolia used a proof-of-work (PoW) consensus mechanism. However, in the light of The Merge, Sepolia followed the mainnet’s example and merged with the proof-of-stake (PoS) Sepolia Beacon Chain. So, Sepolia is now, just like Ethereum, a PoS chain. Furthermore, Sepolia is almost an identical copy of Ethereum, so it accurately mimics the mainnet and supports accurate testing. This enables developers to design, create, test, and track their project’s public performance before going live. 
+
+## Supported Execution Clients
+- [Nethermind](https://docs.nethermind.io/)
+- [Geth](https://geth.ethereum.org/docs/)
+- [Erigon](https://github.com/ledgerwatch/erigon)
+- [Besu](https://besu.hyperledger.org/en/stable/)
+
+## Supported Consensus Clients
+- [Lighthouse](https://lighthouse-book.sigmaprime.io/)
+- [Lodestar](https://chainsafe.github.io/lodestar/)
+- [Prysm](https://docs.prylabs.network/docs/getting-started/)
+- [Teku](https://docs.teku.consensys.net/en/latest/)
+
+## Supported Validator Clients
+- [Lighthouse](https://lighthouse-book.sigmaprime.io/)
+- [Lodestar](https://chainsafe.github.io/lodestar/)
+- [Prysm](https://docs.prylabs.network/docs/getting-started/)
+- [Teku](https://docs.teku.consensys.net/en/latest/)
+
+## MEV-Boost
+
+We support [mev-boost](https://github.com/flashbots/mev-boost) on sepolia by default, in case you want to remove it,
+run `sedge generate full-node` using the `--no-mev-boost` flag, for example:
+
+```
+sedge generate full-node --network=sepolia --no-mev-boost=true
+```
+
+## Generating a Full Node
+
+To generate a setup of a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge generate full-node`. For example:
+
+```bash
+sedge generate full-node --no-validator --network=sepolia
+```
+
+## Generating a Full Node with a Validator
+
+To generate a setup of a validator with random clients, you need to omit the `--no-validator` flag. For example:
+
+```bash
+sedge generate full-node --network=sepolia
+```
+
+## Create keystore for validator
+
+To create a keystore for a validator, you need to run the following command:
+
+```bash
+sedge keys --network sepolia
+```
+
+## Running your setup
+
+Once you have generated your setup, you can run it with the following command:
+
+```
+sedge run
+```

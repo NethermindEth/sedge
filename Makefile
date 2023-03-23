@@ -23,25 +23,32 @@ run: ## run
 run-cli: compile ## run cli
 	@./build/sedge cli --config ./config.yaml
 
-test: ## run tests
+generate: ## generate go files
+	@go generate ./...
+
+test: generate ## run tests
 	@mkdir -p coverage
 	@go test -coverprofile=coverage/coverage.out -covermode=count ./...
 
-codecov-test: ## unit tests with coverage using the courtney tool
+codecov-test: generate ## unit tests with coverage using the courtney tool
 	@mkdir -p coverage
 	@courtney/courtney -v -o coverage/coverage.out ./...
+	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 install-gofumpt: ## install gofumpt
 	go install mvdan.cc/gofumpt@latest
+
+install-mockgen: ## install mockgen
+	go install github.com/golang/mock/mockgen@v1.6.0 
 
 install-courtney: ## Install courtney for code coverage
 	@git clone https://github.com/stdevMac/courtney
 	@(cd courtney && go get  ./... && go build courtney.go)
 	@go get ./...
 
-install-deps: | install-gofumpt install-courtney ## Install some project dependencies
+install-deps: | install-gofumpt install-courtney install-mockgen ## Install some project dependencies
 
-coverage: coverage/coverage.out ## show tests coverage
+coverage: ## show tests coverage
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 clients: compile ## Run cmd clients with ./config.yaml
@@ -58,9 +65,10 @@ gomod_tidy: ## go mod tidy
 format: ## run code formatting
 	gofumpt -l -w .
 
+# assert `gofumpt -l` produces no output
+format-check: SHELL:=/bin/bash
 format-check: ## check formatting
-	# assert `gofumpt -l` produces no output
-	test ! $$(gofumpt -l . | tee /dev/stderr)
+	test -z "$$(gofumpt -l . | tee >(cat 1>&2))"
 
 
 help: ## Show this help

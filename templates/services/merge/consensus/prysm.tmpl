@@ -2,19 +2,16 @@
 {{ define "consensus" }}
   consensus:
     stop_grace_period: 30s
-    container_name: consensus-client
+    container_name: sedge-consensus-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
-    image: ${CC_IMAGE_VERSION}{{with .CcCustomCfg}}
-    depends_on:
-      config_consensus:
-        condition: service_completed_successfully{{end}}
+    image: ${CC_IMAGE_VERSION}
     networks:
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/prysm
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
-      - ./config.yml:/network_config/config.yml{{end}}{{if .CcRemoteGen}}
-      - ./genesis.ssz:/network_config/genesis.ssz{{end}}{{end}}
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{if .CustomGenesisPath}}
+      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
@@ -24,13 +21,13 @@
     expose:
       - {{.ClApiPort}}
       - {{.ClAdditionalApiPort}}
-    command:{{if .CcCustomCfg}}{{if .CcRemoteCfg}}
-      - --chain-config-file=/network_config/config.yml{{end}}{{if .CcRemoteDpl}}
-      - --contract-deployment-block=${DEPLOY_BLOCK}{{end}}{{if .CcRemoteGen}}
+    command:{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - --chain-config-file=/network_config/config.yml{{end}}{{if .CustomDeployBlock}}
+      - --contract-deployment-block={{.CustomDeployBlock}}{{end}}{{if .CustomGenesisPath}}
       - --genesis-state=/network_config/genesis.ssz{{end}}{{else}}
-      - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}{{range $enr := .Bootnodes}}
-      - --bootstrap-node={{$enr}}{{end}}{{with .TTD}}
-      - --terminal-total-difficulty-override=${TTD}{{end}}
+      - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}{{range $enr := .CCBootnodesList}}
+      - --bootstrap-node={{$enr}}{{end}}{{if .TTD}}
+      - --terminal-total-difficulty-override={{.TTD}}{{end}}
       - --p2p-tcp-port={{.ClDiscoveryPort}}
       - --p2p-udp-port={{.ClDiscoveryPort}}
       - --jwt-secret=/tmp/jwt/jwtsecret
@@ -44,13 +41,13 @@
       - --execution-endpoint=${EC_AUTH_URL}{{range $url := .FallbackELUrls}}
       - --fallback-web3provider={{$url}}{{end}}
       - --accept-terms-of-use{{with .FeeRecipient}}
-      - --suggested-fee-recipient=${CL_FEE_RECIPIENT}{{end}}
+      - --suggested-fee-recipient=${FEE_RECIPIENT}{{end}}
       - --monitoring-host=0.0.0.0
       - --monitoring-port={{.ClMetricsPort}}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
       - --checkpoint-sync-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}
       - --genesis-beacon-api-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{end}}{{range $flag := .ClExtraFlags}}
-      - --{{$flag}}{{end}}{{if .Mev}}
-      - --http-mev-relay=http://mevboost:{{.MevPort}}{{end}}{{if .LoggingDriver}}
+      - --{{$flag}}{{end}}{{if .MevBoostEndpoint}}
+      - --http-mev-relay={{.MevBoostEndpoint}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:

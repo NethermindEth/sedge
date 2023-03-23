@@ -16,575 +16,335 @@ limitations under the License.
 package cli
 
 import (
-	"bytes"
-	"errors"
-	"fmt"
-	"os"
+	"io"
 	"path/filepath"
-	"strings"
 	"testing"
-	"time"
 
-	posmoni "github.com/NethermindEth/posmoni/pkg/eth2"
+	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
-	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
+	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
-	"github.com/NethermindEth/sedge/test/mock_prompts"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 )
 
-var (
-	inspectExecutionUrl = "http://192.168.128.3"
-	inspectConsensusUrl = "http://192.168.128.3"
-)
+func TestCli(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
 
-var inspectOut = `
-[
-	{
-		"NetworkSettings": {
-			"Bridge": "",
-			"SandboxID": "56e2c759c33315c9de009bd70aac0fdeb9367549303433debb71edff8dd4db39",
-			"HairpinMode": false,
-			"LinkLocalIPv6Address": "",
-			"LinkLocalIPv6PrefixLen": 0,
-			"Ports": {
-				"30303/tcp": [
-					{
-						"HostIp": "0.0.0.0",
-						"HostPort": "30303"
-					}
-				],
-				"30303/udp": [
-					{
-						"HostIp": "0.0.0.0",
-						"HostPort": "30303"
-					}
-				],
-				"8008/tcp": [
-					{
-						"HostIp": "0.0.0.0",
-						"HostPort": "8008"
-					}
-				],
-				"8545/tcp": [
-					{
-						"HostIp": "0.0.0.0",
-						"HostPort": "8560"
-					}
-				]
-			},
-			"SandboxKey": "/var/run/docker/netns/56e2c759c333",
-			"SecondaryIPAddresses": null,
-			"SecondaryIPv6Addresses": null,
-			"EndpointID": "",
-			"Gateway": "",
-			"GlobalIPv6Address": "",
-			"GlobalIPv6PrefixLen": 0,
-			"IPAddress": "",
-			"IPPrefixLen": 0,
-			"IPv6Gateway": "",
-			"MacAddress": "",
-			"Networks": {
-				"sedge_network": {
-					"IPAMConfig": null,
-					"Links": null,
-					"Aliases": [
-						"execution-client",
-						"execution",
-						"babf61f2c52a"
-					],
-					"NetworkID": "b4bb0c21aa1c9495d08309f8f7f4f2fb5a493fd925c880cb146045aafb2f4390",
-					"EndpointID": "7832cdd23f1f9f70e38576f8088da61010e057bffb0b98c83bd391065d703ed9",
-					"Gateway": "192.168.128.1",
-					"IPAddress": "192.168.128.3",
-					"IPPrefixLen": 20,
-					"IPv6Gateway": "",
-					"GlobalIPv6Address": "",
-					"GlobalIPv6PrefixLen": 0,
-					"MacAddress": "02:42:c0:a8:80:03",
-					"DriverOpts": null
-				}
-			}
-		}
+	ETHClients := map[string][]string{
+		"execution": clients.AllClients["execution"],
+		"consensus": clients.AllClients["consensus"],
+		"validator": clients.AllClients["validator"],
 	}
-]
-`
+	ETHClients["execution"] = append(ETHClients["execution"], "randomize")
+	ETHClients["consensus"] = append(ETHClients["consensus"], "randomize")
+	ETHClients["validator"] = append(ETHClients["validator"], "randomize")
 
-type cliCmdTestCase struct {
-	name       string
-	configPath string
-	runner     commands.CommandRunner
-	monitor    MonitoringTool
-	fdOut      *bytes.Buffer
-	args       CliCmdFlags
-	isPreErr   bool
-	isErr      bool
-}
-
-func (flags *CliCmdFlags) argsList() []string {
-	s := []string{}
-	if flags.yes {
-		s = append(s, "--yes")
+	GnosisClients := map[string][]string{
+		"execution": {"nethermind"},
+		"consensus": utils.Filter(clients.AllClients["consensus"], func(c string) bool { return c != "prysm" }),
+		"validator": utils.Filter(clients.AllClients["validator"], func(c string) bool { return c != "prysm" }),
 	}
-	if flags.run {
-		s = append(s, "--run")
-	}
-	if flags.install {
-		s = append(s, "-i")
-	}
-	if flags.executionName != "" {
-		s = append(s, "-e", flags.executionName)
-	}
-	if flags.consensusName != "" {
-		s = append(s, "-c", flags.consensusName)
-	}
-	if flags.validatorName != "" {
-		s = append(s, "-v", flags.validatorName)
-	}
-	if flags.network != "" {
-		s = append(s, "-n", flags.network)
-	}
-	if flags.feeRecipient != "" {
-		s = append(s, "--fee-recipient", flags.feeRecipient)
-	}
-	if flags.services != nil {
-		if len(*flags.services) == 0 {
-			s = append(s, "--run-client none")
-		} else {
-			s = append(s, "--run-clients", strings.Join(*flags.services, ","))
-		}
-	}
-	if flags.generationPath != "" {
-		s = append(s, "-p", flags.generationPath)
-	}
-	return s
-}
+	GnosisClients["execution"] = append(GnosisClients["execution"], "randomize")
+	GnosisClients["consensus"] = append(GnosisClients["consensus"], "randomize")
+	GnosisClients["validator"] = append(GnosisClients["validator"], "randomize")
 
-func (flags *CliCmdFlags) toString() string {
-	return strings.Join(flags.argsList(), " ")
-}
-
-func prepareCliCmd(tc cliCmdTestCase) {
-	// Set output buffers
-	log.SetOutput(tc.fdOut)
-	// Set config file path
-	cfgFile = tc.configPath
-	initConfig()
-	initMonitor(func() MonitoringTool {
-		return tc.monitor
-	})
-}
-
-func buildCliTestCase(
-	t *testing.T,
-	name,
-	caseTestDataDir string,
-	args CliCmdFlags,
-	isPreErr,
-	isErr bool,
-) *cliCmdTestCase {
-	tc := cliCmdTestCase{}
-	configPath := t.TempDir()
-
-	err := test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", caseTestDataDir, "config"), configPath)
-	if err != nil {
-		t.Fatalf("Can't build test case: %v", err)
-	}
-	dcPath := filepath.Join(configPath, "docker-compose-scripts")
-	err = os.Mkdir(dcPath, os.ModePerm)
-	if err != nil {
-		t.Fatalf("Can't build test case: %v", err)
-	}
-
-	// TODO: allow runner edition
-	tc.runner = &test.SimpleCMDRunner{
-		SRunCMD: func(c commands.Command) (string, error) {
-			// For getContainerIP logic
-			if strings.Contains(c.Cmd, "ps --quiet") {
-				return "666", nil
-			} else if strings.Contains(c.Cmd, "docker inspect 666") {
-				return inspectOut, nil
-			}
-			return "", nil
-		},
-		SRunBash: func(bs commands.ScriptFile) (string, error) {
-			return "", nil
-		},
-	}
-
-	// Check for port occupation
-	defaultsPorts := map[string]string{
-		"ELApi": configs.DefaultApiPortEL,
-		"CLApi": configs.DefaultApiPortCL,
-	}
-	ports, err := utils.AssignPorts("localhost", defaultsPorts)
-	if err != nil {
-		t.Fatalf(configs.PortOccupationError, err)
-	}
-
-	tc.monitor = &monitorStub{
-		data: []posmoni.EndpointSyncStatus{
-			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
-			{Endpoint: inspectConsensusUrl + ":" + ports["CLApi"], Synced: true},
-			{Endpoint: inspectExecutionUrl + ":" + ports["ELApi"], Synced: true},
-			{Endpoint: inspectConsensusUrl + ":" + ports["CLApi"], Synced: true},
-		},
-	}
-
-	tc.name = name
-	tc.args = args
-	tc.args.generationPath = dcPath
-	tc.configPath = filepath.Join(configPath, "config.yaml")
-	tc.fdOut = new(bytes.Buffer)
-	tc.isPreErr = isPreErr
-	tc.isErr = isErr
-	return &tc
-}
-
-func TestCliCmd(t *testing.T) {
-	// TODO: Add more test cases
-	tcs := []cliCmdTestCase{
-		*buildCliTestCase(
-			t,
-			"Random clients", "case_1",
-			CliCmdFlags{
-				yes:      true,
-				services: &[]string{execution, consensus},
-			},
-			false,
-			false,
-		),
-		*buildCliTestCase(
-			t,
-			"Fixed clients", "case_1",
-			CliCmdFlags{
-				yes:           true,
-				executionName: "nethermind",
-				consensusName: "lighthouse",
-				validatorName: "lighthouse",
-				services:      &[]string{execution, consensus},
-			},
-			false,
-			false,
-		),
-		*buildCliTestCase(
-			t,
-			"Missing consensus client", "case_1",
-			CliCmdFlags{
-				yes:           true,
-				executionName: "nethermind",
-				validatorName: "lighthouse",
-				services:      &[]string{execution, consensus},
-			},
-			false,
-			false,
-		),
-		*buildCliTestCase(
-			t,
-			"Missing validator client", "case_1",
-			CliCmdFlags{
-				yes:           true,
-				executionName: "nethermind",
-				consensusName: "lighthouse",
-				services:      &[]string{execution, consensus},
-			},
-			false,
-			false,
-		),
-		*buildCliTestCase(
-			t,
-			"Good network input", "case_1",
-			CliCmdFlags{
-				yes:           true,
-				executionName: "nethermind",
-				consensusName: "lighthouse",
-				network:       "mainnet",
-				services:      &[]string{execution, consensus},
-			},
-			false,
-			false,
-		),
-		*buildCliTestCase(
-			t,
-			"Bad network input", "case_1",
-			CliCmdFlags{
-				yes:           true,
-				executionName: "nethermind",
-				consensusName: "lighthouse",
-				network:       "sedge",
-				services:      &[]string{execution, consensus},
-			},
-			true,
-			true,
-		),
-		*buildCliTestCase(
-			t,
-			"--run-client all", "case_1",
-			CliCmdFlags{
-				yes:      true,
-				services: &[]string{"all"},
-			},
-			false,
-			false,
-		),
-		*buildCliTestCase(
-			t,
-			"--run-client none", "case_1",
-			CliCmdFlags{
-				yes: true,
-			},
-			false,
-			false,
-		),
-		*buildCliTestCase(
-			t,
-			"--run-client none, execution, ambiguos error", "case_1",
-			CliCmdFlags{
-				yes:      true,
-				services: &[]string{execution, "none"},
-			},
-			true,
-			true,
-		),
-		*buildCliTestCase(
-			t,
-			"--run-client validator", "case_1",
-			CliCmdFlags{
-				yes:      true,
-				services: &[]string{validator},
-			},
-			false,
-			false,
-		),
-		*buildCliTestCase(
-			t,
-			"--run-client all, validator, ambiguos error", "case_1",
-			CliCmdFlags{
-				yes:      true,
-				services: &[]string{validator, "all"},
-			},
-			true,
-			true,
-		),
-		*buildCliTestCase(
-			t,
-			"--run-client all, validator, ambiguos error", "case_1",
-			CliCmdFlags{
-				yes:      true,
-				services: &[]string{validator, "all"},
-			},
-			true,
-			true,
-		),
-		*buildCliTestCase(
-			t,
-			"Invalid network", "case_1",
-			CliCmdFlags{
-				yes:      true,
-				network:  "test",
-				services: &[]string{execution, consensus},
-			},
-			true,
-			true,
-		),
-	}
-
-	for _, tc := range tcs {
-		t.Run(tc.name, func(t *testing.T) {
-			descr := fmt.Sprintf("sedge cli %s", tc.args.toString())
-
-			ctrl := gomock.NewController(t)
-			prompt := mock_prompts.NewMockPrompt(ctrl)
-			defer ctrl.Finish()
-
-			rootCmd := RootCmd()
-			rootCmd.AddCommand(CliCmd(tc.runner, prompt))
-			argsL := append([]string{"cli"}, tc.args.argsList()...)
-			rootCmd.SetArgs(argsL)
-
-			prepareCliCmd(tc)
-
-			if err := rootCmd.Execute(); !tc.isErr && err != nil {
-				t.Errorf("%s failed: %v", descr, err)
-			} else if tc.isErr && err == nil {
-				t.Errorf("%s expected to fail", descr)
-			}
-		})
-	}
-}
-
-// Stub for MonitoringTool interface
-type monitorStub struct {
-	data  []posmoni.EndpointSyncStatus
-	calls int
-}
-
-func (ms *monitorStub) TrackSync(done <-chan struct{}, beaconEndpoints, executionEndpoints []string, wait time.Duration) <-chan posmoni.EndpointSyncStatus {
-	ms.calls++
-	c := make(chan posmoni.EndpointSyncStatus, len(ms.data))
-	var w time.Duration
-
-	go func() {
-		for {
-			select {
-			case <-done:
-				close(c)
-				return
-			case <-time.After(w):
-				if w == 0 {
-					// Don't wait the first time
-					w = wait
-				}
-				for _, d := range ms.data {
-					c <- d
-				}
-			}
-		}
-	}()
-
-	return c
-}
-
-func TestTrackSync(t *testing.T) {
-	t.Parallel()
-
-	tcs := []struct {
-		name    string
-		data    []posmoni.EndpointSyncStatus
-		runner  commands.CommandRunner
-		flags   CliCmdFlags
-		isError bool
+	tests := []struct {
+		name  string
+		setup func(*testing.T, *sedge_mocks.MockSedgeActions, *sedge_mocks.MockPrompter, *sedge_mocks.MockDependenciesManager)
 	}{
 		{
-			"Test case 1, execution client got an error",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
+			name: "full node with validator mainnet",
+			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
+				generationPath := t.TempDir()
+				genData := generate.GenData{
+					Services: []string{"execution", "consensus", "validator", "mev-boost"},
+					ExecutionClient: &clients.Client{
+						Name:  "nethermind",
+						Type:  "execution",
+						Image: configs.ClientImages.Execution.Nethermind.String(),
+					},
+					ConsensusClient: &clients.Client{
+						Name:  "prysm",
+						Type:  "consensus",
+						Image: configs.ClientImages.Consensus.Prysm.String(),
+					},
+					ValidatorClient: &clients.Client{
+						Name:  "prysm",
+						Type:  "validator",
+						Image: configs.ClientImages.Validator.Prysm.String(),
+					},
+					Network:            "mainnet",
+					CheckpointSyncUrl:  "http://checkpoint.sync",
+					FeeRecipient:       "0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5",
+					MapAllPorts:        true,
+					Graffiti:           "test graffiti",
+					VLStartGracePeriod: 840,
+					Mev:                true,
+					MevImage:           "flashbots/mev-boost:latest",
+					RelayURLs:          configs.NetworksConfigs()[NetworkMainnet].RelayURLs,
+					ContainerTag:       "tag",
+					JWTSecretPath:      filepath.Join(generationPath, "jwtsecret"),
+				}
+				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
+				gomock.InOrder(
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
+					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
+					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
+					prompter.EXPECT().Confirm("Do you want to set up a validator?", true).Return(true, nil),
+					prompter.EXPECT().Confirm("Enable MEV Boost?", true).Return(true, nil),
+					prompter.EXPECT().Input("Mev-Boost image", "flashbots/mev-boost:latest", false, nil).Return("flashbots/mev-boost:latest", nil),
+					prompter.EXPECT().InputList("Insert relay URLs if you don't want to use the default values listed below", configs.NetworksConfigs()[NetworkMainnet].RelayURLs, gomock.AssignableToTypeOf(func([]string) error { return nil })).Return(configs.NetworksConfigs()[NetworkMainnet].RelayURLs, nil),
+					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
+					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(1, nil),
+					prompter.EXPECT().Select("Select validator client", "", ETHClients["validator"]).Return(1, nil),
+					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
+					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false, gomock.AssignableToTypeOf(ui.GraffitiValidator)).Return("test graffiti", nil),
+					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("http://checkpoint.sync", nil),
+					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address", "", true).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
+					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
+					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
+					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
+						GenerationPath: generationPath,
+						GenerationData: genData,
+					})).Return(genData, nil),
+					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
+					prompter.EXPECT().Select("Select mnemonic source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
+					prompter.EXPECT().Select("Select passphrase source", "", []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}).Return(0, nil),
+					prompter.EXPECT().Input("Withdrawal address", "", false, gomock.AssignableToTypeOf(func(s string) error { return ui.EthAddressValidator(s, true) })).Return("0x00000007abca72jmd83jd8u3jd9kdn32j38abc", nil),
+					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
+					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
+					depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil),
+					depsMgr.EXPECT().DockerEngineIsOn().Return(nil),
+					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil),
+					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"validator"},
+					}),
+					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+						ValidatorClient: "prysm",
+						Network:         NetworkMainnet,
+						GenerationPath:  generationPath,
+						From:            filepath.Join(generationPath, "keystore"),
+						ContainerTag:    "tag",
+					}).Return(nil),
+					prompter.EXPECT().Confirm("Do you want to import slashing protection data?", false).Return(false, nil),
+					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
+				)
 			},
-			&test.SimpleCMDRunner{},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			true,
 		},
 		{
-			"Test case 2, execution client got an error, consensus client not synced",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
+			name: "full node without validator mainnet",
+			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
+				generationPath := t.TempDir()
+				genData := generate.GenData{
+					Services: []string{"execution", "consensus"},
+					ExecutionClient: &clients.Client{
+						Name:  "nethermind",
+						Type:  "execution",
+						Image: configs.ClientImages.Execution.Nethermind.String(),
+					},
+					ConsensusClient: &clients.Client{
+						Name:  "prysm",
+						Type:  "consensus",
+						Image: configs.ClientImages.Consensus.Prysm.String(),
+					},
+					Network:           "mainnet",
+					CheckpointSyncUrl: "http://checkpoint.sync",
+					FeeRecipient:      "0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5",
+					MapAllPorts:       true,
+					ContainerTag:      "tag",
+					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
+				}
+				gomock.InOrder(
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
+					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
+					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
+					prompter.EXPECT().Confirm("Do you want to set up a validator?", true).Return(false, nil),
+					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
+					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(1, nil),
+					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("http://checkpoint.sync", nil),
+					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
+					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
+					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
+					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
+						GenerationPath: generationPath,
+						GenerationData: genData,
+					})).Return(genData, nil),
+					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
+				)
 			},
-			&test.SimpleCMDRunner{},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			true,
 		},
 		{
-			"Test case 3, execution client got an error, consensus client synced",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false, Error: errors.New("")},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			name: "execution node",
+			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
+				generationPath := t.TempDir()
+				genData := generate.GenData{
+					Services: []string{"execution"},
+					ExecutionClient: &clients.Client{
+						Name:  "nethermind",
+						Type:  "execution",
+						Image: configs.ClientImages.Execution.Nethermind.String(),
+					},
+					Network:      "mainnet",
+					MapAllPorts:  true,
+					ContainerTag: "tag",
+				}
+
+				gomock.InOrder(
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
+					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(1, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
+					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
+					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
+					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
+					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(2, nil),
+					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
+						GenerationPath: generationPath,
+						GenerationData: genData,
+					})).Return(genData, nil),
+					prompter.EXPECT().Confirm("Run services now?", false).Return(true, nil),
+					depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil),
+					depsMgr.EXPECT().DockerEngineIsOn().Return(nil),
+					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil),
+					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"execution"},
+					}),
+					sedgeActions.EXPECT().RunContainers(actions.RunContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"execution"},
+					}),
+				)
 			},
-			&test.SimpleCMDRunner{},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			true,
 		},
 		{
-			"Test case 4, bad execution client response, good consensus client response",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true, Error: errors.New("")},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
+			name: "consensus node",
+			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
+				generationPath := t.TempDir()
+				genData := generate.GenData{
+					Services: []string{"consensus"},
+					ConsensusClient: &clients.Client{
+						Name:  "lodestar",
+						Type:  "consensus",
+						Image: configs.ClientImages.Consensus.Lodestar.String(),
+					},
+					Network:           NetworkGoerli,
+					CheckpointSyncUrl: "http://checkpoint.sync",
+					FeeRecipient:      "0x2d07a21ebadde0c13e8b91022a7e5732eb6bf5d5",
+					MapAllPorts:       true,
+					ExecutionApiUrl:   "http://execution:5051",
+					ExecutionAuthUrl:  "http://execution:5051",
+					MevBoostEndpoint:  "http://mev-boost:3030",
+					ContainerTag:      "tag",
+					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
+				}
+
+				gomock.InOrder(
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(1, nil),
+					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
+					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
+					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(3, nil),
+					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("http://checkpoint.sync", nil),
+					prompter.EXPECT().InputURL("Mev-Boost endpoint", "", false).Return("http://mev-boost:3030", nil),
+					prompter.EXPECT().InputURL("Execution API URL", "", false).Return("http://execution:5051", nil),
+					prompter.EXPECT().InputURL("Execution Auth API URL", "", false).Return("http://execution:5051", nil),
+					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e8b91022a7e5732eb6bf5d5", nil),
+					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
+					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
+					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
+						GenerationPath: generationPath,
+						GenerationData: genData,
+					})).Return(genData, nil),
+					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
+				)
 			},
-			&test.SimpleCMDRunner{},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			true,
 		},
 		{
-			"Test case 5, consensus client got an error, consensus client not synced",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
+			name: "validator mainnet",
+			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
+				generationPath := t.TempDir()
+
+				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
+				genData := generate.GenData{
+					Services: []string{"validator"},
+					ValidatorClient: &clients.Client{
+						Name:  "prysm",
+						Type:  "validator",
+						Image: configs.ClientImages.Validator.Prysm.String(),
+					},
+					Network:             "mainnet",
+					FeeRecipient:        "0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5",
+					Graffiti:            "test graffiti",
+					VLStartGracePeriod:  840,
+					MevBoostOnValidator: true,
+					ConsensusApiUrl:     "http://localhost:5051",
+					ContainerTag:        "tag",
+				}
+
+				gomock.InOrder(
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
+					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(3, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
+					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
+					prompter.EXPECT().Select("Select validator client", "", ETHClients["validator"]).Return(1, nil),
+					prompter.EXPECT().InputURL("Consensus API URL", "", false).Return("http://localhost:5051", nil),
+					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false, gomock.AssignableToTypeOf(ui.GraffitiValidator)).Return("test graffiti", nil),
+					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
+					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address", "", true).Return("0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5", nil),
+					prompter.EXPECT().Confirm("Enable MEV Boost?", true).Return(true, nil),
+					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
+						GenerationPath: generationPath,
+						GenerationData: genData,
+					})).Return(genData, nil),
+					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
+					prompter.EXPECT().Select("Select mnemonic source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
+					prompter.EXPECT().Select("Select passphrase source", "", []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}).Return(0, nil),
+					prompter.EXPECT().Input("Withdrawal address", "", false, gomock.AssignableToTypeOf(func(s string) error { return ui.EthAddressValidator(s, true) })).Return("0x2d07a21ebadde0c13e6b91022a7e5732eb6bf5d5", nil),
+					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
+					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
+					depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil),
+					depsMgr.EXPECT().DockerEngineIsOn().Return(nil),
+					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil),
+					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"validator"},
+					}),
+					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+						ValidatorClient: "prysm",
+						Network:         NetworkMainnet,
+						From:            filepath.Join(generationPath, "keystore"),
+						GenerationPath:  generationPath,
+						ContainerTag:    "tag",
+					}).Return(nil),
+					prompter.EXPECT().Confirm("Do you want to import slashing protection data?", false).Return(false, nil),
+					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
+				)
 			},
-			&test.SimpleCMDRunner{},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			true,
-		},
-		{
-			"Test case 6, consensus client got an error, consensus client synced",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-			},
-			&test.SimpleCMDRunner{},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			true,
-		},
-		{
-			"Test case 7, mixed results",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-			},
-			&test.SimpleCMDRunner{},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			false,
-		},
-		{
-			"Test case 8, mixed results",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: true},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: false},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-			},
-			&test.SimpleCMDRunner{},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			false,
-		},
-		{
-			"Test case 9, mixed results, error",
-			[]posmoni.EndpointSyncStatus{
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false},
-				{Endpoint: configs.OnPremiseExecutionURL, Synced: true},
-				{Endpoint: configs.OnPremiseConsensusURL, Synced: false, Error: errors.New("")},
-			},
-			&test.SimpleCMDRunner{},
-			CliCmdFlags{
-				generationPath: configs.DefaultDockerComposeScriptsPath,
-			},
-			true,
 		},
 	}
-	// TODO: Starvation bc a synced status from one of the clients is not tested
 
-	for _, tc := range tcs {
-		t.Run(tc.name, func(t *testing.T) {
-			ms := monitorStub{data: tc.data}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			sedgeActions := sedge_mocks.NewMockSedgeActions(ctrl)
+			prompter := sedge_mocks.NewMockPrompter(ctrl)
+			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
+			defer ctrl.Finish()
 
-			err := trackSync(tc.runner, &ms, "", "", time.Millisecond*100, &tc.flags)
-			utils.CheckErr("trackSync(...) failed", tc.isError, err)
+			tt.setup(t, sedgeActions, prompter, depsMgr)
+
+			c := CliCmd(prompter, sedgeActions, depsMgr)
+			c.Execute()
 		})
 	}
 }

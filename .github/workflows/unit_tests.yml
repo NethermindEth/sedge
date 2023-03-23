@@ -9,28 +9,35 @@ on:
 jobs:
   unit_tests:
     name: Run unit tests
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: ["1.18.2"]
+        go: ["1.19"]
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go }}
 
       - name: Install deps
         run: make install-deps
 
-      - name: Run tests
+      - name: Run tests ubuntu
+        if: matrix.os == 'ubuntu-latest'
         run: make codecov-test
+
+      - name: Run tests other
+        if: matrix.os != 'ubuntu-latest'
+        run: make generate && go test ./...
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
+        if: matrix.os == 'ubuntu-latest'
         with:
           fail_ci_if_error: true
           files: ./coverage/coverage.out

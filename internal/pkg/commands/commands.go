@@ -20,11 +20,17 @@ type CommandRunner interface {
 
 	BuildDockerComposePullCMD(options DockerComposePullOptions) Command
 
+	BuildDockerComposeCreateCMD(options DockerComposeCreateOptions) Command
+
+	BuildDockerComposeBuildCMD(options DockerComposeBuildOptions) Command
+
 	BuildDockerPSCMD(options DockerPSOptions) Command
 
 	BuildDockerComposePSCMD(options DockerComposePsOptions) Command
 
 	BuildDockerComposeLogsCMD(options DockerComposeLogsOptions) Command
+
+	BuildDockerComposeVersionCMD() Command
 
 	BuildDockerBuildCMD(options DockerBuildOptions) Command
 
@@ -38,7 +44,9 @@ type CommandRunner interface {
 
 	BuildEchoToFileCMD(options EchoToFileOptions) Command
 
-	RunCMD(cmd Command) (string, error)
+	BuildOpenTextEditor(options OpenTextEditorOptions) Command
+
+	RunCMD(cmd Command) (string, int, error)
 
 	RunScript(script ScriptFile) (string, error)
 }

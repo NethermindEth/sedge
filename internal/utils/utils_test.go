@@ -23,7 +23,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
+
+	"github.com/NethermindEth/sedge/configs"
 )
 
 func TestSkipLines(t *testing.T) {
@@ -124,12 +125,17 @@ func TestPortAvailable(t *testing.T) {
 		}))
 	defer server.Close()
 	split := strings.Split(server.URL, ":")
-	host, port := split[1][2:], split[2]
+	host, strPort := split[1][2:], split[2]
+	port64, err := strconv.ParseUint(strPort, 10, 16)
+	if err != nil {
+		t.Fatalf("cannot convert http server port: %v", err)
+	}
+	port := uint16(port64)
 
 	tcs := []struct {
 		name string
 		host string
-		port string
+		port uint16
 		want bool
 	}{
 		{
@@ -144,20 +150,20 @@ func TestPortAvailable(t *testing.T) {
 		},
 		{
 			"Test case 3, good host and bad port",
-			host, "666666666",
+			host, 9999,
 			true,
 		},
 		{
 			"Test case 4, good host and available port",
-			"localhost", "9999",
+			"localhost", 9999,
 			true,
 		},
 	}
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			if got := portAvailable(tc.host, tc.port, time.Millisecond*200); tc.want != got {
-				t.Errorf("portAvailable(%s, %s, %s) failed; expected: %v, got: %v", tc.host, tc.port, "200ms", tc.want, got)
+			if got := portAvailable(tc.host, tc.port); tc.want != got {
+				t.Errorf("portAvailable(%s, %d) failed; expected: %v, got: %v", tc.host, tc.port, tc.want, got)
 			}
 		})
 	}
@@ -170,49 +176,53 @@ func TestAssignPorts(t *testing.T) {
 		}))
 	defer server.Close()
 	split := strings.Split(server.URL, ":")
-	host, port := split[1][2:], split[2]
-	portN, _ := strconv.Atoi(port)
+	host, strPort := split[1][2:], split[2]
+	port64, err := strconv.ParseUint(strPort, 10, 16)
+	if err != nil {
+		t.Fatalf("cannot convert http server port: %v", err)
+	}
+	port := uint16(port64)
 
 	tcs := []struct {
 		name     string
 		host     string
-		defaults map[string]string
-		want     map[string]string
+		defaults map[string]uint16
+		want     map[string]uint16
 		isErr    bool
 	}{
 		{
 			"Test case 1, good host and defaults",
 			host,
-			map[string]string{"EL": "8545", "CL": port},
-			map[string]string{"EL": "8545", "CL": strconv.Itoa(portN + 1)},
+			map[string]uint16{"EL": 8545, "CL": port},
+			map[string]uint16{"EL": 8545, "CL": port + 1},
 			false,
 		},
 		{
 			"Test case 2, good host and bad defaults",
 			host,
-			map[string]string{"EL": "8545", "CL": ""},
-			map[string]string{},
+			map[string]uint16{"EL": 8545, "CL": 0},
+			map[string]uint16{},
 			true,
 		},
 		{
 			"Test case 3, good host and bad defaults",
 			host,
-			map[string]string{"CL": "", "EL": "8545"},
-			map[string]string{},
+			map[string]uint16{"CL": 0, "EL": 8545},
+			map[string]uint16{},
 			true,
 		},
 		{
 			"Test case 4, bad host and good defaults",
 			"b@dh0$t",
-			map[string]string{"CL": "9000", "EL": "8545"},
-			map[string]string{"CL": "9000", "EL": "8545"},
+			map[string]uint16{"CL": 9000, "EL": 8545},
+			map[string]uint16{"CL": 9000, "EL": 8545},
 			false,
 		},
 		{
 			"Test case 5, good host and successive increments",
 			host,
-			map[string]string{"CL": port, "EL": strconv.Itoa(portN + 1)},
-			map[string]string{"CL": strconv.Itoa(portN + 1), "EL": strconv.Itoa(portN + 2)},
+			map[string]uint16{"CL": port, "EL": port + 1},
+			map[string]uint16{"CL": port + 1, "EL": port + 2},
 			false,
 		},
 	}
@@ -229,7 +239,7 @@ func TestAssignPorts(t *testing.T) {
 			if err == nil {
 				for k := range tc.want {
 					if tc.want[k] != got[k] {
-						t.Errorf("A mismatch in the result has been found. Expected (key: %s, value: %s); got (key: %s, value %s). Call: %s. Expected object: %+v, Got: %+v", k, tc.want[k], k, got[k], descr, tc.want, got)
+						t.Errorf("A mismatch in the result has been found. Expected (key: %s, value: %d); got (key: %s, value %d). Call: %s. Expected object: %+v, Got: %+v", k, tc.want[k], k, got[k], descr, tc.want, got)
 					}
 				}
 			}
@@ -268,6 +278,219 @@ func TestFilter(t *testing.T) {
 
 			if !reflect.DeepEqual(got, tc.want) {
 				t.Errorf("Filter(%+v) failed; expected: %+v, got: %+v", tc.in, tc.want, got)
+			}
+		})
+	}
+}
+
+func TestUriValidator(t *testing.T) {
+	tcs := []struct {
+		name string
+		in   []string
+		want bool
+	}{
+		{
+			"good uris",
+			[]string{
+				"http://localhost:8545",
+				"https://localhost:8545",
+				"https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net",
+				"https://boost-relay.flashbots.net",
+				"https://localhost:8545/api/v1/eth1",
+				"https://localhost:8545/api/v1/eth1,.{}",
+				"https://nethermind/api/v1/eth1",
+				"http://sedge",
+				"https://192.168.0.1",
+			},
+			true,
+		},
+		{
+			"good uri",
+			[]string{"http://banana/api/monkey/[spliat]"},
+			true,
+		},
+		{
+			"bad uri",
+			[]string{"https://192.168.0.1:8545", "localhost:8545", "https:/boost-relay.flashbots.net"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{"localhost:8545"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{"localhost/545"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{"https:/boost-relay.flashbots.net"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{"htp://localhost:8545"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{"./8080"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{"44.33.55.66:8080"},
+			false,
+		},
+		{
+			"bad uri",
+			[]string{""},
+			false,
+		},
+	}
+
+	for i, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Helper()
+			t.Logf("Test case %d: %s", i+1, tc.name)
+
+			uri, got := UriValidator(tc.in)
+
+			if got != tc.want {
+				t.Errorf("UriValidator(%s) failed; expected: %v, got: %v. Bad uri: %s", tc.in, tc.want, got, uri)
+			}
+			if !got && !Contains(tc.in, uri) {
+				t.Errorf("UriValidator(%s) returned a different uri that provided; expected: %s, got: %s", tc.in, tc.in, uri)
+			}
+		})
+	}
+}
+
+func TestENodesValidator(t *testing.T) {
+	tcs := []struct {
+		name string
+		in   []string
+		want error
+	}{
+		{
+			"good enodes",
+			[]string{
+				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
+				"enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30303",
+				"enode://715171f50508aba88aecd1250af392a45a330af91d7b90701c436b618c86aaa1589c9184561907bebbb56439b8f8787bc01f49a7c77276c58c1b09822d75e8e8@@52.231.165.108:30303",
+				"enode://5d6d7cd20d6da4bb83a1d28cadb5d409b64edf314c0335df658c1a54e32c7c4a7ab7823d57c39b6a757556e68ff1df17c748b698544a55cb488b52479a92b60f@the-second-most-cool-enode:666",
+			},
+			nil,
+		},
+		{
+			"bad enode",
+			[]string{
+				"enode://0x0f6b",
+			},
+			fmt.Errorf(configs.InvalidEnodeError, "enode://0x0f6b"),
+		},
+		{
+			"bad enode",
+			[]string{
+				"enode://2b252ab6a1d0f971d9722cb839a42cb81db019ba44c08754628ab4a823487071b5695317c8ccd085219c3a03af063495b2f1da8d18218da2d6a82981b45e6ffc@the-most-cool-enode",
+			},
+			fmt.Errorf(configs.InvalidEnodeError, "enode://2b252ab6a1d0f971d9722cb839a42cb81db019ba44c08754628ab4a823487071b5695317c8ccd085219c3a03af063495b2f1da8d18218da2d6a82981b45e6ffc@the-most-cool-enode"),
+		},
+		{
+			"bad enode",
+			[]string{
+				"enode://4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166",
+			},
+			fmt.Errorf(configs.InvalidEnodeError, "enode://4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166"),
+		},
+		{
+			"bad enode",
+			[]string{
+				"enode:4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166",
+				"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
+			},
+			fmt.Errorf(configs.InvalidEnodeError, "enode:4aeb4ab6c14b23e2c4cfdce879c04b0748a20d8e9b59e25ded2a08143e265c6c25936e74cbc8e641e3312ca288673d91f2f93f8e277de3cfa444ecdaaf982052@157.90.35.166"),
+		},
+	}
+
+	for i, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Helper()
+			t.Logf("Test case %d: %s", i+1, tc.name)
+
+			got := ENodesValidator(tc.in)
+
+			if err := CheckErr("ENodesValidator", tc.want != nil, got); err != nil {
+				t.Error(err)
+			}
+
+			if got != nil && tc.want != nil && got.Error() != tc.want.Error() {
+				t.Errorf("ENodesValidator(%s) returned a different error; expected: %s, got: %s", tc.in, tc.want, got)
+			}
+		})
+	}
+}
+
+func TestENRValidator(t *testing.T) {
+	tcs := []struct {
+		name string
+		in   []string
+		want error
+	}{
+		{
+			"good enrs",
+			[]string{
+				"enr:-LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo", "enr:-KG4QCIzJZTY_fs_2vqWEatJL9RrtnPwDCv-jRBuO5FQ2qBrfJubWOWazri6s9HsyZdu-fRUfEzkebhf1nvO42_FVzwDhGV0aDKQed8EKAAAECD__________4JpZIJ2NIJpcISHtbYziXNlY3AyNTZrMaED4m9AqVs6F32rSCGsjtYcsyfQE2K8nDiGmocUY_iq-TSDdGNwgiMog3VkcIIjKA", "enr:-Ku4QFmUkNp0g9bsLX2PfVeIyT-9WO-PZlrqZBNtEyofOOfLMScDjaTzGxIb1Ns9Wo5Pm_8nlq-SZwcQfTH2cgO-s88Bh2F0dG5ldHOIAAAAAAAAAACEZXRoMpDkvpOTAAAQIP__________gmlkgnY0gmlwhBLf22SJc2VjcDI1NmsxoQLV_jMOIxKbjHFKgrkFvwDvpexo6Nd58TK5k7ss4Vt0IoN1ZHCCG1g",
+				"enr:-LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNH",
+			},
+			nil,
+		},
+		{
+			"bad enr",
+			[]string{
+				"enr:LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo",
+			},
+			fmt.Errorf(configs.InvalidEnrError, "enr:LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo"),
+		},
+		{
+			"bad enr",
+			[]string{
+				"enr-LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo",
+			},
+			fmt.Errorf(configs.InvalidEnrError, "enr-LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo"),
+		},
+		{
+			"bad enr",
+			[]string{
+				"en:-LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo",
+			},
+			fmt.Errorf(configs.InvalidEnrError, "en:-LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo"),
+		},
+		{
+			"bad enr",
+			[]string{
+				"enrLK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo",
+				"enr:-LK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo",
+			},
+			fmt.Errorf(configs.InvalidEnrError, "enrLK4QH1xnjotgXwg25IDPjrqRGFnH1ScgNHA3dv1Z8xHCp4uP3N3Jjl_aYv_WIxQRdwZvSukzbwspXZ7JjpldyeVDzMCh2F0dG5ldHOIAAAAAAAAAACEZXRoMpB53wQoAAAQIP__________gmlkgnY0gmlwhIe1te-Jc2VjcDI1NmsxoQOkcGXqbCJYbcClZ3z5f6NWhX_1YPFRYRRWQpJjwSHpVIN0Y3CCIyiDdWRwgiMo"),
+		},
+	}
+
+	for i, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Helper()
+			t.Logf("Test case %d: %s", i+1, tc.name)
+
+			got := ENRValidator(tc.in)
+
+			if err := CheckErr("ENRValidator", tc.want != nil, got); err != nil {
+				t.Error(err)
+			}
+
+			if got != nil && tc.want != nil && got.Error() != tc.want.Error() {
+				t.Errorf("ENRValidator(%s) returned a different error; expected: %s, got: %s", tc.in, tc.want, got)
 			}
 		})
 	}

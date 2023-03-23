@@ -37,12 +37,12 @@ Random element from list
 b. error
 Error if any
 */
-func RandomChoice(clients ClientMap) (client Client, err error) {
+func RandomChoice(clients ClientMap) (client *Client, err error) {
 	if len(clients) == 0 {
 		return client, errors.New(configs.EmptyClientMapError)
 	}
 
-	list := make([]Client, 0)
+	list := make([]*Client, 0)
 	for _, client := range clients {
 		if client.Supported {
 			list = append(list, client)
@@ -58,4 +58,20 @@ func RandomChoice(clients ClientMap) (client Client, err error) {
 		return
 	}
 	return list[n.Int64()], nil
+}
+
+// ErrEmptyClientsList is returned when the clients list is empty
+var ErrEmptyClientsList = errors.New("empty clients list")
+
+// RandomClientName returns a random client name from a list of clients
+func RandomClientName(clients []string) (client string, err error) {
+	if len(clients) == 0 {
+		return client, ErrEmptyClientsList
+	}
+
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(clients))))
+	if err != nil {
+		return
+	}
+	return clients[n.Int64()], nil
 }

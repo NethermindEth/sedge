@@ -5,11 +5,11 @@ version: "3.9"
 services:
 {{template "execution" .}}
 {{if .Mev}}
-  mevboost:
+  mev-boost:
     image: {{if .MevImage}}{{.MevImage}}{{else}}flashbots/mev-boost:latest{{end}}
     networks:
       - sedge
-    container_name: mev-boost
+    container_name: sedge-mev-boost{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: on-failure
     entrypoint:
       - /app/mev-boost
@@ -18,23 +18,13 @@ services:
       - -{{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
       - -relay-check
       - -relays
-      - ${RELAY_URL}{{end}}
-  {{if or .CcCustomCfg .VlCustomCfg}}config_consensus:
-    container_name: config_custom_network
-    image: busybox:latest
-    volumes:
-      - ./:/tmp/app
-    command: >
-      sh -c "{{if or .CcRemoteCfg .VlRemoteCfg }}wget -O /tmp/app/config.yml ${CONFIG_URL};{{end}}{{if or .CcRemoteGen .VlRemoteGen }}wget -O /tmp/app/genesis.ssz ${GENESIS_URL};{{end}}{{if or .CcRemoteDpl .VlRemoteDpl }}echo -n ${DEPLOY_BLOCK} > /tmp/app/deploy_block.txt;{{end}}"{{if .LoggingDriver}}
-    logging:
-      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
-      options:
-        max-size: "10m"
-        max-file: "10"{{end}}{{end}}{{end}}
+      - ${RELAY_URLS}{{end}}
 {{template "consensus" .}}
+{{ if .WithValidatorClient}}
+{{template "validator-blocker" .}}{{end}}
 {{template "validator" .}}
 
 networks:
   sedge:
-    name: sedge_network
+    name: sedge-network{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
 {{ end }}

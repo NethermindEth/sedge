@@ -23,6 +23,10 @@ type Command struct {
 	Cmd string
 	// GetOutput : get output of command
 	GetOutput bool
+	// ForceNoSudo : force the command to not be run with sudo
+	ForceNoSudo bool
+	// IgnoreTerminal : command can be executed without using a terminal, useful for windows
+	IgnoreTerminal bool
 }
 
 // ScriptFile : Represents a bash or bat script to be executed
@@ -57,6 +61,22 @@ type DockerComposePullOptions struct {
 	Services []string
 }
 
+// DockerComposeCreateOptions represents `docker compose create` command options
+type DockerComposeCreateOptions struct {
+	// Path to the docker-compose.yaml
+	Path string
+	// Services names
+	Services []string
+}
+
+// DockerComposeBuildOptions represents `docker compose build` command options
+type DockerComposeBuildOptions struct {
+	// Path to the docker-compose.yaml
+	Path string
+	// Services names
+	Services []string
+}
+
 // DockerPSOptions : Represent docker ps command options
 type DockerPSOptions struct {
 	// All : use with --all
@@ -69,7 +89,7 @@ type DockerComposePsOptions struct {
 	Path string
 	// Services : use with --services to display services
 	Services bool
-	// Quiet : use with --quietto display only IDs
+	// Quiet : use with --quiet to display only IDs
 	Quiet bool
 	// ServiceName: Service argument
 	ServiceName string
@@ -95,6 +115,8 @@ type DockerBuildOptions struct {
 	Path string
 	// Tag : docker build --tag tag
 	Tag string
+	// Args : docker --build-arg tags
+	Args map[string]string
 }
 
 // DockerInspectOptions : Represents docker inspect command options
@@ -123,4 +145,10 @@ type EchoToFileOptions struct {
 	FileName string
 	// Content : content to be written to file
 	Content string
+}
+
+// OpenTextEditorOptions represents options to open file in a text editor
+type OpenTextEditorOptions struct {
+	// FilePath path to the file to open
+	FilePath string
 }

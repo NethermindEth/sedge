@@ -2,14 +2,15 @@
 {{ define "execution" }}
   execution:
     stop_grace_period: 30s
-    container_name: execution-client
+    container_name: sedge-execution-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
     image: ${EC_IMAGE_VERSION}
     networks:
       - sedge
     volumes:
       - ${EC_DATA_DIR}:/nethermind/data
-      - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+      - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CustomChainSpecPath}}
+      - {{.CustomChainSpecPath}}:/nethermind/custom_config/chainspec.json{{end}}
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
@@ -19,11 +20,12 @@
     expose:
       - {{.ElApiPort}}
       - {{.ElAuthPort}}
-    command:
-      - --config={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
+    command:{{if .CustomChainSpecPath}}
+      - --Init.ChainSpecPath=/nethermind/custom_config/chainspec.json{{end}}
+      - --config={{if .CustomNetwork}}none{{else}}{{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --datadir=/nethermind/data
-      - --log=${NETHERMIND_LOG_LEVEL}{{with .TTD}}
-      - --Merge.TerminalTotalDifficulty=${TTD}{{end}}
+      - --log=${NETHERMIND_LOG_LEVEL}{{if .TTD}}
+      - --Merge.TerminalTotalDifficulty={{.TTD}}{{end}}
       - --Sync.SnapSync=${EC_SNAP_SYNC_ENABLED}
       - --JsonRpc.Enabled=true
       - --JsonRpc.Host=0.0.0.0
@@ -32,7 +34,10 @@
       - --JsonRpc.JwtSecretFile=/tmp/jwt/jwtsecret
       - --JsonRpc.EngineHost=0.0.0.0
       - --JsonRpc.EnginePort={{.ElAuthPort}}
-      - --Network.DiscoveryPort={{.ElDiscoveryPort}}
+      - --Network.DiscoveryPort={{.ElDiscoveryPort}}{{if .ECBootnodes}}
+      - --Network.Bootnodes={{.ECBootnodes}}
+      - --Discovery.Bootnodes={{.ECBootnodes}}
+      - --Network.StaticPeers={{.ECBootnodes}}{{end}}
       - --HealthChecks.Enabled=true
       - --Pruning.CacheMb=${NETHERMIND_PRUNING_CACHEMB}
       - --Metrics.Enabled=true

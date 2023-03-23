@@ -18,17 +18,20 @@ package utils
 import (
 	"fmt"
 	"net"
+	"net/url"
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/NethermindEth/sedge/configs"
 	log "github.com/sirupsen/logrus"
 )
 
-var reAddr = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
+var (
+	reAddr     = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
+	regexEnode = regexp.MustCompile(`^enode:\/\/[0-9a-fA-F]{128}@.*:[1-9][0-9]*$`)
+	regexEnr   = regexp.MustCompile(`enr:-.*$`)
+)
 
 /*
 SkipLines :
@@ -132,9 +135,9 @@ returns :-
 a. bool
 True if <port> is available. False otherwise
 */
-func AssignPorts(host string, defaults map[string]string) (ports map[string]string, err error) {
-	ports = make(map[string]string)
-	mask := make(map[string]bool)
+func AssignPorts(host string, defaults map[string]uint16) (ports map[string]uint16, err error) {
+	ports = make(map[string]uint16)
+	mask := make(map[uint16]bool)
 
 	keys := make([]string, 0, len(defaults))
 	for k := range defaults {
@@ -144,16 +147,11 @@ func AssignPorts(host string, defaults map[string]string) (ports map[string]stri
 
 	for _, k := range keys {
 		v := defaults[k]
-		if v == "" {
-			return ports, fmt.Errorf(configs.DefaultPortEmptyError, k)
+		if v == 0 {
+			return ports, fmt.Errorf(configs.DefaultPortInvalidError, k)
 		}
-
-		for !portAvailable(host, v, time.Second*5) || mask[v] {
-			i, err := strconv.Atoi(v)
-			if err != nil {
-				return ports, err
-			}
-			v = strconv.Itoa(i + 1)
+		for !portAvailable(host, v) || mask[v] {
+			v = v + 1
 		}
 		ports[k] = v
 		mask[v] = true
@@ -176,18 +174,23 @@ returns :-
 a. bool
 True if <port> is available. False otherwise
 */
-func portAvailable(host, port string, timeout time.Duration) bool {
-	log.Debugf("Checking port occupation of %s\n", net.JoinHostPort(host, port))
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, port), timeout)
+func portAvailable(ip string, port uint16) bool {
+	log.Debugf("checking occupation of %s:%d", ip, port)
+	netIp := net.ParseIP("127.0.0.1")
+	if ip != "localhost" && ip != "0.0.0.0" {
+		netIp = net.ParseIP(ip)
+		if netIp == nil {
+			log.Debugf("invalid host ip address")
+			return true
+		}
+	}
+	sock, err := net.Listen("tcp", fmt.Sprintf("%s:%d", netIp.String(), port))
 	if err != nil {
-		log.Debugf("Port seems available, got connecting error: %v", err)
-		return true
+		log.Debugf("error checking  %s:%d occupation: %v", ip, port, err)
+		return false
 	}
-	if conn != nil {
-		defer conn.Close()
-		log.Debugf("Port open at %s", net.JoinHostPort(host, port))
-	}
-	return conn == nil
+	sock.Close()
+	return true
 }
 
 /*
@@ -204,14 +207,59 @@ returns :-
 a. []K
 Filtered list
 */
-func Filter[K any](list []K, filter func(K) bool) []K {
-	n := 0
+func Filter[T any](list []T, filter func(T) bool) (ret []T) {
 	for _, v := range list {
 		if filter(v) {
-			list[n] = v
-			n++
+			ret = append(ret, v)
 		}
 	}
+	return
+}
 
-	return list[:n]
+// UriValidator validates a URI and returns true if it is valid.
+func UriValidator(input []string) (string, bool) {
+	for _, uri := range input {
+		u, err := url.Parse(uri)
+		if err != nil {
+			return uri, false
+		}
+		wrongScheme := u.Scheme != "http" && u.Scheme != "https"
+
+		if wrongScheme || u.Host == "" {
+			return uri, false
+		}
+	}
+	return "", true
+}
+
+// ENodesValidator validates a list of EL boot nodes and returns an error if any
+// of them is invalid.
+func ENodesValidator(bootNodes []string) error {
+	set := make(map[string]struct{})
+	for _, bootNode := range bootNodes {
+		if _, ok := set[bootNode]; ok {
+			return fmt.Errorf("%s: %s", configs.ErrDuplicatedBootNode, bootNode)
+		}
+		if !regexEnode.MatchString(bootNode) {
+			return fmt.Errorf(configs.InvalidEnodeError, bootNode)
+		}
+		set[bootNode] = struct{}{}
+	}
+	return nil
+}
+
+// ENRValidator validates a list of CL boot nodes and returns an error if any
+// of them is invalid.
+func ENRValidator(bootNodes []string) error {
+	set := make(map[string]struct{})
+	for _, bootNode := range bootNodes {
+		if _, ok := set[bootNode]; ok {
+			return fmt.Errorf("%s: %s", configs.ErrDuplicatedBootNode, bootNode)
+		}
+		if !regexEnr.MatchString(bootNode) {
+			return fmt.Errorf(configs.InvalidEnrError, bootNode)
+		}
+		set[bootNode] = struct{}{}
+	}
+	return nil
 }

@@ -1,9 +1,24 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package commands
 
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -24,14 +39,34 @@ func NewCMDRunner(options CMDRunnerOptions) CommandRunner {
 }
 
 func (cr *WindowsCMDRunner) BuildDockerComposeUpCMD(options DockerComposeUpOptions) Command {
-	servs := strings.Join(options.Services, " ")
-	command := fmt.Sprintf("docker compose -f %s up -d %s", options.Path, servs)
+	command := fmt.Sprintf("docker compose -f %s up -d", options.Path)
+	if len(options.Services) > 0 {
+		command += " " + strings.Join(options.Services, " ")
+	}
 	return Command{Cmd: command}
 }
 
 func (cr *WindowsCMDRunner) BuildDockerComposePullCMD(options DockerComposePullOptions) Command {
-	services := strings.Join(options.Services, " ")
-	command := fmt.Sprintf("docker compose -f %s pull %s", options.Path, services)
+	command := fmt.Sprintf("docker compose -f %s pull", options.Path)
+	if len(options.Services) > 0 {
+		command += " " + strings.Join(options.Services, " ")
+	}
+	return Command{Cmd: command}
+}
+
+func (cr *WindowsCMDRunner) BuildDockerComposeCreateCMD(options DockerComposeCreateOptions) Command {
+	command := fmt.Sprintf("docker compose -f %s create", options.Path)
+	if len(options.Services) > 0 {
+		command += " " + strings.Join(options.Services, " ")
+	}
+	return Command{Cmd: command}
+}
+
+func (cr *WindowsCMDRunner) BuildDockerComposeBuildCMD(options DockerComposeBuildOptions) Command {
+	command := fmt.Sprintf("docker compose -f %s build", options.Path)
+	if len(options.Services) > 0 {
+		command += " " + strings.Join(options.Services, " ")
+	}
 	return Command{Cmd: command}
 }
 
@@ -90,14 +125,24 @@ func (cr *WindowsCMDRunner) BuildDockerComposeLogsCMD(options DockerComposeLogsO
 	return Command{Cmd: command}
 }
 
+func (cr *WindowsCMDRunner) BuildDockerComposeVersionCMD() Command {
+	return Command{Cmd: "docker compose version"}
+}
+
 func (cr *WindowsCMDRunner) BuildDockerBuildCMD(options DockerBuildOptions) Command {
-	command := fmt.Sprintf("docker build %s", options.Path)
+	command := "docker build"
 	if len(options.Tag) > 0 {
 		log.Debug(`Command "docker build" built with "-t" flag.`)
 		command += " -t " + options.Tag
 	} else {
-		log.Debug(`Command "docker build" built withot "-t" flag.`)
+		log.Debug(`Command "docker build" built without "-t" flag.`)
 	}
+	if len(options.Args) > 0 {
+		for key, value := range options.Args {
+			command += fmt.Sprintf(" --build-arg %s=%s", key, value)
+		}
+	}
+	command += " " + options.Path
 	return Command{Cmd: command}
 }
 
@@ -128,11 +173,21 @@ func (cr *WindowsCMDRunner) BuildEchoToFileCMD(options EchoToFileOptions) Comman
 	return Command{Cmd: fmt.Sprintf("echo %s > %s", options.Content, options.FileName)}
 }
 
-func (cr *WindowsCMDRunner) RunCMD(cmd Command) (string, error) {
+func (cr *WindowsCMDRunner) BuildOpenTextEditor(options OpenTextEditorOptions) Command {
+	return Command{Cmd: fmt.Sprintf("notepad %s", options.FilePath), IgnoreTerminal: true}
+}
+
+func (cr *WindowsCMDRunner) RunCMD(cmd Command) (string, int, error) {
 	var out string
 	r := strings.ReplaceAll(cmd.Cmd, "\n", "")
 
-	exc := exec.Command(cr.terminal, r)
+	var exc *exec.Cmd
+	if !cmd.IgnoreTerminal {
+		exc = exec.Command(cr.terminal, r)
+	} else {
+		s := strings.Split(r, " ")
+		exc = exec.Command(s[0], s[1:]...)
+	}
 
 	var combinedOut bytes.Buffer
 	exc.Stdin = os.Stdin
@@ -145,16 +200,17 @@ func (cr *WindowsCMDRunner) RunCMD(cmd Command) (string, error) {
 	}
 
 	if err := exc.Start(); err != nil {
-		return out, err
+		return out, -1, err
 	}
 
 	err := exc.Wait()
+	exitCode := exc.ProcessState.ExitCode()
 	if cmd.GetOutput {
 		out = combinedOut.String()
 		out = strings.ReplaceAll(out, "\r", "") // Remove windows \r character
 	}
 
-	return out, err
+	return out, exitCode, err
 }
 
 func (cr *WindowsCMDRunner) RunScript(script ScriptFile) (string, error) {
@@ -166,7 +222,7 @@ func (cr *WindowsCMDRunner) RunScript(script ScriptFile) (string, error) {
 	}
 
 	tempFileDir := os.TempDir()
-	rawScript, err := ioutil.ReadAll(&scriptBuffer)
+	rawScript, err := io.ReadAll(&scriptBuffer)
 	if err != nil {
 		return out, err
 	}
