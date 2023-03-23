@@ -2,6 +2,7 @@
 #exit when any command fails
 set -e
 cd /home/runner/work/sedge/sedge/sedge
+go install github.com/golang/mock/mockgen@v1.6.0
 go generate ./...
 mkdir -p build/package/debian/src/github.com/NethermindEth/sedge/
 rsync -aq . build/package/debian/src/github.com/NethermindEth/sedge/ --exclude build/ --exclude .git/ --exclude docs/
