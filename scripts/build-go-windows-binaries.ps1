@@ -7,6 +7,8 @@ if (-not(Test-Path "build")) {
     New-Item "build" -ItemType Directory | Out-Null
 }
 
+$VERSION = $env:VERSION
+
 foreach ($platform in $platforms) {
     $parts = $platform.Split("/")
     $GOOS = $parts[0]
