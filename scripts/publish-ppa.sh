@@ -9,9 +9,10 @@ rsync -aq . build/package/debian/src/github.com/NethermindEth/sedge/ --exclude b
 cd build/package/debian/src/github.com/NethermindEth/sedge/ && go mod vendor
 cd /home/runner/work/sedge/sedge/sedge
 
-echo "sedge ($VERSION) jammy; urgency=medium
+export SVERSION=${VERSION#v}
+echo "sedge ($SVERSION) jammy; urgency=medium
 
-  * Sedge ($VERSION release)
+  * Sedge ($SVERSION release)
 
  -- Nethermind <devops@nethermind.io>  $( date -R )" > /home/runner/work/sedge/sedge/sedge/build/package/debian/debian/changelog
 
@@ -19,9 +20,9 @@ cd build/package/debian
 debuild -S -uc -us
 cd ..
 echo 'Signing package'
-debsign -p 'gpg --batch --yes --no-tty --pinentry-mode loopback --passphrase-file /tmp/PASSPHRASE' -S -k$PPA_GPG_KEYID sedge_${VERSION}_source.changes
+debsign -p 'gpg --batch --yes --no-tty --pinentry-mode loopback --passphrase-file /tmp/PASSPHRASE' -S -k$PPA_GPG_KEYID sedge_${SVERSION}_source.changes
 echo 'Uploading'
-dput -f ppa:nethermindeth/sedge sedge_${VERSION}_source.changes
+dput -f ppa:nethermindeth/sedge sedge_${SVERSION}_source.changes
 echo "Publishing Sedge to PPA complete"
 echo 'Cleanup'
-rm -r sedge_$VERSION*
+rm -r sedge_$SVERSION*
