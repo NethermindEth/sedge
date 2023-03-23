@@ -1,0 +1,68 @@
+---
+id: exposing-apis
+sidebar_position: 9
+---
+
+# Exposing APIs
+
+## Ethereum APIs
+
+There are a few main options for connecting to Ethereum nodes:
+
+- RPC (Remote Procedure Call) - The simplest option, just sends JSON RPC requests to a node. Used by web3.js and many other libs.
+- IPC (Inter-Process Communication) - Local socket connection, higher performance than RPC. Also used by web3.js and others.
+- WS (WebSockets) - For receiving real-time updates (new blocks, logs, etc). Also supported in web3.js.
+- ETH (Devp2p) - Low level protocol to connect to nodes. Quite complex, not commonly used outside of core Ethereum implementations.
+
+So in code, it would look something like this:
+```
+// RPC
+const Web3 = require('web3')
+const web3 = new Web3('http://localhost:8545')
+
+// IPC
+const web3 = new Web3('/tmp/geth.ipc')
+
+// WS
+const web3WS = new Web3('ws://localhost:8546')
+
+// ETH / Devp2p
+// Much more complex, not shown here
+```
+
+You can then call methods on web3 to interact with the Ethereum blockchain, deploy contracts, send transactions, etc.
+So to connect to both a consensus node (for mining/block info) and an execution node (for deploying contracts), you'd
+simply instantiate multiple Web3 instances pointing to different nodes.
+
+## Exposing APIs using Sedge
+
+:::info
+
+By default, Sedge doesn't expose any important port that can be used to interact with the node.
+This is to prevent accidental exposure of the node to the internet.
+
+:::
+
+In order to connect to a node, you need to expose the ports of the nodes you are running that expose those APIs.
+
+
+To expose the needed ports for APIs interactions in the generated docker-compose file, you will need to set the
+`--map-all` flag while generating those files. This will expose all the ports of the nodes that expose APIs.
+
+```
+sedge generate full-node --map-all
+```
+
+:::caution
+
+Exposing the ports of your node to the internet is a security risk.
+
+Only expose the ports you need, and make sure to secure them properly.
+
+:::
+
+:::tip
+
+If you run a docker image that use the same network of the setup, by default `sedge-network`, you can connect that container to the nodes you already have running. This way you can connect to the nodes without exposing the ports to the internet.
+
+:::

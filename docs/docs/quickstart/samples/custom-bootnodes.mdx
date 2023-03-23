@@ -1,0 +1,47 @@
+---
+id: custom-bootnodes
+sidebar_position: 3
+---
+
+# Using custom Bootnodes
+
+## What are Bootnodes?
+
+Bootnodes on Ethereum refer to a specific type of node that serves as an entry point for new nodes to join the Ethereum
+network. These nodes are typically maintained by the Ethereum Foundation or other trusted entities, and they are
+responsible for helping new nodes find other nodes to connect to on the network.
+
+When a new node wants to join the Ethereum network, it first needs to connect to one or more bootnodes. The bootnode
+will then provide the new node with a list of other nodes that it can connect to on the network. Once connected to these
+nodes, the new node can start participating in the Ethereum network by verifying transactions, executing smart contracts,
+and more.
+
+Bootnodes are important for the health and security of the Ethereum network because they help ensure that new nodes can
+quickly and easily join the network, even if they don't know any other nodes to connect to. Additionally, bootnodes can
+help prevent certain types of attacks on the network, such as Sybil attacks, by only providing a limited number of node
+addresses to new nodes.
+
+## How to use custom bootnodes with Sedge
+
+Sedge supports the use of custom bootnodes, which can be useful for testing and development purposes. To use custom
+bootnodes on the Execution Client, you can specify the `--execution-bootnodes` flag when starting Sedge. For example:
+
+```
+sedge generate full-node --execution-bootnodes enode://<bootnode-enode-url1>,enode://<bootnode-enode-ur2>,enode://<bootnode-enode-ur3>
+```
+If you want to modify the Consensus Client bootnodes, you can specify the `--consensus-bootnodes` flag when starting Sedge. For example:
+
+```
+sedge generate full-node --consensus-bootnodes enr:-<bootnode-enr-1>,enr:-<bootnode-enr-2>,enr:-<bootnode-enr-3>
+```
+
+Those examples can be applied to the Sedge commands that generate a node, such as `sedge generate consensus` or
+`sedge geneate execution`, setting in each case the bootnodes for the corresponding client, for
+
+```
+sedge generate consensus --consensus-bootnodes enr:-<bootnode-enr-1>,enr:-<bootnode-enr-2>,enr:-<bootnode-enr-3>
+```
+or
+```
+sedge generate execution --execution-bootnodes enode://<bootnode-enode-url1>,enode://<bootnode-enode-ur2>,enode://<bootnode-enode-ur3>
+```

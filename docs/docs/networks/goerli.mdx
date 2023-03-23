@@ -31,26 +31,26 @@ Proof-of-Stake following the network’s total block difficulty having crossed 1
 ## MEV-Boost
 
 We support [mev-boost](https://github.com/flashbots/mev-boost) on goerli by default, in case you want to remove it,
-run `sedge cli` using the `--no-mev-boost` flag, for example:
+run `sedge generate full-node` using the `--no-mev-boost` flag, for example:
 
 ```
-sedge cli --network goerli --no-mev-boost=true
+sedge generate full-node --network goerli --no-mev-boost=true
 ```
 
-## Running a Full Node
+## Generating a Full Node
 
-For running a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge cli`. For example:
+To generate a setup of a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge generate full-node`. For example:
 
 ```bash
-sedge cli --no-validator --network=goerli
+sedge generate full-node --no-validator --network=goerli
 ```
 
-## Running a Validator
+## Generating a Full Node with a Validator
 
-For running a validator with random clients, you need to omit the `--no-validator` flag. For example:
+To generate a setup of a validator with random clients, you need to omit the `--no-validator` flag. For example:
 
 ```bash
-sedge cli --network=goerli
+sedge generate full-node --network=goerli
 ```
 
 ## Create keystore for validator
@@ -59,4 +59,12 @@ To create a keystore for a validator, you need to run the following command:
 
 ```bash
 sedge keys --network goerli
+```
+
+## Running your setup
+
+Once you have generated your setup, you can run it with the following command:
+
+```
+sedge run
 ```

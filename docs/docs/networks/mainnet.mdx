@@ -29,19 +29,19 @@ secured by the Proof-of-Stake (PoS) algorithm.
 
 ## MEV-Boost
 
-We support [mev-boost](https://github.com/flashbots/mev-boost) on mainnet by default, in case you want to remove it,
-run `sedge cli` using the `--no-mev-boost` flag, for example:
+We support [mev-boost](https://github.com/flashbots/mev-boost) on mainnet by default, in case you want to remove it from your setup,
+run `sedge generate full-node` using the `--no-mev-boost` flag, for example:
 
 ```
-sedge cli --no-mev-boost=true
+sedge generate full-node --no-mev-boost=true
 ```
 
-## Running a Full Node
+## Generating a Full Node
 
-For running a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge cli`. For example:
+To generate a setup of a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge generate full-node`. For example:
 
 ```bash
-sedge cli --no-validator
+sedge generate full-node --no-validator
 ```
 
 :::info
@@ -50,12 +50,12 @@ Sedge uses Mainnet as default network, therefore is not necessary to specify the
 
 :::
 
-## Running a Validator
+## Generating a Full Node with a Validator
 
 For running a validator with random clients, you need to omit the `--no-validator` flag. For example:
 
 ```bash
-sedge cli
+sedge generate full-node
 ```
 
 ## Create keystore for validator
@@ -64,4 +64,12 @@ To create a keystore for a validator, you need to run the following command:
 
 ```bash
 sedge keys
+```
+
+## Running your setup
+
+Once you have generated your setup, you can run it with the following command:
+
+```
+sedge run
 ```

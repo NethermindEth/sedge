@@ -21,32 +21,34 @@ We will walk through the following steps:
 1. Download and install Sedge in a new brand machine
 2. Generate validator keystore
 3. Run Sedge's main workflow with default configuration values and use it to install dependencies (only for Linux)
-4. Generate a `docker-compose` script with a randomized set of execution, consensus and validator clients
-5. Run the `docker-compose` script
+4. Generate a `docker-compose.yml` script with a randomized set of execution, consensus and validator clients
+5. Run the `docker-compose.yml` script
 
 The hardware specifications of the machine we are going to use are:
 
 - 4 CPU cores
-- 8 GB RAM
-- 200 SSD
+- 16 GB RAM
+- 1 TB SSD
 - Ubuntu 22.04/amd64
 
 ### 1. Download and install Sedge in a new brand Linux machine
 
-First open a console in the Home directory. Then use `curl` or `wget` to download a binary from the releases page (we will be using the `0.1.2` version). Check the [installation guide](install-guide) for more information or if you want to use another installation method:
+First open a console in the Home directory. Then use `curl` or `wget` to download a binary from the releases page
+(we will be using the `1.0.0` version). Check the [installation guide](install-guide) for more information or if you
+want to use another installation method:
 
 <Tabs groupId="download-cmds">
   <TabItem value="curl" label="curl">
 
   ```
-  curl -L https://github.com/NethermindEth/sedge/releases/download/0.1.2/sedge-v0.1.2-linux-amd64 --output sedge
+  curl -L https://github.com/NethermindEth/sedge/releases/download/1.0.0/sedge-v1.0.0-linux-amd64 --output sedge
   ```
 
   </TabItem>
   <TabItem value="wget" label="wget">
 
   ```
-  wget https://github.com/NethermindEth/sedge/releases/download/0.1.2/sedge-v0.1.2-linux-amd64 -O sedge
+  wget https://github.com/NethermindEth/sedge/releases/download/1.0.0/sedge-v1.0.0-linux-amd64 -O sedge
   ```
 
   </TabItem>
@@ -59,15 +61,10 @@ The `-O` flag is to rename binary as __sedge__
 
 :::
 
-:::note
-
-The `$` symbol represents the Terminal prompt
-
-:::
-
 :::info
 
-This guide assumes your Terminal session is pointing all the time to the folder in which you downloaded Sedge. You can check the directory pointed by your Terminal session if you execute `pwd`.
+This guide assumes your Terminal session is pointing all the time to the folder in which you downloaded Sedge. You can
+check the directory pointed by your Terminal session if you execute `pwd`.
 
 :::
 
@@ -83,28 +80,14 @@ Set binary as executable executing `chmod +x sedge`. You shouldn't see any outpu
 
 <!-- ![chmod-help](/img/chmod-and-help.png) -->
 
-### 2. Generate validator keystore
-
-Running the `sedge keys` command will generate a keystore folder with a validator keystore inside. This keystore will be used to register the validator.
-
-```bash
-sedge keys
-```
-
-:::info
-
-You can learn more about `sedge keys` if you check [here in our documentation](/docs/commands/keys).
-
-:::
-
 ### 2. Run Sedge's main workflow with default configuration values
 
 
 You can run Sedge's main workflow in two ways:
 - Interactive mode
-    * `sedge cli` is a fully interactive command that will guide you through the process covering all the steps needed for the setup.
+  * `sedge cli` is a fully interactive command that will guide you through the process covering all the steps needed for the setup.
 - Non-interactive mode
-    * The non-interactive mode is useful if you want to run Sedge in a CI/CD pipeline or if you are a more advanced user, and you want to run Sedge with a predefined configuration.
+  * The non-interactive mode is useful if you want to run Sedge in a CI/CD pipeline or if you are a more advanced user, and you want to run Sedge with a predefined configuration.
 
 :::tip
 
@@ -113,13 +96,10 @@ If you are a new user, we recommend you to use the interactive mode.
 :::
 
 
-#### 2.1. 1-click interactive setup
+#### 2.1 One-click interactive setup
 
-Running the `sedge cli` command will run Sedge's main workflow. This workflow will install all the dependencies needed to run a validator node, generate a `docker-compose` script with a randomized set of execution, consensus and validator clients, and run the `docker-compose` script.
-
-```bash
-sedge cli
-```
+The `sedge cli` command will guide you through the process covering all the steps needed for the setup. It will be fully
+interactive and will ask you for the required information. According to your selection, it will generate a `docker-compose.yml` script and a `.env` with the desired configuration.
 
 :::info
 
@@ -127,32 +107,33 @@ You can learn more about `sedge cli` if you check [here in our documentation](/d
 
 :::
 
-#### 2.2. Non-interactive setup
+#### 2.2 Non-interactive setup
 
-If you want to run the non-interactive mode, you will need to run only two commands, and provide the set of arguments needed for each command.
+If you want to run the non-interactive mode, you will need to run only four commands (two if you are not running a validator and you don't need the validator keystore), and provide the set of arguments needed for each command.
 1. `sedge generate`
-2. `sedge run`
+2. `sedge keys`
+3. `sedge import-key`
+4. `sedge run`
 
-##### 2.2.1. Generation
+##### 2.2.1 Generation
 
-Running the `sedge generate` command will generate a `docker-compose` script and a `.env` file with a randomized set of
-execution, consensus and validator clients unless set.
+Running the following `sedge generate` command will generate a `docker-compose.yml` script and a `.env` file with a randomized set of execution, consensus and validator clients unless set.
 
 ```bash
 sedge generate full-node
 ```
 
 You have other options to run `sedge generate`:
-1. `sedge generate full-node` will generate a `docker-compose` script and a `.env` file with a randomized if not set,
-execution, consensus and validator clients, with mev-boost if applicable unless explicitly not set. Validator node
+1. `sedge generate full-node` will generate a `docker-compose.yml` script and a `.env` file with a randomized, if not set,
+execution, consensus, and validator clients, with mev-boost if applicable unless explicitly not set. Validator node
 can also be omitted if you use `--no-validator` flag.
-2. `sedge generate execution` will generate a `docker-compose` script and a `.env` file with a randomized if not set
-execution clients.
-3. `sedge generate consensus` will generate a `docker-compose` script and a `.env` file with a randomized if not set
-consensus clients.
-4. `sedge generate validator` will generate a `docker-compose` script and a `.env` file with a randomized if not set
-validator clients.
-5. `sedge generate mev-boost` will generate a `docker-compose` script and a `.env` file with a mev-boost client.
+2. `sedge generate execution` will generate a `docker-compose.yml` script and a `.env` file with a randomized, if not set,
+execution client.
+3. `sedge generate consensus` will generate a `docker-compose.yml` script and a `.env` file with a randomized, if not set,
+consensus client.
+4. `sedge generate validator` will generate a `docker-compose.yml` script and a `.env` file with a randomized, if not set,
+validator client.
+5. `sedge generate mev-boost` will generate a `docker-compose.yml` script and a `.env` file with a mev-boost client.
 
 :::info
 
@@ -160,9 +141,46 @@ You can learn more about `sedge generate` if you check [here in our documentatio
 
 :::
 
-##### 2.2.2. Running
+##### 2.2.2 Generate validator keystore
 
-Running the `sedge run` command will run the `docker-compose` script generated by the `sedge generate` command.
+Running the `sedge keys` command will generate a keystore folder with validator keys inside. This keystore contains a `deposit_data.json` that can be used to register the validator.
+
+```bash
+sedge keys
+```
+
+:::caution Disclaimer
+
+Users acknowledge that generating the keystore for any network is an unaudited feature of Sedge. Nethermind provides this feature on an ‘as is’ basis and makes no warranties regarding its proper functioning. The use of this feature is at the user’s own risk - Nethermind excludes all liability for any malfunction or loss of money that may occur as the result of an unexpected behavior during the keystore generation.
+
+:::
+
+:::info
+
+You can learn more about `sedge keys` if you check [here in our documentation](/docs/commands/keys), and more about
+[key management](/docs/quickstart/keys-management.mdx) .
+
+:::
+
+##### 2.2.3 Import Keys
+
+Running the `sedge import-key` command will import the keys that you generated in the previous step.
+
+```bash
+sedge import-key
+```
+
+:::info
+
+You can learn more about `sedge import-key` if you check [here in our documentation](/docs/commands/import-key), and more about
+[key management](/docs/quickstart/keys-management.mdx) .
+
+:::
+
+
+##### 2.2.4 Running
+
+Running the `sedge run` command will run the `docker-compose.yml` script generated by the `sedge generate` command.
 
 ```bash
 sedge run

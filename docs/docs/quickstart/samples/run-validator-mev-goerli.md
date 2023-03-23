@@ -1,24 +1,42 @@
 ---
-sidebar_position: 6
-id: run-teku-mev-boost
+sidebar_position: 2
+id: run-mev-boost-goerli
 ---
 
 # Run a validator with mev-boost on Goerli
 
 This guide shows you how to setup and run a validator using [Teku](https://github.com/Consensys/teku/) as consensus layer, with a random execution client, and mev-boost.
 
-First make sure you have Sedge installed and in your PATH following the [installation guide](install-guide.mdx).
+First make sure you have Sedge installed and in your PATH following the [installation guide](quickstart/install-guide.mdx).
 
 :::tip
 
-If you don't have Sedge in your PATH, just open your Terminal on the folder which Sedge's executable / binary is and run `./sedge` instead of only `sedge`.
+If you don't have Sedge in your PATH, just open your terminal on the folder which Sedge's executable / binary is and run `./sedge` instead of only `sedge`.
 
 :::
 
-Run the following command from your Terminal to setup a Teku consensus and validator nodes on Goerli with a random execution client:
+Run the following command from your terminal to set up a Teku consensus and validator nodes on Goerli with a random execution client:
 
 ```
-sedge cli --network goerli -c teku
+sedge generate full-node --network goerli -c teku 
+```
+
+Set up your keys running the following command from your terminal:
+
+```
+sedge keys --network goerli
+```
+
+Import the keys that you just generate in the command above using the following command:
+
+```
+sedge import-key
+```
+
+After that, you just need to run your setup with the following command:
+
+```
+sedge run
 ```
 
 The `--network` flag allow you to choose the target network for the setup. To check out supported networks run `sedge networks`. Default network is mainnet.
