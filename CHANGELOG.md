@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Changed
+
+- Changed NETHERMIND_PRUNING_CACHEMB env var from 2048 to 1024.
+- Update Goerli checkpoint sync to use [this]( https://goerli.checkpoint-sync.ethpandaops.io).
+
 ## [v1.0.0] - 2023-3-23
 
 ### Added
