@@ -98,7 +98,6 @@ func Int64Validator(ans interface{}) error {
 	return nil
 }
 
-// TODO: Write unit tests
 func fileExtensionValidator(extensions []string) func(ans interface{}) error {
 	return func(ans interface{}) error {
 		if input, ok := ans.(string); ok {
@@ -113,7 +112,6 @@ func fileExtensionValidator(extensions []string) func(ans interface{}) error {
 	}
 }
 
-// TODO: add unit tests
 // DigitsStringValidator validates that the input is a valid string with only digits
 func DigitsStringValidator(ttd string) error {
 	if !digitsString.MatchString(ttd) {
@@ -122,7 +120,6 @@ func DigitsStringValidator(ttd string) error {
 	return nil
 }
 
-// TODO: add unit tests
 func GraffitiValidator(str string) error {
 	if len(str) > 16 {
 		return fmt.Errorf(configs.ErrGraffitiLength, str, len(str))
