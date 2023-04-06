@@ -74,6 +74,9 @@ func DirPathValidator(ans string) error {
 
 func URLValidator(ans interface{}) error {
 	if str, ok := ans.(string); ok {
+		if str == "" {
+			return nil
+		}
 		if invalidURL, ok := utils.UriValidator([]string{str}); !ok {
 			return fmt.Errorf("%w: %s", ErrInvalidURL, invalidURL)
 		}
