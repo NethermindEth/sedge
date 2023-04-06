@@ -286,6 +286,7 @@ func TestFileExtensionValidator(t *testing.T) {
 		})
 	}
 }
+
 func TestDigitsStringValidator(t *testing.T) {
 	tests := []struct {
 		name  string
