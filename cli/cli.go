@@ -591,7 +591,7 @@ func checkCLIDependencies(p ui.Prompter, o *CliCmdOptions, a actions.SedgeAction
 					return err
 				}
 			}
-			return fmt.Errorf("%w: %s. To install dependencies if supported run: 'sedge deps install", ErrMissingDependencies, strings.Join(pendingDependencies, ", "))
+			return fmt.Errorf("%w: %s. To install dependencies if supported run: 'sedge deps install'", ErrMissingDependencies, strings.Join(pendingDependencies, ", "))
 		}
 		// for _, s := range supported {
 		// 	if err := depsMgr.Install(s); err != nil {
@@ -975,17 +975,17 @@ func inputImportSlashingProtectionFrom(p ui.Prompter, o *CliCmdOptions) (err err
 }
 
 func inputExecutionAPIUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.ExecutionApiUrl, err = p.InputURL("Execution API URL", "", false)
+	o.genData.ExecutionApiUrl, err = p.InputURL("Execution API URL", "", true)
 	return
 }
 
 func inputExecutionAuthUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.ExecutionAuthUrl, err = p.InputURL("Execution Auth API URL", "", false)
+	o.genData.ExecutionAuthUrl, err = p.InputURL("Execution Auth API URL", "", true)
 	return
 }
 
 func inputConsensusAPIUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.ConsensusApiUrl, err = p.InputURL("Consensus API URL", "", false)
+	o.genData.ConsensusApiUrl, err = p.InputURL("Consensus API URL", "", true)
 	return
 }
 
