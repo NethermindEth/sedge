@@ -7,10 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## Changed
+### Added
 
+- Unit tests
+
+### Changed
+
+- Update client images to Shapella-ready version
 - Changed NETHERMIND_PRUNING_CACHEMB env var from 2048 to 1024.
 - Update Goerli checkpoint sync to use [this]( https://goerli.checkpoint-sync.ethpandaops.io).
+
+### Fixed
+
+- Checkpoint sync URL prompt is not longer mandatory
 
 ## [v1.0.0] - 2023-3-23
 
