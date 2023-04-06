@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Unit tests
 
+### Changed
+
+- Update client images to Shapella-ready version
+
 ### Fixed
 
 - Checkpoint sync URL prompt is not longer mandatory
