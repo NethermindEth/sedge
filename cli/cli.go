@@ -591,7 +591,7 @@ func checkCLIDependencies(p ui.Prompter, o *CliCmdOptions, a actions.SedgeAction
 					return err
 				}
 			}
-			return fmt.Errorf("%w: %s. To install dependencies if supported run: 'sedge deps install", ErrMissingDependencies, strings.Join(pendingDependencies, ", "))
+			return fmt.Errorf("%w: %s. To install dependencies if supported run: 'sedge deps install'", ErrMissingDependencies, strings.Join(pendingDependencies, ", "))
 		}
 		// for _, s := range supported {
 		// 	if err := depsMgr.Install(s); err != nil {
