@@ -50,6 +50,7 @@ func TestImportKeys_NumberOfArguments(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd := ImportKeysCmd(nil, nil)
 			cmd.SetArgs(tt.args)
+			cmd.SetOutput(io.Discard)
 			err := cmd.Execute()
 			assert.ErrorIs(t, err, ErrInvalidNumberOfArguments)
 		})
