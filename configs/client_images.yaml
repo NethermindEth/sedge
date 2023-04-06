@@ -17,23 +17,23 @@ consensus:
     version: v4.0.1
   lodestar:
     name: chainsafe/lodestar
-    version: v1.7.0
+    version: v1.7.2
   teku:
     name: consensys/teku
     version: 23.3.1
   prysm:
     name: gcr.io/prysmaticlabs/prysm/beacon-chain
-    version: v4.0.0
+    version: v4.0.1
 validator:
   lighthouse:
     name: sigp/lighthouse
     version: v4.0.1
   lodestar:
     name: chainsafe/lodestar
-    version: v1.7.0
+    version: v1.7.2
   teku:
     name: consensys/teku
     version: 23.3.1
   prysm:
     name: gcr.io/prysmaticlabs/prysm/validator
-    version: v4.0.0
+    version: v4.0.1
