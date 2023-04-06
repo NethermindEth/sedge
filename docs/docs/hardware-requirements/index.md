@@ -12,7 +12,7 @@ keywords:
 
 # Hardware requirements
 
-Hardware requirements are continuously changing from time to time but we can give you an idea of what do you need. 
+Hardware requirements are continuously changing from time to time but we can give you an idea of what you need. 
 
 :::caution Warning
 
