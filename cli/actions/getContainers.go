@@ -2,6 +2,7 @@ package actions
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/docker/docker/api/types"
@@ -76,11 +77,16 @@ type ContainerData struct {
 }
 
 func getContainerData(containerData types.ContainerJSON) (ContainerData, error) {
-	data := ContainerData{
-		Name:  containerData.Name,
-		Image: containerData.Config.Image,
-		Ip:    containerData.NetworkSettings.IPAddress,
+	data := ContainerData{}
+
+	sedgeNetwork, ok := containerData.NetworkSettings.Networks["sedge-network"]
+	if !ok {
+		return ContainerData{}, fmt.Errorf("failed to get sedge-network for container %s", containerData.Name)
 	}
+
+	data.Name = containerData.Name
+	data.Image = containerData.Config.Image
+	data.Ip = sedgeNetwork.IPAddress
 
 	return data, nil
 }
