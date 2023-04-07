@@ -24,6 +24,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -48,10 +49,21 @@ func ShowCmd(cmdRunner commands.CommandRunner, sedgeActions actions.SedgeActions
 				return err
 			}
 
-			err := sedgeActions.ShowContainers(actions.ShowContainersOptions{
+			data, err := sedgeActions.GetContainersData(actions.GetContainersDataOptions{
 				DockerComposePath: filepath.Join(generationPath, configs.DefaultDockerComposeScriptName),
 			})
+			if err != nil {
+				log.Errorf("Failed to get sedge containers data: %v", err)
+				return err
+			}
 
+			output, err := yaml.Marshal(data)
+			if err != nil {
+				log.Errorf("Failed to show sedge containers data: %v", err)
+				return err
+			}
+
+			log.Info(string(output))
 			return err
 		},
 	}
