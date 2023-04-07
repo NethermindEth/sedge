@@ -10,13 +10,13 @@ here and there.
 
 ## Adding a Consensus Client
 
-While adding a Consensus Client, you should follow this steps:
+While adding a Consensus Client, you should follow these steps:
 1. Add a template under `templates/services/merge/consensus/` that contains all the docker compose parts for run that
 new client.
 2. Add what is going to be the environment vars for the docker compose file under each of the supported networks for this
 new client, for example:
  - `templates/envs/[network]/consensus/new_client.tmpl`
-3. Update the script that check for updates on the images at `scripts/check-image-updates.sh`.
+3. Update the script that checks for updates on the images at `scripts/check-image-updates.sh`.
 4. Update documentation, including all the references on `docs/docs` folder, that are going to be displayed on Sedge
 official documentation, and on the `Readme.md`
 5. Add entry on the `CHANGELOG.md`
@@ -32,7 +32,7 @@ new client.
 2. Add what is going to be the environment vars for the docker compose file under each of the supported networks for this
 new client, for example:
  - `templates/envs/[network]/execution/new_client.tmpl`
-3. Update the script that check for updates on the images at `scripts/check-image-updates.sh`.
+3. Update the script that checks for updates on the images at `scripts/check-image-updates.sh`.
 4. Update documentation, including all the references on `docs/docs` folder, that are going to be displayed on Sedge
 official documentation, and on the `Readme.md`
 5. Add entry on the `CHANGELOG.md`
@@ -40,7 +40,7 @@ official documentation, and on the `Readme.md`
 
 ## Adding a Validator Client
 
-While adding a Validator Client, you should follow this steps:
+While adding a Validator Client, you should follow these steps:
 1. Add a template under `templates/services/merge/validator/` that contains all the docker compose parts for run that
 new client.
 2. Make sure to add any necessary code for the validator keystore import service. Make your chances in the
