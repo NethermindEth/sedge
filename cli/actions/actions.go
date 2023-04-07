@@ -33,6 +33,7 @@ type SedgeActions interface {
 	CreateJWTSecrets(CreateJWTSecretOptions) (string, error)
 	ImportValidatorKeys(ImportValidatorKeysOptions) error
 	ValidateDockerComposeFile(path string, services ...string) error
+	ShowContainers(ShowContainersOptions) error
 }
 
 type sedgeActions struct {
