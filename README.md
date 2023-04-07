@@ -227,15 +227,16 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Windows support
 - [x] Bug fixes
 
-### Version 1.0 (Current)
+### Version 1.0 
 
 - [x] Full Ethereum PoS support with MEV-Boost
 - [x] Set up and run only one node (execution/consensus/validator)
 - [x] Keystore generation
 - [x] Slashing protection
   
-### Version 1.X
+### Version 1.X (Current)
 
+- [ ] Support Erigon on Gnosis
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
 - [ ] More tests!!!
 - [ ] Support for Nimbus client
