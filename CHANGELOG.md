@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.1.0] - 2023-04-07
+
+### Added
+
+- Unit tests
+
+### Changed
+
+- Update client images to Shapella-ready version.
+- Update Nethermind client settings. Use default JSON-RPC modules, Prunning Cache size, and Snap Sync mode.
+- Update Goerli checkpoint sync to use [this]( https://goerli.checkpoint-sync.ethpandaops.io).
+
+### Fixed
+
+- Fix Erigon command line flags.
+- Checkpoint sync URL prompt is not longer mandatory.
+
 ## [v1.0.0] - 2023-3-23
 
 ### Added

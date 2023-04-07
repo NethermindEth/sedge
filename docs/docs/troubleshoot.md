@@ -25,14 +25,14 @@ sudo cp ~/.docker/cli-plugins/docker-compose /root/.docker/cli-plugins/
 If Prysm throws an error that indicates that can't find a wallet datadir, that means that the wallet was not created
 correctly.
 
-To solve this, you should run `sedge import-key` with the flag `--start-validator` to starts the validator client after
+To solve this, you should run `sedge import-key` with the flag `--start-validator` to start the validator client after
 import, regardless of the state the validator was in before.
 
 This will create the wallet datadir and the validator will start correctly.
 
 ### Permissions issues
 
-If you found a permission issue while installing some dependencies, and you got a error like this:
+If you found a permission issue while installing some dependencies, and you got an error like this:
 
 ```
 docker.service - Docker Application Container Engine

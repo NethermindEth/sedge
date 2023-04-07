@@ -8,8 +8,8 @@
     networks:
       - sedge
     volumes:
-      - ${EC_DATA_DIR}:/home/erigon/.local/share/erigon
-      - ${EC_JWT_SECRET_PATH}:/home/erigon/.local/share/erigon/jwt.hex
+    - ${EC_DATA_DIR}:/var/lib/erigon
+    - ${EC_JWT_SECRET_PATH}:/var/lib/erigon/jwtsecret
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
@@ -21,18 +21,23 @@
       - {{.ElAuthPort}}
     user: root
     command:
+    - --private.api.addr=0.0.0.0:9090
+    - --nat=any
     - --externalcl
     - --http
     - --http.addr=0.0.0.0
     - --http.port={{.ElApiPort}}
+    - --http.vhosts=*
+    - --http.corsdomain=*
+    - --http.api=web3,eth,net,engine
     - --txpool.disable
     - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}{{if .ECBootnodes}}
     - --bootnodes={{.ECBootnodes}}{{end}}
     - --authrpc.addr=0.0.0.0
     - --authrpc.port={{.ElAuthPort}}
     - --authrpc.vhosts=*
-    - --authrpc.jwtsecret=/home/erigon/.local/share/erigon/jwt.hex
-    - --datadir=/home/erigon/.local/share/erigon
+    - --authrpc.jwtsecret=/var/lib/erigon/jwtsecret
+    - --datadir=/var/lib/erigon
     - --healthcheck
     - --metrics
     - --metrics.addr=0.0.0.0
