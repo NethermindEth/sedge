@@ -31,7 +31,6 @@
     - --http.corsdomain=*
     - --http.api=web3,eth,net,engine
     - --txpool.disable
-    - --chain=${NETWORK}
     - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}{{if .ECBootnodes}}
     - --bootnodes={{.ECBootnodes}}{{end}}
     - --authrpc.addr=0.0.0.0
