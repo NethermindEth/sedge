@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New command to show Sedge container info: `sedge show`
+
 ## [v1.1.0] - 2023-04-07
 
 ### Added
