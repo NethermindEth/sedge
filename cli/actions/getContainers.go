@@ -14,7 +14,6 @@ type GetContainersDataOptions struct {
 }
 
 func (actions *sedgeActions) GetContainersData(options GetContainersDataOptions) (ContainersData, error) {
-
 	log.Info("Showing existing containers information")
 
 	composeData, err := generate.ParseCompose(options.DockerComposePath)
@@ -79,7 +78,7 @@ type ContainerData struct {
 func getContainerData(containerData types.ContainerJSON) (ContainerData, error) {
 	data := ContainerData{}
 
-	sedgeNetwork, ok := containerData.NetworkSettings.Networks["sedge-network"] //FIXME: fix in case of network data renaming
+	sedgeNetwork, ok := containerData.NetworkSettings.Networks["sedge-network"] // FIXME: fix in case of network data renaming
 	if !ok {
 		return ContainerData{}, fmt.Errorf("failed to get sedge-network for container %s", containerData.Name)
 	}

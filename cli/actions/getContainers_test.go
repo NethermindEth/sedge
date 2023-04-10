@@ -67,7 +67,7 @@ func buildGetContainersDataTestCase(
 	}
 
 	testCaseFinalDockerComposeFilePath := filepath.Join(t.TempDir(), configs.DefaultDockerComposeScriptName)
-	err = os.WriteFile(testCaseFinalDockerComposeFilePath, testCaseDockerComposeFileContent, 0644)
+	err = os.WriteFile(testCaseFinalDockerComposeFilePath, testCaseDockerComposeFileContent, 0o644)
 	if err != nil {
 		t.Fatalf("Failed to write %s file: %v", testCaseFinalDockerComposeFilePath, err)
 	}
@@ -97,7 +97,7 @@ func buildInspectResults(
 		},
 		NetworkSettings: &types.NetworkSettings{
 			Networks: map[string]*network.EndpointSettings{
-				"sedge-network": { //FIXME: fix in case of network data renaming
+				"sedge-network": { // FIXME: fix in case of network data renaming
 					IPAddress: containerIp,
 				},
 			},
