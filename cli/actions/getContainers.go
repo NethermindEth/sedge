@@ -29,14 +29,14 @@ func (actions *sedgeActions) GetContainersData(options GetContainersDataOptions)
 		if composeData.Services.Execution != nil && composeData.Services.Execution.ContainerName != "" {
 			containersNames = append(containersNames, composeData.Services.Execution.ContainerName)
 		}
+		if composeData.Services.Mevboost != nil && composeData.Services.Mevboost.ContainerName != "" {
+			containersNames = append(containersNames, composeData.Services.Mevboost.ContainerName)
+		}
 		if composeData.Services.Consensus != nil && composeData.Services.Consensus.ContainerName != "" {
 			containersNames = append(containersNames, composeData.Services.Consensus.ContainerName)
 		}
 		if composeData.Services.Validator != nil && composeData.Services.Validator.ContainerName != "" {
 			containersNames = append(containersNames, composeData.Services.Validator.ContainerName)
-		}
-		if composeData.Services.Mevboost != nil && composeData.Services.Mevboost.ContainerName != "" {
-			containersNames = append(containersNames, composeData.Services.Mevboost.ContainerName)
 		}
 
 		outputData := ContainersData{}
@@ -79,7 +79,7 @@ type ContainerData struct {
 func getContainerData(containerData types.ContainerJSON) (ContainerData, error) {
 	data := ContainerData{}
 
-	sedgeNetwork, ok := containerData.NetworkSettings.Networks["sedge-network"]
+	sedgeNetwork, ok := containerData.NetworkSettings.Networks["sedge-network"] //FIXME: fix in case of network data renaming
 	if !ok {
 		return ContainerData{}, fmt.Errorf("failed to get sedge-network for container %s", containerData.Name)
 	}
