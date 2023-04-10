@@ -73,6 +73,7 @@ func main() {
 		cli.ImportKeysCmd(sedgeActions, depsMgr),
 		cli.GenerateCmd(sedgeActions),
 		cli.DependenciesCommand(depsMgr),
+		cli.ShowCmd(cmdRunner, sedgeActions, depsMgr),
 	)
 	sedgeCmd.SilenceErrors = true
 	sedgeCmd.SilenceUsage = true
