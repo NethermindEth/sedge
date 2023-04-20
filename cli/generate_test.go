@@ -166,14 +166,6 @@ func buildGenerateTestCase(
 	tErr error,
 ) generateCmdTestCase {
 	tc := generateCmdTestCase{}
-	configPath := t.TempDir()
-
-	dcPath := filepath.Join(configPath, "docker-compose-scripts")
-	err := os.Mkdir(dcPath, os.ModePerm)
-	if err != nil {
-		t.Fatalf("Can't build test case: %v", err)
-	}
-
 	tc.name = name
 	tc.args = args
 	tc.globalArgs = globalArgs
