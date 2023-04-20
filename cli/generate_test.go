@@ -157,31 +157,16 @@ func (flags *GenCmdFlags) toString() string {
 	return strings.Join(flags.argsList(), " ")
 }
 
-func buildGenerateTestCase(
-	t *testing.T,
-	name string,
-	args GenCmdFlags,
-	globalArgs globalFlags,
-	subCommand subCmd,
-	tErr error,
-) generateCmdTestCase {
-	tc := generateCmdTestCase{}
-	tc.name = name
-	tc.args = args
-	tc.globalArgs = globalArgs
-	tc.globalArgs.generationPath = t.TempDir()
-	tc.subCommand = subCommand
-	tc.err = tErr
-	return tc
-}
-
 func TestGenerateCmd(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
 	tcs := []generateCmdTestCase{
-		buildGenerateTestCase(
-			t,
+		{
 			"Execution, bad number of arguments",
+			subCmd{
+				name: "execution",
+				args: []string{"nethermind", "besu"},
+			},
 			GenCmdFlags{},
 			globalFlags{
 				install:        false,
@@ -189,15 +174,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
-			subCmd{
-				name: "execution",
-				args: []string{"nethermind", "besu"},
-			},
 			errors.New("requires one argument"),
-		),
-		buildGenerateTestCase(
-			t,
+		},
+		{
 			"Consensus, bad number of arguments",
+			subCmd{
+				name: "consensus",
+				args: []string{"teku", "lodestar"},
+			},
 			GenCmdFlags{
 				executionAuthUrl: "http://localhost:8545",
 				executionApiUrl:  "http://localhost:8545",
@@ -208,15 +192,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
+			errors.New("requires one argument"),
+		},
+		{
+			"Validator, bad number of arguments",
 			subCmd{
-				name: "consensus",
+				name: "validator",
 				args: []string{"teku", "lodestar"},
 			},
-			errors.New("requires one argument"),
-		),
-		buildGenerateTestCase(
-			t,
-			"Validator, bad number of arguments",
 			GenCmdFlags{
 				consensusApiUrl: "http://localhost:4000",
 			},
@@ -226,15 +209,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
-			subCmd{
-				name: "validator",
-				args: []string{"teku", "lodestar"},
-			},
 			errors.New("requires one argument"),
-		),
-		buildGenerateTestCase(
-			t,
+		},
+		{
 			"full-node Fixed clients",
+			subCmd{
+				name: "full-node",
+				args: []string{},
+			},
 			GenCmdFlags{
 				executionName: "nethermind",
 				consensusName: "lighthouse",
@@ -245,29 +227,27 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			nil,
+		},
+		{
+			"full-node Random clients, no feeRecipient",
 			subCmd{
 				name: "full-node",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"full-node Random clients, no feeRecipient",
 			GenCmdFlags{},
 			globalFlags{
 				install: false,
 				logging: "",
 			},
+			nil,
+		},
+		{
+			"full-node Random clients, relay-urls, single relay",
 			subCmd{
 				name: "full-node",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"full-node Random clients, relay-urls, single relay",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 				relayURLs:    []string{"https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net"},
@@ -276,15 +256,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			nil,
+		},
+		{
+			"full-node Random clients, relay-urls",
 			subCmd{
 				name: "full-node",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"full-node Random clients, relay-urls",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 				relayURLs:    []string{"https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net", "https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money"},
@@ -293,15 +272,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			nil,
+		},
+		{
+			"full-node Random clients, relay-urls",
 			subCmd{
 				name: "full-node",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"full-node Random clients, relay-urls",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 				relayURLs:    []string{"https://@boost-relay.flashbots.net", "https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money"},
@@ -310,15 +288,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			nil,
+		},
+		{
+			"full-node Random clients, invalid relay-urls",
 			subCmd{
 				name: "full-node",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"full-node Random clients, invalid relay-urls",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 				relayURLs:    []string{"https:/boost-relay.flashbots.net", "https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money{"},
@@ -327,15 +304,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "https:/boost-relay.flashbots.net"),
+		},
+		{
+			"full-node Random clients, invalid relay-url",
 			subCmd{
 				name: "full-node",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "https:/boost-relay.flashbots.net"),
-		),
-		buildGenerateTestCase(
-			t,
-			"full-node Random clients, invalid relay-url",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 				relayURLs:    []string{"boost-relay.flashbots.net"},
@@ -344,15 +320,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "boost-relay.flashbots.net"),
+		},
+		{
+			"full-node Random clients, custom Ckpt sync endpoint",
 			subCmd{
 				name: "full-node",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "boost-relay.flashbots.net"),
-		),
-		buildGenerateTestCase(
-			t,
-			"full-node Random clients, custom Ckpt sync endpoint",
 			GenCmdFlags{
 				checkpointSyncUrl: "https://localhost:8545/api/v1/eth1",
 			},
@@ -360,15 +335,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			nil,
+		},
+		{
+			"consensus Random client, custom Ckpt sync endpoint",
 			subCmd{
-				name: "full-node",
+				name: "consensus",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, custom Ckpt sync endpoint",
 			GenCmdFlags{
 				executionAuthUrl:  "https://localhost:8545",
 				executionApiUrl:   "http://localhost",
@@ -378,15 +352,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			nil,
+		},
+		{
+			"consensus Random client, custom Ckpt sync endpoint",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, custom Ckpt sync endpoint",
 			GenCmdFlags{
 				executionAuthUrl:  "https://192.168.0.1:8545",
 				executionApiUrl:   "http://127.0.0.1",
@@ -396,15 +369,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			nil,
+		},
+		{
+			"consensus Random client, custom Ckpt sync endpoint",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, custom Ckpt sync endpoint",
 			GenCmdFlags{
 				executionAuthUrl:  "https://192.168.0.1:8545/v1/api",
 				executionApiUrl:   "http://127.0.0.1/v1/api",
@@ -414,15 +386,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			nil,
+		},
+		{
+			"consensus Random client, bad custom Ckpt sync endpoint",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, bad custom Ckpt sync endpoint",
 			GenCmdFlags{
 				executionAuthUrl:  "http://localhost:8545",
 				executionApiUrl:   "http://localhost:8545",
@@ -432,15 +403,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			fmt.Errorf(configs.InvalidUrlFlagError, "checkpoint sync", "./8080"),
+		},
+		{
+			"consensus Random client, bad custom Ckpt sync endpoint",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlagError, "checkpoint sync", "./8080"),
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, bad custom Ckpt sync endpoint",
 			GenCmdFlags{
 				executionAuthUrl:  "http://localhost:8545/..,;",
 				executionApiUrl:   "http://localhost:8545/{}",
@@ -450,15 +420,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			fmt.Errorf(configs.InvalidUrlFlagError, "checkpoint sync", "44.33.55.66:8080"),
+		},
+		{
+			"consensus Random client, invalid api url",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlagError, "checkpoint sync", "44.33.55.66:8080"),
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, invalid api url",
 			GenCmdFlags{
 				executionAuthUrl: "http://localhost",
 				executionApiUrl:  "localhost/8545",
@@ -467,15 +436,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			fmt.Errorf(configs.InvalidUrlFlagError, "execution api", "localhost/8545"),
+		},
+		{
+			"consensus Random client, invalid api url",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlagError, "execution api", "localhost/8545"),
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, invalid api url",
 			GenCmdFlags{
 				executionAuthUrl: "http://localhost",
 				executionApiUrl:  "localhost:8545",
@@ -484,15 +452,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			fmt.Errorf(configs.InvalidUrlFlagError, "execution api", "localhost:8545"),
+		},
+		{
+			"consensus Random client, invalid auth url",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlagError, "execution api", "localhost:8545"),
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, invalid auth url",
 			GenCmdFlags{
 				executionAuthUrl: "htp://localhost:4000",
 				executionApiUrl:  "https://localhost:8545",
@@ -501,15 +468,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			fmt.Errorf(configs.InvalidUrlFlagError, "execution auth", "htp://localhost:4000"),
+		},
+		{
+			"consensus Random client, valid mev-boost url",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlagError, "execution auth", "htp://localhost:4000"),
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, valid mev-boost url",
 			GenCmdFlags{
 				executionAuthUrl: "http://execution:8551",
 				executionApiUrl:  "https://execution:8545",
@@ -519,15 +485,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			nil,
+		},
+		{
+			"consensus Random client, valid mev-boost url",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, valid mev-boost url",
 			GenCmdFlags{
 				executionAuthUrl: "http://execution:8551",
 				executionApiUrl:  "https://execution:8545",
@@ -537,15 +502,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			nil,
+		},
+		{
+			"consensus Random client, invalid mev-boost url",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, invalid mev-boost url",
 			GenCmdFlags{
 				executionAuthUrl: "http://execution:8551",
 				executionApiUrl:  "https://execution:8545",
@@ -555,15 +519,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			fmt.Errorf(configs.InvalidUrlFlagError, "mev-boost endpoint", "mev-boost:3000"),
+		},
+		{
+			"consensus Random client, invalid mev-boost url",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlagError, "mev-boost endpoint", "mev-boost:3000"),
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, invalid mev-boost url",
 			GenCmdFlags{
 				executionAuthUrl: "http://execution:8551",
 				executionApiUrl:  "https://execution:8545",
@@ -573,15 +536,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			fmt.Errorf(configs.InvalidUrlFlagError, "mev-boost endpoint", "htp://mev-boost:3000"),
+		},
+		{
+			"consensus Random client, custom enrs",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlagError, "mev-boost endpoint", "htp://mev-boost:3000"),
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, custom enrs",
 			GenCmdFlags{
 				executionAuthUrl: "http://execution:8551",
 				executionApiUrl:  "https://execution:8545",
@@ -591,15 +553,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			nil,
+		},
+		{
+			"consensus Random client, custom enr",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, custom enr",
 			GenCmdFlags{
 				executionAuthUrl: "http://execution:8551",
 				executionApiUrl:  "https://execution:8545",
@@ -609,15 +570,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			nil,
+		},
+		{
+			"consensus Random client, invalid custom enrs",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, invalid custom enrs",
 			GenCmdFlags{
 				executionAuthUrl: "http://execution:8551",
 				executionApiUrl:  "https://execution:8545",
@@ -627,15 +587,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			fmt.Errorf(configs.InvalidEnrError, "enr:Iq4QMCTfIMXnow27baRUb35Q8iiFHSIDBJh6hQM5Axohhf4b6Kr_cOCu0htQ5WvVqKvFgY28893DHAg8gnBAXsAVqmGAX53x8JggmlkgnY0gmlwhLKAlv6Jc2VjcDI1NmsxoQK6S-Cii_KmfFdUJL2TANL3ksaKUnNXvTCv1tLwXs0QgIN1ZHCCIyk"),
+		},
+		{
+			"consensus Random client, invalid custom enrs",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidEnrError, "enr:Iq4QMCTfIMXnow27baRUb35Q8iiFHSIDBJh6hQM5Axohhf4b6Kr_cOCu0htQ5WvVqKvFgY28893DHAg8gnBAXsAVqmGAX53x8JggmlkgnY0gmlwhLKAlv6Jc2VjcDI1NmsxoQK6S-Cii_KmfFdUJL2TANL3ksaKUnNXvTCv1tLwXs0QgIN1ZHCCIyk"),
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, invalid custom enrs",
 			GenCmdFlags{
 				executionAuthUrl: "http://execution:8551",
 				executionApiUrl:  "https://execution:8545",
@@ -645,15 +604,14 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			fmt.Errorf(configs.InvalidEnrError, "enr-Iq4QMCTfIMXnow27baRUb35Q8iiFHSIDBJh6hQM5Axohhf4b6Kr_cOCu0htQ5WvVqKvFgY28893DHAg8gnBAXsAVqmGAX53x8JggmlkgnY0gmlwhLKAlv6Jc2VjcDI1NmsxoQK6S-Cii_KmfFdUJL2TANL3ksaKUnNXvTCv1tLwXs0QgIN1ZHCCIyk"),
+		},
+		{
+			"consensus Random client, duplicated custom enrs",
 			subCmd{
 				name: "consensus",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidEnrError, "enr-Iq4QMCTfIMXnow27baRUb35Q8iiFHSIDBJh6hQM5Axohhf4b6Kr_cOCu0htQ5WvVqKvFgY28893DHAg8gnBAXsAVqmGAX53x8JggmlkgnY0gmlwhLKAlv6Jc2VjcDI1NmsxoQK6S-Cii_KmfFdUJL2TANL3ksaKUnNXvTCv1tLwXs0QgIN1ZHCCIyk"),
-		),
-		buildGenerateTestCase(
-			t,
-			"consensus Random client, duplicated custom enrs",
 			GenCmdFlags{
 				executionAuthUrl: "http://execution:8551",
 				executionApiUrl:  "https://execution:8545",
@@ -663,30 +621,28 @@ func TestGenerateCmd(t *testing.T) {
 				install: false,
 				logging: "",
 			},
+			fmt.Errorf("%s: %s", configs.ErrDuplicatedBootNode, "enr:-KG4QE5OIg5ThTjkzrlVF32WT_-XT14WeJtIz2zoTqLLjQhYAmJlnk4ItSoH41_2x0RX0wTFIe5GgjRzU2u7Q1fN4vADhGV0aDKQqP7o7pAAAHAyAAAAAAAAAIJpZIJ2NIJpcISlFsStiXNlY3AyNTZrMaEC-Rrd_bBZwhKpXzFCrStKp1q_HmGOewxY3KwM8ofAj_ODdGNwgiMog3VkcIIjKA"),
+		},
+		{
+			"Wrong sub command",
 			subCmd{
-				name: "consensus",
+				name: "full",
 				args: []string{},
 			},
-			fmt.Errorf("%s: %s", configs.ErrDuplicatedBootNode, "enr:-KG4QE5OIg5ThTjkzrlVF32WT_-XT14WeJtIz2zoTqLLjQhYAmJlnk4ItSoH41_2x0RX0wTFIe5GgjRzU2u7Q1fN4vADhGV0aDKQqP7o7pAAAHAyAAAAAAAAAIJpZIJ2NIJpcISlFsStiXNlY3AyNTZrMaEC-Rrd_bBZwhKpXzFCrStKp1q_HmGOewxY3KwM8ofAj_ODdGNwgiMog3VkcIIjKA"),
-		),
-		buildGenerateTestCase(
-			t,
-			"Wrong sub command",
 			GenCmdFlags{},
 			globalFlags{
 				install: false,
 				network: "",
 				logging: "",
 			},
+			nil,
+		},
+		{
+			"Missing validator client",
 			subCmd{
-				name: "full",
+				name: "full-node",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"Missing validator client",
 			GenCmdFlags{
 				executionName: "nethermind",
 				consensusName: "lighthouse",
@@ -698,15 +654,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "mainnet",
 				logging:        "",
 			},
+			nil,
+		},
+		{
+			"Good network input",
 			subCmd{
 				name: "full-node",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"Good network input",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 			},
@@ -716,15 +671,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "mainnet",
 				logging:        "",
 			},
-			subCmd{
-				name: "full-node",
-				args: []string{},
-			},
 			nil,
-		),
-		buildGenerateTestCase(
-			t,
+		},
+		{
 			"Bad network input",
+			subCmd{
+				name: "consensus",
+				args: []string{"lighthouse"},
+			},
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 			},
@@ -734,15 +688,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "wrong",
 				logging:        "",
 			},
+			errors.New("unknown network \"wrong\". Please provide correct network name. Use 'networks' command to see the list of supported networks"),
+		},
+		{
+			"Consensus fixed client",
 			subCmd{
 				name: "consensus",
-				args: []string{"lighthouse"},
+				args: []string{"teku"},
 			},
-			errors.New("unknown network \"wrong\". Please provide correct network name. Use 'networks' command to see the list of supported networks"),
-		),
-		buildGenerateTestCase(
-			t,
-			"Consensus fixed client",
 			GenCmdFlags{
 				executionAuthUrl: "http://localhost:8545/eth",
 				executionApiUrl:  "https://execution/eth",
@@ -754,15 +707,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
+			nil,
+		},
+		{
+			"Consensus Missing execution-auth-url",
 			subCmd{
 				name: "consensus",
 				args: []string{"teku"},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"Consensus Missing execution-auth-url",
 			GenCmdFlags{
 				executionApiUrl: "http://localhost:8545",
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
@@ -773,15 +725,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
+			errors.New("required flag(s) \"execution-auth-url\" not set"),
+		},
+		{
+			"Consensus Missing execution-api-url",
 			subCmd{
 				name: "consensus",
 				args: []string{"teku"},
 			},
-			errors.New("required flag(s) \"execution-auth-url\" not set"),
-		),
-		buildGenerateTestCase(
-			t,
-			"Consensus Missing execution-api-url",
 			GenCmdFlags{
 				executionAuthUrl: "http://localhost:8545",
 				feeRecipient:     "0x0000000000000000000000000000000000000000",
@@ -792,15 +743,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
+			errors.New("required flag(s) \"execution-api-url\" not set"),
+		},
+		{
+			"Consensus wrong client",
 			subCmd{
 				name: "consensus",
-				args: []string{"teku"},
+				args: []string{"wrong"},
 			},
-			errors.New("required flag(s) \"execution-api-url\" not set"),
-		),
-		buildGenerateTestCase(
-			t,
-			"Consensus wrong client",
 			GenCmdFlags{
 				executionAuthUrl: "http://localhost:8545",
 				executionApiUrl:  "http://localhost:8545",
@@ -812,15 +762,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
-			subCmd{
-				name: "consensus",
-				args: []string{"wrong"},
-			},
 			errors.New("invalid consensus client"),
-		),
-		buildGenerateTestCase(
-			t,
+		},
+		{
 			"Validator missing consensus-api",
+			subCmd{
+				name: "validator",
+				args: []string{},
+			},
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 			},
@@ -830,15 +779,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
+			errors.New("required flag(s) \"consensus-url\" not set"),
+		},
+		{
+			"Validator good client",
 			subCmd{
 				name: "validator",
-				args: []string{},
+				args: []string{"teku"},
 			},
-			errors.New("required flag(s) \"consensus-url\" not set"),
-		),
-		buildGenerateTestCase(
-			t,
-			"Validator good client",
 			GenCmdFlags{
 				consensusApiUrl: "http://localhost:4000",
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
@@ -849,15 +797,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
-			subCmd{
-				name: "validator",
-				args: []string{"teku"},
-			},
 			nil,
-		),
-		buildGenerateTestCase(
-			t,
+		},
+		{
 			"MevBoost",
+			subCmd{
+				name: "mev-boost",
+				args: []string{},
+			},
 			GenCmdFlags{},
 			globalFlags{
 				install:        false,
@@ -865,15 +812,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
+			nil,
+		},
+		{
+			"MevBoost custom relay url, single one",
 			subCmd{
 				name: "mev-boost",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"MevBoost custom relay url, single one",
 			GenCmdFlags{
 				relayURLs: []string{`"https://boost-relay.flashbots.net,"`},
 			},
@@ -883,15 +829,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
+			nil,
+		},
+		{
+			"MevBoost custom relay urls",
 			subCmd{
 				name: "mev-boost",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"MevBoost custom relay urls",
 			GenCmdFlags{
 				relayURLs: []string{"https://boost-relay.flashbots.net", "http://@boost-relay.flashbots.net"},
 			},
@@ -901,15 +846,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
+			nil,
+		},
+		{
+			"MevBoost custom relay urls",
 			subCmd{
 				name: "mev-boost",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"MevBoost custom relay urls",
 			GenCmdFlags{
 				relayURLs: []string{"https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net", "https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money"},
 			},
@@ -919,15 +863,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
+			nil,
+		},
+		{
+			"MevBoost invalid custom relay url",
 			subCmd{
 				name: "mev-boost",
 				args: []string{},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"MevBoost invalid custom relay url",
 			GenCmdFlags{
 				relayURLs: []string{"https:/boost-relay.flashbots.net", "https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money"},
 			},
@@ -937,15 +880,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
+			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "https:/boost-relay.flashbots.net"),
+		},
+		{
+			"MevBoost invalid custom relay url",
 			subCmd{
 				name: "mev-boost",
 				args: []string{},
 			},
-			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "https:/boost-relay.flashbots.net"),
-		),
-		buildGenerateTestCase(
-			t,
-			"MevBoost invalid custom relay url",
 			GenCmdFlags{
 				relayURLs: []string{"boost-relay.flashbots.net", "https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money"},
 			},
@@ -955,15 +897,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
+			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "boost-relay.flashbots.net"),
+		},
+		{
+			"MevBoost wrong argument",
 			subCmd{
 				name: "mev-boost",
-				args: []string{},
+				args: []string{"wrong"},
 			},
-			fmt.Errorf(configs.InvalidUrlFlagError, "relay", "boost-relay.flashbots.net"),
-		),
-		buildGenerateTestCase(
-			t,
-			"MevBoost wrong argument",
 			GenCmdFlags{},
 			globalFlags{
 				install:        false,
@@ -971,15 +912,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
-			subCmd{
-				name: "mev-boost",
-				args: []string{"wrong"},
-			},
 			errors.New("unknown command \"wrong\" for \"sedge generate mev-boost\""),
-		),
-		buildGenerateTestCase(
-			t,
+		},
+		{
 			"Execution ",
+			subCmd{
+				name: "execution",
+				args: []string{"nethermind"},
+			},
 			GenCmdFlags{
 				mapAllPorts: true,
 			},
@@ -989,15 +929,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "sepolia",
 				logging:        "",
 			},
+			nil,
+		},
+		{
+			"Execution custom enodes",
 			subCmd{
 				name: "execution",
 				args: []string{"nethermind"},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"Execution custom enodes",
 			GenCmdFlags{
 				customEnodes: []string{"enode://ea6d67eb3277d8ae9292fc700fa757ef6d2127c4db9712bcd5eb1341b1d937ac71cc2b15efe3a8496f4fc9fc12156d7ac73d82eb3c0f68928442116030b76f48@3.135.122.4:30303", "enode://c5e1e38709a2eb402557e82e071ccec1c6e2adedb01f7d6afdc80d25f7e9287f954fa9b742f01b1b74a5c532de9476afeb6efdcf5a683672a663204eadb15e45@3.17.46.220:30303"},
 			},
@@ -1007,15 +946,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "mainnet",
 				logging:        "",
 			},
+			nil,
+		},
+		{
+			"Execution custom enode",
 			subCmd{
 				name: "execution",
 				args: []string{"nethermind"},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"Execution custom enode",
 			GenCmdFlags{
 				customEnodes: []string{"enode://ea6d67eb3277d8ae9292fc700fa757ef6d2127c4db9712bcd5eb1341b1d937ac71cc2b15efe3a8496f4fc9fc12156d7ac73d82eb3c0f68928442116030b76f48@3.135.122.4:30303"},
 			},
@@ -1025,15 +963,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "mainnet",
 				logging:        "",
 			},
+			nil,
+		},
+		{
+			"Execution invalid custom enodes",
 			subCmd{
 				name: "execution",
 				args: []string{"nethermind"},
 			},
-			nil,
-		),
-		buildGenerateTestCase(
-			t,
-			"Execution invalid custom enodes",
 			GenCmdFlags{
 				customEnodes: []string{"enode:3.135.122.4:30303", "enode://c5e1e38709a2eb402557e82e071ccec1c6e2adedb01f7d6afdc80d25f7e9287f954fa9b742f01b1b74a5c532de9476afeb6efdcf5a683672a663204eadb15e45@3.17.46.220:30303"},
 			},
@@ -1043,15 +980,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "mainnet",
 				logging:        "",
 			},
+			fmt.Errorf(configs.InvalidEnodeError, "enode:3.135.122.4:30303"),
+		},
+		{
+			"Execution invalid custom enodes",
 			subCmd{
 				name: "execution",
 				args: []string{"nethermind"},
 			},
-			fmt.Errorf(configs.InvalidEnodeError, "enode:3.135.122.4:30303"),
-		),
-		buildGenerateTestCase(
-			t,
-			"Execution invalid custom enodes",
 			GenCmdFlags{
 				customEnodes: []string{"enode://@3.135.122.4:30303", "enode://c5e1e38709a2eb402557e82e071ccec1c6e2adedb01f7d6afdc80d25f7e9287f954fa9b742f01b1b74a5c532de9476afeb6efdcf5a683672a663204eadb15e45@3.17.46.220:30303"},
 			},
@@ -1061,15 +997,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "mainnet",
 				logging:        "",
 			},
+			fmt.Errorf(configs.InvalidEnodeError, "enode://@3.135.122.4:30303"),
+		},
+		{
+			"Execution duplicated custom enodes",
 			subCmd{
 				name: "execution",
 				args: []string{"nethermind"},
 			},
-			fmt.Errorf(configs.InvalidEnodeError, "enode://@3.135.122.4:30303"),
-		),
-		buildGenerateTestCase(
-			t,
-			"Execution duplicated custom enodes",
 			GenCmdFlags{
 				customEnodes: []string{"enode://c5e1e38709a2eb402557e82e071ccec1c6e2adedb01f7d6afdc80d25f7e9287f954fa9b742f01b1b74a5c532de9476afeb6efdcf5a683672a663204eadb15e45@3.17.46.220:30303", "enode://c5e1e38709a2eb402557e82e071ccec1c6e2adedb01f7d6afdc80d25f7e9287f954fa9b742f01b1b74a5c532de9476afeb6efdcf5a683672a663204eadb15e45@3.17.46.220:30303"},
 			},
@@ -1079,15 +1014,14 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "mainnet",
 				logging:        "",
 			},
+			fmt.Errorf("%s: %s", configs.ErrDuplicatedBootNode, "enode://c5e1e38709a2eb402557e82e071ccec1c6e2adedb01f7d6afdc80d25f7e9287f954fa9b742f01b1b74a5c532de9476afeb6efdcf5a683672a663204eadb15e45@3.17.46.220:30303"),
+		},
+		{
+			"Execution wrong client on gnosis",
 			subCmd{
 				name: "execution",
-				args: []string{"nethermind"},
+				args: []string{"geth"},
 			},
-			fmt.Errorf("%s: %s", configs.ErrDuplicatedBootNode, "enode://c5e1e38709a2eb402557e82e071ccec1c6e2adedb01f7d6afdc80d25f7e9287f954fa9b742f01b1b74a5c532de9476afeb6efdcf5a683672a663204eadb15e45@3.17.46.220:30303"),
-		),
-		buildGenerateTestCase(
-			t,
-			"Execution wrong client on gnosis",
 			GenCmdFlags{},
 			globalFlags{
 				install:        false,
@@ -1095,15 +1029,13 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "gnosis",
 				logging:        "",
 			},
-			subCmd{
-				name: "execution",
-				args: []string{"geth"},
-			},
 			errors.New("invalid execution client"),
-		),
-		buildGenerateTestCase(
-			t,
+		},
+		{
 			"Mainnet Network, custom ttd, should fail",
+			subCmd{
+				name: "full-node",
+			},
 			GenCmdFlags{
 				CustomFlags: CustomFlags{
 					customTTD: "some",
@@ -1112,13 +1044,13 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "mainnet",
 			},
-			subCmd{
-				name: "full-node",
-			},
-			errors.New("custom flags used without --network custom")),
-		buildGenerateTestCase(
-			t,
+			errors.New("custom flags used without --network custom"),
+		},
+		{
 			"Custom Network and custom ttd, should work",
+			subCmd{
+				name: "full-node",
+			},
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 				CustomFlags: CustomFlags{
@@ -1128,13 +1060,13 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "custom",
 			},
-			subCmd{
-				name: "full-node",
-			},
-			nil),
-		buildGenerateTestCase(
-			t,
+			nil,
+		},
+		{
 			"Custom Network and custom ttd, execution node, should work",
+			subCmd{
+				name: "execution",
+			},
 			GenCmdFlags{
 				CustomFlags: CustomFlags{
 					customTTD: "some",
@@ -1143,13 +1075,13 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "custom",
 			},
+			nil,
+		},
+		{
+			"Mainnet Network custom ChainSpec, execution node, shouldn't work",
 			subCmd{
 				name: "execution",
 			},
-			nil),
-		buildGenerateTestCase(
-			t,
-			"Mainnet Network custom ChainSpec, execution node, shouldn't work",
 			GenCmdFlags{
 				CustomFlags: CustomFlags{
 					customTTD: "some",
@@ -1158,13 +1090,13 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "mainnet",
 			},
-			subCmd{
-				name: "execution",
-			},
-			errors.New("custom flags used without --network custom")),
-		buildGenerateTestCase(
-			t,
+			errors.New("custom flags used without --network custom"),
+		},
+		{
 			"Full-node, custom TTD",
+			subCmd{
+				name: "full-node",
+			},
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 				CustomFlags: CustomFlags{
@@ -1174,13 +1106,14 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "custom",
 			},
-			subCmd{
-				name: "full-node",
-			},
-			nil),
-		buildGenerateTestCase(
-			t,
+			nil,
+		},
+		{
 			"Execution ",
+			subCmd{
+				name: "execution",
+				args: []string{"nethermind"},
+			},
 			GenCmdFlags{
 				mapAllPorts: true,
 			},
@@ -1190,15 +1123,13 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "sepolia",
 				logging:        "",
 			},
-			subCmd{
-				name: "execution",
-				args: []string{"nethermind"},
-			},
 			nil,
-		),
-		buildGenerateTestCase(
-			t,
+		},
+		{
 			"Full-node, waitEpoch set",
+			subCmd{
+				name: "full-node",
+			},
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 				waitEpoch:    5,
@@ -1206,13 +1137,13 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "chiado",
 			},
+			nil,
+		},
+		{
+			"Full-node, valid Graffiti",
 			subCmd{
 				name: "full-node",
 			},
-			nil),
-		buildGenerateTestCase(
-			t,
-			"Full-node, valid Graffiti",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 				graffiti:     "sedge-graffiti",
@@ -1220,13 +1151,13 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "gnosis",
 			},
+			nil,
+		},
+		{
+			"Full-node, Graffiti too long",
 			subCmd{
 				name: "full-node",
 			},
-			nil),
-		buildGenerateTestCase(
-			t,
-			"Full-node, Graffiti too long",
 			GenCmdFlags{
 				feeRecipient: "0x0000000000000000000000000000000000000000",
 				graffiti:     "sedge-graffiti-sedge",
@@ -1234,13 +1165,14 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "gnosis",
 			},
-			subCmd{
-				name: "full-node",
-			},
-			fmt.Errorf(configs.ErrGraffitiLength, "sedge-graffiti-sedge", 20)),
-		buildGenerateTestCase(
-			t,
+			fmt.Errorf(configs.ErrGraffitiLength, "sedge-graffiti-sedge", 20),
+		},
+		{
 			"Validator, waitEpoch set",
+			subCmd{
+				name: "validator",
+				args: []string{"lodestar"},
+			},
 			GenCmdFlags{
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
 				waitEpoch:       50,
@@ -1249,14 +1181,14 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "goerli",
 			},
+			nil,
+		},
+		{
+			"Validator, invalid consensus api url",
 			subCmd{
 				name: "validator",
 				args: []string{"lodestar"},
 			},
-			nil),
-		buildGenerateTestCase(
-			t,
-			"Validator, invalid consensus api url",
 			GenCmdFlags{
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
 				consensusApiUrl: "localhost/4000",
@@ -1264,14 +1196,14 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "goerli",
 			},
+			fmt.Errorf(configs.InvalidUrlFlagError, "consensus api", "localhost/4000"),
+		},
+		{
+			"Validator, invalid consensus api url",
 			subCmd{
 				name: "validator",
-				args: []string{"lodestar"},
+				args: []string{"teku"},
 			},
-			fmt.Errorf(configs.InvalidUrlFlagError, "consensus api", "localhost/4000")),
-		buildGenerateTestCase(
-			t,
-			"Validator, invalid consensus api url",
 			GenCmdFlags{
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
 				consensusApiUrl: "htp://localhost:4000",
@@ -1279,14 +1211,14 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "sepolia",
 			},
+			fmt.Errorf(configs.InvalidUrlFlagError, "consensus api", "htp://localhost:4000"),
+		},
+		{
+			"Validator, invalid consensus api url",
 			subCmd{
 				name: "validator",
-				args: []string{"teku"},
+				args: []string{"lodestar"},
 			},
-			fmt.Errorf(configs.InvalidUrlFlagError, "consensus api", "htp://localhost:4000")),
-		buildGenerateTestCase(
-			t,
-			"Validator, invalid consensus api url",
 			GenCmdFlags{
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
 				consensusApiUrl: "localhost:4000",
@@ -1294,14 +1226,14 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "goerli",
 			},
+			fmt.Errorf(configs.InvalidUrlFlagError, "consensus api", "localhost:4000"),
+		},
+		{
+			"Validator, valid consensus api url",
 			subCmd{
 				name: "validator",
-				args: []string{"lodestar"},
+				args: []string{"prysm"},
 			},
-			fmt.Errorf(configs.InvalidUrlFlagError, "consensus api", "localhost:4000")),
-		buildGenerateTestCase(
-			t,
-			"Validator, valid consensus api url",
 			GenCmdFlags{
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
 				consensusApiUrl: "https://localhost:80/dasd,.,",
@@ -1309,14 +1241,14 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "sepolia",
 			},
+			nil,
+		},
+		{
+			"Validator, valid consensus api url",
 			subCmd{
 				name: "validator",
 				args: []string{"prysm"},
 			},
-			nil),
-		buildGenerateTestCase(
-			t,
-			"Validator, valid consensus api url",
 			GenCmdFlags{
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
 				consensusApiUrl: "https://localhost",
@@ -1324,14 +1256,14 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "sepolia",
 			},
+			nil,
+		},
+		{
+			"Validator, valid consensus api url",
 			subCmd{
 				name: "validator",
-				args: []string{"prysm"},
+				args: []string{"lighthouse"},
 			},
-			nil),
-		buildGenerateTestCase(
-			t,
-			"Validator, valid consensus api url",
 			GenCmdFlags{
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
 				consensusApiUrl: "https://localhost/api/endpoint",
@@ -1339,14 +1271,14 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "mainnet",
 			},
+			nil,
+		},
+		{
+			"Validator, valid consensus api url",
 			subCmd{
 				name: "validator",
-				args: []string{"lighthouse"},
+				args: []string{"lodestar"},
 			},
-			nil),
-		buildGenerateTestCase(
-			t,
-			"Validator, valid consensus api url",
 			GenCmdFlags{
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
 				consensusApiUrl: "https://localhost:8000/api/endpoint",
@@ -1354,14 +1286,14 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "mainnet",
 			},
+			nil,
+		},
+		{
+			"Validator, graffiti too long",
 			subCmd{
 				name: "validator",
-				args: []string{"lodestar"},
+				args: []string{"teku"},
 			},
-			nil),
-		buildGenerateTestCase(
-			t,
-			"Validator, graffiti too long",
 			GenCmdFlags{
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
 				consensusApiUrl: "https://localhost:8000/api/endpoint{}",
@@ -1370,14 +1302,14 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "goerli",
 			},
+			fmt.Errorf(configs.ErrGraffitiLength, "sedge-graffiti-sedge", 20),
+		},
+		{
+			"Validator, valid graffiti",
 			subCmd{
 				name: "validator",
-				args: []string{"teku"},
+				args: []string{"lodestar"},
 			},
-			fmt.Errorf(configs.ErrGraffitiLength, "sedge-graffiti-sedge", 20)),
-		buildGenerateTestCase(
-			t,
-			"Validator, valid graffiti",
 			GenCmdFlags{
 				feeRecipient:    "0x0000000000000000000000000000000000000000",
 				consensusApiUrl: "https://localhost:8000/api/endpoint",
@@ -1386,14 +1318,13 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "mainnet",
 			},
-			subCmd{
-				name: "validator",
-				args: []string{"lodestar"},
-			},
-			nil),
-		buildGenerateTestCase(
-			t,
+			nil,
+		},
+		{
 			"Validator blocker not generated with --no-validator flag",
+			subCmd{
+				name: "full-node",
+			},
 			GenCmdFlags{
 				noValidator:   true,
 				executionName: "nethermind",
@@ -1402,11 +1333,8 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "mainnet",
 			},
-			subCmd{
-				name: "full-node",
-			},
 			nil,
-		),
+		},
 	}
 
 	// TODO: Add test cases for Execution fallback urls
@@ -1422,6 +1350,7 @@ func TestGenerateCmd(t *testing.T) {
 			argsL := append([]string{"generate"}, tc.subCommand.argsList()...)
 			argsL = append(argsL, tc.args.argsList()...)
 			argsL = append(argsL, tc.globalArgs.argsList()...)
+			argsL = append(argsL, "-p", t.TempDir())
 			rootCmd.SetArgs(argsL)
 			rootCmd.SetOutput(io.Discard)
 
