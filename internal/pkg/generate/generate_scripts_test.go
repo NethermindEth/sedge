@@ -207,17 +207,20 @@ var checkExtraFlagsOnExecution = func(t *testing.T, data *GenData, compose, env 
 	return nil
 }
 
-var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	// load compose file
-	composeBytes, err := io.ReadAll(compose)
-	if err != nil {
-		return err
+func checkValidatorBlocker(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
+	if composeData.Services.Validator != nil {
+		assert.NotNil(t, composeData.Services.ValidatorBlocker)
+		containerName := "sedge-validator-blocker"
+		if data.ContainerTag != "" {
+			containerName = containerName + "-" + data.ContainerTag
+		}
+		assert.Equal(t, containerName, composeData.Services.ValidatorBlocker.ContainerName)
+	} else {
+		assert.Nil(t, composeData.Services.ValidatorBlocker)
 	}
-	var composeData ComposeData
-	err = yaml.Unmarshal(composeBytes, &composeData)
-	if err != nil {
-		return err
-	}
+	return nil
+}
 
 var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
@@ -293,7 +296,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 							Network:         network,
 							Services:        []string{execution},
 						},
-						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyExecution},
+						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyExecution, checkValidatorBlocker},
 					},
 					genTestData{
 						Description: fmt.Sprintf(baseDescription+"consensus: %s, network: %s, only consensus", consensusCl, network),
@@ -302,7 +305,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 							Network:         network,
 							Services:        []string{consensus},
 						},
-						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyConsensus},
+						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyConsensus, checkValidatorBlocker},
 					},
 					genTestData{
 						Description: fmt.Sprintf(baseDescription+"validator: %s, network: %s, only validator", consensusCl, network),
@@ -311,7 +314,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 							Network:         network,
 							Services:        []string{validator},
 						},
-						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyValidator},
+						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyValidator, checkValidatorBlocker},
 					},
 				)
 				if utils.Contains(validatorClients, consensusCl) {
@@ -325,7 +328,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 								Network:         network,
 								Services:        []string{execution, consensus, validator},
 							},
-							CheckFunctions: []CheckFunc{defaultFunc},
+							CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker},
 						},
 						genTestData{
 							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, network),
@@ -335,7 +338,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 								ConsensusClient: &clients.Client{Name: consensusCl},
 								Network:         network,
 							},
-							CheckFunctions: []CheckFunc{defaultFunc},
+							CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker},
 						},
 						genTestData{
 							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, Execution Client not Valid", executionCl, consensusCl, consensusCl, network),
@@ -346,7 +349,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 								Network:         network,
 							},
 							ErrorGenCompose: ErrConsensusClientNotValid,
-							CheckFunctions:  []CheckFunc{defaultFunc},
+							CheckFunctions:  []CheckFunc{defaultFunc, checkValidatorBlocker},
 						})
 				}
 			}
@@ -368,7 +371,7 @@ func TestGenerateComposeServices(t *testing.T) {
 				Network:         "mainnet",
 				Mev:             true,
 			},
-			CheckFunctions: []CheckFunc{defaultFunc},
+			CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker},
 		},
 		{
 			Description: "Test mevBoost service",
@@ -378,7 +381,7 @@ func TestGenerateComposeServices(t *testing.T) {
 				Mev:             true,
 				MevBoostService: true,
 			},
-			CheckFunctions: []CheckFunc{defaultFunc, checkMevServices},
+			CheckFunctions: []CheckFunc{defaultFunc, checkMevServices, checkValidatorBlocker},
 		},
 		{
 			Description: "Test EL extra flags",
@@ -388,7 +391,7 @@ func TestGenerateComposeServices(t *testing.T) {
 				Network:         "mainnet",
 				ElExtraFlags:    []string{"extra", "flag"},
 			},
-			CheckFunctions: []CheckFunc{checkExtraFlagsOnExecution},
+			CheckFunctions: []CheckFunc{checkExtraFlagsOnExecution, checkValidatorBlocker},
 		},
 	}
 
@@ -454,7 +457,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 								Network:         network,
 								Services:        []string{execution, consensus, validator},
 							},
-							CheckFunctions: []CheckFunc{checkTTDOnExecution, defaultFunc, checkECBootnodesOnExecution},
+							CheckFunctions: []CheckFunc{checkTTDOnExecution, defaultFunc, checkECBootnodesOnExecution, checkValidatorBlocker},
 						},
 						genTestData{
 							Description: fmt.Sprintf(baseDescription+"ecBootnodes tests, execution: %s, consensus: %s, validator: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, network),
@@ -465,7 +468,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 								ConsensusClient: &clients.Client{Name: consensusCl},
 								Network:         network,
 							},
-							CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkTTDOnExecution},
+							CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkTTDOnExecution, checkValidatorBlocker},
 						},
 						genTestData{
 							Description: fmt.Sprintf(baseDescription+"ccBootnodes tests, execution: %s, consensus: %s, validator: %s, network: %s, Execution Client not Valid", executionCl, consensusCl, consensusCl, network),
@@ -475,7 +478,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 								CCBootnodes:     []string{"enr:1", "enr:2"},
 								Network:         network,
 							},
-							CheckFunctions: []CheckFunc{defaultFunc, checkCCBootnodesOnConsensus},
+							CheckFunctions: []CheckFunc{defaultFunc, checkCCBootnodesOnConsensus, checkValidatorBlocker},
 						})
 				}
 			}
