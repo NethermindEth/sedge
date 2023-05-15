@@ -161,6 +161,33 @@ func TestRun(t *testing.T) {
 			},
 			err: "error starting service containers: run error",
 		},
+		{
+			name: "Skip pull",
+			args: []string{"--skip-pull"},
+			setup: func(t *testing.T, d *sedge_mocks.MockDependenciesManager, a *sedge_mocks.MockSedgeActions) (generationPath string) {
+				generationPath = t.TempDir()
+				err := test.PrepareTestCaseDir(filepath.Join("testdata", "run_tests", "valid"), generationPath)
+				if err != nil {
+					t.Fatalf("Error setting up test case: %v", err)
+				}
+				gomock.InOrder(
+					d.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil).Times(1),
+					d.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+					d.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+					a.EXPECT().ValidateDockerComposeFile(filepath.Join(generationPath, "docker-compose.yml"), []string{}).Return(nil).Times(1),
+					a.EXPECT().SetupContainers(actions.SetupContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{},
+						SkipPull:       true,
+					}).Return(nil).Times(1),
+					a.EXPECT().RunContainers(actions.RunContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{},
+					}).Return(nil).Times(1),
+				)
+				return
+			},
+		},
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
