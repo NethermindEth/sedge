@@ -53,7 +53,7 @@ func clean(s string) string {
 	return strings.ReplaceAll(s, "\r", "")
 }
 
-var checkOnlyExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
+func checkOnlyExecution(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Execution)
@@ -61,7 +61,7 @@ var checkOnlyExecution = func(t *testing.T, data *GenData, compose, env io.Reade
 	return nil
 }
 
-var checkOnlyConsensus = func(t *testing.T, data *GenData, compose, env io.Reader) error {
+func checkOnlyConsensus(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Consensus)
@@ -69,7 +69,7 @@ var checkOnlyConsensus = func(t *testing.T, data *GenData, compose, env io.Reade
 	return nil
 }
 
-var checkOnlyValidator = func(t *testing.T, data *GenData, compose, env io.Reader) error {
+func checkOnlyValidator(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Validator)
@@ -77,7 +77,7 @@ var checkOnlyValidator = func(t *testing.T, data *GenData, compose, env io.Reade
 	return nil
 }
 
-var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env io.Reader) error {
+func checkCCBootnodesOnConsensus(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
 	if len(data.CCBootnodes) == 0 {
 		data.CCBootnodes = configs.NetworksConfigs()[data.Network].DefaultCCBootnodes
@@ -104,7 +104,7 @@ var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env
 	return nil
 }
 
-var checkTTDOnExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
+func checkTTDOnExecution(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
 	customTTD := data.CustomTTD
 	if customTTD == "" {
@@ -124,7 +124,7 @@ var checkTTDOnExecution = func(t *testing.T, data *GenData, compose, env io.Read
 	return nil
 }
 
-var checkECBootnodesOnExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
+func checkECBootnodesOnExecution(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
 	if len(data.ECBootnodes) == 0 {
 		data.ECBootnodes = configs.NetworksConfigs()[data.Network].DefaultECBootnodes
@@ -177,7 +177,7 @@ func checkFlagOnCommands(t *testing.T, commands []string, flag string) {
 	assert.True(t, exists)
 }
 
-var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader) error {
+func checkMevServices(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
 
 	if utils.Contains(data.Services, mevBoost) {
@@ -193,7 +193,7 @@ var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader)
 	return nil
 }
 
-var checkExtraFlagsOnExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
+func checkExtraFlagsOnExecution(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
 
 	if composeData.Services.Execution != nil {
@@ -222,7 +222,7 @@ func checkValidatorBlocker(t *testing.T, data *GenData, compose, env io.Reader) 
 	return nil
 }
 
-var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) error {
+func defaultFunc(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
 
 	if utils.Contains(data.Services, execution) {
