@@ -54,10 +54,7 @@ func clean(s string) string {
 }
 
 var checkOnlyExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := retrieveComposeData(compose)
-	if err != nil {
-		return err
-	}
+	composeData := retrieveComposeData(t, compose)
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Execution)
 	assert.Equal(t, composeData.Services.Execution.ContainerName, services.DefaultSedgeExecutionClient)
@@ -65,10 +62,7 @@ var checkOnlyExecution = func(t *testing.T, data *GenData, compose, env io.Reade
 }
 
 var checkOnlyConsensus = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := retrieveComposeData(compose)
-	if err != nil {
-		return err
-	}
+	composeData := retrieveComposeData(t, compose)
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Consensus)
 	assert.Equal(t, composeData.Services.Consensus.ContainerName, services.DefaultSedgeConsensusClient)
@@ -76,10 +70,7 @@ var checkOnlyConsensus = func(t *testing.T, data *GenData, compose, env io.Reade
 }
 
 var checkOnlyValidator = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := retrieveComposeData(compose)
-	if err != nil {
-		return err
-	}
+	composeData := retrieveComposeData(t, compose)
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Validator)
 	assert.Equal(t, composeData.Services.Validator.ContainerName, services.DefaultSedgeValidatorClient)
@@ -87,10 +78,7 @@ var checkOnlyValidator = func(t *testing.T, data *GenData, compose, env io.Reade
 }
 
 var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := retrieveComposeData(compose)
-	if err != nil {
-		return err
-	}
+	composeData := retrieveComposeData(t, compose)
 	if len(data.CCBootnodes) == 0 {
 		data.CCBootnodes = configs.NetworksConfigs()[data.Network].DefaultCCBootnodes
 	}
@@ -117,10 +105,7 @@ var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env
 }
 
 var checkTTDOnExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := retrieveComposeData(compose)
-	if err != nil {
-		return err
-	}
+	composeData := retrieveComposeData(t, compose)
 	customTTD := data.CustomTTD
 	if customTTD == "" {
 		customTTD = configs.NetworksConfigs()[data.Network].DefaultTTD
@@ -140,10 +125,7 @@ var checkTTDOnExecution = func(t *testing.T, data *GenData, compose, env io.Read
 }
 
 var checkECBootnodesOnExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := retrieveComposeData(compose)
-	if err != nil {
-		return err
-	}
+	composeData := retrieveComposeData(t, compose)
 	if len(data.ECBootnodes) == 0 {
 		data.ECBootnodes = configs.NetworksConfigs()[data.Network].DefaultECBootnodes
 	}
@@ -168,18 +150,19 @@ var checkECBootnodesOnExecution = func(t *testing.T, data *GenData, compose, env
 }
 
 // retrieveComposeData returns compose data from the reader
-func retrieveComposeData(compose io.Reader) (*ComposeData, error) {
+func retrieveComposeData(t *testing.T, compose io.Reader) ComposeData {
+	t.Helper()
 	// load compose file
 	composeBytes, err := io.ReadAll(compose)
 	if err != nil {
-		return nil, err
+		t.Fatal(err)
 	}
 	var composeData ComposeData
 	err = yaml.Unmarshal(composeBytes, &composeData)
 	if err != nil {
-		return nil, err
+		t.Fatal(err)
 	}
-	return &composeData, nil
+	return composeData
 }
 
 func checkFlagOnCommands(t *testing.T, commands []string, flag string) {
@@ -195,16 +178,7 @@ func checkFlagOnCommands(t *testing.T, commands []string, flag string) {
 }
 
 var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	// load compose file
-	composeBytes, err := io.ReadAll(compose)
-	if err != nil {
-		return err
-	}
-	var composeData ComposeData
-	err = yaml.Unmarshal(composeBytes, &composeData)
-	if err != nil {
-		return err
-	}
+	composeData := retrieveComposeData(t, compose)
 
 	if utils.Contains(data.Services, mevBoost) {
 		if composeData.Services.Mevboost != nil {
@@ -220,16 +194,7 @@ var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader)
 }
 
 var checkExtraFlagsOnExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	// load compose file
-	composeBytes, err := io.ReadAll(compose)
-	if err != nil {
-		return err
-	}
-	var composeData ComposeData
-	err = yaml.Unmarshal(composeBytes, &composeData)
-	if err != nil {
-		return err
-	}
+	composeData := retrieveComposeData(t, compose)
 
 	if composeData.Services.Execution != nil {
 		for _, flag := range data.ElExtraFlags {
@@ -253,6 +218,9 @@ var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) erro
 	if err != nil {
 		return err
 	}
+
+var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
 
 	if utils.Contains(data.Services, execution) {
 		assert.NotNil(t, composeData.Services.Execution)
