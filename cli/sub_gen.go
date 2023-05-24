@@ -58,7 +58,10 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 			return preValidationGenerateCmd(network, logging, &flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			services := []string{execution, consensus, validator}
+			services := []string{execution, consensus}
+			if !flags.noValidator {
+				services = append(services, validator)
+			}
 			if !flags.noMev && !flags.noValidator {
 				services = append(services, mevBoost)
 			}
