@@ -53,44 +53,32 @@ func clean(s string) string {
 	return strings.ReplaceAll(s, "\r", "")
 }
 
-var checkOnlyExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := retrieveComposeData(compose)
-	if err != nil {
-		return err
-	}
+func checkOnlyExecution(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Execution)
 	assert.Equal(t, composeData.Services.Execution.ContainerName, services.DefaultSedgeExecutionClient)
 	return nil
 }
 
-var checkOnlyConsensus = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := retrieveComposeData(compose)
-	if err != nil {
-		return err
-	}
+func checkOnlyConsensus(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Consensus)
 	assert.Equal(t, composeData.Services.Consensus.ContainerName, services.DefaultSedgeConsensusClient)
 	return nil
 }
 
-var checkOnlyValidator = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := retrieveComposeData(compose)
-	if err != nil {
-		return err
-	}
+func checkOnlyValidator(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
 	assert.NotNil(t, composeData.Services)
 	assert.NotNil(t, composeData.Services.Validator)
 	assert.Equal(t, composeData.Services.Validator.ContainerName, services.DefaultSedgeValidatorClient)
 	return nil
 }
 
-var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := retrieveComposeData(compose)
-	if err != nil {
-		return err
-	}
+func checkCCBootnodesOnConsensus(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
 	if len(data.CCBootnodes) == 0 {
 		data.CCBootnodes = configs.NetworksConfigs()[data.Network].DefaultCCBootnodes
 	}
@@ -116,11 +104,8 @@ var checkCCBootnodesOnConsensus = func(t *testing.T, data *GenData, compose, env
 	return nil
 }
 
-var checkTTDOnExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := retrieveComposeData(compose)
-	if err != nil {
-		return err
-	}
+func checkTTDOnExecution(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
 	customTTD := data.CustomTTD
 	if customTTD == "" {
 		customTTD = configs.NetworksConfigs()[data.Network].DefaultTTD
@@ -139,11 +124,8 @@ var checkTTDOnExecution = func(t *testing.T, data *GenData, compose, env io.Read
 	return nil
 }
 
-var checkECBootnodesOnExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData, err := retrieveComposeData(compose)
-	if err != nil {
-		return err
-	}
+func checkECBootnodesOnExecution(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
 	if len(data.ECBootnodes) == 0 {
 		data.ECBootnodes = configs.NetworksConfigs()[data.Network].DefaultECBootnodes
 	}
@@ -168,18 +150,19 @@ var checkECBootnodesOnExecution = func(t *testing.T, data *GenData, compose, env
 }
 
 // retrieveComposeData returns compose data from the reader
-func retrieveComposeData(compose io.Reader) (*ComposeData, error) {
+func retrieveComposeData(t *testing.T, compose io.Reader) ComposeData {
+	t.Helper()
 	// load compose file
 	composeBytes, err := io.ReadAll(compose)
 	if err != nil {
-		return nil, err
+		t.Fatal(err)
 	}
 	var composeData ComposeData
 	err = yaml.Unmarshal(composeBytes, &composeData)
 	if err != nil {
-		return nil, err
+		t.Fatal(err)
 	}
-	return &composeData, nil
+	return composeData
 }
 
 func checkFlagOnCommands(t *testing.T, commands []string, flag string) {
@@ -194,17 +177,8 @@ func checkFlagOnCommands(t *testing.T, commands []string, flag string) {
 	assert.True(t, exists)
 }
 
-var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	// load compose file
-	composeBytes, err := io.ReadAll(compose)
-	if err != nil {
-		return err
-	}
-	var composeData ComposeData
-	err = yaml.Unmarshal(composeBytes, &composeData)
-	if err != nil {
-		return err
-	}
+func checkMevServices(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
 
 	if utils.Contains(data.Services, mevBoost) {
 		if composeData.Services.Mevboost != nil {
@@ -219,17 +193,8 @@ var checkMevServices = func(t *testing.T, data *GenData, compose, env io.Reader)
 	return nil
 }
 
-var checkExtraFlagsOnExecution = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	// load compose file
-	composeBytes, err := io.ReadAll(compose)
-	if err != nil {
-		return err
-	}
-	var composeData ComposeData
-	err = yaml.Unmarshal(composeBytes, &composeData)
-	if err != nil {
-		return err
-	}
+func checkExtraFlagsOnExecution(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
 
 	if composeData.Services.Execution != nil {
 		for _, flag := range data.ElExtraFlags {
@@ -242,17 +207,23 @@ var checkExtraFlagsOnExecution = func(t *testing.T, data *GenData, compose, env 
 	return nil
 }
 
-var defaultFunc = func(t *testing.T, data *GenData, compose, env io.Reader) error {
-	// load compose file
-	composeBytes, err := io.ReadAll(compose)
-	if err != nil {
-		return err
+func checkValidatorBlocker(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
+	if composeData.Services.Validator != nil {
+		assert.NotNil(t, composeData.Services.ValidatorBlocker)
+		containerName := "sedge-validator-blocker"
+		if data.ContainerTag != "" {
+			containerName = containerName + "-" + data.ContainerTag
+		}
+		assert.Equal(t, containerName, composeData.Services.ValidatorBlocker.ContainerName)
+	} else {
+		assert.Nil(t, composeData.Services.ValidatorBlocker)
 	}
-	var composeData ComposeData
-	err = yaml.Unmarshal(composeBytes, &composeData)
-	if err != nil {
-		return err
-	}
+	return nil
+}
+
+func defaultFunc(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
 
 	if utils.Contains(data.Services, execution) {
 		assert.NotNil(t, composeData.Services.Execution)
@@ -325,7 +296,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 							Network:         network,
 							Services:        []string{execution},
 						},
-						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyExecution},
+						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyExecution, checkValidatorBlocker},
 					},
 					genTestData{
 						Description: fmt.Sprintf(baseDescription+"consensus: %s, network: %s, only consensus", consensusCl, network),
@@ -334,7 +305,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 							Network:         network,
 							Services:        []string{consensus},
 						},
-						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyConsensus},
+						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyConsensus, checkValidatorBlocker},
 					},
 					genTestData{
 						Description: fmt.Sprintf(baseDescription+"validator: %s, network: %s, only validator", consensusCl, network),
@@ -343,7 +314,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 							Network:         network,
 							Services:        []string{validator},
 						},
-						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyValidator},
+						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyValidator, checkValidatorBlocker},
 					},
 				)
 				if utils.Contains(validatorClients, consensusCl) {
@@ -357,7 +328,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 								Network:         network,
 								Services:        []string{execution, consensus, validator},
 							},
-							CheckFunctions: []CheckFunc{defaultFunc},
+							CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker},
 						},
 						genTestData{
 							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, network),
@@ -367,7 +338,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 								ConsensusClient: &clients.Client{Name: consensusCl},
 								Network:         network,
 							},
-							CheckFunctions: []CheckFunc{defaultFunc},
+							CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker},
 						},
 						genTestData{
 							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, Execution Client not Valid", executionCl, consensusCl, consensusCl, network),
@@ -378,7 +349,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 								Network:         network,
 							},
 							ErrorGenCompose: ErrConsensusClientNotValid,
-							CheckFunctions:  []CheckFunc{defaultFunc},
+							CheckFunctions:  []CheckFunc{defaultFunc, checkValidatorBlocker},
 						})
 				}
 			}
@@ -400,7 +371,7 @@ func TestGenerateComposeServices(t *testing.T) {
 				Network:         "mainnet",
 				Mev:             true,
 			},
-			CheckFunctions: []CheckFunc{defaultFunc},
+			CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker},
 		},
 		{
 			Description: "Test mevBoost service",
@@ -410,7 +381,7 @@ func TestGenerateComposeServices(t *testing.T) {
 				Mev:             true,
 				MevBoostService: true,
 			},
-			CheckFunctions: []CheckFunc{defaultFunc, checkMevServices},
+			CheckFunctions: []CheckFunc{defaultFunc, checkMevServices, checkValidatorBlocker},
 		},
 		{
 			Description: "Test EL extra flags",
@@ -420,7 +391,7 @@ func TestGenerateComposeServices(t *testing.T) {
 				Network:         "mainnet",
 				ElExtraFlags:    []string{"extra", "flag"},
 			},
-			CheckFunctions: []CheckFunc{checkExtraFlagsOnExecution},
+			CheckFunctions: []CheckFunc{checkExtraFlagsOnExecution, checkValidatorBlocker},
 		},
 	}
 
@@ -486,7 +457,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 								Network:         network,
 								Services:        []string{execution, consensus, validator},
 							},
-							CheckFunctions: []CheckFunc{checkTTDOnExecution, defaultFunc, checkECBootnodesOnExecution},
+							CheckFunctions: []CheckFunc{checkTTDOnExecution, defaultFunc, checkECBootnodesOnExecution, checkValidatorBlocker},
 						},
 						genTestData{
 							Description: fmt.Sprintf(baseDescription+"ecBootnodes tests, execution: %s, consensus: %s, validator: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, network),
@@ -497,7 +468,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 								ConsensusClient: &clients.Client{Name: consensusCl},
 								Network:         network,
 							},
-							CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkTTDOnExecution},
+							CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkTTDOnExecution, checkValidatorBlocker},
 						},
 						genTestData{
 							Description: fmt.Sprintf(baseDescription+"ccBootnodes tests, execution: %s, consensus: %s, validator: %s, network: %s, Execution Client not Valid", executionCl, consensusCl, consensusCl, network),
@@ -507,7 +478,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 								CCBootnodes:     []string{"enr:1", "enr:2"},
 								Network:         network,
 							},
-							CheckFunctions: []CheckFunc{defaultFunc, checkCCBootnodesOnConsensus},
+							CheckFunctions: []CheckFunc{defaultFunc, checkCCBootnodesOnConsensus, checkValidatorBlocker},
 						})
 				}
 			}
