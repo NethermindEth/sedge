@@ -427,6 +427,14 @@ func TestGenerateDockerCompose(t *testing.T) {
 					assert.NotEmpty(t, cmpData.Services.Mevboost.Entrypoint)
 				}
 			}
+
+			if tc.genData.ValidatorClient == nil {
+				// Check validator blocker is not set if validator is not set
+				assert.Nil(t, cmpData.Services.ValidatorBlocker)
+			} else {
+				// Check that validator-blocker service is set when validator is set
+				assert.NotNil(t, cmpData.Services.ValidatorBlocker)
+			}
 		})
 	}
 }
