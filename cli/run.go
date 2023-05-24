@@ -31,6 +31,7 @@ func RunCmd(sedgeActions actions.SedgeActions, depsMgr dependencies.Dependencies
 	var (
 		generationPath string
 		services       []string
+		skipPull       bool
 	)
 
 	cmd := &cobra.Command{
@@ -51,6 +52,7 @@ func RunCmd(sedgeActions actions.SedgeActions, depsMgr dependencies.Dependencies
 			err := sedgeActions.SetupContainers(actions.SetupContainersOptions{
 				GenerationPath: generationPath,
 				Services:       services,
+				SkipPull:       skipPull,
 			})
 			if err != nil {
 				return fmt.Errorf(configs.SetupContainersErr, err)
@@ -69,5 +71,6 @@ func RunCmd(sedgeActions actions.SedgeActions, depsMgr dependencies.Dependencies
 
 	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data")
 	cmd.Flags().StringSliceVar(&services, "services", []string{}, "List of services to run. If this flag is not provided, all services will run.")
+	cmd.Flags().BoolVar(&skipPull, "skip-pull", false, "Avoid pulling images before running containers. If the images are not available locally, this flag could cause an error.")
 	return cmd
 }

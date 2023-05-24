@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New `--skip-pull` flag to skip pulling docker images when running `sedge run`.
+
 ## [v1.1.0] - 2023-04-07
 
 ### Added
