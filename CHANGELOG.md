@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add default [checkpoint sync url]( https://checkpoint.chiadochain.net ) for Chiado.
 - New `--skip-pull` flag to skip pulling docker images when running `sedge run`.
 
+### Fixed
+
+- Change validator blocker container image to [busybox](https://hub.docker.com/_/busybox).
+
 ## [v1.1.0] - 2023-04-07
 
 ### Added
