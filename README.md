@@ -1,8 +1,10 @@
+![Sedge Logo](logo.svg)
 # Sedge
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/NethermindEth/sedge)](https://goreportcard.com/report/github.com/NethermindEth/sedge)
 [![Discord](https://user-images.githubusercontent.com/7288322/34471967-1df7808a-efbb-11e7-9088-ed0b04151291.png)](https://discord.com/invite/PaCMRFdvWT)
 [![codecov](https://codecov.io/gh/NethermindEth/sedge/branch/main/graph/badge.svg?token=8FERO4PO1V)](https://codecov.io/gh/NethermindEth/sedge)
+
 
 Sedge is a one-click node setup tool for PoS network/chain validators and nodes written entirely in the Go programming language. Sedge takes care of the entire on-premise full node setup based on the chosen client, using generated docker-compose scripts based on the desired configuration.
 
