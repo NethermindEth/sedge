@@ -1,4 +1,11 @@
-![Sedge Logo](logo.svg)
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/35319980/243113011-f562f439-1350-4281-bf8b-74dd696a703b.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/35319980/243113023-af952792-e724-4637-ab45-2c18c997a871.svg">
+    <img alt="Nethermind" src="https://user-images.githubusercontent.com/35319980/243113023-af952792-e724-4637-ab45-2c18c997a871.svg" height="64">
+  </picture>
+</p>
+
 # Sedge
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/NethermindEth/sedge)](https://goreportcard.com/report/github.com/NethermindEth/sedge)
