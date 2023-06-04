@@ -26,6 +26,7 @@ import (
 type SetupContainersOptions struct {
 	GenerationPath string
 	Services       []string
+	SkipPull       bool
 }
 
 func (s *sedgeActions) SetupContainers(options SetupContainersOptions) error {
@@ -38,13 +39,17 @@ func (s *sedgeActions) SetupContainers(options SetupContainersOptions) error {
 	if _, _, err := s.commandRunner.RunCMD(buildCmd); err != nil {
 		return err
 	}
-	pullCmd := s.commandRunner.BuildDockerComposePullCMD(commands.DockerComposePullOptions{
-		Path:     filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName),
-		Services: options.Services,
-	})
-	log.Infof(configs.RunningCommand, pullCmd.Cmd)
-	if _, _, err := s.commandRunner.RunCMD(pullCmd); err != nil {
-		return err
+	if !options.SkipPull {
+		pullCmd := s.commandRunner.BuildDockerComposePullCMD(commands.DockerComposePullOptions{
+			Path:     filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName),
+			Services: options.Services,
+		})
+		log.Infof(configs.RunningCommand, pullCmd.Cmd)
+		if _, _, err := s.commandRunner.RunCMD(pullCmd); err != nil {
+			return err
+		}
+	} else {
+		log.Warn("Skipping 'docker compose pull' step")
 	}
 	createCmd := s.commandRunner.BuildDockerComposeCreateCMD(commands.DockerComposeCreateOptions{
 		Path:     filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName),

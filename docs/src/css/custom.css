@@ -6,8 +6,8 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --sedge-color: #e87e32;
-  --ifm-color-primary: #e87e32;
+  --sedge-color: #3399FF;
+  --ifm-color-primary: #3399FF;
   --ifm-color-primary-dark: #020805;
   --ifm-color-primary-darker: #020805;
   --ifm-color-primary-darkest: #020805;
@@ -20,7 +20,7 @@
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #e87e32;
+  --ifm-color-primary: #3266e8;
   --ifm-color-primary-dark: #f7fbf9;
   --ifm-color-primary-darker: #f7fbf9;
   --ifm-color-primary-darkest: #f7fbf9;
@@ -31,5 +31,5 @@
 }
 
 .navbar--fixed-top {
-  border-bottom: 3px solid #e87e32;
+  border-bottom: 3px solid #3399FF;
 }

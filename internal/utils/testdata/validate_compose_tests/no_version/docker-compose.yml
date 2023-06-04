@@ -103,7 +103,7 @@ services:
         max-size: 10m
         max-file: "10"
   validator-blocker:
-    image: yauritux/busybox-curl:latest
+    image: busybox
     networks:
     - sedge
     command: |-
