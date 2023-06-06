@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Change validator blocker container image to [busybox](https://hub.docker.com/_/busybox).
+- Erigon command line flags. 
   
 ## [Unreleased]
 
