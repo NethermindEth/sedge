@@ -168,7 +168,7 @@ func getMockActions(t *testing.T) actions.SedgeActions {
 	)
 }
 
-func TestGetContainresData(t *testing.T) {
+func TestGetContainersData(t *testing.T) {
 	tcs := []getContainersTestCase{
 		buildGetContainersDataTestCase(
 			t,
