@@ -57,6 +57,13 @@ func ShowCmd(cmdRunner commands.CommandRunner, sedgeActions actions.SedgeActions
 				return err
 			}
 
+			// Remove initial slash from container name
+			for i := range data.Containers {
+				if len(data.Containers[i].Name) > 0 && data.Containers[i].Name[0] == '/' {
+					data.Containers[i].Name = data.Containers[i].Name[1:]
+				}
+			}
+
 			output, err := yaml.Marshal(data)
 			if err != nil {
 				log.Errorf("Failed to show sedge containers data: %v", err)

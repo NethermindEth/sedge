@@ -98,7 +98,7 @@ func getContainerData(containerData types.ContainerJSON) (ContainerData, error) 
 		return ContainerData{}, fmt.Errorf("failed to get sedge-network for container %s", containerData.Name)
 	}
 
-	data.Name = containerData.Name[1:] // remove slash
+	data.Name = containerData.Name
 	data.Image = containerData.Config.Image
 	data.Ip = sedgeNetwork.IPAddress
 
