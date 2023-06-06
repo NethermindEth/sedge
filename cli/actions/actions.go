@@ -16,6 +16,7 @@ limitations under the License.
 package actions
 
 import (
+	clientsimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
@@ -24,6 +25,7 @@ import (
 
 //go:generate mockgen -package=sedge_mocks -destination=../../mocks/sedgeActions.go github.com/NethermindEth/sedge/cli/actions SedgeActions
 type SedgeActions interface {
+	ClientsImages() clientsimages.ClientsImages
 	GetCommandRunner() commands.CommandRunner
 	ImportSlashingInterchangeData(SlashingImportOptions) error
 	ExportSlashingInterchangeData(SlashingExportOptions) error
@@ -40,12 +42,14 @@ type sedgeActions struct {
 	dockerClient   client.APIClient
 	serviceManager services.ServiceManager
 	commandRunner  commands.CommandRunner
+	clientsImages  clientsimages.ClientsImages
 }
 
 type SedgeActionsOptions struct {
 	DockerClient   client.APIClient
 	ServiceManager services.ServiceManager
 	CommandRunner  commands.CommandRunner
+	ClientsImages  clientsimages.ClientsImages
 }
 
 func NewSedgeActions(options SedgeActionsOptions) SedgeActions {
@@ -53,9 +57,14 @@ func NewSedgeActions(options SedgeActionsOptions) SedgeActions {
 		dockerClient:   options.DockerClient,
 		serviceManager: options.ServiceManager,
 		commandRunner:  options.CommandRunner,
+		clientsImages:  options.ClientsImages,
 	}
 }
 
-func (s *sedgeActions) GetCommandRunner() commands.CommandRunner {
+func (s sedgeActions) GetCommandRunner() commands.CommandRunner {
 	return s.commandRunner
+}
+
+func (s sedgeActions) ClientsImages() clientsimages.ClientsImages {
+	return s.clientsImages
 }

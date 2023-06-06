@@ -19,10 +19,17 @@ import (
 	"regexp"
 	"testing"
 
+	clientsimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSetImageOrDefault_Execution(t *testing.T) {
+	// default clients images
+	defaults, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	tests := []struct {
 		client        Client
 		expectedImage regexp.Regexp
@@ -58,13 +65,19 @@ func TestSetImageOrDefault_Execution(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.client.Name, func(t *testing.T) {
-			test.client.SetImageOrDefault("")
+			test.client.SetImageOrDefault("", defaults)
 			assert.True(t, test.expectedImage.Match([]byte(test.client.Image)))
 		})
 	}
 }
 
 func TestSetImageOrDefault_Consensus(t *testing.T) {
+	// default clients images
+	defaults, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	tests := []struct {
 		client        Client
 		expectedImage regexp.Regexp
@@ -100,13 +113,19 @@ func TestSetImageOrDefault_Consensus(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.client.Name, func(t *testing.T) {
-			test.client.SetImageOrDefault("")
+			test.client.SetImageOrDefault("", defaults)
 			assert.True(t, test.expectedImage.Match([]byte(test.client.Image)))
 		})
 	}
 }
 
 func TestSetImageOrDefault_Validator(t *testing.T) {
+	// default clients images
+	defaults, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	tests := []struct {
 		client        Client
 		expectedImage regexp.Regexp
@@ -142,13 +161,19 @@ func TestSetImageOrDefault_Validator(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.client.Name, func(t *testing.T) {
-			test.client.SetImageOrDefault("")
+			test.client.SetImageOrDefault("", defaults)
 			assert.True(t, test.expectedImage.Match([]byte(test.client.Image)))
 		})
 	}
 }
 
 func TestSetImageOrDefault_CustomImage(t *testing.T) {
+	// default clients images
+	defaults, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	tests := []struct {
 		client      Client
 		customImage string
@@ -177,7 +202,7 @@ func TestSetImageOrDefault_CustomImage(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.client.Name, func(t *testing.T) {
-			test.client.SetImageOrDefault(test.customImage)
+			test.client.SetImageOrDefault(test.customImage, defaults)
 			assert.Equal(t, test.customImage, test.client.Image)
 		})
 	}

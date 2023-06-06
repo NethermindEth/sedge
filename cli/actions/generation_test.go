@@ -31,7 +31,7 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
-	clientimages "github.com/NethermindEth/sedge/configs/images"
+	clientsimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
@@ -73,6 +73,12 @@ func TestGenerateDockerCompose(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
 	tests := make([]genTestData, 0)
+
+	// clients images
+	clientsImages, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	networks, err := utils.SupportedNetworks()
 	if err != nil {
@@ -267,13 +273,13 @@ func TestGenerateDockerCompose(t *testing.T) {
 
 			// Setup client images
 			if tc.genData.ExecutionClient != nil {
-				tc.genData.ExecutionClient.SetImageOrDefault("")
+				tc.genData.ExecutionClient.SetImageOrDefault("", clientsImages)
 			}
 			if tc.genData.ConsensusClient != nil {
-				tc.genData.ConsensusClient.SetImageOrDefault("")
+				tc.genData.ConsensusClient.SetImageOrDefault("", clientsImages)
 			}
 			if tc.genData.ValidatorClient != nil {
-				tc.genData.ValidatorClient.SetImageOrDefault("")
+				tc.genData.ValidatorClient.SetImageOrDefault("", clientsImages)
 			}
 
 			_, err := sedgeAction.Generate(actions.GenerateOptions{
@@ -443,6 +449,13 @@ func TestGenerateDockerCompose(t *testing.T) {
 func TestFolderCreationOnCompose(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
+
+	// clients images
+	clientsImages, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	samplePath := t.TempDir() + "test"
 	c := clients.ClientInfo{Network: "mainnet"}
 	clientsMap, _ := c.Clients([]string{"execution", "consensus"})
@@ -454,13 +467,13 @@ func TestFolderCreationOnCompose(t *testing.T) {
 		Network:         "mainnet",
 		JWTSecretPath:   samplePath,
 	}
-	sampleData.ExecutionClient.Image = clientimages.ClientImages.Execution.Nethermind.String()
-	sampleData.ConsensusClient.Image = clientimages.ClientImages.Consensus.Lighthouse.String()
-	sampleData.ValidatorClient.Image = clientimages.ClientImages.Consensus.Lighthouse.String()
+	sampleData.ExecutionClient.Image = clientsImages.Execution().Nethermind().String()
+	sampleData.ConsensusClient.Image = clientsImages.Consensus().Lighthouse().String()
+	sampleData.ValidatorClient.Image = clientsImages.Consensus().Lighthouse().String()
 
 	sedgeAction := newAction(t, nil)
 
-	_, err := sedgeAction.Generate(actions.GenerateOptions{
+	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: sampleData,
 		GenerationPath: samplePath,
 	})

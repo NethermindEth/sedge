@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	clientimages "github.com/NethermindEth/sedge/configs/images"
+	clientsimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/stretchr/testify/assert"
 )
@@ -49,6 +49,12 @@ func retrieveEnvData(t *testing.T, reader io.Reader) map[string]string {
 
 // TestGenerateEnvFile tests the generation of the .env file
 func TestGenerateEnvFile(t *testing.T) {
+	// default clients images
+	clientsImages, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	tests := []struct {
 		name          string
 		data          *GenData
@@ -58,11 +64,11 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check ec image",
 			data: &GenData{
-				ExecutionClient: &clients.Client{Name: "nethermind", Image: clientimages.ClientImages.Execution.Nethermind.String()},
+				ExecutionClient: &clients.Client{Name: "nethermind", Image: clientsImages.Execution().Nethermind().String()},
 				Network:         "mainnet",
 			},
 			fieldsToCheck: map[string]string{
-				"EC_IMAGE_VERSION": clientimages.ClientImages.Execution.Nethermind.String(),
+				"EC_IMAGE_VERSION": clientsImages.Execution().Nethermind().String(),
 			},
 		},
 		{

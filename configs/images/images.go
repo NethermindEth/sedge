@@ -1,11 +1,7 @@
-package clientimages
+package clientsimages
 
 import (
-	_ "embed"
 	"fmt"
-
-	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
 )
 
 type Image struct {
@@ -13,37 +9,33 @@ type Image struct {
 	Version string `yaml:"version"`
 }
 
-func (i *Image) String() string {
+func (i Image) String() string {
 	return fmt.Sprintf("%s:%s", i.Name, i.Version)
 }
 
-var ClientImages struct {
-	Execution struct {
-		Geth       Image `yaml:"geth"`
-		Besu       Image `yaml:"besu"`
-		Nethermind Image `yaml:"nethermind"`
-		Erigon     Image `yaml:"erigon"`
-	}
-	Consensus struct {
-		Lighthouse Image `yaml:"lighthouse"`
-		Lodestar   Image `yaml:"lodestar"`
-		Teku       Image `yaml:"teku"`
-		Prysm      Image `yaml:"prysm"`
-	}
-	Validator struct {
-		Lighthouse Image `yaml:"lighthouse"`
-		Lodestar   Image `yaml:"lodestar"`
-		Teku       Image `yaml:"teku"`
-		Prysm      Image `yaml:"prysm"`
-	}
+type ExecutionClientsImages interface {
+	Geth() Image
+	Besu() Image
+	Nethermind() Image
+	Erigon() Image
 }
 
-//go:embed client_images.yaml
-var clientImages string
+type ConsensusClientsImages interface {
+	Lighthouse() Image
+	Lodestar() Image
+	Teku() Image
+	Prysm() Image
+}
 
-func init() {
-	err := yaml.Unmarshal([]byte(clientImages), &ClientImages)
-	if err != nil {
-		log.Fatal(err)
-	}
+type ValidatorClientsImages interface {
+	Lighthouse() Image
+	Lodestar() Image
+	Teku() Image
+	Prysm() Image
+}
+
+type ClientsImages interface {
+	Execution() ExecutionClientsImages
+	Consensus() ConsensusClientsImages
+	Validator() ValidatorClientsImages
 }

@@ -24,7 +24,7 @@ import (
 	"path/filepath"
 
 	"github.com/NethermindEth/sedge/configs"
-	clientimages "github.com/NethermindEth/sedge/configs/images"
+	clientsimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/images/validator-import/lighthouse"
 	"github.com/NethermindEth/sedge/internal/images/validator-import/teku"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
@@ -51,6 +51,7 @@ type ImportValidatorKeysOptions struct {
 	ContainerTag    string
 	CustomConfig    ImportValidatorKeysCustomOptions
 }
+
 type ImportValidatorKeysCustomOptions struct {
 	NetworkConfigPath string
 	GenesisPath       string
@@ -107,25 +108,45 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 	var ctID string
 	switch options.ValidatorClient {
 	case "prysm":
-		prysmCtID, err := setupPrysmValidatorImportContainer(s.dockerClient, s.serviceManager, options)
+		prysmCtID, err := setupPrysmValidatorImportContainer(
+			s.dockerClient,
+			s.serviceManager,
+			s.clientsImages,
+			options,
+		)
 		if err != nil {
 			return err
 		}
 		ctID = prysmCtID
 	case "lodestar":
-		lodestarCtID, err := setupLodestarValidatorImport(s.dockerClient, s.serviceManager, options)
+		lodestarCtID, err := setupLodestarValidatorImport(
+			s.dockerClient,
+			s.serviceManager,
+			s.clientsImages,
+			options,
+		)
 		if err != nil {
 			return err
 		}
 		ctID = lodestarCtID
 	case "lighthouse":
-		lighthouseCtID, err := setupLighthouseValidatorImport(s.dockerClient, s.commandRunner, options)
+		lighthouseCtID, err := setupLighthouseValidatorImport(
+			s.dockerClient,
+			s.commandRunner,
+			s.clientsImages,
+			options,
+		)
 		if err != nil {
 			return err
 		}
 		ctID = lighthouseCtID
 	case "teku":
-		tekuCtID, err := setupTekuValidatorImport(s.dockerClient, s.commandRunner, options)
+		tekuCtID, err := setupTekuValidatorImport(
+			s.dockerClient,
+			s.commandRunner,
+			s.clientsImages,
+			options,
+		)
 		if err != nil {
 			return err
 		}
@@ -152,7 +173,12 @@ func isDefaultKeysPath(generationPath, from string) bool {
 	return from == filepath.Join(generationPath, "keystore")
 }
 
-func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, options ImportValidatorKeysOptions) (string, error) {
+func setupPrysmValidatorImportContainer(
+	dockerClient client.APIClient,
+	serviceManager services.ServiceManager,
+	clientsImages clientsimages.ClientsImages,
+	options ImportValidatorKeysOptions,
+) (string, error) {
 	var (
 		validatorCtName       = services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 		validatorImportCtName = services.ContainerNameWithTag(services.ServiceCtValidatorImport, options.ContainerTag)
@@ -210,7 +236,12 @@ func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceMa
 	return ct.ID, nil
 }
 
-func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, options ImportValidatorKeysOptions) (string, error) {
+func setupLodestarValidatorImport(
+	dockerClient client.APIClient,
+	serviceManager services.ServiceManager,
+	clientsImages clientsimages.ClientsImages,
+	options ImportValidatorKeysOptions,
+) (string, error) {
 	var (
 		validatorCtName       = services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 		validatorImportCtName = services.ContainerNameWithTag(services.ServiceCtValidatorImport, options.ContainerTag)
@@ -274,7 +305,12 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 	return ct.ID, nil
 }
 
-func setupLighthouseValidatorImport(dockerClient client.APIClient, commandRunner commands.CommandRunner, options ImportValidatorKeysOptions) (string, error) {
+func setupLighthouseValidatorImport(
+	dockerClient client.APIClient,
+	commandRunner commands.CommandRunner,
+	clientsImages clientsimages.ClientsImages,
+	options ImportValidatorKeysOptions,
+) (string, error) {
 	var (
 		validatorCtName       = services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 		validatorImportCtName = services.ContainerNameWithTag(services.ServiceCtValidatorImport, options.ContainerTag)
@@ -293,7 +329,7 @@ func setupLighthouseValidatorImport(dockerClient client.APIClient, commandRunner
 		Tag:  "sedge/validator-import-lighthouse",
 		Args: map[string]string{
 			"NETWORK":    options.Network,
-			"LH_VERSION": clientimages.ClientImages.Validator.Lighthouse.String(),
+			"LH_VERSION": clientsImages.Validator().Lighthouse().String(),
 		},
 	})
 	log.Infof(configs.RunningCommand, buildCmd.Cmd)
@@ -347,7 +383,12 @@ func setupLighthouseValidatorImport(dockerClient client.APIClient, commandRunner
 	return ct.ID, nil
 }
 
-func setupTekuValidatorImport(dockerClient client.APIClient, commandRunner commands.CommandRunner, options ImportValidatorKeysOptions) (string, error) {
+func setupTekuValidatorImport(
+	dockerClient client.APIClient,
+	commandRunner commands.CommandRunner,
+	clientsImages clientsimages.ClientsImages,
+	options ImportValidatorKeysOptions,
+) (string, error) {
 	var (
 		validatorCtName       = services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 		validatorImportCtName = services.ContainerNameWithTag(services.ServiceCtValidatorImport, options.ContainerTag)
