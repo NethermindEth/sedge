@@ -49,7 +49,7 @@ func main() {
 	serviceManager := services.NewServiceManager(dockerClient)
 
 	// Clients Images configs
-	clientsImages, err := clientsimages.NewDefaultClientsImages()
+	clientsImages, err := clientsimages.NewOnlineClientsImages()
 	if err != nil {
 		log.Fatal(err)
 	}
