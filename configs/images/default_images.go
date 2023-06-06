@@ -3,7 +3,7 @@ package clientsimages
 import (
 	_ "embed"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 //go:embed client_images.yaml

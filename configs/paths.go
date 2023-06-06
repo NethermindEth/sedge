@@ -16,7 +16,7 @@ limitations under the License.
 package configs
 
 const (
-	ConfigFileName                      = ".sedge"
+	ConfigFolderName                    = ".sedge"
 	CustomNetworkConfigsFolder          = "./custom_configs"
 	DefaultDockerComposeScriptName      = "docker-compose.yml"
 	ExecutionNetworkConfigFileName      = "chainSpec.json"
