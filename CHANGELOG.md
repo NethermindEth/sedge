@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- New command to show Sedge container info: `sedge show`
 - Add default [checkpoint sync url]( https://checkpoint.chiadochain.net ) for Chiado.
 - New `--skip-pull` flag to skip pulling docker images when running `sedge run`.
 
