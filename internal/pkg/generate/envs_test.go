@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/NethermindEth/sedge/configs"
+	clientimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/stretchr/testify/assert"
 )
@@ -58,11 +58,11 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check ec image",
 			data: &GenData{
-				ExecutionClient: &clients.Client{Name: "nethermind", Image: configs.ClientImages.Execution.Nethermind.String()},
+				ExecutionClient: &clients.Client{Name: "nethermind", Image: clientimages.ClientImages.Execution.Nethermind.String()},
 				Network:         "mainnet",
 			},
 			fieldsToCheck: map[string]string{
-				"EC_IMAGE_VERSION": configs.ClientImages.Execution.Nethermind.String(),
+				"EC_IMAGE_VERSION": clientimages.ClientImages.Execution.Nethermind.String(),
 			},
 		},
 		{

@@ -31,6 +31,7 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	clientimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
@@ -453,9 +454,9 @@ func TestFolderCreationOnCompose(t *testing.T) {
 		Network:         "mainnet",
 		JWTSecretPath:   samplePath,
 	}
-	sampleData.ExecutionClient.Image = configs.ClientImages.Execution.Nethermind.String()
-	sampleData.ConsensusClient.Image = configs.ClientImages.Consensus.Lighthouse.String()
-	sampleData.ValidatorClient.Image = configs.ClientImages.Consensus.Lighthouse.String()
+	sampleData.ExecutionClient.Image = clientimages.ClientImages.Execution.Nethermind.String()
+	sampleData.ConsensusClient.Image = clientimages.ClientImages.Consensus.Lighthouse.String()
+	sampleData.ValidatorClient.Image = clientimages.ClientImages.Consensus.Lighthouse.String()
 
 	sedgeAction := newAction(t, nil)
 

@@ -15,7 +15,7 @@ limitations under the License.
 */
 package clients
 
-import "github.com/NethermindEth/sedge/configs"
+import clientimages "github.com/NethermindEth/sedge/configs/images"
 
 // Client : Struct Represent a client like geth, prysm, etc
 type Client struct {
@@ -40,39 +40,39 @@ func (c *Client) SetImageOrDefault(image string) {
 func (c *Client) setExecutionImage(image string) {
 	switch c.Name {
 	case "geth":
-		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Geth.String())
+		c.Image = valueOrDefault(image, clientimages.ClientImages.Execution.Geth.String())
 	case "besu":
-		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Besu.String())
+		c.Image = valueOrDefault(image, clientimages.ClientImages.Execution.Besu.String())
 	case "nethermind":
-		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Nethermind.String())
+		c.Image = valueOrDefault(image, clientimages.ClientImages.Execution.Nethermind.String())
 	case "erigon":
-		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Erigon.String())
+		c.Image = valueOrDefault(image, clientimages.ClientImages.Execution.Erigon.String())
 	}
 }
 
 func (c *Client) setConsensusImage(image string) {
 	switch c.Name {
 	case "lighthouse":
-		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Lighthouse.String())
+		c.Image = valueOrDefault(image, clientimages.ClientImages.Consensus.Lighthouse.String())
 	case "prysm":
-		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Prysm.String())
+		c.Image = valueOrDefault(image, clientimages.ClientImages.Consensus.Prysm.String())
 	case "teku":
-		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Teku.String())
+		c.Image = valueOrDefault(image, clientimages.ClientImages.Consensus.Teku.String())
 	case "lodestar":
-		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Lodestar.String())
+		c.Image = valueOrDefault(image, clientimages.ClientImages.Consensus.Lodestar.String())
 	}
 }
 
 func (c *Client) setValidatorImage(image string) {
 	switch c.Name {
 	case "lighthouse":
-		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Lighthouse.String())
+		c.Image = valueOrDefault(image, clientimages.ClientImages.Validator.Lighthouse.String())
 	case "prysm":
-		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Prysm.String())
+		c.Image = valueOrDefault(image, clientimages.ClientImages.Validator.Prysm.String())
 	case "teku":
-		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Teku.String())
+		c.Image = valueOrDefault(image, clientimages.ClientImages.Validator.Teku.String())
 	case "lodestar":
-		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Lodestar.String())
+		c.Image = valueOrDefault(image, clientimages.ClientImages.Validator.Lodestar.String())
 	}
 }
 

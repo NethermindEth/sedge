@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 
 	"github.com/NethermindEth/sedge/configs"
+	clientimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/images/validator-import/lighthouse"
 	"github.com/NethermindEth/sedge/internal/images/validator-import/teku"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
@@ -292,7 +293,7 @@ func setupLighthouseValidatorImport(dockerClient client.APIClient, commandRunner
 		Tag:  "sedge/validator-import-lighthouse",
 		Args: map[string]string{
 			"NETWORK":    options.Network,
-			"LH_VERSION": configs.ClientImages.Validator.Lighthouse.String(),
+			"LH_VERSION": clientimages.ClientImages.Validator.Lighthouse.String(),
 		},
 	})
 	log.Infof(configs.RunningCommand, buildCmd.Cmd)

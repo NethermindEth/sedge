@@ -1,4 +1,4 @@
-package configs
+package clientimages
 
 import (
 	_ "embed"

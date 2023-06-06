@@ -22,6 +22,7 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	clientimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
@@ -68,17 +69,17 @@ func TestCli(t *testing.T) {
 					ExecutionClient: &clients.Client{
 						Name:  "nethermind",
 						Type:  "execution",
-						Image: configs.ClientImages.Execution.Nethermind.String(),
+						Image: clientimages.ClientImages.Execution.Nethermind.String(),
 					},
 					ConsensusClient: &clients.Client{
 						Name:  "prysm",
 						Type:  "consensus",
-						Image: configs.ClientImages.Consensus.Prysm.String(),
+						Image: clientimages.ClientImages.Consensus.Prysm.String(),
 					},
 					ValidatorClient: &clients.Client{
 						Name:  "prysm",
 						Type:  "validator",
-						Image: configs.ClientImages.Validator.Prysm.String(),
+						Image: clientimages.ClientImages.Validator.Prysm.String(),
 					},
 					Network:            "mainnet",
 					CheckpointSyncUrl:  "http://checkpoint.sync",
@@ -149,12 +150,12 @@ func TestCli(t *testing.T) {
 					ExecutionClient: &clients.Client{
 						Name:  "nethermind",
 						Type:  "execution",
-						Image: configs.ClientImages.Execution.Nethermind.String(),
+						Image: clientimages.ClientImages.Execution.Nethermind.String(),
 					},
 					ConsensusClient: &clients.Client{
 						Name:  "prysm",
 						Type:  "consensus",
-						Image: configs.ClientImages.Consensus.Prysm.String(),
+						Image: clientimages.ClientImages.Consensus.Prysm.String(),
 					},
 					Network:           "mainnet",
 					CheckpointSyncUrl: "http://checkpoint.sync",
@@ -192,7 +193,7 @@ func TestCli(t *testing.T) {
 					ExecutionClient: &clients.Client{
 						Name:  "nethermind",
 						Type:  "execution",
-						Image: configs.ClientImages.Execution.Nethermind.String(),
+						Image: clientimages.ClientImages.Execution.Nethermind.String(),
 					},
 					Network:      "mainnet",
 					MapAllPorts:  true,
@@ -235,7 +236,7 @@ func TestCli(t *testing.T) {
 					ConsensusClient: &clients.Client{
 						Name:  "lodestar",
 						Type:  "consensus",
-						Image: configs.ClientImages.Consensus.Lodestar.String(),
+						Image: clientimages.ClientImages.Consensus.Lodestar.String(),
 					},
 					Network:           NetworkGoerli,
 					CheckpointSyncUrl: "http://checkpoint.sync",
@@ -280,7 +281,7 @@ func TestCli(t *testing.T) {
 					ValidatorClient: &clients.Client{
 						Name:  "prysm",
 						Type:  "validator",
-						Image: configs.ClientImages.Validator.Prysm.String(),
+						Image: clientimages.ClientImages.Validator.Prysm.String(),
 					},
 					Network:             "mainnet",
 					FeeRecipient:        "0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5",
