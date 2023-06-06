@@ -8,7 +8,7 @@ require (
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
 	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/compose-spec/compose-go v1.12.0
-	github.com/docker/docker v23.0.1+incompatible
+	github.com/docker/docker v23.0.3+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v47 v47.1.0
 	github.com/google/uuid v1.3.0
@@ -37,7 +37,7 @@ require (
 	github.com/creack/pty v1.1.18 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/distribution/distribution/v3 v3.0.0-20230223072852-e5d5810851d1 // indirect
-	github.com/docker/distribution v2.8.1+incompatible // indirect
+	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/ferranbt/fastssz v0.1.3 // indirect

@@ -2,7 +2,7 @@
 {{ define "validator-blocker" }}
   validator-blocker:
     container_name: sedge-validator-blocker{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
-    image: yauritux/busybox-curl:latest
+    image: busybox
     networks:
     - sedge
     command: >
@@ -11,7 +11,7 @@
         sleep {{ .VLStartGracePeriod }};
         echo 'Done';
         while true; do
-          response=$$(curl -s -o /dev/null -w \"%{http_code}\" ${CC_API_URL}/eth/v1/node/health)
+          response=$$(wget -S ${CC_API_URL}/eth/v1/node/health -O /dev/null 2>&1 | grep -m 1 "HTTP/" | awk '{print $2}')
           if [ $$response -eq 200 ]; then
             echo 'Endpoint is up!'
             break

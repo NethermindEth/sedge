@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9 
+sidebar_position: 10
 id: run 
 ---
 
@@ -13,22 +13,27 @@ the generation folder. To run the services this sequence of actions are made:
 - Create containers (`docker compose create`)
 - Start containers (`docker compose up`)
 
+:::info Skip `docker compose pull` action
+To skip the `docker compose pull` command, the `--skip-pull` flag could be used. This is useful
+when the images are already pulled or the user wants to use a local custom image.
+:::
+
 ## Help
 
 ```shell
-$ sedge run --help
 Run all the generated services
 
 Usage:
   sedge run [flags]
 
 Flags:
-  -h, --help                   help for run
-  -p, --path string            docker-compose scripts generation path (default "./docker-compose-scripts")
-      --services stringArray   List of services to run. If this flag is not provided, all services will run.
+  -h, --help               help for run
+  -p, --path string        generation path for sedge data (default "/home/root/sedge/sedge-data")
+      --services strings   List of services to run. If this flag is not provided, all services will run.
+      --skip-pull          Avoid pulling images before running containers. If the images are not available locally, this flag could cause an error.
 
 Global Flags:
-      --config string   config file (default is $HOME/.sedge.yaml)
+      --log-level string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
 ```
 
 ## Execution Example
