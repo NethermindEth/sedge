@@ -344,6 +344,7 @@ func TestCli(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			sedgeActions := sedge_mocks.NewMockSedgeActions(ctrl)
+			sedgeActions.EXPECT().ClientsImages().Return(clientsImages)
 			prompter := sedge_mocks.NewMockPrompter(ctrl)
 			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
 			defer ctrl.Finish()

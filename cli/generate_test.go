@@ -26,6 +26,7 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	clientsimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/test"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -160,6 +161,13 @@ func (flags *GenCmdFlags) toString() string {
 func TestGenerateCmd(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
+
+	// Clients Images
+	clientsImages, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	tcs := []generateCmdTestCase{
 		{
 			"Execution, bad number of arguments",
@@ -1343,7 +1351,9 @@ func TestGenerateCmd(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			descr := fmt.Sprintf("sedge generate %s %s %s", strings.Join(tc.subCommand.argsList(), " "), tc.args.toString(), strings.Join(tc.globalArgs.argsList(), " "))
-			sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{})
+			sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{
+				ClientsImages: clientsImages,
+			})
 
 			rootCmd := RootCmd()
 			rootCmd.AddCommand(GenerateCmd(sedgeActions))
@@ -1369,10 +1379,18 @@ func TestGeneratePathCases(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
 
+	// Clients Images
+	clientsImages, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	// Custom Generation path
 	path := t.TempDir()
 	descr := fmt.Sprintf("Generation path error, sedge generate execution --path %s", path)
-	sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{})
+	sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{
+		ClientsImages: clientsImages,
+	})
 
 	rootCmd := RootCmd()
 	rootCmd.AddCommand(GenerateCmd(sedgeActions))
@@ -1380,7 +1398,7 @@ func TestGeneratePathCases(t *testing.T) {
 	rootCmd.SetArgs(argsL)
 	rootCmd.SetOutput(io.Discard)
 
-	err := rootCmd.Execute()
+	err = rootCmd.Execute()
 
 	assert.NoError(t, err, descr)
 
@@ -1390,7 +1408,9 @@ func TestGeneratePathCases(t *testing.T) {
 		t.Fatal(err)
 	}
 	descr = fmt.Sprintf("Init generation path, sedge generate execution --path %s", path)
-	sedgeActions = actions.NewSedgeActions(actions.SedgeActionsOptions{})
+	sedgeActions = actions.NewSedgeActions(actions.SedgeActionsOptions{
+		ClientsImages: clientsImages,
+	})
 
 	rootCmd = RootCmd()
 	rootCmd.AddCommand(GenerateCmd(sedgeActions))
@@ -1411,7 +1431,9 @@ func TestGeneratePathCases(t *testing.T) {
 	}
 	jwtPath := filepath.Join(path, "jwtsecret")
 
-	sedgeActions = actions.NewSedgeActions(actions.SedgeActionsOptions{})
+	sedgeActions = actions.NewSedgeActions(actions.SedgeActionsOptions{
+		ClientsImages: clientsImages,
+	})
 
 	rootCmd = RootCmd()
 	rootCmd.AddCommand(GenerateCmd(sedgeActions))
@@ -1426,7 +1448,9 @@ func TestGeneratePathCases(t *testing.T) {
 	// Custom jwt secret path, error
 	path = t.TempDir()
 	descr = fmt.Sprintf("Custom jwt secret path, error, sedge generate execution --jwt-secret-path %s", path)
-	sedgeActions = actions.NewSedgeActions(actions.SedgeActionsOptions{})
+	sedgeActions = actions.NewSedgeActions(actions.SedgeActionsOptions{
+		ClientsImages: clientsImages,
+	})
 
 	rootCmd = RootCmd()
 	rootCmd.AddCommand(GenerateCmd(sedgeActions))

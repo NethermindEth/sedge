@@ -10,90 +10,90 @@ import (
 var clientImages string
 
 type DefaultExecutionImages struct {
-	geth       Image `yaml:"geth"`
-	besu       Image `yaml:"besu"`
-	nethermind Image `yaml:"nethermind"`
-	erigon     Image `yaml:"erigon"`
+	GethImage       Image `yaml:"geth"`
+	BesuImage       Image `yaml:"besu"`
+	NethermindImage Image `yaml:"nethermind"`
+	ErigonImage     Image `yaml:"erigon"`
 }
 
 func (dei DefaultExecutionImages) Geth() Image {
-	return dei.geth
+	return dei.GethImage
 }
 
 func (dei DefaultExecutionImages) Besu() Image {
-	return dei.besu
+	return dei.BesuImage
 }
 
 func (dei DefaultExecutionImages) Nethermind() Image {
-	return dei.nethermind
+	return dei.NethermindImage
 }
 
 func (dei DefaultExecutionImages) Erigon() Image {
-	return dei.erigon
+	return dei.ErigonImage
 }
 
 type DefaultConsensusImages struct {
-	lighthouse Image `yaml:"lighthouse"`
-	lodestar   Image `yaml:"lodestar"`
-	teku       Image `yaml:"teku"`
-	prysm      Image `yaml:"prysm"`
+	LighthouseImage Image `yaml:"lighthouse"`
+	LodestarImage   Image `yaml:"lodestar"`
+	TekuImage       Image `yaml:"teku"`
+	PrysmImage      Image `yaml:"prysm"`
 }
 
 func (dci DefaultConsensusImages) Lighthouse() Image {
-	return dci.lighthouse
+	return dci.LighthouseImage
 }
 
 func (dci DefaultConsensusImages) Lodestar() Image {
-	return dci.lodestar
+	return dci.LodestarImage
 }
 
 func (dci DefaultConsensusImages) Teku() Image {
-	return dci.teku
+	return dci.TekuImage
 }
 
 func (dci DefaultConsensusImages) Prysm() Image {
-	return dci.prysm
+	return dci.PrysmImage
 }
 
 type DefaultValidatorImages struct {
-	lighthouse Image `yaml:"lighthouse"`
-	lodestar   Image `yaml:"lodestar"`
-	teku       Image `yaml:"teku"`
-	prysm      Image `yaml:"prysm"`
+	LighthouseImage Image `yaml:"lighthouse"`
+	LodestarImage   Image `yaml:"lodestar"`
+	TekuImage       Image `yaml:"teku"`
+	PrysmImage      Image `yaml:"prysm"`
 }
 
 func (dvi DefaultValidatorImages) Lighthouse() Image {
-	return dvi.lighthouse
+	return dvi.LighthouseImage
 }
 
 func (dvi DefaultValidatorImages) Lodestar() Image {
-	return dvi.lodestar
+	return dvi.LodestarImage
 }
 
 func (dvi DefaultValidatorImages) Teku() Image {
-	return dvi.teku
+	return dvi.TekuImage
 }
 
 func (dvi DefaultValidatorImages) Prysm() Image {
-	return dvi.prysm
+	return dvi.PrysmImage
 }
 
 type DefaultClientsImages struct {
-	execution DefaultExecutionImages `yaml:"execution"`
-	consensus DefaultConsensusImages `yaml:"consensus"`
-	validator DefaultValidatorImages `yaml:"validator"`
+	ExecutionImages DefaultExecutionImages `yaml:"execution"`
+	ConsensusImages DefaultConsensusImages `yaml:"consensus"`
+	ValidatorImages DefaultValidatorImages `yaml:"validator"`
 }
 
 func (dci DefaultClientsImages) Execution() ExecutionClientsImages {
-	return dci.execution
+	return dci.ExecutionImages
 }
 
 func (dci DefaultClientsImages) Consensus() ConsensusClientsImages {
-	return dci.consensus
+	return dci.ConsensusImages
 }
 
 func (dci DefaultClientsImages) Validator() ValidatorClientsImages {
-	return dci.validator
+	return dci.ValidatorImages
 }
 
 func NewDefaultClientsImages() (ClientsImages, error) {

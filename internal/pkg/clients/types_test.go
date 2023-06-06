@@ -32,41 +32,41 @@ func TestSetImageOrDefault_Execution(t *testing.T) {
 
 	tests := []struct {
 		client        Client
-		expectedImage regexp.Regexp
+		expectedImage string
 	}{
 		{
 			client: Client{
 				Name: "geth",
 				Type: "execution",
 			},
-			expectedImage: *regexp.MustCompile(`^ethereum/client-go:v\d+\.\d+\.\d+$`),
+			expectedImage: `^ethereum/client-go:v\d+\.\d+\.\d+$`,
 		},
 		{
 			client: Client{
 				Name: "besu",
 				Type: "execution",
 			},
-			expectedImage: *regexp.MustCompile(`^hyperledger/besu:\d+\.\d+\.\d+$`),
+			expectedImage: `^hyperledger/besu:\d+\.\d+\.\d+$`,
 		},
 		{
 			client: Client{
 				Name: "nethermind",
 				Type: "execution",
 			},
-			expectedImage: *regexp.MustCompile(`^nethermind/nethermind:\d+\.\d+\.\d+$`),
+			expectedImage: `^nethermind/nethermind:\d+\.\d+\.\d+$`,
 		},
 		{
 			client: Client{
 				Name: "erigon",
 				Type: "execution",
 			},
-			expectedImage: *regexp.MustCompile(`^thorax/erigon:v\d+\.\d+\.\d+$`),
+			expectedImage: `^thorax/erigon:v\d+\.\d+\.\d+$`,
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.client.Name, func(t *testing.T) {
 			test.client.SetImageOrDefault("", defaults)
-			assert.True(t, test.expectedImage.Match([]byte(test.client.Image)))
+			assert.Regexp(t, test.expectedImage, test.client.Image)
 		})
 	}
 }
