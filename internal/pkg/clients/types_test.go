@@ -23,6 +23,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var guesser clientsimages.ClientsImagesGuesser
+
 func TestSetImageOrDefault_Execution(t *testing.T) {
 	// default clients images
 	defaults, err := clientsimages.NewDefaultClientsImages()
@@ -32,35 +34,35 @@ func TestSetImageOrDefault_Execution(t *testing.T) {
 
 	tests := []struct {
 		client        Client
-		expectedImage string
+		expectedImage *regexp.Regexp
 	}{
 		{
 			client: Client{
 				Name: "geth",
 				Type: "execution",
 			},
-			expectedImage: `^ethereum/client-go:v\d+\.\d+\.\d+$`,
+			expectedImage: guesser.GethRegexp(),
 		},
 		{
 			client: Client{
 				Name: "besu",
 				Type: "execution",
 			},
-			expectedImage: `^hyperledger/besu:\d+\.\d+\.\d+$`,
+			expectedImage: guesser.BesuRegexp(),
 		},
 		{
 			client: Client{
 				Name: "nethermind",
 				Type: "execution",
 			},
-			expectedImage: `^nethermind/nethermind:\d+\.\d+\.\d+$`,
+			expectedImage: guesser.NethermindRegexp(),
 		},
 		{
 			client: Client{
 				Name: "erigon",
 				Type: "execution",
 			},
-			expectedImage: `^thorax/erigon:v\d+\.\d+\.\d+$`,
+			expectedImage: guesser.ErigonRegexp(),
 		},
 	}
 	for _, test := range tests {
@@ -80,41 +82,41 @@ func TestSetImageOrDefault_Consensus(t *testing.T) {
 
 	tests := []struct {
 		client        Client
-		expectedImage regexp.Regexp
+		expectedImage *regexp.Regexp
 	}{
 		{
 			client: Client{
 				Name: "lighthouse",
 				Type: "consensus",
 			},
-			expectedImage: *regexp.MustCompile(`^sigp/lighthouse:v\d+\.\d+\.\d+$`),
+			expectedImage: guesser.LighthouseConsensusRegexp(),
 		},
 		{
 			client: Client{
 				Name: "prysm",
 				Type: "consensus",
 			},
-			expectedImage: *regexp.MustCompile(`^gcr.io/prysmaticlabs/prysm/beacon-chain:v\d+\.\d+\.\d+$`),
+			expectedImage: guesser.PrysmConsensusRegexp(),
 		},
 		{
 			client: Client{
 				Name: "teku",
 				Type: "consensus",
 			},
-			expectedImage: *regexp.MustCompile(`^consensys/teku:\d+\.\d+\.\d+$`),
+			expectedImage: guesser.TekuConsensusRegexp(),
 		},
 		{
 			client: Client{
 				Name: "lodestar",
 				Type: "consensus",
 			},
-			expectedImage: *regexp.MustCompile(`^chainsafe/lodestar:v\d+\.\d+\.\d+$`),
+			expectedImage: guesser.LodestarConsensusRegexp(),
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.client.Name, func(t *testing.T) {
 			test.client.SetImageOrDefault("", defaults)
-			assert.True(t, test.expectedImage.Match([]byte(test.client.Image)))
+			assert.Regexp(t, test.expectedImage, test.client.Image)
 		})
 	}
 }
@@ -128,35 +130,35 @@ func TestSetImageOrDefault_Validator(t *testing.T) {
 
 	tests := []struct {
 		client        Client
-		expectedImage regexp.Regexp
+		expectedImage *regexp.Regexp
 	}{
 		{
 			client: Client{
 				Name: "lighthouse",
 				Type: "validator",
 			},
-			expectedImage: *regexp.MustCompile(`^sigp/lighthouse:v\d+\.\d+\.\d+$`),
+			expectedImage: guesser.LighthouseValidatorRegexp(),
 		},
 		{
 			client: Client{
 				Name: "prysm",
 				Type: "validator",
 			},
-			expectedImage: *regexp.MustCompile(`^gcr.io/prysmaticlabs/prysm/validator:v\d+\.\d+\.\d+$`),
+			expectedImage: guesser.PrysmValidatorRegexp(),
 		},
 		{
 			client: Client{
 				Name: "teku",
 				Type: "validator",
 			},
-			expectedImage: *regexp.MustCompile(`^consensys/teku:\d+\.\d+\.\d+$`),
+			expectedImage: guesser.TekuValidatorRegexp(),
 		},
 		{
 			client: Client{
 				Name: "lodestar",
 				Type: "validator",
 			},
-			expectedImage: *regexp.MustCompile(`^chainsafe/lodestar:v\d+\.\d+\.\d+$`),
+			expectedImage: guesser.LodestarValidatorRegexp(),
 		},
 	}
 	for _, test := range tests {

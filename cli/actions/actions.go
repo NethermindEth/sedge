@@ -36,6 +36,7 @@ type SedgeActions interface {
 	ImportValidatorKeys(ImportValidatorKeysOptions) error
 	ValidateDockerComposeFile(path string, services ...string) error
 	GetContainersData(GetContainersDataOptions) (ContainersData, error)
+	UpdateClients(UpdateClientsOptions) error
 }
 
 type sedgeActions struct {
