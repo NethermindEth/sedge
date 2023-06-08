@@ -78,7 +78,7 @@ func (oci OnlineClientsImages) GetNewOrDefaultImages() ([]byte, error) {
 	var rawImages []byte
 	log.Debug("fetching online client images")
 	resp, err := http.Get(getOnlineSourceFile())
-	if err != nil {
+	if err != nil || resp.StatusCode != http.StatusOK {
 		log.Debugf("error fetching online images: %v", err)
 		rawImages, err = oci.getCachedImages()
 		if err != nil {
