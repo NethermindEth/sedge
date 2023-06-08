@@ -16,18 +16,20 @@ limitations under the License.
 package clientsimages
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path"
 
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 
 const (
-	OnlineImagesSourceFile = "https://raw.githubusercontent.com/NethermindEth/sedge/develop/configs/client_images.yaml"
+	OnlineImagesSourceFile = "https://raw.githubusercontent.com/NethermindEth/sedge/%s-images/configs/images/clients_images.yaml"
 	OnlineImagesCacheFile  = "sedge_client_images.yaml"
 )
 
@@ -68,10 +70,14 @@ func (oci OnlineClientsImages) getCachedImagesFilePath() string {
 	return path.Join(home, configs.ConfigFolderName, OnlineImagesCacheFile)
 }
 
+func getOnlineSourceFile() string {
+	return fmt.Sprintf(OnlineImagesSourceFile, utils.CurrentVersion())
+}
+
 func (oci OnlineClientsImages) GetNewOrDefaultImages() ([]byte, error) {
 	var rawImages []byte
 	log.Debug("fetching online client images")
-	resp, err := http.Get(OnlineImagesSourceFile)
+	resp, err := http.Get(getOnlineSourceFile())
 	if err != nil {
 		log.Debugf("error fetching online images: %v", err)
 		rawImages, err = oci.getCachedImages()

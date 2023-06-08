@@ -21,7 +21,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-//go:embed client_images.yaml
+//go:embed clients_images.yaml
 var clientImages string
 
 type DefaultExecutionImages struct {
