@@ -69,6 +69,7 @@ type GenCmdFlags struct {
 	mevImage          string
 	mevBoostOnVal     bool
 	noValidator       bool
+	reuseJwt          bool
 	jwtPath           string
 	graffiti          string
 	mapAllPorts       bool
@@ -246,8 +247,14 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	}
 
 	// Generate jwt secrets if needed
-	if flags.jwtPath == "" {
+	if flags.jwtPath == "" && !flags.reuseJwt {
 		flags.jwtPath, err = handleJWTSecret(generationPath)
+		if err != nil {
+			return err
+		}
+	} else if flags.reuseJwt {
+		reusedPath := filepath.Join(generationPath, "jwtsecret")
+		flags.jwtPath, err = loadJWTSecret(reusedPath)
 		if err != nil {
 			return err
 		}
