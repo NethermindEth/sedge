@@ -25,6 +25,7 @@ import (
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	clientsimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
@@ -69,6 +70,12 @@ func TestSlashingExport_ValidatorIsRequired(t *testing.T) {
 func TestSlashingExport_Params(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
+
+	// Clients Images
+	clientsImages, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	customDir := t.TempDir()
 	outDir := t.TempDir()
@@ -202,6 +209,7 @@ func TestSlashingExport_Params(t *testing.T) {
 			defer ctrl.Finish()
 
 			mockActions := sedge_mocks.NewMockSedgeActions(ctrl)
+			mockActions.EXPECT().ClientsImages().Return(clientsImages).AnyTimes()
 			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
 			gomock.InOrder(
 				depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker, dependencies.DockerCompose}, nil).Times(1),
@@ -228,6 +236,12 @@ func TestSlashingExport_Params(t *testing.T) {
 func TestSlashingExport_Errors(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
+
+	// Clients Images
+	clientsImages, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	tests := []struct {
 		name   string
@@ -256,6 +270,7 @@ func TestSlashingExport_Errors(t *testing.T) {
 			defer ctrl.Finish()
 
 			mockActions := sedge_mocks.NewMockSedgeActions(ctrl)
+			mockActions.EXPECT().ClientsImages().Return(clientsImages).AnyTimes()
 			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
 			if tt.checks {
 				depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker, dependencies.DockerCompose}, nil).Times(1)

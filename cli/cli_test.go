@@ -22,6 +22,7 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	clientsimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
@@ -36,6 +37,12 @@ import (
 func TestCli(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
+
+	// clients images
+	clientsImages, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	ETHClients := map[string][]string{
 		"execution": clients.AllClients["execution"],
@@ -68,17 +75,17 @@ func TestCli(t *testing.T) {
 					ExecutionClient: &clients.Client{
 						Name:  "nethermind",
 						Type:  "execution",
-						Image: configs.ClientImages.Execution.Nethermind.String(),
+						Image: clientsImages.Execution().Nethermind().String(),
 					},
 					ConsensusClient: &clients.Client{
 						Name:  "prysm",
 						Type:  "consensus",
-						Image: configs.ClientImages.Consensus.Prysm.String(),
+						Image: clientsImages.Consensus().Prysm().String(),
 					},
 					ValidatorClient: &clients.Client{
 						Name:  "prysm",
 						Type:  "validator",
-						Image: configs.ClientImages.Validator.Prysm.String(),
+						Image: clientsImages.Validator().Prysm().String(),
 					},
 					Network:            "mainnet",
 					CheckpointSyncUrl:  "http://checkpoint.sync",
@@ -149,12 +156,12 @@ func TestCli(t *testing.T) {
 					ExecutionClient: &clients.Client{
 						Name:  "nethermind",
 						Type:  "execution",
-						Image: configs.ClientImages.Execution.Nethermind.String(),
+						Image: clientsImages.Execution().Nethermind().String(),
 					},
 					ConsensusClient: &clients.Client{
 						Name:  "prysm",
 						Type:  "consensus",
-						Image: configs.ClientImages.Consensus.Prysm.String(),
+						Image: clientsImages.Consensus().Prysm().String(),
 					},
 					Network:           "mainnet",
 					CheckpointSyncUrl: "http://checkpoint.sync",
@@ -192,7 +199,7 @@ func TestCli(t *testing.T) {
 					ExecutionClient: &clients.Client{
 						Name:  "nethermind",
 						Type:  "execution",
-						Image: configs.ClientImages.Execution.Nethermind.String(),
+						Image: clientsImages.Execution().Nethermind().String(),
 					},
 					Network:      "mainnet",
 					MapAllPorts:  true,
@@ -235,7 +242,7 @@ func TestCli(t *testing.T) {
 					ConsensusClient: &clients.Client{
 						Name:  "lodestar",
 						Type:  "consensus",
-						Image: configs.ClientImages.Consensus.Lodestar.String(),
+						Image: clientsImages.Consensus().Lodestar().String(),
 					},
 					Network:           NetworkGoerli,
 					CheckpointSyncUrl: "http://checkpoint.sync",
@@ -280,7 +287,7 @@ func TestCli(t *testing.T) {
 					ValidatorClient: &clients.Client{
 						Name:  "prysm",
 						Type:  "validator",
-						Image: configs.ClientImages.Validator.Prysm.String(),
+						Image: clientsImages.Validator().Prysm().String(),
 					},
 					Network:             "mainnet",
 					FeeRecipient:        "0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5",
@@ -337,6 +344,7 @@ func TestCli(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			sedgeActions := sedge_mocks.NewMockSedgeActions(ctrl)
+			sedgeActions.EXPECT().ClientsImages().Return(clientsImages)
 			prompter := sedge_mocks.NewMockPrompter(ctrl)
 			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
 			defer ctrl.Finish()

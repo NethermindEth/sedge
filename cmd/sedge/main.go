@@ -20,6 +20,7 @@ import (
 
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
+	clientsimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
@@ -47,6 +48,12 @@ func main() {
 	// Docker service
 	serviceManager := services.NewServiceManager(dockerClient)
 
+	// Clients Images configs
+	clientsImages, err := clientsimages.NewOnlineClientsImages()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Init dependencies manager
 	depsMgr := dependencies.NewDependenciesManager(cmdRunner)
 
@@ -55,6 +62,7 @@ func main() {
 		DockerClient:   dockerClient,
 		ServiceManager: serviceManager,
 		CommandRunner:  cmdRunner,
+		ClientsImages:  clientsImages,
 	}
 	sedgeActions := actions.NewSedgeActions(sdgOpts)
 

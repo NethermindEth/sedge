@@ -25,6 +25,7 @@ import (
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	clientsimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
@@ -237,6 +238,12 @@ func TestSlashingImport_Errors(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
 
+	// Clients Images
+	clientsImages, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	tests := []struct {
 		name string
 		args []string
@@ -261,6 +268,7 @@ func TestSlashingImport_Errors(t *testing.T) {
 			defer ctrl.Finish()
 
 			mockActions := sedge_mocks.NewMockSedgeActions(ctrl)
+			mockActions.EXPECT().ClientsImages().Return(clientsImages).AnyTimes()
 			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
 
 			if tt.run {

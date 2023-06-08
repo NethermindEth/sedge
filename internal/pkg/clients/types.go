@@ -15,7 +15,7 @@ limitations under the License.
 */
 package clients
 
-import "github.com/NethermindEth/sedge/configs"
+import clientsimages "github.com/NethermindEth/sedge/configs/images"
 
 // Client : Struct Represent a client like geth, prysm, etc
 type Client struct {
@@ -26,53 +26,56 @@ type Client struct {
 	Supported bool
 }
 
-func (c *Client) SetImageOrDefault(image string) {
+func (c *Client) SetImageOrDefault(
+	image string,
+	defaults clientsimages.ClientsImages,
+) {
 	switch c.Type {
 	case "validator":
-		c.setValidatorImage(image)
+		c.setValidatorImage(image, defaults)
 	case "consensus":
-		c.setConsensusImage(image)
+		c.setConsensusImage(image, defaults)
 	case "execution":
-		c.setExecutionImage(image)
+		c.setExecutionImage(image, defaults)
 	}
 }
 
-func (c *Client) setExecutionImage(image string) {
+func (c *Client) setExecutionImage(image string, defaults clientsimages.ClientsImages) {
 	switch c.Name {
 	case "geth":
-		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Geth.String())
+		c.Image = valueOrDefault(image, defaults.Execution().Geth().String())
 	case "besu":
-		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Besu.String())
+		c.Image = valueOrDefault(image, defaults.Execution().Besu().String())
 	case "nethermind":
-		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Nethermind.String())
+		c.Image = valueOrDefault(image, defaults.Execution().Nethermind().String())
 	case "erigon":
-		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Erigon.String())
+		c.Image = valueOrDefault(image, defaults.Execution().Erigon().String())
 	}
 }
 
-func (c *Client) setConsensusImage(image string) {
+func (c *Client) setConsensusImage(image string, defaults clientsimages.ClientsImages) {
 	switch c.Name {
 	case "lighthouse":
-		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Lighthouse.String())
+		c.Image = valueOrDefault(image, defaults.Consensus().Lighthouse().String())
 	case "prysm":
-		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Prysm.String())
+		c.Image = valueOrDefault(image, defaults.Consensus().Prysm().String())
 	case "teku":
-		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Teku.String())
+		c.Image = valueOrDefault(image, defaults.Consensus().Teku().String())
 	case "lodestar":
-		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Lodestar.String())
+		c.Image = valueOrDefault(image, defaults.Consensus().Lodestar().String())
 	}
 }
 
-func (c *Client) setValidatorImage(image string) {
+func (c *Client) setValidatorImage(image string, defaults clientsimages.ClientsImages) {
 	switch c.Name {
 	case "lighthouse":
-		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Lighthouse.String())
+		c.Image = valueOrDefault(image, defaults.Validator().Lighthouse().String())
 	case "prysm":
-		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Prysm.String())
+		c.Image = valueOrDefault(image, defaults.Validator().Prysm().String())
 	case "teku":
-		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Teku.String())
+		c.Image = valueOrDefault(image, defaults.Validator().Teku().String())
 	case "lodestar":
-		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Lodestar.String())
+		c.Image = valueOrDefault(image, defaults.Validator().Lodestar().String())
 	}
 }
 

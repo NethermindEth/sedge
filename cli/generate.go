@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	clientsimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/crypto"
 
 	"github.com/NethermindEth/sedge/cli/actions"
@@ -68,6 +69,7 @@ type GenCmdFlags struct {
 	mevImage          string
 	mevBoostOnVal     bool
 	noValidator       bool
+	reuseJwt          bool
 	jwtPath           string
 	graffiti          string
 	mapAllPorts       bool
@@ -233,7 +235,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	}
 
 	// Handle selection and validation of clients
-	combinedClients, err := valClients(clientsMap, flags, services)
+	combinedClients, err := valClients(sedgeAction.ClientsImages(), clientsMap, flags, services)
 	if err != nil {
 		return err
 	}
@@ -245,8 +247,14 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	}
 
 	// Generate jwt secrets if needed
-	if flags.jwtPath == "" {
+	if flags.jwtPath == "" && !flags.reuseJwt {
 		flags.jwtPath, err = handleJWTSecret(generationPath)
+		if err != nil {
+			return err
+		}
+	} else if flags.reuseJwt {
+		reusedPath := filepath.Join(generationPath, "jwtsecret")
+		flags.jwtPath, err = loadJWTSecret(reusedPath)
 		if err != nil {
 			return err
 		}
@@ -326,7 +334,12 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	return nil
 }
 
-func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
+func valClients(
+	dci clientsimages.ClientsImages,
+	allClients clients.OrderedClients,
+	flags *GenCmdFlags,
+	services []string,
+) (*clients.Clients, error) {
 	var executionClient, consensusClient, validatorClient *clients.Client
 	var err error
 
@@ -344,7 +357,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 				executionClient.Image = strings.Join(executionParts[1:], ":")
 			}
 		}
-		executionClient.SetImageOrDefault(strings.Join(executionParts[1:], ":"))
+		executionClient.SetImageOrDefault(strings.Join(executionParts[1:], ":"), dci)
 		// Patch Geth image if network needs TTD to be set
 		if executionClient.Name == "geth" && network != "mainnet" {
 			executionClient.Image = "ethereum/client-go:v1.10.26"
@@ -369,7 +382,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 				consensusClient.Image = strings.Join(consensusParts[1:], ":")
 			}
 		}
-		consensusClient.SetImageOrDefault(strings.Join(consensusParts[1:], ":"))
+		consensusClient.SetImageOrDefault(strings.Join(consensusParts[1:], ":"), dci)
 		if err = clients.ValidateClient(consensusClient, consensus); err != nil {
 			return nil, err
 		}
@@ -391,7 +404,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 
 			}
 		}
-		validatorClient.SetImageOrDefault(strings.Join(validatorParts[1:], ":"))
+		validatorClient.SetImageOrDefault(strings.Join(validatorParts[1:], ":"), dci)
 		if err = clients.ValidateClient(validatorClient, validator); err != nil {
 			return nil, err
 		}

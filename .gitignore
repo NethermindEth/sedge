@@ -4,7 +4,7 @@ vendor
 
 .idea/
 
-/sedge-data/
+sedge-data/
 
 coverage/*
 

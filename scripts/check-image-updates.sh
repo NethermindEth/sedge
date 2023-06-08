@@ -1,13 +1,13 @@
 function get-field() {
     # $1 - field name
-    cat configs/client_images.yaml | yq "$1"
+    cat configs/images/client_images.yaml | yq "$1"
 }
 
 function update-field() {
     # $1 - field name
     # $2 - new value
-    echo "Updating $1 to $2 in configs/client_images.yaml"
-    yq eval -i "$1 = $2" configs/client_images.yaml
+    echo "Updating $1 to $2 in configs/images/client_images.yaml"
+    yq eval -i "$1 = $2" configs/images/client_images.yaml
 }
 
 function update-client() {

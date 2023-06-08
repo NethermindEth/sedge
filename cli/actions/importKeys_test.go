@@ -27,6 +27,7 @@ import (
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli/actions"
+	clientsimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
@@ -107,6 +108,12 @@ func TestImportKeys_ValidatorRunning(t *testing.T) {
 }
 
 func TestImportKeysCustom_ValidatorRunning(t *testing.T) {
+	// Clients Images
+	clientsImages, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	clients := []string{"lighthouse", "teku"}
 	for _, validatorClient := range clients {
 		t.Run(validatorClient, func(t *testing.T) {
@@ -120,6 +127,7 @@ func TestImportKeysCustom_ValidatorRunning(t *testing.T) {
 				DockerClient:   dockerClient,
 				ServiceManager: serviceManager,
 				CommandRunner:  &cmdRunner,
+				ClientsImages:  clientsImages,
 			})
 
 			from, err := setupKeystoreDir(t)
@@ -168,6 +176,12 @@ func TestImportKeys_UnsupportedClient(t *testing.T) {
 }
 
 func TestImportKeys_CustomOptions(t *testing.T) {
+	// Clients Images
+	clientsImages, err := clientsimages.NewDefaultClientsImages()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	tests := []struct {
 		client      string
 		network     string
@@ -204,6 +218,7 @@ func TestImportKeys_CustomOptions(t *testing.T) {
 				DockerClient:   dockerClient,
 				ServiceManager: serviceManager,
 				CommandRunner:  &cmdRunner,
+				ClientsImages:  clientsImages,
 			})
 
 			from, err := setupKeystoreDir(t)

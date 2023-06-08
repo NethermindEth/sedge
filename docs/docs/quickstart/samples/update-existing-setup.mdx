@@ -1,0 +1,87 @@
+---
+id: update-existing-setup
+sidebar_position: 12
+---
+
+# Update an existing setup
+
+If you have used Sedge in the past to generate your validator setup and want to update your clients to new versions with correct flags follow these steps.
+
+:::tip
+
+The following procese will lead to your old working setup being overwritten by new configurations. You may want to store your old setup somewhere else in case any of the following steps cause issues for you. The recommended files to save are the `docker-compose.yml`, `.env` and `jwtsecret` files inside your setup folder. No need to move any of the existing clients data folders since these won't be touched in the setup.
+
+:::
+
+## Using Sedge to update clients versions and flags
+
+Using Sedge to handle the update can be a good way to avoid adding or editing old flags so it works for newer versions. This whole proccess resumes to the use of the `sedge generate` command with corrects flags configurations to preserve your selected clients and their databases. Follow the following steps to know how to select the correct flags.
+
+1. First you need to know which kind of setup you currently have. This means selecting for one of these:
+
+   1. `full-node` - You have generated a Full validator node. This includes the clients for an execution and consensus. It may also include a validator if you decide to generate it. By default the validator is generated. In case you have not generated a validator setup you will need to add the `--no-validator` flag to the final `sedge generate command`.
+
+   2. `execution`, `consensus`, `validator`, `mev-boost` - You have decided to generate only one of the services required for a node. In this case you will select the corresponding one you have used in the past. You may also need to add the corresponding required configurations flags for each of these services. See `sedge generate <service> -h` for help regarding this.
+
+2. Once you have confirmed your current setup its time to check which clients you are currently running in your setup. For this you will need to check your `.env` and `docker-compose.yml` files to find which clients where selected for you. The supported clients and their names can be seen using `sedge clients` command. Depending on your setup from the previous step you'll need to add the `-e`, `-c` or `-v` flags to let know the `sedge generate` command which clients to use so it does not generate a different one.
+
+3. Finally you need to decide what to do with your current `jwtsecret` file. In most cases simple adding `--reuse-jwt-secret` will avoid your current `jwtsecret` to be override in your new setup. If you have imported a `jwtsecret` from another file then you must use add the `--jwt-secret-path=<path/to/jwtsecret>` flag.
+
+4. Once you have a complete knowledge of your current setup or the one you desire to use then run the `sedge generate` command with all the args from the previous steps. In general this is the template for the command to use:
+
+```bash
+sedge generate <setup> <clients-flags> [jwtsecret-flags]
+```
+
+Some examples of how this `sedge generate` command can look like are these:
+
+```bash
+# Full Setup
+sedge generate full-setup -e nethermind -c teku -v teku --reuse-jwt-secret
+# Full Setup no validator
+sedge generate full-setup --no-validator -e erigon -c lodestar --reuse-jwt-secret
+# Execution
+sedge generate execution besu
+# Consensus
+sedge generate consensus lighthouse --execution-api-url=<URL> --execution-auth-url=<URL>  --jwt-secret-path=path/to/jwtsecret 
+# Validator
+sedge generate validator prysm --consensus-url=<URL>
+```
+
+All of the above steps will provide a new Sedge configuration that is ready to be used with latest supported clients versions. You can further customize your setup by using any of the additionals flags provided in `sedge generate` command and subcommands.
+
+### Using Sedge to update clients versions and flags in different folder
+
+If you decide to avoid overriding your previous setup and want to generate new configurations in a different folder follow this steps:
+
+1. Move to a new directory to avoid Sedge overriding your current setup. By default Sedge uses `sedge-data` folder in the current directory from where you are running Sedge, so make sure to change it or use the `-p` flag when running `sedge generate`.
+
+2. Run `sedge generate` as described in the previous section.
+
+3. Move to your previous setup configuration and run `sedge down` on it to stop your current setup. This is to ensure your nodes are correctly stopped for the update.
+
+4. Once the services are correctly stopped move or copy your current clients databases to your new setup folder. These folders are named `execution-data`, `consensus-data` and `validator-data` depending on which services are you running. Also make sure to move your `jwtsecret` if needed. You may also want to copy your generated keystores if any.
+
+5. Finally, run the `sedge run` command on your new setup and make sure all clients are correctly started and updated watching the logs with `sedge logs` commands.
+
+### Using Sedge to update clients versions and flags in same folder
+
+If you feel comfortable with overriding your current configs in place you can skip some of the previous steps when updating your setup. Follow this steps for this:
+
+1. Move to your current setup directory or use the `-p` flag pointing to it.
+
+2. Run `sedge generate` as described in the previous section. This time include `--reuse-jwt-secret` if desired.
+
+3. Run `sedge run` command and make sure all clients are correctly started and updated watching the logs with `sedge logs` command.
+
+## Manually updating clients versions and flags
+
+In case you want to avoid overriding your old configurations and fill comfortable enough to edit your current configurations to update your clients and flags without the help of sedge follow this steps:
+
+1. First move inside your current Sedge setup folder.
+
+2. Edit the `.env` file and replace the old clients versions with the newer versions you wanted to use. This is done by changing the docker images stored in the variables `EC_IMAGE_VERSION`, `CC_IMAGE_VERSION` or `VL_IMAGE_VERSION` depending on which services are you running.
+
+3. Once the images are changed edit the `docker-compose.yml` if needed to change flags or update old flags with newer ones. This step can be skipped some times if the newer versions does not include changes in them.
+
+4. Once your setup have being updated, use `sedge run -p .` command so Sedge restarts all the updated clients and make sure all clients are correctly started and updated watching the logs with `sedge logs` command.

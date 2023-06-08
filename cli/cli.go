@@ -25,6 +25,7 @@ import (
 
 	eth2 "github.com/protolambda/zrnt/eth2/configs"
 
+	clientsimages "github.com/NethermindEth/sedge/configs/images"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
@@ -163,10 +164,14 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, deps
 				}
 			}
 		}
-		if err := runPromptActions(p, o,
+		if err := runPromptActionsWithImages(p, a.ClientsImages(), o,
 			selectExecutionClient,
 			selectConsensusClient,
 			selectValidatorClient,
+		); err != nil {
+			return err
+		}
+		if err := runPromptActions(p, o,
 			inputValidatorGracePeriod,
 			inputGraffiti,
 			inputCheckpointSyncURL,
@@ -175,9 +180,13 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, deps
 			return err
 		}
 	} else {
-		if err := runPromptActions(p, o,
+		if err := runPromptActionsWithImages(p, a.ClientsImages(), o,
 			selectExecutionClient,
 			selectConsensusClient,
+		); err != nil {
+			return err
+		}
+		if err := runPromptActions(p, o,
 			inputCheckpointSyncURL,
 			inputFeeRecipientNoValidator,
 		); err != nil {
@@ -203,7 +212,7 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, deps
 
 func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager) (err error) {
 	o.genData.Services = []string{"execution"}
-	if err := selectExecutionClient(p, o); err != nil {
+	if err := selectExecutionClient(p, a.ClientsImages(), o); err != nil {
 		return err
 	}
 	if o.genData.Network == NetworkCustom {
@@ -233,7 +242,7 @@ func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 
 func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager) (err error) {
 	o.genData.Services = []string{"consensus"}
-	if err := selectConsensusClient(p, o); err != nil {
+	if err := selectConsensusClient(p, a.ClientsImages(), o); err != nil {
 		return err
 	}
 	if o.genData.Network == NetworkCustom {
@@ -278,7 +287,7 @@ func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 
 func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager) (err error) {
 	o.genData.Services = []string{"validator"}
-	if err := selectValidatorClient(p, o); err != nil {
+	if err := selectValidatorClient(p, a.ClientsImages(), o); err != nil {
 		return err
 	}
 	if o.genData.Network == NetworkCustom {
@@ -605,11 +614,32 @@ func checkCLIDependencies(p ui.Prompter, o *CliCmdOptions, a actions.SedgeAction
 	return depsMgr.DockerComposeIsInstalled()
 }
 
-type promptAction func(ui.Prompter, *CliCmdOptions) error
+type (
+	promptAction           func(ui.Prompter, *CliCmdOptions) error
+	promptActionWithImages func(ui.Prompter, clientsimages.ClientsImages, *CliCmdOptions) error
+)
 
-func runPromptActions(p ui.Prompter, o *CliCmdOptions, actions ...promptAction) error {
+func runPromptActions(
+	p ui.Prompter,
+	o *CliCmdOptions,
+	actions ...promptAction,
+) error {
 	for _, action := range actions {
 		if err := action(p, o); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func runPromptActionsWithImages(
+	p ui.Prompter,
+	ci clientsimages.ClientsImages,
+	o *CliCmdOptions,
+	actions ...promptActionWithImages,
+) error {
+	for _, action := range actions {
+		if err := action(p, ci, o); err != nil {
 			return err
 		}
 	}
@@ -636,7 +666,7 @@ func selectNodeType(p ui.Prompter, o *CliCmdOptions) error {
 	return nil
 }
 
-func selectExecutionClient(p ui.Prompter, o *CliCmdOptions) (err error) {
+func selectExecutionClient(p ui.Prompter, defaults clientsimages.ClientsImages, o *CliCmdOptions) (err error) {
 	c := clients.ClientInfo{Network: o.genData.Network}
 	supportedClients, err := c.SupportedClients(execution)
 	if err != nil {
@@ -661,7 +691,7 @@ func selectExecutionClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 		Name: selectedExecutionClient,
 		Type: "execution",
 	}
-	o.genData.ExecutionClient.SetImageOrDefault("")
+	o.genData.ExecutionClient.SetImageOrDefault("", defaults)
 	// Patch Geth image if network needs TTD to be set
 	if o.genData.ExecutionClient.Name == "geth" && o.genData.Network == NetworkMainnet {
 		o.genData.ExecutionClient.Image = "ethereum/client-go:v1.10.26"
@@ -669,7 +699,7 @@ func selectExecutionClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 	return nil
 }
 
-func selectConsensusClient(p ui.Prompter, o *CliCmdOptions) (err error) {
+func selectConsensusClient(p ui.Prompter, defaults clientsimages.ClientsImages, o *CliCmdOptions) (err error) {
 	c := clients.ClientInfo{Network: o.genData.Network}
 	supportedClients, err := c.SupportedClients(consensus)
 	if err != nil {
@@ -694,11 +724,11 @@ func selectConsensusClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 		Name: selectedConsensusClient,
 		Type: "consensus",
 	}
-	o.genData.ConsensusClient.SetImageOrDefault("")
+	o.genData.ConsensusClient.SetImageOrDefault("", defaults)
 	return nil
 }
 
-func selectValidatorClient(p ui.Prompter, o *CliCmdOptions) (err error) {
+func selectValidatorClient(p ui.Prompter, defaults clientsimages.ClientsImages, o *CliCmdOptions) (err error) {
 	c := clients.ClientInfo{Network: o.genData.Network}
 	supportedClients, err := c.SupportedClients(validator)
 	if err != nil {
@@ -723,7 +753,7 @@ func selectValidatorClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 		Name: selectedValidatorClient,
 		Type: "validator",
 	}
-	o.genData.ValidatorClient.SetImageOrDefault("")
+	o.genData.ValidatorClient.SetImageOrDefault("", defaults)
 	return nil
 }
 
@@ -789,11 +819,6 @@ func confirmExposeAllPorts(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func confirmImportSlashingProtection(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.importSlashingProtection, err = p.Confirm("Do you want to import slashing protection data?", false)
-	return
-}
-
-func confirmInstallDependencies(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.installDependencies, err = p.Confirm("Install dependencies?", false)
 	return
 }
 

@@ -14,9 +14,6 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/network"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -37,28 +34,6 @@ const (
 	mevBoostContainerIp     = "192.168.1.4"
 	mevBoostContainerImage  = "flashbots/mev-boost"
 )
-
-func buildInspectResults(
-	containerName,
-	containerImage,
-	containerIp string,
-) types.ContainerJSON {
-	return types.ContainerJSON{
-		ContainerJSONBase: &types.ContainerJSONBase{
-			Name: containerName,
-		},
-		Config: &container.Config{
-			Image: containerImage,
-		},
-		NetworkSettings: &types.NetworkSettings{
-			Networks: map[string]*network.EndpointSettings{
-				"sedge-network": { // FIXME: fix in case of network data renaming
-					IPAddress: containerIp,
-				},
-			},
-		},
-	}
-}
 
 func TestShow(t *testing.T) {
 	// Silence logger

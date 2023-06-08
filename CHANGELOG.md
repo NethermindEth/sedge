@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- New `--reuse-jwt-secret` flag to reuse the jwtsecret when re-generating over a Sedge setup.
+- Allow Sedge to load latest supported clients versions from Sedge repository.
+
 ## [v1.2.0] - 2023-06-06
 
 ### Added
@@ -20,9 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Change validator blocker container image to [busybox](https://hub.docker.com/_/busybox).
-- Erigon command line flags. 
-  
-## [Unreleased]
+- Erigon command line flags.
 
 ## [v1.1.0] - 2023-04-07
 
