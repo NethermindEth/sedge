@@ -614,8 +614,10 @@ func checkCLIDependencies(p ui.Prompter, o *CliCmdOptions, a actions.SedgeAction
 	return depsMgr.DockerComposeIsInstalled()
 }
 
-type promptAction func(ui.Prompter, *CliCmdOptions) error
-type promptActionWithImages func(ui.Prompter, clientsimages.ClientsImages, *CliCmdOptions) error
+type (
+	promptAction           func(ui.Prompter, *CliCmdOptions) error
+	promptActionWithImages func(ui.Prompter, clientsimages.ClientsImages, *CliCmdOptions) error
+)
 
 func runPromptActions(
 	p ui.Prompter,

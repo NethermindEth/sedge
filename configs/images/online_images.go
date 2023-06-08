@@ -58,7 +58,7 @@ func (oci OnlineClientsImages) setCachedImages() error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(oci.getCachedImagesFilePath(), body, 0666)
+	return os.WriteFile(oci.getCachedImagesFilePath(), body, 0o666)
 }
 
 func (oci OnlineClientsImages) getCachedImagesFilePath() string {
