@@ -97,6 +97,25 @@ jobs:
           name: sedge-${{env.VERSION}}-linux-arm64
           path: build/sedge-${{env.VERSION}}-linux-arm64
 
+  prepare-release-images-branch:
+    name: Prepare release tags
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ github.event.inputs.tag }}
+    needs: sedge-linux
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Create release images branch
+        env:
+          BRANCH: ${{env.VERSION}}-images
+        run: |
+          git config --global user.name "nethermind-machine"
+          git branch $BRANCH
+          git checkout $BRANCH
+          git push origin $BRANCH
+
   update-homebrew:
     name: Update Homebrew package
     runs-on: ubuntu-latest

@@ -4,9 +4,40 @@ on:
   push:
     branches:
       - develop
+  workflow_dispatch:
 
 jobs:
-  build:
+  update-latest:
+    name: Check for updates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get current version
+        run: |
+          CURRENT_VERSION=$(curl -s "https://api.github.com/repos/nethermindeth/sedge/releases/latest" | jq -r '.tag_name')
+          echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+
+      - name: Checkout Sedge repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.CURRENT_VERSION }}-images
+
+      - name: Run update check script
+        run: chmod +x ./scripts/check-image-updates.sh && ./scripts/check-image-updates.sh
+        env:
+          PAT: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
+          commit-message: Update ${{ env.CURRENT_VERSION }} images versions to latest version.
+          title: "[Update] Update ${{ env.CURRENT_VERSION }} images versions"
+          reviewers: falcoxyz, AntiD2ta, cbermudez97
+          branch: ${{ env.CURRENT_VERSION }}-update-images
+          draft: false
+
+  update-main:
     name: Check for updates
     runs-on: ubuntu-latest
 
@@ -23,8 +54,8 @@ jobs:
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
-          commit-message: Update image versions to latest version.
-          title: "[Update] Update image versions"
+          commit-message: Update images versions to latest version.
+          title: "[Update] Update images versions"
           reviewers: falcoxyz, AntiD2ta, cbermudez97
           branch: feature/update-container-images
           draft: false
