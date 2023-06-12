@@ -1,0 +1,51 @@
+version: "3.9"
+services:
+  validator-blocker:
+    container_name: sedge-validator-blocker
+    image: yauritux/busybox-curl:latest
+    networks:
+      - sedge
+    command: |-
+      sh -c "
+        echo 'Waiting 420 seconds of grace period before starting the validator';
+        sleep 420;
+        echo 'Done';
+        while true; do
+          response=$$(curl -s -o /dev/null -w \"%{http_code}\" ${CC_API_URL}/eth/v1/node/health)
+          if [ $$response -eq 200 ]; then
+            echo 'Endpoint is up!'
+            break
+          else
+            echo 'Endpoint is down, waiting 30 seconds before checking again...'
+            sleep 30
+          fi
+        done
+      "
+  validator:
+    container_name: sedge-validator-client
+    image: ${VL_IMAGE_VERSION}
+    depends_on:
+      validator-blocker:
+        condition: service_completed_successfully
+    networks:
+      - sedge
+    ports:
+      - 5056:5056
+    volumes:
+      - ${VL_DATA_DIR}:/data
+    command:
+      - lighthouse
+      - vc
+      - --network=${NETWORK}
+      - --beacon-nodes=${CC_API_URL}
+      - --graffiti=${GRAFFITI}
+      - --debug-level=${VL_LOG_LEVEL}
+      - --validators-dir=/data/validators
+      - --suggested-fee-recipient=${FEE_RECIPIENT}
+      - --metrics
+      - --metrics-port=5056
+      - --metrics-address=0.0.0.0
+      - --builder-proposals
+networks:
+  sedge:
+    name: sedge-network
