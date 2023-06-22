@@ -10,7 +10,7 @@ execution:
     version: 1.19.2
   erigon:
     name: thorax/erigon
-    version: v2.44.0
+    version: v2.45.2
 consensus:
   lighthouse:
     name: sigp/lighthouse
