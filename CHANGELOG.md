@@ -5,30 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [v1.2.1] - 2023-06-22
+
+### Changed
+
+- Update client images.
+- Update Nethermind's configuration to show new logging format and colors.
+
+### Fixed
+
+- Missing symbol in validator-blocker container main command.
+
 ## [v1.2.0] - 2023-06-06
 
 ### Added
 
-- New command to show Sedge container info: `sedge show`
+- New command to show Sedge container info: `sedge show`.
 - Add default [checkpoint sync url]( https://checkpoint.chiadochain.net ) for Chiado.
 - New `--skip-pull` flag to skip pulling docker images when running `sedge run`.
 
 ### Changed
 
-- Update client images
+- Update client images.
 
 ### Fixed
 
 - Change validator blocker container image to [busybox](https://hub.docker.com/_/busybox).
 - Erigon command line flags. 
   
-## [Unreleased]
-
 ## [v1.1.0] - 2023-04-07
 
 ### Added
 
-- Unit tests
+- Unit tests.
 
 ### Changed
 
