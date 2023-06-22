@@ -1,8 +1,8 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/35319980/243113011-f562f439-1350-4281-bf8b-74dd696a703b.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/35319980/243113023-af952792-e724-4637-ab45-2c18c997a871.svg">
-    <img alt="Nethermind" src="https://user-images.githubusercontent.com/35319980/243113023-af952792-e724-4637-ab45-2c18c997a871.svg" height="64">
+    <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/35319980/245197671-464fc898-a6e5-4571-bf34-957c319501ec.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/35319980/245197581-2cddd292-75c0-4f4a-b26a-a3dcd071ad63.svg">
+    <img alt="Nethermind" src="https://user-images.githubusercontent.com/35319980/245197581-2cddd292-75c0-4f4a-b26a-a3dcd071ad63.svg" height="100">
   </picture>
 </p>
 

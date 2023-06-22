@@ -1,6 +1,10 @@
 {{/* nethermind.tmpl */}}
 {{ define "execution" }}
   execution:
+    tty: true
+    environment:
+      - TERM=xterm-256color
+      - COLORTERM=truecolor
     stop_grace_period: 30s
     container_name: sedge-execution-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
