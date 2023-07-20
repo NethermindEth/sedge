@@ -406,11 +406,11 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 	}, err
 }
 
-func onlyClients(services []string) []string {
-	newServices := make([]string, 0)
+func onlyClients(services []string) []clients.ClientType {
+	newServices := make([]clients.ClientType, 0)
 	for _, service := range services {
 		if service != mevBoost {
-			newServices = append(newServices, service)
+			newServices = append(newServices, clients.ClientType(service))
 		}
 	}
 	return newServices

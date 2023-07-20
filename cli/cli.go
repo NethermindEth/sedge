@@ -659,7 +659,7 @@ func selectExecutionClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 	}
 	o.genData.ExecutionClient = &clients.Client{
 		Name: selectedExecutionClient,
-		Type: "execution",
+		Type: clients.ExecutionClientType,
 	}
 	o.genData.ExecutionClient.SetImageOrDefault("")
 	// Patch Geth image if network needs TTD to be set

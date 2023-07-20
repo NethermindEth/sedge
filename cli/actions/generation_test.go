@@ -444,11 +444,11 @@ func TestFolderCreationOnCompose(t *testing.T) {
 	log.SetOutput(io.Discard)
 	samplePath := t.TempDir() + "test"
 	c := clients.ClientInfo{Network: "mainnet"}
-	clientsMap, _ := c.Clients([]string{"execution", "consensus"})
+	clientsMap, _ := c.Clients([]clients.ClientType{clients.ExecutionClientType, clients.ConsensusClientType})
 	sampleData := generate.GenData{
-		ExecutionClient: clientsMap["execution"]["nethermind"],
-		ConsensusClient: clientsMap["consensus"]["lighthouse"],
-		ValidatorClient: clientsMap["consensus"]["lighthouse"],
+		ExecutionClient: clientsMap[clients.ExecutionClientType]["nethermind"],
+		ConsensusClient: clientsMap[clients.ConsensusClientType]["lighthouse"],
+		ValidatorClient: clientsMap[clients.ConsensusClientType]["lighthouse"],
 		Services:        []string{"execution", "consensus", "validator"},
 		Network:         "mainnet",
 		JWTSecretPath:   samplePath,

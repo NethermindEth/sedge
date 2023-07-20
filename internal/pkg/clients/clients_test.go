@@ -25,16 +25,16 @@ import (
 
 func TestSupportedClients(t *testing.T) {
 	inputs := [...]struct {
-		clientType string
+		clientType ClientType
 		network    string
 		want       []string
 		isErr      bool
 	}{
-		{"execution", "gnosis", []string{"nethermind"}, false},
-		{"consensus", "gnosis", utils.Filter(AllClients["consensus"], func(c string) bool { return c != "prysm" }), false},
-		{"execution", "mainnet", AllClients["execution"], false},
-		{"consensus", "mainnet", AllClients["consensus"], false},
-		{"validator", "mainnet", AllClients["validator"], false},
+		{ExecutionClientType, "gnosis", []string{"nethermind"}, false},
+		{ConsensusClientType, "gnosis", utils.Filter(AllClients[ConsensusClientType], func(c string) bool { return c != "prysm" }), false},
+		{ExecutionClientType, "mainnet", AllClients[ExecutionClientType], false},
+		{ConsensusClientType, "mainnet", AllClients[ConsensusClientType], false},
+		{ValidatorClientType, "mainnet", AllClients[ValidatorClientType], false},
 		{"random", "mainnet", []string{}, true},
 	}
 
@@ -55,8 +55,8 @@ func TestSupportedClients(t *testing.T) {
 }
 
 type clientsTestCase struct {
-	configClientsTypes map[string][]string
-	query              []string
+	configClientsTypes map[ClientType][]string
+	query              []ClientType
 	network            string
 	isErr              bool
 }
@@ -90,51 +90,51 @@ Loop1:
 func TestClients(t *testing.T) {
 	inputs := [...]clientsTestCase{
 		{
-			map[string][]string{
-				"consensus": {"lighthouse", "prysm", "teku", "lodestar"},
-				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
-				"execution": {"nethermind", "geth", "besu", "erigon"},
+			map[ClientType][]string{
+				ConsensusClientType: {"lighthouse", "prysm", "teku", "lodestar"},
+				ValidatorClientType: {"lighthouse", "prysm", "teku", "lodestar"},
+				ExecutionClientType: {"nethermind", "geth", "besu", "erigon"},
 			},
-			[]string{"consensus"},
+			[]ClientType{ConsensusClientType},
 			"mainnet",
 			false,
 		},
 		{
-			map[string][]string{
-				"consensus": {"lighthouse"},
-				"execution": {"nethermind"},
-				"validator": {"lighthouse"},
+			map[ClientType][]string{
+				ConsensusClientType: {"lighthouse"},
+				ExecutionClientType: {"nethermind"},
+				ValidatorClientType: {"lighthouse"},
 			},
-			[]string{"other"},
+			[]ClientType{"other"},
 			"mainnet",
 			true,
 		},
 		{
-			map[string][]string{
-				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
-				"execution": {"nethermind", "geth", "besu", "erigon"},
+			map[ClientType][]string{
+				ValidatorClientType: {"lighthouse", "prysm", "teku", "lodestar"},
+				ExecutionClientType: {"nethermind", "geth", "besu", "erigon"},
 			},
-			[]string{"execution", "validator"},
+			[]ClientType{ExecutionClientType, ValidatorClientType},
 			"mainnet",
 			false,
 		},
 		{
-			map[string][]string{
-				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
-				"consensus": {"lighthouse", "prysm", "teku", "lodestar"},
-				"execution": {"nethermind", "geth", "besu", "erigon"},
+			map[ClientType][]string{
+				ValidatorClientType: {"lighthouse", "prysm", "teku", "lodestar"},
+				ConsensusClientType: {"lighthouse", "prysm", "teku", "lodestar"},
+				ExecutionClientType: {"nethermind", "geth", "besu", "erigon"},
 			},
-			[]string{"consensus", "other"},
+			[]ClientType{ConsensusClientType, "other"},
 			"mainnet",
 			true,
 		},
 		{
-			map[string][]string{
-				"validator": {"lighthouse", "teku", "lodestar"},
-				"consensus": {"lighthouse", "teku", "lodestar"},
-				"execution": {"nethermind"},
+			map[ClientType][]string{
+				ValidatorClientType: {"lighthouse", "teku", "lodestar"},
+				ConsensusClientType: {"lighthouse", "teku", "lodestar"},
+				ExecutionClientType: {"nethermind"},
 			},
-			[]string{"consensus", "execution", "validator"},
+			[]ClientType{ConsensusClientType, ExecutionClientType, ValidatorClientType},
 			"gnosis",
 			false,
 		},
@@ -161,7 +161,7 @@ func TestClients(t *testing.T) {
 func TestValidateClient(t *testing.T) {
 	inputs := [...]struct {
 		client     Client
-		clientType string
+		clientType ClientType
 		isErr      bool
 	}{
 		{
@@ -172,19 +172,19 @@ func TestValidateClient(t *testing.T) {
 		{
 			client: Client{
 				Name:      "nethermind",
-				Type:      "execution",
+				Type:      ExecutionClientType,
 				Supported: true,
 			},
-			clientType: "execution",
+			clientType: ExecutionClientType,
 			isErr:      false,
 		},
 		{
 			client: Client{
 				Name:      "nethermind",
-				Type:      "execution",
+				Type:      ExecutionClientType,
 				Supported: false,
 			},
-			clientType: "execution",
+			clientType: ExecutionClientType,
 			isErr:      true,
 		},
 	}

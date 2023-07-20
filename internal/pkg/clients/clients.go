@@ -44,8 +44,8 @@ List of supported clients names of type <clientType>
 b. error
 Error if any
 */
-func (c ClientInfo) SupportedClients(clientType string) (clientsNames []string, err error) {
-	files, err := templates.Envs.ReadDir(strings.Join([]string{"envs", c.Network, clientType}, "/"))
+func (c ClientInfo) SupportedClients(clientType ClientType) (clientsNames []string, err error) {
+	files, err := templates.Envs.ReadDir(strings.Join([]string{"envs", c.Network, clientType.ToString()}, "/"))
 	if err != nil {
 		return
 	}
@@ -80,7 +80,7 @@ Map of <clientType>: map of <clientName>: Client
 b. []error
 List of errors
 */
-func (c ClientInfo) Clients(clientTypes []string) (clients OrderedClients, errs []error) {
+func (c ClientInfo) Clients(clientTypes []ClientType) (clients OrderedClients, errs []error) {
 	clients = make(OrderedClients)
 
 	for _, clientType := range clientTypes {
@@ -113,7 +113,7 @@ returns :-
 a. error
 Error if client is not supported or configured
 */
-func ValidateClient(client *Client, currentType string) error {
+func ValidateClient(client *Client, currentType ClientType) error {
 	if client == nil {
 		return nil
 	}

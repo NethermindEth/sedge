@@ -74,22 +74,30 @@ Table data
 b. error
 Error if any
 */
-func buildData(getClients func(string) ([]string, error)) (*ui.ListClientsTable, error) {
-	executionClients, err := getClients("execution")
+func buildData(getClients func(clients.ClientType) ([]string, error)) (*ui.ListClientsTable, error) {
+	executionClients, err := getClients(clients.ExecutionClientType)
 	if err != nil {
 		return nil, err
 	}
-	consensusClients, err := getClients("consensus")
+	consensusClients, err := getClients(clients.ConsensusClientType)
 	if err != nil {
 		return nil, err
 	}
-	validatorClients, err := getClients("validator")
+	validatorClients, err := getClients(clients.ExecutionClientType)
 	if err != nil {
 		return nil, err
 	}
 
 	return &ui.ListClientsTable{
-		ClientTypes: []string{"Execution", "Consensus", "Validator"},
-		Clients:     [][]string{executionClients, consensusClients, validatorClients},
+		ClientTypes: []string{
+			clients.ExecutionClientType.ToTitle(),
+			clients.ConsensusClientType.ToTitle(),
+			clients.ValidatorClientType.ToTitle(),
+		},
+		Clients: [][]string{
+			executionClients,
+			consensusClients,
+			validatorClients,
+		},
 	}, nil
 }
