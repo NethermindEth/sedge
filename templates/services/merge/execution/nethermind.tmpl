@@ -1,6 +1,7 @@
 {{/* nethermind.tmpl */}}
 {{ define "execution" }}
-  execution:
+  execution:{{if and (ge .UID 0) (ge .GID 0)}}
+    user: "{{.UID}}:{{.GID}}"{{end}}
     tty: true
     environment:
       - TERM=xterm-256color

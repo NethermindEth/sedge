@@ -263,16 +263,26 @@ func TestGenerateDockerCompose(t *testing.T) {
 
 			// Always set the JWT secret path
 			tc.genData.JWTSecretPath = samplePath
+			datadirs := make([]datadirsValidation, 0)
 
 			// Setup client images
 			if tc.genData.ExecutionClient != nil {
 				tc.genData.ExecutionClient.SetImageOrDefault("")
+				datadirs = append(datadirs, datadirsValidation{path: configs.ExecutionDir, shouldExist: true})
+			} else {
+				datadirs = append(datadirs, datadirsValidation{path: configs.ExecutionDir, shouldExist: false})
 			}
 			if tc.genData.ConsensusClient != nil {
 				tc.genData.ConsensusClient.SetImageOrDefault("")
+				datadirs = append(datadirs, datadirsValidation{path: configs.ConsensusDir, shouldExist: true})
+			} else {
+				datadirs = append(datadirs, datadirsValidation{path: configs.ConsensusDir, shouldExist: false})
 			}
 			if tc.genData.ValidatorClient != nil {
 				tc.genData.ValidatorClient.SetImageOrDefault("")
+				datadirs = append(datadirs, datadirsValidation{path: configs.ValidatorDir, shouldExist: true})
+			} else {
+				datadirs = append(datadirs, datadirsValidation{path: configs.ValidatorDir, shouldExist: false})
 			}
 
 			_, err := sedgeAction.Generate(actions.GenerateOptions{
@@ -284,7 +294,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 				return
 			}
 
-			validateGeneration(t, samplePath)
+			validateGeneration(t, samplePath, datadirs...)
 			cmpData, err := generate.ParseCompose(filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
 			require.Nil(t, err)
 			envData, err := utils.ParseEnv(filepath.Join(samplePath, configs.DefaultEnvFileName))
@@ -475,7 +485,12 @@ func TestFolderCreationOnCompose(t *testing.T) {
 	assert.NoDirExists(t, samplePath)
 }
 
-func validateGeneration(t *testing.T, samplePath string) {
+type datadirsValidation struct {
+	path        string
+	shouldExist bool
+}
+
+func validateGeneration(t *testing.T, samplePath string, datadirs ...datadirsValidation) {
 	t.Helper()
 
 	// Check that the folder was created
@@ -484,6 +499,14 @@ func validateGeneration(t *testing.T, samplePath string) {
 	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
 	// Check that .env file exist
 	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultEnvFileName))
+	// Check datadirs are correclty generated
+	for _, datadir := range datadirs {
+		if datadir.shouldExist {
+			assert.DirExists(t, filepath.Join(samplePath, datadir.path))
+		} else {
+			assert.NoDirExists(t, filepath.Join(samplePath, datadir.path))
+		}
+	}
 	// Check compose file correctness
 	err := utils.ValidateCompose(filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
 	require.NoError(t, err, "generated compose file is not valid")
