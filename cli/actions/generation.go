@@ -92,19 +92,16 @@ func (s *sedgeActions) Generate(options GenerateOptions) (generate.GenData, erro
 		createIf bool
 	}{
 		{
-			path: filepath.Join(options.GenerationPath, configs.ExecutionDir),
-			createIf: options.GenerationData.ExecutionClient != nil &&
-				options.GenerationData.ExecutionClient.Supported,
+			path:     filepath.Join(options.GenerationPath, configs.ExecutionDir),
+			createIf: options.GenerationData.ExecutionClient != nil,
 		},
 		{
-			path: filepath.Join(options.GenerationPath, configs.ConsensusDir),
-			createIf: options.GenerationData.ConsensusClient != nil &&
-				options.GenerationData.ConsensusClient.Supported,
+			path:     filepath.Join(options.GenerationPath, configs.ConsensusDir),
+			createIf: options.GenerationData.ConsensusClient != nil,
 		},
 		{
-			path: filepath.Join(options.GenerationPath, configs.ValidatorDir),
-			createIf: options.GenerationData.ValidatorClient != nil &&
-				options.GenerationData.ValidatorClient.Supported,
+			path:     filepath.Join(options.GenerationPath, configs.ValidatorDir),
+			createIf: options.GenerationData.ValidatorClient != nil,
 		},
 	}
 	for _, datadir := range datadirs {
