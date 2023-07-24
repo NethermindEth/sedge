@@ -18,9 +18,11 @@ package actions
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/network"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -93,8 +95,13 @@ type ContainerData struct {
 func getContainerData(containerData types.ContainerJSON) (ContainerData, error) {
 	data := ContainerData{}
 
-	sedgeNetwork, ok := containerData.NetworkSettings.Networks["sedge-network"] // FIXME: fix in case of network data renaming
-	if !ok {
+	var sedgeNetwork *network.EndpointSettings = nil
+	for networkName, networkSettings := range containerData.NetworkSettings.Networks {
+		if strings.HasPrefix(networkName, "sedge-network") {
+			sedgeNetwork = networkSettings
+		}
+	}
+	if sedgeNetwork == nil {
 		return ContainerData{}, fmt.Errorf("failed to get sedge-network for container %s", containerData.Name)
 	}
 
