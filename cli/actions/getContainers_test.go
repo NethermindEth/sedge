@@ -20,6 +20,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli/actions"
@@ -65,11 +66,20 @@ type getContainersTestCase struct {
 	logsOutput               bytes.Buffer
 	isErr                    bool
 	expectedErrMsg           string
+	containersTag            string
+}
+
+func nameWithTag(
+	name,
+	tag string,
+) string {
+	return strings.Join([]string{name, tag}, "-")
 }
 
 func buildGetContainersDataTestCase(
 	t *testing.T,
-	name string,
+	name,
+	containersTag,
 	caseDataDir string,
 	isErr bool,
 	expectedErrMsg string,
@@ -92,17 +102,23 @@ func buildGetContainersDataTestCase(
 		getContainersDataOptions: actions.GetContainersDataOptions{
 			DockerComposePath: testCaseFinalDockerComposeFilePath,
 		},
-		expected:   expected,
-		logsOutput: bytes.Buffer{},
-		isErr:      isErr,
+		expected:      expected,
+		logsOutput:    bytes.Buffer{},
+		isErr:         isErr,
+		containersTag: containersTag,
 	}
 }
 
 func buildInspectResults(
+	containersTag,
 	containerName,
 	containerImage,
 	containerIp string,
 ) types.ContainerJSON {
+	networkName := "sedge-network" // May change in templates
+	if containersTag != "" {
+		networkName = nameWithTag(networkName, containersTag)
+	}
 	return types.ContainerJSON{
 		ContainerJSONBase: &types.ContainerJSONBase{
 			Name: containerName,
@@ -112,7 +128,7 @@ func buildInspectResults(
 		},
 		NetworkSettings: &types.NetworkSettings{
 			Networks: map[string]*network.EndpointSettings{
-				"sedge-network": { // FIXME: fix in case of network data renaming
+				networkName: {
 					IPAddress: containerIp,
 				},
 			},
@@ -120,7 +136,10 @@ func buildInspectResults(
 	}
 }
 
-func getMockActions(t *testing.T) actions.SedgeActions {
+func getMockActions(
+	t *testing.T,
+	tc getContainersTestCase,
+) actions.SedgeActions {
 	ctrl := gomock.NewController(t)
 	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	t.Cleanup(
@@ -129,30 +148,18 @@ func getMockActions(t *testing.T) actions.SedgeActions {
 		},
 	)
 
-	// execution container
-	dockerClient.EXPECT().ContainerInspect(gomock.Any(), executionContainerName).Return(buildInspectResults(
-		executionContainerName,
-		executionContainerImage,
-		executionContainerIp,
-	), nil).AnyTimes()
-	// consensus container
-	dockerClient.EXPECT().ContainerInspect(gomock.Any(), consensusContainerName).Return(buildInspectResults(
-		consensusContainerName,
-		consensusContainerImage,
-		consensusContainerIp,
-	), nil).AnyTimes()
-	// validator container
-	dockerClient.EXPECT().ContainerInspect(gomock.Any(), validatorContainerName).Return(buildInspectResults(
-		validatorContainerName,
-		validatorContainerImage,
-		validatorContainerIp,
-	), nil).AnyTimes()
-	// mev boost container
-	dockerClient.EXPECT().ContainerInspect(gomock.Any(), mevBoostContainerName).Return(buildInspectResults(
-		mevBoostContainerName,
-		mevBoostContainerImage,
-		mevBoostContainerIp,
-	), nil).AnyTimes()
+	for _, container := range tc.expected.Containers {
+		dockerClient.EXPECT().ContainerInspect(gomock.Any(), container.Name).Return(
+			buildInspectResults(
+				tc.containersTag,
+				container.Name,
+				container.Image,
+				container.Ip,
+			),
+			nil,
+		).Times(1)
+	}
+
 	// not found containers
 	dockerClient.EXPECT().ContainerInspect(gomock.Any(), executionNotFoundContainerName).Return(types.ContainerJSON{}, errors.New(executionNotFoundErrorMsg)).AnyTimes()
 	dockerClient.EXPECT().ContainerInspect(gomock.Any(), consensusNotFoundContainerName).Return(types.ContainerJSON{}, errors.New(consensusNotFoundErrorMsg)).AnyTimes()
@@ -173,6 +180,7 @@ func TestGetContainersData(t *testing.T) {
 		buildGetContainersDataTestCase(
 			t,
 			"Full Node",
+			"",
 			"case_fullNode",
 			false,
 			"",
@@ -203,7 +211,40 @@ func TestGetContainersData(t *testing.T) {
 		),
 		buildGetContainersDataTestCase(
 			t,
+			"Full Node with Tags",
+			"tag",
+			"case_fullNodeTag",
+			false,
+			"",
+			actions.ContainersData{
+				Containers: []actions.ContainerData{
+					{
+						Name:  nameWithTag(executionContainerName, "tag"),
+						Image: executionContainerImage,
+						Ip:    executionContainerIp,
+					},
+					{
+						Name:  nameWithTag(mevBoostContainerName, "tag"),
+						Image: mevBoostContainerImage,
+						Ip:    mevBoostContainerIp,
+					},
+					{
+						Name:  nameWithTag(consensusContainerName, "tag"),
+						Image: consensusContainerImage,
+						Ip:    consensusContainerIp,
+					},
+					{
+						Name:  nameWithTag(validatorContainerName, "tag"),
+						Image: validatorContainerImage,
+						Ip:    validatorContainerIp,
+					},
+				},
+			},
+		),
+		buildGetContainersDataTestCase(
+			t,
 			"Execution Only",
+			"",
 			"case_executionOnly",
 			false,
 			"",
@@ -220,6 +261,7 @@ func TestGetContainersData(t *testing.T) {
 		buildGetContainersDataTestCase(
 			t,
 			"Consensus Only",
+			"",
 			"case_consensusOnly",
 			false,
 			"",
@@ -236,6 +278,7 @@ func TestGetContainersData(t *testing.T) {
 		buildGetContainersDataTestCase(
 			t,
 			"Validator Only",
+			"",
 			"case_validatorOnly",
 			false,
 			"",
@@ -252,6 +295,7 @@ func TestGetContainersData(t *testing.T) {
 		buildGetContainersDataTestCase(
 			t,
 			"No Execution",
+			"",
 			"case_noExecution",
 			false,
 			"",
@@ -278,6 +322,7 @@ func TestGetContainersData(t *testing.T) {
 		buildGetContainersDataTestCase(
 			t,
 			"No Consensus",
+			"",
 			"case_noConsensus",
 			false,
 			"",
@@ -304,6 +349,7 @@ func TestGetContainersData(t *testing.T) {
 		buildGetContainersDataTestCase(
 			t,
 			"No Mev Boost",
+			"",
 			"case_noMev",
 			false,
 			"",
@@ -330,6 +376,7 @@ func TestGetContainersData(t *testing.T) {
 		buildGetContainersDataTestCase(
 			t,
 			"No Validator",
+			"",
 			"case_noValidator",
 			false,
 			"",
@@ -356,32 +403,35 @@ func TestGetContainersData(t *testing.T) {
 		buildGetContainersDataTestCase(
 			t,
 			"Execution Not Found",
+			"",
 			"case_executionNF",
 			true,
 			executionNotFoundErrorMsg,
-			actions.ContainersData{Containers: []actions.ContainerData{{}}},
+			actions.ContainersData{Containers: []actions.ContainerData{}},
 		),
 		buildGetContainersDataTestCase(
 			t,
 			"Consensus Not Found",
+			"",
 			"case_consensusNF",
 			true,
 			consensusNotFoundErrorMsg,
-			actions.ContainersData{Containers: []actions.ContainerData{{}}},
+			actions.ContainersData{Containers: []actions.ContainerData{}},
 		),
 		buildGetContainersDataTestCase(
 			t,
 			"Validator Not Found",
+			"",
 			"case_validatorNF",
 			true,
 			validatorNotFoundErrorMsg,
-			actions.ContainersData{Containers: []actions.ContainerData{{}}},
+			actions.ContainersData{Containers: []actions.ContainerData{}},
 		),
 	}
 
-	actions := getMockActions(t)
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
+			actions := getMockActions(t, tc)
 			log.SetOutput(&tc.logsOutput)
 			containersData, err := actions.GetContainersData(tc.getContainersDataOptions)
 			if tc.isErr {
