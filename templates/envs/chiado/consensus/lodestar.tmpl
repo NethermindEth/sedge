@@ -10,4 +10,5 @@ CC_IMAGE_VERSION={{.CcImage}}
 CC_DATA_DIR={{.CcDataDir}}
 CC_JWT_SECRET_PATH={{.JWTSecretPath}}
 CC_LODESTAR_PRESET=gnosis
+{{if .CheckpointSyncUrl}}CHECKPOINT_SYNC_URL={{.CheckpointSyncUrl}}{{end}}
 {{ end }}

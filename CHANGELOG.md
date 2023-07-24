@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.2.2] - 2023-07-24
+
+### Changed
+
+- Update client images to Shapella-ready version for Gnosis.
+
+### Fixed
+
+- Issue in Chiado templates with checkpoint sync
+- Fix show error when using containers tags.
+- Fix chiado checkpoint sync url.
+
 ## [v1.2.1] - 2023-06-22
 
 ### Changed
@@ -33,8 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Change validator blocker container image to [busybox](https://hub.docker.com/_/busybox).
-- Erigon command line flags. 
-  
+- Erigon command line flags.
+
 ## [v1.1.0] - 2023-04-07
 
 ### Added
@@ -81,8 +93,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename sedge data directory name to `sedge-data` instead of `docker-compose-scripts`.
 - Update mev-boost relay URLs.
 - Fixed validator restart failure. Validator never restarts, but has a better and safer start-up method:
-  - Validator waits a grace period (2 epochs) before starting.
-  - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint returns with the HTTP code 200 in the newly added `validator-blocker` docker-compose service. This replace the older track sync method.
+    - Validator waits a grace period (2 epochs) before starting.
+    - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint
+      returns with the HTTP code 200 in the newly added `validator-blocker` docker-compose service. This replace the
+      older track sync method.
 - Updated installation script for docker and docker compose in Linux flavours.
 - Updated Checkpoint Sync Url for Goerli.
 - Use new created action for JWT secret handling.
