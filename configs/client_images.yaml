@@ -4,36 +4,36 @@ execution:
     version: v1.12.0
   besu:
     name: hyperledger/besu
-    version: 23.4.1
+    version: 23.4.4
   nethermind:
     name: nethermind/nethermind
-    version: 1.19.2
+    version: 1.20.1
   erigon:
     name: thorax/erigon
-    version: v2.46.0
+    version: v2.48.1
 consensus:
   lighthouse:
     name: sigp/lighthouse
-    version: v4.2.0
+    version: v4.3.0
   lodestar:
     name: chainsafe/lodestar
-    version: v1.9.0
+    version: v1.9.2
   teku:
     name: consensys/teku
-    version: 23.6.0
+    version: 23.6.2
   prysm:
     name: gcr.io/prysmaticlabs/prysm/beacon-chain
-    version: v4.0.6
+    version: v4.0.7
 validator:
   lighthouse:
     name: sigp/lighthouse
-    version: v4.2.0
+    version: v4.3.0
   lodestar:
     name: chainsafe/lodestar
-    version: v1.9.0
+    version: v1.9.2
   teku:
     name: consensys/teku
-    version: 23.6.0
+    version: 23.6.2
   prysm:
     name: gcr.io/prysmaticlabs/prysm/validator
-    version: v4.0.6
+    version: v4.0.7
