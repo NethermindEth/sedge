@@ -15,12 +15,33 @@ limitations under the License.
 */
 package clients
 
-import "github.com/NethermindEth/sedge/configs"
+import (
+	"github.com/NethermindEth/sedge/configs"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+)
+
+type ClientType string
+
+func (ct ClientType) ToString() string {
+	return string(ct)
+}
+
+func (ct ClientType) ToTitle() string {
+	caser := cases.Title(language.English)
+	return caser.String(ct.ToString())
+}
+
+const (
+	ExecutionClientType = ClientType("execution")
+	ConsensusClientType = ClientType("consensus")
+	ValidatorClientType = ClientType("validator")
+)
 
 // Client : Struct Represent a client like geth, prysm, etc
 type Client struct {
 	Name      string
-	Type      string
+	Type      ClientType
 	Image     string
 	Endpoint  string
 	Supported bool
@@ -92,4 +113,4 @@ type Clients struct {
 
 type ClientMap map[string]*Client
 
-type OrderedClients map[string]ClientMap
+type OrderedClients map[ClientType]ClientMap

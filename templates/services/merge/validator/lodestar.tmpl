@@ -1,6 +1,7 @@
 {{/* lodestar.tmpl */}}
 {{ define "validator" }}
-  validator:
+  validator:{{if and (ge .UID 0) (ge .GID 0)}}
+    user: "{{.UID}}:{{.GID}}"{{end}}
     container_name: sedge-validator-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     image: ${VL_IMAGE_VERSION}
     depends_on:

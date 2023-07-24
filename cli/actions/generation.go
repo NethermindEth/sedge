@@ -86,5 +86,34 @@ func (s *sedgeActions) Generate(options GenerateOptions) (generate.GenData, erro
 	}
 	log.Info(configs.CleanedGeneratedFiles)
 
+	// create datadir folders
+	datadirs := []struct {
+		path     string
+		createIf bool
+	}{
+		{
+			path:     filepath.Join(options.GenerationPath, configs.ExecutionDir),
+			createIf: options.GenerationData.ExecutionClient != nil,
+		},
+		{
+			path:     filepath.Join(options.GenerationPath, configs.ConsensusDir),
+			createIf: options.GenerationData.ConsensusClient != nil,
+		},
+		{
+			path:     filepath.Join(options.GenerationPath, configs.ValidatorDir),
+			createIf: options.GenerationData.ValidatorClient != nil,
+		},
+	}
+	for _, datadir := range datadirs {
+		if datadir.createIf {
+			if _, err := os.Stat(datadir.path); os.IsNotExist(err) {
+				err = os.MkdirAll(datadir.path, 0o755)
+				if err != nil {
+					return options.GenerationData, err
+				}
+			}
+		}
+	}
+
 	return options.GenerationData, nil
 }

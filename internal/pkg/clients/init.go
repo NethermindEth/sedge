@@ -15,20 +15,20 @@ limitations under the License.
 */
 package clients
 
-var AllClients map[string][]string = map[string][]string{
-	"execution": {
+var AllClients map[ClientType][]string = map[ClientType][]string{
+	ExecutionClientType: {
 		"nethermind",
 		"geth",
 		"erigon",
 		"besu",
 	},
-	"consensus": {
+	ConsensusClientType: {
 		"lighthouse",
 		"prysm",
 		"teku",
 		"lodestar",
 	},
-	"validator": {
+	ValidatorClientType: {
 		"lighthouse",
 		"prysm",
 		"teku",

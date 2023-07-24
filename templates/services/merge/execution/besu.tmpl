@@ -1,6 +1,7 @@
 {{/* besu.tmpl */}}
 {{ define "execution" }}
-  execution:
+  execution:{{if and (ge .UID 0) (ge .GID 0)}}
+    user: "{{.UID}}:{{.GID}}"{{end}}
     stop_grace_period: 30m
     container_name: sedge-execution-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
