@@ -191,7 +191,7 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check Nethermind for Gnosis network",
 			data: &GenData{
-				ExecutionClient: &clients.Client{Name: "erigon"},
+				ExecutionClient: &clients.Client{Name: "nethermind"},
 				Network:         "gnosis",
 			},
 			fieldsToCheck: map[string]string{
