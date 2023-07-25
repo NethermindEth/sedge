@@ -499,7 +499,7 @@ func validateGeneration(t *testing.T, samplePath string, datadirs ...datadirsVal
 	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultDockerComposeScriptName))
 	// Check that .env file exist
 	assert.FileExists(t, filepath.Join(samplePath, configs.DefaultEnvFileName))
-	// Check datadirs are correclty generated
+	// Check datadirs are correctly generated
 	for _, datadir := range datadirs {
 		if datadir.shouldExist {
 			assert.DirExists(t, filepath.Join(samplePath, datadir.path))
