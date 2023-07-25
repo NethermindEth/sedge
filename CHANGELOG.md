@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Support for Erigon in Gnosis
 
+### Fixed
+
+- Issue in Chiado templates with checkpoint sync
+- Fix show error when using containers tags.
+
 ## [v1.2.0] - 2023-06-06
 
 ### Added
