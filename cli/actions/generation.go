@@ -106,11 +106,14 @@ func (s *sedgeActions) Generate(options GenerateOptions) (generate.GenData, erro
 	}
 	for _, datadir := range datadirs {
 		if datadir.createIf {
-			if _, err := os.Stat(datadir.path); os.IsNotExist(err) {
+			_, err := os.Stat(datadir.path)
+			if os.IsNotExist(err) {
 				err = os.MkdirAll(datadir.path, 0o755)
 				if err != nil {
 					return options.GenerationData, err
 				}
+			} else {
+				return options.GenerationData, err
 			}
 		}
 	}

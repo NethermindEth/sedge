@@ -23,13 +23,13 @@ import (
 
 type ClientType string
 
-func (ct ClientType) ToString() string {
+func (ct ClientType) String() string {
 	return string(ct)
 }
 
 func (ct ClientType) ToTitle() string {
 	caser := cases.Title(language.English)
-	return caser.String(ct.ToString())
+	return caser.String(ct.String())
 }
 
 const (

@@ -45,7 +45,7 @@ b. error
 Error if any
 */
 func (c ClientInfo) SupportedClients(clientType ClientType) (clientsNames []string, err error) {
-	files, err := templates.Envs.ReadDir(strings.Join([]string{"envs", c.Network, clientType.ToString()}, "/"))
+	files, err := templates.Envs.ReadDir(strings.Join([]string{"envs", c.Network, clientType.String()}, "/"))
 	if err != nil {
 		return
 	}
