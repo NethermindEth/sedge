@@ -195,7 +195,7 @@ func TestGenerateEnvFile(t *testing.T) {
 				Network:         "gnosis",
 			},
 			fieldsToCheck: map[string]string{
-				"EL_NETWORK": "xdai",
+				"EL_NETWORK": "gnosis",
 			},
 		},
 		{
