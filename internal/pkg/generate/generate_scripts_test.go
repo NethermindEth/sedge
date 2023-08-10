@@ -247,11 +247,7 @@ func defaultFunc(t *testing.T, data *GenData, compose, env io.Reader) error {
 		// Check that the right network is set
 		if data.ExecutionClient != nil {
 			assert.Contains(t, envData, "EL_NETWORK")
-			if data.ExecutionClient.Name == "nethermind" {
-				assert.Equal(t, "xdai", clean(envData["EL_NETWORK"]))
-			} else {
-				assert.Equal(t, "gnosis", clean(envData["EL_NETWORK"]))
-			}
+			assert.Equal(t, "gnosis", clean(envData["EL_NETWORK"]))
 		}
 
 		if data.ConsensusClient != nil {

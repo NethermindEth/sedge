@@ -16,17 +16,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issue in Chiado templates with checkpoint sync
 - Fix show error when using containers tags.
 
+## [v1.2.2] - 2023-07-24
+
+### Changed
+
+- Update client images to Shapella-ready version for Gnosis.
+
+### Fixed
+
+- Issue in Chiado templates with checkpoint sync
+- Fix show error when using containers tags.
+- Fix chiado checkpoint sync url.
+
+## [v1.2.1] - 2023-06-22
+
+### Changed
+
+- Update client images.
+- Update Nethermind's configuration to show new logging format and colors.
+
+### Fixed
+
+- Missing symbol in validator-blocker container main command.
+
 ## [v1.2.0] - 2023-06-06
 
 ### Added
 
-- New command to show Sedge container info: `sedge show`
+- New command to show Sedge container info: `sedge show`.
 - Add default [checkpoint sync url]( https://checkpoint.chiadochain.net ) for Chiado.
 - New `--skip-pull` flag to skip pulling docker images when running `sedge run`.
 
 ### Changed
 
-- Update client images
+- Update client images.
 
 ### Fixed
 
@@ -37,7 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Unit tests
+- Unit tests.
 
 ### Changed
 
@@ -79,8 +102,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename sedge data directory name to `sedge-data` instead of `docker-compose-scripts`.
 - Update mev-boost relay URLs.
 - Fixed validator restart failure. Validator never restarts, but has a better and safer start-up method:
-  - Validator waits a grace period (2 epochs) before starting.
-  - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint returns with the HTTP code 200 in the newly added `validator-blocker` docker-compose service. This replace the older track sync method.
+    - Validator waits a grace period (2 epochs) before starting.
+    - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint
+      returns with the HTTP code 200 in the newly added `validator-blocker` docker-compose service. This replace the
+      older track sync method.
 - Updated installation script for docker and docker compose in Linux flavours.
 - Updated Checkpoint Sync Url for Goerli.
 - Use new created action for JWT secret handling.
