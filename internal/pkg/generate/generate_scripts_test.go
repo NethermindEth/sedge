@@ -245,12 +245,15 @@ func defaultFunc(t *testing.T, data *GenData, compose, env io.Reader) error {
 	envData := retrieveEnvData(t, env)
 	if data.Network == "gnosis" {
 		// Check that the right network is set
-		assert.Contains(t, envData, "EL_NETWORK")
-		assert.Equal(t, "xdai", clean(envData["EL_NETWORK"]))
+		if data.ExecutionClient != nil {
+			assert.Contains(t, envData, "EL_NETWORK")
+			assert.Equal(t, "gnosis", clean(envData["EL_NETWORK"]))
+		}
 
-		assert.Contains(t, envData, "CL_NETWORK")
-		assert.Equal(t, "gnosis", clean(envData["CL_NETWORK"]))
-
+		if data.ConsensusClient != nil {
+			assert.Contains(t, envData, "CL_NETWORK")
+			assert.Equal(t, "gnosis", clean(envData["CL_NETWORK"]))
+		}
 	} else {
 		// Check that the right network is set
 		assert.Contains(t, envData, "NETWORK")

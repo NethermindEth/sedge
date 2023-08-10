@@ -1,12 +1,7 @@
-{{/* nethermind.tmpl */}}
+{{/* erigon.tmpl */}}
 {{ define "execution" }}
-EL_NETWORK=gnosis
-
 # --- Execution Layer - Execution Node - configuration ---
 EC_IMAGE_VERSION={{.ElImage}}
-NETHERMIND_LOG_LEVEL=INFO
-EC_NODENAME=Nethermind
-NETHERMIND_METRICS_PUSH_GATEWAY_URL=http://localhost:9090/metrics
 EC_DATA_DIR={{.ElDataDir}}
 EC_JWT_SECRET_PATH={{.JWTSecretPath}}
 {{ end }}

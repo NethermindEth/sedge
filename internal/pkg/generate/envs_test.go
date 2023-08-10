@@ -179,6 +179,26 @@ func TestGenerateEnvFile(t *testing.T) {
 			},
 		},
 		{
+			name: "Check Erigon for Gnosis network",
+			data: &GenData{
+				ExecutionClient: &clients.Client{Name: "erigon"},
+				Network:         "gnosis",
+			},
+			fieldsToCheck: map[string]string{
+				"EL_NETWORK": "gnosis",
+			},
+		},
+		{
+			name: "Check Nethermind for Gnosis network",
+			data: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				Network:         "gnosis",
+			},
+			fieldsToCheck: map[string]string{
+				"EL_NETWORK": "gnosis",
+			},
+		},
+		{
 			name: "Check wrong network",
 			data: &GenData{
 				ExecutionClient: &clients.Client{Name: "erigon"},
@@ -203,7 +223,6 @@ func TestGenerateEnvFile(t *testing.T) {
 				ConsensusClient: &clients.Client{Name: "teku"},
 			},
 			fieldsToCheck: map[string]string{
-				"EL_NETWORK": "xdai",
 				"CL_NETWORK": "gnosis",
 			},
 		},

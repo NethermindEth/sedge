@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.2.3] - 2023-08-11
+
+### Added
+
+- Support for Erigon in Gnosis
+
+### Fixed
+
+- Issue in Chiado templates with checkpoint sync
+- Fix show error when using containers tags.
+
+### Changed
+
+- Moved xdai to gnosis on Nethermind config
+
 ## [v1.2.2] - 2023-07-24
 
 ### Changed
