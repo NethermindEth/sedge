@@ -53,7 +53,7 @@ TARGET_AGGREGATORS_PER_COMMITTEE: 16
 RANDOM_SUBNETS_PER_VALIDATOR: 1
 # 2**8 (= 256)
 EPOCHS_PER_RANDOM_SUBNET_SUBSCRIPTION: 256
-# 6 (estimate from xDai mainnet)
+# 6 (estimate from Gnosis mainnet)
 SECONDS_PER_ETH1_BLOCK: 6
 
 # Gwei values

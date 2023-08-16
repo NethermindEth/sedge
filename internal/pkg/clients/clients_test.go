@@ -30,7 +30,7 @@ func TestSupportedClients(t *testing.T) {
 		want       []string
 		isErr      bool
 	}{
-		{"execution", "gnosis", []string{"nethermind"}, false},
+		{"execution", "gnosis", []string{"nethermind", "erigon"}, false},
 		{"consensus", "gnosis", utils.Filter(AllClients["consensus"], func(c string) bool { return c != "prysm" }), false},
 		{"execution", "mainnet", AllClients["execution"], false},
 		{"consensus", "mainnet", AllClients["consensus"], false},
@@ -132,7 +132,7 @@ func TestClients(t *testing.T) {
 			map[string][]string{
 				"validator": {"lighthouse", "teku", "lodestar"},
 				"consensus": {"lighthouse", "teku", "lodestar"},
-				"execution": {"nethermind"},
+				"execution": {"nethermind", "erigon"},
 			},
 			[]string{"consensus", "execution", "validator"},
 			"gnosis",
