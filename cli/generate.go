@@ -48,41 +48,33 @@ const (
 	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mev-boost"
 )
 
-type CustomFlags struct {
-	customTTD           string
-	customChainSpec     string
-	customNetworkConfig string
-	customGenesis       string
-	customDeployBlock   string
-}
-
 // GenCmdFlags is a struct that holds the flags of the generate command
 type GenCmdFlags struct {
-	CustomFlags
-	executionName     string
-	consensusName     string
-	validatorName     string
-	checkpointSyncUrl string
-	feeRecipient      string
-	noMev             bool
-	mevImage          string
-	mevBoostOnVal     bool
-	noValidator       bool
-	jwtPath           string
-	graffiti          string
-	mapAllPorts       bool
-	fallbackEL        []string
-	elExtraFlags      []string
-	clExtraFlags      []string
-	vlExtraFlags      []string
-	relayURLs         []string
-	mevBoostUrl       string
-	executionApiUrl   string
-	executionAuthUrl  string
-	consensusApiUrl   string
-	waitEpoch         int
-	customEnodes      []string
-	customEnrs        []string
+	executionName       string
+	consensusName       string
+	validatorName       string
+	checkpointSyncUrl   string
+	feeRecipient        string
+	noMev               bool
+	mevImage            string
+	mevBoostOnVal       bool
+	noValidator         bool
+	jwtPath             string
+	graffiti            string
+	mapAllPorts         bool
+	fallbackEL          []string
+	elExtraFlags        []string
+	clExtraFlags        []string
+	vlExtraFlags        []string
+	relayURLs           []string
+	mevBoostUrl         string
+	executionApiUrl     string
+	executionAuthUrl    string
+	consensusApiUrl     string
+	waitEpoch           int
+	customConfigsSource string
+	customEnodes        []string
+	customEnrs          []string
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -264,42 +256,53 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 
 	vlStartGracePeriod := configs.NetworkEpochTime(network) * time.Duration(flags.waitEpoch)
 
+	// Handle custom config source
+	customConfigsSource := flags.customConfigsSource
+	if customConfigsSource == "" {
+		customConfigsSource = configs.NetworksConfigs()[network].DefaultCustomConfigSrc
+	}
+	var customNetworkData actions.CustomConfigsResults
+	if customConfigsSource != "" {
+		customNetworkData, err = sedgeAction.GetCustomConfigs(
+			actions.GetCustomConfigsOptions{
+				GenerationPath:     generationPath,
+				CustomConfigSource: customConfigsSource,
+			},
+		)
+	}
+
 	// Generate docker-compose scripts
 	gd := generate.GenData{
-		ExecutionClient:         combinedClients.Execution,
-		ConsensusClient:         combinedClients.Consensus,
-		ValidatorClient:         combinedClients.Validator,
-		Network:                 network,
-		CheckpointSyncUrl:       flags.checkpointSyncUrl,
-		FeeRecipient:            flags.feeRecipient,
-		JWTSecretPath:           flags.jwtPath,
-		Graffiti:                flags.graffiti,
-		FallbackELUrls:          flags.fallbackEL,
-		ElExtraFlags:            flags.elExtraFlags,
-		ClExtraFlags:            flags.clExtraFlags,
-		VlExtraFlags:            flags.vlExtraFlags,
-		MapAllPorts:             flags.mapAllPorts,
-		Mev:                     !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
-		MevImage:                flags.mevImage,
-		LoggingDriver:           configs.GetLoggingDriver(logging),
-		RelayURLs:               flags.relayURLs,
-		MevBoostService:         utils.Contains(services, mevBoost),
-		MevBoostEndpoint:        flags.mevBoostUrl,
-		Services:                services,
-		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
-		ExecutionApiUrl:         flags.executionApiUrl,
-		ExecutionAuthUrl:        flags.executionAuthUrl,
-		ConsensusApiUrl:         flags.consensusApiUrl,
-		ECBootnodes:             flags.customEnodes,
-		CCBootnodes:             flags.customEnrs,
-		CustomTTD:               flags.customTTD,
-		CustomChainSpecPath:     flags.CustomFlags.customChainSpec,
-		CustomNetworkConfigPath: flags.CustomFlags.customNetworkConfig,
-		CustomGenesisPath:       flags.CustomFlags.customGenesis,
-		CustomDeployBlock:       flags.customDeployBlock,
-		CustomDeployBlockPath:   flags.CustomFlags.customDeployBlock,
-		MevBoostOnValidator:     flags.mevBoostOnVal,
-		ContainerTag:            containerTag,
+		ExecutionClient:     combinedClients.Execution,
+		ConsensusClient:     combinedClients.Consensus,
+		ValidatorClient:     combinedClients.Validator,
+		Network:             network,
+		CheckpointSyncUrl:   flags.checkpointSyncUrl,
+		FeeRecipient:        flags.feeRecipient,
+		JWTSecretPath:       flags.jwtPath,
+		Graffiti:            flags.graffiti,
+		FallbackELUrls:      flags.fallbackEL,
+		ElExtraFlags:        flags.elExtraFlags,
+		ClExtraFlags:        flags.clExtraFlags,
+		VlExtraFlags:        flags.vlExtraFlags,
+		MapAllPorts:         flags.mapAllPorts,
+		Mev:                 !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
+		MevImage:            flags.mevImage,
+		LoggingDriver:       configs.GetLoggingDriver(logging),
+		RelayURLs:           flags.relayURLs,
+		MevBoostService:     utils.Contains(services, mevBoost),
+		MevBoostEndpoint:    flags.mevBoostUrl,
+		Services:            services,
+		VLStartGracePeriod:  uint(vlStartGracePeriod.Seconds()),
+		ExecutionApiUrl:     flags.executionApiUrl,
+		ExecutionAuthUrl:    flags.executionAuthUrl,
+		ConsensusApiUrl:     flags.consensusApiUrl,
+		ECBootnodes:         append(flags.customEnodes, customNetworkData.ExecutionBootnodes...),
+		CCBootnodes:         append(flags.customEnrs, customNetworkData.ConsensusBootnodes...),
+		MevBoostOnValidator: flags.mevBoostOnVal,
+		ContainerTag:        containerTag,
+		// Custom Network Data
+		CustomNetwork: customNetworkData.ToCustomNetworkData(),
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,

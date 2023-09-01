@@ -126,20 +126,8 @@ func (flags *GenCmdFlags) argsList() []string {
 	if flags.mapAllPorts {
 		s = append(s, "--map-all")
 	}
-	if flags.customTTD != "" {
-		s = append(s, "--custom-ttd", flags.customTTD)
-	}
-	if flags.customChainSpec != "" {
-		s = append(s, "--custom-chainSpec", flags.customChainSpec)
-	}
-	if flags.customNetworkConfig != "" {
-		s = append(s, "--custom-config", flags.customNetworkConfig)
-	}
-	if flags.customGenesis != "" {
-		s = append(s, "--custom-genesis", flags.customGenesis)
-	}
-	if flags.customDeployBlock != "" {
-		s = append(s, "--custom-deploy-block", flags.customDeployBlock)
+	if flags.customConfigsSource != "" {
+		s = append(s, "--custom-configs", flags.customConfigsSource)
 	}
 	if len(flags.customEnodes) > 0 {
 		s = append(s, "--execution-bootnodes", strings.Join(flags.customEnodes, ","))
@@ -1037,9 +1025,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "full-node",
 			},
 			GenCmdFlags{
-				CustomFlags: CustomFlags{
-					customTTD: "some",
-				},
+				customConfigsSource: "some",
 			},
 			globalFlags{
 				network: "mainnet",
@@ -1052,10 +1038,8 @@ func TestGenerateCmd(t *testing.T) {
 				name: "full-node",
 			},
 			GenCmdFlags{
-				feeRecipient: "0x0000000000000000000000000000000000000000",
-				CustomFlags: CustomFlags{
-					customTTD: "some",
-				},
+				feeRecipient:        "0x0000000000000000000000000000000000000000",
+				customConfigsSource: "some",
 			},
 			globalFlags{
 				network: "custom",
@@ -1068,9 +1052,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "execution",
 			},
 			GenCmdFlags{
-				CustomFlags: CustomFlags{
-					customTTD: "some",
-				},
+				customConfigsSource: "some",
 			},
 			globalFlags{
 				network: "custom",
@@ -1083,9 +1065,7 @@ func TestGenerateCmd(t *testing.T) {
 				name: "execution",
 			},
 			GenCmdFlags{
-				CustomFlags: CustomFlags{
-					customTTD: "some",
-				},
+				customConfigsSource: "some",
 			},
 			globalFlags{
 				network: "mainnet",
@@ -1098,10 +1078,8 @@ func TestGenerateCmd(t *testing.T) {
 				name: "full-node",
 			},
 			GenCmdFlags{
-				feeRecipient: "0x0000000000000000000000000000000000000000",
-				CustomFlags: CustomFlags{
-					customTTD: "some",
-				},
+				feeRecipient:        "0x0000000000000000000000000000000000000000",
+				customConfigsSource: "some",
 			},
 			globalFlags{
 				network: "custom",

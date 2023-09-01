@@ -21,18 +21,14 @@ type LogConfig struct {
 }
 
 type NetworkConfig struct {
-	Name                      string
-	RequireJWT                bool
-	NetworkService            string
-	GenesisForkVersion        string
-	DefaultTTD                string
-	DefaultECBootnodes        []string
-	DefaultCCBootnodes        []string
-	DefaultCustomChainSpecSrc string
-	DefaultCustomConfigSrc    string
-	DefaultCustomGenesisSrc   string
-	DefaultCustomDeployBlock  string
-	SupportsMEVBoost          bool
-	CheckpointSyncURL         string
-	RelayURLs                 []string
+	Name                   string
+	RequireJWT             bool
+	NetworkService         string
+	GenesisForkVersion     string
+	DefaultECBootnodes     []string
+	DefaultCCBootnodes     []string
+	DefaultCustomConfigSrc string
+	SupportsMEVBoost       bool
+	CheckpointSyncURL      string
+	RelayURLs              []string
 }

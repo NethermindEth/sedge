@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/google/go-github/v54/github"
 	log "github.com/sirupsen/logrus"
@@ -41,6 +42,28 @@ type CustomConfigsResults struct {
 	CustomConfigs      map[string]string
 	ExecutionBootnodes []string
 	ConsensusBootnodes []string
+}
+
+func (results CustomConfigsResults) ToCustomNetworkData() generate.CustomNetworkData {
+	return generate.CustomNetworkData{
+		// General
+		Path:      results.Path,
+		NetworkID: results.NetworkID,
+		// Execution
+		NethermindChainspec: results.CustomConfigs[configs.NethermindChainspecFileName],
+		GethGenesis:         results.CustomConfigs[configs.GethGenesisFileName],
+		BesuGenesis:         results.CustomConfigs[configs.BesuGenesisFileName],
+		// Consensus
+		ConsensusConfig:          results.CustomConfigs[configs.ConsensusConfigFileName],
+		GenesisState:             results.CustomConfigs[configs.GenesisStateFileName],
+		DeployBlock:              results.CustomConfigs[configs.DeployBlockFileName],
+		DeployBlockValue:         results.DeployBlockValue,
+		DepositContract:          results.CustomConfigs[configs.DepositContractFileName],
+		DepositContractBlock:     results.CustomConfigs[configs.DepositContractBlockFileName],
+		DepositContractBlockHash: results.CustomConfigs[configs.DepositContractBlockHashFileName],
+		TrustedSetupTxt:          results.CustomConfigs[configs.TrustedSetupTxtFileName],
+		TrustedSetupJson:         results.CustomConfigs[configs.TrustedSetupJsonFileName],
+	}
 }
 
 type customConfigItem struct {
