@@ -36,6 +36,8 @@ type GetCustomConfigsOptions struct {
 
 type CustomConfigsResults struct {
 	NetworkID          string
+	DeployBlockValue   string
+	Path               string
 	CustomConfigs      map[string]string
 	ExecutionBootnodes []string
 	ConsensusBootnodes []string
@@ -131,9 +133,10 @@ func (s *sedgeActions) GetCustomConfigs(options GetCustomConfigsOptions) (Custom
 		},
 	}
 
+	results.Path = path.Join(options.GenerationPath, configs.CustomNetworkConfigsFolder)
 	err = s.copyCustomConfigs(
 		sourcePath,
-		path.Join(options.GenerationPath, configs.CustomNetworkConfigsFolder),
+		results.Path,
 		&results,
 		customConfigTargets,
 		[]string{
@@ -148,20 +151,33 @@ func (s *sedgeActions) GetCustomConfigs(options GetCustomConfigsOptions) (Custom
 		return results, err
 	}
 
+	// Get network id
 	gethPath, gethOk := results.CustomConfigs[configs.GethGenesisFileName]
 	besuPath, besuOk := results.CustomConfigs[configs.BesuGenesisFileName]
-	if gethOk {
+	if gethOk && gethPath != "" {
 		results.NetworkID, err = getNetworkIDFrom(gethPath)
 		if err != nil {
 			return results, err
 		}
-	} else if besuOk {
+	} else if besuOk && besuPath != "" {
 		results.NetworkID, err = getNetworkIDFrom(besuPath)
 		if err != nil {
 			return results, err
 		}
 	} else {
 		log.Warn("Network ID not found in custom configs. This is required for some execution clients.")
+	}
+
+	// Get deploy block
+	deployBlockFile, ok := results.CustomConfigs[configs.DeployBlockFileName]
+	if ok && deployBlockFile != "" {
+		data, err := os.ReadFile(deployBlockFile)
+		if err != nil {
+			return results, err
+		}
+		results.DeployBlockValue = string(data)
+	} else {
+		log.Warn("Deploy Block not found in custom configs. This is required for some consensus clients.")
 	}
 
 	// Clean temp directory if downloaded
