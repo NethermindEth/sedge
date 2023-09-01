@@ -1,5 +1,26 @@
 {{/* erigon.tmpl */}}
-{{ define "execution" }}
+{{ define "execution" }}{{ if .CustomNetwork.GethGenesis }}
+  execution-init:
+    container_name: sedge-execution-init{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: no
+    image: ${EC_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${EC_DATA_DIR}:/var/lib/erigon
+      - {{ .CustomNetwork.GethGenesis }}:/custom-config/genesis.json
+    entrypoint: /bin/sh
+    command >-
+      stat var/lib/erigon/chaindata ||
+      erigon
+      --datadir=/var/lib/erigon
+      init
+      /custom-config/genesis.json
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
   execution:
     stop_grace_period: 30m
     container_name: sedge-execution-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
@@ -20,28 +41,29 @@
       - {{.ElApiPort}}
       - {{.ElAuthPort}}
     user: root
-    command:
-    - --private.api.addr=0.0.0.0:9090
-    - --nat=any
-    - --http
-    - --http.addr=0.0.0.0
-    - --http.port={{.ElApiPort}}
-    - --http.vhosts=*
-    - --http.corsdomain=*
-    - --http.api=web3,eth,net,engine
-    - --txpool.disable
-    - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}{{if .ECBootnodes}}
-    - --bootnodes={{.ECBootnodes}}{{end}}
-    - --authrpc.addr=0.0.0.0
-    - --authrpc.port={{.ElAuthPort}}
-    - --authrpc.vhosts=*
-    - --authrpc.jwtsecret=/var/lib/erigon/jwtsecret
-    - --datadir=/var/lib/erigon
-    - --healthcheck
-    - --metrics
-    - --metrics.addr=0.0.0.0
-    - --metrics.port={{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
-    - --{{$flag}}{{end}}{{if .LoggingDriver}}
+    command:{{ if .CustomNetwork.NetworkID }}
+      - --networkid={{.CustomNetwork.NetworkID}}{{else}}
+      - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
+      - --private.api.addr=0.0.0.0:9090
+      - --nat=any
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.port={{.ElApiPort}}
+      - --http.vhosts=*
+      - --http.corsdomain=*
+      - --http.api=web3,eth,net,engine
+      - --txpool.disable{{if .ECBootnodes}}
+      - --bootnodes={{.ECBootnodes}}{{end}}
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.port={{.ElAuthPort}}
+      - --authrpc.vhosts=*
+      - --authrpc.jwtsecret=/var/lib/erigon/jwtsecret
+      - --datadir=/var/lib/erigon
+      - --healthcheck
+      - --metrics
+      - --metrics.addr=0.0.0.0
+      - --metrics.port={{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
+      - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:

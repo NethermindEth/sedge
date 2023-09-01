@@ -16,16 +16,12 @@ limitations under the License.
 package configs
 
 const (
-	ConfigFileName                      = ".sedge"
-	DefaultDockerComposeScriptName      = "docker-compose.yml"
-	ExecutionNetworkConfigFileName      = "chainSpec.json"
-	ConsensusNetworkConfigFileName      = "config.yaml"
-	ConsensusNetworkGenesisFileName     = "genesis.ssz"
-	ConsensusNetworkDeployBlockFileName = "deploy_block.txt"
-	ExecutionDir                        = "execution-data"
-	ConsensusDir                        = "consensus-data"
-	ValidatorDir                        = "validator-data"
-	KeystoreDir                         = "keystore"
+	ConfigFileName                 = ".sedge"
+	DefaultDockerComposeScriptName = "docker-compose.yml"
+	ExecutionDir                   = "execution-data"
+	ConsensusDir                   = "consensus-data"
+	ValidatorDir                   = "validator-data"
+	KeystoreDir                    = "keystore"
 	// Custom network configs file names
 	CustomNetworkConfigsFolder = "custom-configs"
 	// Execution clients custom configs file names

@@ -12,11 +12,12 @@
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
+      - ${VL_DATA_DIR}:/data{{if .CustomNetwork.ConsensusConfig}}
+      - {{.CustomNetwork.ConsensusConfig}}:/custom-config/config.yaml{{end}}
     command:
-      - validator-client{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - --network=/network_config/config.yml{{end}}{{end}}
+      - validator-client{{if .CustomNetwork.Path}}{{if .CustomNetwork.ConsensusConfig}}
+      - --network=/custom-config/config.yaml{{end}}{{else}}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --beacon-node-api-endpoint=${CC_API_URL}
       - --data-path=/data
       - --log-destination=CONSOLE

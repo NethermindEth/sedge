@@ -13,8 +13,8 @@
       - sedge
     volumes:
       - ${EC_DATA_DIR}:/nethermind/data
-      - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CustomChainSpecPath}}
-      - {{.CustomChainSpecPath}}:/nethermind/custom_config/chainspec.json{{end}}
+      - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{ if .CustomNetwork.NethermindChainspec }}
+      - {{ .CustomNetwork.NethermindChainspec }}:/custom-config/chainspec.json{{end}}
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
@@ -24,12 +24,12 @@
     expose:
       - {{.ElApiPort}}
       - {{.ElAuthPort}}
-    command:{{if .CustomChainSpecPath}}
-      - --Init.ChainSpecPath=/nethermind/custom_config/chainspec.json{{end}}
-      - --config={{if .CustomNetwork}}none{{else}}{{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
+    command:{{ if .CustomNetwork.NethermindChainspec }}
+      - --config=none
+      - --Init.ChainSpecPath=/custom-config/chainspec.json{{ else }}
+      - --config={{ if .SplittedNetwork }}${EL_NETWORK}{{ else }}${NETWORK}{{ end }}{{ end }}
       - --datadir=/nethermind/data
-      - --log=${NETHERMIND_LOG_LEVEL}{{if .TTD}}
-      - --Merge.TerminalTotalDifficulty={{.TTD}}{{end}}
+      - --log=${NETHERMIND_LOG_LEVEL}
       - --JsonRpc.Enabled=true
       - --JsonRpc.Host=0.0.0.0
       - --JsonRpc.Port={{.ElApiPort}}

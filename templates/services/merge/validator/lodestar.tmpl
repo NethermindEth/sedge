@@ -11,11 +11,11 @@
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
+      - ${VL_DATA_DIR}:/data{{if .CustomNetwork.ConsensusConfig}}
+      - {{.CustomNetwork.ConsensusConfig}}:/custom-config/config.yaml{{end}}
     command: 
-      - validator{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - --paramsFile=/network_config/config.yml{{end}}{{else}}
+      - validator{{if .CustomConsensusConfigs}}{{if .CustomNetwork.ConsensusConfig}}
+      - --paramsFile=/custom-config/config.yaml{{end}}{{else}}
       - --preset=${VL_LODESTAR_PRESET}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --dataDir=/data

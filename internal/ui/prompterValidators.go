@@ -113,8 +113,8 @@ func fileExtensionValidator(extensions []string) func(ans interface{}) error {
 }
 
 // DigitsStringValidator validates that the input is a valid string with only digits
-func DigitsStringValidator(ttd string) error {
-	if !digitsString.MatchString(ttd) {
+func DigitsStringValidator(str string) error {
+	if !digitsString.MatchString(str) {
 		return ErrInvalidDigitString
 	}
 	return nil

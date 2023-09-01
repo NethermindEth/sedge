@@ -9,8 +9,8 @@
       - sedge
     volumes:
       - ${EC_DATA_DIR}:/var/lib/besu/data
-      - ${EC_JWT_SECRET_PATH}:/var/lib/besu/jwtsecret{{if .CustomChainSpecPath}}
-      - {{.CustomChainSpecPath}}:/nethermind/custom_config/chainspec.json{{end}}
+      - ${EC_JWT_SECRET_PATH}:/var/lib/besu/jwtsecret{{if .CustomNetwork.BesuGenesis }}
+      - {{ .CustomNetwork.BesuGenesis }}:/custom-config/besu.json{{end}}
     user: root
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
@@ -21,11 +21,10 @@
     expose:
       - {{.ElApiPort}}
       - {{.ElAuthPort}}
-    command:{{if .TTD}}
-    - --override-genesis-config=terminalTotalDifficulty={{.TTD}}{{end}}
+    command:
     - --sync-mode=X_SNAP
-    - --data-storage-format=BONSAI{{if .CustomChainSpecPath}}
-    - --genesis-file=/nethermind/custom_config/chainspec.json{{else}}
+    - --data-storage-format=BONSAI{{if .CustomNetwork.BesuGenesis }}
+    - --genesis-file=/custom-config/besu.json{{else}}
     - --network={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
     - --data-path=/var/lib/besu/data{{if .ECBootnodes}}
     - --bootnodes={{.ECBootnodes}}{{end}}

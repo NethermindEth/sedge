@@ -1,5 +1,26 @@
 {{/* geth.tmpl */}}
-{{ define "execution" }}
+{{ define "execution" }}{{ if .CustomNetwork.GethGenesis }}
+  execution-init:
+    container_name: sedge-execution-init{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: no
+    image: ${EC_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${EC_DATA_DIR}:/var/lib/goethereum
+      - {{ .CustomNetwork.GethGenesis }}:/custom-config/genesis.json
+    entrypoint: /bin/sh
+    command >-
+      stat /var/lib/goethereum/geth/chaindata ||
+      geth
+      --datadir=/var/lib/goethereum
+      init
+      /custom-config/genesis.json
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
   execution:
     stop_grace_period: 30m
     container_name: sedge-execution-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
@@ -21,8 +42,9 @@
       - {{.ElApiPort}}
       - {{.ElWsPort}}
       - {{.ElAuthPort}}
-    command:{{if .TTD}} 
-      - --override.terminaltotaldifficulty={{.TTD}}{{end}}{{if .ECBootnodes}}
+    command:{{ if .CustomNetwork.NetworkID }}
+      - --networkid={{.CustomNetwork.NetworkID}}{{else}}
+      - --{{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}{{if .ECBootnodes}}
       - --bootnodes={{.ECBootnodes}}{{end}}
       - --syncmode=${EC_SYNC_MODE}
       - --http
@@ -34,7 +56,6 @@
       - --datadir=/var/lib/goethereum
       - --port={{.ElDiscoveryPort}}
       - --http.port={{.ElApiPort}}
-      - --{{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
       - --verbosity
       - ${GETH_LOG_LEVEL}
       - --ws
