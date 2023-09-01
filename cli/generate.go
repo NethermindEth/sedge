@@ -269,6 +269,9 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 				CustomConfigSource: customConfigsSource,
 			},
 		)
+		if err != nil {
+			return fmt.Errorf(configs.ErrLoadingCustomConfigs, err)
+		}
 	}
 
 	// Generate docker-compose scripts

@@ -84,4 +84,5 @@ const (
 	ErrDuplicatedBootNode             = "duplicated boot node"
 	ErrGraffitiLength                 = "graffiti must have 16 characters at most. Provided graffiti %s has %d characters"
 	ErrCMDArgsNotSupported            = "command %s does not support arguments. Please use flags instead"
+	ErrLoadingCustomConfigs           = "error loading custom configs: %w"
 )

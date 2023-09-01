@@ -63,6 +63,7 @@ var ErrCancelled = errors.New("cancelled by the user")
 
 type CliCmdOptions struct {
 	genData                  generate.GenData
+	customConfigsSource      string
 	generationPath           string
 	nodeType                 string
 	withValidator            bool
@@ -133,11 +134,7 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, deps
 	}
 	if o.genData.Network == NetworkCustom {
 		if err := runPromptActions(p, o,
-			inputCustomNetworkConfig,
-			inputCustomChainSpec,
-			inputCustomGenesis,
-			inputCustomTTD,
-			inputCustomDeployBlock,
+			inputCustomConfigSource,
 			inputExecutionBootNodes,
 			inputConsensusBootNodes,
 		); err != nil {
@@ -190,6 +187,25 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, deps
 	if err := setupJWT(p, o, false); err != nil {
 		return err
 	}
+	// Handle custom config source
+	customConfigsSource := o.customConfigsSource
+	if customConfigsSource == "" {
+		customConfigsSource = configs.NetworksConfigs()[network].DefaultCustomConfigSrc
+	}
+	if customConfigsSource != "" {
+		customNetworkData, err := a.GetCustomConfigs(
+			actions.GetCustomConfigsOptions{
+				GenerationPath:     generationPath,
+				CustomConfigSource: customConfigsSource,
+			},
+		)
+		if err != nil {
+			return fmt.Errorf(configs.ErrLoadingCustomConfigs, err)
+		}
+		o.genData.CustomNetwork = customNetworkData.ToCustomNetworkData()
+		o.genData.ECBootnodes = append(o.genData.ECBootnodes, customNetworkData.ExecutionBootnodes...)
+		o.genData.CCBootnodes = append(o.genData.CCBootnodes, customNetworkData.ConsensusBootnodes...)
+	}
 	// Call generate action
 	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
@@ -208,8 +224,7 @@ func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 	}
 	if o.genData.Network == NetworkCustom {
 		if err := runPromptActions(p, o,
-			inputCustomChainSpec,
-			inputCustomTTD,
+			inputCustomConfigSource,
 			inputExecutionBootNodes,
 		); err != nil {
 			return err
@@ -220,6 +235,25 @@ func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 	}
 	if err := setupJWT(p, o, true); err != nil {
 		return err
+	}
+	// Handle custom config source
+	customConfigsSource := o.customConfigsSource
+	if customConfigsSource == "" {
+		customConfigsSource = configs.NetworksConfigs()[network].DefaultCustomConfigSrc
+	}
+	if customConfigsSource != "" {
+		customNetworkData, err := a.GetCustomConfigs(
+			actions.GetCustomConfigsOptions{
+				GenerationPath:     generationPath,
+				CustomConfigSource: customConfigsSource,
+			},
+		)
+		if err != nil {
+			return fmt.Errorf(configs.ErrLoadingCustomConfigs, err)
+		}
+		o.genData.CustomNetwork = customNetworkData.ToCustomNetworkData()
+		o.genData.ECBootnodes = append(o.genData.ECBootnodes, customNetworkData.ExecutionBootnodes...)
+		o.genData.CCBootnodes = append(o.genData.CCBootnodes, customNetworkData.ConsensusBootnodes...)
 	}
 	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
@@ -238,9 +272,7 @@ func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 	}
 	if o.genData.Network == NetworkCustom {
 		if err := runPromptActions(p, o,
-			inputCustomNetworkConfig,
-			inputCustomGenesis,
-			inputCustomDeployBlock,
+			inputCustomConfigSource,
 			inputConsensusBootNodes,
 		); err != nil {
 			return err
@@ -266,6 +298,25 @@ func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 	if err := setupJWT(p, o, true); err != nil {
 		return err
 	}
+	// Handle custom config source
+	customConfigsSource := o.customConfigsSource
+	if customConfigsSource == "" {
+		customConfigsSource = configs.NetworksConfigs()[network].DefaultCustomConfigSrc
+	}
+	if customConfigsSource != "" {
+		customNetworkData, err := a.GetCustomConfigs(
+			actions.GetCustomConfigsOptions{
+				GenerationPath:     generationPath,
+				CustomConfigSource: customConfigsSource,
+			},
+		)
+		if err != nil {
+			return fmt.Errorf(configs.ErrLoadingCustomConfigs, err)
+		}
+		o.genData.CustomNetwork = customNetworkData.ToCustomNetworkData()
+		o.genData.ECBootnodes = append(o.genData.ECBootnodes, customNetworkData.ExecutionBootnodes...)
+		o.genData.CCBootnodes = append(o.genData.CCBootnodes, customNetworkData.ConsensusBootnodes...)
+	}
 	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
 		GenerationPath: o.generationPath,
@@ -283,9 +334,7 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 	}
 	if o.genData.Network == NetworkCustom {
 		if err := runPromptActions(p, o,
-			inputCustomNetworkConfig,
-			inputCustomGenesis,
-			inputCustomDeployBlock,
+			inputCustomConfigSource,
 		); err != nil {
 			return err
 		}
@@ -303,6 +352,25 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 			return err
 		}
 		o.genData.MevBoostOnValidator = o.withMevBoost
+	}
+	// Handle custom config source
+	customConfigsSource := o.customConfigsSource
+	if customConfigsSource == "" {
+		customConfigsSource = configs.NetworksConfigs()[network].DefaultCustomConfigSrc
+	}
+	if customConfigsSource != "" {
+		customNetworkData, err := a.GetCustomConfigs(
+			actions.GetCustomConfigsOptions{
+				GenerationPath:     generationPath,
+				CustomConfigSource: customConfigsSource,
+			},
+		)
+		if err != nil {
+			return fmt.Errorf(configs.ErrLoadingCustomConfigs, err)
+		}
+		o.genData.CustomNetwork = customNetworkData.ToCustomNetworkData()
+		o.genData.ECBootnodes = append(o.genData.ECBootnodes, customNetworkData.ExecutionBootnodes...)
+		o.genData.CCBootnodes = append(o.genData.CCBootnodes, customNetworkData.ConsensusBootnodes...)
 	}
 	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
@@ -535,9 +603,9 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, d
 		From:            o.keystorePath,
 		ContainerTag:    o.genData.ContainerTag,
 		CustomConfig: actions.ImportValidatorKeysCustomOptions{
-			NetworkConfigPath: o.genData.CustomNetworkConfigPath,
-			GenesisPath:       o.genData.CustomGenesisPath,
-			DeployBlockPath:   o.genData.CustomDeployBlockPath,
+			NetworkConfigPath: o.genData.CustomNetwork.ConsensusConfig,
+			GenesisPath:       o.genData.CustomNetwork.GenesisState,
+			DeployBlockPath:   o.genData.CustomNetwork.DeployBlock,
 		},
 	})
 	if err != nil {
@@ -802,38 +870,12 @@ func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
 	return
 }
 
-func inputCustomNetworkConfig(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomNetworkConfigPath, err = p.InputFilePath("Custom network config file path", "", true, ".yml", ".yaml")
+func inputCustomConfigSource(p ui.Prompter, o *CliCmdOptions) (err error) {
+	o.customConfigsSource, err = p.InputFilePath("Custom network configs sources file path or url", "", true)
 	if err != nil {
 		return err
 	}
-	return absPathInPlace(&o.genData.CustomNetworkConfigPath)
-}
-
-func inputCustomChainSpec(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomChainSpecPath, err = p.InputFilePath("File path or url to use as custom network chainSpec for execution client", "", true, ".json")
-	if err != nil {
-		return err
-	}
-	return absPathInPlace(&o.genData.CustomChainSpecPath)
-}
-
-func inputCustomGenesis(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomGenesisPath, err = p.InputFilePath("File path or URL to use as custom network genesis for consensus client", "", true, ".ssz")
-	if err != nil {
-		return err
-	}
-	return absPathInPlace(&o.genData.CustomGenesisPath)
-}
-
-func inputCustomTTD(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomTTD, err = p.Input("Custom TTD (Terminal Total Difficulty)", "0", false, ui.DigitsStringValidator)
-	return
-}
-
-func inputCustomDeployBlock(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomDeployBlock, err = p.Input("Custom deploy block", "0", false, ui.DigitsStringValidator)
-	return
+	return absPathInPlace(&o.customConfigsSource)
 }
 
 func inputExecutionBootNodes(p ui.Prompter, o *CliCmdOptions) (err error) {
