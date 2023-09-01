@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Nethermind
+Copyright 2023 Nethermind
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ limitations under the License.
 package actions
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
@@ -34,6 +35,7 @@ type GetCustomConfigsOptions struct {
 }
 
 type CustomConfigsResults struct {
+	NetworkID          string
 	CustomConfigs      map[string]string
 	ExecutionBootnodes []string
 	ConsensusBootnodes []string
@@ -54,7 +56,7 @@ func (s *sedgeActions) GetCustomConfigs(options GetCustomConfigsOptions) (Custom
 		return results, err
 	}
 
-	downloadTargets := []customConfigItem{
+	customConfigTargets := []customConfigItem{
 		// Execution clients custom configs
 		{
 			fileName: configs.NethermindChainspecFileName,
@@ -133,7 +135,7 @@ func (s *sedgeActions) GetCustomConfigs(options GetCustomConfigsOptions) (Custom
 		sourcePath,
 		path.Join(options.GenerationPath, configs.CustomNetworkConfigsFolder),
 		&results,
-		downloadTargets,
+		customConfigTargets,
 		[]string{
 			"bootnode.txt",
 			"bootstrap_nodes_execution.txt",
@@ -144,6 +146,22 @@ func (s *sedgeActions) GetCustomConfigs(options GetCustomConfigsOptions) (Custom
 	)
 	if err != nil {
 		return results, err
+	}
+
+	gethPath, gethOk := results.CustomConfigs[configs.GethGenesisFileName]
+	besuPath, besuOk := results.CustomConfigs[configs.BesuGenesisFileName]
+	if gethOk {
+		results.NetworkID, err = getNetworkIDFrom(gethPath)
+		if err != nil {
+			return results, err
+		}
+	} else if besuOk {
+		results.NetworkID, err = getNetworkIDFrom(besuPath)
+		if err != nil {
+			return results, err
+		}
+	} else {
+		log.Warn("Network ID not found in custom configs. This is required for some execution clients.")
 	}
 
 	// Clean temp directory if downloaded
@@ -213,7 +231,7 @@ func (s sedgeActions) copyCustomConfigs(
 	sourcePath string,
 	destPath string,
 	results *CustomConfigsResults,
-	downloadTargets []customConfigItem,
+	copyTargets []customConfigItem,
 	executionBootnodesAllowedNames []string,
 	consensusBootnodesAllowedNames []string,
 ) error {
@@ -231,7 +249,7 @@ func (s sedgeActions) copyCustomConfigs(
 			if item.Name() == allowedName {
 				bootnodes, err := s.extractBootnodesFromFile(path.Join(sourcePath, item.Name()))
 				if err != nil {
-					return err
+					return fmt.Errorf("error extracting bootnodes from file %s: %v", item.Name(), err)
 				}
 				results.ExecutionBootnodes = append(results.ExecutionBootnodes, bootnodes...)
 				break
@@ -242,7 +260,7 @@ func (s sedgeActions) copyCustomConfigs(
 			if item.Name() == allowedName {
 				bootnodes, err := s.extractBootnodesFromFile(path.Join(sourcePath, item.Name()))
 				if err != nil {
-					return err
+					return fmt.Errorf("error extracting bootnodes from file %s: %v", item.Name(), err)
 				}
 				results.ConsensusBootnodes = append(results.ConsensusBootnodes, bootnodes...)
 				break
@@ -250,7 +268,7 @@ func (s sedgeActions) copyCustomConfigs(
 		}
 		// Other custom config file
 	targetsLoop:
-		for _, target := range downloadTargets {
+		for _, target := range copyTargets {
 			_, ok := results.CustomConfigs[target.fileName]
 			if ok {
 				continue
@@ -294,4 +312,25 @@ func (s sedgeActions) extractBootnodesFromFile(
 	}
 
 	return bootnodes, nil
+}
+
+func getNetworkIDFrom(
+	gethGenesisFile string,
+) (string, error) {
+	data, err := os.ReadFile(gethGenesisFile)
+	if err != nil {
+		return "", err
+	}
+
+	var genesis struct {
+		Config struct {
+			ChainID int `json:"chainId"`
+		} `json:"config"`
+	}
+
+	if err = json.Unmarshal(data, &genesis); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%d", genesis.Config.ChainID), nil
 }
