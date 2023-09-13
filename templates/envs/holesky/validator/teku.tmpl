@@ -1,0 +1,12 @@
+{{/* teku.tmpl */}}
+{{ define "validator" }}
+# --- Consensus Layer - Validator Node - configuration ---
+CC_API_URL={{.ConsensusApiURL}}
+GRAFFITI={{.Graffiti}}
+VL_LOG_LEVEL=info
+VL_INSTANCE_NAME=TekuValidator
+VL_IMAGE_VERSION={{.VlImage}}
+KEYSTORE_DIR={{.KeystoreDir}}
+VL_DATA_DIR={{.VlDataDir}}
+# --- MEV=true, not sure if MEV is enabled on holesky ---
+{{ end }}
