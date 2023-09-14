@@ -142,9 +142,6 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		GenesisForkVersion: "0x00017000",
 		SupportsMEVBoost:   false,
 		DefaultTTD:         "1",
-		DefaultCustomConfigSrc:   "https://github.com/eth-clients/holesky/blob/main/custom_config_data/config.yaml",
-		DefaultCustomGenesisSrc:  "https://github.com/eth-clients/holesky/blob/main/custom_config_data/genesis.ssz",
-		DefaultCustomDeployBlock: "0",
 		DefaultECBootnodes: []string{
 			"enode://ac906289e4b7f12df423d654c5a962b6ebe5b3a74cc9e06292a85221f9a64a6f1cfdd6b714ed6dacef51578f92b34c60ee91e9ede9c7f8fadc4d347326d95e2b@146.190.13.128:30303",
 			"enode://a3435a0155a3e837c02f5e7f5662a2f1fbc25b48e4dc232016e1c51b544cb5b4510ef633ea3278c0e970fa8ad8141e2d4d0f9f95456c537ff05fdf9b31c15072@178.128.136.233:30303",
@@ -155,7 +152,8 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 			"enr:-LK4QMlzEff6d-M0A1pSFG5lJ2c56i_I-ZftdojZbW3ehkGNM4pkQuHQqzVvF1BG9aDjIakjnmO23mCBFFZ2w5zOsugEh2F0dG5ldHOIAAAAAAYAAACEZXRoMpCpfoNmMAFwAAABAAAAAAAAgmlkgnY0gmlwhKyuI_mJc2VjcDI1NmsxoQIH1kQRCZW-4AIVyAeXj5o49m_IqNFKRHp6tSpfXMUrSYN0Y3CCIyiDdWRwgiMo",
 			"enr:-Le4QI88slOwzz66Ksq8Vnz324DPb1BzSiY-WYPvnoJIl-lceW9bmSJnwDzgNbCjp5wsBigg76x4tValvGgQPxxSjrMBhGV0aDKQqX6DZjABcAAAAQAAAAAAAIJpZIJ2NIJpcIQ5gR6Wg2lwNpAgAUHQBwEQAAAAAAAAADR-iXNlY3AyNTZrMaEDPMSNdcL92uNIyCsS177Z6KTXlbZakQqxv3aQcWawNXeDdWRwgiMohHVkcDaCI4I",
 		},
-		CheckpointSyncURL: "https://checkpoint-sync.holesky.ethpandaops.io/",
+		//TODO - uncomment checkpoint sync when Holesky network gets large
+		//CheckpointSyncURL: "https://checkpoint-sync.holesky.ethpandaops.io/",
 	},
 	NetworkCustom: {
 		Name:               NetworkCustom,
