@@ -7,7 +7,7 @@ execution:
     version: 23.7.2
   nethermind:
     name: nethermind/nethermind
-    version: 1.21.0
+    version: 1.21.0-rc
   erigon:
     name: thorax/erigon
     version: v2.49.1
