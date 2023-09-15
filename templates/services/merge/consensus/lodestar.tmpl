@@ -46,8 +46,7 @@
       - --targetPeers=${CC_PEER_COUNT}
       - --metrics=true
       - --metrics.port={{.ClMetricsPort}}
-      - --jwt-secret=/tmp/jwt/jwtsecret{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
-      - --checkpointSyncUrl={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{end}}{{range $flag := .ClExtraFlags}}
+      - --jwt-secret=/tmp/jwt/jwtsecret{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}{{if .MevBoostEndpoint}}
       - --builder=true
       - --builder.urls {{.MevBoostEndpoint}}{{end}}{{if .LoggingDriver}}
