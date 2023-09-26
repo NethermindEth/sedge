@@ -158,11 +158,11 @@ Users acknowledge that no warranty is being made of a successful installation. S
 
 ### Gnosis
 
-| Execution     | Consensus  | Validator  |
-| ------------- | ---------- | ---------- |
-| Nethermind    | Lighthouse | Lighthouse |
-| Erigon (soon) | Lodestar   | Lodestar   |
-|               | Teku       | Teku       |
+| Execution   | Consensus  | Validator  |
+|-------------| ---------- | ---------- |
+| Nethermind  | Lighthouse | Lighthouse |
+| Erigon      | Lodestar   | Lodestar   |
+|             | Teku       | Teku       |
 
 ### Chiado (Gnosis testnet)
 
@@ -245,7 +245,7 @@ The following roadmap covers the main features and ideas we want to implement bu
   
 ### Version 1.X (Current)
 
-- [ ] Support Erigon on Gnosis
+- [x] Support Erigon on Gnosis
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
 - [ ] More tests!!!
 - [ ] Support for Nimbus client
