@@ -660,10 +660,6 @@ func selectExecutionClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 		Type: "execution",
 	}
 	o.genData.ExecutionClient.SetImageOrDefault("")
-	// Patch GRAFFITI={{.Graffiti}} image if network needs TTD to be set
-	if o.genData.ExecutionClient.Name == "GRAFFITI={{.Graffiti}}" && o.genData.Network == NetworkMainnet {
-		o.genData.ExecutionClient.Image = "ethereum/client-go:v1.10.26"
-	}
 	return nil
 }
 
