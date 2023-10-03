@@ -80,6 +80,7 @@ type GenData struct {
 	ExecutionAuthUrl        string
 	ConsensusApiUrl         string
 	ContainerTag            string
+	LatestVersion           bool
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script

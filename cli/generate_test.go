@@ -150,6 +150,9 @@ func (flags *GenCmdFlags) argsList() []string {
 	if len(flags.fallbackEL) > 0 {
 		s = append(s, "--fallback-execution-urls", strings.Join(flags.fallbackEL, ","))
 	}
+	if flags.latestVersion {
+		s = append(s, "--latest")
+	}
 	return s
 }
 
@@ -1333,6 +1336,58 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "mainnet",
 			},
+			nil,
+		},
+		{
+			"Full node - Latest version of clients",
+			subCmd{
+				name: "full-node",
+			},
+			GenCmdFlags{
+				noValidator:   true,
+				executionName: "nethermind",
+				consensusName: "teku",
+				latestVersion: true,
+			},
+			globalFlags{
+				network: "mainnet",
+			},
+			nil,
+		},
+		{
+			"Execution - Latest version of clients",
+			subCmd{
+				name: "execution",
+			},
+			GenCmdFlags{
+				latestVersion: true,
+			},
+			globalFlags{},
+			nil,
+		},
+		{
+			"Consensus - Latest version of clients",
+			subCmd{
+				name: "consensus",
+			},
+			GenCmdFlags{
+				latestVersion:    true,
+				executionApiUrl:  "https://localhost:8545",
+				executionAuthUrl: "https://localhost:8545",
+			},
+			globalFlags{},
+			nil,
+		},
+		{
+			"Validator - Latest version of clients",
+			subCmd{
+				name: "validator",
+			},
+			GenCmdFlags{
+				latestVersion:   true,
+				consensusApiUrl: "https://localhost:8000/api/endpoint",
+			},
+			globalFlags{},
 			nil,
 		},
 	}

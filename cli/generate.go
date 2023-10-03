@@ -83,6 +83,7 @@ type GenCmdFlags struct {
 	waitEpoch         int
 	customEnodes      []string
 	customEnrs        []string
+	latestVersion     bool
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -300,6 +301,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		CustomDeployBlockPath:   flags.CustomFlags.customDeployBlock,
 		MevBoostOnValidator:     flags.mevBoostOnVal,
 		ContainerTag:            containerTag,
+		LatestVersion:           flags.latestVersion,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,
