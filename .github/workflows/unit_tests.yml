@@ -11,7 +11,7 @@ jobs:
     name: Run unit tests
     strategy:
       matrix:
-        go: ["1.19"]
+        go: ["1.21"]
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
 
