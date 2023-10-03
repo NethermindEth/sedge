@@ -216,11 +216,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		}
 	}
 
-	ttd := gd.CustomTTD
-	if len(ttd) == 0 {
-		ttd = configs.NetworksConfigs()[gd.Network].DefaultTTD
-	}
-
 	// Check for CL Bootnode nodes
 	if len(gd.CCBootnodes) == 0 {
 		gd.CCBootnodes = configs.NetworksConfigs()[gd.Network].DefaultCCBootnodes
@@ -251,7 +246,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	data := DockerComposeData{
 		Services:            gd.Services,
 		Network:             gd.Network,
-		TTD:                 ttd,
 		XeeVersion:          xeeVersion,
 		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev),
 		MevBoostOnValidator: gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,

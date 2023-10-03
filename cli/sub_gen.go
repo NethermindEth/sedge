@@ -26,7 +26,7 @@ var ErrCustomFlagsUsedWithoutCustomNetwork = errors.New("custom flags used witho
 
 func validateCustomNetwork(flags *CustomFlags, net string) error {
 	if net != "custom" {
-		if len(flags.customTTD) != 0 || len(flags.customChainSpec) != 0 || len(flags.customNetworkConfig) != 0 ||
+		if len(flags.customChainSpec) != 0 || len(flags.customNetworkConfig) != 0 ||
 			len(flags.customGenesis) != 0 || len(flags.customDeployBlock) != 0 {
 			// TODO add error on expected place
 			return ErrCustomFlagsUsedWithoutCustomNetwork
@@ -90,7 +90,6 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 	cmd.Flags().StringArrayVar(&flags.elExtraFlags, "el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringArrayVar(&flags.clExtraFlags, "cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge generate full-node --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringArrayVar(&flags.vlExtraFlags, "vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge generate full-node --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	cmd.Flags().StringVar(&flags.customTTD, "custom-ttd", "", "Custom Terminal Total Difficulty to use for the execution client")
 	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
 	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
@@ -135,7 +134,6 @@ func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	// Bind flags
 	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
-	cmd.Flags().StringVar(&flags.customTTD, "custom-ttd", "", "Custom Terminal Total Difficulty to use for the execution client")
 	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
 	cmd.Flags().StringSliceVar(&flags.customEnodes, "execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
 	cmd.Flags().StringArrayVar(&flags.elExtraFlags, "el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge generate consensus--el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
