@@ -75,6 +75,7 @@ Flags:
   -c, --consensus string                  Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
   -e, --execution string                  Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
   -v, --validator string                  Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
+      --latest                            Use latest tag on version of clients
       --checkpoint-sync-url string        Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.
       --fee-recipient string              Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption
       --no-mev-boost                      Not use mev-boost if supported
@@ -124,6 +125,7 @@ Usage:
   sedge generate consensus [flags] --execution-api-url <URL> --execution-auth-url <URL> [args]
 
 Flags:
+      --latest                            Use latest tag on version of clients
       --execution-api-url string          Execution API endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-api-url=https://api.url.endpoint'
       --execution-auth-url string         Execution AUTH endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-auth-url=https://auth.url.endpoint'
       --checkpoint-sync-url string        Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.
@@ -161,6 +163,7 @@ Usage:
   sedge generate execution [flags] [args]
 
 Flags:
+      --latest                        Use latest tag on version of clients
       --jwt-secret-path string        Path to the JWT secret file
       --map-all                       Map all clients ports to host. Use with care. Useful to allow remote access to the clients
       --custom-ttd string             Custom Terminal Total Difficulty to use for the execution client
@@ -199,6 +202,7 @@ Usage:
   sedge generate validator [flags] --consensus-url <URL> [args]
 
 Flags:
+      --latest                       Use latest tag on version of clients
       --consensus-url string         Consensus endpoint for the validator client to connect to. Example: 'sedge generate validator --consensus-url http://localhost:4000'
       --fee-recipient string         Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption
       --graffiti string              Graffiti to be used by the validator

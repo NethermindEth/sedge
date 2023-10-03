@@ -38,20 +38,20 @@ First open a console in the Home directory. Then use `curl` or `wget` to downloa
 want to use another installation method:
 
 <Tabs groupId="download-cmds">
-  <TabItem value="curl" label="curl">
+    <TabItem value="curl" label="curl">
 
-  ```
-  curl -L https://github.com/NethermindEth/sedge/releases/download/v1.2.3/sedge-v1.2.3-linux-amd64 --output sedge
-  ```
+        ```
+        curl -L https://github.com/NethermindEth/sedge/releases/download/v1.2.3/sedge-v1.2.3-linux-amd64 --output sedge
+        ```
 
-  </TabItem>
-  <TabItem value="wget" label="wget">
+    </TabItem>
+    <TabItem value="wget" label="wget">
 
-  ```
-  wget https://github.com/NethermindEth/sedge/releases/download/v1.2.3/sedge-v1.2.3-linux-amd64 -O sedge
-  ```
+        ```
+        wget https://github.com/NethermindEth/sedge/releases/download/v1.2.3/sedge-v1.2.3-linux-amd64 -O sedge
+        ```
 
-  </TabItem>
+    </TabItem>
 </Tabs>
 
 
@@ -85,9 +85,9 @@ Set binary as executable executing `chmod +x sedge`. You shouldn't see any outpu
 
 You can run Sedge's main workflow in two ways:
 - Interactive mode
-  * `sedge cli` is a fully interactive command that will guide you through the process covering all the steps needed for the setup.
+* `sedge cli` is a fully interactive command that will guide you through the process covering all the steps needed for the setup.
 - Non-interactive mode
-  * The non-interactive mode is useful if you want to run Sedge in a CI/CD pipeline or if you are a more advanced user, and you want to run Sedge with a predefined configuration.
+* The non-interactive mode is useful if you want to run Sedge in a CI/CD pipeline or if you are a more advanced user, and you want to run Sedge with a predefined configuration.
 
 :::tip
 
@@ -138,6 +138,20 @@ validator client.
 :::info
 
 You can learn more about `sedge generate` if you check [here in our documentation](/docs/commands/generate).
+
+:::
+
+:::info
+
+If you want to use the latest version of the clients, and don't use the fixed image tested by us, you can generate the
+setup using latest version of them using the following command: `sedge generate full-node --latest`. If you want to learn
+more, you can check [here in our documentation](/docs/commands/generate).
+
+You can use `--latest` flag with `full-node`, `execution`, `consensus` and `validator` commands.
+
+If the clients release any version, you can just:
+1. Run `docker compose -f /path/to/docker-compose.yml pull` to update the images.
+2. Run `docker compose -f /path/to/docker-compose.yml up -d` to restart the containers.
 
 :::
 
