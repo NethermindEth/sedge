@@ -250,6 +250,17 @@ func TestGenerateDockerCompose(t *testing.T) {
 								ContainerTag:    "sampleTag",
 							},
 						},
+						genTestData{
+							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s, network: %s, no validator, with latest", executionCl, consensusCl, consensusCl, network),
+							genData: generate.GenData{
+								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
+								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
+								Services:        []string{"execution", "consensus"},
+								Network:         network,
+								ContainerTag:    "sampleTag",
+								LatestVersion:   true,
+							},
+						},
 					)
 				}
 			}
@@ -303,6 +314,12 @@ func TestGenerateDockerCompose(t *testing.T) {
 					assert.Equal(t, services.DefaultSedgeExecutionClient+"-sampleTag", cmpData.Services.Execution.ContainerName)
 				}
 
+				// Test that the execution image is set to latest if flag --latest is provided
+				if tc.genData.LatestVersion {
+					ecImageVersion := envData["EC_IMAGE_VERSION"]
+					assert.True(t, strings.HasSuffix(ecImageVersion, "latest"))
+				}
+
 				// Check that mev-boost service is not set when execution only
 				if tc.genData.ValidatorClient == nil && tc.genData.ConsensusClient == nil {
 					assert.Nil(t, cmpData.Services.Mevboost)
@@ -326,6 +343,11 @@ func TestGenerateDockerCompose(t *testing.T) {
 					assert.True(t, contains(t, cmpData.Services.Consensus.Command, tc.genData.CheckpointSyncUrl), "Checkpoint Sync URL not found in consensus service command: %s", cmpData.Services.Consensus.Command)
 				}
 
+				// Test that the consensus image is set to latest if flag --latest is provided
+				if tc.genData.LatestVersion {
+					ccImageVersion := envData["CC_IMAGE_VERSION"]
+					assert.True(t, strings.HasSuffix(ccImageVersion, "latest"))
+				}
 				// Validate Execution API and AUTH URLs
 				apiEndpoint, authEndpoint := envData["EC_API_URL"], envData["EC_AUTH_URL"]
 				if tc.genData.ExecutionApiUrl != "" {
@@ -377,6 +399,12 @@ func TestGenerateDockerCompose(t *testing.T) {
 				prysmURL := tc.genData.ConsensusApiUrl
 				prysmURL = strings.TrimPrefix(prysmURL, "http://")
 				prysmURL = strings.TrimPrefix(prysmURL, "https://")
+
+				// Test that the consensus image is set to latest if flag --latest is provided
+				if tc.genData.LatestVersion {
+					vlImageVersion := envData["VL_IMAGE_VERSION"]
+					assert.True(t, strings.HasSuffix(vlImageVersion, "latest"))
+				}
 
 				// Check Consensus API URL is set and is valid
 				uri, err := url.ParseRequestURI(envData["CC_API_URL"])
