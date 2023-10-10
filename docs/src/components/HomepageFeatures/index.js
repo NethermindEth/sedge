@@ -8,7 +8,7 @@ const FeatureList = [
         Svg: require('@site/static/img/ethereum.svg').default,
         description: (
             <>
-                We fully support Mainnet, Goerli(tesnet) and Sepolia(tesnet).
+                We fully support Mainnet, Goerli(testnet) and Sepolia(testnet).
 
             </>
         ),
@@ -18,7 +18,7 @@ const FeatureList = [
         Svg: require('@site/static/img/gnosis.svg').default,
         description: (
             <>
-                We fully support deployment on Gnosis and Chiado(tesnet).
+                We fully support deployment on Gnosis and Chiado(testnet).
             </>
         ),
     },
