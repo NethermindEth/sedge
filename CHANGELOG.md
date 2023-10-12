@@ -9,8 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Remove ttd as a flag
-- Remove hardcoded geth version.
+- Remove TTD of the params, test cases, command flags and geth patch for custom testnets.
 
 ## [v1.2.3] - 2023-08-16
 
