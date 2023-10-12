@@ -18,7 +18,6 @@ package actions_test
 import (
 	"crypto/rand"
 	"fmt"
-	"github.com/distribution/reference"
 	"io"
 	"math/big"
 	"net/url"
@@ -29,6 +28,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/distribution/reference"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
