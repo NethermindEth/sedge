@@ -11,14 +11,12 @@
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - {{.CustomNetworkConfigPath}}:/network_config/config.yaml{{end}}{{if .CustomGenesisPath}}
-      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{if .CustomDeployBlockPath}}
-      - {{.CustomDeployBlockPath}}:/network_config/deploy_block.txt{{end}}{{end}}
+      - ${VL_DATA_DIR}:/data{{if .CustomNetwork.Path}}
+      - {{ .CustomNetwork.Path }}:/custom-config{{end}}
     command:
-      - lighthouse{{if .CustomConsensusConfigs}}
-      - --testnet-dir=/network_config{{end}}
-      - vc{{if not .CustomConsensusConfigs}}
+      - lighthouse
+      - vc{{if .CustomNetwork.Path}}
+      - --testnet-dir=/custom-config{{ else }}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --beacon-nodes=${CC_API_URL}
       - --graffiti=${GRAFFITI}

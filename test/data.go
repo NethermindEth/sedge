@@ -20,7 +20,6 @@ package test
 import (
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -42,7 +41,7 @@ type copyOperation struct {
 }
 
 // Create copyOperations for every file on any subdirectory in "srcPath" to "dstPath".
-func getAllFiles(entries []fs.FileInfo, srcPath, dstPath string) ([]copyOperation, error) {
+func getAllFiles(entries []fs.DirEntry, srcPath, dstPath string) ([]copyOperation, error) {
 	ops := []copyOperation{}
 	for _, entry := range entries { // loop through files infos
 		if entry.IsDir() && entry.Name() != "." && entry.Name() != ".." { // entry is a directory
@@ -56,7 +55,7 @@ func getAllFiles(entries []fs.FileInfo, srcPath, dstPath string) ([]copyOperatio
 				return nil, err
 			}
 			// get new entries from new source directory
-			newEntries, err := ioutil.ReadDir(newSrc)
+			newEntries, err := os.ReadDir(newSrc)
 			if err != nil {
 				return nil, err
 			}
@@ -90,7 +89,7 @@ func getAllFiles(entries []fs.FileInfo, srcPath, dstPath string) ([]copyOperatio
 // Copy all sub directory and files from "srcPath" to "dstPath"
 // maintaining the same structure.
 func PrepareTestCaseDir(srcPath, dstPath string) error {
-	srcDirs, err := ioutil.ReadDir(srcPath)
+	srcDirs, err := os.ReadDir(srcPath)
 	if err != nil {
 		return err
 	}

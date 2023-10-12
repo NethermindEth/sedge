@@ -25,6 +25,7 @@ import (
 //go:generate mockgen -package=sedge_mocks -destination=../../mocks/sedgeActions.go github.com/NethermindEth/sedge/cli/actions SedgeActions
 type SedgeActions interface {
 	GetCommandRunner() commands.CommandRunner
+	GetCustomConfigs(GetCustomConfigsOptions) (CustomConfigsResults, error)
 	ImportSlashingInterchangeData(SlashingImportOptions) error
 	ExportSlashingInterchangeData(SlashingExportOptions) error
 	SetupContainers(SetupContainersOptions) error

@@ -9,9 +9,9 @@
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/prysm
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{if .CustomGenesisPath}}
-      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{end}}
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CustomNetwork.ConsensusConfig}}
+      - {{.CustomNetwork.ConsensusConfig}}:/custom-config/config.yaml{{end}}{{if .CustomNetwork.GenesisState}}
+      - {{.CustomNetwork.GenesisState}}:/custom-config/genesis.ssz{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
@@ -21,13 +21,12 @@
     expose:
       - {{.ClApiPort}}
       - {{.ClAdditionalApiPort}}
-    command:{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - --chain-config-file=/network_config/config.yml{{end}}{{if .CustomDeployBlock}}
-      - --contract-deployment-block={{.CustomDeployBlock}}{{end}}{{if .CustomGenesisPath}}
-      - --genesis-state=/network_config/genesis.ssz{{end}}{{else}}
+    command:{{if .CustomNetwork.Path}}{{if .CustomNetwork.ConsensusConfig}}
+      - --chain-config-file=/custom-config/config.yaml{{end}}{{if .CustomNetwork.DeployBlockValue}}
+      - --contract-deployment-block={{.CustomNetwork.DeployBlockValue}}{{end}}{{if .CustomNetwork.GenesisState}}
+      - --genesis-state=/custom-config/genesis.ssz{{end}}{{else}}
       - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}{{range $enr := .CCBootnodesList}}
-      - --bootstrap-node={{$enr}}{{end}}{{if .TTD}}
-      - --terminal-total-difficulty-override={{.TTD}}{{end}}
+      - --bootstrap-node={{$enr}}{{end}}
       - --p2p-tcp-port={{.ClDiscoveryPort}}
       - --p2p-udp-port={{.ClDiscoveryPort}}
       - --jwt-secret=/tmp/jwt/jwtsecret

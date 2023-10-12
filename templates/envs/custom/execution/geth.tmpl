@@ -1,8 +1,9 @@
-{{/* nethermind.tmpl */}}
+{{/* geth.tmpl */}}
 {{ define "execution" }}
 # --- Execution Layer - Execution Node - configuration ---
 EC_IMAGE_VERSION={{.ElImage}}
-NETHERMIND_LOG_LEVEL=INFO
+GETH_LOG_LEVEL=3
 EC_DATA_DIR={{.ElDataDir}}
+EC_SYNC_MODE=snap
 EC_JWT_SECRET_PATH={{.JWTSecretPath}}
 {{ end }}

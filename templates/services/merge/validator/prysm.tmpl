@@ -12,13 +12,13 @@
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
       - ${VL_DATA_DIR}:/data
-      - ${KEYSTORE_DIR}/keystore_password.txt:/keystore/keystore_password.txt{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
+      - ${KEYSTORE_DIR}/keystore_password.txt:/keystore/keystore_password.txt{{if .CustomNetwork.ConsensusConfig}}
+      - {{.CustomNetwork.ConsensusConfig}}:/custom-config/config.yaml{{end}}
     command:
       - --datadir=/data
       - --wallet-dir=/data/wallet
-      - --wallet-password-file=/keystore/keystore_password.txt{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - --chain-config-file=/network_config/config.yml{{end}}{{else}}
+      - --wallet-password-file=/keystore/keystore_password.txt{{if .CustomNetwork.Path}}{{if .CustomNetwork.ConsensusConfig}}
+      - --chain-config-file=/custom-config/config.yaml{{end}}{{else}}
       - --{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --beacon-rpc-provider=${CC_ADD_API_URL}
       - --graffiti=${GRAFFITI}

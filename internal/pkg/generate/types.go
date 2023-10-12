@@ -19,6 +19,27 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 )
 
+// CustomNetworkData: Struct Data object to contain paths used to load custom network configs
+type CustomNetworkData struct {
+	// General
+	Path      string
+	NetworkID string
+	// Execution
+	NethermindChainspec string
+	GethGenesis         string
+	BesuGenesis         string
+	// Consensus
+	ConsensusConfig          string
+	GenesisState             string
+	DeployBlock              string
+	DeployBlockValue         string
+	DepositContract          string
+	DepositContractBlock     string
+	DepositContractBlockHash string
+	TrustedSetupTxt          string
+	TrustedSetupJson         string
+}
+
 // EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
 type EnvData struct {
 	Services                  []string
@@ -45,88 +66,76 @@ type EnvData struct {
 
 // GenData : Struct Data object for script's generation
 type GenData struct {
-	Services                []string
-	ExecutionClient         *clients.Client
-	ConsensusClient         *clients.Client
-	ValidatorClient         *clients.Client
-	Network                 string
-	CheckpointSyncUrl       string
-	FeeRecipient            string
-	JWTSecretPath           string
-	FallbackELUrls          []string
-	ElExtraFlags            []string
-	ClExtraFlags            []string
-	VlExtraFlags            []string
-	MapAllPorts             bool
-	Mev                     bool
-	RelayURLs               []string
-	MevImage                string
-	MevBoostService         bool
-	MevBoostEndpoint        string
-	MevBoostOnValidator     bool
-	Ports                   map[string]uint16
-	Graffiti                string
-	LoggingDriver           string
-	ECBootnodes             []string
-	CCBootnodes             []string
-	CustomTTD               string
-	CustomChainSpecPath     string
-	CustomNetworkConfigPath string
-	CustomGenesisPath       string
-	CustomDeployBlock       string
-	CustomDeployBlockPath   string
-	VLStartGracePeriod      uint
-	ExecutionApiUrl         string
-	ExecutionAuthUrl        string
-	ConsensusApiUrl         string
-	ContainerTag            string
+	Services            []string
+	ExecutionClient     *clients.Client
+	ConsensusClient     *clients.Client
+	ValidatorClient     *clients.Client
+	Network             string
+	CheckpointSyncUrl   string
+	FeeRecipient        string
+	JWTSecretPath       string
+	FallbackELUrls      []string
+	ElExtraFlags        []string
+	ClExtraFlags        []string
+	VlExtraFlags        []string
+	MapAllPorts         bool
+	Mev                 bool
+	RelayURLs           []string
+	MevImage            string
+	MevBoostService     bool
+	MevBoostEndpoint    string
+	MevBoostOnValidator bool
+	Ports               map[string]uint16
+	Graffiti            string
+	LoggingDriver       string
+	ECBootnodes         []string
+	CCBootnodes         []string
+	CustomNetwork       CustomNetworkData
+	VLStartGracePeriod  uint
+	ExecutionApiUrl     string
+	ExecutionAuthUrl    string
+	ConsensusApiUrl     string
+	ContainerTag        string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
-	Services                []string
-	Network                 string
-	TTD                     string
-	XeeVersion              bool
-	Mev                     bool
-	MevBoostOnValidator     bool
-	MevPort                 uint16
-	MevImage                string
-	MevBoostEndpoint        string
-	CheckpointSyncUrl       string
-	FeeRecipient            string
-	ElDiscoveryPort         uint16
-	ElMetricsPort           uint16
-	ElApiPort               uint16
-	ElAuthPort              uint16
-	ElWsPort                uint16
-	ClDiscoveryPort         uint16
-	ClMetricsPort           uint16
-	ClApiPort               uint16
-	ClAdditionalApiPort     uint16
-	VlMetricsPort           uint16
-	FallbackELUrls          []string
-	ElExtraFlags            []string
-	ClExtraFlags            []string
-	VlExtraFlags            []string
-	ECBootnodes             string
-	CCBootnodes             string
-	CCBootnodesList         []string
-	MapAllPorts             bool
-	SplittedNetwork         bool
-	ClCheckpointSyncUrl     bool
-	LoggingDriver           string
-	CustomConsensusConfigs  bool
-	CustomNetwork           bool
-	CustomChainSpecPath     string
-	CustomNetworkConfigPath string
-	CustomGenesisPath       string
-	CustomDeployBlock       bool
-	CustomDeployBlockPath   string // Needed for lighthouse
-	VLStartGracePeriod      uint
-	UID                     int // Needed for teku
-	GID                     int // Needed for teku
-	ContainerTag            string
+	Services            []string
+	Network             string
+	XeeVersion          bool
+	Mev                 bool
+	MevBoostOnValidator bool
+	MevPort             uint16
+	MevImage            string
+	MevBoostEndpoint    string
+	CheckpointSyncUrl   string
+	FeeRecipient        string
+	ElDiscoveryPort     uint16
+	ElMetricsPort       uint16
+	ElApiPort           uint16
+	ElAuthPort          uint16
+	ElWsPort            uint16
+	ClDiscoveryPort     uint16
+	ClMetricsPort       uint16
+	ClApiPort           uint16
+	ClAdditionalApiPort uint16
+	VlMetricsPort       uint16
+	FallbackELUrls      []string
+	ElExtraFlags        []string
+	ClExtraFlags        []string
+	VlExtraFlags        []string
+	ECBootnodes         string
+	CCBootnodes         string
+	CCBootnodesList     []string
+	MapAllPorts         bool
+	SplittedNetwork     bool
+	ClCheckpointSyncUrl bool
+	LoggingDriver       string
+	CustomNetwork       CustomNetworkData
+	VLStartGracePeriod  uint
+	UID                 int // Needed for teku
+	GID                 int // Needed for teku
+	ContainerTag        string
 }
 
 // WithConsensusClient returns true if the consensus client is set

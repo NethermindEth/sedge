@@ -13,9 +13,10 @@
       - sedge
     volumes:
       - ${CC_DATA_DIR}:/var/lib/teku
-      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{if .CustomGenesisPath}}
-      - {{.CustomGenesisPath}}:/network_config/genesis.ssz{{end}}{{end}}
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret{{if .CustomNetwork.ConsensusConfig}}
+      - {{.CustomNetwork.ConsensusConfig}}:/custom-config/config.yaml{{end}}{{if .CustomNetwork.GenesisState}}
+      - {{.CustomNetwork.GenesisState}}:/custom-config/genesis.ssz{{end}}{{if .CustomNetwork.TrustedSetupTxt}}
+      - {{.CustomNetwork.TrustedSetupTxt}}:/custom-config/trusted_setup.txt{{end}}
     ports:
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/tcp"
       - "{{.ClDiscoveryPort}}:{{.ClDiscoveryPort}}/udp"
@@ -25,10 +26,11 @@
       - {{.ClApiPort}}
     command:
       - --log-destination=CONSOLE
-      - --logging=${CC_LOG_LEVEL}{{if not .CustomConsensusConfigs}}
-      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}{{if .CustomGenesisPath}}
-      - --initial-state=/network_config/genesis.ssz{{end}}{{if .CustomNetworkConfigPath}}
-      - --network=/network_config/config.yml{{end}}{{end}}{{if .CCBootnodes}}
+      - --logging=${CC_LOG_LEVEL}{{if .CustomNetwork.Path}}{{if .CustomNetwork.ConsensusConfig}}
+      - --network=/custom-config/config.yaml{{end}}{{if .CustomNetwork.GenesisState}}
+      - --initial-state=/custom-config/genesis.ssz{{end}}{{if .CustomNetwork.TrustedSetupTxt}}
+      - --Xtrusted-setup=/custom-config/trusted_setup.txt{{end}}{{else}}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}{{if .CCBootnodes}}
       - --p2p-discovery-bootnodes={{.CCBootnodes}}{{end}}
       - --p2p-enabled=true
       - --p2p-port={{.ClDiscoveryPort}}
@@ -46,8 +48,7 @@
       - --data-storage-non-canonical-blocks-enabled=false
       - --ee-endpoint=${EC_AUTH_URL}{{with .FeeRecipient}}
       - --validators-proposer-default-fee-recipient=${FEE_RECIPIENT}{{end}}
-      - --ee-jwt-secret-file=/tmp/jwt/jwtsecret{{if .TTD}}
-      - --Xnetwork-total-terminal-difficulty-override={{.TTD}}{{end}}
+      - --ee-jwt-secret-file=/tmp/jwt/jwtsecret
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0

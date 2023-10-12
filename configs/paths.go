@@ -16,15 +16,25 @@ limitations under the License.
 package configs
 
 const (
-	ConfigFileName                      = ".sedge"
-	CustomNetworkConfigsFolder          = "./custom_configs"
-	DefaultDockerComposeScriptName      = "docker-compose.yml"
-	ExecutionNetworkConfigFileName      = "chainSpec.json"
-	ConsensusNetworkConfigFileName      = "config.yaml"
-	ConsensusNetworkGenesisFileName     = "genesis.ssz"
-	ConsensusNetworkDeployBlockFileName = "deploy_block.txt"
-	ExecutionDir                        = "execution-data"
-	ConsensusDir                        = "consensus-data"
-	ValidatorDir                        = "validator-data"
-	KeystoreDir                         = "keystore"
+	ConfigFileName                 = ".sedge"
+	DefaultDockerComposeScriptName = "docker-compose.yml"
+	ExecutionDir                   = "execution-data"
+	ConsensusDir                   = "consensus-data"
+	ValidatorDir                   = "validator-data"
+	KeystoreDir                    = "keystore"
+	// Custom network configs file names
+	CustomNetworkConfigsFolder = "custom-configs"
+	// Execution clients custom configs file names
+	NethermindChainspecFileName = "nethermind_chainspec.json"
+	GethGenesisFileName         = "geth_genesis.json"
+	BesuGenesisFileName         = "besu_genesis.json"
+	// Consensus clients custom configs file names
+	ConsensusConfigFileName          = "config.yaml"
+	GenesisStateFileName             = "genesis.ssz"
+	DeployBlockFileName              = "deploy_block.txt"
+	DepositContractFileName          = "deposit_contract.txt"
+	DepositContractBlockFileName     = "deposit_contract_block.txt"
+	DepositContractBlockHashFileName = "deposit_contract_block_hash.txt"
+	TrustedSetupTxtFileName          = "trusted_setup.txt"
+	TrustedSetupJsonFileName         = "trusted_setup.json"
 )
