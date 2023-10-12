@@ -18,6 +18,7 @@ package actions_test
 import (
 	"crypto/rand"
 	"fmt"
+	"github.com/distribution/reference"
 	"io"
 	"math/big"
 	"net/url"
@@ -316,12 +317,12 @@ func TestGenerateDockerCompose(t *testing.T) {
 
 				// Check ecImage has the right format
 				ecImageVersion := envData["EC_IMAGE_VERSION"]
-				pattern := `^[a-zA-Z.-]+\/[a-zA-Z.-]+:[a-zA-Z0-9.-]+$`
-				assert.Regexp(t, pattern, ecImageVersion)
+				named, err := reference.ParseNormalizedNamed(ecImageVersion)
+				assert.NoError(t, err, "invalid image", ecImageVersion)
 
 				// Test that the execution image is set to latest if flag --latest is provided
 				if tc.genData.LatestVersion {
-					assert.True(t, strings.HasSuffix(ecImageVersion, ":latest"))
+					assert.True(t, strings.HasSuffix(named.String(), ":latest"))
 				}
 
 				// Check that mev-boost service is not set when execution only
@@ -349,12 +350,12 @@ func TestGenerateDockerCompose(t *testing.T) {
 
 				// Check ccImage has the right format
 				ccImageVersion := envData["CC_IMAGE_VERSION"]
-				pattern := `^[a-zA-Z.-]+\/[a-zA-Z.-]+:[a-zA-Z0-9.-]+$`
-				assert.Regexp(t, pattern, ccImageVersion)
+				named, err := reference.ParseNormalizedNamed(ccImageVersion)
+				assert.NoError(t, err, "invalid image", ccImageVersion)
 
 				// Test that the consensus image is set to latest if flag --latest is provided
 				if tc.genData.LatestVersion {
-					assert.True(t, strings.HasSuffix(ccImageVersion, ":latest"))
+					assert.True(t, strings.HasSuffix(named.String(), ":latest"))
 				}
 				// Validate Execution API and AUTH URLs
 				apiEndpoint, authEndpoint := envData["EC_API_URL"], envData["EC_AUTH_URL"]
@@ -410,12 +411,12 @@ func TestGenerateDockerCompose(t *testing.T) {
 
 				// Check vlImage has the right format
 				vlImageVersion := envData["VL_IMAGE_VERSION"]
-				pattern := `^[a-zA-Z.-]+\/[a-zA-Z.-]+:[a-zA-Z0-9.-]+$`
-				assert.Regexp(t, pattern, vlImageVersion)
+				named, err := reference.ParseNormalizedNamed(vlImageVersion)
+				assert.NoError(t, err, "invalid image", vlImageVersion)
 
 				// Test that the consensus image is set to latest if flag --latest is provided
 				if tc.genData.LatestVersion {
-					assert.True(t, strings.HasSuffix(vlImageVersion, ":latest"))
+					assert.True(t, strings.HasSuffix(named.String(), ":latest"))
 				}
 
 				// Check Consensus API URL is set and is valid
