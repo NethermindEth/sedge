@@ -583,7 +583,9 @@ func joinIfNotEmpty(strs ...string) string {
 func imageOrEmpty(cls *clients.Client, latest bool) string {
 	if cls != nil {
 		if latest {
-			return "latest"
+			splits := strings.Split(cls.Image, ":")
+			splits[len(splits)-1] = "latest"
+			return strings.Join(splits, ":")
 		}
 		return cls.Image
 	}
