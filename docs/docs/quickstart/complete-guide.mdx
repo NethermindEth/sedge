@@ -41,14 +41,14 @@ want to use another installation method:
   <TabItem value="curl" label="curl">
 
   ```
-  curl -L https://github.com/NethermindEth/sedge/releases/download/v1.2.2/sedge-v1.2.2-linux-amd64 --output sedge
+  curl -L https://github.com/NethermindEth/sedge/releases/download/v1.2.3/sedge-v1.2.3-linux-amd64 --output sedge
   ```
 
   </TabItem>
   <TabItem value="wget" label="wget">
 
   ```
-  wget https://github.com/NethermindEth/sedge/releases/download/v1.2.2/sedge-v1.2.2-linux-amd64 -O sedge
+  wget https://github.com/NethermindEth/sedge/releases/download/v1.2.3/sedge-v1.2.3-linux-amd64 -O sedge
   ```
 
   </TabItem>
@@ -138,6 +138,20 @@ validator client.
 :::info
 
 You can learn more about `sedge generate` if you check [here in our documentation](/docs/commands/generate).
+
+:::
+
+:::info
+
+If you want to use the client's latest version and avoid using the fixed version tested by us, you can generate the
+setup using the following command: `sedge generate full-node --latest`. If you want to learn
+more, you can check [here in our documentation](/docs/commands/generate).
+
+The `--latest` flag can be used for the `full-node`, `execution`, `consensus` and `validator` commands.
+
+You can update your client's versions using the following commands if the clients release any version:
+1. Run `docker compose -f /path/to/docker-compose.yml pull` to update the images.
+2. Run `docker compose -f /path/to/docker-compose.yml up -d` to restart the containers.
 
 :::
 

@@ -7,14 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
 ### Added
 
-- Support for Erigon in Gnosis
+- New `--latest` flag to `sedge generate` subcommands to use the latest version of the image in the clients.
 
 ### Fixed
 
-- Issue in Chiado templates with checkpoint sync
+- Remove TTD of the params, test cases, command flags and geth patch for custom testnets.
+
+## [v1.2.3] - 2023-08-16
+
+### Added
+
+- Support for Erigon in Gnosis.
+
+### Fixed
+
+- Issue in Chiado templates with checkpoint sync.
 - Fix show error when using containers tags.
+
+### Changed
+
+- Update client images.
+- Moved xdai to gnosis on Nethermind config.
 
 ## [v1.2.2] - 2023-07-24
 
@@ -24,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Issue in Chiado templates with checkpoint sync
+- Issue in Chiado templates with checkpoint sync.
 - Fix show error when using containers tags.
 - Fix chiado checkpoint sync url.
 
@@ -102,10 +118,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename sedge data directory name to `sedge-data` instead of `docker-compose-scripts`.
 - Update mev-boost relay URLs.
 - Fixed validator restart failure. Validator never restarts, but has a better and safer start-up method:
-    - Validator waits a grace period (2 epochs) before starting.
-    - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint
-      returns with the HTTP code 200 in the newly added `validator-blocker` docker-compose service. This replace the
-      older track sync method.
+	- Validator waits a grace period (2 epochs) before starting.
+	- Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint
+	  returns with the HTTP code 200 in the newly added `validator-blocker` docker-compose service. This replace the
+	  older track sync method.
 - Updated installation script for docker and docker compose in Linux flavours.
 - Updated Checkpoint Sync Url for Goerli.
 - Use new created action for JWT secret handling.

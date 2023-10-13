@@ -31,8 +31,7 @@
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --eth1=true
       - --eth1.providerUrls=${EC_API_URL}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
-      - --execution.urls=${EC_AUTH_URL}{{if .TTD}}
-      - --terminal-total-difficulty-override={{.TTD}}{{end}}
+      - --execution.urls=${EC_AUTH_URL}
       - --logFile=/var/lib/lodestart/consensus/logs/beacon.log 
       - --logFileLevel=${CC_LOG_LEVEL}{{with .FeeRecipient}}
       - --suggestedFeeRecipient=${FEE_RECIPIENT}{{end}}
