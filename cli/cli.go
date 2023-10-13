@@ -44,7 +44,7 @@ const (
 	NetworkSepolia = "sepolia"
 	NetworkGnosis  = "gnosis"
 	NetworkChiado  = "chiado"
-	NetworkHolesky  = "holesky"
+	NetworkHolesky = "holesky"
 	NetworkCustom  = "custom"
 
 	NodeTypeFullNode  = "full-node"

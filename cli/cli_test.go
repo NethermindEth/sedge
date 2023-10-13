@@ -277,7 +277,8 @@ func TestCli(t *testing.T) {
 					}),
 				)
 			},
-		}, {
+		},
+		{
 			name: "execution node holesky",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
@@ -362,7 +363,8 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
 				)
 			},
-		}, {
+		},
+		{
 			name: "consensus node holesky",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
