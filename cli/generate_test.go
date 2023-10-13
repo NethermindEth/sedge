@@ -126,9 +126,6 @@ func (flags *GenCmdFlags) argsList() []string {
 	if flags.mapAllPorts {
 		s = append(s, "--map-all")
 	}
-	if flags.customTTD != "" {
-		s = append(s, "--custom-ttd", flags.customTTD)
-	}
 	if flags.customChainSpec != "" {
 		s = append(s, "--custom-chainSpec", flags.customChainSpec)
 	}
@@ -1033,83 +1030,6 @@ func TestGenerateCmd(t *testing.T) {
 				logging:        "",
 			},
 			errors.New("invalid execution client"),
-		},
-		{
-			"Mainnet Network, custom ttd, should fail",
-			subCmd{
-				name: "full-node",
-			},
-			GenCmdFlags{
-				CustomFlags: CustomFlags{
-					customTTD: "some",
-				},
-			},
-			globalFlags{
-				network: "mainnet",
-			},
-			errors.New("custom flags used without --network custom"),
-		},
-		{
-			"Custom Network and custom ttd, should work",
-			subCmd{
-				name: "full-node",
-			},
-			GenCmdFlags{
-				feeRecipient: "0x0000000000000000000000000000000000000000",
-				CustomFlags: CustomFlags{
-					customTTD: "some",
-				},
-			},
-			globalFlags{
-				network: "custom",
-			},
-			nil,
-		},
-		{
-			"Custom Network and custom ttd, execution node, should work",
-			subCmd{
-				name: "execution",
-			},
-			GenCmdFlags{
-				CustomFlags: CustomFlags{
-					customTTD: "some",
-				},
-			},
-			globalFlags{
-				network: "custom",
-			},
-			nil,
-		},
-		{
-			"Mainnet Network custom ChainSpec, execution node, shouldn't work",
-			subCmd{
-				name: "execution",
-			},
-			GenCmdFlags{
-				CustomFlags: CustomFlags{
-					customTTD: "some",
-				},
-			},
-			globalFlags{
-				network: "mainnet",
-			},
-			errors.New("custom flags used without --network custom"),
-		},
-		{
-			"Full-node, custom TTD",
-			subCmd{
-				name: "full-node",
-			},
-			GenCmdFlags{
-				feeRecipient: "0x0000000000000000000000000000000000000000",
-				CustomFlags: CustomFlags{
-					customTTD: "some",
-				},
-			},
-			globalFlags{
-				network: "custom",
-			},
-			nil,
 		},
 		{
 			"Execution ",

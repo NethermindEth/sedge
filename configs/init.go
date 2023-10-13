@@ -22,7 +22,6 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		NetworkService:     "merge",
 		GenesisForkVersion: "0x00000000",
 		SupportsMEVBoost:   true,
-		DefaultTTD:         "",
 		DefaultECBootnodes: []string{
 			"enode://d860a01f9722d78051619d1e2351aba3f43f943f6f00718d1b9baa4101932a1f5011f16bb2b1bb35db20d6fe28fa0bf09636d26a87d31de9ec6203eeedb1f666@18.138.108.67:30303",
 			"enode://22a8232c3abc76a16ae9d6c3b164f98775fe226f0917b0ca871128a74a8e9630b458460865bab457221f1d448dd9791d24c4e5d88786180ac185df813a68d4de@3.209.45.79:30303",
@@ -51,7 +50,6 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		NetworkService:     "merge",
 		GenesisForkVersion: "0x00001020",
 		SupportsMEVBoost:   true,
-		DefaultTTD:         "10790000",
 		DefaultECBootnodes: []string{
 			"enode://011f758e6552d105183b1761c5e2dea0111bc20fd5f6422bc7f91e0fabbec9a6595caf6239b37feb773dddd3f87240d99d859431891e4a642cf2a0a9e6cbb98a@51.141.78.53:30303",
 			"enode://176b9417f511d05b6b2cf3e34b756cf0a7096b3094572a8f6ef4cdcb9d1f9d00683bf0f83347eebdf3b81c3521c2332086d9592802230bf528eaf606a1d9677b@13.93.54.137:30303",
@@ -82,7 +80,6 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		NetworkService:     "merge",
 		GenesisForkVersion: "0x90000069",
 		SupportsMEVBoost:   false,
-		DefaultTTD:         "17000000000000000",
 		DefaultCCBootnodes: []string{
 			"enr:-Iq4QMCTfIMXnow27baRUb35Q8iiFHSIDBJh6hQM5Axohhf4b6Kr_cOCu0htQ5WvVqKvFgY28893DHAg8gnBAXsAVqmGAX53x8JggmlkgnY0gmlwhLKAlv6Jc2VjcDI1NmsxoQK6S-Cii_KmfFdUJL2TANL3ksaKUnNXvTCv1tLwXs0QgIN1ZHCCIyk",
 			"enr:-Ly4QFoZTWR8ulxGVsWydTNGdwEESueIdj-wB6UmmjUcm-AOPxnQi7wprzwcdo7-1jBW_JxELlUKJdJES8TDsbl1EdNlh2F0dG5ldHOI__78_v2bsV-EZXRoMpA2-lATkAAAcf__________gmlkgnY0gmlwhBLYJjGJc2VjcDI1NmsxoQI0gujXac9rMAb48NtMqtSTyHIeNYlpjkbYpWJw46PmYYhzeW5jbmV0cw-DdGNwgiMog3VkcIIjKA",
@@ -99,7 +96,6 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		RequireJWT:               true,
 		NetworkService:           "merge",
 		GenesisForkVersion:       "0x0000006f",
-		DefaultTTD:               "231707791542740786049188744689299064356246512",
 		DefaultCustomConfigSrc:   "https://github.com/gnosischain/configs/raw/main/chiado/config.yaml",
 		DefaultCustomGenesisSrc:  "https://github.com/gnosischain/configs/raw/main/chiado/genesis.ssz",
 		DefaultCustomDeployBlock: "0",
@@ -118,7 +114,6 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		RequireJWT:         true,
 		NetworkService:     "merge",
 		GenesisForkVersion: "0x00000064",
-		DefaultTTD:         "8626000000000000000000058750000000000000000000",
 		DefaultECBootnodes: []string{
 			"enode://ea6d67eb3277d8ae9292fc700fa757ef6d2127c4db9712bcd5eb1341b1d937ac71cc2b15efe3a8496f4fc9fc12156d7ac73d82eb3c0f68928442116030b76f48@3.135.122.4:30303",
 			"enode://c5e1e38709a2eb402557e82e071ccec1c6e2adedb01f7d6afdc80d25f7e9287f954fa9b742f01b1b74a5c532de9476afeb6efdcf5a683672a663204eadb15e45@3.17.46.220:30303",
