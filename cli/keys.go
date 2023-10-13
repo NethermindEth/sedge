@@ -181,7 +181,7 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 		},
 	}
 	// Flag binds
-	cmd.Flags().StringVarP(&flags.network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia etc.")
+	cmd.Flags().StringVarP(&flags.network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado etc.")
 	cmd.Flags().StringVarP(&flags.path, "path", "p", configs.DefaultAbsSedgeDataPath, "Absolute path to keystore folder. e.g. /home/user/keystore")
 	cmd.Flags().StringVar(&flags.eth1WithdrawalAddress, "eth1-withdrawal-address", "", "If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
 	cmd.Flags().StringVar(&flags.mnemonicPath, "mnemonic-path", "", "Path to file with a existing mnemonic to use.")
