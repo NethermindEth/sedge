@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove TTD of the params, test cases, command flags and geth patch for custom testnets.
 
+### Changed
+
+- Remove default bootnodes for networks managed by clients.
+- Remove custom configurations for Chiado and instead use the clients configuration.
+
 ## [v1.2.3] - 2023-08-16
 
 ### Added
@@ -118,10 +123,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename sedge data directory name to `sedge-data` instead of `docker-compose-scripts`.
 - Update mev-boost relay URLs.
 - Fixed validator restart failure. Validator never restarts, but has a better and safer start-up method:
-	- Validator waits a grace period (2 epochs) before starting.
-	- Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint
-	  returns with the HTTP code 200 in the newly added `validator-blocker` docker-compose service. This replace the
-	  older track sync method.
+  - Validator waits a grace period (2 epochs) before starting.
+  - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint
+      returns with the HTTP code 200 in the newly added `validator-blocker` docker-compose service. This replace the
+      older track sync method.
 - Updated installation script for docker and docker compose in Linux flavours.
 - Updated Checkpoint Sync Url for Goerli.
 - Use new created action for JWT secret handling.

@@ -22,7 +22,7 @@ type LogConfig struct {
 
 type NetworkConfig struct {
 	Name                      string
-	RequireJWT                bool
+	NoJWT                     bool
 	NetworkService            string
 	GenesisForkVersion        string
 	DefaultECBootnodes        []string

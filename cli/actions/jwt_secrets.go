@@ -38,7 +38,7 @@ func (s *sedgeActions) CreateJWTSecrets(options CreateJWTSecretOptions) (string,
 	// Generate JWT secret if necessary
 	var err error
 	jwtPath := options.JWTPath
-	if jwtPath == "" && configs.NetworksConfigs()[options.Network].RequireJWT {
+	if jwtPath == "" && !configs.NetworksConfigs()[options.Network].NoJWT {
 		return handleJWTSecret(options.GenerationPath)
 	} else if filepath.IsAbs(jwtPath) { // Ensure jwtPath is absolute
 		if jwtPath, err = filepath.Abs(jwtPath); err != nil {
