@@ -69,7 +69,6 @@ type GenData struct {
 	LoggingDriver           string
 	ECBootnodes             []string
 	CCBootnodes             []string
-	CustomTTD               string
 	CustomChainSpecPath     string
 	CustomNetworkConfigPath string
 	CustomGenesisPath       string
@@ -80,13 +79,13 @@ type GenData struct {
 	ExecutionAuthUrl        string
 	ConsensusApiUrl         string
 	ContainerTag            string
+	LatestVersion           bool
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
 	Services                []string
 	Network                 string
-	TTD                     string
 	XeeVersion              bool
 	Mev                     bool
 	MevBoostOnValidator     bool

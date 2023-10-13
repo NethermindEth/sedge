@@ -28,8 +28,7 @@
       - --Init.ChainSpecPath=/nethermind/custom_config/chainspec.json{{end}}
       - --config={{if .CustomNetwork}}none{{else}}{{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
       - --datadir=/nethermind/data
-      - --log=${NETHERMIND_LOG_LEVEL}{{if .TTD}}
-      - --Merge.TerminalTotalDifficulty={{.TTD}}{{end}}
+      - --log=${NETHERMIND_LOG_LEVEL}
       - --JsonRpc.Enabled=true
       - --JsonRpc.Host=0.0.0.0
       - --JsonRpc.Port={{.ElApiPort}}

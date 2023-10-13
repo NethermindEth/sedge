@@ -49,7 +49,6 @@ const (
 )
 
 type CustomFlags struct {
-	customTTD           string
 	customChainSpec     string
 	customNetworkConfig string
 	customGenesis       string
@@ -83,6 +82,7 @@ type GenCmdFlags struct {
 	waitEpoch         int
 	customEnodes      []string
 	customEnrs        []string
+	latestVersion     bool
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -292,7 +292,6 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ConsensusApiUrl:         flags.consensusApiUrl,
 		ECBootnodes:             flags.customEnodes,
 		CCBootnodes:             flags.customEnrs,
-		CustomTTD:               flags.customTTD,
 		CustomChainSpecPath:     flags.CustomFlags.customChainSpec,
 		CustomNetworkConfigPath: flags.CustomFlags.customNetworkConfig,
 		CustomGenesisPath:       flags.CustomFlags.customGenesis,
@@ -300,6 +299,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		CustomDeployBlockPath:   flags.CustomFlags.customDeployBlock,
 		MevBoostOnValidator:     flags.mevBoostOnVal,
 		ContainerTag:            containerTag,
+		LatestVersion:           flags.latestVersion,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,
@@ -345,10 +345,6 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			}
 		}
 		executionClient.SetImageOrDefault(strings.Join(executionParts[1:], ":"))
-		// Patch Geth image if network needs TTD to be set
-		if executionClient.Name == "geth" && network != "mainnet" {
-			executionClient.Image = "ethereum/client-go:v1.10.26"
-		}
 		if err = clients.ValidateClient(executionClient, execution); err != nil {
 			return nil, err
 		}

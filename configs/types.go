@@ -25,7 +25,6 @@ type NetworkConfig struct {
 	NoJWT                     bool
 	NetworkService            string
 	GenesisForkVersion        string
-	DefaultTTD                string
 	DefaultECBootnodes        []string
 	DefaultCCBootnodes        []string
 	DefaultCustomChainSpecSrc string
