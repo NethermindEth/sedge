@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New `--latest` flag to `sedge generate` subcommands to use the latest version of the image in the clients.
-- Integrate Holesky network.make 
+- Integrate Holesky network.
 
 ### Fixed
 
