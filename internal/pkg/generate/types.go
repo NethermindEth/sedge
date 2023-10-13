@@ -69,7 +69,6 @@ type GenData struct {
 	LoggingDriver           string
 	ECBootnodes             []string
 	CCBootnodes             []string
-	CustomTTD               string
 	CustomChainSpecPath     string
 	CustomNetworkConfigPath string
 	CustomGenesisPath       string
@@ -86,7 +85,6 @@ type GenData struct {
 type DockerComposeData struct {
 	Services                []string
 	Network                 string
-	TTD                     string
 	XeeVersion              bool
 	Mev                     bool
 	MevBoostOnValidator     bool

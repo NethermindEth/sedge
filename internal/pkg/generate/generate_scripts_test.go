@@ -104,26 +104,6 @@ func checkCCBootnodesOnConsensus(t *testing.T, data *GenData, compose, env io.Re
 	return nil
 }
 
-func checkTTDOnExecution(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData := retrieveComposeData(t, compose)
-	customTTD := data.CustomTTD
-	if customTTD == "" {
-		customTTD = configs.NetworksConfigs()[data.Network].DefaultTTD
-	}
-	if customTTD != "" {
-		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "besu" {
-			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--override-genesis-config=terminalTotalDifficulty="+customTTD)
-		}
-		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "nethermind" {
-			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--Merge.TerminalTotalDifficulty="+customTTD)
-		}
-		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "geth" {
-			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--override.terminaltotaldifficulty="+customTTD)
-		}
-	}
-	return nil
-}
-
 func checkECBootnodesOnExecution(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
 	if len(data.ECBootnodes) == 0 {
@@ -452,7 +432,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 				if utils.Contains(validatorClients, consensusCl) {
 					tests = append(tests,
 						genTestData{
-							Description: fmt.Sprintf(baseDescription+"customTTD tests, execution: %s, consensus: %s, validator: %s, network: %s, all", executionCl, consensusCl, consensusCl, network),
+							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, all", executionCl, consensusCl, consensusCl, network),
 							GenerationData: &GenData{
 								ExecutionClient: &clients.Client{Name: executionCl},
 								ConsensusClient: &clients.Client{Name: consensusCl},
@@ -460,7 +440,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 								Network:         network,
 								Services:        []string{execution, consensus, validator},
 							},
-							CheckFunctions: []CheckFunc{checkTTDOnExecution, defaultFunc, checkECBootnodesOnExecution, checkValidatorBlocker},
+							CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkValidatorBlocker},
 						},
 						genTestData{
 							Description: fmt.Sprintf(baseDescription+"ecBootnodes tests, execution: %s, consensus: %s, validator: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, network),
@@ -471,7 +451,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 								ConsensusClient: &clients.Client{Name: consensusCl},
 								Network:         network,
 							},
-							CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkTTDOnExecution, checkValidatorBlocker},
+							CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkValidatorBlocker},
 						},
 						genTestData{
 							Description: fmt.Sprintf(baseDescription+"ccBootnodes tests, execution: %s, consensus: %s, validator: %s, network: %s, Execution Client not Valid", executionCl, consensusCl, consensusCl, network),
