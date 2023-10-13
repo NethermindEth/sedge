@@ -29,6 +29,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/distribution/reference"
+
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
@@ -250,6 +252,17 @@ func TestGenerateDockerCompose(t *testing.T) {
 								ContainerTag:    "sampleTag",
 							},
 						},
+						genTestData{
+							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s, network: %s, no validator, with latest", executionCl, consensusCl, consensusCl, network),
+							genData: generate.GenData{
+								ExecutionClient: &clients.Client{Name: executionCl, Type: "execution"},
+								ConsensusClient: &clients.Client{Name: consensusCl, Type: "consensus"},
+								Services:        []string{"execution", "consensus"},
+								Network:         network,
+								ContainerTag:    "sampleTag",
+								LatestVersion:   true,
+							},
+						},
 					)
 				}
 			}
@@ -303,6 +316,16 @@ func TestGenerateDockerCompose(t *testing.T) {
 					assert.Equal(t, services.DefaultSedgeExecutionClient+"-sampleTag", cmpData.Services.Execution.ContainerName)
 				}
 
+				// Check ecImage has the right format
+				ecImageVersion := envData["EC_IMAGE_VERSION"]
+				named, err := reference.ParseNormalizedNamed(ecImageVersion)
+				assert.NoError(t, err, "invalid image", ecImageVersion)
+
+				// Test that the execution image is set to latest if flag --latest is provided
+				if tc.genData.LatestVersion {
+					assert.True(t, strings.HasSuffix(named.String(), ":latest"))
+				}
+
 				// Check that mev-boost service is not set when execution only
 				if tc.genData.ValidatorClient == nil && tc.genData.ConsensusClient == nil {
 					assert.Nil(t, cmpData.Services.Mevboost)
@@ -326,6 +349,15 @@ func TestGenerateDockerCompose(t *testing.T) {
 					assert.True(t, contains(t, cmpData.Services.Consensus.Command, tc.genData.CheckpointSyncUrl), "Checkpoint Sync URL not found in consensus service command: %s", cmpData.Services.Consensus.Command)
 				}
 
+				// Check ccImage has the right format
+				ccImageVersion := envData["CC_IMAGE_VERSION"]
+				named, err := reference.ParseNormalizedNamed(ccImageVersion)
+				assert.NoError(t, err, "invalid image", ccImageVersion)
+
+				// Test that the consensus image is set to latest if flag --latest is provided
+				if tc.genData.LatestVersion {
+					assert.True(t, strings.HasSuffix(named.String(), ":latest"))
+				}
 				// Validate Execution API and AUTH URLs
 				apiEndpoint, authEndpoint := envData["EC_API_URL"], envData["EC_AUTH_URL"]
 				if tc.genData.ExecutionApiUrl != "" {
@@ -377,6 +409,16 @@ func TestGenerateDockerCompose(t *testing.T) {
 				prysmURL := tc.genData.ConsensusApiUrl
 				prysmURL = strings.TrimPrefix(prysmURL, "http://")
 				prysmURL = strings.TrimPrefix(prysmURL, "https://")
+
+				// Check vlImage has the right format
+				vlImageVersion := envData["VL_IMAGE_VERSION"]
+				named, err := reference.ParseNormalizedNamed(vlImageVersion)
+				assert.NoError(t, err, "invalid image", vlImageVersion)
+
+				// Test that the consensus image is set to latest if flag --latest is provided
+				if tc.genData.LatestVersion {
+					assert.True(t, strings.HasSuffix(named.String(), ":latest"))
+				}
 
 				// Check Consensus API URL is set and is valid
 				uri, err := url.ParseRequestURI(envData["CC_API_URL"])

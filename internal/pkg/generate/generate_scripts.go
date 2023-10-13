@@ -401,11 +401,11 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	data := EnvData{
 		Services:                  gd.Services,
 		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
-		ElImage:                   imageOrEmpty(cls[execution]),
+		ElImage:                   imageOrEmpty(cls[execution], gd.LatestVersion),
 		ElDataDir:                 "./" + configs.ExecutionDir,
-		CcImage:                   imageOrEmpty(cls[consensus]),
+		CcImage:                   imageOrEmpty(cls[consensus], gd.LatestVersion),
 		CcDataDir:                 "./" + configs.ConsensusDir,
-		VlImage:                   imageOrEmpty(cls[validator]),
+		VlImage:                   imageOrEmpty(cls[validator], gd.LatestVersion),
 		VlDataDir:                 "./" + configs.ValidatorDir,
 		ExecutionApiURL:           executionApiUrl,
 		ExecutionAuthURL:          executionAuthUrl,
@@ -574,8 +574,13 @@ func joinIfNotEmpty(strs ...string) string {
 }
 
 // imageOrEmpty returns the image of the client if it is not nil, otherwise returns an empty string
-func imageOrEmpty(cls *clients.Client) string {
+func imageOrEmpty(cls *clients.Client, latest bool) string {
 	if cls != nil {
+		if latest {
+			splits := strings.Split(cls.Image, ":")
+			splits[len(splits)-1] = "latest"
+			return strings.Join(splits, ":")
+		}
 		return cls.Image
 	}
 	return ""
