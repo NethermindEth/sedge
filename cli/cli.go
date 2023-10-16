@@ -44,6 +44,7 @@ const (
 	NetworkSepolia = "sepolia"
 	NetworkGnosis  = "gnosis"
 	NetworkChiado  = "chiado"
+	NetworkHolesky = "holesky"
 	NetworkCustom  = "custom"
 
 	NodeTypeFullNode  = "full-node"
@@ -615,7 +616,7 @@ func runPromptActions(p ui.Prompter, o *CliCmdOptions, actions ...promptAction) 
 }
 
 func selectNetwork(p ui.Prompter, o *CliCmdOptions) error {
-	options := []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado}
+	options := []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}
 	index, err := p.Select("Select network", "", options)
 	if err != nil {
 		return err

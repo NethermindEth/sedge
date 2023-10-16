@@ -69,6 +69,13 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		GenesisForkVersion: "0x00000064",
 		CheckpointSyncURL:  "https://checkpoint.gnosischain.com",
 	},
+	NetworkHolesky: {
+		Name:               NetworkHolesky,
+		NetworkService:     "merge",
+		GenesisForkVersion: "0x00017000",
+		SupportsMEVBoost:   false,
+		CheckpointSyncURL:  "https://checkpoint-sync.holesky.ethpandaops.io/",
+	},
 	NetworkCustom: {
 		Name:               NetworkCustom,
 		NetworkService:     "merge",
