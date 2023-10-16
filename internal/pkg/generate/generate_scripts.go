@@ -156,7 +156,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	cls := mapClients(gd)
-
+	networkConfig := configs.NetworksConfigs()[gd.Network]
 	for tmpKind, client := range cls {
 		var name string
 		if client == nil {
@@ -166,7 +166,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		}
 		tmp, err := templates.Services.ReadFile(strings.Join([]string{
 			"services",
-			configs.NetworksConfigs()[gd.Network].NetworkService,
+			networkConfig.NetworkService,
 			tmpKind,
 			name + ".tmpl",
 		}, "/"))
@@ -247,7 +247,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		Services:            gd.Services,
 		Network:             gd.Network,
 		XeeVersion:          xeeVersion,
-		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev),
+		Mev:                 networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev)),
 		MevBoostOnValidator: gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		MevPort:             gd.Ports["MevPort"],
 		MevBoostEndpoint:    gd.MevBoostEndpoint,
@@ -311,13 +311,13 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	}
 
 	cls := mapClients(gd)
-
+	networkConfig := configs.NetworksConfigs()[gd.Network]
 	for tmpKind, client := range cls {
 		var tmp []byte
 		if client == nil {
 			tmp, err = templates.Services.ReadFile(strings.Join([]string{
 				"services",
-				configs.NetworksConfigs()[gd.Network].NetworkService,
+				networkConfig.NetworkService,
 				tmpKind,
 				"empty.tmpl",
 			}, "/"))
@@ -400,7 +400,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 
 	data := EnvData{
 		Services:                  gd.Services,
-		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
+		Mev:                       networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
 		ElImage:                   imageOrEmpty(cls[execution], gd.LatestVersion),
 		ElDataDir:                 "./" + configs.ExecutionDir,
 		CcImage:                   imageOrEmpty(cls[consensus], gd.LatestVersion),
