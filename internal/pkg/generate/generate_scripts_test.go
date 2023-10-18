@@ -220,7 +220,10 @@ func defaultFunc(t *testing.T, data *GenData, compose, env io.Reader) error {
 	if utils.Contains(data.Services, configConsensus) {
 		assert.NotNil(t, composeData.Services.ConfigConsensus)
 	}
-
+	networkConfig := configs.NetworksConfigs()[data.Network]
+	if !networkConfig.SupportsMEVBoost {
+		assert.Nil(t, composeData.Services.Mevboost)
+	}
 	// load .env file
 	envData := retrieveEnvData(t, env)
 	if data.Network == "gnosis" {

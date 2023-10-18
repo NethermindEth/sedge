@@ -2,7 +2,6 @@
 {{ define "env" }}
 # --- Global configuration ---
 NETWORK=holesky
-# --- {{if .WithMevBoostClient}}RELAY_URLS={{.RelayURLs}}{{end}} ---
 {{if .FeeRecipient}}
 FEE_RECIPIENT={{.FeeRecipient}}{{end}}
 {{template "execution" .}}
