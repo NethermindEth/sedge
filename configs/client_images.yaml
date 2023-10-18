@@ -1,7 +1,7 @@
 execution:
   geth:
     name: ethereum/client-go
-    version: v1.13.3
+    version: v1.13.4
   besu:
     name: hyperledger/besu
     version: 23.7.2
@@ -23,7 +23,7 @@ consensus:
     version: 23.9.0
   prysm:
     name: gcr.io/prysmaticlabs/prysm/beacon-chain
-    version: v4.0.8
+    version: v4.1.0
 validator:
   lighthouse:
     name: sigp/lighthouse
@@ -36,4 +36,4 @@ validator:
     version: 23.9.0
   prysm:
     name: gcr.io/prysmaticlabs/prysm/validator
-    version: v4.0.8
+    version: v4.1.0
