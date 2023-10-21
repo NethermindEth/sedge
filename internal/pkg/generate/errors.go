@@ -34,3 +34,6 @@ var ErrExecutionClientNotValid = errors.New("invalid execution client")
 
 // ErrValidatorClientNotValid is returned when the validator client is not valid
 var ErrValidatorClientNotValid = errors.New("invalid validator client")
+
+// ErrValidatorClientNotValid is returned when the starknet client is not valid
+var ErrStarknetClientNotValid = errors.New("invalid starknet client")

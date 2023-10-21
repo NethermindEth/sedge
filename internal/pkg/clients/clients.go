@@ -72,7 +72,7 @@ Get all the supported clients for the ClientInfo's network
 
 params :-
 a. clientTypes []string
-Types of client supported. E.g execution, consensus, validator
+Types of client supported. E.g execution, consensus, validator, starknet-clients
 
 returns :-
 a. OrderedClients

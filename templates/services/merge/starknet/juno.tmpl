@@ -1,0 +1,47 @@
+{{/* juno.tmpl */}}
+{{ define "starknet" }}
+  starknet:
+    tty: true
+    environment:
+      - TERM=xterm-256color
+      - COLORTERM=truecolor
+    stop_grace_period: 30s
+    container_name: sedge-starknet-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: unless-stopped
+    image: ${L2_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${L2_DATA_DIR}:/juno/data{{if .MapAllPorts}}
+    ports:
+      - "{{.L2ApiPort}}:{{.L2ApiPort}}"
+      - "{{.L2WsPort}}:{{.L2WSPort}}"{{end}}
+    expose:
+      - {{.L2ApiPort}}
+      - {{.L2WsPort}}
+    command:
+      - --colour={{.Colour}}
+      - --db-path={{.DbPath}}
+      - --eth-node={{ .EthNode}}
+      - --http={{if .Http}}{{.Http}}{{else}}true{{end}}
+      - --http-host={{if .HttpHost}}{{.HttpHost}}{{else}}127.0.0.1{{end}}
+      - --http-port={{.L2ApiPort}}
+      - --ws={{if .Ws}}{{.Ws}}{{else}}false{{end}}
+      - --ws-host={{if .WsHost}}{{.WsHost}}{{else}}127.0.0.1{{end}}
+      - --ws-port={{.L2WsPort}}
+      - --pprof={{if .Pprof}}{{.Pprof}}{{else}}false{{end}}
+      - --pprof-host={{if .PprofHost}}{{.PprofHost}}{{else}}127.0.0.1{{end}}
+      - --pprof-port={{.L2PprofPort}}
+      - --metrics={{if .Metrics}}{{.Metrics}}{{else}}false{{end}}
+      - --metrics-host={{if .MetricsHost}}{{.MetricsHost}}{{else}}127.0.0.1{{end}}
+      - --metrics-port={{.L2MetricsPort}}
+      - --grpc={{if .Grpc}}{{.Grpc}}{{else}}false{{end}}
+      - --grpc-host={{if .GrpcHost}}{{.GrpcHost}}{{else}}127.0.0.1{{end}}
+      - --grpc-port={{.L2GrpcPort}}
+      - --log-level={{if .LogLevel}}{{.LogLevel}}{{else}}info{{end}}
+      - --network={{if .Network}}{{.Network}}{{else}}mainnet{{end}}
+      - --pending-poll-interval={{if .PendingPollInterval}}{{.PendingPollInterval}}{{else}}10m{{end}}
+      - --p2p={{if .P2p}}{{.P2p}}{{else}}false{{end}}
+      - --p2p-addr={{.P2pAddr}}
+      - --p2p-boot-peers={{.P2pBootPeers}}
+{{ end }}

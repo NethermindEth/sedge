@@ -34,6 +34,8 @@ func (c *Client) SetImageOrDefault(image string) {
 		c.setConsensusImage(image)
 	case "execution":
 		c.setExecutionImage(image)
+	case "starknet":
+		c.setStarknetImage(image)
 	}
 }
 
@@ -76,6 +78,14 @@ func (c *Client) setValidatorImage(image string) {
 	}
 }
 
+// starknet 
+func (c *Client) setStarknetImage(image string) {
+	switch c.Name {
+	case "juno":
+		c.Image = valueOrDefault(image, configs.ClientImages.Starknet.Juno.String())
+	}
+}
+
 func valueOrDefault(value string, defaultValue string) string {
 	if value == "" {
 		return defaultValue
@@ -83,11 +93,12 @@ func valueOrDefault(value string, defaultValue string) string {
 	return value
 }
 
-// Clients : Struct Represent a combination of execution, consensus and validator clients
+// Clients : Struct Represent a combination of execution, consensus, validator and layer-2 clients
 type Clients struct {
 	Execution *Client
 	Consensus *Client
 	Validator *Client
+	Starknet  *Client
 }
 
 type ClientMap map[string]*Client

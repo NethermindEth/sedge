@@ -1,0 +1,7 @@
+{{/* juno.tmpl */}}
+{{ define "starknet" }}
+# --- Juno Node - configuration ---
+EC_IMAGE_VERSION={{.L2Image}}
+NETHERMIND_LOG_LEVEL=INFO
+EC_DATA_DIR={{.L2DataDir}}
+{{ end }}

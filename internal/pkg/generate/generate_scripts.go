@@ -40,6 +40,7 @@ const (
 	mevBoost        = "mev-boost"
 	configConsensus = "config_consensus"
 	empty           = "empty"
+	starknet        = "starknet" //for juno
 )
 
 // validateClients validates each client in GenData
@@ -52,6 +53,9 @@ func validateClients(gd *GenData) error {
 		return err
 	}
 	if err := validateValidator(gd, &c); err != nil {
+		return err
+	}
+	if err := validateStarknet(gd, &c); err != nil {
 		return err
 	}
 	return nil
@@ -103,12 +107,29 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 	return nil
 }
 
+// validatestarknet validates the starknet client in GenData
+func validateStarknet(gd *GenData, c *clients.ClientInfo) error {
+	if gd.StarknetClient == nil {
+		return nil
+	}
+
+	starknetClients, err := c.SupportedClients(starknet)
+	if err != nil {
+		return ErrUnableToGetClientsInfo
+	}
+	if !utils.Contains(starknetClients, gd.StarknetClient.Name) {
+		return ErrStarknetClientNotValid
+	}
+	return nil
+}
+
 // mapClients convert genData clients to clients.Clients
 func mapClients(gd *GenData) map[string]*clients.Client {
 	cls := map[string]*clients.Client{
 		execution: gd.ExecutionClient,
 		consensus: gd.ConsensusClient,
 		validator: gd.ValidatorClient,
+		starknet:  gd.StarknetClient,
 	}
 
 	return cls
@@ -137,6 +158,13 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		"CLAdditionalApi": configs.DefaultAdditionalApiPortCL,
 		"VLMetrics":       configs.DefaultMetricsPortVL,
 		"MevPort":         configs.DefaultMevPort,
+		// Needed for Juno
+		"L2Api":           configs.DefaultL2ApiPort,
+		"L2Ws":            configs.DefaultL2WsPort,
+		"L2Pprof":         configs.DefaultL2PprofPortCL,
+		"L2Metrics":       configs.DefaultL2MetricsPortCL,
+		"L2Grpc":          configs.DefaultL2GrpcPortCL,
+		
 	}
 	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -200,6 +228,10 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 
 	if cls[execution] != nil {
 		gd.ExecutionClient.Endpoint = configs.OnPremiseExecutionURL
+	}
+
+	if cls[starknet] != nil {
+		gd.StarknetClient.Endpoint = configs.OnPremiseStarknetURL
 	}
 
 	if cls[consensus] != nil {
@@ -270,6 +302,13 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ClApiPort:           gd.Ports["CLApi"],
 		ClAdditionalApiPort: gd.Ports["CLAdditionalApi"],
 		VlMetricsPort:       gd.Ports["VLMetrics"],
+		// Needed for Juno
+		L2ApiPort:           gd.Ports["L2Api"],  
+	    L2WsPort:            gd.Ports["L2Ws"],
+		L2MetricsPort:       gd.Ports["L2Metrics"],
+		L2PprofPort:         gd.Ports["L2Pprof"],
+		L2GrpcPort:          gd.Ports["L2Grpc"],
+
 		FallbackELUrls:      gd.FallbackELUrls,
 		ElExtraFlags:        gd.ElExtraFlags,
 		ClExtraFlags:        gd.ClExtraFlags,
@@ -293,8 +332,27 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		UID:                     os.Geteuid(),
 		GID:                     os.Getegid(),
 		ContainerTag:            gd.ContainerTag,
-	}
 
+		DbPath:                  gd.DbPath,
+		EthNode:                 gd.EthNode,
+		Colour:                  gd.Colour,
+		Http:                    gd.Http,
+		HttpHost:                gd.HttpHost,
+		Ws:                      gd.Ws,
+		WsHost:                  gd.WsHost,
+		Pprof:                   gd.Pprof,
+		PprofHost:               gd.PprofHost,
+		Metrics:                 gd.Metrics,
+		MetricsHost:             gd.MetricsHost,
+		Grpc:                    gd.Grpc,
+		GrpcHost:                gd.GrpcHost,
+		LogLevel:                gd.LogLevel,
+		PendingPollInterval:     gd.PendingPollInterval,
+		P2p:                     gd.P2p,
+		P2pAddr:                 gd.P2pAddr,
+		P2pBootPeers:            gd.P2pBootPeers,
+	}
+ 
 	// Save to writer
 	err = baseTmp.Execute(at, data)
 	if err != nil {
@@ -390,7 +448,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 			gd.MevBoostEndpoint = fmt.Sprintf("%s:%v", configs.DefaultMevBoostEndpoint, gd.Ports["MevPort"])
 		}
 	}
-
+	
 	graffiti := gd.Graffiti
 	if graffiti == "" {
 		graffiti = generateGraffiti(gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient)
@@ -408,7 +466,9 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		Services:                  gd.Services,
 		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		ElImage:                   imageOrEmpty(cls[execution]),
+		L2Image:                   imageOrEmpty(cls[starknet]), //for Juno
 		ElDataDir:                 "./" + configs.ExecutionDir,
+		L2DataDir:                 "./" + configs.StarknetDir,  //for Juno
 		CcImage:                   imageOrEmpty(cls[consensus]),
 		CcDataDir:                 "./" + configs.ConsensusDir,
 		VlImage:                   imageOrEmpty(cls[validator]),

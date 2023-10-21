@@ -274,3 +274,46 @@ func MevBoostSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().SortFlags = false
 	return cmd
 }
+
+func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
+	var flags GenCmdFlags
+
+	cmd := &cobra.Command{
+		Use:   "starknet [flags]",
+		Short: "Generate a starknet node config",
+		Long:  "Generate a docker-compose and an environment file for a starknet node configuration",
+		Args:  cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return preValidationGenerateCmd(network, logging, &flags)
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{starknet})
+		},
+	}
+	// Bind flags
+	cmd.Flags().BoolVar(&flags.colour, "colour", true, " Enable colored logs.")
+	cmd.Flags().StringVar(&flags.dbPath, "db-path", "", "Path to the database.")
+	cmd.Flags().StringVar(&flags.ethNode, "eth-node", "", "Websocket endpoint of the Ethereum node used to verify the L2 chain. If using Infura, it looks something like `wss://mainnet.infura.io/ws/v3/your-infura-project-id`'")
+	cmd.Flags().BoolVar(&flags.http, "http", false, "Enables the HTTP RPC server.")
+	cmd.Flags().StringVar(&flags.httpHost, "http-host", "", "Interface on which the HTTP RPC server will listen for requests.")
+	cmd.Flags().StringVar(&flags.httpPort, "http-port", "", "Port on which the HTTP RPC server will listen for requests.")
+	cmd.Flags().BoolVar(&flags.ws, "ws", false, "Websocket RPC server")
+	cmd.Flags().StringVar(&flags.wsHost, "ws-host", "", "Interface on which the Websocket RPC server will listen for requests.")
+	cmd.Flags().StringVar(&flags.wsPort, "ws-port", "", "Port on which the Websocket RPC server will listen for requests.")
+	cmd.Flags().BoolVar(&flags.pprof, "pprof", false, "pprof server")
+	cmd.Flags().StringVar(&flags.pprofHost, "pprof-host", "", "Interface on which the pprof RPC server will listen for requests.")
+	cmd.Flags().StringVar(&flags.pprofPort, "pprof-port", "", "Port on which the pprof RPC server will listen for requests.")
+	cmd.Flags().BoolVar(&flags.metrics, "metrics", false, "metrics server")
+	cmd.Flags().StringVar(&flags.metricsHost, "metrics-host", "", "Interface on which the metrics server will listen for requests.")
+	cmd.Flags().StringVar(&flags.metricsPort, "metrics-port", "", "Port on which the metrics RPC server will listen for requests.")
+	cmd.Flags().BoolVar(&flags.grpc, "grpc", false, "Grpc server.")
+	cmd.Flags().StringVar(&flags.grpcHost, "grpc-host", "", "Interface on which the grpc server will listen for requests.")
+	cmd.Flags().StringVar(&flags.grpcPort, "grpc-port", "", "Port on which the grpc server will listen for requests.")
+	cmd.Flags().StringVar(&flags.logLevel, "log-level", "", "Options: debug, info, warn, error.")
+	cmd.Flags().StringVar(&flags.network, "network", "", "Options: mainnet, goerli, goerli2, integration")
+	cmd.Flags().StringVar(&flags.pendingPollInterval, "pending-poll-interval", "", "How often to fetch the pending block when synced to the head of the chain. Provide a duration like 5s (five seconds) or 10m (10 minutes). Disabled by default.")
+	cmd.Flags().BoolVar(&flags.p2p, "", false, "Enable the p2p server")
+	cmd.Flags().StringVar(&flags.p2pAddr, "p2p-addr", "", "Source address")
+	cmd.Flags().StringVar(&flags.p2pBootPeers, "p2p-boot-peers", "", "Boot nodes")
+	return cmd
+}

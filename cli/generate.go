@@ -19,6 +19,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	// "net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -45,7 +46,7 @@ var (
 )
 
 const (
-	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mev-boost"
+	execution, consensus, validator, mevBoost, starknet = "execution", "consensus", "validator", "mev-boost", "starknet"
 )
 
 type CustomFlags struct {
@@ -62,6 +63,7 @@ type GenCmdFlags struct {
 	executionName     string
 	consensusName     string
 	validatorName     string
+	starknetName      string //starknet
 	checkpointSyncUrl string
 	feeRecipient      string
 	noMev             bool
@@ -83,6 +85,32 @@ type GenCmdFlags struct {
 	waitEpoch         int
 	customEnodes      []string
 	customEnrs        []string
+
+	// juno flags
+	colour            bool
+	dbPath            string
+	ethNode           string
+	http              bool
+	httpHost          string
+	httpPort          string
+	ws                bool
+	wsHost            string
+	wsPort            string
+	pprof             bool
+	pprofHost         string
+	pprofPort         string
+	metrics           bool
+	metricsPort       string
+	metricsHost       string
+	grpc              bool
+	grpcHost          string
+	grpcPort          string
+	logLevel          string
+	network           string
+	pendingPollInterval           string
+	p2p               bool
+	p2pAddr           string
+	p2pBootPeers      string
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -100,6 +128,7 @@ You can generate:
 - Consensus Node
 - Validator Node
 - Mev-Boost Instance
+- Starknet Node
 `,
 		Args: cobra.NoArgs,
 	}
@@ -109,6 +138,7 @@ You can generate:
 	cmd.AddCommand(ConsensusSubCmd(sedgeAction))
 	cmd.AddCommand(ValidatorSubCmd(sedgeAction))
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
+	cmd.AddCommand(StarknetSubCmd(sedgeAction))
 
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
 	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, etc.")
@@ -269,6 +299,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ExecutionClient:         combinedClients.Execution,
 		ConsensusClient:         combinedClients.Consensus,
 		ValidatorClient:         combinedClients.Validator,
+		StarknetClient:          combinedClients.Starknet, //starknet
 		Network:                 network,
 		CheckpointSyncUrl:       flags.checkpointSyncUrl,
 		FeeRecipient:            flags.feeRecipient,
@@ -300,6 +331,32 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		CustomDeployBlockPath:   flags.CustomFlags.customDeployBlock,
 		MevBoostOnValidator:     flags.mevBoostOnVal,
 		ContainerTag:            containerTag,
+
+		// juno
+		Colour:                  flags.colour,
+		DbPath:                  flags.dbPath,
+		EthNode:                 flags.ethNode,
+		Http:                    flags.http,
+		HttpHost:                flags.httpHost,
+		HttpPort:                flags.httpPort,
+		Ws:                      flags.ws,
+		WsHost:                  flags.wsHost,
+		WsPort:                  flags.wsPort,
+		Pprof:                   flags.pprof,
+		PprofHost:               flags.pprofHost,
+		PprofPort:               flags.pprofPort,
+		Metrics:                 flags.metrics,
+		MetricsPort:             flags.metricsPort,
+		MetricsHost:             flags.metricsHost,
+		Grpc:                    flags.grpc,
+		GrpcHost:                flags.grpcHost,
+		GrpcPort:                flags.grpcPort,
+		LogLevel:                flags.logLevel,
+		PendingPollInterval:     flags.pendingPollInterval,  
+		P2p:                     flags.p2p,
+		P2pAddr:                 flags.p2pAddr,
+		P2pBootPeers:            flags.p2pBootPeers,
+
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,
@@ -327,7 +384,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 }
 
 func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
-	var executionClient, consensusClient, validatorClient *clients.Client
+	var executionClient, consensusClient, validatorClient, starknetClient *clients.Client
 	var err error
 
 	// execution client
@@ -399,10 +456,33 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		validatorClient = nil
 	}
 
+		// starknet client
+		if utils.Contains(services, starknet) {
+			starknetParts := strings.Split(flags.starknetName, ":")
+			starknetClient, err = clients.RandomChoice(allClients[starknet])
+			if err != nil {
+				return nil, err
+			}
+			if flags.starknetName != "" {
+				starknetClient.Name = starknetParts[0]
+				if len(starknetParts) > 1 {
+					log.Warn(configs.CustomStarknetImagesWarning)
+					starknetClient.Image = strings.Join(starknetParts[1:], ":")
+				}
+			}
+			starknetClient.SetImageOrDefault(strings.Join(starknetParts[1:], ":"))
+			if err = clients.ValidateClient(starknetClient, starknet); err != nil {
+				return nil, err
+			}
+		} else {
+			starknetClient = nil
+		}
+
 	return &clients.Clients{
 		Execution: executionClient,
 		Consensus: consensusClient,
 		Validator: validatorClient,
+		Starknet:  starknetClient,
 	}, err
 }
 

@@ -34,4 +34,8 @@ var AllClients map[string][]string = map[string][]string{
 		"teku",
 		"lodestar",
 	},
+	// starknet
+	"starknet": {
+		"juno",
+	},
 }

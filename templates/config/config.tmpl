@@ -11,5 +11,8 @@ consensusClients:
 validatorClients:
 {{ range $_, $name := index . "validator" }}  - {{ $name }}
 {{end}}
+starknetClients:
+{{ range $_, $name := index . "starknet" }}  - {{ $name }}
+{{end}}
 logs:
   logLevel: info

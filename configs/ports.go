@@ -27,4 +27,11 @@ const (
 	DefaultAdditionalApiPortCL uint16 = 4001
 	DefaultMetricsPortVL       uint16 = 5056
 	DefaultMevPort             uint16 = 18550
+
+	// Needed for Juno
+	DefaultL2ApiPort           uint16 = 6060 
+	DefaultL2WsPort            uint16 = 6061 
+	DefaultL2MetricsPortCL     uint16 = 9090 
+	DefaultL2PprofPortCL       uint16 = 6062 
+	DefaultL2GrpcPortCL        uint16 = 6064 
 )

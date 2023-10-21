@@ -24,7 +24,9 @@ type EnvData struct {
 	Services                  []string
 	Mev                       bool
 	ElImage                   string
+	L2Image                   string //for juno
 	ElDataDir                 string
+	L2DataDir                 string //for juno
 	CcImage                   string
 	CcDataDir                 string
 	VlImage                   string
@@ -41,6 +43,7 @@ type EnvData struct {
 	Graffiti                  string
 	RelayURLs                 string
 	CheckpointSyncUrl         string
+
 }
 
 // GenData : Struct Data object for script's generation
@@ -49,6 +52,7 @@ type GenData struct {
 	ExecutionClient         *clients.Client
 	ConsensusClient         *clients.Client
 	ValidatorClient         *clients.Client
+	StarknetClient          *clients.Client  //starknet
 	Network                 string
 	CheckpointSyncUrl       string
 	FeeRecipient            string
@@ -80,6 +84,31 @@ type GenData struct {
 	ExecutionAuthUrl        string
 	ConsensusApiUrl         string
 	ContainerTag            string
+	
+	// juno flags
+	Colour                  bool
+	DbPath                  string
+	EthNode                 string
+	Http                    bool
+	HttpHost                string
+	HttpPort                string
+	Ws                      bool
+	WsHost                  string
+	WsPort                  string
+	Pprof                   bool
+	PprofHost               string
+	PprofPort               string
+	Metrics                 bool
+	MetricsPort             string
+	MetricsHost             string
+	Grpc                    bool
+	GrpcHost                string
+	GrpcPort                string
+	LogLevel                string
+	PendingPollInterval     string
+	P2p                     bool
+	P2pAddr                 string
+	P2pBootPeers            string	
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -99,6 +128,14 @@ type DockerComposeData struct {
 	ElMetricsPort           uint16
 	ElApiPort               uint16
 	ElAuthPort              uint16
+
+	// Needed for Juno
+	L2ApiPort               uint16   
+	L2WsPort                uint16	 
+	L2MetricsPort           uint16	
+	L2PprofPort             uint16	
+	L2GrpcPort              uint16	
+
 	ElWsPort                uint16
 	ClDiscoveryPort         uint16
 	ClMetricsPort           uint16
@@ -127,6 +164,32 @@ type DockerComposeData struct {
 	UID                     int // Needed for teku
 	GID                     int // Needed for teku
 	ContainerTag            string
+
+	// juno flags
+	Colour                  bool
+	DbPath                  string
+	EthNode                 string
+	Http                    bool
+	HttpHost                string
+	HttpPort                string
+	Ws                      bool
+	WsHost                  string
+	WsPort                  string
+	Pprof                   bool
+	PprofHost               string
+	PprofPort               string
+	Metrics                 bool
+	MetricsPort             string
+	MetricsHost             string
+	Grpc                    bool
+	GrpcHost                string
+	GrpcPort                string
+	LogLevel                string
+	PendingPollInterval     string
+	P2p                     bool
+	P2pAddr                 string
+	P2pBootPeers            string	
+
 }
 
 // WithConsensusClient returns true if the consensus client is set
@@ -238,10 +301,25 @@ type Services struct {
 	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker,omitempty"`
 	Validator        *Validator        `yaml:"validator,omitempty"`
 	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus,omitempty"`
+	Starknet         *Starknet		   `yaml:"config_starknet,omitempty"` //starknet services
 }
 type Sedge struct {
 	Name string `yaml:"name"`
 }
 type Networks struct {
 	Sedge *Sedge `yaml:"sedge"`
+}
+
+// starknet
+type Starknet struct {
+	StopGracePeriod string   `yaml:"stop_grace_period"`
+	ContainerName   string   `yaml:"container_name"`
+	Restart         string   `yaml:"restart"`
+	Image           string   `yaml:"image"`
+	Networks        []string `yaml:"networks"`
+	Volumes         []string `yaml:"volumes"`
+	Ports           []string `yaml:"ports"`
+	Expose          []int    `yaml:"expose"`
+	Command         []string `yaml:"command"`
+	Logging         *Logging `yaml:"logging,omitempty"`
 }

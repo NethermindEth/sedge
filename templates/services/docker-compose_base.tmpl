@@ -23,6 +23,7 @@ services:
 {{ if .WithValidatorClient}}
 {{template "validator-blocker" .}}{{end}}
 {{template "validator" .}}
+{{template "starknet" .}}
 
 networks:
   sedge:
