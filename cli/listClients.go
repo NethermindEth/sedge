@@ -87,9 +87,13 @@ func buildData(getClients func(string) ([]string, error)) (*ui.ListClientsTable,
 	if err != nil {
 		return nil, err
 	}
+	starknetClients, err := getClients("starknet")
+	if err != nil {
+		return nil, err
+	}
 
 	return &ui.ListClientsTable{
-		ClientTypes: []string{"Execution", "Consensus", "Validator"},
-		Clients:     [][]string{executionClients, consensusClients, validatorClients},
+		ClientTypes: []string{"Execution", "Consensus", "Validator", "Starknet"},
+		Clients:     [][]string{executionClients, consensusClients, validatorClients, starknetClients},
 	}, nil
 }
