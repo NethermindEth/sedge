@@ -315,5 +315,6 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().BoolVar(&flags.p2p, "", false, "Enable the p2p server")
 	cmd.Flags().StringVar(&flags.p2pAddr, "p2p-addr", "", "Source address")
 	cmd.Flags().StringVar(&flags.p2pBootPeers, "p2p-boot-peers", "", "Boot nodes")
+	cmd.Flags().SortFlags = false
 	return cmd
 }

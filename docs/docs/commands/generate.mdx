@@ -5,13 +5,13 @@ id: generate
 
 # Generate
 
-Running `sedge generate` with the different sub commands will generate the docker-compose file that will be used to run the nodes.
+Running `sedge generate` with the different sub commands will generate the docker-compose file that will be used to run the node--
 
 ## Help
 
 ```
 $ sedge generate -h
-Generate new setups according to selected options and flags.
+Generate new setups according to selected options and flag--
 
 It will create a 'docker-compose.yml' and a '.env', which you will need later to run the docker-compose script. You can use 'sedge run' to run the script and start the setup.
 
@@ -38,7 +38,7 @@ Available Commands:
 Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
   -h, --help                   help for generate
-      --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
+      --logging string         Docker logging driver used by all the service-- Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
   -n, --network string         Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge-data")
 
@@ -54,7 +54,7 @@ Use "sedge generate [command] --help" for more information about a command.
 
 :::caution
 
-You should use `--fee-recipient` flag to set the fee recipient address if your setup includes a **validator**. If you don't set it, your priority fee earnings will be deposited into a burn address.
+You should use `--fee-recipient` flag to set the fee recipient address if your setup includes a **validator**. If you don't set it, your priority fee earnings will be deposited into a burn addres--
 
 :::
 
@@ -74,15 +74,15 @@ Usage:
   sedge generate full-node [flags]
 
 Flags:
-  -c, --consensus string                  Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
+  -c, --consensus string                  Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbu-- Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
   -e, --execution string                  Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
-  -v, --validator string                  Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
+  -v, --validator string                  Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbu-- Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
       --checkpoint-sync-url string        Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.
-      --fee-recipient string              Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption
+      --fee-recipient string              Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or reward-- There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it choose-- It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption
       --no-mev-boost                      Not use mev-boost if supported
   -m, --mev-boost-image string            Custom docker image to use for Mev Boost. Example: 'sedge generate full-node --mev-boost-image flashbots/mev-boost:latest-portable'
-      --relay-urls strings                List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate full-node --relay-url=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money
-      --no-validator                      Exclude the validator from the full node setup. Designed for execution and consensus nodes setup without a validator node. Exclude also the validator from other flags. If set, mev-boost will not be used.
+      --relay-urls strings                List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate full-node --relay-url=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbot--net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money
+      --no-validator                      Exclude the validator from the full node setup. Designed for execution and consensus nodes setup without a validator node. Exclude also the validator from other flag-- If set, mev-boost will not be used.
       --jwt-secret-path string            Path to the JWT secret file
       --graffiti string                   Graffiti to be used by the validator
       --map-all                           Map all clients ports to host. Use with care. Useful to allow remote access to the clients
@@ -103,7 +103,7 @@ Flags:
 Global Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
       --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
-      --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
+      --logging string         Docker logging driver used by all the service-- Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
   -n, --network string         Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```
@@ -129,7 +129,7 @@ Flags:
       --execution-api-url string          Execution API endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-api-url=https://api.url.endpoint'
       --execution-auth-url string         Execution AUTH endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-auth-url=https://auth.url.endpoint'
       --checkpoint-sync-url string        Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.
-      --fee-recipient string              Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption
+      --fee-recipient string              Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or reward-- There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it choose-- It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption
       --jwt-secret-path string            Path to the JWT secret file
       --mev-boost-url string              If you are running a mev boost node, and you want to connect to it, you need to set mev-boost-url, if not set, node will not load any mev boost related config.
       --map-all                           Map all clients ports to host. Use with care. Useful to allow remote access to the clients
@@ -144,7 +144,7 @@ Flags:
 Global Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
       --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
-      --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
+      --logging string         Docker logging driver used by all the service-- Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
   -n, --network string         Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```
@@ -174,7 +174,7 @@ Flags:
 Global Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
       --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
-      --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
+      --logging string         Docker logging driver used by all the service-- Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
   -n, --network string         Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```
@@ -183,7 +183,7 @@ Global Flags:
 
 :::caution
 
-You should use `--fee-recipient` flag to set the fee recipient address. If you don't set it, your priority fee earnings will be deposited into a burn address.
+You should use `--fee-recipient` flag to set the fee recipient addres-- If you don't set it, your priority fee earnings will be deposited into a burn addres--
 
 :::
 
@@ -202,7 +202,7 @@ Usage:
 
 Flags:
       --consensus-url string         Consensus endpoint for the validator client to connect to. Example: 'sedge generate validator --consensus-url http://localhost:4000'
-      --fee-recipient string         Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption
+      --fee-recipient string         Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or reward-- There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it choose-- It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption
       --graffiti string              Graffiti to be used by the validator
       --mev-boost                    Use mev-boost while turning on validator node
       --custom-config string         File path or url to use as custom network config file for consensus client.
@@ -215,7 +215,7 @@ Flags:
 Global Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
       --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
-      --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
+      --logging string         Docker logging driver used by all the service-- Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
   -n, --network string         Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```
@@ -230,14 +230,58 @@ Usage:
   sedge generate mev-boost [flags]
 
 Flags:
-      --relay-urls strings       List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate mev-boost --relay-url=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money
+      --relay-urls strings       List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate mev-boost --relay-url=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbot--net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money
   -m, --mev-boost-image string   Custom docker image to use for Mev Boost. Example: 'sedge generate mev-boost --mev-boost-image flashbots/mev-boost:latest-portable'
   -h, --help                     help for mev-boost
 
 Global Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
       --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
-      --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
+      --logging string         Docker logging driver used by all the service-- Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
+  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
+  -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
+```
+
+#### Starknet
+
+```
+$ sedge generate starknet -h
+Generate a docker-compose and an environment file for a starknet node configuration
+
+Usage:
+  sedge generate starknet [flags]
+
+Flags:
+      --colour bool                     Enable colored log.
+      --db-path string                  Path to the database.
+      --eth-node string                 Websocket endpoint of the Ethereum node used to verify the L2 chain. If using Infura, it looks something like `wss://mainnet.infura.io/ws/v3/your-infura-project-id`'"
+      --http string                     Enables the HTTP RPC server.
+      --http-host string                Interface on which the HTTP RPC server will listen for request.
+      --http-port string                Port on which the HTTP RPC server will listen for request.
+      --ws bool                         Websocket RPC server.
+      --ws-host string                  Interface on which the Websocket RPC server will listen for request.
+      --ws-port string                  Port on which the Websocket RPC server will listen for request.
+      --pprof bool                      Pprof server
+      --pprof-host string               Interface on which the pprof RPC server will listen for request.
+      --pprof-port string               Port on which the pprof RPC server will listen for request.
+      --metrics bool                    Metrics server.
+      --metrics-host string             Interface on which the metrics server will listen for request.
+      --metrics-port string             Port on which the metrics RPC server will listen for request.
+      --grpc bool                       Grpc server.
+      --grpc-host string                Interface on which the grpc server will listen for request.
+      --grpc-port string                Port on which the grpc server will listen for request.
+      --log-level string                Options: debug, info, warn, error.
+      --network string                  Options: mainnet, goerli, goerli2, integration.
+      --pending-poll-interval string    How often to fetch the pending block when synced to the head of the chain. Provide a duration like 5s (five seconds) or 10m (10 minutes). Disabled by default.")
+      --p2p bool                        Enable the p2p server.
+      --p2p-addr string                 Source address.
+      --p2p-boot-peers string           Boot nodes.
+      -h, --help                        help for starknet
+
+Global Flags:
+      --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
+      --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
+      --logging string         Docker logging driver used by all the service-- Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
   -n, --network string         Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```

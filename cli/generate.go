@@ -198,6 +198,11 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 			validator: singleUriValidator("execution auth", utils.UriValidator),
 		},
 		{
+			value:     []string{flags.ethNode},
+			check:     flags.ethNode != "",
+			validator: singleUriValidator("eth node", utils.UriValidator),
+		},
+		{
 			value:     []string{flags.consensusApiUrl},
 			check:     flags.consensusApiUrl != "",
 			validator: singleUriValidator("consensus api", utils.UriValidator),
