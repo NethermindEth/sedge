@@ -39,8 +39,8 @@ const (
 	validatorImport = "validator-import"
 	mevBoost        = "mev-boost"
 	configConsensus = "config_consensus"
+	starknet        = "starknet"
 	empty           = "empty"
-	starknet        = "starknet" //for juno
 )
 
 // validateClients validates each client in GenData
@@ -159,12 +159,11 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		"VLMetrics":       configs.DefaultMetricsPortVL,
 		"MevPort":         configs.DefaultMevPort,
 		// Needed for Juno
-		"L2Api":           configs.DefaultL2ApiPort,
-		"L2Ws":            configs.DefaultL2WsPort,
-		"L2Pprof":         configs.DefaultL2PprofPortCL,
-		"L2Metrics":       configs.DefaultL2MetricsPortCL,
-		"L2Grpc":          configs.DefaultL2GrpcPortCL,
-		
+		"L2Api":     configs.DefaultL2ApiPort,
+		"L2Ws":      configs.DefaultL2WsPort,
+		"L2Pprof":   configs.DefaultL2PprofPortCL,
+		"L2Metrics": configs.DefaultL2MetricsPortCL,
+		"L2Grpc":    configs.DefaultL2GrpcPortCL,
 	}
 	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -303,11 +302,11 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ClAdditionalApiPort: gd.Ports["CLAdditionalApi"],
 		VlMetricsPort:       gd.Ports["VLMetrics"],
 		// Needed for Juno
-		L2ApiPort:           gd.Ports["L2Api"],  
-	    L2WsPort:            gd.Ports["L2Ws"],
-		L2MetricsPort:       gd.Ports["L2Metrics"],
-		L2PprofPort:         gd.Ports["L2Pprof"],
-		L2GrpcPort:          gd.Ports["L2Grpc"],
+		L2ApiPort:     gd.Ports["L2Api"],
+		L2WsPort:      gd.Ports["L2Ws"],
+		L2MetricsPort: gd.Ports["L2Metrics"],
+		L2PprofPort:   gd.Ports["L2Pprof"],
+		L2GrpcPort:    gd.Ports["L2Grpc"],
 
 		FallbackELUrls:      gd.FallbackELUrls,
 		ElExtraFlags:        gd.ElExtraFlags,
@@ -333,26 +332,26 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		GID:                     os.Getegid(),
 		ContainerTag:            gd.ContainerTag,
 
-		DbPath:                  gd.DbPath,
-		EthNode:                 gd.EthNode,
-		Colour:                  gd.Colour,
-		Http:                    gd.Http,
-		HttpHost:                gd.HttpHost,
-		Ws:                      gd.Ws,
-		WsHost:                  gd.WsHost,
-		Pprof:                   gd.Pprof,
-		PprofHost:               gd.PprofHost,
-		Metrics:                 gd.Metrics,
-		MetricsHost:             gd.MetricsHost,
-		Grpc:                    gd.Grpc,
-		GrpcHost:                gd.GrpcHost,
-		LogLevel:                gd.LogLevel,
-		PendingPollInterval:     gd.PendingPollInterval,
-		P2p:                     gd.P2p,
-		P2pAddr:                 gd.P2pAddr,
-		P2pBootPeers:            gd.P2pBootPeers,
+		DbPath:              gd.DbPath,
+		EthNode:             gd.EthNode,
+		Colour:              gd.Colour,
+		Http:                gd.Http,
+		HttpHost:            gd.HttpHost,
+		Ws:                  gd.Ws,
+		WsHost:              gd.WsHost,
+		Pprof:               gd.Pprof,
+		PprofHost:           gd.PprofHost,
+		Metrics:             gd.Metrics,
+		MetricsHost:         gd.MetricsHost,
+		Grpc:                gd.Grpc,
+		GrpcHost:            gd.GrpcHost,
+		LogLevel:            gd.LogLevel,
+		PendingPollInterval: gd.PendingPollInterval,
+		P2p:                 gd.P2p,
+		P2pAddr:             gd.P2pAddr,
+		P2pBootPeers:        gd.P2pBootPeers,
 	}
- 
+
 	// Save to writer
 	err = baseTmp.Execute(at, data)
 	if err != nil {
@@ -448,7 +447,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 			gd.MevBoostEndpoint = fmt.Sprintf("%s:%v", configs.DefaultMevBoostEndpoint, gd.Ports["MevPort"])
 		}
 	}
-	
+
 	graffiti := gd.Graffiti
 	if graffiti == "" {
 		graffiti = generateGraffiti(gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient)
@@ -468,7 +467,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ElImage:                   imageOrEmpty(cls[execution]),
 		L2Image:                   imageOrEmpty(cls[starknet]), //for Juno
 		ElDataDir:                 "./" + configs.ExecutionDir,
-		L2DataDir:                 "./" + configs.StarknetDir,  //for Juno
+		L2DataDir:                 "./" + configs.StarknetDir, //for Juno
 		CcImage:                   imageOrEmpty(cls[consensus]),
 		CcDataDir:                 "./" + configs.ConsensusDir,
 		VlImage:                   imageOrEmpty(cls[validator]),
