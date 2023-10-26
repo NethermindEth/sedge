@@ -7,10 +7,10 @@ execution:
     version: 23.7.2
   nethermind:
     name: nethermind/nethermind
-    version: 1.21.0
+    version: 1.21.1
   erigon:
     name: thorax/erigon
-    version: v2.52.5
+    version: v2.53.1
 consensus:
   lighthouse:
     name: sigp/lighthouse
@@ -23,7 +23,7 @@ consensus:
     version: 23.9.0
   prysm:
     name: gcr.io/prysmaticlabs/prysm/beacon-chain
-    version: v4.1.0
+    version: v4.1.1
 validator:
   lighthouse:
     name: sigp/lighthouse
@@ -36,4 +36,4 @@ validator:
     version: 23.9.0
   prysm:
     name: gcr.io/prysmaticlabs/prysm/validator
-    version: v4.1.0
+    version: v4.1.1
