@@ -39,6 +39,6 @@ validator:
     version: v4.0.7
 starknet:
   juno:
-    name: 
-    version: v4.3.0
+    name: nethermind/juno
+    version: v0.7.0
 

@@ -252,30 +252,31 @@ Usage:
   sedge generate starknet [flags]
 
 Flags:
-      --colour bool                     Enable colored log.
       --db-path string                  Path to the database.
-      --eth-node string                 Websocket endpoint of the Ethereum node used to verify the L2 chain. If using Infura, it looks something like `wss://mainnet.infura.io/ws/v3/your-infura-project-id`'"
-      --http string                     Enables the HTTP RPC server.
-      --http-host string                Interface on which the HTTP RPC server will listen for request.
+      --execution-api-url string        Execution API endpoint for the consensus client. Example: 'sedge generate starknet -r --execution-api-url=`https://api.url.endpoint`"
       --http-port string                Port on which the HTTP RPC server will listen for request.
-      --ws bool                         Websocket RPC server.
-      --ws-host string                  Interface on which the Websocket RPC server will listen for request.
       --ws-port string                  Port on which the Websocket RPC server will listen for request.
-      --pprof bool                      Pprof server
-      --pprof-host string               Interface on which the pprof RPC server will listen for request.
       --pprof-port string               Port on which the pprof RPC server will listen for request.
-      --metrics bool                    Metrics server.
-      --metrics-host string             Interface on which the metrics server will listen for request.
       --metrics-port string             Port on which the metrics RPC server will listen for request.
-      --grpc bool                       Grpc server.
-      --grpc-host string                Interface on which the grpc server will listen for request.
       --grpc-port string                Port on which the grpc server will listen for request.
-      --log-level string                Options: debug, info, warn, error.
-      --network string                  Options: mainnet, goerli, goerli2, integration.
-      --pending-poll-interval string    How often to fetch the pending block when synced to the head of the chain. Provide a duration like 5s (five seconds) or 10m (10 minutes). Disabled by default.")
-      --p2p bool                        Enable the p2p server.
-      --p2p-addr string                 Source address.
-      --p2p-boot-peers string           Boot nodes.
+      --pending-poll-interval string    How often to fetch the pending block when synced to the head of the chain. Provide a duration like 5s (five seconds) or 10m (10 minutes). Disabled by default."
+      --consensus                       Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
+	    --execution                       Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
+	    --fallback-execution-urls         Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge generate full-node -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'
+	    --el-extra-flag                   Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'
+	    --extra-flag                      Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge generate full-node --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'
+	    --custom-ttd                      Custom Terminal Total Difficulty to use for the execution client
+	    --custom-chainSpec                File path or url to use as custom network chainSpec for execution client.
+	    --custom-config                   File path or url to use as custom network config file for consensus client.
+	    --genesis                         File path or url to use as custom network genesis for consensus client.
+	    --custom-deploy-block             Custom network deploy block to use for consensus client.
+	    --execution-bootnodes             List of comma separated enodes to use as custom network peers for execution client.
+	    --consensus-bootnodes             List of comma separated enrs to use as custom network peers for consensus client."
+	    --sync-url                        Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.
+	    --fee-recipient                   Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption
+      --relay-urls                      List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate full-node --relay-urls=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money'
+	    --wait-epoch                      Number of epochs to wait before starting and restarting of the starknet client.")
+	    --no-validator                    Exclude the validator from the full node setup. Designed for execution and consensus nodes setup without a validator node.
       -h, --help                        help for starknet
 
 Global Flags:

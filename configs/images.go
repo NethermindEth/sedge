@@ -38,7 +38,7 @@ var ClientImages struct {
 	}
 	// starknet
 	Starknet struct {
-		Juno Image `yaml:"juno"`
+		Juno       Image `yaml:"juno"`
 	}
 }
 

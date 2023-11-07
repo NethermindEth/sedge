@@ -22,6 +22,8 @@ services:
 {{template "consensus" .}}
 {{ if .WithValidatorClient}}
 {{template "validator-blocker" .}}{{end}}
+{{ if .WithFullFlagStarknet}}
+{{template "starknet-blocker" .}}{{end}}
 {{template "validator" .}}
 {{template "starknet" .}}
 

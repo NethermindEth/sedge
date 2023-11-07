@@ -87,30 +87,13 @@ type GenCmdFlags struct {
 	customEnrs        []string
 
 	// juno flags
-	colour            bool
 	dbPath            string
-	ethNode           string
-	http              bool
-	httpHost          string
 	httpPort          string
-	ws                bool
-	wsHost            string
 	wsPort            string
-	pprof             bool
-	pprofHost         string
-	pprofPort         string
-	metrics           bool
-	metricsPort       string
-	metricsHost       string
-	grpc              bool
-	grpcHost          string
 	grpcPort          string
-	logLevel          string
-	network           string
+	metricsPort       string
 	pendingPollInterval           string
-	p2p               bool
-	p2pAddr           string
-	p2pBootPeers      string
+	full              bool
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -197,11 +180,11 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 			check:     flags.executionAuthUrl != "",
 			validator: singleUriValidator("execution auth", utils.UriValidator),
 		},
-		{
-			value:     []string{flags.ethNode},
-			check:     flags.ethNode != "",
-			validator: singleUriValidator("eth node", utils.UriValidator),
-		},
+		// {
+		// 	value:     []string{flags.ethNode},
+		// 	check:     flags.ethNode != "",
+		// 	validator: singleUriValidator("eth node", utils.UriValidator),
+		// },
 		{
 			value:     []string{flags.consensusApiUrl},
 			check:     flags.consensusApiUrl != "",
@@ -298,6 +281,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	}
 
 	vlStartGracePeriod := configs.NetworkEpochTime(network) * time.Duration(flags.waitEpoch)
+	slStartGracePeriod := configs.NetworkEpochTime(network) * time.Duration(flags.waitEpoch)
 
 	// Generate docker-compose scripts
 	gd := generate.GenData{
@@ -323,6 +307,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		MevBoostEndpoint:        flags.mevBoostUrl,
 		Services:                services,
 		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
+		SLStartGracePeriod:      uint(slStartGracePeriod.Seconds()), //for starknet
 		ExecutionApiUrl:         flags.executionApiUrl,
 		ExecutionAuthUrl:        flags.executionAuthUrl,
 		ConsensusApiUrl:         flags.consensusApiUrl,
@@ -338,29 +323,12 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ContainerTag:            containerTag,
 
 		// juno
-		Colour:                  flags.colour,
 		DbPath:                  flags.dbPath,
-		EthNode:                 flags.ethNode,
-		Http:                    flags.http,
-		HttpHost:                flags.httpHost,
 		HttpPort:                flags.httpPort,
-		Ws:                      flags.ws,
-		WsHost:                  flags.wsHost,
 		WsPort:                  flags.wsPort,
-		Pprof:                   flags.pprof,
-		PprofHost:               flags.pprofHost,
-		PprofPort:               flags.pprofPort,
-		Metrics:                 flags.metrics,
 		MetricsPort:             flags.metricsPort,
-		MetricsHost:             flags.metricsHost,
-		Grpc:                    flags.grpc,
-		GrpcHost:                flags.grpcHost,
 		GrpcPort:                flags.grpcPort,
-		LogLevel:                flags.logLevel,
 		PendingPollInterval:     flags.pendingPollInterval,  
-		P2p:                     flags.p2p,
-		P2pAddr:                 flags.p2pAddr,
-		P2pBootPeers:            flags.p2pBootPeers,
 
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
@@ -461,27 +429,27 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		validatorClient = nil
 	}
 
-		// starknet client
-		if utils.Contains(services, starknet) {
-			starknetParts := strings.Split(flags.starknetName, ":")
-			starknetClient, err = clients.RandomChoice(allClients[starknet])
-			if err != nil {
-				return nil, err
-			}
-			if flags.starknetName != "" {
-				starknetClient.Name = starknetParts[0]
-				if len(starknetParts) > 1 {
-					log.Warn(configs.CustomStarknetImagesWarning)
-					starknetClient.Image = strings.Join(starknetParts[1:], ":")
-				}
-			}
-			starknetClient.SetImageOrDefault(strings.Join(starknetParts[1:], ":"))
-			if err = clients.ValidateClient(starknetClient, starknet); err != nil {
-				return nil, err
-			}
-		} else {
-			starknetClient = nil
+	// starknet client
+	if utils.Contains(services, starknet) {
+		starknetParts := strings.Split(flags.starknetName, ":")
+		starknetClient, err = clients.RandomChoice(allClients[starknet])
+		if err != nil {
+			return nil, err
 		}
+		if flags.starknetName != "" {
+			starknetClient.Name = starknetParts[0]
+			if len(starknetParts) > 1 {
+				log.Warn(configs.CustomStarknetImagesWarning)
+				starknetClient.Image = strings.Join(starknetParts[1:], ":")
+			}
+		}
+		starknetClient.SetImageOrDefault(strings.Join(starknetParts[1:], ":"))
+		if err = clients.ValidateClient(starknetClient, starknet); err != nil {
+			return nil, err
+		}
+	} else {
+		starknetClient = nil
+	}
 
 	return &clients.Clients{
 		Execution: executionClient,

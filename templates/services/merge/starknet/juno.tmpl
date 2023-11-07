@@ -20,28 +20,21 @@
       - {{.L2ApiPort}}
       - {{.L2WsPort}}
     command:
-      - --colour={{.Colour}}
-      - --db-path={{.DbPath}}
-      - --eth-node={{ .EthNode}}
-      - --http={{if .Http}}{{.Http}}{{else}}true{{end}}
-      - --http-host={{if .HttpHost}}{{.HttpHost}}{{else}}127.0.0.1{{end}}
+      - --colour=true
+      - --db-path=/juno/data
+      - --eth1-endpoints=${EC_API_URL}
+      - --http=0.0.0.0
+      - --http-host=0.0.0.0
       - --http-port={{.L2ApiPort}}
-      - --ws={{if .Ws}}{{.Ws}}{{else}}false{{end}}
-      - --ws-host={{if .WsHost}}{{.WsHost}}{{else}}127.0.0.1{{end}}
+      - --ws=false
+      - --ws-host=0.0.0.0
       - --ws-port={{.L2WsPort}}
-      - --pprof={{if .Pprof}}{{.Pprof}}{{else}}false{{end}}
-      - --pprof-host={{if .PprofHost}}{{.PprofHost}}{{else}}127.0.0.1{{end}}
-      - --pprof-port={{.L2PprofPort}}
-      - --metrics={{if .Metrics}}{{.Metrics}}{{else}}false{{end}}
-      - --metrics-host={{if .MetricsHost}}{{.MetricsHost}}{{else}}127.0.0.1{{end}}
+      - --metrics=false
+      - --metrics-host=0.0.0.0
       - --metrics-port={{.L2MetricsPort}}
-      - --grpc={{if .Grpc}}{{.Grpc}}{{else}}false{{end}}
-      - --grpc-host={{if .GrpcHost}}{{.GrpcHost}}{{else}}127.0.0.1{{end}}
+      - --grpc=false
+      - --grpc-host=0.0.0.0
       - --grpc-port={{.L2GrpcPort}}
-      - --log-level={{if .LogLevel}}{{.LogLevel}}{{else}}info{{end}}
-      - --network={{if .Network}}{{.Network}}{{else}}mainnet{{end}}
-      - --pending-poll-interval={{if .PendingPollInterval}}{{.PendingPollInterval}}{{else}}10m{{end}}
-      - --p2p={{if .P2p}}{{.P2p}}{{else}}false{{end}}
-      - --p2p-addr={{.P2pAddr}}
-      - --p2p-boot-peers={{.P2pBootPeers}}
-{{ end }}
+      - --network=${NETWORK}
+      - --pending-poll-interval=10s
+      {{end}}
