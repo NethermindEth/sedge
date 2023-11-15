@@ -76,6 +76,20 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		SupportsMEVBoost:   false,
 		CheckpointSyncURL:  "https://checkpoint-sync.holesky.ethpandaops.io/",
 	},
+	NetworkVolta: {
+		Name:               NetworkVolta,
+		NetworkService:     "merge",
+		GenesisForkVersion: "0x00001020",
+		SupportsMEVBoost:   true,
+		CheckpointSyncURL:  "https://goerli.checkpoint-sync.ethpandaops.io",
+	},
+	NetworkEnergyWeb: {
+		Name:               NetworkEnergyWeb,
+		NetworkService:     "merge",
+		GenesisForkVersion: "0x00001020",
+		SupportsMEVBoost:   true,
+		CheckpointSyncURL:  "https://goerli.checkpoint-sync.ethpandaops.io",
+	},
 	NetworkCustom: {
 		Name:               NetworkCustom,
 		NetworkService:     "merge",

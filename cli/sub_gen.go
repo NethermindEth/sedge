@@ -17,6 +17,8 @@ package cli
 
 import (
 	"errors"
+	"fmt"
+	"slices"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/spf13/cobra"
@@ -275,5 +277,64 @@ func MevBoostSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().StringVarP(&flags.mevImage, "mev-boost-image", "m", "", "Custom docker image to use for Mev Boost. Example: 'sedge generate mev-boost --mev-boost-image flashbots/mev-boost:latest-portable'")
 	cmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia etc.")
 	cmd.Flags().SortFlags = false
+	return cmd
+}
+
+// POA Network Error msg
+var ErrNotPOANetworkFlags = errors.New("the provided network is not a poa network")
+
+func validatePOANetwork(network string) error {
+	// validating POA network
+	fmt.Printf("Validating network %s\n", network)
+	var networks = []string{"volta", "EnergyWeb"}
+	if !slices.Contains(networks, network) {
+		return ErrNotPOANetworkFlags
+	}
+	return nil
+}
+
+func PoaSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
+	var flags GenCmdFlags
+
+	cmd := &cobra.Command{
+		Use:   "poa [flags] [args]",
+		Short: "Generate a poa node config",
+		Long: "Generate a docker-compose and an environment file with a execution node configuration.\n" +
+			"Valid args: name of execution clients according to network\n\n" +
+			"Should be one of: nethermind, geth, besu, erigon. If you don't provide one, it will chosen randomly.\n" +
+			"Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate execution nethermind:docker.image'. If you want to use the default docker image, just use the client name",
+
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) > 0 {
+				if cobra.ExactArgs(1)(cmd, args) != nil {
+					return errors.New("requires one argument")
+				}
+				flags.poaName = args[0]
+			}
+			return nil
+		},
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Printf("Network: %s\n", network)
+			if err := validatePOANetwork(network); err != nil {
+				return err
+			}
+			return preValidationGenerateCmd(network, logging, &flags)
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Printf("Testing %s Node\n", poa)
+
+			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{poa})
+		},
+	}
+
+	// Bind flags
+	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")
+	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
+	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
+	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
+	cmd.Flags().StringSliceVar(&flags.customEnodes, "execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
+	cmd.Flags().StringArrayVar(&flags.elExtraFlags, "el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge generate consensus--el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().SortFlags = false
+
 	return cmd
 }

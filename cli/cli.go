@@ -39,18 +39,21 @@ import (
 )
 
 const (
-	NetworkMainnet = "mainnet"
-	NetworkGoerli  = "goerli"
-	NetworkSepolia = "sepolia"
-	NetworkGnosis  = "gnosis"
-	NetworkChiado  = "chiado"
-	NetworkHolesky = "holesky"
-	NetworkCustom  = "custom"
+	NetworkMainnet   = "mainnet"
+	NetworkGoerli    = "goerli"
+	NetworkSepolia   = "sepolia"
+	NetworkGnosis    = "gnosis"
+	NetworkChiado    = "chiado"
+	NetworkHolesky   = "holesky"
+	NetworkCustom    = "custom"
+	NetworkVolta     = "volta"
+	NetworkEnergyWeb = "EnergyWeb"
 
 	NodeTypeFullNode  = "full-node"
 	NodeTypeExecution = "execution"
 	NodeTypeConsensus = "consensus"
 	NodeTypeValidator = "validator"
+	NodeTypePoa       = "poa"
 
 	Randomize = "randomize"
 
@@ -97,6 +100,7 @@ func CliCmd(p ui.Prompter, actions actions.SedgeActions, depsMgr dependencies.De
 - Execution Node
 - Consensus Node
 - Validator Node
+- Poa Node
 
 Follow the prompts to select the options you want for your node. At the end of the process, you will
 be asked to run the generated setup or not. If you chose to run the setup, it will be executed for you
@@ -120,6 +124,8 @@ using docker compose command behind the scenes.
 				return setupConsensusNode(p, o, actions, depsMgr)
 			case NodeTypeValidator:
 				return setupValidatorNode(p, o, actions, depsMgr)
+			case NodeTypePoa:
+				return setupExecutionNode(p, o, actions, depsMgr)
 			}
 			return nil
 		},

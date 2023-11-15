@@ -45,7 +45,7 @@ var (
 )
 
 const (
-	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mev-boost"
+	execution, consensus, validator, mevBoost, poa = "execution", "consensus", "validator", "mev-boost", "poa"
 )
 
 type CustomFlags struct {
@@ -61,6 +61,7 @@ type GenCmdFlags struct {
 	executionName     string
 	consensusName     string
 	validatorName     string
+	poaName           string
 	checkpointSyncUrl string
 	feeRecipient      string
 	noMev             bool
@@ -100,6 +101,7 @@ You can generate:
 - Consensus Node
 - Validator Node
 - Mev-Boost Instance
+- Poa Node
 `,
 		Args: cobra.NoArgs,
 	}
@@ -109,9 +111,10 @@ You can generate:
 	cmd.AddCommand(ConsensusSubCmd(sedgeAction))
 	cmd.AddCommand(ValidatorSubCmd(sedgeAction))
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
+	cmd.AddCommand(PoaSubCmd(sedgeAction))
 
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
-	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado, etc.")
+	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado, volta, EnergyWeb etc.")
 	cmd.PersistentFlags().StringVar(&logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
 	cmd.PersistentFlags().StringVar(&containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.")
 	return cmd
@@ -220,6 +223,8 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 }
 
 func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActions, services []string) error {
+
+	fmt.Printf("Parent called: %s\n", flags.poaName)
 	// Warn if ports are being exposed
 	if flags.mapAllPorts {
 		log.Warn(configs.MapAllPortsWarning)
