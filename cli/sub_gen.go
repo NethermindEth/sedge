@@ -282,23 +282,18 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		Use:   "starknet [flags] --execution-api-url <URL>",
 		Short: "Generate a starknet node config",
 		Long: "Generate a docker-compose and an environment file for a starknet node configuration\n" +
-			"Valid args: url of execution clients according to network\n\n" +
-			"\n\n" +
-			"Required flags:\n" +
-			"- '--execution-api-url'\n",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) > 0 {
-				if cobra.ExactArgs(1)(cmd, args) != nil {
-					return errors.New("requires one argument")
-				}
-				flags.consensusName = args[0]
-			}
-			return nil
-		},
+			"Valid args: url of execution clients according to network\n\n",
+		Args: cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
+			if !flags.full {
+				err := cmd.MarkFlagRequired("execution-api-url")
+				if err != nil {
+					return nil
+				}
+			}	
 			return preValidationGenerateCmd(network, logging, &flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
