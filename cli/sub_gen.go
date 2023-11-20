@@ -18,7 +18,6 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"slices"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/spf13/cobra"
@@ -285,9 +284,17 @@ var ErrNotPOANetworkFlags = errors.New("the provided network is not a poa networ
 
 func validatePOANetwork(network string) error {
 	// validating POA network
+	found := false
+	var networks = []string{"volta", "energyweb"}
 	fmt.Printf("Validating network %s\n", network)
-	var networks = []string{"volta", "EnergyWeb"}
-	if !slices.Contains(networks, network) {
+
+	for _, n := range networks {
+		if n == network {
+			found = true
+			break
+		}
+	}
+	if !found {
 		return ErrNotPOANetworkFlags
 	}
 	return nil
@@ -309,7 +316,7 @@ func PoaSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
 					return errors.New("requires one argument")
 				}
-				flags.poaName = args[0]
+				flags.executionName = args[0]
 			}
 			return nil
 		},
@@ -321,9 +328,7 @@ func PoaSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			return preValidationGenerateCmd(network, logging, &flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Printf("Testing %s Node\n", poa)
-
-			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{poa})
+			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{execution})
 		},
 	}
 

@@ -47,13 +47,12 @@ const (
 	NetworkHolesky   = "holesky"
 	NetworkCustom    = "custom"
 	NetworkVolta     = "volta"
-	NetworkEnergyWeb = "EnergyWeb"
+	Networkenergyweb = "energyweb"
 
 	NodeTypeFullNode  = "full-node"
 	NodeTypeExecution = "execution"
 	NodeTypeConsensus = "consensus"
 	NodeTypeValidator = "validator"
-	NodeTypePoa       = "poa"
 
 	Randomize = "randomize"
 
@@ -124,8 +123,6 @@ using docker compose command behind the scenes.
 				return setupConsensusNode(p, o, actions, depsMgr)
 			case NodeTypeValidator:
 				return setupValidatorNode(p, o, actions, depsMgr)
-			case NodeTypePoa:
-				return setupExecutionNode(p, o, actions, depsMgr)
 			}
 			return nil
 		},

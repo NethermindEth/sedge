@@ -29,14 +29,14 @@ const (
 	NetworkGnosis    = "gnosis"
 	NetworkChiado    = "chiado"
 	NetworkHolesky   = "holesky"
-	NetworkVolta     = "volta" //define volta
-	NetworkEnergyWeb = "EnergyWeb" //define EnergyWeb
+	NetworkVolta     = "volta"
+	NetworkEnergyWeb = "energyweb"
 	NetworkCustom    = "custom"
 )
 
 var ErrInvalidNetwork = errors.New("invalid network")
 
-//added volta and EnergyWeb
+// added volta and EnergyWeb
 func NetworkCheck(value string) error {
 	switch value {
 	case NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky, NetworkCustom, NetworkVolta, NetworkEnergyWeb:
@@ -56,8 +56,8 @@ func NetworkSupported() []string {
 		NetworkChiado,
 		NetworkHolesky,
 		NetworkCustom,
-		NetworkVolta, //added volta
-		NetworkEnergyWeb, //added energyweb
+		NetworkVolta,
+		NetworkEnergyWeb,
 	}
 }
 
