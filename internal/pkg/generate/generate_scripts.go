@@ -37,7 +37,7 @@ const (
 	consensus       = "consensus"
 	validator       = "validator"
 	validatorImport = "validator-import"
-	starknetImport = "starknet-import"
+	starknetImport  = "starknet-import"
 	mevBoost        = "mev-boost"
 	configConsensus = "config_consensus"
 	starknet        = "starknet"
@@ -206,7 +206,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		}
 	}
 	validatorBlockerTemplate := "validator-blocker"
-	starknetBlockerTemplate  := "starknet-blocker"
+	starknetBlockerTemplate := "starknet-blocker"
 
 	// Parse validator-blocker template
 	tmp, err := templates.Services.ReadFile(strings.Join([]string{"services", validatorBlockerTemplate + ".tmpl"}, "/"))
@@ -392,6 +392,14 @@ func EnvFile(gd *GenData, at io.Writer) error {
 			return err
 		}
 	}
+
+	eth1Endpoint := gd.Eth1Endpoint
+	if cls[starknet] != nil {
+		if eth1Endpoint == "" {
+			eth1Endpoint = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELApi"])
+		}
+	}
+
 	executionApiUrl := gd.ExecutionApiUrl
 	executionAuthUrl := gd.ExecutionAuthUrl
 	if cls[execution] != nil {
@@ -444,7 +452,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 
 	graffiti := gd.Graffiti
 	if graffiti == "" {
-		graffiti = generateGraffiti(gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient, gd.StarknetClient )
+		graffiti = generateGraffiti(gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient, gd.StarknetClient)
 	}
 
 	if len(gd.RelayURLs) == 0 {
@@ -467,6 +475,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		VlImage:                   imageOrEmpty(cls[validator]),
 		VlDataDir:                 "./" + configs.ValidatorDir,
 		ExecutionApiURL:           executionApiUrl,
+		Eth1Endpoint:              eth1Endpoint,
 		ExecutionAuthURL:          executionAuthUrl,
 		ConsensusApiURL:           consensusApiUrl,
 		ConsensusAdditionalApiURL: consensusAdditionalApiUrl,

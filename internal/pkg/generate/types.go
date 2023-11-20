@@ -43,6 +43,7 @@ type EnvData struct {
 	Graffiti                  string
 	RelayURLs                 string
 	CheckpointSyncUrl         string
+	Eth1Endpoint              string
 }
 
 // GenData : Struct Data object for script's generation
@@ -86,6 +87,7 @@ type GenData struct {
 	ContainerTag            string
 
 	// juno flags
+	Eth1Endpoint        string
 	DbPath              string
 	HttpPort            string
 	WsPort              string

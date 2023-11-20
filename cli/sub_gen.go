@@ -289,7 +289,7 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 				return err
 			}
 			if !flags.full {
-				err := cmd.MarkFlagRequired("execution-api-url")
+				err := cmd.MarkFlagRequired("eth-1-endpoint")
 				if err != nil {
 					return nil
 				}
@@ -311,6 +311,7 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	}
 	// Bind flags
 	cmd.Flags().StringVar(&flags.executionApiUrl, "execution-api-url", "", "Execution API endpoint for the consensus client. Example: 'sedge generate starknet -r --execution-api-url=https://api.url.endpoint'")
+	cmd.Flags().StringVar(&flags.eth1Endpoint, "eth-1-endpoint", "", "Eth 1 endpoint for connecting to L1 client node. Example: 'sedge generate starknet -r --eth-1-endpoint=wss://api.url.endpoint'")
 	cmd.Flags().StringVar(&flags.dbPath, "db-path", "", "Path to the database.")
 	cmd.Flags().StringVar(&flags.httpPort, "http-port", "", "Port on which the HTTP RPC server will listen for requests.")
 	cmd.Flags().StringVar(&flags.wsPort, "ws-port", "", "Port on which the Websocket RPC server will listen for requests.")

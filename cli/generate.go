@@ -19,6 +19,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+
 	// "net/http"
 	"os"
 	"path/filepath"
@@ -87,6 +88,7 @@ type GenCmdFlags struct {
 	customEnrs        []string
 
 	// juno flags
+	eth1Endpoint      string
 	dbPath            string
 	httpPort          string
 	wsPort            string
@@ -180,11 +182,11 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 			check:     flags.executionAuthUrl != "",
 			validator: singleUriValidator("execution auth", utils.UriValidator),
 		},
-		// {
-		// 	value:     []string{flags.ethNode},
-		// 	check:     flags.ethNode != "",
-		// 	validator: singleUriValidator("eth node", utils.UriValidator),
-		// },
+		{
+			value:     []string{flags.eth1Endpoint},
+			check:     flags.eth1Endpoint != "",
+			validator: singleUriValidator("eth node", utils.Eth1Validator),
+		},
 		{
 			value:     []string{flags.consensusApiUrl},
 			check:     flags.consensusApiUrl != "",
@@ -323,6 +325,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ContainerTag:            containerTag,
 
 		// juno
+		Eth1Endpoint:            flags.eth1Endpoint, 
 		DbPath:                  flags.dbPath,
 		HttpPort:                flags.httpPort,
 		WsPort:                  flags.wsPort,
