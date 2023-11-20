@@ -15,7 +15,9 @@
       - ${L2_DATA_DIR}:/juno/data{{if .MapAllPorts}}
     ports:
       - "{{.L2ApiPort}}:{{.L2ApiPort}}"
-      - "{{.L2WsPort}}:{{.L2WSPort}}"{{end}}
+      - "{{.L2WsPort}}:{{.L2WsPort}}"
+      - "{{.L2MetricsPort}}:{{.L2MetricsPort}}"
+      - "{{.L2GrpcPort}}:{{.L2GrpcPort}}"{{end}}
     expose:
       - {{.L2ApiPort}}
       - {{.L2WsPort}}
