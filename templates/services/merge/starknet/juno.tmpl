@@ -5,7 +5,7 @@
     environment:
       - TERM=xterm-256color
       - COLORTERM=truecolor
-    stop_grace_period: 30m
+    stop_grace_period: 30s
     container_name: sedge-starknet-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
     image: ${L2_IMAGE_VERSION}
@@ -15,9 +15,7 @@
       - ${L2_DATA_DIR}:/juno/data{{if .MapAllPorts}}
     ports:
       - "{{.L2ApiPort}}:{{.L2ApiPort}}"
-      - "{{.L2WsPort}}:{{.L2WsPort}}"
-      - "{{.L2MetricsPort}}:{{.L2MetricsPort}}"
-      - "{{.L2GrpcPort}}:{{.L2GrpcPort}}"{{end}}
+      - "{{.L2WsPort}}:{{.L2WSPort}}"{{end}}
     expose:
       - {{.L2ApiPort}}
       - {{.L2WsPort}}
@@ -26,16 +24,16 @@
       - --db-path=/juno/data
       - --eth-node=${ETH_1_ENDPOINT}
       - --http=true
-      - --http-host=localhost
+      - --http-host=0.0.0.0
       - --http-port={{.L2ApiPort}}
       - --ws=false
-      - --ws-host=localhost
+      - --ws-host=0.0.0.0
       - --ws-port={{.L2WsPort}}
       - --metrics=false
-      - --metrics-host=localhost
+      - --metrics-host=0.0.0.0
       - --metrics-port={{.L2MetricsPort}}
       - --grpc=false
-      - --grpc-host=localhost
+      - --grpc-host=0.0.0.0
       - --grpc-port={{.L2GrpcPort}}
       - --pending-poll-interval=10s
       {{end}}
