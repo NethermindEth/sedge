@@ -24,7 +24,7 @@
     command:
       - --colour=true
       - --db-path=/juno/data
-      - --eth-node=${ETH-1-ENDPOINT}
+      - --eth-node=${ETH_1_ENDPOINT}
       - --http=true
       - --http-host=localhost
       - --http-port={{.L2ApiPort}}
@@ -37,6 +37,5 @@
       - --grpc=false
       - --grpc-host=localhost
       - --grpc-port={{.L2GrpcPort}}
-      - --network=${NETWORK}
       - --pending-poll-interval=10s
       {{end}}
