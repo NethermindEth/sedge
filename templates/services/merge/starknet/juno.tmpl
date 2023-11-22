@@ -12,10 +12,10 @@
     networks:
       - sedge
     volumes:
-      - ${L2_DATA_DIR}:/juno/data{{if .MapAllPorts}}
+      - ${L2_DATA_DIR}:/juno/data
     ports:
       - "{{.L2ApiPort}}:{{.L2ApiPort}}"
-      - "{{.L2WsPort}}:{{.L2WSPort}}"{{end}}
+      - "{{.L2WsPort}}:{{.L2WSPort}}"
     expose:
       - {{.L2ApiPort}}
       - {{.L2WsPort}}
