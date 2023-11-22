@@ -15,7 +15,7 @@
       - ${L2_DATA_DIR}:/juno/data
     ports:
       - "{{.L2ApiPort}}:{{.L2ApiPort}}"
-      - "{{.L2WsPort}}:{{.L2WSPort}}"
+      - "{{.L2WsPort}}:{{.L2WsPort}}"
     expose:
       - {{.L2ApiPort}}
       - {{.L2WsPort}}
