@@ -23,7 +23,8 @@ services:
 {{ if .WithValidatorClient}}
 {{template "validator-blocker" .}}{{end}}
 {{ if .WithFullFlagStarknet}}
-{{template "starknet-blocker" .}}{{end}}
+{{template "starknet-blocker" .}}
+{{template "nginx-proxy" .}}{{end}}
 {{template "validator" .}}
 {{template "starknet" .}}
 

@@ -208,6 +208,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 	validatorBlockerTemplate := "validator-blocker"
 	starknetBlockerTemplate := "starknet-blocker"
+	nginxServerTemplate := "nginx-proxy"
 
 	// Parse validator-blocker template
 	tmp, err := templates.Services.ReadFile(strings.Join([]string{"services", validatorBlockerTemplate + ".tmpl"}, "/"))
@@ -224,6 +225,15 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		return err
 	}
 	if _, err = baseTmp.Parse(string(tmp2)); err != nil {
+		return err
+	}
+
+	// Parse nginx-proxy template
+	tmp3, err := templates.Services.ReadFile(strings.Join([]string{"services", nginxServerTemplate + ".tmpl"}, "/"))
+	if err != nil {
+		return err
+	}
+	if _, err = baseTmp.Parse(string(tmp3)); err != nil {
 		return err
 	}
 

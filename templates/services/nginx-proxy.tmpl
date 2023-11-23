@@ -1,0 +1,12 @@
+{{/* nginx-proxy.tmpl */}}
+{{ define "nginx-proxy" }}
+  nginx:
+    container_name: sedge-nginx-proxy{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    image: nginx:latest
+    networks:
+       - sedge
+    ports:
+      - "80:80"  # Expose port 80 for Nginx
+    volumes:
+      - ./execution_proxy.conf:/etc/nginx/conf.d/execution_proxy.conf:ro
+{{ end }}
