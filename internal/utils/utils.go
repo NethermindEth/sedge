@@ -223,23 +223,7 @@ func UriValidator(input []string) (string, bool) {
 		if err != nil {
 			return uri, false
 		}
-		wrongScheme := u.Scheme != "http" && u.Scheme != "https"
-
-		if wrongScheme || u.Host == "" {
-			return uri, false
-		}
-	}
-	return "", true
-}
-
-// UriValidator validates a URI and returns true if it is valid.
-func Eth1Validator(input []string) (string, bool) {
-	for _, uri := range input {
-		u, err := url.Parse(uri)
-		if err != nil {
-			return uri, false
-		}
-		wrongScheme := u.Scheme != "wss"
+		wrongScheme := u.Scheme != "http" && u.Scheme != "https" && u.Scheme != "wss"
 
 		if wrongScheme || u.Host == "" {
 			return uri, false

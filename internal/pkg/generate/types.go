@@ -89,10 +89,6 @@ type GenData struct {
 	// juno flags
 	Eth1Endpoint        string
 	DbPath              string
-	HttpPort            string
-	WsPort              string
-	MetricsPort         string
-	GrpcPort            string
 	PendingPollInterval string
 }
 
@@ -150,10 +146,6 @@ type DockerComposeData struct {
 
 	// juno flags
 	DbPath              string
-	HttpPort            string
-	WsPort              string
-	MetricsPort         string
-	GrpcPort            string
 	PendingPollInterval string
 }
 

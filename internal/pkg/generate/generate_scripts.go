@@ -393,12 +393,12 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		}
 	}
 
-	eth1Endpoint := gd.Eth1Endpoint
-	if cls[starknet] != nil {
-		if eth1Endpoint == "" {
-			eth1Endpoint = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELApi"])
-		}
-	}
+	// eth1Endpoint := gd.Eth1Endpoint
+	// if cls[starknet] != nil {
+	// 	if eth1Endpoint == "" {
+	// 		eth1Endpoint = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELApi"])
+	// 	}
+	// }
 
 	executionApiUrl := gd.ExecutionApiUrl
 	executionAuthUrl := gd.ExecutionAuthUrl
@@ -475,7 +475,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		VlImage:                   imageOrEmpty(cls[validator]),
 		VlDataDir:                 "./" + configs.ValidatorDir,
 		ExecutionApiURL:           executionApiUrl,
-		Eth1Endpoint:              eth1Endpoint,
+		// Eth1Endpoint:              eth1Endpoint,
 		ExecutionAuthURL:          executionAuthUrl,
 		ConsensusApiURL:           consensusApiUrl,
 		ConsensusAdditionalApiURL: consensusAdditionalApiUrl,

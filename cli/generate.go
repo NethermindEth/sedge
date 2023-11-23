@@ -90,10 +90,6 @@ type GenCmdFlags struct {
 	// juno flags
 	eth1Endpoint      string
 	dbPath            string
-	httpPort          string
-	wsPort            string
-	grpcPort          string
-	metricsPort       string
 	pendingPollInterval           string
 	full              bool
 }
@@ -181,11 +177,6 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 			value:     []string{flags.executionAuthUrl},
 			check:     flags.executionAuthUrl != "",
 			validator: singleUriValidator("execution auth", utils.UriValidator),
-		},
-		{
-			value:     []string{flags.eth1Endpoint},
-			check:     flags.eth1Endpoint != "",
-			validator: singleUriValidator("eth node", utils.Eth1Validator),
 		},
 		{
 			value:     []string{flags.consensusApiUrl},
@@ -327,10 +318,6 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		// juno
 		Eth1Endpoint:            flags.eth1Endpoint, 
 		DbPath:                  flags.dbPath,
-		HttpPort:                flags.httpPort,
-		WsPort:                  flags.wsPort,
-		MetricsPort:             flags.metricsPort,
-		GrpcPort:                flags.grpcPort,
 		PendingPollInterval:     flags.pendingPollInterval,  
 
 	}
