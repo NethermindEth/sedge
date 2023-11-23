@@ -35,5 +35,5 @@
       - --grpc=false
       - --grpc-host=0.0.0.0
       - --grpc-port={{.L2GrpcPort}}
-      - --pending-poll-interval={{.PendingPollInterval}}
+      - --pending-poll-interval={{if .PendingPollInterval}}{{.PendingPollInterval}}{{else}}10s{{end}}
       {{end}}
