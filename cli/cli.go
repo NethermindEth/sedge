@@ -345,7 +345,7 @@ func setupStarknetNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, 
 	} else {
 		if err := runPromptActions(p, o,
 			inputEthNode,
-			inputDbPath,
+			// inputDbPath,
 		); err != nil {
 			return err
 		}
@@ -1112,10 +1112,10 @@ func inputEthNode(p ui.Prompter, o *CliCmdOptions) (err error) {
 	return
 }
 
-func inputDbPath(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.DbPath, err = p.InputFilePath("Custom path to database", "", true, ".yml", ".yaml", ".txt", ".json")
-	return
-}
+// func inputDbPath(p ui.Prompter, o *CliCmdOptions) (err error) {
+// 	o.genData.DbPath, err = p.InputFilePath("Custom path to database", "", true, ".yml", ".yaml", ".txt", ".json")
+// 	return
+// }
 
 func absPathInPlace(path *string) error {
 	absPath, err := filepath.Abs(*path)

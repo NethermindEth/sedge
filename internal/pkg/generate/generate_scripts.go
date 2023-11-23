@@ -20,6 +20,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -342,8 +343,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		GID:                     os.Getegid(),
 		ContainerTag:            gd.ContainerTag,
 
-		DbPath:              gd.DbPath,
+		// DbPath:              gd.DbPath,
 		PendingPollInterval: gd.PendingPollInterval,
+		Full:                gd.Full,
 	}
 
 	// Save to writer
@@ -369,6 +371,16 @@ func EnvFile(gd *GenData, at io.Writer) error {
 
 	cls := mapClients(gd)
 
+	// modify the EC_API_URL endpoint to use for starknet
+	var executionEndpoint string
+	if gd.Full {
+		endpoint := endpointOrEmpty(cls[execution])
+		if strings.HasPrefix(endpoint, "http") {
+			executionEndpoint = strings.TrimPrefix(endpoint, "http")
+		} 
+		gd.ExecutionApiUrl = "wss" + executionEndpoint + ":" + strconv.Itoa(int(gd.Ports["ELApi"]))
+	}
+
 	for tmpKind, client := range cls {
 		var tmp []byte
 		if client == nil {
@@ -392,13 +404,6 @@ func EnvFile(gd *GenData, at io.Writer) error {
 			return err
 		}
 	}
-
-	// eth1Endpoint := gd.Eth1Endpoint
-	// if cls[starknet] != nil {
-	// 	if eth1Endpoint == "" {
-	// 		eth1Endpoint = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELApi"])
-	// 	}
-	// }
 
 	executionApiUrl := gd.ExecutionApiUrl
 	executionAuthUrl := gd.ExecutionAuthUrl
@@ -475,7 +480,6 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		VlImage:                   imageOrEmpty(cls[validator]),
 		VlDataDir:                 "./" + configs.ValidatorDir,
 		ExecutionApiURL:           executionApiUrl,
-		// Eth1Endpoint:              eth1Endpoint,
 		ExecutionAuthURL:          executionAuthUrl,
 		ConsensusApiURL:           consensusApiUrl,
 		ConsensusAdditionalApiURL: consensusAdditionalApiUrl,
@@ -487,6 +491,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		Graffiti:                  graffiti,
 		RelayURLs:                 strings.Join(gd.RelayURLs, ","),
 		CheckpointSyncUrl:         gd.CheckpointSyncUrl,
+		Full:                      gd.Full,
 	}
 
 	// Save to writer

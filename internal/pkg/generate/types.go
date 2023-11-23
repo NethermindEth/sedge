@@ -24,8 +24,8 @@ type EnvData struct {
 	Services                  []string
 	Mev                       bool
 	ElImage                   string
-	L2Image                   string //for juno
 	ElDataDir                 string
+	L2Image                   string //for juno
 	L2DataDir                 string //for juno
 	CcImage                   string
 	CcDataDir                 string
@@ -44,6 +44,7 @@ type EnvData struct {
 	RelayURLs                 string
 	CheckpointSyncUrl         string
 	Eth1Endpoint              string
+	Full                      bool   
 }
 
 // GenData : Struct Data object for script's generation
@@ -87,9 +88,9 @@ type GenData struct {
 	ContainerTag            string
 
 	// juno flags
-	Eth1Endpoint        string
-	DbPath              string
-	PendingPollInterval string
+	// DbPath              string
+	PendingPollInterval     string
+	Full                    bool
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -145,8 +146,9 @@ type DockerComposeData struct {
 	ContainerTag            string
 
 	// juno flags
-	DbPath              string
-	PendingPollInterval string
+	// DbPath              string
+	PendingPollInterval    string
+	Full                   bool
 }
 
 // WithConsensusClient returns true if the consensus client is set

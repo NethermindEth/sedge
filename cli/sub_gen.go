@@ -312,7 +312,7 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	// Bind flags
 	cmd.Flags().StringVar(&flags.executionApiUrl, "execution-api-url", "", "Execution API endpoint for the consensus client. Example: 'sedge generate starknet -r --execution-api-url=https://api.url.endpoint'")
 	// cmd.Flags().StringVar(&flags.eth1Endpoint, "eth-1-endpoint", "", "Eth 1 endpoint for connecting to L1 client node. Example: 'sedge generate starknet -r --eth-1-endpoint=wss://api.url.endpoint'")
-	cmd.Flags().StringVar(&flags.dbPath, "db-path", "", "Path to the database.")
+	//cmd.Flags().StringVar(&flags.dbPath, "db-path", "", "Path to the database.")
 	cmd.Flags().StringVar(&flags.pendingPollInterval, "pending-poll-interval", "", "How often to fetch the pending block when synced to the head of the chain. Provide a duration like 5s (five seconds) or 10m (10 minutes). Disabled by default.")
 	cmd.Flags().BoolVar(&flags.full, "full", false, "Generate a full node setup with Juno. Designed for execution and consensus nodes setup without a validator node. Exclude also the full from other flags. If set, mev-boost will not be used.")
 	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
@@ -332,6 +332,7 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().StringSliceVar(&flags.relayURLs, "relay-urls", []string{}, "List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate full-node --relay-urls=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money'")
 	cmd.Flags().IntVar(&flags.waitEpoch, "wait-epoch", 1, "Number of epochs to wait before starting and restarting of the starknet client.")
 	cmd.Flags().BoolVar(&flags.noValidator, "no-validator", false, "Exclude the validator from the full node setup. Designed for execution and consensus nodes setup without a validator node.")
+	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
 	cmd.Flags().SortFlags = false
 	return cmd
 }

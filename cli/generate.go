@@ -88,10 +88,9 @@ type GenCmdFlags struct {
 	customEnrs        []string
 
 	// juno flags
-	eth1Endpoint      string
-	dbPath            string
-	pendingPollInterval           string
-	full              bool
+	// dbPath            string
+	pendingPollInterval string
+	full                bool
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -316,9 +315,9 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ContainerTag:            containerTag,
 
 		// juno
-		Eth1Endpoint:            flags.eth1Endpoint, 
-		DbPath:                  flags.dbPath,
+		// DbPath:                  flags.dbPath,
 		PendingPollInterval:     flags.pendingPollInterval,  
+		Full:                    flags.full,
 
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
