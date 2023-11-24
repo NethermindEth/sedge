@@ -110,7 +110,6 @@ You can generate:
 	cmd.AddCommand(ConsensusSubCmd(sedgeAction))
 	cmd.AddCommand(ValidatorSubCmd(sedgeAction))
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
-	cmd.AddCommand(PoaSubCmd(sedgeAction))
 
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
 	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado, volta, energyweb etc.")

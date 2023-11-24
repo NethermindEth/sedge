@@ -53,24 +53,35 @@ If you don't provide a execution, consensus or validator client, it will be chos
 Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate full-node --execution nethermind:docker.image'. If you want to use the default docker image, just use the client name`,
 		Args: cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
 			return preValidationGenerateCmd(network, logging, &flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			services := []string{execution, consensus}
-			if !flags.noValidator {
-				services = append(services, validator)
+			services := []string{}
+			if validatePOANetwork(network) == nil {
+				services = append(services, execution)
+
+			} else {
+
+				services = append(services, execution, consensus)
+
+				if !flags.noValidator {
+					services = append(services, validator)
+				}
+
+				if !flags.noMev && !flags.noValidator {
+					services = append(services, mevBoost)
+				}
+				if flags.consensusName == "" {
+					flags.consensusName = flags.validatorName
+				} else if flags.validatorName == "" {
+					flags.validatorName = flags.consensusName
+				}
 			}
-			if !flags.noMev && !flags.noValidator {
-				services = append(services, mevBoost)
-			}
-			if flags.consensusName == "" {
-				flags.consensusName = flags.validatorName
-			} else if flags.validatorName == "" {
-				flags.validatorName = flags.consensusName
-			}
+
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, services)
 		},
 	}
@@ -287,7 +298,6 @@ func validatePOANetwork(network string) error {
 	found := false
 	var networks = []string{"volta", "energyweb"}
 	fmt.Printf("Validating network %s\n", network)
-
 	for _, n := range networks {
 		if n == network {
 			found = true
@@ -298,48 +308,4 @@ func validatePOANetwork(network string) error {
 		return ErrNotPOANetworkFlags
 	}
 	return nil
-}
-
-func PoaSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
-	var flags GenCmdFlags
-
-	cmd := &cobra.Command{
-		Use:   "poa [flags] [args]",
-		Short: "Generate a poa node config",
-		Long: "Generate a docker-compose and an environment file with a execution node configuration.\n" +
-			"Valid args: name of execution clients according to network\n\n" +
-			"Should be one of: nethermind, geth, besu, erigon. If you don't provide one, it will chosen randomly.\n" +
-			"Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate execution nethermind:docker.image'. If you want to use the default docker image, just use the client name",
-
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) > 0 {
-				if cobra.ExactArgs(1)(cmd, args) != nil {
-					return errors.New("requires one argument")
-				}
-				flags.executionName = args[0]
-			}
-			return nil
-		},
-		PreRunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Printf("Network: %s\n", network)
-			if err := validatePOANetwork(network); err != nil {
-				return err
-			}
-			return preValidationGenerateCmd(network, logging, &flags)
-		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{execution})
-		},
-	}
-
-	// Bind flags
-	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")
-	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
-	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
-	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
-	cmd.Flags().StringSliceVar(&flags.customEnodes, "execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
-	cmd.Flags().StringArrayVar(&flags.elExtraFlags, "el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge generate consensus--el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	cmd.Flags().SortFlags = false
-
-	return cmd
 }

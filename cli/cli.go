@@ -99,7 +99,6 @@ func CliCmd(p ui.Prompter, actions actions.SedgeActions, depsMgr dependencies.De
 - Execution Node
 - Consensus Node
 - Validator Node
-- Poa Node
 
 Follow the prompts to select the options you want for your node. At the end of the process, you will
 be asked to run the generated setup or not. If you chose to run the setup, it will be executed for you
