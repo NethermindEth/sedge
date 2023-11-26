@@ -387,8 +387,8 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		endpoint := endpointOrEmpty(cls[execution])
 		if strings.HasPrefix(endpoint, "http") {
 			executionEndpoint = strings.TrimPrefix(endpoint, "http")
-		} 
-		gd.ExecutionApiUrl = "wss" + executionEndpoint + ":" + strconv.Itoa(int(gd.Ports["ELApi"]))
+		}
+		gd.ExecutionApiUrl = "ws" + executionEndpoint + ":" + strconv.Itoa(int(gd.Ports["ELApi"]))
 	}
 
 	for tmpKind, client := range cls {
@@ -423,6 +423,13 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		}
 		if executionAuthUrl == "" {
 			executionAuthUrl = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELAuth"])
+		}
+	}
+	starknetApiUrl := gd.StarknetApiUrl
+	//executionAuthUrl := gd.ExecutionAuthUrl
+	if cls[starknet] != nil {
+		if starknetApiUrl == "" {
+			starknetApiUrl = fmt.Sprintf("%s:%v", cls[starknet].Endpoint, gd.Ports["L2Api"])
 		}
 	}
 	consensusApiUrl := gd.ConsensusApiUrl
@@ -492,6 +499,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ExecutionApiURL:           executionApiUrl,
 		ExecutionAuthURL:          executionAuthUrl,
 		ConsensusApiURL:           consensusApiUrl,
+		StarknetApiURL:            starknetApiUrl,
 		ConsensusAdditionalApiURL: consensusAdditionalApiUrl,
 		FeeRecipient:              gd.FeeRecipient,
 		JWTSecretPath:             gd.JWTSecretPath,

@@ -11,7 +11,7 @@
         sleep {{ .SLStartGracePeriod }};
         echo 'Done';
         while true; do
-          response=$$(wget -S ${EC_API_URL}/eth/v1/node/health -O /dev/null 2>&1 | grep -m 1 "HTTP/" | awk '{print $$2}')
+          response=$$(wget -S ${SC_API_URL}/eth/v1/node/health -O /dev/null 2>&1 | grep -m 1 "HTTP/" | awk '{print $$2}')
           if [ $$response -eq 200 ]; then
             echo 'Endpoint is up!'
             break

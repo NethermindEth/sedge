@@ -7,6 +7,7 @@
        - sedge
     ports:
       - "80:80"  # Expose port 80 for Nginx
+    restart: always
     volumes:
-      - ./execution_proxy.conf:/etc/nginx/conf.d/execution_proxy.conf:ro
+      - ./nginx/conf/:/etc/nginx/conf.d/:ro
 {{ end }}

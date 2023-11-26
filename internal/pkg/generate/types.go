@@ -34,6 +34,7 @@ type EnvData struct {
 	ExecutionApiURL           string
 	ExecutionAuthURL          string
 	ConsensusApiURL           string
+	StarknetApiURL            string
 	ConsensusAdditionalApiURL string
 	FeeRecipient              string
 	JWTSecretPath             string
@@ -84,6 +85,7 @@ type GenData struct {
 	SLStartGracePeriod      uint
 	ExecutionApiUrl         string
 	ExecutionAuthUrl        string
+	StarknetApiUrl          string
 	ConsensusApiUrl         string
 	ContainerTag            string
 
