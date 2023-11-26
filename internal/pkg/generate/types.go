@@ -186,7 +186,7 @@ func (d EnvData) WithMevBoostClient() bool {
 // WithFullFlagStarknet returns true if Juno Node is run with the full flag
 func (d DockerComposeData) WithFullFlagStarknet() bool {
 	for _, service := range d.Services {
-		if service == consensus || service == execution {
+		if service == starknet {
 			return true
 		}
 	}

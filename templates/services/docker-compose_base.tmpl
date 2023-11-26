@@ -22,11 +22,11 @@ services:
 {{template "consensus" .}}
 {{ if .WithValidatorClient}}
 {{template "validator-blocker" .}}{{end}}
+{{template "validator" .}}
+{{template "starknet" .}}
 {{ if .WithFullFlagStarknet}}
 {{template "starknet-blocker" .}}
 {{template "nginx-proxy" .}}{{end}}
-{{template "validator" .}}
-{{template "starknet" .}}
 
 networks:
   sedge:
