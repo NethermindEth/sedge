@@ -656,7 +656,7 @@ func joinIfNotEmpty(strs ...string) string {
 // imageOrEmpty returns the image of the client if it is not nil, otherwise returns an empty string
 func imageOrEmpty(cls *clients.Client) string {
 	if cls != nil {
-		return cls.Image
+	 return cls.Image
 	}
 	return ""
 }

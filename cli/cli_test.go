@@ -41,19 +41,23 @@ func TestCli(t *testing.T) {
 		"execution": clients.AllClients["execution"],
 		"consensus": clients.AllClients["consensus"],
 		"validator": clients.AllClients["validator"],
+		"starknet":  clients.AllClients["starknet"],
 	}
 	ETHClients["execution"] = append(ETHClients["execution"], "randomize")
 	ETHClients["consensus"] = append(ETHClients["consensus"], "randomize")
 	ETHClients["validator"] = append(ETHClients["validator"], "randomize")
+	ETHClients["starknet"] =  append(ETHClients["starknet"], "randomize")
 
 	GnosisClients := map[string][]string{
 		"execution": {"nethermind"},
 		"consensus": utils.Filter(clients.AllClients["consensus"], func(c string) bool { return c != "prysm" }),
 		"validator": utils.Filter(clients.AllClients["validator"], func(c string) bool { return c != "prysm" }),
+		"starknet":  {"juno"},
 	}
 	GnosisClients["execution"] = append(GnosisClients["execution"], "randomize")
 	GnosisClients["consensus"] = append(GnosisClients["consensus"], "randomize")
 	GnosisClients["validator"] = append(GnosisClients["validator"], "randomize")
+	GnosisClients["starknet"] = append(GnosisClients["starknet"], "randomize")
 
 	tests := []struct {
 		name  string
