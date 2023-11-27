@@ -185,8 +185,17 @@ func (d EnvData) WithMevBoostClient() bool {
 
 // WithFullFlagStarknet returns true if Juno Node is run with the full flag
 func (d DockerComposeData) WithFullFlagStarknet() bool {
+	hasStarknet := false
+	hasExecution := false
+
 	for _, service := range d.Services {
-		if service == starknet {
+		if service == starknet  {
+			hasStarknet = true
+		}
+		if service == execution  {
+			hasExecution = true
+		}
+		if hasStarknet && hasExecution {
 			return true
 		}
 	}
@@ -247,11 +256,6 @@ type StarknetBlocker struct {
 	ContainerName string `yaml:"container_name"`
 	Command       string `yaml:"command"`
 }
-type nginxProxy struct {
-	Image         string `yaml:"image"`
-	ContainerName string `yaml:"container_name"`
-	Command       string `yaml:"command"`
-}
 type ValidatorImportDependsOn struct {
 	Condition string `yaml:"condition"`
 }
@@ -286,7 +290,6 @@ type Services struct {
 	Consensus        *Consensus        `yaml:"consensus,omitempty"`
 	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker,omitempty"`
 	StarknetBlocker  *StarknetBlocker  `yaml:"starknet-blocker,omitempty"`
-	nginxProxy       *nginxProxy       `yaml:"nginx-proxy,omitempty"`
 	Validator        *Validator        `yaml:"validator,omitempty"`
 	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus,omitempty"`
 	Starknet         *Starknet         `yaml:"config_starknet,omitempty"` //starknet services

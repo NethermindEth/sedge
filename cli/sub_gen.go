@@ -311,8 +311,6 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	}
 	// Bind flags
 	cmd.Flags().StringVar(&flags.executionApiUrl, "execution-api-url", "", "Execution API endpoint for the consensus client. Example: 'sedge generate starknet -r --execution-api-url=https://api.url.endpoint'")
-	// cmd.Flags().StringVar(&flags.eth1Endpoint, "eth-1-endpoint", "", "Eth 1 endpoint for connecting to L1 client node. Example: 'sedge generate starknet -r --eth-1-endpoint=wss://api.url.endpoint'")
-	//cmd.Flags().StringVar(&flags.dbPath, "db-path", "", "Path to the database.")
 	cmd.Flags().StringVar(&flags.pendingPollInterval, "pending-poll-interval", "", "How often to fetch the pending block when synced to the head of the chain. Provide a duration like 5s (five seconds) or 10m (10 minutes). Disabled by default.")
 	cmd.Flags().BoolVar(&flags.full, "full", false, "Generate a full node setup with Juno. Designed for execution and consensus nodes setup without a validator node. Exclude also the full from other flags. If set, mev-boost will not be used.")
 	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")

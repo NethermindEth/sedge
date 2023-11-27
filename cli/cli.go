@@ -345,7 +345,6 @@ func setupStarknetNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, 
 	} else {
 		if err := runPromptActions(p, o,
 			inputEthNode,
-			// inputDbPath,
 		); err != nil {
 			return err
 		}
