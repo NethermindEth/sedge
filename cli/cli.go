@@ -322,11 +322,13 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 // setup a starknet node
 func setupStarknetNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager) (err error) {
 	o.genData.Services = []string{"starknet"}
+	if err := selectStarknetClient(p, o); err != nil {
+		return err
+	}
 	if err := confirmWithFullStarknetNode(p, o); err != nil {
 		return err
 	}
-	if o.withFullL1Node {
-		o.genData.Services = append(o.genData.Services, "execution", "consensus")
+	if o.genData.Network == NetworkCustom {
 		if err := runPromptActions(p, o,
 			inputCustomNetworkConfig,
 			inputCustomChainSpec,
@@ -335,10 +337,19 @@ func setupStarknetNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, 
 			inputCustomDeployBlock,
 			inputExecutionBootNodes,
 			inputConsensusBootNodes,
-			selectStarknetClient,
+		); err != nil {
+			return err
+		}
+	}
+	if o.withFullL1Node {
+		o.genData.Services = append(o.genData.Services, "execution", "consensus")
+
+		if err := runPromptActions(p, o,
 			selectExecutionClient,
 			selectConsensusClient,
 			inputStarknetGracePeriod,
+			inputCheckpointSyncURL,
+			inputFeeRecipientNoValidator,
 		); err != nil {
 			return err
 		}

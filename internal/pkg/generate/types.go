@@ -90,7 +90,6 @@ type GenData struct {
 	ContainerTag            string
 
 	// juno flags
-	// DbPath              string
 	PendingPollInterval     string
 	Full                    bool
 }

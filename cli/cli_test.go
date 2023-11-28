@@ -57,7 +57,7 @@ func TestCli(t *testing.T) {
 	GnosisClients["execution"] = append(GnosisClients["execution"], "randomize")
 	GnosisClients["consensus"] = append(GnosisClients["consensus"], "randomize")
 	GnosisClients["validator"] = append(GnosisClients["validator"], "randomize")
-	GnosisClients["starknet"] = append(GnosisClients["starknet"], "randomize")
+	GnosisClients["starknet"] =  append(GnosisClients["starknet"], "randomize")
 
 	tests := []struct {
 		name  string
@@ -331,6 +331,104 @@ func TestCli(t *testing.T) {
 						ContainerTag:    "tag",
 					}).Return(nil),
 					prompter.EXPECT().Confirm("Do you want to import slashing protection data?", false).Return(false, nil),
+					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
+				)
+			},
+		},
+		{
+			name: "starknet node",
+			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
+				generationPath := t.TempDir()
+				genData := generate.GenData{
+					Services: []string{"starknet"},
+					StarknetClient: &clients.Client{
+						Name:  "juno",
+						Type:  "starknet",
+						Image: configs.ClientImages.Execution.Nethermind.String(),
+					},
+					Network:      "mainnet",
+					MapAllPorts:  true,
+					ContainerTag: "tag",
+				}
+
+				gomock.InOrder(
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli}).Return(0, nil),
+					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator, NodeTypeStarknet}).Return(1, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
+					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
+					prompter.EXPECT().Select("Select starknet client", "", ETHClients["starknet"]).Return(0, nil),
+					prompter.EXPECT().Confirm("Do you want to set up a full starknet node (with execution and consensus)?", true).Return(false, nil),
+					prompter.EXPECT().InputURL("Eth 1 Endpoint", "", true).Return("ws://execution:8545", nil),
+					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
+					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(2, nil),
+					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
+						GenerationPath: generationPath,
+						GenerationData: genData,
+					})).Return(genData, nil),
+					prompter.EXPECT().Confirm("Run services now?", false).Return(true, nil),
+					depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil),
+					depsMgr.EXPECT().DockerEngineIsOn().Return(nil),
+					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil),
+					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"starknet"},
+					}),
+					sedgeActions.EXPECT().RunContainers(actions.RunContainersOptions{
+						GenerationPath: generationPath,
+						Services:       []string{"starknet"},
+					}),
+				)
+			},
+		},
+		{
+			name: "starknet node with execution and consensus",
+			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
+				generationPath := t.TempDir()
+				genData := generate.GenData{
+					Services: []string{"starknet", "execution", "consensus"},
+					StarknetClient: &clients.Client{
+						Name:  "juno",
+						Type:  "starknet",
+						Image: configs.ClientImages.Starknet.Juno.String(),
+					},
+					ExecutionClient: &clients.Client{
+						Name:  "nethermind",
+						Type:  "execution",
+						Image: configs.ClientImages.Execution.Nethermind.String(),
+					},
+					ConsensusClient: &clients.Client{
+						Name:  "prysm",
+						Type:  "consensus",
+						Image: configs.ClientImages.Consensus.Prysm.String(),
+					},
+					Network:            "mainnet",
+					CheckpointSyncUrl:  "http://checkpoint.sync",
+					FeeRecipient:       "0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5",
+					MapAllPorts:        true,
+					SLStartGracePeriod: 840,
+					ContainerTag:       "tag",
+					ExecutionApiUrl:    "ws://execution:8545",
+					JWTSecretPath:      filepath.Join(generationPath, "jwtsecret"),
+				}
+				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
+				gomock.InOrder(
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
+					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator, NodeTypeStarknet}).Return(0, nil),
+					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
+					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
+					prompter.EXPECT().Select("Select starknet client", "", ETHClients["starknet"]).Return(0, nil),
+					prompter.EXPECT().Confirm("Do you want to set up a full starknet node (with execution and consensus)?", true).Return(true, nil),
+					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
+					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(1, nil),
+					prompter.EXPECT().InputInt64("Starknet grace period. This is the number of epochs the starknet  client will wait before starting", int64(1)).Return(int64(2), nil),
+					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("http://checkpoint.sync", nil),
+					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
+					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
+					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
+					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
+						GenerationPath: generationPath,
+						GenerationData: genData,
+					})).Return(genData, nil),
 					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
 				)
 			},

@@ -373,7 +373,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 
 	// modify the EC_API_URL endpoint to use for starknet
 	var executionEndpoint string
-	if gd.Full {
+	if gd.Full || cls[starknet] != nil{
 		endpoint := endpointOrEmpty(cls[execution])
 		if strings.HasPrefix(endpoint, "http") {
 			executionEndpoint = strings.TrimPrefix(endpoint, "http")
