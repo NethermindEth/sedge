@@ -147,7 +147,6 @@ type DockerComposeData struct {
 	ContainerTag            string
 
 	// juno flags
-	// DbPath              string
 	PendingPollInterval    string
 	Full                   bool
 }
@@ -291,7 +290,7 @@ type Services struct {
 	StarknetBlocker  *StarknetBlocker  `yaml:"starknet-blocker,omitempty"`
 	Validator        *Validator        `yaml:"validator,omitempty"`
 	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus,omitempty"`
-	Starknet         *Starknet         `yaml:"config_starknet,omitempty"` //starknet services
+	Starknet         *Starknet         `yaml:"starknet,omitempty"` //starknet services
 }
 type Sedge struct {
 	Name string `yaml:"name"`

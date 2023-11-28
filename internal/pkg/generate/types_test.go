@@ -71,6 +71,35 @@ func TestDockerComposeData_WithConsensusClient(t *testing.T) {
 	}
 }
 
+func TestDockerComposeData_WithStarknetClient(t *testing.T) {
+	tests := []struct {
+		name string
+		data DockerComposeData
+		want bool
+		}{
+		{
+			name: "with consensus and execution client",
+			data: DockerComposeData{
+				Services: []string{"execution", "consensus", "starknet"},
+			},
+			want: true,
+		},
+		{
+			name: "with nil services",
+			data: DockerComposeData{
+				Services: nil,
+			},
+			want: false,
+		},
+	}
+	for _, tC := range tests {
+		t.Run(tC.name, func(t *testing.T) {
+			out := tC.data.WithFullFlagStarknet()
+			assert.Equal(t, out, tC.want, "services: %v", tC.data.Services)
+		})
+	}
+}
+
 func TestDockerComposeData_WithValidatorClient(t *testing.T) {
 	tests := []struct {
 		name string

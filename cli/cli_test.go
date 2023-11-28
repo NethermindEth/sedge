@@ -407,7 +407,6 @@ func TestCli(t *testing.T) {
 					MapAllPorts:        true,
 					SLStartGracePeriod: 840,
 					ContainerTag:       "tag",
-					ExecutionApiUrl:    "ws://execution:8545",
 					JWTSecretPath:      filepath.Join(generationPath, "jwtsecret"),
 				}
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})

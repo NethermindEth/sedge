@@ -104,26 +104,6 @@ func checkCCBootnodesOnConsensus(t *testing.T, data *GenData, compose, env io.Re
 	return nil
 }
 
-func checkTTDOnExecution(t *testing.T, data *GenData, compose, env io.Reader) error {
-	composeData := retrieveComposeData(t, compose)
-	customTTD := data.CustomTTD
-	if customTTD == "" {
-		customTTD = configs.NetworksConfigs()[data.Network].DefaultTTD
-	}
-	if customTTD != "" {
-		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "besu" {
-			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--override-genesis-config=terminalTotalDifficulty="+customTTD)
-		}
-		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "nethermind" {
-			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--Merge.TerminalTotalDifficulty="+customTTD)
-		}
-		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "geth" {
-			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--override.terminaltotaldifficulty="+customTTD)
-		}
-	}
-	return nil
-}
-
 func checkECBootnodesOnExecution(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
 	if len(data.ECBootnodes) == 0 {
@@ -240,7 +220,10 @@ func defaultFunc(t *testing.T, data *GenData, compose, env io.Reader) error {
 	if utils.Contains(data.Services, configConsensus) {
 		assert.NotNil(t, composeData.Services.ConfigConsensus)
 	}
-
+	networkConfig := configs.NetworksConfigs()[data.Network]
+	if !networkConfig.SupportsMEVBoost {
+		assert.Nil(t, composeData.Services.Mevboost)
+	}
 	// load .env file
 	envData := retrieveEnvData(t, env)
 	if data.Network == "gnosis" {
@@ -452,7 +435,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 				if utils.Contains(validatorClients, consensusCl) {
 					tests = append(tests,
 						genTestData{
-							Description: fmt.Sprintf(baseDescription+"customTTD tests, execution: %s, consensus: %s, validator: %s, network: %s, all", executionCl, consensusCl, consensusCl, network),
+							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, all", executionCl, consensusCl, consensusCl, network),
 							GenerationData: &GenData{
 								ExecutionClient: &clients.Client{Name: executionCl},
 								ConsensusClient: &clients.Client{Name: consensusCl},
@@ -460,7 +443,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 								Network:         network,
 								Services:        []string{execution, consensus, validator},
 							},
-							CheckFunctions: []CheckFunc{checkTTDOnExecution, defaultFunc, checkECBootnodesOnExecution, checkValidatorBlocker},
+							CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkValidatorBlocker},
 						},
 						genTestData{
 							Description: fmt.Sprintf(baseDescription+"ecBootnodes tests, execution: %s, consensus: %s, validator: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, network),
@@ -471,7 +454,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 								ConsensusClient: &clients.Client{Name: consensusCl},
 								Network:         network,
 							},
-							CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkTTDOnExecution, checkValidatorBlocker},
+							CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkValidatorBlocker},
 						},
 						genTestData{
 							Description: fmt.Sprintf(baseDescription+"ccBootnodes tests, execution: %s, consensus: %s, validator: %s, network: %s, Execution Client not Valid", executionCl, consensusCl, consensusCl, network),
@@ -523,6 +506,22 @@ func TestValidateClients(t *testing.T) {
 			Error: ErrValidatorClientNotValid,
 		},
 		{
+			Description: "Wrong starknet client",
+			Data: &GenData{
+				StarknetClient: &clients.Client{Name: "wrong"},
+				Network:         "mainnet",
+			},
+			Error: ErrStarknetClientNotValid,
+		},
+		{
+			Description: "Wrong validator client",
+			Data: &GenData{
+				ValidatorClient: &clients.Client{Name: "wrong"},
+				Network:         "mainnet",
+			},
+			Error: ErrValidatorClientNotValid,
+		},
+		{
 			Description: "Wrong network, empty clients",
 			Data: &GenData{
 				Network: wrongDep,
@@ -553,6 +552,14 @@ func TestValidateClients(t *testing.T) {
 			},
 			Error: ErrUnableToGetClientsInfo,
 		},
+		{
+			Description: "Wrong network, good starknet client",
+			Data: &GenData{
+				StarknetClient:  &clients.Client{Name: "juno"},
+				Network:         wrongDep,
+			},
+			Error: ErrUnableToGetClientsInfo,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.Description, func(t *testing.T) {
@@ -575,6 +582,7 @@ func TestEnvFileAndFlags(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku"},
 				ValidatorClient: &clients.Client{Name: "teku"},
+				StarknetClient: &clients.Client{Name: "juno"},
 				Network:         "mainnet",
 				Mev:             true,
 			},
@@ -586,6 +594,7 @@ func TestEnvFileAndFlags(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku", Endpoint: "http://localhost"},
 				ValidatorClient: &clients.Client{Name: "teku"},
+				StarknetClient: &clients.Client{Name: "juno"},
 				Network:         "mainnet",
 				Mev:             true,
 			},
@@ -626,6 +635,16 @@ func TestEnvFileAndFlags(t *testing.T) {
 			},
 			Error: nil,
 		},
+		{
+			Description: "Juno and execution with ExecutionApiUrl",
+			Data: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				StarknetClient:  &clients.Client{Name: "juno"},
+				Network:         "mainnet",
+				ExecutionApiUrl: "ws://localhost:8545",
+			},
+			Error: nil,
+		},
 	}
 
 	for _, tt := range tests {
@@ -649,7 +668,28 @@ func TestEnvFileAndFlags(t *testing.T) {
 				}
 			}
 		})
+		t.Run(tt.Description, func(t *testing.T) {
+			var buffer bytes.Buffer
+			err := EnvFile(tt.Data, io.Writer(&buffer))
+			if err != nil {
+				assert.ErrorIs(t, err, tt.Error)
+				return
+			}
+			if tt.Data.StarknetClient != nil {
+				if tt.Data.ConsensusApiUrl == "" {
+					str := buffer.String()
+					assert.Contains(t, str, "SC_API_URL="+endpointOrEmpty(tt.Data.StarknetClient)+":")
+				} else {
+					if tt.Data.StarknetClient.Name == "prysm" && tt.Data.StarknetClient != nil {
+						assert.Contains(t, buffer.String(), "SC_ADD_API_URL=starknet:")
+					} else {
+						assert.Contains(t, buffer.String(), "SC_API_URL="+tt.Data.StarknetApiUrl)
+					}
+				}
+			}
+		})
 	}
+	
 }
 
 func TestCleanGeneratedFiles(t *testing.T) {
@@ -663,6 +703,7 @@ func TestCleanGeneratedFiles(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku"},
 				ValidatorClient: &clients.Client{Name: "teku"},
+				StarknetClient: &clients.Client{Name: "juno"},
 				Network:         "mainnet",
 				Mev:             true,
 			},
@@ -673,6 +714,7 @@ func TestCleanGeneratedFiles(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku"},
 				ValidatorClient: &clients.Client{Name: "teku"},
+				StarknetClient: &clients.Client{Name: "juno"},
 				Network:         "mainnet",
 				Mev:             true,
 			},
