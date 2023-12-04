@@ -86,6 +86,9 @@ func (flags *GenCmdFlags) argsList() []string {
 	if flags.validatorName != "" {
 		s = append(s, "-v", flags.validatorName)
 	}
+	if flags.starknetName != "" {
+		s = append(s, "-v", flags.starknetName)
+	}
 	if flags.checkpointSyncUrl != "" {
 		s = append(s, "--checkpoint-sync-url", flags.checkpointSyncUrl)
 	}
@@ -150,6 +153,12 @@ func (flags *GenCmdFlags) argsList() []string {
 	if len(flags.fallbackEL) > 0 {
 		s = append(s, "--fallback-execution-urls", strings.Join(flags.fallbackEL, ","))
 	}
+	if flags.full {
+		s = append(s, "--full", flags.customDeployBlock)
+	}
+	if flags.pendingPollInterval != "" {
+		s = append(s, "--full", flags.pendingPollInterval)
+	}
 	return s
 }
 
@@ -168,6 +177,23 @@ func TestGenerateCmd(t *testing.T) {
 				args: []string{"nethermind", "besu"},
 			},
 			GenCmdFlags{},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "",
+				logging:        "",
+			},
+			errors.New("requires one argument"),
+		},
+		{
+			"Starknet, bad number of arguments",
+			subCmd{
+				name: "starknet",
+				args: []string{" "},
+			},
+			GenCmdFlags{
+				executionApiUrl:  "ws://localhost:8545",
+			},
 			globalFlags{
 				install:        false,
 				generationPath: "",

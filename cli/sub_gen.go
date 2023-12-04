@@ -281,9 +281,22 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "starknet [flags] --execution-api-url <URL>",
 		Short: "Generate a starknet node config",
-		Long: "Generate a docker-compose and an environment file for a starknet node configuration\n" +
-			"Valid args: url of execution clients according to network\n\n",
-		Args: cobra.NoArgs,
+		Long: "Generate a docker-compose and an environment file with a starknet node configuration\n" +
+			"Valid args: name of starknet clients according to network\n\n" +
+			"Should be juno. If you don't provide one, it will chosen randomly.\n" +
+			"Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate consensus juno:docker.image'. If you want to use the default docker image, just use the client name" +
+			"\n\n" +
+			"Required flags:\n" +
+			"- '--execution-auth-url'",
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) > 0 {
+				if cobra.ExactArgs(1)(cmd, args) != nil {
+					return errors.New("requires one argument")
+				}
+				flags.consensusName = args[0]
+			}
+			return nil
+		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
