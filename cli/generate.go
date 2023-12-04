@@ -88,7 +88,6 @@ type GenCmdFlags struct {
 	customEnrs        []string
 
 	// juno flags
-	// dbPath            string
 	pendingPollInterval string
 	full                bool
 }

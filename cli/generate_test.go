@@ -186,23 +186,6 @@ func TestGenerateCmd(t *testing.T) {
 			errors.New("requires one argument"),
 		},
 		{
-			"Starknet, bad number of arguments",
-			subCmd{
-				name: "starknet",
-				args: []string{" "},
-			},
-			GenCmdFlags{
-				executionApiUrl:  "ws://localhost:8545",
-			},
-			globalFlags{
-				install:        false,
-				generationPath: "",
-				network:        "",
-				logging:        "",
-			},
-			errors.New("requires one argument"),
-		},
-		{
 			"Consensus, bad number of arguments",
 			subCmd{
 				name: "consensus",
@@ -1353,6 +1336,70 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			GenCmdFlags{
 				noValidator:   true,
+				executionName: "nethermind",
+				consensusName: "teku",
+			},
+			globalFlags{
+				network: "mainnet",
+			},
+			nil,
+		},
+		{
+			"Starknet, missing execution api url",
+			subCmd{
+				name: "starknet",
+				args: []string{"juno"},
+			},
+			GenCmdFlags{},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "",
+				logging:        "",
+			},
+			errors.New("required flag(s) \"execution-api-url\" not set"),
+		},
+		{
+			"Starknet, correct number of arguments with client name",
+			subCmd{
+				name: "starknet",
+				args: []string{"juno"},
+			},
+			GenCmdFlags{
+				executionApiUrl:  "ws://localhost:8545",
+			},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "",
+				logging:        "",
+			},
+			nil,
+		},
+		{
+			"Starknet, with full flag",
+			subCmd{
+				name: "starknet",
+				args: []string{" "},
+			},
+			GenCmdFlags{
+				full:  true,
+			},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "",
+				logging:        "",
+			},
+			errors.New("requires one argument"),
+		},
+		{
+			"Starknet blocker not generated with --full flag",
+			subCmd{
+				name: "starknet",
+			},
+			GenCmdFlags{
+				full:          true,
 				executionName: "nethermind",
 				consensusName: "teku",
 			},

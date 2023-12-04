@@ -293,7 +293,7 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
 					return errors.New("requires one argument")
 				}
-				flags.consensusName = args[0]
+				flags.starknetName = args[0]
 			}
 			return nil
 		},
