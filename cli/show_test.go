@@ -26,6 +26,7 @@ const (
 	executionContainerName = "execution-client"
 	consensusContainerName = "consensus-client"
 	validatorContainerName = "validator-client"
+	starknetContainerName  = "starknet-client"
 	mevBoostContainerName  = "mev-boost"
 
 	executionContainerIp    = "192.168.1.1"
@@ -36,6 +37,8 @@ const (
 	validatorContainerImage = "consensys/teku"
 	mevBoostContainerIp     = "192.168.1.4"
 	mevBoostContainerImage  = "flashbots/mev-boost"
+	starknetContainerIp     = "192.168.1.5"
+	starknetContainerImage  = "nethermind/juno"
 )
 
 func buildInspectResults(
@@ -99,6 +102,11 @@ func TestShow(t *testing.T) {
 							Name:  mevBoostContainerName,
 							Image: mevBoostContainerImage,
 							Ip:    mevBoostContainerIp,
+						},
+						{
+							Name:  starknetContainerName,
+							Image: starknetContainerImage,
+							Ip:    starknetContainerIp,
 						},
 					},
 				}

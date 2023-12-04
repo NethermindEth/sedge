@@ -157,7 +157,7 @@ func (flags *GenCmdFlags) argsList() []string {
 		s = append(s, "--full", flags.customDeployBlock)
 	}
 	if flags.pendingPollInterval != "" {
-		s = append(s, "--full", flags.pendingPollInterval)
+		s = append(s, "--pending-poll-interval", flags.pendingPollInterval)
 	}
 	return s
 }
@@ -1367,6 +1367,7 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			GenCmdFlags{
 				executionApiUrl:  "ws://localhost:8545",
+				pendingPollInterval: "5s",
 			},
 			globalFlags{
 				install:        false,
@@ -1405,6 +1406,39 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			globalFlags{
 				network: "mainnet",
+			},
+			nil,
+		},
+		{
+			"starknet with full flag and  Fixed clients",
+			subCmd{
+				name: "starknet",
+				args: []string{},
+			},
+			GenCmdFlags{
+				executionName: "nethermind",
+				consensusName: "lighthouse",
+				full:          true,
+				feeRecipient:  "0x0000000000000000000000000000000000000000",
+			},
+			globalFlags{
+				install: false,
+				logging: "",
+			},
+			nil,
+		},
+		{
+			"full-node Random clients, no feeRecipient",
+			subCmd{
+				name: "starknet",
+				args: []string{},
+			},
+			GenCmdFlags{
+				full:  true,
+			},
+			globalFlags{
+				install: false,
+				logging: "",
 			},
 			nil,
 		},

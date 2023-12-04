@@ -41,6 +41,8 @@ const (
 	consensusNotFoundContainerName = "sedge-execution-client-nf"
 	validatorContainerName         = "sedge-validator-client"
 	validatorNotFoundContainerName = "sedge-validator-client-nf"
+	starknetContainerName          = "sedge-starknet-client"
+	starknetNotFoundContainerName  = "sedge-starknet-client-nf"
 	mevBoostContainerName          = "sedge-mev-boost"
 
 	executionContainerIp    = "192.168.1.1"
@@ -51,6 +53,8 @@ const (
 	validatorContainerImage = "consensys/teku"
 	mevBoostContainerIp     = "192.168.1.4"
 	mevBoostContainerImage  = "flashbots/mev-boost"
+	starknetContainerIp     = "192.168.1.5"
+	starknetContainerImage  = "nethermind/juno"
 
 	executionNotFoundErrorMsg = "execution container not found"
 	consensusNotFoundErrorMsg = "consensus container not found"

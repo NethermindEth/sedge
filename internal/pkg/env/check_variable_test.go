@@ -107,6 +107,25 @@ func TestCheckVariable(t *testing.T) {
 			false,
 			true,
 		},
+		{
+			"Test case 9, goerli, juno config, no starknet config",
+			ReMEV,
+			"goerli",
+			"starknet",
+			"juno",
+			false,
+			false,
+		},
+		{
+			"Test case 10, mainnet, invalid starknet client",
+			ReMEV,
+			"mainnet",
+			"starknet",
+			"test",
+			false,
+			true,
+		},
+
 	}
 
 	for _, tc := range tcs {

@@ -35,6 +35,7 @@ func TestSupportedClients(t *testing.T) {
 		{"execution", "mainnet", AllClients["execution"], false},
 		{"consensus", "mainnet", AllClients["consensus"], false},
 		{"validator", "mainnet", AllClients["validator"], false},
+		{"starknet", "mainnet",  AllClients["starknet"], false},
 		{"random", "mainnet", []string{}, true},
 	}
 
@@ -94,6 +95,7 @@ func TestClients(t *testing.T) {
 				"consensus": {"lighthouse", "prysm", "teku", "lodestar"},
 				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
 				"execution": {"nethermind", "geth", "besu", "erigon"},
+				"starknet" : {"juno"},
 			},
 			[]string{"consensus"},
 			"mainnet",
@@ -104,6 +106,7 @@ func TestClients(t *testing.T) {
 				"consensus": {"lighthouse"},
 				"execution": {"nethermind"},
 				"validator": {"lighthouse"},
+				"starknet" : {"juno"},
 			},
 			[]string{"other"},
 			"mainnet",
@@ -123,6 +126,7 @@ func TestClients(t *testing.T) {
 				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
 				"consensus": {"lighthouse", "prysm", "teku", "lodestar"},
 				"execution": {"nethermind", "geth", "besu", "erigon"},
+				"starknet" : {"juno"},
 			},
 			[]string{"consensus", "other"},
 			"mainnet",
