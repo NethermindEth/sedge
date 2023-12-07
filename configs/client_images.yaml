@@ -7,10 +7,10 @@ execution:
     version: 23.10.2
   nethermind:
     name: nethermind/nethermind
-    version: 1.22.0
+    version: 1.23.0
   erigon:
     name: thorax/erigon
-    version: v2.54.0
+    version: v2.55.1
 consensus:
   lighthouse:
     name: sigp/lighthouse
