@@ -373,7 +373,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 
 	// modify the EC_API_URL endpoint to use for starknet
 	var executionEndpoint string
-	if gd.Full || cls[starknet] != nil{
+	if gd.Full || cls[starknet] != nil {
 		endpoint := endpointOrEmpty(cls[execution])
 		if strings.HasPrefix(endpoint, "http") {
 			executionEndpoint = strings.TrimPrefix(endpoint, "http")
@@ -656,7 +656,7 @@ func joinIfNotEmpty(strs ...string) string {
 // imageOrEmpty returns the image of the client if it is not nil, otherwise returns an empty string
 func imageOrEmpty(cls *clients.Client) string {
 	if cls != nil {
-	 return cls.Image
+		return cls.Image
 	}
 	return ""
 }
