@@ -75,7 +75,6 @@ type GenData struct {
 	LoggingDriver           string
 	ECBootnodes             []string
 	CCBootnodes             []string
-	CustomTTD               string
 	CustomChainSpecPath     string
 	CustomNetworkConfigPath string
 	CustomGenesisPath       string
@@ -88,7 +87,7 @@ type GenData struct {
 	StarknetApiUrl          string
 	ConsensusApiUrl         string
 	ContainerTag            string
-
+	LatestVersion           bool
 	// juno flags
 	PendingPollInterval     string
 	Full                    bool
@@ -96,26 +95,20 @@ type GenData struct {
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
-	Services            []string
-	Network             string
-	TTD                 string
-	XeeVersion          bool
-	Mev                 bool
-	MevBoostOnValidator bool
-	MevPort             uint16
-	MevImage            string
-	MevBoostEndpoint    string
-	CheckpointSyncUrl   string
-	FeeRecipient        string
-	ElDiscoveryPort     uint16
-	ElMetricsPort       uint16
-	ElApiPort           uint16
-	ElAuthPort          uint16
-
-	L2ApiPort               uint16
-	L2WsPort                uint16
-	L2MetricsPort           uint16
-	L2GrpcPort              uint16
+	Services                []string
+	Network                 string
+	XeeVersion              bool
+	Mev                     bool
+	MevBoostOnValidator     bool
+	MevPort                 uint16
+	MevImage                string
+	MevBoostEndpoint        string
+	CheckpointSyncUrl       string
+	FeeRecipient            string
+	ElDiscoveryPort         uint16
+	ElMetricsPort           uint16
+	ElApiPort               uint16
+	ElAuthPort              uint16
 	ElWsPort                uint16
 	ClDiscoveryPort         uint16
 	ClMetricsPort           uint16
@@ -147,8 +140,12 @@ type DockerComposeData struct {
 	ContainerTag            string
 
 	// juno flags
-	PendingPollInterval    string
-	Full                   bool
+	PendingPollInterval     string
+	Full                    bool
+	L2ApiPort               uint16
+	L2WsPort                uint16
+	L2MetricsPort           uint16
+	L2GrpcPort              uint16
 }
 
 // WithConsensusClient returns true if the consensus client is set

@@ -141,6 +141,20 @@ You can learn more about `sedge generate` if you check [here in our documentatio
 
 :::
 
+:::info
+
+If you want to use the client's latest version and avoid using the fixed version tested by us, you can generate the
+setup using the following command: `sedge generate full-node --latest`. If you want to learn
+more, you can check [here in our documentation](/docs/commands/generate).
+
+The `--latest` flag can be used for the `full-node`, `execution`, `consensus` and `validator` commands.
+
+You can update your client's versions using the following commands if the clients release any version:
+1. Run `docker compose -f /path/to/docker-compose.yml pull` to update the images.
+2. Run `docker compose -f /path/to/docker-compose.yml up -d` to restart the containers.
+
+:::
+
 ##### 2.2.2 Generate validator keystore
 
 Running the `sedge keys` command will generate a keystore folder with validator keys inside. This keystore contains a `deposit_data.json` that can be used to register the validator.

@@ -21,8 +21,7 @@
       - {{.ElApiPort}}
       - {{.ElWsPort}}
       - {{.ElAuthPort}}
-    command:{{if .TTD}} 
-      - --override.terminaltotaldifficulty={{.TTD}}{{end}}{{if .ECBootnodes}}
+    command:{{if .ECBootnodes}}
       - --bootnodes={{.ECBootnodes}}{{end}}
       - --syncmode=${EC_SYNC_MODE}
       - --http

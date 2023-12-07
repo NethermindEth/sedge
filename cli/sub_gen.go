@@ -26,7 +26,7 @@ var ErrCustomFlagsUsedWithoutCustomNetwork = errors.New("custom flags used witho
 
 func validateCustomNetwork(flags *CustomFlags, net string) error {
 	if net != "custom" {
-		if len(flags.customTTD) != 0 || len(flags.customChainSpec) != 0 || len(flags.customNetworkConfig) != 0 ||
+		if len(flags.customChainSpec) != 0 || len(flags.customNetworkConfig) != 0 ||
 			len(flags.customGenesis) != 0 || len(flags.customDeployBlock) != 0 {
 			// TODO add error on expected place
 			return ErrCustomFlagsUsedWithoutCustomNetwork
@@ -77,6 +77,7 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.validatorName, "validator", "v", "", "Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
+	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")
 	cmd.Flags().StringVar(&flags.checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.")
 	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
 	cmd.Flags().BoolVar(&flags.noMev, "no-mev-boost", false, "Not use mev-boost if supported")
@@ -90,7 +91,6 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 	cmd.Flags().StringArrayVar(&flags.elExtraFlags, "el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringArrayVar(&flags.clExtraFlags, "cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge generate full-node --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringArrayVar(&flags.vlExtraFlags, "vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge generate full-node --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	cmd.Flags().StringVar(&flags.customTTD, "custom-ttd", "", "Custom Terminal Total Difficulty to use for the execution client")
 	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
 	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")
@@ -133,9 +133,9 @@ func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	}
 
 	// Bind flags
+	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")
 	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
-	cmd.Flags().StringVar(&flags.customTTD, "custom-ttd", "", "Custom Terminal Total Difficulty to use for the execution client")
 	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
 	cmd.Flags().StringSliceVar(&flags.customEnodes, "execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
 	cmd.Flags().StringArrayVar(&flags.elExtraFlags, "el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge generate consensus--el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
@@ -177,6 +177,7 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		},
 	}
 	// Bind flags
+	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")
 	cmd.Flags().StringVar(&flags.executionApiUrl, "execution-api-url", "", "Execution API endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-api-url=https://api.url.endpoint'")
 	cmd.Flags().StringVar(&flags.executionAuthUrl, "execution-auth-url", "", "Execution AUTH endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-auth-url=https://auth.url.endpoint'")
 	cmd.Flags().StringVar(&flags.checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.")
@@ -236,6 +237,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		},
 	}
 	// Bind flags
+	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")
 	cmd.Flags().StringVar(&flags.consensusApiUrl, "consensus-url", "", "Consensus endpoint for the validator client to connect to. Example: 'sedge generate validator --consensus-url http://localhost:4000'")
 	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
 	cmd.Flags().StringVar(&flags.graffiti, "graffiti", "", "Graffiti to be used by the validator")
@@ -271,6 +273,7 @@ func MevBoostSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	// Bind flags
 	cmd.Flags().StringSliceVar(&flags.relayURLs, "relay-urls", []string{}, "List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate mev-boost --relay-urls=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money'")
 	cmd.Flags().StringVarP(&flags.mevImage, "mev-boost-image", "m", "", "Custom docker image to use for Mev Boost. Example: 'sedge generate mev-boost --mev-boost-image flashbots/mev-boost:latest-portable'")
+	cmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia etc.")
 	cmd.Flags().SortFlags = false
 	return cmd
 }
@@ -331,7 +334,6 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().StringSliceVar(&flags.fallbackEL, "fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge generate starknet --full -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
 	cmd.Flags().StringArrayVar(&flags.elExtraFlags, "el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge generate starknet --full --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringArrayVar(&flags.clExtraFlags, "cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge generate starknet --full --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	cmd.Flags().StringVar(&flags.customTTD, "custom-ttd", "", "Custom Terminal Total Difficulty to use for the execution client")
 	cmd.Flags().StringVar(&flags.customChainSpec, "custom-chainSpec", "", "File path or url to use as custom network chainSpec for execution client.")
 	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
 	cmd.Flags().StringVar(&flags.customGenesis, "custom-genesis", "", "File path or url to use as custom network genesis for consensus client.")

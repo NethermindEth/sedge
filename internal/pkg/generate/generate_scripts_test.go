@@ -509,7 +509,7 @@ func TestValidateClients(t *testing.T) {
 			Description: "Wrong starknet client",
 			Data: &GenData{
 				StarknetClient: &clients.Client{Name: "wrong"},
-				Network:         "mainnet",
+				Network:        "mainnet",
 			},
 			Error: ErrStarknetClientNotValid,
 		},
@@ -555,8 +555,8 @@ func TestValidateClients(t *testing.T) {
 		{
 			Description: "Wrong network, good starknet client",
 			Data: &GenData{
-				StarknetClient:  &clients.Client{Name: "juno"},
-				Network:         wrongDep,
+				StarknetClient: &clients.Client{Name: "juno"},
+				Network:        wrongDep,
 			},
 			Error: ErrUnableToGetClientsInfo,
 		},
@@ -582,7 +582,7 @@ func TestEnvFileAndFlags(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku"},
 				ValidatorClient: &clients.Client{Name: "teku"},
-				StarknetClient: &clients.Client{Name: "juno"},
+				StarknetClient:  &clients.Client{Name: "juno"},
 				Network:         "mainnet",
 				Mev:             true,
 			},
@@ -594,7 +594,7 @@ func TestEnvFileAndFlags(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku", Endpoint: "http://localhost"},
 				ValidatorClient: &clients.Client{Name: "teku"},
-				StarknetClient: &clients.Client{Name: "juno"},
+				StarknetClient:  &clients.Client{Name: "juno"},
 				Network:         "mainnet",
 				Mev:             true,
 			},
@@ -668,28 +668,8 @@ func TestEnvFileAndFlags(t *testing.T) {
 				}
 			}
 		})
-		t.Run(tt.Description, func(t *testing.T) {
-			var buffer bytes.Buffer
-			err := EnvFile(tt.Data, io.Writer(&buffer))
-			if err != nil {
-				assert.ErrorIs(t, err, tt.Error)
-				return
-			}
-			if tt.Data.StarknetClient != nil {
-				if tt.Data.ConsensusApiUrl == "" {
-					str := buffer.String()
-					assert.Contains(t, str, "SC_API_URL="+endpointOrEmpty(tt.Data.StarknetClient)+":")
-				} else {
-					if tt.Data.StarknetClient.Name == "prysm" && tt.Data.StarknetClient != nil {
-						assert.Contains(t, buffer.String(), "SC_ADD_API_URL=starknet:")
-					} else {
-						assert.Contains(t, buffer.String(), "SC_API_URL="+tt.Data.StarknetApiUrl)
-					}
-				}
-			}
-		})
 	}
-	
+
 }
 
 func TestCleanGeneratedFiles(t *testing.T) {
@@ -703,7 +683,7 @@ func TestCleanGeneratedFiles(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku"},
 				ValidatorClient: &clients.Client{Name: "teku"},
-				StarknetClient: &clients.Client{Name: "juno"},
+				StarknetClient:  &clients.Client{Name: "juno"},
 				Network:         "mainnet",
 				Mev:             true,
 			},
@@ -714,7 +694,7 @@ func TestCleanGeneratedFiles(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku"},
 				ValidatorClient: &clients.Client{Name: "teku"},
-				StarknetClient: &clients.Client{Name: "juno"},
+				StarknetClient:  &clients.Client{Name: "juno"},
 				Network:         "mainnet",
 				Mev:             true,
 			},

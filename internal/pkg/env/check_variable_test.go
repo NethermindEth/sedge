@@ -36,15 +36,6 @@ func TestCheckVariable(t *testing.T) {
 		isErr      bool
 	}{
 		{
-			"Test case 1, mainnet, no TTD",
-			ReMEV,
-			"mainnet",
-			"execution",
-			"nethermind",
-			false,
-			false,
-		},
-		{
 			"Test case 2, invalid network, error",
 			ReMEV,
 			"testnet",

@@ -51,7 +51,6 @@ const (
 )
 
 type CustomFlags struct {
-	customTTD           string
 	customChainSpec     string
 	customNetworkConfig string
 	customGenesis       string
@@ -86,7 +85,7 @@ type GenCmdFlags struct {
 	waitEpoch         int
 	customEnodes      []string
 	customEnrs        []string
-
+	latestVersion     bool
 	// juno flags
 	pendingPollInterval string
 	full                bool
@@ -120,7 +119,7 @@ You can generate:
 	cmd.AddCommand(StarknetSubCmd(sedgeAction))
 
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
-	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, etc.")
+	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado, etc.")
 	cmd.PersistentFlags().StringVar(&logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
 	cmd.PersistentFlags().StringVar(&containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.")
 	return cmd
@@ -304,7 +303,6 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ConsensusApiUrl:         flags.consensusApiUrl,
 		ECBootnodes:             flags.customEnodes,
 		CCBootnodes:             flags.customEnrs,
-		CustomTTD:               flags.customTTD,
 		CustomChainSpecPath:     flags.CustomFlags.customChainSpec,
 		CustomNetworkConfigPath: flags.CustomFlags.customNetworkConfig,
 		CustomGenesisPath:       flags.CustomFlags.customGenesis,
@@ -312,12 +310,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		CustomDeployBlockPath:   flags.CustomFlags.customDeployBlock,
 		MevBoostOnValidator:     flags.mevBoostOnVal,
 		ContainerTag:            containerTag,
-
-		// juno
-		// DbPath:                  flags.dbPath,
-		PendingPollInterval:     flags.pendingPollInterval,  
-		Full:                    flags.full,
-
+		LatestVersion:           flags.latestVersion,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,
@@ -363,10 +356,6 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			}
 		}
 		executionClient.SetImageOrDefault(strings.Join(executionParts[1:], ":"))
-		// Patch Geth image if network needs TTD to be set
-		if executionClient.Name == "geth" && network != "mainnet" {
-			executionClient.Image = "ethereum/client-go:v1.10.26"
-		}
 		if err = clients.ValidateClient(executionClient, execution); err != nil {
 			return nil, err
 		}
