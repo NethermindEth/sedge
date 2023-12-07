@@ -9,7 +9,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/compose-spec/compose-go v1.12.0
 	github.com/distribution/reference v0.5.0
-	github.com/docker/docker v23.0.3+incompatible
+	github.com/docker/docker v24.0.7+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v47 v47.1.0
 	github.com/google/uuid v1.3.0
