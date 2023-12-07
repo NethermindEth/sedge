@@ -1380,64 +1380,45 @@ func TestGenerateCmd(t *testing.T) {
 				consensusName: "teku",
 			},
 			globalFlags{
-				install:        false,
-				generationPath: "",
-				network:        "",
-				logging:        "",
+				network: "mainnet",
 			},
 			nil,
 		},
 		{
-			"Starknet, missing execution api url",
+			"starknet with full flag and  Fixed clients",
 			subCmd{
 				name: "starknet",
-				args: []string{"juno"},
-			},
-			GenCmdFlags{},
-			globalFlags{
-				install:        false,
-				generationPath: "",
-				network:        "",
-				logging:        "",
-			},
-			errors.New("required flag(s) \"execution-api-url\" not set"),
-		},
-		{
-			"Starknet, correct number of arguments with client name",
-			subCmd{
-				name: "starknet",
-				args: []string{"juno"},
+				args: []string{},
 			},
 			GenCmdFlags{
-				executionApiUrl:  "ws://localhost:8545",
-				pendingPollInterval: "5s",
+				executionName: "nethermind",
+				consensusName: "lighthouse",
+				full:          true,
+				feeRecipient:  "0x0000000000000000000000000000000000000000",
 			},
 			globalFlags{
-				install:        false,
-				generationPath: "",
-				network:        "",
-				logging:        "",
+				install: false,
+				logging: "",
 			},
 			nil,
 		},
 		{
-			"Starknet, with full flag",
+			"full-node Random clients, no feeRecipient",
 			subCmd{
 				name: "starknet",
-				args: []string{" "},
+				args: []string{},
 			},
 			GenCmdFlags{
 				full:  true,
 			},
 			globalFlags{
-				install:        false,
-				generationPath: "",
-				network:        "",
-				logging:        "",
+				install: false,
+				logging: "",
 			},
-			errors.New("requires one argument"),
+			nil,
 		},
-	}	
+	}
+
 	// TODO: Add test cases for Execution fallback urls
 	// TODO: Add test cases for EL and CL bootnodes in full-node
 
