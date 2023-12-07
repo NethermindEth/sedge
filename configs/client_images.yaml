@@ -12,6 +12,9 @@ execution:
     name: thorax/erigon
     version: v2.53.1
 consensus:
+  nimbus:
+    name: statusim/nimbus-eth2
+    version: multiarch-v23.11.0
   lighthouse:
     name: sigp/lighthouse
     version: v4.5.0
