@@ -185,16 +185,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 
 	cls := mapClients(gd)
 	networkConfig := configs.NetworksConfigs()[gd.Network]
-	
-	// modify the EC_API_URL endpoint to use for starknet
-	var executionEndpoint string
-	if gd.Full || cls[starknet] != nil {
-		endpoint := endpointOrEmpty(cls[execution])
-		if strings.HasPrefix(endpoint, "http") {
-			executionEndpoint = strings.TrimPrefix(endpoint, "http")
-		}
-		gd.ExecutionApiUrl = "ws" + executionEndpoint + ":" + strconv.Itoa(int(gd.Ports["ELApi"]))
-	}
+
 
 	for tmpKind, client := range cls {
 		var name string
@@ -403,8 +394,17 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	executionApiUrl := gd.ExecutionApiUrl
 	executionAuthUrl := gd.ExecutionAuthUrl
 	if cls[execution] != nil {
+		// modify the EC_API_URL endpoint to use for starknet
 		if executionApiUrl == "" {
-			executionApiUrl = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELApi"])
+			var executionEndpoint string
+			if gd.Full || cls[starknet] != nil {
+				endpoint := endpointOrEmpty(cls[execution])
+				if strings.HasPrefix(endpoint, "http") {
+					executionEndpoint = strings.TrimPrefix(endpoint, "http")
+				}
+				gd.ExecutionApiUrl = "ws" + executionEndpoint + ":" + strconv.Itoa(int(gd.Ports["ELApi"]))
+				executionApiUrl = fmt.Sprintf("%s", gd.ExecutionApiUrl)
+			}
 		}
 		if executionAuthUrl == "" {
 			executionAuthUrl = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELAuth"])

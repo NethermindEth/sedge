@@ -71,7 +71,7 @@ const (
 	ErrorDownloadingFile              = "error downloading file from %s: %v"
 	ErrorCopyingFile                  = "error copying file from %s: %v"
 	ErrorWritingDeployBlockFile       = "error writing custom deploy block file %s: %v"
-	InvalidUrlFlagError               = "invalid %s url %s. URL must be in the format http(s)://<host>:<port>/<api>/<endpoint>/... or http://<host>/<api>/<endpoint>/"
+	InvalidUrlFlagError               = "invalid %s url %s. URL must be in the format http(s)://<host>:<port>/<api>/<endpoint>/... or http://<host>/<api>/<endpoint>/... or ws(s)://<host>:<port>/<api>/<endpoint>/"
 	InvalidEnodeError                 = "invalid enode %s. Bootnode must be in the format enode://<node id>@<host>:<port>"
 	InvalidEnrError                   = "invalid enr %s. ENR must be in the format enr:<base64 encoded string>"
 	InvalidService                    = "provided service %s is invalid"
