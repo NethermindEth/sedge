@@ -347,7 +347,7 @@ func TestCli(t *testing.T) {
 
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(1, nil),
-					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator, NodeTypeStarknet}).Return(2, nil),
+					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
 					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(3, nil),
@@ -507,7 +507,7 @@ func TestCli(t *testing.T) {
 			},
 		},
 		{
-			name: "starknet node goerli",
+			name: "starknet node sepolia",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
 				genData := generate.GenData{
@@ -518,7 +518,7 @@ func TestCli(t *testing.T) {
 						Image: configs.ClientImages.Starknet.Juno.String(),
 					},
 					ExecutionApiUrl: "ws://execution:8545",
-					Network:         "goerli",
+					Network:         "sepolia",
 					MapAllPorts:     true,
 					ContainerTag:    "tag",
 					Full:            false,
@@ -526,7 +526,7 @@ func TestCli(t *testing.T) {
 				}
 
 				gomock.InOrder(
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(1, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(2, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator, NodeTypeStarknet}).Return(4, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),

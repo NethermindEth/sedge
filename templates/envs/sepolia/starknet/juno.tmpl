@@ -1,0 +1,8 @@
+{{/* juno.tmpl */}}
+{{ define "starknet" }}
+# --- Juno Node - configuration ---
+L2_IMAGE_VERSION={{.L2Image}}
+L2_DATA_DIR={{.L2DataDir}}
+EC_API_URL={{.ExecutionApiURL}}
+SC_API_URL={{.StarknetApiURL}}
+{{ end }}

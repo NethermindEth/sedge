@@ -679,8 +679,8 @@ func runPromptActions(p ui.Prompter, o *CliCmdOptions, actions ...promptAction) 
 }
 
 // check if network is mainnet or goerli for starknet
-func networkNotMainnetOrGoerli(o *CliCmdOptions) bool {
-	return o.genData.Network != NetworkMainnet && o.genData.Network != NetworkGoerli
+func networkNotMainnetOrSepolia(o *CliCmdOptions) bool {
+	return o.genData.Network != NetworkMainnet && o.genData.Network != NetworkSepolia
 }
 
 func selectNetwork(p ui.Prompter, o *CliCmdOptions) error {
@@ -706,7 +706,7 @@ func removeFromNodeType(options []string, optionToRemove string) []string {
 func selectNodeType(p ui.Prompter, o *CliCmdOptions) error {
 	options := []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator, NodeTypeStarknet}
 	// check if mainnet or goerli was selected, if not omit starknet
-	if networkNotMainnetOrGoerli(o) {
+	if networkNotMainnetOrSepolia(o) {
 		options = removeFromNodeType(options, NodeTypeStarknet)
 	}
 	index, err := p.Select("Select node type", "", options)
