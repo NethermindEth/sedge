@@ -1,42 +1,42 @@
 execution:
   geth:
     name: ethereum/client-go
-    version: v1.13.4
+    version: v1.13.5
   besu:
     name: hyperledger/besu
-    version: 23.7.2
+    version: 23.10.2
   nethermind:
     name: nethermind/nethermind
-    version: 1.21.0
+    version: 1.23.0
   erigon:
     name: thorax/erigon
-    version: v2.52.5
+    version: v2.55.1
 consensus:
   lighthouse:
     name: sigp/lighthouse
     version: v4.5.0
   lodestar:
     name: chainsafe/lodestar
-    version: v1.11.3
+    version: v1.12.0
   teku:
     name: consensys/teku
-    version: 23.9.0
+    version: 23.11.0
   prysm:
     name: gcr.io/prysmaticlabs/prysm/beacon-chain
-    version: v4.1.0
+    version: v4.1.1
 validator:
   lighthouse:
     name: sigp/lighthouse
     version: v4.5.0
   lodestar:
     name: chainsafe/lodestar
-    version: v1.11.3
+    version: v1.12.0
   teku:
     name: consensys/teku
-    version: 23.9.0
+    version: 23.11.0
   prysm:
     name: gcr.io/prysmaticlabs/prysm/validator
-    version: v4.1.0
+    version: v4.1.1
 starknet:
   juno:
     name: nethermind/juno

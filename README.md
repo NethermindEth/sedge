@@ -164,7 +164,7 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Teku       | Teku       |
-| Besu       |            |            |
+| Besu       | Prysm      | Prysm      |
 
 ### Gnosis
 

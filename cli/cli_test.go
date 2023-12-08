@@ -57,15 +57,6 @@ func TestCli(t *testing.T) {
 	GnosisClients["consensus"] = append(GnosisClients["consensus"], "randomize")
 	GnosisClients["validator"] = append(GnosisClients["validator"], "randomize")
 
-	HoleskyClients := map[string][]string{
-		"execution": clients.AllClients["execution"],
-		"consensus": utils.Filter(clients.AllClients["consensus"], func(c string) bool { return c != "prysm" }),
-		"validator": utils.Filter(clients.AllClients["validator"], func(c string) bool { return c != "prysm" }),
-	}
-	HoleskyClients["execution"] = append(HoleskyClients["execution"], "randomize")
-	HoleskyClients["consensus"] = append(HoleskyClients["consensus"], "randomize")
-	HoleskyClients["validator"] = append(HoleskyClients["validator"], "randomize")
-
 	tests := []struct {
 		name  string
 		setup func(*testing.T, *sedge_mocks.MockSedgeActions, *sedge_mocks.MockPrompter, *sedge_mocks.MockDependenciesManager)
@@ -223,8 +214,8 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
 					prompter.EXPECT().Confirm("Do you want to set up a validator?", true).Return(false, nil),
-					prompter.EXPECT().Select("Select execution client", "", HoleskyClients["execution"]).Return(0, nil),
-					prompter.EXPECT().Select("Select consensus client", "", HoleskyClients["consensus"]).Return(2, nil),
+					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
+					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(3, nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("https://checkpoint-sync.holesky.ethpandaops.io/", nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
@@ -392,7 +383,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
-					prompter.EXPECT().Select("Select consensus client", "", HoleskyClients["consensus"]).Return(2, nil),
+					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(3, nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("https://checkpoint-sync.holesky.ethpandaops.io/", nil),
 					prompter.EXPECT().InputURL("Execution API URL", "", true).Return("http://execution:5051", nil),
 					prompter.EXPECT().InputURL("Execution Auth API URL", "", true).Return("http://execution:5051", nil),
