@@ -353,6 +353,7 @@ func setupStarknetNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, 
 	} else {
 		if err := runPromptActions(p, o,
 			inputEthNode,
+			inputRemoteDbURL,
 		); err != nil {
 			return err
 		}
@@ -1106,10 +1107,14 @@ func inputContainerTag(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputEthNode(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.ExecutionApiUrl, err = p.InputURL("Eth 1 Endpoint", "", true)
+	o.genData.ExecutionApiUrl, err = p.InputURL("Input Eth 1 Endpoint", "", true)
 	return
 }
 
+func inputRemoteDbURL(p ui.Prompter, o *CliCmdOptions) (err error) {
+	o.genData.RemoteDbURL, err = p.InputURL("Input GRPC URL of a remote Juno node (press Enter to skip)", "", false)
+	return
+}
 
 func absPathInPlace(path *string) error {
 	absPath, err := filepath.Abs(*path)

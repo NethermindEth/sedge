@@ -60,35 +60,36 @@ type CustomFlags struct {
 // GenCmdFlags is a struct that holds the flags of the generate command
 type GenCmdFlags struct {
 	CustomFlags
-	executionName     string
-	consensusName     string
-	validatorName     string
-	starknetName      string //starknet
-	checkpointSyncUrl string
-	feeRecipient      string
-	noMev             bool
-	mevImage          string
-	mevBoostOnVal     bool
-	noValidator       bool
-	jwtPath           string
-	graffiti          string
-	mapAllPorts       bool
-	fallbackEL        []string
-	elExtraFlags      []string
-	clExtraFlags      []string
-	vlExtraFlags      []string
-	relayURLs         []string
-	mevBoostUrl       string
-	executionApiUrl   string
-	executionAuthUrl  string
-	consensusApiUrl   string
-	waitEpoch         int
-	customEnodes      []string
-	customEnrs        []string
-	latestVersion     bool
+	executionName       string
+	consensusName       string
+	validatorName       string
+	starknetName        string //starknet
+	checkpointSyncUrl   string
+	feeRecipient        string
+	noMev               bool
+	mevImage            string
+	mevBoostOnVal       bool
+	noValidator         bool
+	jwtPath             string
+	graffiti            string
+	mapAllPorts         bool
+	fallbackEL          []string
+	elExtraFlags        []string
+	clExtraFlags        []string
+	vlExtraFlags        []string
+	relayURLs           []string
+	mevBoostUrl         string
+	executionApiUrl     string
+	executionAuthUrl    string
+	consensusApiUrl     string
+	waitEpoch           int
+	customEnodes        []string
+	customEnrs          []string
+	latestVersion       bool
 	// juno flags
 	pendingPollInterval string
 	full                bool
+	remoteDbURL         string
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -311,6 +312,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		MevBoostOnValidator:     flags.mevBoostOnVal,
 		ContainerTag:            containerTag,
 		LatestVersion:           flags.latestVersion,
+		RemoteDbURL:             flags.remoteDbURL,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,

@@ -36,5 +36,10 @@
       - --grpc-host=0.0.0.0
       - --grpc-port={{.L2GrpcPort}}
       - --network=${NETWORK}
+      - --db-cache-size: 8
+      - --max-vms=48
+      - --max-vm-queue=96
+      - --rpc-max-block-scan=18446744073709551615
       - --pending-poll-interval={{if .PendingPollInterval}}{{.PendingPollInterval}}{{else}}10s{{end}}
+      - --remote-db={REMOTE_DB}
       {{end}}

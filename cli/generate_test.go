@@ -98,7 +98,6 @@ func (flags *GenCmdFlags) argsList() []string {
 	if flags.executionApiUrl != "" {
 		s = append(s, "--execution-api-url", flags.executionApiUrl)
 	}
-
 	if flags.noMev {
 		s = append(s, "--no-mev-boost")
 	}

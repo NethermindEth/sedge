@@ -476,6 +476,7 @@ func TestCli(t *testing.T) {
 					MapAllPorts:     true,
 					ContainerTag:    "tag",
 					Full:            false,
+					RemoteDbURL:     "http://example.com",
 					JWTSecretPath:   filepath.Join(generationPath, "jwtsecret"),
 				}
 
@@ -486,7 +487,8 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
 					prompter.EXPECT().Select("Select starknet client", "", ETHClients["starknet"]).Return(0, nil),
 					prompter.EXPECT().Confirm("Do you want to set up a full starknet node (with execution and consensus)?", true).Return(false, nil),
-					prompter.EXPECT().InputURL("Eth 1 Endpoint", "", true).Return("ws://execution:8545", nil),
+					prompter.EXPECT().InputURL("Input Eth 1 Endpoint", "", true).Return("ws://execution:8545", nil),
+					prompter.EXPECT().InputURL("Input GRPC URL of a remote Juno node (press Enter to skip)", "", false).Return("http://example.com", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
@@ -513,6 +515,7 @@ func TestCli(t *testing.T) {
 					MapAllPorts:     true,
 					ContainerTag:    "tag",
 					Full:            false,
+					RemoteDbURL:     "http://example.com",
 					JWTSecretPath:   filepath.Join(generationPath, "jwtsecret"),
 				}
 
@@ -523,7 +526,8 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
 					prompter.EXPECT().Select("Select starknet client", "", ETHClients["starknet"]).Return(0, nil),
 					prompter.EXPECT().Confirm("Do you want to set up a full starknet node (with execution and consensus)?", true).Return(false, nil),
-					prompter.EXPECT().InputURL("Eth 1 Endpoint", "", true).Return("ws://execution:8545", nil),
+					prompter.EXPECT().InputURL("Input Eth 1 Endpoint", "", true).Return("ws://execution:8545", nil),
+					prompter.EXPECT().InputURL("Input GRPC URL of a remote Juno node (press Enter to skip)", "", false).Return("http://example.com", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{

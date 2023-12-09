@@ -44,8 +44,7 @@ type EnvData struct {
 	Graffiti                  string
 	RelayURLs                 string
 	CheckpointSyncUrl         string
-	Eth1Endpoint              string
-	Full                      bool   
+	RemoteDbURL                  string   
 }
 
 // GenData : Struct Data object for script's generation
@@ -91,6 +90,7 @@ type GenData struct {
 	// juno flags
 	PendingPollInterval     string
 	Full                    bool
+	RemoteDbURL             string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
