@@ -63,7 +63,7 @@ type GenCmdFlags struct {
 	executionName     string
 	consensusName     string
 	validatorName     string
-	starknetName      string //starknet
+	starknetName      string // starknet
 	checkpointSyncUrl string
 	feeRecipient      string
 	noMev             bool
@@ -279,7 +279,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ExecutionClient:         combinedClients.Execution,
 		ConsensusClient:         combinedClients.Consensus,
 		ValidatorClient:         combinedClients.Validator,
-		StarknetClient:          combinedClients.Starknet, //starknet
+		StarknetClient:          combinedClients.Starknet, // starknet
 		Network:                 network,
 		CheckpointSyncUrl:       flags.checkpointSyncUrl,
 		FeeRecipient:            flags.feeRecipient,
@@ -298,7 +298,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		MevBoostEndpoint:        flags.mevBoostUrl,
 		Services:                services,
 		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
-		SLStartGracePeriod:      uint(slStartGracePeriod.Seconds()), //for starknet
+		SLStartGracePeriod:      uint(slStartGracePeriod.Seconds()), // for starknet
 		ExecutionApiUrl:         flags.executionApiUrl,
 		ExecutionAuthUrl:        flags.executionAuthUrl,
 		ConsensusApiUrl:         flags.consensusApiUrl,

@@ -669,7 +669,6 @@ func TestEnvFileAndFlags(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestCleanGeneratedFiles(t *testing.T) {

@@ -25,8 +25,8 @@ type EnvData struct {
 	Mev                       bool
 	ElImage                   string
 	ElDataDir                 string
-	L2Image                   string //for juno
-	L2DataDir                 string //for juno
+	L2Image                   string // for juno
+	L2DataDir                 string // for juno
 	CcImage                   string
 	CcDataDir                 string
 	VlImage                   string
@@ -53,7 +53,7 @@ type GenData struct {
 	ExecutionClient         *clients.Client
 	ConsensusClient         *clients.Client
 	ValidatorClient         *clients.Client
-	StarknetClient          *clients.Client //starknet
+	StarknetClient          *clients.Client // starknet
 	Network                 string
 	CheckpointSyncUrl       string
 	FeeRecipient            string
@@ -287,8 +287,9 @@ type Services struct {
 	StarknetBlocker  *StarknetBlocker  `yaml:"starknet-blocker,omitempty"`
 	Validator        *Validator        `yaml:"validator,omitempty"`
 	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus,omitempty"`
-	Starknet         *Starknet         `yaml:"starknet,omitempty"` //starknet services
+	Starknet         *Starknet         `yaml:"starknet,omitempty"` // starknet services
 }
+
 type Sedge struct {
 	Name string `yaml:"name"`
 }
