@@ -41,7 +41,7 @@ func TestCli(t *testing.T) {
 		"execution": clients.AllClients["execution"],
 		"consensus": clients.AllClients["consensus"],
 		"validator": clients.AllClients["validator"],
-		"starknet":  clients.AllClients["starknet"],
+		"starknet" : clients.AllClients["starknet"],
 	}
 	ETHClients["execution"] = append(ETHClients["execution"], "randomize")
 	ETHClients["consensus"] = append(ETHClients["consensus"], "randomize")

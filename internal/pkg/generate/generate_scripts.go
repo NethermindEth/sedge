@@ -186,7 +186,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	cls := mapClients(gd)
 	networkConfig := configs.NetworksConfigs()[gd.Network]
 
-
 	for tmpKind, client := range cls {
 		var name string
 		if client == nil {
@@ -404,6 +403,8 @@ func EnvFile(gd *GenData, at io.Writer) error {
 				}
 				gd.ExecutionApiUrl = "ws" + executionEndpoint + ":" + strconv.Itoa(int(gd.Ports["ELApi"]))
 				executionApiUrl = fmt.Sprintf("%s", gd.ExecutionApiUrl)
+			} else {
+				executionApiUrl = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELApi"])
 			}
 		}
 		if executionAuthUrl == "" {
