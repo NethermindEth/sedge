@@ -1340,7 +1340,7 @@ func TestGenerateCmd(t *testing.T) {
 				args: []string{"juno"},
 			},
 			GenCmdFlags{
-				executionApiUrl:  "ws://localhost:8545",
+				executionApiUrl:     "ws://localhost:8545",
 				pendingPollInterval: "5s",
 			},
 			globalFlags{
@@ -1358,7 +1358,7 @@ func TestGenerateCmd(t *testing.T) {
 				args: []string{" "},
 			},
 			GenCmdFlags{
-				full:  true,
+				full: true,
 			},
 			globalFlags{
 				install:        false,
@@ -1408,7 +1408,7 @@ func TestGenerateCmd(t *testing.T) {
 				args: []string{},
 			},
 			GenCmdFlags{
-				full:  true,
+				full: true,
 			},
 			globalFlags{
 				install: false,

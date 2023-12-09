@@ -78,7 +78,7 @@ func (c *Client) setValidatorImage(image string) {
 	}
 }
 
-// starknet 
+// starknet
 func (c *Client) setStarknetImage(image string) {
 	switch c.Name {
 	case "juno":

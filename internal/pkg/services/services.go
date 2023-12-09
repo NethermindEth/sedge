@@ -23,11 +23,11 @@ import (
 const (
 	ServiceCtSlashingData       = "sedge-validator-slashing-data-manager"
 	ServiceCtValidatorImport    = "sedge-validator-import"
-	ServiceCtStarknetImport    = "sedge-starknet-import"
+	ServiceCtStarknetImport     = "sedge-starknet-import"
 	DefaultSedgeValidatorClient = "sedge-validator-client"
 	DefaultSedgeExecutionClient = "sedge-execution-client"
 	DefaultSedgeConsensusClient = "sedge-consensus-client"
-	DefaultSedgeStarknetClient = "sedge-starknet-client"
+	DefaultSedgeStarknetClient  = "sedge-starknet-client"
 )
 
 type ServiceManager interface {

@@ -333,7 +333,6 @@ func setupStarknetNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, 
 			inputCustomChainSpec,
 			inputCustomGenesis,
 			inputCustomDeployBlock,
-			
 		); err != nil {
 			return err
 		}

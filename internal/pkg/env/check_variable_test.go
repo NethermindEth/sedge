@@ -116,7 +116,6 @@ func TestCheckVariable(t *testing.T) {
 			false,
 			true,
 		},
-
 	}
 
 	for _, tc := range tcs {

@@ -44,7 +44,7 @@ type EnvData struct {
 	Graffiti                  string
 	RelayURLs                 string
 	CheckpointSyncUrl         string
-	RemoteDbURL                  string   
+	RemoteDbURL               string
 }
 
 // GenData : Struct Data object for script's generation
@@ -88,9 +88,9 @@ type GenData struct {
 	ContainerTag            string
 	LatestVersion           bool
 	// juno flags
-	PendingPollInterval     string
-	Full                    bool
-	RemoteDbURL             string
+	PendingPollInterval string
+	Full                bool
+	RemoteDbURL         string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -140,12 +140,12 @@ type DockerComposeData struct {
 	ContainerTag            string
 
 	// juno flags
-	PendingPollInterval     string
-	Full                    bool
-	L2ApiPort               uint16
-	L2WsPort                uint16
-	L2MetricsPort           uint16
-	L2GrpcPort              uint16
+	PendingPollInterval string
+	Full                bool
+	L2ApiPort           uint16
+	L2WsPort            uint16
+	L2MetricsPort       uint16
+	L2GrpcPort          uint16
 }
 
 // WithConsensusClient returns true if the consensus client is set
@@ -184,10 +184,10 @@ func (d DockerComposeData) WithFullFlagStarknet() bool {
 	hasExecution := false
 
 	for _, service := range d.Services {
-		if service == starknet  {
+		if service == starknet {
 			hasStarknet = true
 		}
-		if service == execution  {
+		if service == execution {
 			hasExecution = true
 		}
 		if hasStarknet && hasExecution {

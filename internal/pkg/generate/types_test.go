@@ -76,7 +76,7 @@ func TestDockerComposeData_WithStarknetClient(t *testing.T) {
 		name string
 		data DockerComposeData
 		want bool
-		}{
+	}{
 		{
 			name: "with consensus and execution client",
 			data: DockerComposeData{

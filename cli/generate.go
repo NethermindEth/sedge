@@ -60,32 +60,32 @@ type CustomFlags struct {
 // GenCmdFlags is a struct that holds the flags of the generate command
 type GenCmdFlags struct {
 	CustomFlags
-	executionName       string
-	consensusName       string
-	validatorName       string
-	starknetName        string //starknet
-	checkpointSyncUrl   string
-	feeRecipient        string
-	noMev               bool
-	mevImage            string
-	mevBoostOnVal       bool
-	noValidator         bool
-	jwtPath             string
-	graffiti            string
-	mapAllPorts         bool
-	fallbackEL          []string
-	elExtraFlags        []string
-	clExtraFlags        []string
-	vlExtraFlags        []string
-	relayURLs           []string
-	mevBoostUrl         string
-	executionApiUrl     string
-	executionAuthUrl    string
-	consensusApiUrl     string
-	waitEpoch           int
-	customEnodes        []string
-	customEnrs          []string
-	latestVersion       bool
+	executionName     string
+	consensusName     string
+	validatorName     string
+	starknetName      string //starknet
+	checkpointSyncUrl string
+	feeRecipient      string
+	noMev             bool
+	mevImage          string
+	mevBoostOnVal     bool
+	noValidator       bool
+	jwtPath           string
+	graffiti          string
+	mapAllPorts       bool
+	fallbackEL        []string
+	elExtraFlags      []string
+	clExtraFlags      []string
+	vlExtraFlags      []string
+	relayURLs         []string
+	mevBoostUrl       string
+	executionApiUrl   string
+	executionAuthUrl  string
+	consensusApiUrl   string
+	waitEpoch         int
+	customEnodes      []string
+	customEnrs        []string
+	latestVersion     bool
 	// juno flags
 	pendingPollInterval string
 	full                bool
