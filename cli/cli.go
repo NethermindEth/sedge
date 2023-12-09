@@ -679,7 +679,7 @@ func runPromptActions(p ui.Prompter, o *CliCmdOptions, actions ...promptAction) 
 	return nil
 }
 
-// check if network is mainnet or goerli for starknet
+// check if network is mainnet or sepolia for starknet
 func networkNotMainnetOrSepolia(o *CliCmdOptions) bool {
 	return o.genData.Network != NetworkMainnet && o.genData.Network != NetworkSepolia
 }

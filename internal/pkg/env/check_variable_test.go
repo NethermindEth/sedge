@@ -99,9 +99,9 @@ func TestCheckVariable(t *testing.T) {
 			true,
 		},
 		{
-			"Test case 9, goerli, juno config, no starknet config",
+			"Test case 9, sepolia, juno config, no starknet config",
 			ReMEV,
-			"goerli",
+			"sepolia",
 			"starknet",
 			"juno",
 			false,
