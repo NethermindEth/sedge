@@ -1,0 +1,59 @@
+---
+sidebar_position: 4
+id: holesky
+---
+
+# Holesky
+
+Holesky is Ethereum's public testnet that serves as a technical experimentation platform for Ethereum's infrastructure, staking designs, and protocol-level developments. This testing environment brings its own set of validators, a dedicated block explorer, and an ecosystem of faucets.
+
+## Supported Execution Clients
+- [Nethermind](https://docs.nethermind.io/)
+- [Geth](https://geth.ethereum.org/docs/)
+- [Erigon](https://github.com/ledgerwatch/erigon)
+- [Besu](https://besu.hyperledger.org/en/stable/)
+
+## Supported Consensus Clients
+- [Lighthouse](https://lighthouse-book.sigmaprime.io/)
+- [Lodestar](https://chainsafe.github.io/lodestar/)
+- [Prysm](https://docs.prylabs.network/docs/getting-started/)
+- [Teku](https://docs.teku.consensys.net/en/latest/)
+
+## Supported Validator Clients
+- [Lighthouse](https://lighthouse-book.sigmaprime.io/)
+- [Lodestar](https://chainsafe.github.io/lodestar/)
+- [Prysm](https://docs.prylabs.network/docs/getting-started/)
+- [Teku](https://docs.teku.consensys.net/en/latest/)
+
+
+## Generating a Full Node
+
+To generate a setup of a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge generate full-node`. For example:
+
+```bash
+sedge generate full-node --no-validator --network=holesky
+```
+
+## Generating a Full Node with a Validator
+
+To generate a setup of a validator with random clients, you need to omit the `--no-validator` flag. For example:
+
+```bash
+sedge generate full-node --network=holesky
+```
+
+## Create keystore for validator
+
+To create a keystore for a validator, you need to run the following command:
+
+```bash
+sedge keys --network holesky
+```
+
+## Running your setup
+
+Once you have generated your setup, you can run it with the following command:
+
+```
+sedge run
+```
