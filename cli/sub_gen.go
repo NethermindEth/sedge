@@ -328,7 +328,6 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	// Bind flags
 	cmd.Flags().StringVar(&flags.executionApiUrl, "execution-api-url", "", "Execution API endpoint for the consensus client. Example: 'sedge generate starknet -r --execution-api-url=https://api.url.endpoint'")
 	cmd.Flags().StringVar(&flags.pendingPollInterval, "pending-poll-interval", "", "How often to fetch the pending block when synced to the head of the chain. Provide a duration like 5s (five seconds) or 10m (10 minutes). Default is 5s")
-	cmd.Flags().StringVar(&flags.remoteDbURL, "remote-db", "", "GRPC URL of a remote Juno node.")
 	cmd.Flags().BoolVar(&flags.full, "full", false, "Generate a full node setup with Juno. Designed for execution and consensus nodes setup without a validator node.")
 	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")

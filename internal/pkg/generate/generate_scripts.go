@@ -494,7 +494,6 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		Graffiti:                  graffiti,
 		RelayURLs:                 strings.Join(gd.RelayURLs, ","),
 		CheckpointSyncUrl:         gd.CheckpointSyncUrl,
-		RemoteDbURL:               gd.RemoteDbURL,
 	}
 
 	// Save to writer

@@ -89,7 +89,6 @@ type GenCmdFlags struct {
 	// juno flags
 	pendingPollInterval string
 	full                bool
-	remoteDbURL         string
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -312,7 +311,6 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		MevBoostOnValidator:     flags.mevBoostOnVal,
 		ContainerTag:            containerTag,
 		LatestVersion:           flags.latestVersion,
-		RemoteDbURL:             flags.remoteDbURL,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,
