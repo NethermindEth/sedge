@@ -87,8 +87,8 @@ type GenData struct {
 	ContainerTag            string
 	LatestVersion           bool
 	// juno flags
-	PendingPollInterval     string
-	Full                    bool
+	PendingPollInterval string
+	Full                bool
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script

@@ -1109,8 +1109,6 @@ func inputEthNode(p ui.Prompter, o *CliCmdOptions) (err error) {
 	return
 }
 
-
-
 func absPathInPlace(path *string) error {
 	absPath, err := filepath.Abs(*path)
 	if err != nil {
