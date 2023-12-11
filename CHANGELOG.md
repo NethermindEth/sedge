@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove default bootnodes for networks managed by clients.
 - Remove custom configurations for Chiado and instead use the clients configuration.
+- Update client images.
 
 ## [v1.2.3] - 2023-08-16
 
