@@ -29,6 +29,7 @@ Sedge is a one-click node setup tool for PoS network/chain validators and nodes 
     - [Mainnet](#mainnet)
     - [Sepolia](#sepolia)
     - [Goerli](#goerli)
+    - [Holesky](#holesky)
     - [Gnosis](#gnosis)
     - [Chiado (Gnosis testnet)](#chiado-gnosis-testnet)
     - [CL clients with Mev-Boost](#cl-clients-with-mev-boost)
@@ -155,6 +156,15 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
+
+### Holesky
+
+| Execution  | Consensus  | Validator  |
+| ---------- |------------|------------|
+| Geth       | Lighthouse | Lighthouse |
+| Nethermind | Lodestar   | Lodestar   |
+| Erigon     | Teku       | Teku       |
+| Besu       | Prysm      | Prysm      |
 
 ### Gnosis
 

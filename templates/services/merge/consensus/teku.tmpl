@@ -1,7 +1,7 @@
 {{/* teku.tmpl */}}
 {{ define "consensus" }}
-  consensus:{{if and (ge .UID 0) (ge .GID 0)}}
-    user: "{{.UID}}:{{.GID}}"{{end}}
+  consensus:
+    user: "root:root"
     stop_grace_period: 30s
     container_name: sedge-consensus-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
@@ -46,8 +46,7 @@
       - --data-storage-non-canonical-blocks-enabled=false
       - --ee-endpoint=${EC_AUTH_URL}{{with .FeeRecipient}}
       - --validators-proposer-default-fee-recipient=${FEE_RECIPIENT}{{end}}
-      - --ee-jwt-secret-file=/tmp/jwt/jwtsecret{{if .TTD}}
-      - --Xnetwork-total-terminal-difficulty-override={{.TTD}}{{end}}
+      - --ee-jwt-secret-file=/tmp/jwt/jwtsecret
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0

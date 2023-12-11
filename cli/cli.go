@@ -44,6 +44,7 @@ const (
 	NetworkSepolia = "sepolia"
 	NetworkGnosis  = "gnosis"
 	NetworkChiado  = "chiado"
+	NetworkHolesky = "holesky"
 	NetworkCustom  = "custom"
 
 	NodeTypeFullNode  = "full-node"
@@ -136,7 +137,6 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, deps
 			inputCustomNetworkConfig,
 			inputCustomChainSpec,
 			inputCustomGenesis,
-			inputCustomTTD,
 			inputCustomDeployBlock,
 			inputExecutionBootNodes,
 			inputConsensusBootNodes,
@@ -209,7 +209,6 @@ func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 	if o.genData.Network == NetworkCustom {
 		if err := runPromptActions(p, o,
 			inputCustomChainSpec,
-			inputCustomTTD,
 			inputExecutionBootNodes,
 		); err != nil {
 			return err
@@ -617,7 +616,7 @@ func runPromptActions(p ui.Prompter, o *CliCmdOptions, actions ...promptAction) 
 }
 
 func selectNetwork(p ui.Prompter, o *CliCmdOptions) error {
-	options := []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado}
+	options := []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}
 	index, err := p.Select("Select network", "", options)
 	if err != nil {
 		return err
@@ -662,10 +661,6 @@ func selectExecutionClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 		Type: "execution",
 	}
 	o.genData.ExecutionClient.SetImageOrDefault("")
-	// Patch Geth image if network needs TTD to be set
-	if o.genData.ExecutionClient.Name == "geth" && o.genData.Network == NetworkMainnet {
-		o.genData.ExecutionClient.Image = "ethereum/client-go:v1.10.26"
-	}
 	return nil
 }
 
@@ -824,11 +819,6 @@ func inputCustomGenesis(p ui.Prompter, o *CliCmdOptions) (err error) {
 		return err
 	}
 	return absPathInPlace(&o.genData.CustomGenesisPath)
-}
-
-func inputCustomTTD(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.CustomTTD, err = p.Input("Custom TTD (Terminal Total Difficulty)", "0", false, ui.DigitsStringValidator)
-	return
 }
 
 func inputCustomDeployBlock(p ui.Prompter, o *CliCmdOptions) (err error) {

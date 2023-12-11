@@ -156,7 +156,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	cls := mapClients(gd)
-
+	networkConfig := configs.NetworksConfigs()[gd.Network]
 	for tmpKind, client := range cls {
 		var name string
 		if client == nil {
@@ -166,7 +166,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		}
 		tmp, err := templates.Services.ReadFile(strings.Join([]string{
 			"services",
-			configs.NetworksConfigs()[gd.Network].NetworkService,
+			networkConfig.NetworkService,
 			tmpKind,
 			name + ".tmpl",
 		}, "/"))
@@ -216,11 +216,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		}
 	}
 
-	ttd := gd.CustomTTD
-	if len(ttd) == 0 {
-		ttd = configs.NetworksConfigs()[gd.Network].DefaultTTD
-	}
-
 	// Check for CL Bootnode nodes
 	if len(gd.CCBootnodes) == 0 {
 		gd.CCBootnodes = configs.NetworksConfigs()[gd.Network].DefaultCCBootnodes
@@ -251,9 +246,8 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	data := DockerComposeData{
 		Services:            gd.Services,
 		Network:             gd.Network,
-		TTD:                 ttd,
 		XeeVersion:          xeeVersion,
-		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev),
+		Mev:                 networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev)),
 		MevBoostOnValidator: gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		MevPort:             gd.Ports["MevPort"],
 		MevBoostEndpoint:    gd.MevBoostEndpoint,
@@ -317,13 +311,13 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	}
 
 	cls := mapClients(gd)
-
+	networkConfig := configs.NetworksConfigs()[gd.Network]
 	for tmpKind, client := range cls {
 		var tmp []byte
 		if client == nil {
 			tmp, err = templates.Services.ReadFile(strings.Join([]string{
 				"services",
-				configs.NetworksConfigs()[gd.Network].NetworkService,
+				networkConfig.NetworkService,
 				tmpKind,
 				"empty.tmpl",
 			}, "/"))
@@ -406,12 +400,12 @@ func EnvFile(gd *GenData, at io.Writer) error {
 
 	data := EnvData{
 		Services:                  gd.Services,
-		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
-		ElImage:                   imageOrEmpty(cls[execution]),
+		Mev:                       networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
+		ElImage:                   imageOrEmpty(cls[execution], gd.LatestVersion),
 		ElDataDir:                 "./" + configs.ExecutionDir,
-		CcImage:                   imageOrEmpty(cls[consensus]),
+		CcImage:                   imageOrEmpty(cls[consensus], gd.LatestVersion),
 		CcDataDir:                 "./" + configs.ConsensusDir,
-		VlImage:                   imageOrEmpty(cls[validator]),
+		VlImage:                   imageOrEmpty(cls[validator], gd.LatestVersion),
 		VlDataDir:                 "./" + configs.ValidatorDir,
 		ExecutionApiURL:           executionApiUrl,
 		ExecutionAuthURL:          executionAuthUrl,
@@ -580,8 +574,13 @@ func joinIfNotEmpty(strs ...string) string {
 }
 
 // imageOrEmpty returns the image of the client if it is not nil, otherwise returns an empty string
-func imageOrEmpty(cls *clients.Client) string {
+func imageOrEmpty(cls *clients.Client, latest bool) string {
 	if cls != nil {
+		if latest {
+			splits := strings.Split(cls.Image, ":")
+			splits[len(splits)-1] = "latest"
+			return strings.Join(splits, ":")
+		}
 		return cls.Image
 	}
 	return ""

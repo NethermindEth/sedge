@@ -11,8 +11,13 @@ jobs:
     name: Build sedge
     strategy:
       matrix:
-        go: ["1.19"]
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            go: '1.19'
+          - os: macos-latest
+            go: '1.19'
+          - os: windows-latest
+            go: '1.21'
     runs-on: ${{ matrix.os }}
 
     steps:

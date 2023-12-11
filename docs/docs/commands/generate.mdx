@@ -37,7 +37,7 @@ Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
   -h, --help                   help for generate
       --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
-  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
+  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge-data")
 
 Global Flags:
@@ -75,6 +75,7 @@ Flags:
   -c, --consensus string                  Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
   -e, --execution string                  Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
   -v, --validator string                  Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
+      --latest                            Use the latest version of clients. This sets the "latest" tag on the client's docker images. Latest version might not work.
       --checkpoint-sync-url string        Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.
       --fee-recipient string              Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption
       --no-mev-boost                      Not use mev-boost if supported
@@ -88,7 +89,6 @@ Flags:
       --el-extra-flag stringArray         Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag "<flag1>=value1" --el-extra-flag "<flag2>=\"value2\""'
       --cl-extra-flag stringArray         Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge generate full-node --cl-extra-flag "<flag1>=value1" --cl-extra-flag "<flag2>=\"value2\""'
       --vl-extra-flag stringArray         Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge generate full-node --vl-extra-flag "<flag1>=value1" --vl-extra-flag "<flag2>=\"value2\""'
-      --custom-ttd string                 Custom Terminal Total Difficulty to use for the execution client
       --custom-chainSpec string           File path or url to use as custom network chainSpec for execution client.
       --custom-config string              File path or url to use as custom network config file for consensus client.
       --custom-genesis string             File path or url to use as custom network genesis for consensus client.
@@ -102,7 +102,7 @@ Global Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
       --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
       --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
-  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
+  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```
 
@@ -124,6 +124,7 @@ Usage:
   sedge generate consensus [flags] --execution-api-url <URL> --execution-auth-url <URL> [args]
 
 Flags:
+      --latest                            Use the latest version of clients. This sets the "latest" tag on the client's docker images. Latest version might not work.
       --execution-api-url string          Execution API endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-api-url=https://api.url.endpoint'
       --execution-auth-url string         Execution AUTH endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-auth-url=https://auth.url.endpoint'
       --checkpoint-sync-url string        Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.
@@ -161,9 +162,9 @@ Usage:
   sedge generate execution [flags] [args]
 
 Flags:
+      --latest                       Use the latest version of clients. This sets the "latest" tag on the client's docker images. Latest version might not work.
       --jwt-secret-path string        Path to the JWT secret file
       --map-all                       Map all clients ports to host. Use with care. Useful to allow remote access to the clients
-      --custom-ttd string             Custom Terminal Total Difficulty to use for the execution client
       --custom-chainSpec string       File path or url to use as custom network chainSpec for execution client.
       --execution-bootnodes strings   List of comma separated enodes to use as custom network peers for execution client.
       --el-extra-flag stringArray     Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge generate consensus--el-extra-flag "<flag1>=value1" --el-extra-flag "<flag2>=\"value2\""'
@@ -173,7 +174,7 @@ Global Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
       --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
       --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
-  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
+  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```
 
@@ -199,6 +200,7 @@ Usage:
   sedge generate validator [flags] --consensus-url <URL> [args]
 
 Flags:
+      --latest                       Use the latest version of clients. This sets the "latest" tag on the client's docker images. Latest version might not work.
       --consensus-url string         Consensus endpoint for the validator client to connect to. Example: 'sedge generate validator --consensus-url http://localhost:4000'
       --fee-recipient string         Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption
       --graffiti string              Graffiti to be used by the validator
@@ -214,7 +216,7 @@ Global Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
       --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
       --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
-  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
+  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```
 

@@ -4,8 +4,12 @@ keywords:
   - sedge
   - installation
   - validator
-  - goerli
   - mainnet
+  - goerli
+  - sepolia
+  - holesky
+  - chiado
+  - gnosis
   - Ethereum
   - mev-boost
 ---
