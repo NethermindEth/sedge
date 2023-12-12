@@ -77,6 +77,14 @@ func checkOnlyValidator(t *testing.T, data *GenData, compose, env io.Reader) err
 	return nil
 }
 
+func checkOnlyStarknet(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
+	assert.NotNil(t, composeData.Services)
+	assert.NotNil(t, composeData.Services.Starknet)
+	assert.Equal(t, composeData.Services.Starknet.ContainerName, services.DefaultSedgeStarknetClient)
+	return nil
+}
+
 func checkCCBootnodesOnConsensus(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
 	if len(data.CCBootnodes) == 0 {
@@ -202,6 +210,21 @@ func checkValidatorBlocker(t *testing.T, data *GenData, compose, env io.Reader) 
 	return nil
 }
 
+func checkStarknetBlocker(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
+	if composeData.Services.Starknet != nil {
+		assert.NotNil(t, composeData.Services.StarknetBlocker)
+		containerName := "sedge-starknet-blocker"
+		if data.ContainerTag != "" {
+			containerName = containerName + "-" + data.ContainerTag
+		}
+		assert.Equal(t, containerName, composeData.Services.StarknetBlocker.ContainerName)
+	} else {
+		assert.Nil(t, composeData.Services.StarknetBlocker)
+	}
+	return nil
+}
+
 func defaultFunc(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
 
@@ -270,73 +293,101 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 		if err != nil {
 			t.Errorf("SupportedClients(\"validator\") failed: %v", err)
 		}
+		starknetClients, err := c.SupportedClients("starknet")
+		if err != nil {
+			t.Errorf("SupportedClients(\"starknet\") failed: %v", err)
+		}
 
 		// TODO: Add CheckpointSyncUrl, FallbackELUrls and FeeRecipient to test data
 		for _, executionCl := range executionClients {
 			for _, consensusCl := range consensusClients {
-				tests = append(tests,
-					genTestData{
-						Description: fmt.Sprintf(baseDescription+"execution: %s, network: %s, only execution", executionCl, network),
-						GenerationData: &GenData{
-							ExecutionClient: &clients.Client{Name: executionCl},
-							Network:         network,
-							Services:        []string{execution},
-						},
-						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyExecution, checkValidatorBlocker},
-					},
-					genTestData{
-						Description: fmt.Sprintf(baseDescription+"consensus: %s, network: %s, only consensus", consensusCl, network),
-						GenerationData: &GenData{
-							ConsensusClient: &clients.Client{Name: consensusCl},
-							Network:         network,
-							Services:        []string{consensus},
-						},
-						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyConsensus, checkValidatorBlocker},
-					},
-					genTestData{
-						Description: fmt.Sprintf(baseDescription+"validator: %s, network: %s, only validator", consensusCl, network),
-						GenerationData: &GenData{
-							ValidatorClient: &clients.Client{Name: consensusCl},
-							Network:         network,
-							Services:        []string{validator},
-						},
-						CheckFunctions: []CheckFunc{defaultFunc, checkOnlyValidator, checkValidatorBlocker},
-					},
-				)
-				if utils.Contains(validatorClients, consensusCl) {
+				for _, starknetCl := range starknetClients {
 					tests = append(tests,
 						genTestData{
-							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, all", executionCl, consensusCl, consensusCl, network),
+							Description: fmt.Sprintf(baseDescription+"execution: %s, network: %s, only execution", executionCl, network),
 							GenerationData: &GenData{
 								ExecutionClient: &clients.Client{Name: executionCl},
+								Network:         network,
+								Services:        []string{execution},
+							},
+							CheckFunctions: []CheckFunc{defaultFunc, checkOnlyExecution, checkValidatorBlocker},
+						},
+						genTestData{
+							Description: fmt.Sprintf(baseDescription+"consensus: %s, network: %s, only consensus", consensusCl, network),
+							GenerationData: &GenData{
 								ConsensusClient: &clients.Client{Name: consensusCl},
+								Network:         network,
+								Services:        []string{consensus},
+							},
+							CheckFunctions: []CheckFunc{defaultFunc, checkOnlyConsensus, checkValidatorBlocker},
+						},
+						genTestData{
+							Description: fmt.Sprintf(baseDescription+"validator: %s, network: %s, only validator", consensusCl, network),
+							GenerationData: &GenData{
 								ValidatorClient: &clients.Client{Name: consensusCl},
 								Network:         network,
-								Services:        []string{execution, consensus, validator},
+								Services:        []string{validator},
 							},
-							CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker},
+							CheckFunctions: []CheckFunc{defaultFunc, checkOnlyValidator, checkValidatorBlocker},
 						},
 						genTestData{
-							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, network),
+							Description: fmt.Sprintf(baseDescription+"starknet: %s, network: %s, only starknet", starknetCl, network),
 							GenerationData: &GenData{
-								Services:        []string{execution, consensus},
-								ExecutionClient: &clients.Client{Name: executionCl},
-								ConsensusClient: &clients.Client{Name: consensusCl},
-								Network:         network,
+								StarknetClient: &clients.Client{Name: starknetCl},
+								Network:        network,
+								Services:       []string{starknet},
 							},
-							CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker},
+							CheckFunctions: []CheckFunc{defaultFunc, checkOnlyStarknet, checkValidatorBlocker},
 						},
-						genTestData{
-							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, Execution Client not Valid", executionCl, consensusCl, consensusCl, network),
-							GenerationData: &GenData{
-								Services:        []string{execution, consensus},
-								ExecutionClient: &clients.Client{Name: executionCl},
-								ConsensusClient: &clients.Client{Name: wrongDep},
-								Network:         network,
+					)
+					if utils.Contains(validatorClients, consensusCl) {
+						tests = append(tests,
+							genTestData{
+								Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, starknet: %s, network: %s, all", executionCl, consensusCl, consensusCl, starknetCl, network),
+								GenerationData: &GenData{
+									ExecutionClient: &clients.Client{Name: executionCl},
+									ConsensusClient: &clients.Client{Name: consensusCl},
+									ValidatorClient: &clients.Client{Name: consensusCl},
+									StarknetClient:  &clients.Client{Name: starknetCl},
+									Network:         network,
+									Services:        []string{execution, consensus, validator, starknet},
+								},
+								CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker, checkStarknetBlocker},
 							},
-							ErrorGenCompose: ErrConsensusClientNotValid,
-							CheckFunctions:  []CheckFunc{defaultFunc, checkValidatorBlocker},
-						})
+							genTestData{
+								Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, starknet: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, starknetCl, network),
+								GenerationData: &GenData{
+									Services:        []string{execution, consensus, starknet},
+									ExecutionClient: &clients.Client{Name: executionCl},
+									ConsensusClient: &clients.Client{Name: consensusCl},
+									StarknetClient:  &clients.Client{Name: starknetCl},
+									Network:         network,
+								},
+								CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker},
+							},
+							genTestData{
+								Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, Execution Client not Valid", executionCl, consensusCl, consensusCl, network),
+								GenerationData: &GenData{
+									Services:        []string{execution, consensus},
+									ExecutionClient: &clients.Client{Name: executionCl},
+									ConsensusClient: &clients.Client{Name: wrongDep},
+									Network:         network,
+								},
+								ErrorGenCompose: ErrConsensusClientNotValid,
+								CheckFunctions:  []CheckFunc{defaultFunc, checkValidatorBlocker},
+							},
+							genTestData{
+								Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, starknet: %s, network: %s, Execution Client not Valid", executionCl, consensusCl, starknetCl, network),
+								GenerationData: &GenData{
+									Services:        []string{execution, consensus, starknet},
+									ExecutionClient: &clients.Client{Name: executionCl},
+									StarknetClient:  &clients.Client{Name: wrongDep},
+									Network:         network,
+								},
+								ErrorGenCompose: ErrStarknetClientNotValid,
+								CheckFunctions:  []CheckFunc{defaultFunc, checkStarknetBlocker},
+							})
+					}
 				}
 			}
 		}
@@ -350,14 +401,15 @@ func TestGenerateComposeServices(t *testing.T) {
 		{
 			Description: "Test generation of compose services",
 			GenerationData: &GenData{
-				Services:        []string{execution, consensus, validator, validatorImport, mevBoost},
+				Services:        []string{execution, consensus, validator, validatorImport, starknet, starknetImport, mevBoost},
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku"},
 				ValidatorClient: &clients.Client{Name: "teku"},
+				StarknetClient:  &clients.Client{Name: "juno"},
 				Network:         "mainnet",
 				Mev:             true,
 			},
-			CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker},
+			CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker, checkStarknetBlocker},
 		},
 		{
 			Description: "Test mevBoost service",
@@ -429,43 +481,50 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 		if err != nil {
 			t.Errorf("SupportedClients(\"validator\") failed: %v", err)
 		}
+		starknetClients, err := c.SupportedClients("starknet")
+		if err != nil {
+			t.Errorf("SupportedClients(\"starknet\") failed: %v", err)
+		}
 
 		for _, executionCl := range executionClients {
 			for _, consensusCl := range consensusClients {
-				if utils.Contains(validatorClients, consensusCl) {
-					tests = append(tests,
-						genTestData{
-							Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, network: %s, all", executionCl, consensusCl, consensusCl, network),
-							GenerationData: &GenData{
-								ExecutionClient: &clients.Client{Name: executionCl},
-								ConsensusClient: &clients.Client{Name: consensusCl},
-								ValidatorClient: &clients.Client{Name: consensusCl},
-								Network:         network,
-								Services:        []string{execution, consensus, validator},
+				for _, starknetCl := range starknetClients {
+					if utils.Contains(validatorClients, consensusCl) {
+						tests = append(tests,
+							genTestData{
+								Description: fmt.Sprintf(baseDescription+"execution: %s, consensus: %s, validator: %s, starknet: %s, network: %s, all", executionCl, consensusCl, consensusCl, starknetCl, network),
+								GenerationData: &GenData{
+									ExecutionClient: &clients.Client{Name: executionCl},
+									ConsensusClient: &clients.Client{Name: consensusCl},
+									ValidatorClient: &clients.Client{Name: consensusCl},
+									StarknetClient:  &clients.Client{Name: starknetCl},
+									Network:         network,
+									Services:        []string{execution, consensus, validator, starknet},
+								},
+								CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkValidatorBlocker, checkStarknetBlocker},
 							},
-							CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkValidatorBlocker},
-						},
-						genTestData{
-							Description: fmt.Sprintf(baseDescription+"ecBootnodes tests, execution: %s, consensus: %s, validator: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, network),
-							GenerationData: &GenData{
-								Services:        []string{execution, consensus},
-								ExecutionClient: &clients.Client{Name: executionCl},
-								ECBootnodes:     []string{"enode:1", "enode:2", "enode:3"},
-								ConsensusClient: &clients.Client{Name: consensusCl},
-								Network:         network,
+							genTestData{
+								Description: fmt.Sprintf(baseDescription+"ecBootnodes tests, execution: %s, consensus: %s, validator: %s, network: %s, no validator", executionCl, consensusCl, consensusCl, network),
+								GenerationData: &GenData{
+									Services:        []string{execution, consensus, starknet},
+									ExecutionClient: &clients.Client{Name: executionCl},
+									ECBootnodes:     []string{"enode:1", "enode:2", "enode:3"},
+									ConsensusClient: &clients.Client{Name: consensusCl},
+									Network:         network,
+								},
+								CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkValidatorBlocker},
 							},
-							CheckFunctions: []CheckFunc{defaultFunc, checkECBootnodesOnExecution, checkValidatorBlocker},
-						},
-						genTestData{
-							Description: fmt.Sprintf(baseDescription+"ccBootnodes tests, execution: %s, consensus: %s, validator: %s, network: %s, Execution Client not Valid", executionCl, consensusCl, consensusCl, network),
-							GenerationData: &GenData{
-								Services:        []string{consensus},
-								ConsensusClient: &clients.Client{Name: consensusCl},
-								CCBootnodes:     []string{"enr:1", "enr:2"},
-								Network:         network,
-							},
-							CheckFunctions: []CheckFunc{defaultFunc, checkCCBootnodesOnConsensus, checkValidatorBlocker},
-						})
+							genTestData{
+								Description: fmt.Sprintf(baseDescription+"ccBootnodes tests, execution: %s, consensus: %s, validator: %s, network: %s, Execution Client not Valid", executionCl, consensusCl, consensusCl, network),
+								GenerationData: &GenData{
+									Services:        []string{consensus},
+									ConsensusClient: &clients.Client{Name: consensusCl},
+									CCBootnodes:     []string{"enr:1", "enr:2"},
+									Network:         network,
+								},
+								CheckFunctions: []CheckFunc{defaultFunc, checkCCBootnodesOnConsensus, checkValidatorBlocker},
+							})
+					}
 				}
 			}
 		}
