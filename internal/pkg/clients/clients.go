@@ -17,7 +17,6 @@ package clients
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -48,10 +47,6 @@ Error if any
 func (c ClientInfo) SupportedClients(clientType string) (clientsNames []string, err error) {
 	files, err := templates.Envs.ReadDir(strings.Join([]string{"envs", c.Network, clientType}, "/"))
 	if err != nil {
-		if os.IsNotExist(err) {
-			// Handle the case where the file does not exist for a specific network and client type
-			return []string{}, nil
-		}
 		return nil, err
 	}
 
