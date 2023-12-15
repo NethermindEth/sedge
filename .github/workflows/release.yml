@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-go@v3
         with:
-          go-version: "1.18.3"
+          go-version: "1.19.0"
 
       - run: chmod +x ./scripts/build-go-darwin-binaries.sh && ./scripts/build-go-darwin-binaries.sh
 
@@ -52,7 +52,7 @@ jobs:
 
       - uses: actions/setup-go@v3
         with:
-          go-version: "1.18.3"
+          go-version: "1.21.0"
 
       - run: scripts\build-go-windows-binaries.ps1
 
@@ -74,7 +74,7 @@ jobs:
 
       - uses: actions/setup-go@v3
         with:
-          go-version: "1.18.3"
+          go-version: "1.19.0"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -189,7 +189,7 @@ jobs:
           path: sedge
       - uses: actions/setup-go@v3
         with:
-          go-version: "1.18.3"
+          go-version: "1.19.0"
       - name: Run publish PPA script
         env:
           GOPATH: /home/runner/go
