@@ -153,7 +153,7 @@ func (flags *GenCmdFlags) argsList() []string {
 		s = append(s, "--latest")
 	}
 	if flags.full {
-		s = append(s, "--full", flags.customDeployBlock)
+		s = append(s, "--full")
 	}
 	if flags.pendingPollInterval != "" {
 		s = append(s, "--pending-poll-interval", flags.pendingPollInterval)
@@ -1366,7 +1366,7 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
-			errors.New("requires one argument"),
+			errors.New("invalid starknet client"),
 		},
 		{
 			"Starknet blocker not generated with --full flag",

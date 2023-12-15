@@ -327,16 +327,6 @@ func setupStarknetNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, 
 	if err := confirmWithFullStarknetNode(p, o); err != nil {
 		return err
 	}
-	if o.genData.Network == NetworkCustom {
-		if err := runPromptActions(p, o,
-			inputCustomNetworkConfig,
-			inputCustomChainSpec,
-			inputCustomGenesis,
-			inputCustomDeployBlock,
-		); err != nil {
-			return err
-		}
-	}
 	if o.withFullL1Node {
 		o.genData.Services = append(o.genData.Services, "execution", "consensus")
 

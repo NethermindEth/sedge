@@ -1,0 +1,46 @@
+version: "3.9"
+services:
+  starknet:
+    tty: true
+    environment:
+    - TERM=xterm-256color
+    - COLORTERM=truecolor
+    stop_grace_period: 30s
+    container_name: sedge-starknet-client-nf
+    restart: unless-stopped
+    image: ${L2_IMAGE_VERSION}
+    networks:
+    - sedge
+    volumes:
+    - ${L2_DATA_DIR}:/juno/data
+    ports:
+    - 6060:6060
+    - 6061:6061
+    expose:
+    - 6060
+    - 6061
+    command:
+    - --colour=true
+    - --db-path=/juno/data
+    - --eth-node=${EC_API_URL}
+    - --http=true
+    - --http-host=0.0.0.0
+    - --http-port=6060
+    - --ws=true
+    - --ws-host=0.0.0.0
+    - --ws-port=6061
+    - --metrics=false
+    - --metrics-host=0.0.0.0
+    - --metrics-port=9090
+    - --grpc=false
+    - --grpc-host=0.0.0.0
+    - --grpc-port=6064
+    - --network=${NETWORK}
+    - --db-cache-size=8
+    - --max-vms=48
+    - --max-vm-queue=96
+    - --rpc-max-block-scan=18446744073709551615
+    - --pending-poll-interval=10s
+networks:
+  sedge:
+    name: sedge-network
