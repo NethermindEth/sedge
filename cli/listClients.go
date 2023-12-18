@@ -67,10 +67,6 @@ func runListClientsCmd(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		if omitStarknet {
-			log.Infof("No Starknet client(s) for network %s\n", n)
-		}
-
 		ui.WriteListClientsTable(cmd.OutOrStdout(), data)
 	}
 
