@@ -653,12 +653,12 @@ func TestEnvFileAndFlags(t *testing.T) {
 			Error: nil,
 		},
 		{
-			Description: "Juno and execution with ExecutionApiUrl",
+			Description: "Juno and execution with EthNodeUrl",
 			Data: &GenData{
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				StarknetClient:  &clients.Client{Name: "juno"},
 				Network:         "mainnet",
-				ExecutionApiUrl: "ws://localhost:8545",
+				EthNodeUrl:      "ws://localhost:8545",
 			},
 			Error: nil,
 		},

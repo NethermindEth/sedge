@@ -35,6 +35,7 @@ type EnvData struct {
 	ExecutionAuthURL          string
 	ConsensusApiURL           string
 	StarknetApiURL            string
+	EthNodeURL                string
 	ConsensusAdditionalApiURL string
 	FeeRecipient              string
 	JWTSecretPath             string
@@ -86,9 +87,9 @@ type GenData struct {
 	ConsensusApiUrl         string
 	ContainerTag            string
 	LatestVersion           bool
-	// juno flags
-	PendingPollInterval string
-	Full                bool
+	PendingPollInterval     string
+	Full                    bool
+	EthNodeUrl              string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script

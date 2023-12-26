@@ -282,7 +282,7 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 
 	cmd := &cobra.Command{
-		Use:   "starknet [flags] --execution-api-url <URL>",
+		Use:   "starknet [flags] --eth-nodegit <URL>",
 		Short: "Generate a starknet node config",
 		Long: "Generate a docker-compose and an environment file with a starknet node configuration\n" +
 			"Valid args: name of starknet clients according to network\n\n" +
@@ -290,7 +290,7 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			"Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate consensus juno:docker.image'. If you want to use the default docker image, just use the client name" +
 			"\n\n" +
 			"Required flags:\n" +
-			"- '--execution-auth-url'",
+			"- '--eth-node'",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
@@ -305,7 +305,7 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 				return err
 			}
 			if !flags.full {
-				err := cmd.MarkFlagRequired("execution-api-url")
+				err := cmd.MarkFlagRequired("eth-node")
 				if err != nil {
 					return nil
 				}
@@ -326,7 +326,7 @@ func StarknetSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		},
 	}
 	// Bind flags
-	cmd.Flags().StringVar(&flags.executionApiUrl, "execution-api-url", "", "Execution API endpoint for the consensus client. Example: 'sedge generate starknet -r --execution-api-url=https://api.url.endpoint'")
+	cmd.Flags().StringVar(&flags.ethNodeUrl, "eth-node", "", "Execution API endpoint for the execution client. Example: 'sedge generate starknet -r --execution-api-url=https://api.url.endpoint'")
 	cmd.Flags().StringVar(&flags.pendingPollInterval, "pending-poll-interval", "", "How often to fetch the pending block when synced to the head of the chain. Provide a duration like 5s (five seconds) or 10m (10 minutes). Default is 5s")
 	cmd.Flags().BoolVar(&flags.full, "full", false, "Generate a full node setup with Juno. Designed for execution and consensus nodes setup without a validator node.")
 	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")

@@ -89,6 +89,7 @@ type GenCmdFlags struct {
 	// juno flags
 	pendingPollInterval string
 	full                bool
+	ethNodeUrl          string
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -210,6 +211,11 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 			check:     len(flags.customEnrs) > 0,
 			validator: utils.ENRValidator,
 		},
+		{
+			value:     []string{flags.ethNodeUrl},
+			check:     flags.ethNodeUrl != "",
+			validator: singleUriValidator("eth node", utils.JunoUriValidator),
+		},
 	}
 	for _, uri := range toValidate {
 		if uri.check {
@@ -297,10 +303,11 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		MevBoostEndpoint:        flags.mevBoostUrl,
 		Services:                services,
 		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
-		SLStartGracePeriod:      uint(slStartGracePeriod.Seconds()), // for starknet
+		SLStartGracePeriod:      uint(slStartGracePeriod.Seconds()),
 		ExecutionApiUrl:         flags.executionApiUrl,
 		ExecutionAuthUrl:        flags.executionAuthUrl,
 		ConsensusApiUrl:         flags.consensusApiUrl,
+		EthNodeUrl:              flags.ethNodeUrl,
 		ECBootnodes:             flags.customEnodes,
 		CCBootnodes:             flags.customEnrs,
 		CustomChainSpecPath:     flags.CustomFlags.customChainSpec,

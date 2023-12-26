@@ -254,7 +254,7 @@ Usage:
   sedge generate starknet [flags]
 
 Flags:
-      --execution-api-url string          Execution API endpoint for the Ethereum L1 client. Example: 'sedge generate starknet --execution-api-url=`wss://api.url.endpoint`"
+      --eth-node string                   Execution API endpoint for the Ethereum L1 client. Example: 'sedge generate starknet --eth-node=`wss://api.url.endpoint`"
       --full                              Generate a full node setup with Juno. Designed for execution and consensus nodes setup without a validator node.`
       --pending-poll-interval             How often to fetch the pending block when synced to the head of the chain. Provide a duration like 5s (five seconds) or 10m (10 minutes). Default is 5s
   -c, --consensus string                  Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbu-- Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name

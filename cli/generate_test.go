@@ -158,6 +158,9 @@ func (flags *GenCmdFlags) argsList() []string {
 	if flags.pendingPollInterval != "" {
 		s = append(s, "--pending-poll-interval", flags.pendingPollInterval)
 	}
+	if flags.ethNodeUrl != "" {
+		s = append(s, "--eth-node", flags.ethNodeUrl)
+	}
 	return s
 }
 
@@ -1319,7 +1322,7 @@ func TestGenerateCmd(t *testing.T) {
 			nil,
 		},
 		{
-			"Starknet, missing execution api url",
+			"Starknet, missing eth node url",
 			subCmd{
 				name: "starknet",
 				args: []string{"juno"},
@@ -1331,7 +1334,7 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
-			errors.New("required flag(s) \"execution-api-url\" not set"),
+			errors.New("required flag(s) \"eth-node\" not set"),
 		},
 		{
 			"Starknet, correct number of arguments with client name",
@@ -1340,7 +1343,7 @@ func TestGenerateCmd(t *testing.T) {
 				args: []string{"juno"},
 			},
 			GenCmdFlags{
-				executionApiUrl:     "ws://localhost:8545",
+				ethNodeUrl:          "ws://localhost:8545",
 				pendingPollInterval: "5s",
 			},
 			globalFlags{

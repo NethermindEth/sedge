@@ -471,12 +471,12 @@ func TestCli(t *testing.T) {
 						Type:  "starknet",
 						Image: configs.ClientImages.Starknet.Juno.String(),
 					},
-					ExecutionApiUrl: "ws://execution:8545",
-					Network:         "mainnet",
-					MapAllPorts:     true,
-					ContainerTag:    "tag",
-					Full:            false,
-					JWTSecretPath:   filepath.Join(generationPath, "jwtsecret"),
+					EthNodeUrl:    "ws://execution:8545",
+					Network:       "mainnet",
+					MapAllPorts:   true,
+					ContainerTag:  "tag",
+					Full:          false,
+					JWTSecretPath: filepath.Join(generationPath, "jwtsecret"),
 				}
 
 				gomock.InOrder(
@@ -508,12 +508,12 @@ func TestCli(t *testing.T) {
 						Type:  "starknet",
 						Image: configs.ClientImages.Starknet.Juno.String(),
 					},
-					ExecutionApiUrl: "ws://execution:8545",
-					Network:         "sepolia",
-					MapAllPorts:     true,
-					ContainerTag:    "tag",
-					Full:            false,
-					JWTSecretPath:   filepath.Join(generationPath, "jwtsecret"),
+					EthNodeUrl:    "ws://execution:8545",
+					Network:       "sepolia",
+					MapAllPorts:   true,
+					ContainerTag:  "tag",
+					Full:          false,
+					JWTSecretPath: filepath.Join(generationPath, "jwtsecret"),
 				}
 
 				gomock.InOrder(

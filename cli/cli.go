@@ -1095,7 +1095,7 @@ func inputContainerTag(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputEthNode(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.genData.ExecutionApiUrl, err = p.InputURL("Input Eth 1 Endpoint", "", true)
+	o.genData.EthNodeUrl, err = p.InputURL("Input Eth 1 Endpoint", "", true)
 	return
 }
 

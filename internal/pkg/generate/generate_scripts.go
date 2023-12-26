@@ -390,27 +390,32 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		}
 	}
 
-	executionApiUrl := gd.ExecutionApiUrl
-	executionAuthUrl := gd.ExecutionAuthUrl
+	ethNodeUrl := gd.EthNodeUrl
 	if cls[execution] != nil {
-		// modify the EC_API_URL endpoint to use for starknet
-		if executionApiUrl == "" {
-			var executionEndpoint string
+		if ethNodeUrl == "" {
+			var ethNodeEndpoint string
 			if gd.Full || cls[starknet] != nil {
 				endpoint := endpointOrEmpty(cls[execution])
 				if strings.HasPrefix(endpoint, "http") {
-					executionEndpoint = strings.TrimPrefix(endpoint, "http")
+					ethNodeEndpoint = strings.TrimPrefix(endpoint, "http")
 				}
-				gd.ExecutionApiUrl = "ws" + executionEndpoint + ":" + strconv.Itoa(int(gd.Ports["ELApi"]))
-				executionApiUrl = fmt.Sprintf("%s", gd.ExecutionApiUrl)
-			} else {
-				executionApiUrl = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELApi"])
+				gd.EthNodeUrl = "ws" + ethNodeEndpoint + ":" + strconv.Itoa(int(gd.Ports["ELApi"]))
+				ethNodeUrl = fmt.Sprintf("%s", gd.EthNodeUrl)
 			}
+		}
+	}
+
+	executionApiUrl := gd.ExecutionApiUrl
+	executionAuthUrl := gd.ExecutionAuthUrl
+	if cls[execution] != nil {
+		if executionApiUrl == "" {
+			executionApiUrl = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELApi"])
 		}
 		if executionAuthUrl == "" {
 			executionAuthUrl = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELAuth"])
 		}
 	}
+
 	starknetApiUrl := gd.StarknetApiUrl
 	if cls[starknet] != nil {
 		if starknetApiUrl == "" {
@@ -483,6 +488,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		VlDataDir:                 "./" + configs.ValidatorDir,
 		ExecutionApiURL:           executionApiUrl,
 		ExecutionAuthURL:          executionAuthUrl,
+		EthNodeURL:                ethNodeUrl,
 		ConsensusApiURL:           consensusApiUrl,
 		StarknetApiURL:            starknetApiUrl,
 		ConsensusAdditionalApiURL: consensusAdditionalApiUrl,
