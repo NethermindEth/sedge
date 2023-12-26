@@ -86,6 +86,9 @@ func (flags *GenCmdFlags) argsList() []string {
 	if flags.validatorName != "" {
 		s = append(s, "-v", flags.validatorName)
 	}
+	if flags.starknetName != "" {
+		s = append(s, "-v", flags.starknetName)
+	}
 	if flags.checkpointSyncUrl != "" {
 		s = append(s, "--checkpoint-sync-url", flags.checkpointSyncUrl)
 	}
@@ -95,7 +98,6 @@ func (flags *GenCmdFlags) argsList() []string {
 	if flags.executionApiUrl != "" {
 		s = append(s, "--execution-api-url", flags.executionApiUrl)
 	}
-
 	if flags.noMev {
 		s = append(s, "--no-mev-boost")
 	}
@@ -149,6 +151,15 @@ func (flags *GenCmdFlags) argsList() []string {
 	}
 	if flags.latestVersion {
 		s = append(s, "--latest")
+	}
+	if flags.full {
+		s = append(s, "--full")
+	}
+	if flags.pendingPollInterval != "" {
+		s = append(s, "--pending-poll-interval", flags.pendingPollInterval)
+	}
+	if flags.ethNodeUrl != "" {
+		s = append(s, "--eth-node", flags.ethNodeUrl)
 	}
 	return s
 }
@@ -1308,6 +1319,104 @@ func TestGenerateCmd(t *testing.T) {
 				consensusApiUrl: "https://localhost:8000/api/endpoint",
 			},
 			globalFlags{},
+			nil,
+		},
+		{
+			"Starknet, missing eth node url",
+			subCmd{
+				name: "starknet",
+				args: []string{"juno"},
+			},
+			GenCmdFlags{},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "",
+				logging:        "",
+			},
+			errors.New("required flag(s) \"eth-node\" not set"),
+		},
+		{
+			"Starknet, correct number of arguments with client name",
+			subCmd{
+				name: "starknet",
+				args: []string{"juno"},
+			},
+			GenCmdFlags{
+				ethNodeUrl:          "ws://localhost:8545",
+				pendingPollInterval: "5s",
+			},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "",
+				logging:        "",
+			},
+			nil,
+		},
+		{
+			"Starknet, with full flag",
+			subCmd{
+				name: "starknet",
+				args: []string{" "},
+			},
+			GenCmdFlags{
+				full: true,
+			},
+			globalFlags{
+				install:        false,
+				generationPath: "",
+				network:        "",
+				logging:        "",
+			},
+			errors.New("invalid starknet client"),
+		},
+		{
+			"Starknet blocker not generated with --full flag",
+			subCmd{
+				name: "starknet",
+			},
+			GenCmdFlags{
+				full:          true,
+				executionName: "nethermind",
+				consensusName: "teku",
+			},
+			globalFlags{
+				network: "mainnet",
+			},
+			nil,
+		},
+		{
+			"starknet with full flag and  Fixed clients",
+			subCmd{
+				name: "starknet",
+				args: []string{},
+			},
+			GenCmdFlags{
+				executionName: "nethermind",
+				consensusName: "lighthouse",
+				full:          true,
+				feeRecipient:  "0x0000000000000000000000000000000000000000",
+			},
+			globalFlags{
+				install: false,
+				logging: "",
+			},
+			nil,
+		},
+		{
+			"full-node Random clients, no feeRecipient",
+			subCmd{
+				name: "starknet",
+				args: []string{},
+			},
+			GenCmdFlags{
+				full: true,
+			},
+			globalFlags{
+				install: false,
+				logging: "",
+			},
 			nil,
 		},
 	}

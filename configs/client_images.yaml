@@ -37,3 +37,7 @@ validator:
   prysm:
     name: gcr.io/prysmaticlabs/prysm/validator
     version: v4.1.1
+starknet:
+  juno:
+    name: nethermind/juno
+    version: v0.8.0

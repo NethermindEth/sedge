@@ -26,5 +26,6 @@ const (
 	ExecutionDir                        = "execution-data"
 	ConsensusDir                        = "consensus-data"
 	ValidatorDir                        = "validator-data"
+	StarknetDir                         = "starknet-data"
 	KeystoreDir                         = "keystore"
 )

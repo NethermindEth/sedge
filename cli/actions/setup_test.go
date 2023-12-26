@@ -38,11 +38,11 @@ func TestSetupContainers(t *testing.T) {
 			name: "with services",
 			options: actions.SetupContainersOptions{
 				GenerationPath: filepath.Join("a", "b", "c", "d"),
-				Services:       []string{"validator", "consensus", "execution"},
+				Services:       []string{"validator", "consensus", "execution", "starknet"},
 			},
-			expectedBuildCmd:  fmt.Sprintf("docker compose -f %s build validator consensus execution", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
-			expectedPullCmd:   fmt.Sprintf("docker compose -f %s pull validator consensus execution", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
-			expectedCreateCmd: fmt.Sprintf("docker compose -f %s create validator consensus execution", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
+			expectedBuildCmd:  fmt.Sprintf("docker compose -f %s build validator consensus execution starknet", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
+			expectedPullCmd:   fmt.Sprintf("docker compose -f %s pull validator consensus execution starknet", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
+			expectedCreateCmd: fmt.Sprintf("docker compose -f %s create validator consensus execution starknet", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
 		},
 		{
 			name: "without services",
@@ -58,12 +58,12 @@ func TestSetupContainers(t *testing.T) {
 			name: "skip-pull",
 			options: actions.SetupContainersOptions{
 				GenerationPath: filepath.Join("a", "b", "c", "d"),
-				Services:       []string{"execution", "consensus"},
+				Services:       []string{"execution", "consensus", "starknet"},
 				SkipPull:       true,
 			},
-			expectedBuildCmd:  fmt.Sprintf("docker compose -f %s build execution consensus", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
+			expectedBuildCmd:  fmt.Sprintf("docker compose -f %s build execution consensus starknet", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
 			expectedPullCmd:   "",
-			expectedCreateCmd: fmt.Sprintf("docker compose -f %s create execution consensus", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
+			expectedCreateCmd: fmt.Sprintf("docker compose -f %s create execution consensus starknet", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
 		},
 	}
 	for _, tc := range tests {

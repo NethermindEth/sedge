@@ -232,6 +232,22 @@ func UriValidator(input []string) (string, bool) {
 	return "", true
 }
 
+// UriValidator validates a URI and returns true if it is valid.
+func JunoUriValidator(input []string) (string, bool) {
+	for _, uri := range input {
+		u, err := url.Parse(uri)
+		if err != nil {
+			return uri, false
+		}
+		wrongScheme := u.Scheme != "wss" && u.Scheme != "ws"
+
+		if wrongScheme || u.Host == "" {
+			return uri, false
+		}
+	}
+	return "", true
+}
+
 // ENodesValidator validates a list of EL boot nodes and returns an error if any
 // of them is invalid.
 func ENodesValidator(bootNodes []string) error {

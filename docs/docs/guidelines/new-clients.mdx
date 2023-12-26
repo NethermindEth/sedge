@@ -55,3 +55,20 @@ official documentation, and on the `Readme.md`
 6. Add entry on the `CHANGELOG.md`
 7. Run tests, and add new tests if needed.
 8. Create a PR with your changes, and we will review it as soon as possible.
+
+## Adding an Starknet Client
+
+You can follow as an example [this PR](https://github.com/NethermindEth/sedge/pull/156), that adds Erigon to the
+supported Starknet Clients.
+
+The most important things to add:
+1. Add a template under `templates/services/merge/starknet/` that contains all the docker compose parts for run that
+new client.
+2. Add what is going to be the environment vars for the docker compose file under each of the supported networks for this
+new client, for example:
+ - `templates/envs/[network]/starknet/new_client.tmpl`
+3. Update the script that checks for updates on the images at `scripts/check-image-updates.sh`.
+4. Update documentation, including all the references on `docs/docs` folder, that are going to be displayed on Sedge
+official documentation, and on the `Readme.md`
+5. Add entry on the `CHANGELOG.md`
+6. Run tests, and add new tests if needed.

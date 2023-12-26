@@ -42,39 +42,55 @@ func ClientsCmd() *cobra.Command {
 }
 
 func runListClientsCmd(cmd *cobra.Command, args []string) error {
-	// Get supported networks and print table of clients per network
 	networks, err := utils.SupportedNetworks()
 	if err != nil {
 		return err
 	}
 
+	// omit starknet for the following networks
+	omitStarknetNetworks := map[string]bool{
+		"chiado":  true,
+		"goerli":  true,
+		"custom":  true,
+		"gnosis":  true,
+		"holesky": true,
+	}
+
 	for _, n := range networks {
-		log.Infof("Listing supported clients for network %s\n", n)
 		c := clients.ClientInfo{Network: n}
-		data, err := buildData(c.SupportedClients)
+
+		// Check if 'starknet' should be omitted for this network
+		omitStarknet := omitStarknetNetworks[n]
+
+		data, err := buildData(c.SupportedClients, !omitStarknet, nil)
 		if err != nil {
 			return err
 		}
+
+		if omitStarknet {
+			log.Infof("No Starknet client(s) for network %s\n", n)
+		}
+
 		ui.WriteListClientsTable(cmd.OutOrStdout(), data)
 	}
 
 	return nil
 }
 
-/*
-buildData :
-Builds the data for the supported clients table
+// /*
+// buildData :
+// Builds the data for the supported clients table
 
-params :-
-None
+// params :-
+//
 
-returns :-
-a. ui.ListClientsTable
-Table data
-b. error
-Error if any
-*/
-func buildData(getClients func(string) ([]string, error)) (*ui.ListClientsTable, error) {
+// returns :-
+// a. ui.ListClientsTable
+// Table data
+// b. error
+// Error if any
+// */
+func buildData(getClients func(string) ([]string, error), checkStarknet bool, starknetClients []string) (*ui.ListClientsTable, error) {
 	executionClients, err := getClients("execution")
 	if err != nil {
 		return nil, err
@@ -88,8 +104,16 @@ func buildData(getClients func(string) ([]string, error)) (*ui.ListClientsTable,
 		return nil, err
 	}
 
+	// Include 'starknet' clients if needed
+	if checkStarknet {
+		starknetClients, err = getClients("starknet")
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return &ui.ListClientsTable{
-		ClientTypes: []string{"Execution", "Consensus", "Validator"},
-		Clients:     [][]string{executionClients, consensusClients, validatorClients},
+		ClientTypes: []string{"Execution", "Consensus", "Validator", "Starknet"},
+		Clients:     [][]string{executionClients, consensusClients, validatorClients, starknetClients},
 	}, nil
 }

@@ -1,0 +1,24 @@
+{{/* starknet-blocker.tmpl */}}
+{{ define "starknet-blocker" }}
+  starknet-blocker:
+    container_name: sedge-starknet-blocker{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    image: busybox
+    networks:
+    - sedge
+    command: >
+      sh -c "
+        echo 'Waiting {{ .SLStartGracePeriod }} seconds of grace period before starting the starknet client';
+        sleep {{ .SLStartGracePeriod }};
+        echo 'Done';
+        while true; do
+          response=$$(wget -S ${SC_API_URL}/eth/v1/node/health -O /dev/null 2>&1 | grep -m 1 "HTTP/" | awk '{print $$2}')
+          if [ $$response -eq 200 ]; then
+            echo 'Endpoint is up!'
+            break
+          else
+            echo 'Endpoint is down, waiting 30 seconds before checking again...'
+            sleep 30
+          fi
+        done
+      "
+{{ end }}

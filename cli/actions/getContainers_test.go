@@ -41,6 +41,8 @@ const (
 	consensusNotFoundContainerName = "sedge-execution-client-nf"
 	validatorContainerName         = "sedge-validator-client"
 	validatorNotFoundContainerName = "sedge-validator-client-nf"
+	starknetContainerName          = "sedge-starknet-client"
+	starknetNotFoundContainerName  = "sedge-starknet-client-nf"
 	mevBoostContainerName          = "sedge-mev-boost"
 
 	executionContainerIp    = "192.168.1.1"
@@ -51,10 +53,13 @@ const (
 	validatorContainerImage = "consensys/teku"
 	mevBoostContainerIp     = "192.168.1.4"
 	mevBoostContainerImage  = "flashbots/mev-boost"
+	starknetContainerIp     = "192.168.1.5"
+	starknetContainerImage  = "nethermind/juno"
 
 	executionNotFoundErrorMsg = "execution container not found"
 	consensusNotFoundErrorMsg = "consensus container not found"
 	validatorNotFoundErrorMsg = "validator container not found"
+	starknetNotFoundErrorMsg  = "starknet container not found"
 
 	unexpectedContainerErrorMsg = "unexpected container name"
 )
@@ -164,6 +169,7 @@ func getMockActions(
 	dockerClient.EXPECT().ContainerInspect(gomock.Any(), executionNotFoundContainerName).Return(types.ContainerJSON{}, errors.New(executionNotFoundErrorMsg)).AnyTimes()
 	dockerClient.EXPECT().ContainerInspect(gomock.Any(), consensusNotFoundContainerName).Return(types.ContainerJSON{}, errors.New(consensusNotFoundErrorMsg)).AnyTimes()
 	dockerClient.EXPECT().ContainerInspect(gomock.Any(), validatorNotFoundContainerName).Return(types.ContainerJSON{}, errors.New(validatorNotFoundErrorMsg)).AnyTimes()
+	dockerClient.EXPECT().ContainerInspect(gomock.Any(), starknetNotFoundContainerName).Return(types.ContainerJSON{}, errors.New(starknetNotFoundErrorMsg)).AnyTimes()
 	dockerClient.EXPECT().ContainerInspect(gomock.All(), gomock.All()).Return(types.ContainerJSON{}, errors.New(unexpectedContainerErrorMsg)).AnyTimes()
 
 	return actions.NewSedgeActions(
@@ -243,6 +249,33 @@ func TestGetContainersData(t *testing.T) {
 		),
 		buildGetContainersDataTestCase(
 			t,
+			"Starknet Full Node",
+			"",
+			"case_fullNodeStarknet",
+			false,
+			"",
+			actions.ContainersData{
+				Containers: []actions.ContainerData{
+					{
+						Name:  executionContainerName,
+						Image: executionContainerImage,
+						Ip:    executionContainerIp,
+					},
+					{
+						Name:  consensusContainerName,
+						Image: consensusContainerImage,
+						Ip:    consensusContainerIp,
+					},
+					{
+						Name:  starknetContainerName,
+						Image: starknetContainerImage,
+						Ip:    starknetContainerIp,
+					},
+				},
+			},
+		),
+		buildGetContainersDataTestCase(
+			t,
 			"Execution Only",
 			"",
 			"case_executionOnly",
@@ -288,6 +321,23 @@ func TestGetContainersData(t *testing.T) {
 						Name:  validatorContainerName,
 						Image: validatorContainerImage,
 						Ip:    validatorContainerIp,
+					},
+				},
+			},
+		),
+		buildGetContainersDataTestCase(
+			t,
+			"Starknet Only",
+			"",
+			"case_starknetOnly",
+			false,
+			"",
+			actions.ContainersData{
+				Containers: []actions.ContainerData{
+					{
+						Name:  starknetContainerName,
+						Image: starknetContainerImage,
+						Ip:    starknetContainerIp,
 					},
 				},
 			},
@@ -425,6 +475,15 @@ func TestGetContainersData(t *testing.T) {
 			"case_validatorNF",
 			true,
 			validatorNotFoundErrorMsg,
+			actions.ContainersData{Containers: []actions.ContainerData{}},
+		),
+		buildGetContainersDataTestCase(
+			t,
+			"Starknet Not Found",
+			"",
+			"case_starknetNF",
+			true,
+			starknetNotFoundErrorMsg,
 			actions.ContainersData{Containers: []actions.ContainerData{}},
 		),
 	}

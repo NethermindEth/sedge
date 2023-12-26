@@ -1,0 +1,152 @@
+version: "3.9"
+services:
+  execution:
+    stop_grace_period: 30m
+    container_name: sedge-execution-client
+    restart: unless-stopped
+    image: ${EC_IMAGE_VERSION}
+    networks:
+    - sedge
+    volumes:
+    - ${EC_DATA_DIR}:/var/lib/besu/data
+    - ${EC_JWT_SECRET_PATH}:/var/lib/besu/jwtsecret
+    user: root
+    ports:
+    - 30303:30303/tcp
+    - 30303:30303/udp
+    - 8008:8008/tcp
+    expose:
+    - 8545
+    - 8551
+    command:
+    - --sync-mode=X_SNAP
+    - --data-storage-format=BONSAI
+    - --network=${NETWORK}
+    - --data-path=/var/lib/besu/data
+    - --metrics-enabled=true
+    - --metrics-host=0.0.0.0
+    - --metrics-port=8008
+    - --engine-rpc-enabled=true
+    - --engine-jwt-secret=/var/lib/besu/jwtsecret
+    - --engine-rpc-port=8551
+    - --engine-host-allowlist=*
+    - --rpc-http-enabled=true
+    - --rpc-http-host=0.0.0.0
+    - --rpc-http-port=8545
+    - --rpc-http-api=${EC_ENABLED_MODULES}
+    - --rpc-http-cors-origins=*
+    - --host-whitelist=*
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+  consensus:
+    stop_grace_period: 30s
+    container_name: sedge-consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    networks:
+    - sedge
+    volumes:
+    - ${CC_DATA_DIR}:/var/lib/lodestar/consensus
+    - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+    - 9000:9000/tcp
+    - 9000:9000/udp
+    - 5054:5054/tcp
+    expose:
+    - 4000
+    environment:
+      NODE_OPTIONS: --max_old_space_size=6144
+    command:
+    - beacon
+    - --preset=${CC_LODESTAR_PRESET}
+    - --dataDir=/var/lib/lodestar/consensus
+    - --network=${NETWORK}
+    - --eth1=true
+    - --eth1.providerUrls=${EC_API_URL}
+    - --execution.urls=${EC_AUTH_URL}
+    - --logFile=/var/lib/lodestart/consensus/logs/beacon.log
+    - --logFileLevel=${CC_LOG_LEVEL}
+    - --port=9000
+    - --rest=true
+    - --rest.address=0.0.0.0
+    - --rest.port=4000
+    - --rest.cors=*
+    - --discv5=true
+    - --targetPeers=${CC_PEER_COUNT}
+    - --metrics=true
+    - --metrics.port=5054
+    - --jwt-secret=/tmp/jwt/jwtsecret
+    - --checkpointSyncUrl=${CHECKPOINT_SYNC_URL}
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+  starknet-blocker:
+    container_name: sedge-starknet-blocker
+    image: busybox
+    networks:
+    - sedge
+    command: |-
+      sh -c "
+        echo 'Waiting 420 seconds of grace period before starting the starknet client';
+        sleep 420;
+        echo 'Done';
+        while true; do
+          response=$$(wget -S ${SC_API_URL}/eth/v1/node/health -O /dev/null 2>&1 | grep -m 1 "HTTP/" | awk '{print $$2}')
+          if [ $$response -eq 200 ]; then
+            echo 'Endpoint is up!'
+            break
+          else
+            echo 'Endpoint is down, waiting 30 seconds before checking again...'
+            sleep 30
+          fi
+        done
+      "
+  starknet:
+    tty: true
+    environment:
+    - TERM=xterm-256color
+    - COLORTERM=truecolor
+    stop_grace_period: 30s
+    container_name: sedge-starknet-client
+    restart: unless-stopped
+    image: ${L2_IMAGE_VERSION}
+    networks:
+    - sedge
+    volumes:
+    - ${L2_DATA_DIR}:/juno/data
+    ports:
+    - 6060:6060
+    - 6061:6061
+    expose:
+    - 6060
+    - 6061
+    command:
+    - --colour=true
+    - --db-path=/juno/data
+    - --eth-node=${ETH_NODE_URL}
+    - --http=true
+    - --http-host=0.0.0.0
+    - --http-port=6060
+    - --ws=true
+    - --ws-host=0.0.0.0
+    - --ws-port=6061
+    - --metrics=false
+    - --metrics-host=0.0.0.0
+    - --metrics-port=9090
+    - --grpc=false
+    - --grpc-host=0.0.0.0
+    - --grpc-port=6064
+    - --network=${NETWORK}
+    - --db-cache-size=8
+    - --max-vms=48
+    - --max-vm-queue=96
+    - --rpc-max-block-scan=18446744073709551615
+    - --pending-poll-interval=10s
+networks:
+  sedge:
+    name: sedge-network

@@ -36,6 +36,10 @@ var ClientImages struct {
 		Teku       Image `yaml:"teku"`
 		Prysm      Image `yaml:"prysm"`
 	}
+	// starknet
+	Starknet struct {
+		Juno Image `yaml:"juno"`
+	}
 }
 
 //go:embed client_images.yaml

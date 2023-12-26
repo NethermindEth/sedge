@@ -1,0 +1,44 @@
+{{/* juno.tmpl */}}
+{{ define "starknet" }}
+  starknet:
+    tty: true
+    environment:
+      - TERM=xterm-256color
+      - COLORTERM=truecolor
+    stop_grace_period: 30s
+    container_name: sedge-starknet-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: unless-stopped
+    image: ${L2_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${L2_DATA_DIR}:/juno/data
+    ports:
+      - "{{.L2ApiPort}}:{{.L2ApiPort}}"
+      - "{{.L2WsPort}}:{{.L2WsPort}}"
+    expose:
+      - {{.L2ApiPort}}
+      - {{.L2WsPort}}
+    command:
+      - --colour=true
+      - --db-path=/juno/data
+      - --eth-node=${ETH_NODE_URL}
+      - --http=true
+      - --http-host=0.0.0.0
+      - --http-port={{.L2ApiPort}}
+      - --ws=true
+      - --ws-host=0.0.0.0
+      - --ws-port={{.L2WsPort}}
+      - --metrics=false
+      - --metrics-host=0.0.0.0
+      - --metrics-port={{.L2MetricsPort}}
+      - --grpc=false
+      - --grpc-host=0.0.0.0
+      - --grpc-port={{.L2GrpcPort}}
+      - --network=${NETWORK}
+      - --db-cache-size=8
+      - --max-vms=48
+      - --max-vm-queue=96
+      - --rpc-max-block-scan=18446744073709551615
+      - --pending-poll-interval={{if .PendingPollInterval}}{{.PendingPollInterval}}{{else}}10s{{end}}
+      {{end}}

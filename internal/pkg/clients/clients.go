@@ -47,7 +47,7 @@ Error if any
 func (c ClientInfo) SupportedClients(clientType string) (clientsNames []string, err error) {
 	files, err := templates.Envs.ReadDir(strings.Join([]string{"envs", c.Network, clientType}, "/"))
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	supported := make([]string, 0)
@@ -72,7 +72,7 @@ Get all the supported clients for the ClientInfo's network
 
 params :-
 a. clientTypes []string
-Types of client supported. E.g execution, consensus, validator
+Types of client supported. E.g execution, consensus, validator, starknet-clients
 
 returns :-
 a. OrderedClients

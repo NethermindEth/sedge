@@ -20,4 +20,5 @@ var Dependencies []string = []string{"docker"}
 const (
 	OnPremiseExecutionURL = "http://execution"
 	OnPremiseConsensusURL = "http://consensus"
+	OnPremiseStarknetURL  = "http://starknet"
 )

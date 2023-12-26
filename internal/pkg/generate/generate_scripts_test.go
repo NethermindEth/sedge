@@ -202,6 +202,21 @@ func checkValidatorBlocker(t *testing.T, data *GenData, compose, env io.Reader) 
 	return nil
 }
 
+func checkStarknetBlocker(t *testing.T, data *GenData, compose, env io.Reader) error {
+	composeData := retrieveComposeData(t, compose)
+	if composeData.Services.Starknet != nil {
+		assert.NotNil(t, composeData.Services.StarknetBlocker)
+		containerName := "sedge-starknet-blocker"
+		if data.ContainerTag != "" {
+			containerName = containerName + "-" + data.ContainerTag
+		}
+		assert.Equal(t, containerName, composeData.Services.StarknetBlocker.ContainerName)
+	} else {
+		assert.Nil(t, composeData.Services.StarknetBlocker)
+	}
+	return nil
+}
+
 func defaultFunc(t *testing.T, data *GenData, compose, env io.Reader) error {
 	composeData := retrieveComposeData(t, compose)
 
@@ -338,6 +353,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 							CheckFunctions:  []CheckFunc{defaultFunc, checkValidatorBlocker},
 						})
 				}
+
 			}
 		}
 	}
@@ -350,14 +366,15 @@ func TestGenerateComposeServices(t *testing.T) {
 		{
 			Description: "Test generation of compose services",
 			GenerationData: &GenData{
-				Services:        []string{execution, consensus, validator, validatorImport, mevBoost},
+				Services:        []string{execution, consensus, validator, validatorImport, starknet, starknetImport, mevBoost},
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku"},
 				ValidatorClient: &clients.Client{Name: "teku"},
+				StarknetClient:  &clients.Client{Name: "juno"},
 				Network:         "mainnet",
 				Mev:             true,
 			},
-			CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker},
+			CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker, checkStarknetBlocker},
 		},
 		{
 			Description: "Test mevBoost service",
@@ -506,6 +523,22 @@ func TestValidateClients(t *testing.T) {
 			Error: ErrValidatorClientNotValid,
 		},
 		{
+			Description: "Wrong starknet client",
+			Data: &GenData{
+				StarknetClient: &clients.Client{Name: "wrong"},
+				Network:        "mainnet",
+			},
+			Error: ErrStarknetClientNotValid,
+		},
+		{
+			Description: "Wrong validator client",
+			Data: &GenData{
+				ValidatorClient: &clients.Client{Name: "wrong"},
+				Network:         "mainnet",
+			},
+			Error: ErrValidatorClientNotValid,
+		},
+		{
 			Description: "Wrong network, empty clients",
 			Data: &GenData{
 				Network: wrongDep,
@@ -536,6 +569,14 @@ func TestValidateClients(t *testing.T) {
 			},
 			Error: ErrUnableToGetClientsInfo,
 		},
+		{
+			Description: "Wrong network, good starknet client",
+			Data: &GenData{
+				StarknetClient: &clients.Client{Name: "juno"},
+				Network:        wrongDep,
+			},
+			Error: ErrUnableToGetClientsInfo,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.Description, func(t *testing.T) {
@@ -558,6 +599,7 @@ func TestEnvFileAndFlags(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku"},
 				ValidatorClient: &clients.Client{Name: "teku"},
+				StarknetClient:  &clients.Client{Name: "juno"},
 				Network:         "mainnet",
 				Mev:             true,
 			},
@@ -569,6 +611,7 @@ func TestEnvFileAndFlags(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku", Endpoint: "http://localhost"},
 				ValidatorClient: &clients.Client{Name: "teku"},
+				StarknetClient:  &clients.Client{Name: "juno"},
 				Network:         "mainnet",
 				Mev:             true,
 			},
@@ -609,6 +652,16 @@ func TestEnvFileAndFlags(t *testing.T) {
 			},
 			Error: nil,
 		},
+		{
+			Description: "Juno and execution with EthNodeUrl",
+			Data: &GenData{
+				ExecutionClient: &clients.Client{Name: "nethermind"},
+				StarknetClient:  &clients.Client{Name: "juno"},
+				Network:         "mainnet",
+				EthNodeUrl:      "ws://localhost:8545",
+			},
+			Error: nil,
+		},
 	}
 
 	for _, tt := range tests {
@@ -646,6 +699,7 @@ func TestCleanGeneratedFiles(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku"},
 				ValidatorClient: &clients.Client{Name: "teku"},
+				StarknetClient:  &clients.Client{Name: "juno"},
 				Network:         "mainnet",
 				Mev:             true,
 			},
@@ -656,6 +710,7 @@ func TestCleanGeneratedFiles(t *testing.T) {
 				ExecutionClient: &clients.Client{Name: "nethermind"},
 				ConsensusClient: &clients.Client{Name: "teku"},
 				ValidatorClient: &clients.Client{Name: "teku"},
+				StarknetClient:  &clients.Client{Name: "juno"},
 				Network:         "mainnet",
 				Mev:             true,
 			},

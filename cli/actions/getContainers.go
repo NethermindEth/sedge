@@ -54,6 +54,9 @@ func (actions *sedgeActions) GetContainersData(options GetContainersDataOptions)
 		if composeData.Services.Validator != nil && composeData.Services.Validator.ContainerName != "" {
 			containersNames = append(containersNames, composeData.Services.Validator.ContainerName)
 		}
+		if composeData.Services.Starknet != nil && composeData.Services.Starknet.ContainerName != "" {
+			containersNames = append(containersNames, composeData.Services.Starknet.ContainerName)
+		}
 
 		outputData := ContainersData{}
 		outputData.Containers = make([]ContainerData, 0, len(containersNames))

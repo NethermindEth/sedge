@@ -19,6 +19,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+
+	// "net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -45,7 +47,7 @@ var (
 )
 
 const (
-	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mev-boost"
+	execution, consensus, validator, mevBoost, starknet = "execution", "consensus", "validator", "mev-boost", "starknet"
 )
 
 type CustomFlags struct {
@@ -61,6 +63,7 @@ type GenCmdFlags struct {
 	executionName     string
 	consensusName     string
 	validatorName     string
+	starknetName      string // starknet
 	checkpointSyncUrl string
 	feeRecipient      string
 	noMev             bool
@@ -83,6 +86,10 @@ type GenCmdFlags struct {
 	customEnodes      []string
 	customEnrs        []string
 	latestVersion     bool
+	// juno flags
+	pendingPollInterval string
+	full                bool
+	ethNodeUrl          string
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -100,6 +107,7 @@ You can generate:
 - Consensus Node
 - Validator Node
 - Mev-Boost Instance
+- Starknet Node
 `,
 		Args: cobra.NoArgs,
 	}
@@ -109,6 +117,7 @@ You can generate:
 	cmd.AddCommand(ConsensusSubCmd(sedgeAction))
 	cmd.AddCommand(ValidatorSubCmd(sedgeAction))
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
+	cmd.AddCommand(StarknetSubCmd(sedgeAction))
 
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
 	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado, etc.")
@@ -202,6 +211,11 @@ func preValidationGenerateCmd(network, logging string, flags *GenCmdFlags) error
 			check:     len(flags.customEnrs) > 0,
 			validator: utils.ENRValidator,
 		},
+		{
+			value:     []string{flags.ethNodeUrl},
+			check:     flags.ethNodeUrl != "",
+			validator: singleUriValidator("eth node", utils.JunoUriValidator),
+		},
 	}
 	for _, uri := range toValidate {
 		if uri.check {
@@ -263,12 +277,14 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	}
 
 	vlStartGracePeriod := configs.NetworkEpochTime(network) * time.Duration(flags.waitEpoch)
+	slStartGracePeriod := configs.NetworkEpochTime(network) * time.Duration(flags.waitEpoch)
 
 	// Generate docker-compose scripts
 	gd := generate.GenData{
 		ExecutionClient:         combinedClients.Execution,
 		ConsensusClient:         combinedClients.Consensus,
 		ValidatorClient:         combinedClients.Validator,
+		StarknetClient:          combinedClients.Starknet, // starknet
 		Network:                 network,
 		CheckpointSyncUrl:       flags.checkpointSyncUrl,
 		FeeRecipient:            flags.feeRecipient,
@@ -287,9 +303,11 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		MevBoostEndpoint:        flags.mevBoostUrl,
 		Services:                services,
 		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
+		SLStartGracePeriod:      uint(slStartGracePeriod.Seconds()),
 		ExecutionApiUrl:         flags.executionApiUrl,
 		ExecutionAuthUrl:        flags.executionAuthUrl,
 		ConsensusApiUrl:         flags.consensusApiUrl,
+		EthNodeUrl:              flags.ethNodeUrl,
 		ECBootnodes:             flags.customEnodes,
 		CCBootnodes:             flags.customEnrs,
 		CustomChainSpecPath:     flags.CustomFlags.customChainSpec,
@@ -327,7 +345,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 }
 
 func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
-	var executionClient, consensusClient, validatorClient *clients.Client
+	var executionClient, consensusClient, validatorClient, starknetClient *clients.Client
 	var err error
 
 	// execution client
@@ -395,10 +413,33 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		validatorClient = nil
 	}
 
+	// starknet client
+	if utils.Contains(services, starknet) {
+		starknetParts := strings.Split(flags.starknetName, ":")
+		starknetClient, err = clients.RandomChoice(allClients[starknet])
+		if err != nil {
+			return nil, err
+		}
+		if flags.starknetName != "" {
+			starknetClient.Name = starknetParts[0]
+			if len(starknetParts) > 1 {
+				log.Warn(configs.CustomStarknetImagesWarning)
+				starknetClient.Image = strings.Join(starknetParts[1:], ":")
+			}
+		}
+		starknetClient.SetImageOrDefault(strings.Join(starknetParts[1:], ":"))
+		if err = clients.ValidateClient(starknetClient, starknet); err != nil {
+			return nil, err
+		}
+	} else {
+		starknetClient = nil
+	}
+
 	return &clients.Clients{
 		Execution: executionClient,
 		Consensus: consensusClient,
 		Validator: validatorClient,
+		Starknet:  starknetClient,
 	}, err
 }
 

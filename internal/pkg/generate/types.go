@@ -25,6 +25,8 @@ type EnvData struct {
 	Mev                       bool
 	ElImage                   string
 	ElDataDir                 string
+	L2Image                   string // for juno
+	L2DataDir                 string // for juno
 	CcImage                   string
 	CcDataDir                 string
 	VlImage                   string
@@ -32,6 +34,8 @@ type EnvData struct {
 	ExecutionApiURL           string
 	ExecutionAuthURL          string
 	ConsensusApiURL           string
+	StarknetApiURL            string
+	EthNodeURL                string
 	ConsensusAdditionalApiURL string
 	FeeRecipient              string
 	JWTSecretPath             string
@@ -49,6 +53,7 @@ type GenData struct {
 	ExecutionClient         *clients.Client
 	ConsensusClient         *clients.Client
 	ValidatorClient         *clients.Client
+	StarknetClient          *clients.Client // starknet
 	Network                 string
 	CheckpointSyncUrl       string
 	FeeRecipient            string
@@ -75,11 +80,16 @@ type GenData struct {
 	CustomDeployBlock       string
 	CustomDeployBlockPath   string
 	VLStartGracePeriod      uint
+	SLStartGracePeriod      uint
 	ExecutionApiUrl         string
 	ExecutionAuthUrl        string
+	StarknetApiUrl          string
 	ConsensusApiUrl         string
 	ContainerTag            string
 	LatestVersion           bool
+	PendingPollInterval     string
+	Full                    bool
+	EthNodeUrl              string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -123,9 +133,18 @@ type DockerComposeData struct {
 	CustomDeployBlock       bool
 	CustomDeployBlockPath   string // Needed for lighthouse
 	VLStartGracePeriod      uint
+	SLStartGracePeriod      uint
 	UID                     int // Needed for teku
 	GID                     int // Needed for teku
 	ContainerTag            string
+
+	// juno flags
+	PendingPollInterval string
+	Full                bool
+	L2ApiPort           uint16
+	L2WsPort            uint16
+	L2MetricsPort       uint16
+	L2GrpcPort          uint16
 }
 
 // WithConsensusClient returns true if the consensus client is set
@@ -152,6 +171,25 @@ func (d DockerComposeData) WithValidatorClient() bool {
 func (d EnvData) WithMevBoostClient() bool {
 	for _, service := range d.Services {
 		if service == mevBoost {
+			return true
+		}
+	}
+	return false
+}
+
+// WithFullFlagStarknet returns true if Juno Node is run with the full flag
+func (d DockerComposeData) WithFullFlagStarknet() bool {
+	hasStarknet := false
+	hasExecution := false
+
+	for _, service := range d.Services {
+		if service == starknet {
+			hasStarknet = true
+		}
+		if service == execution {
+			hasExecution = true
+		}
+		if hasStarknet && hasExecution {
 			return true
 		}
 	}
@@ -207,12 +245,22 @@ type ValidatorBlocker struct {
 	ContainerName string `yaml:"container_name"`
 	Command       string `yaml:"command"`
 }
+type StarknetBlocker struct {
+	Image         string `yaml:"image"`
+	ContainerName string `yaml:"container_name"`
+	Command       string `yaml:"command"`
+}
 type ValidatorImportDependsOn struct {
+	Condition string `yaml:"condition"`
+}
+type StarknetImportDependsOn struct {
 	Condition string `yaml:"condition"`
 }
 type DependsOn struct {
 	ValidatorImport *ValidatorImportDependsOn `yaml:"validator-import"`
+	StarknetImport  *StarknetImportDependsOn  `yaml:"starknet-import"`
 }
+
 type Validator struct {
 	ContainerName string     `yaml:"container_name"`
 	Image         string     `yaml:"image"`
@@ -235,12 +283,30 @@ type Services struct {
 	Mevboost         *Mevboost         `yaml:"mev-boost,omitempty"`
 	Consensus        *Consensus        `yaml:"consensus,omitempty"`
 	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker,omitempty"`
+	StarknetBlocker  *StarknetBlocker  `yaml:"starknet-blocker,omitempty"`
 	Validator        *Validator        `yaml:"validator,omitempty"`
 	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus,omitempty"`
+	Starknet         *Starknet         `yaml:"starknet,omitempty"` // starknet services
 }
+
 type Sedge struct {
 	Name string `yaml:"name"`
 }
 type Networks struct {
 	Sedge *Sedge `yaml:"sedge"`
+}
+
+// starknet
+type Starknet struct {
+	StopGracePeriod string     `yaml:"stop_grace_period"`
+	ContainerName   string     `yaml:"container_name"`
+	Restart         string     `yaml:"restart"`
+	Image           string     `yaml:"image"`
+	DependsOn       *DependsOn `yaml:"depends_on"`
+	Networks        []string   `yaml:"networks"`
+	Volumes         []string   `yaml:"volumes"`
+	Ports           []string   `yaml:"ports"`
+	Expose          []int      `yaml:"expose"`
+	Command         []string   `yaml:"command"`
+	Logging         *Logging   `yaml:"logging,omitempty"`
 }

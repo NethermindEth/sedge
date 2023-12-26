@@ -99,6 +99,7 @@ Happy Staking!
 	CustomExecutionImagesWarning    = "You are using custom images for the execution client!!! Make sure this is intended. Also check these images are correct and available from this device otherwise the setup will fail or have an unexpected behavior."
 	CustomConsensusImagesWarning    = "You are using custom images for the consensus client!!! Make sure this is intended. Also check these images are correct and available from this device otherwise the setup will fail or have an unexpected behavior."
 	CustomValidatorImagesWarning    = "You are using custom images for the validator client!!! Make sure this is intended. Also check these images are correct and available from this device otherwise the setup will fail or have an unexpected behavior."
+	CustomStarknetImagesWarning     = "You are using custom images for the starknet client!!! Make sure this is intended. Also check these images are correct and available from this device otherwise the setup will fail or have an unexpected behavior."
 	MapAllPortsWarning              = "You are mapping all ports for the clients!!! Make sure this is intended. This could make the clients vulnerable to attacks. Be sure to setup a firewall."
 	CheckpointUrlUsedWarning        = "A Checkpoint Sync Url will be used for the consensus node. Using %s ."
 	NoBootnodesFound                = "No bootnodes found in %s env file "

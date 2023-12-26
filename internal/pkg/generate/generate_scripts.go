@@ -20,6 +20,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -37,8 +38,10 @@ const (
 	consensus       = "consensus"
 	validator       = "validator"
 	validatorImport = "validator-import"
+	starknetImport  = "starknet-import"
 	mevBoost        = "mev-boost"
 	configConsensus = "config_consensus"
+	starknet        = "starknet"
 	empty           = "empty"
 )
 
@@ -52,6 +55,9 @@ func validateClients(gd *GenData) error {
 		return err
 	}
 	if err := validateValidator(gd, &c); err != nil {
+		return err
+	}
+	if err := validateStarknet(gd, &c); err != nil {
 		return err
 	}
 	return nil
@@ -103,12 +109,29 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 	return nil
 }
 
+// validatestarknet validates the starknet client in GenData
+func validateStarknet(gd *GenData, c *clients.ClientInfo) error {
+	if gd.StarknetClient == nil {
+		return nil
+	}
+
+	starknetClients, err := c.SupportedClients(starknet)
+	if err != nil {
+		return ErrUnableToGetClientsInfo
+	}
+	if !utils.Contains(starknetClients, gd.StarknetClient.Name) {
+		return ErrStarknetClientNotValid
+	}
+	return nil
+}
+
 // mapClients convert genData clients to clients.Clients
 func mapClients(gd *GenData) map[string]*clients.Client {
 	cls := map[string]*clients.Client{
 		execution: gd.ExecutionClient,
 		consensus: gd.ConsensusClient,
 		validator: gd.ValidatorClient,
+		starknet:  gd.StarknetClient,
 	}
 
 	return cls
@@ -137,6 +160,11 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		"CLAdditionalApi": configs.DefaultAdditionalApiPortCL,
 		"VLMetrics":       configs.DefaultMetricsPortVL,
 		"MevPort":         configs.DefaultMevPort,
+		// Needed for Juno
+		"L2Api":     configs.DefaultL2ApiPort,
+		"L2Ws":      configs.DefaultL2WsPort,
+		"L2Metrics": configs.DefaultL2MetricsPortCL,
+		"L2Grpc":    configs.DefaultL2GrpcPortCL,
 	}
 	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -157,6 +185,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 
 	cls := mapClients(gd)
 	networkConfig := configs.NetworksConfigs()[gd.Network]
+
 	for tmpKind, client := range cls {
 		var name string
 		if client == nil {
@@ -179,6 +208,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		}
 	}
 	validatorBlockerTemplate := "validator-blocker"
+	starknetBlockerTemplate := "starknet-blocker"
 
 	// Parse validator-blocker template
 	tmp, err := templates.Services.ReadFile(strings.Join([]string{"services", validatorBlockerTemplate + ".tmpl"}, "/"))
@@ -186,6 +216,15 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		return err
 	}
 	if _, err = baseTmp.Parse(string(tmp)); err != nil {
+		return err
+	}
+
+	// Parse starknet-blocker template
+	tmp2, err := templates.Services.ReadFile(strings.Join([]string{"services", starknetBlockerTemplate + ".tmpl"}, "/"))
+	if err != nil {
+		return err
+	}
+	if _, err = baseTmp.Parse(string(tmp2)); err != nil {
 		return err
 	}
 
@@ -200,6 +239,10 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 
 	if cls[execution] != nil {
 		gd.ExecutionClient.Endpoint = configs.OnPremiseExecutionURL
+	}
+
+	if cls[starknet] != nil {
+		gd.StarknetClient.Endpoint = configs.OnPremiseStarknetURL
 	}
 
 	if cls[consensus] != nil {
@@ -264,6 +307,12 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ClApiPort:           gd.Ports["CLApi"],
 		ClAdditionalApiPort: gd.Ports["CLAdditionalApi"],
 		VlMetricsPort:       gd.Ports["VLMetrics"],
+		// Needed for Juno
+		L2ApiPort:     gd.Ports["L2Api"],
+		L2WsPort:      gd.Ports["L2Ws"],
+		L2MetricsPort: gd.Ports["L2Metrics"],
+		L2GrpcPort:    gd.Ports["L2Grpc"],
+
 		FallbackELUrls:      gd.FallbackELUrls,
 		ElExtraFlags:        gd.ElExtraFlags,
 		ClExtraFlags:        gd.ClExtraFlags,
@@ -276,6 +325,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
 		LoggingDriver:       gd.LoggingDriver,
 		VLStartGracePeriod:  gd.VLStartGracePeriod,
+		SLStartGracePeriod:  gd.SLStartGracePeriod,
 		CustomNetwork:       gd.Network == configs.NetworkCustom, // Used custom templates
 		CustomConsensusConfigs: gd.CustomNetworkConfigPath != "" ||
 			gd.CustomGenesisPath != "" ||
@@ -287,6 +337,10 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		UID:                     os.Geteuid(),
 		GID:                     os.Getegid(),
 		ContainerTag:            gd.ContainerTag,
+
+		// DbPath:              gd.DbPath,
+		PendingPollInterval: gd.PendingPollInterval,
+		Full:                gd.Full,
 	}
 
 	// Save to writer
@@ -335,6 +389,22 @@ func EnvFile(gd *GenData, at io.Writer) error {
 			return err
 		}
 	}
+
+	ethNodeUrl := gd.EthNodeUrl
+	if cls[execution] != nil {
+		if ethNodeUrl == "" {
+			var ethNodeEndpoint string
+			if gd.Full || cls[starknet] != nil {
+				endpoint := endpointOrEmpty(cls[execution])
+				if strings.HasPrefix(endpoint, "http") {
+					ethNodeEndpoint = strings.TrimPrefix(endpoint, "http")
+				}
+				gd.EthNodeUrl = "ws" + ethNodeEndpoint + ":" + strconv.Itoa(int(gd.Ports["ELApi"]))
+				ethNodeUrl = fmt.Sprintf("%s", gd.EthNodeUrl)
+			}
+		}
+	}
+
 	executionApiUrl := gd.ExecutionApiUrl
 	executionAuthUrl := gd.ExecutionAuthUrl
 	if cls[execution] != nil {
@@ -343,6 +413,13 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		}
 		if executionAuthUrl == "" {
 			executionAuthUrl = fmt.Sprintf("%s:%v", cls[execution].Endpoint, gd.Ports["ELAuth"])
+		}
+	}
+
+	starknetApiUrl := gd.StarknetApiUrl
+	if cls[starknet] != nil {
+		if starknetApiUrl == "" {
+			starknetApiUrl = fmt.Sprintf("%s:%v", cls[starknet].Endpoint, gd.Ports["L2Api"])
 		}
 	}
 	consensusApiUrl := gd.ConsensusApiUrl
@@ -387,7 +464,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 
 	graffiti := gd.Graffiti
 	if graffiti == "" {
-		graffiti = generateGraffiti(gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient)
+		graffiti = generateGraffiti(gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient, gd.StarknetClient)
 	}
 
 	if len(gd.RelayURLs) == 0 {
@@ -402,14 +479,18 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		Services:                  gd.Services,
 		Mev:                       networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
 		ElImage:                   imageOrEmpty(cls[execution], gd.LatestVersion),
+		L2Image:                   imageOrEmpty(cls[starknet], gd.LatestVersion),
 		ElDataDir:                 "./" + configs.ExecutionDir,
+		L2DataDir:                 "./" + configs.StarknetDir,
 		CcImage:                   imageOrEmpty(cls[consensus], gd.LatestVersion),
 		CcDataDir:                 "./" + configs.ConsensusDir,
 		VlImage:                   imageOrEmpty(cls[validator], gd.LatestVersion),
 		VlDataDir:                 "./" + configs.ValidatorDir,
 		ExecutionApiURL:           executionApiUrl,
 		ExecutionAuthURL:          executionAuthUrl,
+		EthNodeURL:                ethNodeUrl,
 		ConsensusApiURL:           consensusApiUrl,
+		StarknetApiURL:            starknetApiUrl,
 		ConsensusAdditionalApiURL: consensusAdditionalApiUrl,
 		FeeRecipient:              gd.FeeRecipient,
 		JWTSecretPath:             gd.JWTSecretPath,
@@ -551,7 +632,7 @@ func nameOrEmpty(cls *clients.Client) string {
 }
 
 // generateGraffiti generates a graffiti string based on the execution, consensus and validator clients
-func generateGraffiti(execution, consensus, validator *clients.Client) string {
+func generateGraffiti(execution, consensus, validator, starknet *clients.Client) string {
 	if consensus != nil && execution != nil {
 		if validator != nil {
 			if consensus.Name == validator.Name {

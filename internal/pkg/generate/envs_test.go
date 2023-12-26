@@ -92,7 +92,7 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check set of RELAY_URLS, mainnet",
 			data: &GenData{
-				Services:        []string{consensus, validator, execution, mevBoost},
+				Services:        []string{consensus, validator, execution, mevBoost, starknet},
 				ValidatorClient: &clients.Client{Name: "teku"},
 				Network:         "mainnet",
 				Mev:             true,
@@ -105,7 +105,7 @@ func TestGenerateEnvFile(t *testing.T) {
 		{
 			name: "Check set of RELAY_URLS, goerli",
 			data: &GenData{
-				Services:        []string{consensus, validator, execution, mevBoost},
+				Services:        []string{consensus, validator, execution, mevBoost, starknet},
 				ValidatorClient: &clients.Client{Name: "prysm"},
 				Network:         "goerli",
 				Mev:             true,
@@ -273,7 +273,7 @@ func TestMissingEnvVars(t *testing.T) {
 		{
 			name: "Check RELAY_URLS",
 			data: &GenData{
-				Services:        []string{consensus, validator, execution},
+				Services:        []string{consensus, validator, execution, starknet},
 				ConsensusClient: &clients.Client{Name: "teku"},
 				Network:         "mainnet",
 				Mev:             true,

@@ -182,3 +182,24 @@ func TestSetImageOrDefault_CustomImage(t *testing.T) {
 		})
 	}
 }
+
+func TestSetImageOrDefault_Starknet(t *testing.T) {
+	tests := []struct {
+		client        Client
+		expectedImage regexp.Regexp
+	}{
+		{
+			client: Client{
+				Name: "juno",
+				Type: "starknet",
+			},
+			expectedImage: *regexp.MustCompile(`^nethermind/juno:v\d+\.\d+\.\d+$`),
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.client.Name, func(t *testing.T) {
+			test.client.SetImageOrDefault("")
+			assert.True(t, test.expectedImage.Match([]byte(test.client.Image)))
+		})
+	}
+}

@@ -1,0 +1,36 @@
+---
+id: running-starknet-node
+sidebar_position: 11
+---
+
+# Running a Starknet node
+
+## What is a Starknet node
+
+You can run a node for the Starknet ecosystem which is a permissionless, zk-STARK-based Layer-2 network, 
+aiming for full decentralization. The node utilizes Ethereum’s Layer 1 for proof verification and data availability.
+
+## Running a Starknet node using Sedge
+
+Sedge can be used to run a Starknet node, running only one node, or alongside a full Ethereum node.
+
+### Running a Starknet node alone
+
+You can run a Starknet node alone, connecting to an external Ethereum-1 endpoint Relay url, or setting your own.
+There is a example of how to generate a Starknet node using Sedge:
+
+```
+sedge generate starknet --eth-node=""
+```
+
+### Running a starknet node alongside a full Ethereum node (execution + consensus)
+
+If you generate a starknet node using Sedge, with the `--full` flag, Sedge will generate the node together with an Ethereum node 
+and automatically connects to your locally running Ethereum (L1) node via a websocket connection without the need 
+to provide an external Ethereum-1 endpoint node.
+
+For example:
+
+```
+sedge generate starknet --full
+```

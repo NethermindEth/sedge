@@ -51,6 +51,7 @@ const (
 	NodeTypeExecution = "execution"
 	NodeTypeConsensus = "consensus"
 	NodeTypeValidator = "validator"
+	NodeTypeStarknet  = "starknet"
 
 	Randomize = "randomize"
 
@@ -67,6 +68,7 @@ type CliCmdOptions struct {
 	generationPath           string
 	nodeType                 string
 	withValidator            bool
+	withFullL1Node           bool
 	withMevBoost             bool
 	importSlashingProtection bool
 	slashingProtectionFrom   string
@@ -97,6 +99,7 @@ func CliCmd(p ui.Prompter, actions actions.SedgeActions, depsMgr dependencies.De
 - Execution Node
 - Consensus Node
 - Validator Node
+- Starknet  Node
 
 Follow the prompts to select the options you want for your node. At the end of the process, you will
 be asked to run the generated setup or not. If you chose to run the setup, it will be executed for you
@@ -120,6 +123,8 @@ using docker compose command behind the scenes.
 				return setupConsensusNode(p, o, actions, depsMgr)
 			case NodeTypeValidator:
 				return setupValidatorNode(p, o, actions, depsMgr)
+			case NodeTypeStarknet:
+				return setupStarknetNode(p, o, actions, depsMgr)
 			}
 			return nil
 		},
@@ -313,6 +318,51 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 	return postGenerate(p, o, a, depsManager)
 }
 
+// setup a starknet node
+func setupStarknetNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager) (err error) {
+	o.genData.Services = []string{"starknet"}
+	if err := selectStarknetClient(p, o); err != nil {
+		return err
+	}
+	if err := confirmWithFullStarknetNode(p, o); err != nil {
+		return err
+	}
+	if o.withFullL1Node {
+		o.genData.Services = append(o.genData.Services, "execution", "consensus")
+
+		if err := runPromptActions(p, o,
+			selectExecutionClient,
+			selectConsensusClient,
+			inputStarknetGracePeriod,
+			inputCheckpointSyncURL,
+			inputFeeRecipientNoValidator,
+		); err != nil {
+			return err
+		}
+	} else {
+		if err := runPromptActions(p, o,
+			inputEthNode,
+		); err != nil {
+			return err
+		}
+	}
+	if err := confirmExposeAllPorts(p, o); err != nil {
+		return err
+	}
+	if err := setupJWT(p, o, false); err != nil {
+		return err
+	}
+	// Call generate action
+	o.genData, err = a.Generate(actions.GenerateOptions{
+		GenerationData: o.genData,
+		GenerationPath: o.generationPath,
+	})
+	if err != nil {
+		return err
+	}
+	return postGenerate(p, o, a, depsManager)
+}
+
 func setupJWT(p ui.Prompter, o *CliCmdOptions, skip bool) error {
 	if skip {
 		if err := selectJWTSourceOrSkip(p, o); err != nil {
@@ -361,6 +411,8 @@ func postGenerate(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsM
 		services = []string{"consensus"}
 	case NodeTypeValidator:
 		services = []string{"validator"}
+	case NodeTypeStarknet:
+		services = []string{"starknet"}
 	}
 	run, err := p.Confirm("Run services now?", false)
 	if err != nil {
@@ -615,6 +667,11 @@ func runPromptActions(p ui.Prompter, o *CliCmdOptions, actions ...promptAction) 
 	return nil
 }
 
+// check if network is mainnet or sepolia for starknet
+func networkNotMainnetOrSepolia(o *CliCmdOptions) bool {
+	return o.genData.Network != NetworkMainnet && o.genData.Network != NetworkSepolia
+}
+
 func selectNetwork(p ui.Prompter, o *CliCmdOptions) error {
 	options := []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}
 	index, err := p.Select("Select network", "", options)
@@ -625,8 +682,22 @@ func selectNetwork(p ui.Prompter, o *CliCmdOptions) error {
 	return nil
 }
 
+func removeFromNodeType(options []string, optionToRemove string) []string {
+	newSlice := make([]string, 0)
+	for _, item := range options {
+		if item != optionToRemove {
+			newSlice = append(newSlice, item)
+		}
+	}
+	return newSlice
+}
+
 func selectNodeType(p ui.Prompter, o *CliCmdOptions) error {
-	options := []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}
+	options := []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator, NodeTypeStarknet}
+	// check if mainnet or goerli was selected, if not omit starknet
+	if networkNotMainnetOrSepolia(o) {
+		options = removeFromNodeType(options, NodeTypeStarknet)
+	}
 	index, err := p.Select("Select node type", "", options)
 	if err != nil {
 		return err
@@ -722,6 +793,35 @@ func selectValidatorClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 	return nil
 }
 
+func selectStarknetClient(p ui.Prompter, o *CliCmdOptions) (err error) {
+	c := clients.ClientInfo{Network: o.genData.Network}
+	supportedClients, err := c.SupportedClients(starknet)
+	if err != nil {
+		return err
+	}
+	options := append(supportedClients, Randomize)
+	index, err := p.Select("Select starknet client", "", options)
+	if err != nil {
+		return err
+	}
+	selectedStarknetClient := options[index]
+	// In case random is selected, select a random client
+	if selectedStarknetClient == Randomize {
+		randomName, err := clients.RandomClientName(supportedClients)
+		if err != nil {
+			return err
+		}
+		selectedStarknetClient = randomName
+		log.Info("Random starknet client selected: ", selectedStarknetClient)
+	}
+	o.genData.StarknetClient = &clients.Client{
+		Name: selectedStarknetClient,
+		Type: "starknet",
+	}
+	o.genData.StarknetClient.SetImageOrDefault("")
+	return nil
+}
+
 func selectJWTSource(p ui.Prompter, o *CliCmdOptions) error {
 	options := []string{SourceTypeCreate, SourceTypeExisting}
 	index, err := p.Select("Select JWT source", "", options)
@@ -774,6 +874,11 @@ func selectKeystorePassphraseSource(p ui.Prompter, o *CliCmdOptions) error {
 
 func confirmWithValidator(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.withValidator, err = p.Confirm("Do you want to set up a validator?", true)
+	return
+}
+
+func confirmWithFullStarknetNode(p ui.Prompter, o *CliCmdOptions) (err error) {
+	o.withFullL1Node, err = p.Confirm("Do you want to set up a full starknet node (with execution and consensus)?", true)
 	return
 }
 
@@ -889,6 +994,15 @@ func inputValidatorGracePeriod(p ui.Prompter, o *CliCmdOptions) (err error) {
 	return nil
 }
 
+func inputStarknetGracePeriod(p ui.Prompter, o *CliCmdOptions) (err error) {
+	epochs, err := p.InputInt64("Starknet grace period. This is the number of epochs the starknet client will wait before starting", 1)
+	if err != nil {
+		return err
+	}
+	o.genData.SLStartGracePeriod = uint((configs.NetworkEpochTime(o.genData.Network) * time.Duration(epochs)).Seconds())
+	return nil
+}
+
 func inputGenerationPath(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.generationPath, err = p.Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil)
 	if err != nil {
@@ -977,6 +1091,11 @@ func inputConsensusAPIUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func inputContainerTag(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.ContainerTag, err = p.Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil)
+	return
+}
+
+func inputEthNode(p ui.Prompter, o *CliCmdOptions) (err error) {
+	o.genData.EthNodeUrl, err = p.InputURL("Input Eth 1 Endpoint", "", true)
 	return
 }
 

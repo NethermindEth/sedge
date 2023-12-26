@@ -132,12 +132,12 @@ Users acknowledge that no warranty is being made of a successful installation. S
 
 ### Mainnet
 
-| Execution  | Consensus  | Validator  |
-| ---------- | ---------- | ---------- |
-| Geth       | Lighthouse | Lighthouse |
-| Nethermind | Lodestar   | Lodestar   |
-| Erigon     | Prysm      | Prysm      |
-| Besu       | Teku       | Teku       |
+| Execution  | Consensus  | Validator  | Starknet  |
+| ---------- | ---------- | ---------- |---------- |
+| Geth       | Lighthouse | Lighthouse | Juno      |
+| Nethermind | Lodestar   | Lodestar   |           |
+| Erigon     | Prysm      | Prysm      |           |
+| Besu       | Teku       | Teku       |           |
 
 ### Sepolia
 
@@ -150,12 +150,12 @@ Users acknowledge that no warranty is being made of a successful installation. S
 
 ### Goerli
 
-| Execution  | Consensus  | Validator  |
-| ---------- | ---------- | ---------- |
-| Geth       | Lighthouse | Lighthouse |
-| Nethermind | Lodestar   | Lodestar   |
-| Erigon     | Prysm      | Prysm      |
-| Besu       | Teku       | Teku       |
+| Execution  | Consensus  | Validator  | Starknet   |
+| ---------- | ---------- | ---------- | ---------- |
+| Geth       | Lighthouse | Lighthouse | Juno       |
+| Nethermind | Lodestar   | Lodestar   |            |
+| Erigon     | Prysm      | Prysm      |            |
+| Besu       | Teku       | Teku       |            |
 
 ### Holesky
 
