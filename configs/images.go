@@ -36,6 +36,9 @@ var ClientImages struct {
 		Teku       Image `yaml:"teku"`
 		Prysm      Image `yaml:"prysm"`
 	}
+	Optimism struct {
+		OpNode Image `yaml:"optimism"`
+	}
 }
 
 //go:embed client_images.yaml

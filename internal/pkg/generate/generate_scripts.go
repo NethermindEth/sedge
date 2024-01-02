@@ -36,6 +36,7 @@ const (
 	execution       = "execution"
 	consensus       = "consensus"
 	validator       = "validator"
+	optimism        = "optimism"
 	validatorImport = "validator-import"
 	mevBoost        = "mev-boost"
 	configConsensus = "config_consensus"
@@ -109,6 +110,7 @@ func mapClients(gd *GenData) map[string]*clients.Client {
 		execution: gd.ExecutionClient,
 		consensus: gd.ConsensusClient,
 		validator: gd.ValidatorClient,
+		optimism:  gd.OptimismClient,
 	}
 
 	return cls
@@ -126,17 +128,21 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 	// Check for port occupation
 	defaultsPorts := map[string]uint16{
-		"ELDiscovery":     configs.DefaultDiscoveryPortEL,
-		"ELMetrics":       configs.DefaultMetricsPortEL,
-		"ELApi":           configs.DefaultApiPortEL,
-		"ELAuth":          configs.DefaultAuthPortEL,
-		"ELWS":            configs.DefaultWSPortEL,
-		"CLDiscovery":     configs.DefaultDiscoveryPortCL,
-		"CLMetrics":       configs.DefaultMetricsPortCL,
-		"CLApi":           configs.DefaultApiPortCL,
-		"CLAdditionalApi": configs.DefaultAdditionalApiPortCL,
-		"VLMetrics":       configs.DefaultMetricsPortVL,
-		"MevPort":         configs.DefaultMevPort,
+		"ELDiscovery":       configs.DefaultDiscoveryPortEL,
+		"ELMetrics":         configs.DefaultMetricsPortEL,
+		"ELApi":             configs.DefaultApiPortEL,
+		"ELAuth":            configs.DefaultAuthPortEL,
+		"ELWS":              configs.DefaultWSPortEL,
+		"CLDiscovery":       configs.DefaultDiscoveryPortCL,
+		"CLMetrics":         configs.DefaultMetricsPortCL,
+		"CLApi":             configs.DefaultApiPortCL,
+		"CLAdditionalApi":   configs.DefaultAdditionalApiPortCL,
+		"VLMetrics":         configs.DefaultMetricsPortVL,
+		"MevPort":           configs.DefaultMevPort,
+		"ApiPortELOP":       configs.DefaultApiPortELOP,
+		"AuthPortELOP":      configs.DefaultAuthPortELOP,
+		"DiscoveryPortELOP": configs.DefaultDiscoveryPortELOP,
+		"MetricsPortELOP":   configs.DefaultMetricsPortELOP,
 	}
 	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -264,8 +270,14 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ClApiPort:           gd.Ports["CLApi"],
 		ClAdditionalApiPort: gd.Ports["CLAdditionalApi"],
 		VlMetricsPort:       gd.Ports["VLMetrics"],
+		ElOPApiPort:         gd.Ports["ApiPortELOP"],
+		ElOPAuthPort:        gd.Ports["AuthPortELOP"],
+		ElOPDiscoveryPort:   gd.Ports["DiscoveryPortELOP"],
+		ElOPMetricsPort:     gd.Ports["MetricsPortELOP"],
 		FallbackELUrls:      gd.FallbackELUrls,
 		ElExtraFlags:        gd.ElExtraFlags,
+		ElOPExtraFlags:      gd.ElOpExtraFlags,
+		OPExtraFlags:        gd.OpExtraFlags,
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
 		ECBootnodes:         strings.Join(gd.ECBootnodes, ","),
@@ -366,7 +378,12 @@ func EnvFile(gd *GenData, at io.Writer) error {
 			consensusAdditionalApiUrl = consensusApiUrl
 		}
 	}
-
+	executionOPApiUrl := gd.ExecutionApiUrl
+	if cls[optimism] != nil {
+		if executionOPApiUrl == "" {
+			executionOPApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(gd.ExecutionOPClient), gd.Ports["ApiPortELOP"])
+		}
+	}
 	var mevSupported bool
 	if cls[validator] != nil {
 		mevSupported, err = env.CheckVariable(env.ReMEV, gd.Network, "validator", gd.ValidatorClient.Name)
@@ -397,6 +414,14 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	if gd.CheckpointSyncUrl == "" {
 		gd.CheckpointSyncUrl = configs.NetworksConfigs()[gd.Network].CheckpointSyncURL
 	}
+	elOpImage := ""
+	if gd.ExecutionOPClient != nil {
+		elOpImage = imageOrEmpty(gd.ExecutionOPClient, gd.LatestVersion)
+	}
+	opImageVersion := ""
+	if gd.OptimismClient != nil {
+		opImageVersion = imageOrEmpty(cls[optimism], gd.LatestVersion)
+	}
 
 	data := EnvData{
 		Services:                  gd.Services,
@@ -419,6 +444,10 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		Graffiti:                  graffiti,
 		RelayURLs:                 strings.Join(gd.RelayURLs, ","),
 		CheckpointSyncUrl:         gd.CheckpointSyncUrl,
+		ExecutionOPApiURL:         executionOPApiUrl,
+		JWTOPSecretPath:           gd.JWTSecretOP,
+		OPImageVersion:            opImageVersion,
+		ElOpImage:                 elOpImage,
 	}
 
 	// Save to writer
