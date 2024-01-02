@@ -17,6 +17,7 @@ package cli
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/spf13/cobra"
@@ -52,27 +53,38 @@ If you don't provide a execution, consensus or validator client, it will be chos
 Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate full-node --execution nethermind:docker.image'. If you want to use the default docker image, just use the client name`,
 		Args: cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
 			return preValidationGenerateCmd(network, logging, &flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			services := []string{execution, consensus}
-			if !flags.noValidator {
-				services = append(services, validator)
+			services := []string{}
+			if validatePOANetwork(network) == nil {
+				services = append(services, execution)
+
+			} else {
+
+				services = append(services, execution, consensus)
+
+				if !flags.noValidator {
+					services = append(services, validator)
+				}
+
+				if !flags.noMev && !flags.noValidator {
+					services = append(services, mevBoost)
+				}
+				if flags.consensusName == "" {
+					flags.consensusName = flags.validatorName
+				} else if flags.validatorName == "" {
+					flags.validatorName = flags.consensusName
+				}
+				if flags.optimismEnabled {
+					services = append(services, optimism)
+				}
 			}
-			if !flags.noMev && !flags.noValidator {
-				services = append(services, mevBoost)
-			}
-			if flags.optimismEnabled {
-				services = append(services, optimism)
-			}
-			if flags.consensusName == "" {
-				flags.consensusName = flags.validatorName
-			} else if flags.validatorName == "" {
-				flags.validatorName = flags.consensusName
-			}
+
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, services)
 		},
 	}
@@ -337,4 +349,24 @@ func MevBoostSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia etc.")
 	cmd.Flags().SortFlags = false
 	return cmd
+}
+
+// POA Network Error msg
+var ErrNotPOANetworkFlags = errors.New("the provided network is not a poa network")
+
+func validatePOANetwork(network string) error {
+	// validating POA network
+	found := false
+	var networks = []string{"volta", "energyweb"}
+	fmt.Printf("Validating network %s\n", network)
+	for _, n := range networks {
+		if n == network {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return ErrNotPOANetworkFlags
+	}
+	return nil
 }
