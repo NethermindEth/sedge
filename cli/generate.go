@@ -450,8 +450,15 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		if err = clients.ValidateClient(executionOpClient, optimism); err != nil {
 			return nil, err
 		}
+
+		// If set execution-api-url, set execution and beacon to nil
+		if flags.executionApiUrl != "" {
+			executionClient = nil
+			consensusClient = nil
+		}
 	} else {
-		validatorClient = nil
+		opClient = nil
+		executionOpClient = nil
 	}
 
 	return &clients.Clients{
