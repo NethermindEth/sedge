@@ -61,7 +61,7 @@
       - --l1=${EXECUTION_OP_API_URL}
       - --l1.rpckind=nethermind
       - --l1.trustrpc
-      - --l2=http://execution-l2:{{.ElOPApiPort}}
+      - --l2=http://execution-l2:{{.ElOPAuthPort}}
       - --l2.jwt-secret=/tmp/jwt/jwtsecret
       - --network=${NETWORK}{{range $flag := .OPExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}
