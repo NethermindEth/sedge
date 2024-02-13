@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.3.1] - 2024-02-13
+
+### Fixed
+
+- Fix lodestar and lighthouse new versions flag issue.
+
+### Changed
+
+- Update client images.
+
 ## [v1.3.0] - 2023-12-11
 
 ### Added
