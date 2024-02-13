@@ -1,7 +1,7 @@
 execution:
   geth:
     name: ethereum/client-go
-    version: v1.13.11
+    version: v1.13.12
   besu:
     name: hyperledger/besu
     version: 24.1.1
@@ -10,14 +10,14 @@ execution:
     version: 1.25.3
   erigon:
     name: thorax/erigon
-    version: v2.57.1
+    version: v2.57.3
 consensus:
   lighthouse:
     name: sigp/lighthouse
     version: v4.6.0
   lodestar:
     name: chainsafe/lodestar
-    version: v1.15.0
+    version: v1.15.1
   teku:
     name: consensys/teku
     version: 24.1.1
@@ -30,7 +30,7 @@ validator:
     version: v4.6.0
   lodestar:
     name: chainsafe/lodestar
-    version: v1.15.0
+    version: v1.15.1
   teku:
     name: consensys/teku
     version: 24.1.1
