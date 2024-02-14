@@ -126,7 +126,7 @@ jobs:
           token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
           commit-message: Update Homebrew to latest release
           title: "[Release] Update Homebrew"
-          reviewers: falcoxyz, AntiD2ta, cbermudez97, stdevMac
+          reviewers: AntiD2ta, cbermudez97, stdevMac, adriantpaez
           draft: false
           path: homebrew-sedge
           add-paths: |
