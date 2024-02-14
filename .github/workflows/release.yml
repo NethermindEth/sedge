@@ -20,21 +20,21 @@ jobs:
       VERSION: ${{ github.event.inputs.tag }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         with:
           go-version: "1.19.0"
 
       - run: chmod +x ./scripts/build-go-darwin-binaries.sh && ./scripts/build-go-darwin-binaries.sh
 
-      - uses: actions/upload-artifact@master
+      - uses: actions/upload-artifact@v4
         name: Uploading sedge darwin amd64 package
         with:
           name: sedge-${{env.VERSION}}-darwin-amd64
           path: build/sedge-${{env.VERSION}}-darwin-amd64
 
-      - uses: actions/upload-artifact@master
+      - uses: actions/upload-artifact@v4
         name: Uploading sedge darwin arm64 package
         with:
           name: sedge-${{env.VERSION}}-darwin-arm64
@@ -48,15 +48,15 @@ jobs:
     needs: sedge-darwin
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         with:
           go-version: "1.21.0"
 
       - run: scripts\build-go-windows-binaries.ps1
 
-      - uses: actions/upload-artifact@master
+      - uses: actions/upload-artifact@v4
         name: Uploading sedge windows amd64 package
         with:
           name: sedge-${{env.VERSION}}-windows-amd64.exe
@@ -70,28 +70,28 @@ jobs:
     needs: sedge-windows
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         with:
           go-version: "1.19.0"
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v4
 
       - run: chmod +x ./scripts/build-go-linux-binaries.sh && ./scripts/build-go-linux-binaries.sh
 
-      - uses: actions/upload-artifact@master
+      - uses: actions/upload-artifact@v4
         name: Uploading sedge linux amd64 package
         with:
           name: sedge-${{env.VERSION}}-linux-amd64
           path: build/sedge-${{env.VERSION}}-linux-amd64
 
-      - uses: actions/upload-artifact@master
+      - uses: actions/upload-artifact@v4
         name: Uploading sedge linux arm64 package
         with:
           name: sedge-${{env.VERSION}}-linux-arm64
@@ -105,12 +105,12 @@ jobs:
     needs: sedge-linux
     steps:
       - name: Download packages
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: /tmp/binaries
 
       - name: Checkout repository
-        uses: actions/checkout@master
+        uses: actions/checkout@v4
         with:
           repository: NethermindEth/homebrew-sedge
           path: homebrew-sedge
@@ -140,10 +140,10 @@ jobs:
     needs: update-homebrew
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download packages
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: /tmp/binaries
       - name: Generate Changelog
@@ -184,10 +184,10 @@ jobs:
         run: |
           sudo apt update && sudo apt install golang-go debhelper libdebhelper-perl build-essential devscripts rsync -y
       - name: Checking out Sedge repository
-        uses: actions/checkout@master
+        uses: actions/checkout@v4
         with:
           path: sedge
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         with:
           go-version: "1.19.0"
       - name: Run publish PPA script
@@ -200,7 +200,7 @@ jobs:
       - name: Sleep for 1 hour
         run: sleep 3600s
         shell: bash
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
       - run: pip install launchpadlib --upgrade
       - name: Run copy binaries PPA script
         env:
