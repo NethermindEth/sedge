@@ -42,7 +42,7 @@ install-mockgen: ## install mockgen
 	go install github.com/golang/mock/mockgen@v1.6.0 
 
 install-courtney: ## Install courtney for code coverage
-	@git clone https://github.com/stdevMac/courtney
+	@git clone https://github.com/dave/courtney
 	@(cd courtney && go get  ./... && go build courtney.go)
 	@go get ./...
 

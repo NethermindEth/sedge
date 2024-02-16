@@ -13,9 +13,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            go: '1.19'
+            go: '1.21'
           - os: macos-latest
-            go: '1.19'
+            go: '1.21'
           - os: windows-latest
             go: '1.21'
     runs-on: ${{ matrix.os }}
@@ -27,10 +27,10 @@ jobs:
           git config --global core.eol lf
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
 
