@@ -448,6 +448,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		JWTOPSecretPath:           gd.JWTSecretOP,
 		OPImageVersion:            opImageVersion,
 		ElOpImage:                 elOpImage,
+		ElOPAuthPort:              gd.Ports["AuthPortELOP"],
 	}
 
 	// Save to writer
