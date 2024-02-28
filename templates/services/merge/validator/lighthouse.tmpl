@@ -30,6 +30,7 @@
       - --metrics-address=0.0.0.0{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}{{if .MevBoostOnValidator}}
       - --builder-proposals{{end}}{{if .LoggingDriver}}
+      - {{if .Distributed}}--distributed{{end}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
