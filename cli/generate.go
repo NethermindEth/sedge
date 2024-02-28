@@ -426,7 +426,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 		if flags.optimismName != "" {
-			opClient.Name = optimismParts[0]
+			opClient.Name = "optimism"
 			if len(optimismParts) > 1 {
 				opClient.Image = strings.Join(optimismParts[1:], ":")
 
