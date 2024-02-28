@@ -1,0 +1,9 @@
+{{/* charon.tmpl */}}
+{{ define "distributedValidator" }}
+# --- Charon - distributed validator - configuration ---
+DC_LOG_LEVEL=info
+DC_LOG_FORMAT=console
+DC_INSTANCE_NAME=Charon
+DC_DATA_DIR={{.CcDataDir}}
+DC_API_URL={{.ConsensusApiURL}}
+{{ end }}

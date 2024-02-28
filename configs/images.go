@@ -36,6 +36,9 @@ var ClientImages struct {
 		Teku       Image `yaml:"teku"`
 		Prysm      Image `yaml:"prysm"`
 	}
+	DistributedValidator struct {
+		Charon Image `yaml:"charon"`
+	}
 }
 
 //go:embed client_images.yaml

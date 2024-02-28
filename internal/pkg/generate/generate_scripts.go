@@ -33,13 +33,15 @@ import (
 )
 
 const (
-	execution       = "execution"
-	consensus       = "consensus"
-	validator       = "validator"
-	validatorImport = "validator-import"
-	mevBoost        = "mev-boost"
-	configConsensus = "config_consensus"
-	empty           = "empty"
+	execution            = "execution"
+	consensus            = "consensus"
+	validator            = "validator"
+	validatorImport      = "validator-import"
+	mevBoost             = "mev-boost"
+	configConsensus      = "config_consensus"
+	empty                = "empty"
+	distributedValidator = "distributedValidator"
+	charon               = "charon"
 )
 
 // validateClients validates each client in GenData
@@ -54,6 +56,9 @@ func validateClients(gd *GenData) error {
 	if err := validateValidator(gd, &c); err != nil {
 		return err
 	}
+	// if err := validateDistributedValidator(gd, &c); err != nil {
+	// 	return err
+	// }
 	return nil
 }
 
@@ -71,6 +76,21 @@ func validateValidator(gd *GenData, c *clients.ClientInfo) error {
 	}
 	return nil
 }
+
+// validateDistributedValidator validates the validator client in GenData
+// func validateDistributedValidator(gd *GenData, c *clients.ClientInfo) error {
+// 	if gd.DistributedValidatorClient == nil {
+// 		return nil
+// 	}
+// 	validatorClients, err := c.SupportedClients(distributedValidator)
+// 	if err != nil {
+// 		return ErrUnableToGetClientsInfo
+// 	}
+// 	if !utils.Contains(validatorClients, gd.ValidatorClient.Name) {
+// 		return ErrValidatorClientNotValid
+// 	}
+// 	return nil
+// }
 
 // validateExecution validates the execution client in GenData
 func validateExecution(gd *GenData, c *clients.ClientInfo) error {
@@ -106,9 +126,10 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 // mapClients convert genData clients to clients.Clients
 func mapClients(gd *GenData) map[string]*clients.Client {
 	cls := map[string]*clients.Client{
-		execution: gd.ExecutionClient,
-		consensus: gd.ConsensusClient,
-		validator: gd.ValidatorClient,
+		execution:            gd.ExecutionClient,
+		consensus:            gd.ConsensusClient,
+		validator:            gd.ValidatorClient,
+		distributedValidator: gd.DistributedValidatorClient,
 	}
 
 	return cls
@@ -243,9 +264,17 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		}
 	}
 
+	if gd.Distributed {
+		// Check for distributed validator
+		if cls[distributedValidator] != nil {
+			gd.DistributedValidatorClient.Endpoint = configs.OnPremiseDistributedValidatorURL
+		}
+	}
+
 	data := DockerComposeData{
 		Services:            gd.Services,
 		Network:             gd.Network,
+		Distributed:         gd.Distributed,
 		XeeVersion:          xeeVersion,
 		Mev:                 networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev)),
 		MevBoostOnValidator: gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
@@ -296,6 +325,13 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	return nil
+}
+
+func (d DockerComposeData) DistributedValidatorEndpoint() string {
+	if d.Distributed {
+		return configs.OnPremiseDistributedValidatorURL
+	}
+	return ""
 }
 
 // EnvFile generates a .env file with the provided GenData
@@ -404,7 +440,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ElImage:                   imageOrEmpty(cls[execution], gd.LatestVersion),
 		ElDataDir:                 "./" + configs.ExecutionDir,
 		CcImage:                   imageOrEmpty(cls[consensus], gd.LatestVersion),
-		CcDataDir:                 "./" + configs.ConsensusDir,
+		CcDataDir:                 "./" + configs.CharonDir,
 		VlImage:                   imageOrEmpty(cls[validator], gd.LatestVersion),
 		VlDataDir:                 "./" + configs.ValidatorDir,
 		ExecutionApiURL:           executionApiUrl,
@@ -419,6 +455,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		Graffiti:                  graffiti,
 		RelayURLs:                 strings.Join(gd.RelayURLs, ","),
 		CheckpointSyncUrl:         gd.CheckpointSyncUrl,
+		Distributed:               gd.Distributed,
 	}
 
 	// Save to writer

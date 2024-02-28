@@ -34,6 +34,8 @@ func (c *Client) SetImageOrDefault(image string) {
 		c.setConsensusImage(image)
 	case "execution":
 		c.setExecutionImage(image)
+	case "distributedValidator":
+		c.setDistributedValidatorImage(image)
 	}
 }
 
@@ -76,6 +78,13 @@ func (c *Client) setValidatorImage(image string) {
 	}
 }
 
+func (c *Client) setDistributedValidatorImage(image string) {
+	switch c.Name {
+	case "charon":
+		c.Image = valueOrDefault(image, configs.ClientImages.DistributedValidator.Charon.String())
+	}
+}
+
 func valueOrDefault(value string, defaultValue string) string {
 	if value == "" {
 		return defaultValue
@@ -85,9 +94,10 @@ func valueOrDefault(value string, defaultValue string) string {
 
 // Clients : Struct Represent a combination of execution, consensus and validator clients
 type Clients struct {
-	Execution *Client
-	Consensus *Client
-	Validator *Client
+	Execution            *Client
+	Consensus            *Client
+	Validator            *Client
+	DistributedValidator *Client
 }
 
 type ClientMap map[string]*Client

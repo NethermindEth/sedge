@@ -1,0 +1,24 @@
+{{/* charon.tmpl */}}
+{{ define "distributedValidator" }}
+  charon:
+    image: obolnetwork/charon:${CHARON_VERSION:-v0.19.0}
+    environment:
+      - CHARON_BEACON_NODE_ENDPOINTS=${CC_API_URL}
+      - CHARON_LOG_LEVEL=${DC_LOG_LEVEL:-info}
+      - CHARON_LOG_FORMAT=${DC_LOG_FORMAT:-console}
+      - CHARON_P2P_RELAYS=${DC_P2P_RELAYS:-https://0.relay.obol.tech}
+      - CHARON_P2P_EXTERNAL_HOSTNAME=${DC_INSTANCE_NAME:-charon}
+      - CHARON_P2P_TCP_ADDRESS=0.0.0.0:3610
+      - CHARON_VALIDATOR_API_ADDRESS=0.0.0.0:3600
+      - CHARON_MONITORING_ADDRESS=0.0.0.0:3620
+      - CHARON_BUILDER_API={{.MevBoostOnValidator}}
+    ports:
+      - ${CHARON_PORT_P2P_TCP:-3610}:${CHARON_PORT_P2P_TCP:-3610}/tcp # P2P TCP libp2p
+    networks:
+      - sedge
+    volumes:
+      - ${DC_DATA_DIR}:/opt/charon/.charon
+    restart: unless-stopped
+    healthcheck:
+      - test: wget -qO- http://localhost:3620/readyz
+{{ end }}
