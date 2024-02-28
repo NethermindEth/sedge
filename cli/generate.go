@@ -437,7 +437,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 
-		optimismExecutionParts := strings.Split(flags.optimismName, ":")
+		optimismExecutionParts := strings.Split(flags.optimismExecutionName, ":")
 		executionOpClient = allClients[execution]["nethermind"]
 		if flags.optimismExecutionName != "" {
 			executionOpClient.Name = optimismExecutionParts[0]
