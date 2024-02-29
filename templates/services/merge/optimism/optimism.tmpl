@@ -58,11 +58,12 @@
       - ${EC_OP_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
     command:
       - op-node
-      - --l1=${EXECUTION_OP_API_URL}
+      - --l1=${EC_API_URL}
       - --l1.rpckind=nethermind
       - --l1.trustrpc
       - --l2=${EC_OP_RPC_URL}
       - --l2.jwt-secret=/tmp/jwt/jwtsecret
+      - --l1.beacon=${CC_API_URL}
       - --network=${NETWORK}{{range $flag := .OPExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:
