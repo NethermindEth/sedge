@@ -117,7 +117,7 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 	cmd.Flags().StringVar(&flags.optimismName, "op-image", "", "Optimism consensus client image.")
 	cmd.Flags().StringVar(&flags.optimismExecutionName, "op-execution-image", "", "Image name set for nethermind client to be used with optimism.")
 	cmd.Flags().StringArrayVar(&flags.elOpExtraFlags, "el-op-extra-flag", []string{}, "Additional flag to configure the execution client for optimism service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	cmd.Flags().StringArrayVar(&flags.elOpExtraFlags, "op-extra-flag", []string{}, "Additional flag to configure the optimism client service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringArrayVar(&flags.opExtraFlags, "op-extra-flag", []string{}, "Additional flag to configure the optimism client service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().SortFlags = false
 	return cmd
 }
