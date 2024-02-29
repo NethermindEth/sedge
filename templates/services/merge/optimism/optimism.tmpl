@@ -63,7 +63,7 @@
       - --l1.trustrpc
       - --l2=${EC_OP_RPC_URL}
       - --l2.jwt-secret=/tmp/jwt/jwtsecret
-      - --l1.beacon=${CC_API_URL}
+      # - --l1.beacon=${CC_API_URL} -> To be uncommented when Nethermind supports op-node 1.7.0
       - --network=${NETWORK}{{range $flag := .OPExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:
