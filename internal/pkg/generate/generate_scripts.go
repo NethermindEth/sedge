@@ -249,6 +249,12 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		}
 	}
 
+	// Set network prefix
+	networkPrefix := "op"
+	if gd.IsBase {
+		networkPrefix = "base"
+	}
+
 	data := DockerComposeData{
 		Services:            gd.Services,
 		Network:             gd.Network,
@@ -278,6 +284,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ElExtraFlags:        gd.ElExtraFlags,
 		ElOPExtraFlags:      gd.ElOpExtraFlags,
 		OPExtraFlags:        gd.OpExtraFlags,
+		NetworkPrefix:       networkPrefix,
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
 		ECBootnodes:         strings.Join(gd.ECBootnodes, ","),

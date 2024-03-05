@@ -66,6 +66,7 @@ type GenData struct {
 	VlExtraFlags            []string
 	ElOpExtraFlags          []string
 	OpExtraFlags            []string
+	IsBase                  bool
 	MapAllPorts             bool
 	Mev                     bool
 	RelayURLs               []string
@@ -122,6 +123,7 @@ type DockerComposeData struct {
 	ElExtraFlags            []string
 	ElOPExtraFlags          []string
 	OPExtraFlags            []string
+	NetworkPrefix           string
 	ClExtraFlags            []string
 	VlExtraFlags            []string
 	ECBootnodes             string

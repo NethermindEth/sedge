@@ -24,7 +24,7 @@
       - {{.ElOPApiPort}}
       - {{.ElOPAuthPort}}
     command:
-      - --config=op-${NETWORK}
+      - --config={{.NetworkPrefix}}-${NETWORK}
       - --datadir=/nethermind/data
       - --log=${NETHERMIND_OP_LOG_LEVEL}
       - --JsonRpc.Enabled=true
@@ -63,7 +63,7 @@
       - --l1.trustrpc
       - --l2=${EC_OP_RPC_URL}
       - --l2.jwt-secret=/tmp/jwt/jwtsecret
-      - --network=${NETWORK}{{range $flag := .OPExtraFlags}}
+      - --network={{.NetworkPrefix}}-${NETWORK}{{range $flag := .OPExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
