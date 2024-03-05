@@ -454,7 +454,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		}
 
 		// If set execution-api-url, set execution and beacon to nil
-		if flags.executionApiUrl != "" {
+		if flags.executionApiUrl != "" || flags.consensusApiUrl != "" {
 			executionClient = nil
 			consensusClient = nil
 		}
