@@ -284,6 +284,18 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 
 	vlStartGracePeriod := configs.NetworkEpochTime(network) * time.Duration(flags.waitEpoch)
 
+	var consensusApiUrl string // Assume this is the type you need; adjust as necessary
+	var executionApiUrl string
+	var executionAuthUrl string
+	if combinedClients.Consensus != nil {
+		consensusApiUrl = flags.consensusApiUrl
+	}
+
+	if combinedClients.Execution != nil {
+		executionApiUrl = flags.executionApiUrl
+		executionAuthUrl = flags.executionAuthUrl
+	}
+
 	// Generate docker-compose scripts
 	gd := generate.GenData{
 		ExecutionClient:         combinedClients.Execution,
@@ -312,9 +324,9 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		MevBoostEndpoint:        flags.mevBoostUrl,
 		Services:                services,
 		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
-		ExecutionApiUrl:         flags.executionApiUrl,
-		ExecutionAuthUrl:        flags.executionAuthUrl,
-		ConsensusApiUrl:         flags.consensusApiUrl,
+		ExecutionApiUrl:         executionApiUrl,
+		ExecutionAuthUrl:        executionAuthUrl,
+		ConsensusApiUrl:         consensusApiUrl,
 		ECBootnodes:             flags.customEnodes,
 		CCBootnodes:             flags.customEnrs,
 		CustomChainSpecPath:     flags.CustomFlags.customChainSpec,
