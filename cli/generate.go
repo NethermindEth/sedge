@@ -45,7 +45,8 @@ var (
 )
 
 const (
-	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mev-boost"
+	execution, consensus, validator, mevBoost, optimism = "execution", "consensus", "validator", "mev-boost", "optimism"
+	jwtPathName                                         = "jwtsecret"
 )
 
 type CustomFlags struct {
@@ -55,9 +56,19 @@ type CustomFlags struct {
 	customDeployBlock   string
 }
 
+type OptimismFlags struct {
+	optimismEnabled       bool
+	optimismName          string
+	optimismExecutionName string
+	elOpExtraFlags        []string
+	opExtraFlags          []string
+	isBase                bool
+}
+
 // GenCmdFlags is a struct that holds the flags of the generate command
 type GenCmdFlags struct {
 	CustomFlags
+	OptimismFlags
 	executionName     string
 	consensusName     string
 	validatorName     string
@@ -110,6 +121,7 @@ You can generate:
 	cmd.AddCommand(ConsensusSubCmd(sedgeAction))
 	cmd.AddCommand(ValidatorSubCmd(sedgeAction))
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
+	cmd.AddCommand(OpFullNodeSubCmd(sedgeAction))
 
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
 	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado, volta, energyweb etc.")
@@ -247,7 +259,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 
 	// Generate jwt secrets if needed
 	if flags.jwtPath == "" {
-		flags.jwtPath, err = handleJWTSecret(generationPath)
+		flags.jwtPath, err = handleJWTSecret(generationPath, jwtPathName)
 		if err != nil {
 			return err
 		}
@@ -257,7 +269,14 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 			return err
 		}
 	}
-
+	var jwtSecretOP string
+	// If optimism is included in the services, generate the jwt secret for it
+	if utils.Contains(services, optimism) {
+		jwtSecretOP, err = handleJWTSecret(generationPath, jwtPathName+"-op")
+		if err != nil {
+			return err
+		}
+	}
 	// Warning if no fee recipient is set
 	if flags.feeRecipient == "" {
 		log.Warn(configs.EmptyFeeRecipientError)
@@ -265,11 +284,25 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 
 	vlStartGracePeriod := configs.NetworkEpochTime(network) * time.Duration(flags.waitEpoch)
 
+	var consensusApiUrl string
+	var executionApiUrl string
+	var executionAuthUrl string
+	if combinedClients.Consensus == nil {
+		consensusApiUrl = flags.consensusApiUrl
+	}
+
+	if combinedClients.Execution == nil {
+		executionApiUrl = flags.executionApiUrl
+		executionAuthUrl = flags.executionAuthUrl
+	}
+
 	// Generate docker-compose scripts
 	gd := generate.GenData{
 		ExecutionClient:         combinedClients.Execution,
 		ConsensusClient:         combinedClients.Consensus,
 		ValidatorClient:         combinedClients.Validator,
+		ExecutionOPClient:       combinedClients.ExecutionOP,
+		OptimismClient:          combinedClients.Optimism,
 		Network:                 network,
 		CheckpointSyncUrl:       flags.checkpointSyncUrl,
 		FeeRecipient:            flags.feeRecipient,
@@ -279,6 +312,9 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ElExtraFlags:            flags.elExtraFlags,
 		ClExtraFlags:            flags.clExtraFlags,
 		VlExtraFlags:            flags.vlExtraFlags,
+		ElOpExtraFlags:          flags.elOpExtraFlags,
+		OpExtraFlags:            flags.opExtraFlags,
+		IsBase:                  flags.isBase,
 		MapAllPorts:             flags.mapAllPorts,
 		Mev:                     !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
 		MevImage:                flags.mevImage,
@@ -288,9 +324,9 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		MevBoostEndpoint:        flags.mevBoostUrl,
 		Services:                services,
 		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
-		ExecutionApiUrl:         flags.executionApiUrl,
-		ExecutionAuthUrl:        flags.executionAuthUrl,
-		ConsensusApiUrl:         flags.consensusApiUrl,
+		ExecutionApiUrl:         executionApiUrl,
+		ExecutionAuthUrl:        executionAuthUrl,
+		ConsensusApiUrl:         consensusApiUrl,
 		ECBootnodes:             flags.customEnodes,
 		CCBootnodes:             flags.customEnrs,
 		CustomChainSpecPath:     flags.CustomFlags.customChainSpec,
@@ -301,6 +337,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		MevBoostOnValidator:     flags.mevBoostOnVal,
 		ContainerTag:            containerTag,
 		LatestVersion:           flags.latestVersion,
+		JWTSecretOP:             jwtSecretOP,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,
@@ -328,7 +365,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 }
 
 func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
-	var executionClient, consensusClient, validatorClient *clients.Client
+	var executionClient, consensusClient, validatorClient, executionOpClient, opClient *clients.Client
 	var err error
 
 	// execution client
@@ -398,11 +435,55 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 	} else {
 		validatorClient = nil
 	}
+	// optimism client
+	if utils.Contains(services, optimism) {
+		optimismParts := strings.Split(flags.optimismName, ":")
+		opClient, err = clients.RandomChoice(allClients[optimism])
+		if err != nil {
+			return nil, err
+		}
+		if flags.optimismName != "" {
+			opClient.Name = "optimism"
+			if len(optimismParts) > 1 {
+				opClient.Image = strings.Join(optimismParts[1:], ":")
+
+			}
+		}
+		opClient.SetImageOrDefault(strings.Join(optimismParts[1:], ":"))
+		if err = clients.ValidateClient(opClient, optimism); err != nil {
+			return nil, err
+		}
+
+		optimismExecutionParts := strings.Split(flags.optimismExecutionName, ":")
+		executionOpClient = allClients[execution]["nethermind"]
+		if flags.optimismExecutionName != "" {
+			executionOpClient.Name = optimismExecutionParts[0]
+			if len(optimismExecutionParts) > 1 {
+				executionOpClient.Image = strings.Join(optimismExecutionParts[1:], ":")
+
+			}
+		}
+		executionOpClient.SetImageOrDefault(strings.Join(optimismExecutionParts[1:], ":"))
+		if err = clients.ValidateClient(executionOpClient, optimism); err != nil {
+			return nil, err
+		}
+
+		// If set execution-api-url, set execution and beacon to nil
+		if flags.executionApiUrl != "" || flags.consensusApiUrl != "" {
+			executionClient = nil
+			consensusClient = nil
+		}
+	} else {
+		opClient = nil
+		executionOpClient = nil
+	}
 
 	return &clients.Clients{
-		Execution: executionClient,
-		Consensus: consensusClient,
-		Validator: validatorClient,
+		Execution:   executionClient,
+		Consensus:   consensusClient,
+		Validator:   validatorClient,
+		ExecutionOP: executionOpClient,
+		Optimism:    opClient,
 	}, err
 }
 
@@ -427,7 +508,7 @@ func initGenPath(path string) error {
 	return nil
 }
 
-func handleJWTSecret(generationPath string) (string, error) {
+func handleJWTSecret(generationPath, name string) (string, error) {
 	log.Info(configs.GeneratingJWTSecret)
 	if !filepath.IsAbs(generationPath) {
 		return "", fmt.Errorf(configs.GenerateJWTSecretError, fmt.Errorf("generation path must be absolute"))
@@ -438,7 +519,7 @@ func handleJWTSecret(generationPath string) (string, error) {
 		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 
-	jwtPath, err := filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+	jwtPath, err := filepath.Abs(filepath.Join(generationPath, name))
 	if err != nil {
 		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
