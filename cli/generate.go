@@ -284,7 +284,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 
 	vlStartGracePeriod := configs.NetworkEpochTime(network) * time.Duration(flags.waitEpoch)
 
-	var consensusApiUrl string // Assume this is the type you need; adjust as necessary
+	var consensusApiUrl string
 	var executionApiUrl string
 	var executionAuthUrl string
 	if combinedClients.Consensus != nil {

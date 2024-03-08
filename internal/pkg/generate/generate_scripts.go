@@ -366,7 +366,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	}
 	consensusApiUrl := gd.ConsensusApiUrl
 	consensusAdditionalApiUrl := consensusApiUrl
-	if consensusApiUrl == "" {
+	if cls[consensus] != nil && consensusApiUrl == "" {
 		consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLAdditionalApi"])
 		consensusApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLApi"])
 
