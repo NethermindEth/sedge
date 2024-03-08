@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update client images to Dencun-ready versions. 
+
 ## [v1.3.0] - 2023-12-11
 
 ### Added
