@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.19.0"
 
@@ -50,7 +50,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.21.0"
 
@@ -72,7 +72,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.19.0"
 
@@ -121,7 +121,7 @@ jobs:
           bash /home/runner/work/sedge/sedge/homebrew-sedge/scripts/update-homebrew.sh
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
           commit-message: Update Homebrew to latest release
@@ -187,7 +187,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: sedge
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.19.0"
       - name: Run publish PPA script

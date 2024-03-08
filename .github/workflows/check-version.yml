@@ -21,7 +21,7 @@ jobs:
           PAT: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
           commit-message: Update image versions to latest version.
