@@ -8,6 +8,5 @@ NETHERMIND_OP_LOG_LEVEL=INFO
 EC_OP_DATA_DIR={{.ElDataDir}}-op
 EC_OP_JWT_SECRET_PATH={{.JWTOPSecretPath}}
 EC_OP_RPC_URL=http://execution-l2:{{.ElOPAuthPort}}
-{{if .ConsensusApiURL}}CC_API_URL={{.ConsensusApiURL}}{{end}}
 OP_IMAGE_VERSION={{.OPImageVersion}}
 {{ end }}

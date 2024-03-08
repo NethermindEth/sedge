@@ -249,6 +249,28 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		}
 	}
 
+	consensusApiUrl := gd.ConsensusApiUrl
+	consensusAdditionalApiUrl := consensusApiUrl
+	if cls[consensus] != nil && consensusApiUrl == "" {
+		consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLAdditionalApi"])
+		consensusApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLApi"])
+
+		// Prysm urls must be without http:// or https://
+		if cls[validator] != nil && cls[validator].Name == "prysm" {
+			consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", "consensus", gd.Ports["CLAdditionalApi"])
+		}
+	} else {
+		if cls[consensus] != nil && cls[consensus].Name == "prysm" {
+			consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", "consensus", gd.Ports["CLAdditionalApi"])
+		} else if cls[validator] != nil && cls[validator].Name == "prysm" {
+			// Strip the http:// or https:// from the url
+			consensusAdditionalApiUrl = strings.TrimPrefix(consensusAdditionalApiUrl, "http://")
+			consensusAdditionalApiUrl = strings.TrimPrefix(consensusAdditionalApiUrl, "https://")
+		} else {
+			consensusAdditionalApiUrl = consensusApiUrl
+		}
+	}
+
 	// Set network prefix
 	networkPrefix := "op"
 	if gd.IsBase {
@@ -306,6 +328,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		UID:                     os.Geteuid(),
 		GID:                     os.Getegid(),
 		ContainerTag:            gd.ContainerTag,
+		ConsensusApiURL:         consensusApiUrl,
 	}
 
 	// Save to writer

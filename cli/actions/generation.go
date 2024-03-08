@@ -53,19 +53,6 @@ func (s *sedgeActions) Generate(options GenerateOptions) (generate.GenData, erro
 	options.GenerationData.CustomGenesisPath = customConfigsPaths.GenesisPath
 	options.GenerationData.CustomDeployBlockPath = customConfigsPaths.DeployBlockPath
 
-	log.Info(configs.GeneratingEnvFile)
-	// open output file
-	outEnv, err := os.Create(filepath.Join(options.GenerationPath, configs.DefaultEnvFileName))
-	if err != nil {
-		return options.GenerationData, err
-	}
-	defer outEnv.Close()
-	err = generate.EnvFile(&options.GenerationData, outEnv)
-	if err != nil {
-		return options.GenerationData, err
-	}
-	log.Info(configs.GeneratedEnvFile)
-
 	log.Info(configs.GeneratingDockerComposeScript)
 	// open output file
 	out, err := os.Create(filepath.Join(options.GenerationPath, configs.DefaultDockerComposeScriptName))
@@ -78,6 +65,19 @@ func (s *sedgeActions) Generate(options GenerateOptions) (generate.GenData, erro
 		return options.GenerationData, err
 	}
 	log.Info(configs.GeneratedDockerComposeScript)
+
+	log.Info(configs.GeneratingEnvFile)
+	// open output file
+	outEnv, err := os.Create(filepath.Join(options.GenerationPath, configs.DefaultEnvFileName))
+	if err != nil {
+		return options.GenerationData, err
+	}
+	defer outEnv.Close()
+	err = generate.EnvFile(&options.GenerationData, outEnv)
+	if err != nil {
+		return options.GenerationData, err
+	}
+	log.Info(configs.GeneratedEnvFile)
 
 	log.Info(configs.CleaningGeneratedFiles)
 	err = generate.CleanGenerated(options.GenerationPath)
