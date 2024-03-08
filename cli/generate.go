@@ -287,11 +287,11 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	var consensusApiUrl string
 	var executionApiUrl string
 	var executionAuthUrl string
-	if combinedClients.Consensus != nil {
+	if combinedClients.Consensus == nil {
 		consensusApiUrl = flags.consensusApiUrl
 	}
 
-	if combinedClients.Execution != nil {
+	if combinedClients.Execution == nil {
 		executionApiUrl = flags.executionApiUrl
 		executionAuthUrl = flags.executionAuthUrl
 	}
