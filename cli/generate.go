@@ -380,6 +380,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			if len(executionParts) > 1 {
 				log.Warn(configs.CustomExecutionImagesWarning)
 				executionClient.Image = strings.Join(executionParts[1:], ":")
+				flags.latestVersion = false
 			}
 		}
 		executionClient.SetImageOrDefault(strings.Join(executionParts[1:], ":"))
@@ -401,6 +402,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			if len(consensusParts) > 1 {
 				log.Warn(configs.CustomConsensusImagesWarning)
 				consensusClient.Image = strings.Join(consensusParts[1:], ":")
+				flags.latestVersion = false
 			}
 		}
 		consensusClient.SetImageOrDefault(strings.Join(consensusParts[1:], ":"))
@@ -422,6 +424,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			if len(validatorParts) > 1 {
 				log.Warn(configs.CustomValidatorImagesWarning)
 				validatorClient.Image = strings.Join(validatorParts[1:], ":")
+				flags.latestVersion = false
 
 			}
 		}
