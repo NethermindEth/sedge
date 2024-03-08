@@ -144,7 +144,7 @@ type DockerComposeData struct {
 	UID                     int // Needed for teku
 	GID                     int // Needed for teku
 	ContainerTag            string
-	ConsensusApiUrl         string
+	ConsensusApiURL         string
 }
 
 // WithConsensusClient returns true if the consensus client is set
