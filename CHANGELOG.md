@@ -10,6 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Update client images to Dencun-ready versions. 
+- 
+## [v1.3.1] - 2024-02-14
+
+### Fixed
+
+- Remove the Lodestar `--eth1.providerUrls` flag
+- Replace the Lighthouse `--eth1-endpoints` flag with `--eth1`.
+
+### Changed
+
+- Update client images.
 
 ## [v1.3.0] - 2023-12-11
 
