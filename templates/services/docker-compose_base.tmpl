@@ -22,7 +22,8 @@ services:
 {{template "consensus" .}}
 {{if .Distributed}}
 {{template "distributedValidator" .}}{{ end }}
-{{template "validator-blocker" .}}
+{{ if .WithValidatorClient}}
+{{template "validator-blocker" .}}{{end}}
 {{template "validator" .}}
 networks:
   sedge:
