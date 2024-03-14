@@ -20,5 +20,5 @@
       - ${DC_DATA_DIR}:/opt/charon/.charon
     restart: unless-stopped
     healthcheck:
-      - test: wget -qO- http://localhost:3620/readyz
+      test: wget -qO- http://localhost:3620/readyz
 {{ end }}
