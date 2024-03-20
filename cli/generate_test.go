@@ -1310,6 +1310,20 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{},
 			nil,
 		},
+		{
+			"full-node random client Distributed",
+			subCmd{
+				name: "distributed",
+				args: []string{},
+			},
+			GenCmdFlags{
+				distributed: true,
+			},
+			globalFlags{
+				network: "goerli",
+			},
+			nil,
+		},
 	}
 
 	// TODO: Add test cases for Execution fallback urls

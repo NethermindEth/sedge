@@ -56,9 +56,9 @@ func validateClients(gd *GenData) error {
 	if err := validateValidator(gd, &c); err != nil {
 		return err
 	}
-	// if err := validateDistributedValidator(gd, &c); err != nil {
-	// 	return err
-	// }
+	if err := validateDistributedValidator(gd, &c); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -78,19 +78,19 @@ func validateValidator(gd *GenData, c *clients.ClientInfo) error {
 }
 
 // validateDistributedValidator validates the validator client in GenData
-// func validateDistributedValidator(gd *GenData, c *clients.ClientInfo) error {
-// 	if gd.DistributedValidatorClient == nil {
-// 		return nil
-// 	}
-// 	validatorClients, err := c.SupportedClients(distributedValidator)
-// 	if err != nil {
-// 		return ErrUnableToGetClientsInfo
-// 	}
-// 	if !utils.Contains(validatorClients, gd.ValidatorClient.Name) {
-// 		return ErrValidatorClientNotValid
-// 	}
-// 	return nil
-// }
+func validateDistributedValidator(gd *GenData, c *clients.ClientInfo) error {
+	if gd.DistributedValidatorClient == nil {
+		return nil
+	}
+	distributedValidatorClients, err := c.SupportedClients(distributedValidator)
+	if err != nil {
+		return ErrUnableToGetClientsInfo
+	}
+	if !utils.Contains(distributedValidatorClients, gd.DistributedValidatorClient.Name) {
+		return ErrDistributedValidatorClientNotValid
+	}
+	return nil
+}
 
 // validateExecution validates the execution client in GenData
 func validateExecution(gd *GenData, c *clients.ClientInfo) error {
