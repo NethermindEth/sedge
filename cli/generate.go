@@ -402,9 +402,10 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 	// distributed validator client
 	if utils.Contains(services, distributedValidator) {
 		distributedValidatorClient, _ = clients.RandomChoice(allClients[distributedValidator])
-		// distributedValidatorClient.Name = "charon"
+		//TODO: Add support for custom images,
+		distributedValidatorClient.Name = "charon"
 		distributedValidatorClient.SetImageOrDefault("")
-		if err = clients.ValidateClient(distributedValidatorClient, validator); err != nil {
+		if err = clients.ValidateClient(distributedValidatorClient, distributedValidator); err != nil {
 			return nil, err
 		}
 	}
