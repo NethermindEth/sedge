@@ -158,6 +158,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		"CLAdditionalApi": configs.DefaultAdditionalApiPortCL,
 		"VLMetrics":       configs.DefaultMetricsPortVL,
 		"MevPort":         configs.DefaultMevPort,
+		"DVDiscovery":     configs.DefaultDiscoveryPortDV,
+		"DVMetrics":       configs.DefaultMetricsPortDV,
+		"DVApi":           configs.DefaultApiPortDV,
 	}
 	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -316,6 +319,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		UID:                     os.Geteuid(),
 		GID:                     os.Getegid(),
 		ContainerTag:            gd.ContainerTag,
+		DVDiscoveryPort:         gd.Ports["DVDiscovery"],
+		DVMetricsPort:           gd.Ports["DVMetrics"],
+		DVApiPort:               gd.Ports["DVApi"],
 	}
 
 	// Save to writer
@@ -434,28 +440,39 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		gd.CheckpointSyncUrl = configs.NetworksConfigs()[gd.Network].CheckpointSyncURL
 	}
 
+	distributedValidatorApiUrl := gd.DistributedValidatorClient.Endpoint
+	if gd.Distributed {
+		// Check for distributed validator
+		if cls[distributedValidator] != nil {
+			distributedValidatorApiUrl = fmt.Sprintf("%s:%v", cls[distributedValidator].Endpoint, gd.Ports["DVApi"])
+		}
+	}
+
 	data := EnvData{
-		Services:                  gd.Services,
-		Mev:                       networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
-		ElImage:                   imageOrEmpty(cls[execution], gd.LatestVersion),
-		ElDataDir:                 "./" + configs.ExecutionDir,
-		CcImage:                   imageOrEmpty(cls[consensus], gd.LatestVersion),
-		CcDataDir:                 "./" + configs.CharonDir,
-		VlImage:                   imageOrEmpty(cls[validator], gd.LatestVersion),
-		VlDataDir:                 "./" + configs.ValidatorDir,
-		ExecutionApiURL:           executionApiUrl,
-		ExecutionAuthURL:          executionAuthUrl,
-		ConsensusApiURL:           consensusApiUrl,
-		ConsensusAdditionalApiURL: consensusAdditionalApiUrl,
-		FeeRecipient:              gd.FeeRecipient,
-		JWTSecretPath:             gd.JWTSecretPath,
-		ExecutionEngineName:       nameOrEmpty(cls[execution]),
-		ConsensusClientName:       nameOrEmpty(cls[consensus]),
-		KeystoreDir:               "./" + configs.KeystoreDir,
-		Graffiti:                  graffiti,
-		RelayURLs:                 strings.Join(gd.RelayURLs, ","),
-		CheckpointSyncUrl:         gd.CheckpointSyncUrl,
-		Distributed:               gd.Distributed,
+		Services:                   gd.Services,
+		Mev:                        networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
+		ElImage:                    imageOrEmpty(cls[execution], gd.LatestVersion),
+		ElDataDir:                  "./" + configs.ExecutionDir,
+		CcImage:                    imageOrEmpty(cls[consensus], gd.LatestVersion),
+		CcDataDir:                  "./" + configs.ConsensusDir,
+		VlImage:                    imageOrEmpty(cls[validator], gd.LatestVersion),
+		VlDataDir:                  "./" + configs.ValidatorDir,
+		ExecutionApiURL:            executionApiUrl,
+		ExecutionAuthURL:           executionAuthUrl,
+		ConsensusApiURL:            consensusApiUrl,
+		ConsensusAdditionalApiURL:  consensusAdditionalApiUrl,
+		FeeRecipient:               gd.FeeRecipient,
+		JWTSecretPath:              gd.JWTSecretPath,
+		ExecutionEngineName:        nameOrEmpty(cls[execution]),
+		ConsensusClientName:        nameOrEmpty(cls[consensus]),
+		KeystoreDir:                "./" + configs.KeystoreDir,
+		Graffiti:                   graffiti,
+		RelayURLs:                  strings.Join(gd.RelayURLs, ","),
+		CheckpointSyncUrl:          gd.CheckpointSyncUrl,
+		Distributed:                gd.Distributed,
+		DistributedValidatorApiUrl: distributedValidatorApiUrl,
+		DvDataDir:                  "./" + configs.DistributedValidatorDir,
+		DvImage:                    imageOrEmpty(cls[distributedValidator], gd.LatestVersion),
 	}
 
 	// Save to writer

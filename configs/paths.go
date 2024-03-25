@@ -27,5 +27,5 @@ const (
 	ConsensusDir                        = "consensus-data"
 	ValidatorDir                        = "validator-data"
 	KeystoreDir                         = "keystore"
-	CharonDir                           = ".charon"
+	DistributedValidatorDir             = ".charon"
 )

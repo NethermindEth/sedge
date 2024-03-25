@@ -35,8 +35,9 @@ var ClientImages struct {
 		Lodestar   Image `yaml:"lodestar"`
 		Teku       Image `yaml:"teku"`
 		Prysm      Image `yaml:"prysm"`
+		Charon     Image `yaml:"charon"`
 	}
-	DistributedValidator struct {
+	Distributed struct {
 		Charon Image `yaml:"charon"`
 	}
 }

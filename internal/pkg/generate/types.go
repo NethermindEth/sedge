@@ -21,27 +21,30 @@ import (
 
 // EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
 type EnvData struct {
-	Services                  []string
-	Mev                       bool
-	ElImage                   string
-	ElDataDir                 string
-	CcImage                   string
-	CcDataDir                 string
-	VlImage                   string
-	VlDataDir                 string
-	ExecutionApiURL           string
-	ExecutionAuthURL          string
-	ConsensusApiURL           string
-	ConsensusAdditionalApiURL string
-	Distributed               bool
-	FeeRecipient              string
-	JWTSecretPath             string
-	ExecutionEngineName       string
-	ConsensusClientName       string
-	KeystoreDir               string
-	Graffiti                  string
-	RelayURLs                 string
-	CheckpointSyncUrl         string
+	Services                   []string
+	Mev                        bool
+	ElImage                    string
+	ElDataDir                  string
+	CcImage                    string
+	CcDataDir                  string
+	VlImage                    string
+	VlDataDir                  string
+	ExecutionApiURL            string
+	ExecutionAuthURL           string
+	ConsensusApiURL            string
+	ConsensusAdditionalApiURL  string
+	Distributed                bool
+	FeeRecipient               string
+	JWTSecretPath              string
+	ExecutionEngineName        string
+	ConsensusClientName        string
+	KeystoreDir                string
+	Graffiti                   string
+	RelayURLs                  string
+	CheckpointSyncUrl          string
+	DistributedValidatorApiUrl string
+	DvDataDir                  string
+	DvImage                    string
 }
 
 // GenData : Struct Data object for script's generation
@@ -131,6 +134,9 @@ type DockerComposeData struct {
 	UID                     int // Needed for teku
 	GID                     int // Needed for teku
 	ContainerTag            string
+	DVDiscoveryPort         uint16
+	DVMetricsPort           uint16
+	DVApiPort               uint16
 }
 
 // WithConsensusClient returns true if the consensus client is set
@@ -163,15 +169,15 @@ func (d EnvData) WithMevBoostClient() bool {
 	return false
 }
 
-// WithDistributedValidatorClient returns true if the Mev-Boost client is set
-// func (d EnvData) WithDistributedValidatorClient() bool {
-// 	for _, service := range d.Services {
-// 		if service == distributedValidator {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
+// WithDistributedValidatorClient returns true if the DistributedValidator client is set
+func (d EnvData) WithDistributedValidatorClient() bool {
+	for _, service := range d.Services {
+		if service == distributedValidator {
+			return true
+		}
+	}
+	return false
+}
 
 type ComposeData struct {
 	Version  string    `yaml:"version,omitempty"`
