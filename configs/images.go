@@ -37,7 +37,7 @@ var ClientImages struct {
 		Prysm      Image `yaml:"prysm"`
 		Charon     Image `yaml:"charon"`
 	}
-	DistributedValidator struct {
+	Distributed struct {
 		Charon Image `yaml:"charon"`
 	}
 }

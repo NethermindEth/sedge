@@ -83,9 +83,9 @@ func (c *Client) setValidatorImage(image string) {
 func (c *Client) setDistributedValidatorImage(image string) {
 	switch c.Name {
 	case "charon":
-		c.Image = valueOrDefault(image, configs.ClientImages.DistributedValidator.Charon.String())
+		c.Image = valueOrDefault(image, configs.ClientImages.Distributed.Charon.String())
 	default:
-		c.Image = valueOrDefault(image, configs.ClientImages.DistributedValidator.Charon.String())
+		c.Image = valueOrDefault(image, configs.ClientImages.Distributed.Charon.String())
 	}
 }
 
