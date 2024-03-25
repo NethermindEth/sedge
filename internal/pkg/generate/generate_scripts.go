@@ -87,7 +87,7 @@ func validateDistributedValidator(gd *GenData, c *clients.ClientInfo) error {
 		return ErrUnableToGetClientsInfo
 	}
 	if !utils.Contains(distributedValidatorClients, gd.DistributedValidatorClient.Name) {
-		return ErrValidatorClientNotValid
+		return ErrDistributedValidatorClientNotValid
 	}
 	return nil
 }

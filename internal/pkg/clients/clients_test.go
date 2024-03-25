@@ -35,6 +35,7 @@ func TestSupportedClients(t *testing.T) {
 		{"execution", "mainnet", AllClients["execution"], false},
 		{"consensus", "mainnet", AllClients["consensus"], false},
 		{"validator", "mainnet", AllClients["validator"], false},
+		{"distributedValidator", "goerli", AllClients["distributedValidator"], false},
 		{"random", "mainnet", []string{}, true},
 	}
 
@@ -136,6 +137,17 @@ func TestClients(t *testing.T) {
 			},
 			[]string{"consensus", "execution", "validator"},
 			"gnosis",
+			false,
+		},
+		{
+			map[string][]string{
+				"validator":            {"lighthouse", "prysm", "teku", "lodestar"},
+				"consensus":            {"lighthouse", "prysm", "teku", "lodestar"},
+				"execution":            {"nethermind", "geth", "besu", "erigon"},
+				"distributedValidator": {"charon"},
+			},
+			[]string{"consensus", "execution", "validator", "distributedValidator"},
+			"goerli",
 			false,
 		},
 	}

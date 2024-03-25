@@ -379,6 +379,19 @@ func TestGenerateComposeServices(t *testing.T) {
 			},
 			CheckFunctions: []CheckFunc{checkExtraFlagsOnExecution, checkValidatorBlocker},
 		},
+		{
+			Description: "Test Distributed Validator",
+			GenerationData: &GenData{
+				ExecutionClient:            &clients.Client{Name: "nethermind"},
+				ConsensusClient:            &clients.Client{Name: "teku"},
+				ValidatorClient:            &clients.Client{Name: "teku"},
+				DistributedValidatorClient: &clients.Client{Name: "charon"},
+				Distributed:                true,
+				Network:                    "goerli",
+				Services:                   []string{execution, consensus, validator, distributedValidator},
+			},
+			CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker},
+		},
 	}
 
 	tests = append(tests, generateTestCases(t)...)
@@ -536,6 +549,16 @@ func TestValidateClients(t *testing.T) {
 			},
 			Error: ErrUnableToGetClientsInfo,
 		},
+		{
+			Description: "Wrong network, good distributed validator",
+			Data: &GenData{
+				Distributed:                true,
+				DistributedValidatorClient: &clients.Client{Name: "charon"},
+				ValidatorClient:            &clients.Client{Name: "teku"},
+				Network:                    wrongDep,
+			},
+			Error: ErrUnableToGetClientsInfo,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.Description, func(t *testing.T) {
@@ -609,6 +632,17 @@ func TestEnvFileAndFlags(t *testing.T) {
 			},
 			Error: nil,
 		},
+		{
+			Description: "Distributed validator charon with ConsensusApiUrl",
+			Data: &GenData{
+				ConsensusClient:            &clients.Client{Name: "teku"},
+				ValidatorClient:            &clients.Client{Name: "teku"},
+				DistributedValidatorClient: &clients.Client{Name: "charon"},
+				Distributed:                true,
+				Network:                    "goerli",
+				ConsensusApiUrl:            "http://localhost:8080",
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -630,6 +664,9 @@ func TestEnvFileAndFlags(t *testing.T) {
 						assert.Contains(t, buffer.String(), "CC_API_URL="+tt.Data.ConsensusApiUrl)
 					}
 				}
+			}
+			if tt.Data.Distributed {
+				assert.Contains(t, buffer.String(), "DC_API_URL="+endpointOrEmpty(tt.Data.ConsensusClient))
 			}
 		})
 	}
