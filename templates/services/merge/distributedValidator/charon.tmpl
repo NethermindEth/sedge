@@ -9,7 +9,7 @@
       - CHARON_P2P_RELAYS=${DV_P2P_RELAYS:-https://0.relay.obol.tech}
       - CHARON_P2P_EXTERNAL_HOSTNAME=${DV_INSTANCE_NAME:-charon}
       - CHARON_P2P_TCP_ADDRESS=0.0.0.0:{{.DVDiscoveryPort}}
-      - CHARON_VALIDATOR_API_ADDRESS=0.0.0.0:{{.DVApiPort}}
+      - CHARON_VALIDATOR_API_ADDRESS=127.0.0.1:{{.DVApiPort}}
       - CHARON_MONITORING_ADDRESS=0.0.0.0:{{.DVMetricsPort}}
       - CHARON_BUILDER_API={{.MevBoostOnValidator}}
     ports:
