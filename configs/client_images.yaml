@@ -37,3 +37,7 @@ validator:
   prysm:
     name: gcr.io/prysmaticlabs/prysm/validator
     version: v5.0.0
+distributed:
+  charon:
+    name: ghcr.io/obolnetwork/charon
+    version: v0.19.2
