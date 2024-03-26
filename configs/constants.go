@@ -20,5 +20,5 @@ var Dependencies []string = []string{"docker"}
 const (
 	OnPremiseExecutionURL            = "http://execution"
 	OnPremiseConsensusURL            = "http://consensus"
-	OnPremiseDistributedValidatorURL = "http://charon"
+	OnPremiseDistributedValidatorURL = "http://dv"
 )

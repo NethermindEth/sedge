@@ -666,7 +666,7 @@ func TestEnvFileAndFlags(t *testing.T) {
 				}
 			}
 			if tt.Data.Distributed {
-				assert.Contains(t, buffer.String(), "DC_API_URL="+endpointOrEmpty(tt.Data.ConsensusClient))
+				assert.Contains(t, buffer.String(), "DV_API_URL="+endpointOrEmpty(tt.Data.ConsensusClient))
 			}
 		})
 	}
