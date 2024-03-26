@@ -504,7 +504,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 				// Check that the distributed-validator service is set.
 				assert.NotNil(t, cmpData.Services.DistributedValidator)
 				// Check that the distributed-validator container Volume is set.
-				assert.Equal(t, "${DC_DATA_DIR}"+":/opt/charon/.charon", cmpData.Services.DistributedValidator.Volumes[0])
+				assert.Equal(t, "${DV_DATA_DIR}"+":/opt/charon/.charon", cmpData.Services.DistributedValidator.Volumes[0])
 			}
 
 			if tc.genData.ValidatorClient == nil {
