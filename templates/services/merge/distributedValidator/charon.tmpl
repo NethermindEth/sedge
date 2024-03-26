@@ -1,12 +1,12 @@
 {{/* charon.tmpl */}}
 {{ define "distributedValidator" }}
-  charon:
+  dv:
     image: obolnetwork/charon:${DV_IMAGE_VERSION}
     environment:
       - CHARON_BEACON_NODE_ENDPOINTS=${CC_API_URL}
       - CHARON_LOG_LEVEL=${DV_LOG_LEVEL:-info}
       - CHARON_LOG_FORMAT=${DV_LOG_FORMAT:-console}
-      - CHARON_P2P_RELAYS=${DV_P2P_RELAYS:-https://0.relay.obol.tech}
+      - CHARON_P2P_RELAYS=${DV_P2P_RELAYS:-https://0.relay.obol.tech,https://1.relay.obol.tech}
       - CHARON_P2P_EXTERNAL_HOSTNAME=${DV_INSTANCE_NAME:-charon}
       - CHARON_P2P_TCP_ADDRESS=0.0.0.0:{{.DVDiscoveryPort}}
       - CHARON_VALIDATOR_API_ADDRESS=127.0.0.1:{{.DVApiPort}}
