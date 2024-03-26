@@ -1,7 +1,7 @@
 {{/* charon.tmpl */}}
 {{ define "distributedValidator" }}
   dv:
-    image: obolnetwork/charon:${DV_IMAGE_VERSION}
+    image: ${DV_IMAGE_VERSION}
     environment:
       - CHARON_BEACON_NODE_ENDPOINTS=${CC_API_URL}
       - CHARON_LOG_LEVEL=${DV_LOG_LEVEL:-info}

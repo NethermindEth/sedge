@@ -96,7 +96,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 			t.Errorf("SupportedClients(\"validator\") failed: %v", err)
 		}
 		var distributedValidatorClients []string
-		if network == "goerli" {
+		if network == "goerli" || network == "holesky" {
 			distributedValidatorClients, err = c.SupportedClients("distributedValidator")
 			if err != nil {
 				t.Errorf("SupportedClients(\"distributedValidator\") failed: %v", err)
@@ -504,7 +504,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 				// Check that the distributed-validator service is set.
 				assert.NotNil(t, cmpData.Services.DistributedValidator)
 				// Check that the distributed-validator container Volume is set.
-				assert.Equal(t, "${DV_DATA_DIR}"+":/opt/charon/.charon", cmpData.Services.DistributedValidator.Volumes[0])
+				assert.Equal(t, "${DV_DATA_DIR}:/opt/charon/.charon", cmpData.Services.DistributedValidator.Volumes[0])
 			}
 
 			if tc.genData.ValidatorClient == nil {

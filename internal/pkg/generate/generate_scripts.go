@@ -440,7 +440,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		gd.CheckpointSyncUrl = configs.NetworksConfigs()[gd.Network].CheckpointSyncURL
 	}
 
-	distributedValidatorApiUrl := gd.DistributedValidatorClient.Endpoint
+	distributedValidatorApiUrl := ""
 	if gd.Distributed {
 		// Check for distributed validator
 		if cls[distributedValidator] != nil {

@@ -270,8 +270,7 @@ type Services struct {
 	ValidatorBlocker     *ValidatorBlocker     `yaml:"validator-blocker,omitempty"`
 	Validator            *Validator            `yaml:"validator,omitempty"`
 	ConfigConsensus      *ConfigConsensus      `yaml:"config_consensus,omitempty"`
-	DistributedValidator *DistributedValidator `yaml:"charon,omitempty"`
-	// Charon               *Charon           `yaml:"charon,omitempty"`
+	DistributedValidator *DistributedValidator `yaml:"dv,omitempty"`
 }
 type Sedge struct {
 	Name string `yaml:"name"`
