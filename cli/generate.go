@@ -45,7 +45,7 @@ var (
 )
 
 const (
-	execution, consensus, validator, mevBoost = "execution", "consensus", "validator", "mev-boost"
+	execution, consensus, validator, distributedValidator, mevBoost = "execution", "consensus", "validator", "distributedValidator", "mev-boost"
 )
 
 type CustomFlags struct {
@@ -61,6 +61,7 @@ type GenCmdFlags struct {
 	executionName     string
 	consensusName     string
 	validatorName     string
+	distributed       bool
 	checkpointSyncUrl string
 	feeRecipient      string
 	noMev             bool
@@ -266,40 +267,42 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 
 	// Generate docker-compose scripts
 	gd := generate.GenData{
-		ExecutionClient:         combinedClients.Execution,
-		ConsensusClient:         combinedClients.Consensus,
-		ValidatorClient:         combinedClients.Validator,
-		Network:                 network,
-		CheckpointSyncUrl:       flags.checkpointSyncUrl,
-		FeeRecipient:            flags.feeRecipient,
-		JWTSecretPath:           flags.jwtPath,
-		Graffiti:                flags.graffiti,
-		FallbackELUrls:          flags.fallbackEL,
-		ElExtraFlags:            flags.elExtraFlags,
-		ClExtraFlags:            flags.clExtraFlags,
-		VlExtraFlags:            flags.vlExtraFlags,
-		MapAllPorts:             flags.mapAllPorts,
-		Mev:                     !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
-		MevImage:                flags.mevImage,
-		LoggingDriver:           configs.GetLoggingDriver(logging),
-		RelayURLs:               flags.relayURLs,
-		MevBoostService:         utils.Contains(services, mevBoost),
-		MevBoostEndpoint:        flags.mevBoostUrl,
-		Services:                services,
-		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
-		ExecutionApiUrl:         flags.executionApiUrl,
-		ExecutionAuthUrl:        flags.executionAuthUrl,
-		ConsensusApiUrl:         flags.consensusApiUrl,
-		ECBootnodes:             flags.customEnodes,
-		CCBootnodes:             flags.customEnrs,
-		CustomChainSpecPath:     flags.CustomFlags.customChainSpec,
-		CustomNetworkConfigPath: flags.CustomFlags.customNetworkConfig,
-		CustomGenesisPath:       flags.CustomFlags.customGenesis,
-		CustomDeployBlock:       flags.customDeployBlock,
-		CustomDeployBlockPath:   flags.CustomFlags.customDeployBlock,
-		MevBoostOnValidator:     flags.mevBoostOnVal,
-		ContainerTag:            containerTag,
-		LatestVersion:           flags.latestVersion,
+		ExecutionClient:            combinedClients.Execution,
+		ConsensusClient:            combinedClients.Consensus,
+		ValidatorClient:            combinedClients.Validator,
+		Distributed:                flags.distributed,
+		DistributedValidatorClient: combinedClients.DistributedValidator,
+		Network:                    network,
+		CheckpointSyncUrl:          flags.checkpointSyncUrl,
+		FeeRecipient:               flags.feeRecipient,
+		JWTSecretPath:              flags.jwtPath,
+		Graffiti:                   flags.graffiti,
+		FallbackELUrls:             flags.fallbackEL,
+		ElExtraFlags:               flags.elExtraFlags,
+		ClExtraFlags:               flags.clExtraFlags,
+		VlExtraFlags:               flags.vlExtraFlags,
+		MapAllPorts:                flags.mapAllPorts,
+		Mev:                        !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
+		MevImage:                   flags.mevImage,
+		LoggingDriver:              configs.GetLoggingDriver(logging),
+		RelayURLs:                  flags.relayURLs,
+		MevBoostService:            utils.Contains(services, mevBoost),
+		MevBoostEndpoint:           flags.mevBoostUrl,
+		Services:                   services,
+		VLStartGracePeriod:         uint(vlStartGracePeriod.Seconds()),
+		ExecutionApiUrl:            flags.executionApiUrl,
+		ExecutionAuthUrl:           flags.executionAuthUrl,
+		ConsensusApiUrl:            flags.consensusApiUrl,
+		ECBootnodes:                flags.customEnodes,
+		CCBootnodes:                flags.customEnrs,
+		CustomChainSpecPath:        flags.CustomFlags.customChainSpec,
+		CustomNetworkConfigPath:    flags.CustomFlags.customNetworkConfig,
+		CustomGenesisPath:          flags.CustomFlags.customGenesis,
+		CustomDeployBlock:          flags.customDeployBlock,
+		CustomDeployBlockPath:      flags.CustomFlags.customDeployBlock,
+		MevBoostOnValidator:        flags.mevBoostOnVal,
+		ContainerTag:               containerTag,
+		LatestVersion:              flags.latestVersion,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,
@@ -328,6 +331,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 
 func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
 	var executionClient, consensusClient, validatorClient *clients.Client
+	var distributedValidatorClient *clients.Client
 	var err error
 
 	// execution client
@@ -395,10 +399,22 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		validatorClient = nil
 	}
 
+	// distributed validator client
+	if utils.Contains(services, distributedValidator) {
+		distributedValidatorClient, _ = clients.RandomChoice(allClients[distributedValidator])
+		//TODO: Add support for custom images,
+		distributedValidatorClient.Name = "charon"
+		distributedValidatorClient.SetImageOrDefault("")
+		if err = clients.ValidateClient(distributedValidatorClient, distributedValidator); err != nil {
+			return nil, err
+		}
+	}
+
 	return &clients.Clients{
-		Execution: executionClient,
-		Consensus: consensusClient,
-		Validator: validatorClient,
+		Execution:            executionClient,
+		Consensus:            consensusClient,
+		Validator:            validatorClient,
+		DistributedValidator: distributedValidatorClient,
 	}, err
 }
 

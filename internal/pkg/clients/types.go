@@ -15,7 +15,9 @@ limitations under the License.
 */
 package clients
 
-import "github.com/NethermindEth/sedge/configs"
+import (
+	"github.com/NethermindEth/sedge/configs"
+)
 
 // Client : Struct Represent a client like geth, prysm, etc
 type Client struct {
@@ -34,6 +36,8 @@ func (c *Client) SetImageOrDefault(image string) {
 		c.setConsensusImage(image)
 	case "execution":
 		c.setExecutionImage(image)
+	case "distributedValidator":
+		c.setDistributedValidatorImage(image)
 	}
 }
 
@@ -76,6 +80,15 @@ func (c *Client) setValidatorImage(image string) {
 	}
 }
 
+func (c *Client) setDistributedValidatorImage(image string) {
+	switch c.Name {
+	case "charon":
+		c.Image = valueOrDefault(image, configs.ClientImages.Distributed.Charon.String())
+	default:
+		c.Image = valueOrDefault(image, configs.ClientImages.Distributed.Charon.String())
+	}
+}
+
 func valueOrDefault(value string, defaultValue string) string {
 	if value == "" {
 		return defaultValue
@@ -83,11 +96,12 @@ func valueOrDefault(value string, defaultValue string) string {
 	return value
 }
 
-// Clients : Struct Represent a combination of execution, consensus and validator clients
+// Clients : Struct Represent a combination of execution, consensus, validator and distributed validator clients
 type Clients struct {
-	Execution *Client
-	Consensus *Client
-	Validator *Client
+	Execution            *Client
+	Consensus            *Client
+	Validator            *Client
+	DistributedValidator *Client
 }
 
 type ClientMap map[string]*Client

@@ -20,10 +20,11 @@ services:
       - -relays
       - ${RELAY_URLS}{{end}}
 {{template "consensus" .}}
+{{if .Distributed}}
+{{template "distributedValidator" .}}{{ end }}
 {{ if .WithValidatorClient}}
 {{template "validator-blocker" .}}{{end}}
 {{template "validator" .}}
-
 networks:
   sedge:
     name: sedge-network{{if .ContainerTag}}-{{.ContainerTag}}{{end}}

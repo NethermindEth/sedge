@@ -33,13 +33,15 @@ import (
 )
 
 const (
-	execution       = "execution"
-	consensus       = "consensus"
-	validator       = "validator"
-	validatorImport = "validator-import"
-	mevBoost        = "mev-boost"
-	configConsensus = "config_consensus"
-	empty           = "empty"
+	execution            = "execution"
+	consensus            = "consensus"
+	validator            = "validator"
+	validatorImport      = "validator-import"
+	mevBoost             = "mev-boost"
+	configConsensus      = "config_consensus"
+	empty                = "empty"
+	distributedValidator = "distributedValidator"
+	charon               = "charon"
 )
 
 // validateClients validates each client in GenData
@@ -52,6 +54,9 @@ func validateClients(gd *GenData) error {
 		return err
 	}
 	if err := validateValidator(gd, &c); err != nil {
+		return err
+	}
+	if err := validateDistributedValidator(gd, &c); err != nil {
 		return err
 	}
 	return nil
@@ -68,6 +73,21 @@ func validateValidator(gd *GenData, c *clients.ClientInfo) error {
 	}
 	if !utils.Contains(validatorClients, gd.ValidatorClient.Name) {
 		return ErrValidatorClientNotValid
+	}
+	return nil
+}
+
+// validateDistributedValidator validates the validator client in GenData
+func validateDistributedValidator(gd *GenData, c *clients.ClientInfo) error {
+	if gd.DistributedValidatorClient == nil {
+		return nil
+	}
+	distributedValidatorClients, err := c.SupportedClients(distributedValidator)
+	if err != nil {
+		return ErrUnableToGetClientsInfo
+	}
+	if !utils.Contains(distributedValidatorClients, gd.DistributedValidatorClient.Name) {
+		return ErrDistributedValidatorClientNotValid
 	}
 	return nil
 }
@@ -106,9 +126,10 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 // mapClients convert genData clients to clients.Clients
 func mapClients(gd *GenData) map[string]*clients.Client {
 	cls := map[string]*clients.Client{
-		execution: gd.ExecutionClient,
-		consensus: gd.ConsensusClient,
-		validator: gd.ValidatorClient,
+		execution:            gd.ExecutionClient,
+		consensus:            gd.ConsensusClient,
+		validator:            gd.ValidatorClient,
+		distributedValidator: gd.DistributedValidatorClient,
 	}
 
 	return cls
@@ -137,6 +158,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		"CLAdditionalApi": configs.DefaultAdditionalApiPortCL,
 		"VLMetrics":       configs.DefaultMetricsPortVL,
 		"MevPort":         configs.DefaultMevPort,
+		"DVDiscovery":     configs.DefaultDiscoveryPortDV,
+		"DVMetrics":       configs.DefaultMetricsPortDV,
+		"DVApi":           configs.DefaultApiPortDV,
 	}
 	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -243,9 +267,17 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		}
 	}
 
+	if gd.Distributed {
+		// Check for distributed validator
+		if cls[distributedValidator] != nil {
+			gd.DistributedValidatorClient.Endpoint = configs.OnPremiseDistributedValidatorURL
+		}
+	}
+
 	data := DockerComposeData{
 		Services:            gd.Services,
 		Network:             gd.Network,
+		Distributed:         gd.Distributed,
 		XeeVersion:          xeeVersion,
 		Mev:                 networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev)),
 		MevBoostOnValidator: gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
@@ -287,6 +319,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		UID:                     os.Geteuid(),
 		GID:                     os.Getegid(),
 		ContainerTag:            gd.ContainerTag,
+		DVDiscoveryPort:         gd.Ports["DVDiscovery"],
+		DVMetricsPort:           gd.Ports["DVMetrics"],
+		DVApiPort:               gd.Ports["DVApi"],
 	}
 
 	// Save to writer
@@ -296,6 +331,13 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	return nil
+}
+
+func (d DockerComposeData) DistributedValidatorEndpoint() string {
+	if d.Distributed {
+		return configs.OnPremiseDistributedValidatorURL
+	}
+	return ""
 }
 
 // EnvFile generates a .env file with the provided GenData
@@ -398,27 +440,39 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		gd.CheckpointSyncUrl = configs.NetworksConfigs()[gd.Network].CheckpointSyncURL
 	}
 
+	distributedValidatorApiUrl := ""
+	if gd.Distributed {
+		// Check for distributed validator
+		if cls[distributedValidator] != nil {
+			distributedValidatorApiUrl = fmt.Sprintf("%s:%v", cls[distributedValidator].Endpoint, gd.Ports["DVApi"])
+		}
+	}
+
 	data := EnvData{
-		Services:                  gd.Services,
-		Mev:                       networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
-		ElImage:                   imageOrEmpty(cls[execution], gd.LatestVersion),
-		ElDataDir:                 "./" + configs.ExecutionDir,
-		CcImage:                   imageOrEmpty(cls[consensus], gd.LatestVersion),
-		CcDataDir:                 "./" + configs.ConsensusDir,
-		VlImage:                   imageOrEmpty(cls[validator], gd.LatestVersion),
-		VlDataDir:                 "./" + configs.ValidatorDir,
-		ExecutionApiURL:           executionApiUrl,
-		ExecutionAuthURL:          executionAuthUrl,
-		ConsensusApiURL:           consensusApiUrl,
-		ConsensusAdditionalApiURL: consensusAdditionalApiUrl,
-		FeeRecipient:              gd.FeeRecipient,
-		JWTSecretPath:             gd.JWTSecretPath,
-		ExecutionEngineName:       nameOrEmpty(cls[execution]),
-		ConsensusClientName:       nameOrEmpty(cls[consensus]),
-		KeystoreDir:               "./" + configs.KeystoreDir,
-		Graffiti:                  graffiti,
-		RelayURLs:                 strings.Join(gd.RelayURLs, ","),
-		CheckpointSyncUrl:         gd.CheckpointSyncUrl,
+		Services:                   gd.Services,
+		Mev:                        networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
+		ElImage:                    imageOrEmpty(cls[execution], gd.LatestVersion),
+		ElDataDir:                  "./" + configs.ExecutionDir,
+		CcImage:                    imageOrEmpty(cls[consensus], gd.LatestVersion),
+		CcDataDir:                  "./" + configs.ConsensusDir,
+		VlImage:                    imageOrEmpty(cls[validator], gd.LatestVersion),
+		VlDataDir:                  "./" + configs.ValidatorDir,
+		ExecutionApiURL:            executionApiUrl,
+		ExecutionAuthURL:           executionAuthUrl,
+		ConsensusApiURL:            consensusApiUrl,
+		ConsensusAdditionalApiURL:  consensusAdditionalApiUrl,
+		FeeRecipient:               gd.FeeRecipient,
+		JWTSecretPath:              gd.JWTSecretPath,
+		ExecutionEngineName:        nameOrEmpty(cls[execution]),
+		ConsensusClientName:        nameOrEmpty(cls[consensus]),
+		KeystoreDir:                "./" + configs.KeystoreDir,
+		Graffiti:                   graffiti,
+		RelayURLs:                  strings.Join(gd.RelayURLs, ","),
+		CheckpointSyncUrl:          gd.CheckpointSyncUrl,
+		Distributed:                gd.Distributed,
+		DistributedValidatorApiUrl: distributedValidatorApiUrl,
+		DvDataDir:                  "./" + configs.DistributedValidatorDir,
+		DvImage:                    imageOrEmpty(cls[distributedValidator], gd.LatestVersion),
 	}
 
 	// Save to writer
