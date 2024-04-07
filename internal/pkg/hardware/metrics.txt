@@ -1,0 +1,140 @@
+// package hardware
+
+// import (
+// 	"fmt"
+// 	"os/exec"
+// 	"runtime"
+// 	"strconv"
+// 	"strings"
+// )
+
+// type HardwareMetrics struct {
+// 	CPUs         int
+// 	TotalRAM     uint64
+// 	FreeRAM      uint64
+// 	Disks        []DiskInfo
+// }
+
+// type DiskInfo struct {
+// 	Name   string
+// 	Space  uint64
+// 	Free   uint64
+// 	Mount  string
+// }
+
+// func GetHardwareMetrics() (*HardwareMetrics, error) {
+// 	metrics := &HardwareMetrics{}
+
+// 	// Get number of CPUs
+// 	metrics.CPUs = runtime.NumCPU()
+
+// 	// Get total RAM
+// 	totalRAM, err := getTotalRAM()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	metrics.TotalRAM = totalRAM
+
+// 	// Get free RAM
+// 	freeRAM, err := getFreeRAM()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	metrics.FreeRAM = freeRAM
+
+// 	// Get disk information
+// 	disks, err := getDiskInfo()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	metrics.Disks = disks
+
+// 	return metrics, nil
+// }
+
+// func getTotalRAM() (uint64, error) {
+// 	out, err := exec.Command("free", "-b").Output()
+// 	if err != nil {
+// 		return 0, err
+// 	}
+
+// 	lines := strings.Split(string(out), "\n")
+// 	if len(lines) < 2 {
+// 		return 0, fmt.Errorf("unexpected output from free command")
+// 	}
+
+// 	fields := strings.Fields(lines[1])
+// 	if len(fields) < 2 {
+// 		return 0, fmt.Errorf("unexpected output from free command")
+// 	}
+
+// 	total, err := strconv.ParseUint(fields[1], 10, 64)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+
+// 	return total, nil
+// }
+
+// func getFreeRAM() (uint64, error) {
+// 	out, err := exec.Command("free", "-b").Output()
+// 	if err != nil {
+// 		return 0, err
+// 	}
+
+// 	lines := strings.Split(string(out), "\n")
+// 	if len(lines) < 2 {
+// 		return 0, fmt.Errorf("unexpected output from free command")
+// 	}
+
+// 	fields := strings.Fields(lines[2])
+// 	if len(fields) < 4 {
+// 		return 0, fmt.Errorf("unexpected output from free command")
+// 	}
+
+// 	free, err := strconv.ParseUint(fields[3], 10, 64)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+
+// 	return free, nil
+// }
+
+// func getDiskInfo() ([]DiskInfo, error) {
+// 	out, err := exec.Command("df", "-BM").Output()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	lines := strings.Split(string(out), "\n")
+// 	disks := make([]DiskInfo, 0, len(lines)-1)
+
+// 	for _, line := range lines[1:] {
+// 		fields := strings.Fields(line)
+// 		if len(fields) < 6 {
+// 			continue
+// 		}
+
+// 		sizeStr := strings.TrimSuffix(fields[1], "M")
+// 		size, err := strconv.ParseUint(sizeStr, 10, 64)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+
+// 		freeStr := strings.TrimSuffix(fields[3], "M")
+// 		free, err := strconv.ParseUint(freeStr, 10, 64)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+
+// 		disk := DiskInfo{
+// 			Name:  fields[0],
+// 			Space: size,
+// 			Free:  free,
+// 			Mount: fields[5],
+// 		}
+// 		disks = append(disks, disk)
+// 	}
+
+// 	return disks, nil
+// }

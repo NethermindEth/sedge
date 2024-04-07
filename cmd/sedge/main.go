@@ -49,7 +49,7 @@ func main() {
 
 	// Init dependencies manager
 	depsMgr := dependencies.NewDependenciesManager(cmdRunner)
-
+	
 	// Init Sedge Actions
 	sdgOpts := actions.SedgeActionsOptions{
 		DockerClient:   dockerClient,
@@ -73,6 +73,7 @@ func main() {
 		cli.ImportKeysCmd(sedgeActions, depsMgr),
 		cli.GenerateCmd(sedgeActions),
 		cli.DependenciesCommand(depsMgr),
+		cli.HardwareCommand(),
 		cli.ShowCmd(cmdRunner, sedgeActions, depsMgr),
 	)
 	sedgeCmd.SilenceErrors = true
