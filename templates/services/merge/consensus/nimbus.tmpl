@@ -1,6 +1,7 @@
 {{/* nimbus.tmpl */}}
 {{ define "consensus" }}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
   consensus-sync:
+    user: "root:root"
     stop_grace_period: 30s
     container_name: sedge-consensus-trusted-sync
     image: ${CC_IMAGE_VERSION}
@@ -24,6 +25,7 @@
         max-file: "10"{{end}}{{end}}{{end}}
 
   consensus:
+    user: "root:root"
     stop_grace_period: 30s
     container_name: consensus-client
     restart: unless-stopped
