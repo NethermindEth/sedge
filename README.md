@@ -148,7 +148,7 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
 
-### Goerli
+### Goerli (Unsupported)
 
 | Execution  | Consensus  | Validator  |
 | ---------- | ---------- | ---------- |
