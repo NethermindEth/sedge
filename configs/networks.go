@@ -57,7 +57,7 @@ func NetworkSupported() []string {
 
 func NetworkEpochTime(network string) time.Duration {
 	switch network {
-	case NetworkMainnet, NetworkSepolia:
+	case NetworkMainnet, NetworkGoerli, NetworkSepolia:
 		return 7 * time.Minute
 	case NetworkGnosis, NetworkChiado:
 		return 2 * time.Minute
