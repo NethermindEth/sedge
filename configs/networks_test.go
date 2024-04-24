@@ -65,9 +65,9 @@ func TestSupportMEVBoost(t *testing.T) {
 			want:    true,
 		},
 		{
-			name:    "Valid network, goerli",
+			name:    "Invalid network, goerli",
 			network: "goerli",
-			want:    true,
+			want:    false,
 		},
 		{
 			name:    "Valid network, sepolia",
