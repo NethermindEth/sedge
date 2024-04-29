@@ -24,7 +24,6 @@ import (
 const (
 	// Network names
 	NetworkMainnet = "mainnet"
-	NetworkGoerli  = "goerli"
 	NetworkSepolia = "sepolia"
 	NetworkGnosis  = "gnosis"
 	NetworkChiado  = "chiado"
@@ -57,7 +56,7 @@ func NetworkSupported() []string {
 
 func NetworkEpochTime(network string) time.Duration {
 	switch network {
-	case NetworkMainnet, NetworkGoerli, NetworkSepolia:
+	case NetworkMainnet, NetworkSepolia:
 		return 7 * time.Minute
 	case NetworkGnosis, NetworkChiado:
 		return 2 * time.Minute
