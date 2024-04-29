@@ -45,7 +45,7 @@ func FullNodeSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 
 It will not generate a validator configuration if the --no-validator flag is set to true.
 
-On mainnet, sepolia and goerli, mev-boost will be activated by default unless you run it with --no-mev-boost flag.
+On mainnet, and sepolia mev-boost will be activated by default unless you run it with --no-mev-boost flag.
 
 If you don't provide a execution, consensus or validator client, it will be chosen randomly. If one of the consensus or validator is provided, but the other one is omitted, then the same pair of clients will be used for both consensus and validator.
 
