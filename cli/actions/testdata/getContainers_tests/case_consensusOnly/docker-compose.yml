@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   consensus:
     stop_grace_period: 30s
