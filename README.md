@@ -137,6 +137,7 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
+| Reth       |            |            |
 
 ### Sepolia
 
@@ -146,6 +147,7 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
+| Reth       |            |            |
 
 ### Holesky
 
@@ -155,6 +157,7 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Teku       | Teku       |
 | Besu       | Prysm      | Prysm      |
+| Reth       |            |            |
 
 ### Gnosis
 
