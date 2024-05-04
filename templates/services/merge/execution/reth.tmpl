@@ -1,0 +1,44 @@
+{{/* reth.tmpl */}}
+{{ define "execution" }}
+  execution:
+    stop_grace_period: 30m
+    container_name: sedge-execution-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: unless-stopped
+    image: ${EC_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${EC_DATA_DIR}:/root/.local/share/reth/mainnet
+      - ${EC_JWT_SECRET_PATH}:/root/jwt:ro
+    ports:
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
+      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp" {{if .MapAllPorts}}
+      - "{{.ElApiPort}}:{{.ElApiPort}}" 
+      - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
+    expose:
+      - {{.ElApiPort}}
+      - {{.ElAuthPort}}
+    pid: host
+    command:
+      - node
+      - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
+      - --log.file.directory /root/logs
+      - --authrpc.addr 0.0.0.0
+      - --authrpc.port {{.ElAuthPort}}
+      - --authrpc.jwtsecret /root/jwt/jwt.hex
+      - --http 
+      - --http.addr = 0.0.0.0 
+      - --http.port = {{.ElApiPort}}
+      - --http.api 
+      - eth,net,web3
+      - --metrics
+      - --metrics.port={{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
+      - --{{$flag}}{{end}}{{if .LoggingDriver}}
+      logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
+
+{{ end }}
