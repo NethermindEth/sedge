@@ -7,7 +7,7 @@ slug: new-networks
 
 We support Ethereum Mainnet and Gnosis Chain, and over time we will update the different testnets on those networks.
 
-We support only active testnets, like Sepolia or Goerli for Ethereum and Chiado for Gnosis, and in the past we supported
+We support only active testnets, like Sepolia for Ethereum and Chiado for Gnosis, and in the past we supported
 other networks now deprecated, we will give our best to keep our pipeline updated.
 
 If you want to contribute to Sedge adding a new network, you can follow the next steps:
@@ -19,8 +19,9 @@ above example for sepolia:
 {{/* docker-compose_base.tmpl */}}
 {{ define "env" }}
 # --- Global configuration ---
-NETWORK=goerli{{if .Mev}}
-RELAY_URL={{if .RelayURL}}{{.RelayURL}}{{else}}https://0xafa4c6985aa049fb79dd37010438cfebeb0f2bd42b115b89dd678dab0670c1de38da0c4e9138c9290a398ecd9a0b3110@builder-relay-goerli.flashbots.net{{end}}{{end}}
+NETWORK=sepolia{{if .WithMevBoostClient}}
+RELAY_URLS={{.RelayURLs}}{{end}}{{if .FeeRecipient}}
+FEE_RECIPIENT={{.FeeRecipient}}{{end}}
 {{template "execution" .}}
 {{template "consensus" .}}
 {{template "validator" .}}
