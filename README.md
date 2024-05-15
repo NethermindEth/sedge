@@ -184,12 +184,12 @@ Users acknowledge that no warranty is being made of a successful installation. S
 
 ### CL clients with Mev-Boost
 
-| Client     | Mev-Boost | Networks                 |
-| ---------- | --------- |--------------------------|
-| Lighthouse | yes       | Mainnet, Goerli, Sepolia |
-| Lodestar   | yes       | Mainnet, Goerli, Sepolia |
-| Prysm      | yes       | Mainnet, Goerli, Sepolia |
-| Teku       | yes       | Mainnet, Goerli, Sepolia |
+| Client     | Mev-Boost | Networks                          |
+| ---------- | --------- |-----------------------------------|
+| Lighthouse | yes       | Mainnet, Goerli, Sepolia, Holesky |
+| Lodestar   | yes       | Mainnet, Goerli, Sepolia, Holesky |
+| Prysm      | yes       | Mainnet, Goerli, Sepolia, Holesky |
+| Teku       | yes       | Mainnet, Goerli, Sepolia, Holesky |
 
 ## Supported Linux flavours for dependency installation
 
