@@ -23,6 +23,7 @@ var AllClients map[string][]string = map[string][]string{
 		"besu",
 	},
 	"consensus": {
+		"nimbus",
 		"lighthouse",
 		"prysm",
 		"teku",
