@@ -27,7 +27,7 @@
   consensus:
     user: "root:root"
     stop_grace_period: 30s
-    container_name: consensus-client
+    container_name: sedge-consensus-client
     restart: unless-stopped
     image: ${CC_IMAGE_VERSION}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl .Mev}}
     depends_on:{{if .Mev}}
@@ -54,7 +54,7 @@
       - --non-interactive=true
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}
       - --max-peers=${CC_PEER_COUNT}
-      - --data-dir="/var/lib/nimbus"
+      - --data-dir=/var/lib/nimbus
       - --web3-url=${EC_AUTH_URL}{{range $url := .FallbackELUrls}} --web3-url={{$url}}{{end}}
       - --bootstrap-node={{.CCBootnodes}}
       - --udp-port={{.ClDiscoveryPort}}
