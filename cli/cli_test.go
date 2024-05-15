@@ -372,6 +372,7 @@ func TestCli(t *testing.T) {
 					MapAllPorts:       false,
 					ExecutionApiUrl:   "http://execution:5051",
 					ExecutionAuthUrl:  "http://execution:5051",
+					MevBoostEndpoint:  "http://mev-boost:3030",
 					ContainerTag:      "tag",
 					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
 				}
