@@ -55,7 +55,12 @@ TEKU_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.githu
 update-client "Teku" "consensus" ".consensus.teku" "$TEKU_LATEST_VERSION"
 update-client "Teku" "validator" ".validator.teku" "$TEKU_LATEST_VERSION"
 
-## Prysm
+# Prysm
 PRYSM_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/prysmaticlabs/prysm/releases/latest | jq -r ".tag_name")
 update-client "Prysm" "consensus" ".consensus.prysm" "$PRYSM_LATEST_VERSION"
 update-client "Prysm" "validator" ".validator.prysm" "$PRYSM_LATEST_VERSION"
+
+# Grandine
+GRANDINE_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/grandinetech/grandine/releases | jq -r ".tag_name")
+update-client "Grandine" "consensus" ".consensus.grandine" "$GRANDINE_LATEST_VERSION"
+update-client "Grandine" "validator" ".validator.grandine" "$GRANDINE_LATEST_VERSION"
