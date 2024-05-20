@@ -174,7 +174,7 @@ func TestImportKeys_CustomOptions(t *testing.T) {
 		customImage bool
 	}{}
 	for _, validatorClient := range []string{"prysm", "lodestar"} {
-		for _, network := range []string{"sepolia", "goerli", "mainnet"} {
+		for _, network := range []string{"sepolia", "mainnet"} {
 			tests = append(tests, struct {
 				client      string
 				network     string
@@ -183,7 +183,7 @@ func TestImportKeys_CustomOptions(t *testing.T) {
 		}
 	}
 	for _, validatorClient := range []string{"lighthouse", "teku"} {
-		for _, network := range []string{"sepolia", "goerli", "mainnet"} {
+		for _, network := range []string{"sepolia", "mainnet"} {
 			tests = append(tests, struct {
 				client      string
 				network     string

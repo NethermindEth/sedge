@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Update client images to Dencun-ready versions. 
 - 
+
+### Removed
+- Removed support for Goerli. 
+
 ## [v1.3.1] - 2024-02-14
 
 ### Fixed

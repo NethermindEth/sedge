@@ -37,7 +37,7 @@ Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
   -h, --help                   help for generate
       --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
-  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado, etc. (default "mainnet")
+  -n, --network string         Target network. e.g. mainnet, sepolia, holesky, gnosis, chiado, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge-data")
 
 Global Flags:
@@ -62,7 +62,7 @@ Generate a docker-compose and an environment file with a full node configuration
 
 It will not generate a validator configuration if the --no-validator flag is set to true.
 
-On mainnet, sepolia and goerli, mev-boost will be activated by default unless you run it with --no-mev-boost flag.
+On mainnet and sepolia mev-boost will be activated by default unless you run it with --no-mev-boost flag.
 
 If you don't provide a execution, consensus or validator client, it will be chosen randomly. If one of the consensus or validator is provided, but the other one is omitted, then the same pair of clients will be used for both consensus and validator.
 
@@ -102,7 +102,7 @@ Global Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
       --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
       --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
-  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado, etc. (default "mainnet")
+  -n, --network string         Target network. e.g. mainnet, sepolia, holesky, gnosis, chiado, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```
 
@@ -144,7 +144,7 @@ Global Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
       --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
       --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
-  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
+  -n, --network string         Target network. e.g. mainnet, sepolia, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```
 
@@ -174,7 +174,7 @@ Global Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
       --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
       --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
-  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado, etc. (default "mainnet")
+  -n, --network string         Target network. e.g. mainnet, sepolia, holesky, gnosis, chiado, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```
 
@@ -216,7 +216,7 @@ Global Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
       --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
       --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
-  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado, etc. (default "mainnet")
+  -n, --network string         Target network. e.g. mainnet, sepolia, holesky, gnosis, chiado, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```
 
@@ -238,6 +238,6 @@ Global Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
       --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
       --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
-  -n, --network string         Target network. e.g. mainnet, goerli, sepolia, etc. (default "mainnet")
+  -n, --network string         Target network. e.g. mainnet, sepolia, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```
