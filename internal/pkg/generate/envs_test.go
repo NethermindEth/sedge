@@ -103,19 +103,6 @@ func TestGenerateEnvFile(t *testing.T) {
 			},
 		},
 		{
-			name: "Check set of RELAY_URLS, goerli",
-			data: &GenData{
-				Services:        []string{consensus, validator, execution, mevBoost},
-				ValidatorClient: &clients.Client{Name: "prysm"},
-				Network:         "goerli",
-				Mev:             true,
-				RelayURLs:       []string{"https://sample.relay", "https://sample.relay2"},
-			},
-			fieldsToCheck: map[string]string{
-				"RELAY_URLS": "https://sample.relay,https://sample.relay2",
-			},
-		},
-		{
 			name: "Check set of RELAY_URLS, sepolia",
 			data: &GenData{
 				Services:        []string{consensus, validator, execution, mevBoost},
