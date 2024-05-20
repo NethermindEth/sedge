@@ -41,7 +41,7 @@ ERIGON_LATEST=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/
 update-client "Erigon" "execution" ".execution.erigon" "$ERIGON_LATEST"
 
 # Reth
-RETH_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://github.com/paradigmxyz/reth/releases/latest | jq -r ".tag_name")
+RETH_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/paradigmxyz/reth/releases/latest | jq -r ".tag_name")
 update-client "Reth" "execution" ".execution.reth" "$RETH_LATEST_VERSION"
 
 # Lighthouse
