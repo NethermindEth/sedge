@@ -31,7 +31,7 @@ func TestSupportedClients(t *testing.T) {
 		isErr      bool
 	}{
 		{"execution", "gnosis", []string{"nethermind", "erigon"}, false},
-		{"consensus", "gnosis", utils.Filter(AllClients["consensus"], func(c string) bool { return c != "prysm" }), false},
+		{"consensus", "gnosis", utils.Filter(AllClients["consensus"], func(c string) bool { return c != "prysm" && c != "grandine" }), false},
 		{"execution", "mainnet", AllClients["execution"], false},
 		{"consensus", "mainnet", AllClients["consensus"], false},
 		{"validator", "mainnet", AllClients["validator"], false},
