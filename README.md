@@ -137,7 +137,7 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
-|            | Grandine   | Grandine   |
+|            | Grandine   |            |
 
 ### Sepolia
 

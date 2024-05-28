@@ -91,7 +91,7 @@ func TestClients(t *testing.T) {
 	inputs := [...]clientsTestCase{
 		{
 			map[string][]string{
-				"consensus": {"lighthouse", "prysm", "teku", "lodestar"},
+				"consensus": {"lighthouse", "prysm", "teku", "lodestar", "grandine"},
 				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
 				"execution": {"nethermind", "geth", "besu", "erigon"},
 			},
