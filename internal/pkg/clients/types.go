@@ -60,6 +60,8 @@ func (c *Client) setConsensusImage(image string) {
 		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Teku.String())
 	case "lodestar":
 		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Lodestar.String())
+	case "grandine":
+		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Grandine.String())
 	}
 }
 
