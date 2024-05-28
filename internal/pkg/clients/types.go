@@ -47,6 +47,8 @@ func (c *Client) setExecutionImage(image string) {
 		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Nethermind.String())
 	case "erigon":
 		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Erigon.String())
+	case "reth":
+		c.Image = valueOrDefault(image, configs.ClientImages.Execution.Reth.String())
 	}
 }
 
