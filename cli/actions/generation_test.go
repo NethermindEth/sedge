@@ -155,36 +155,41 @@ func TestGenerateDockerCompose(t *testing.T) {
 							ExecutionAuthUrl:  "http://localhost:8551",
 						},
 					},
-					genTestData{
-						name: fmt.Sprintf("validator: %s, network: %s, only validator", consensusCl, network),
-						genData: generate.GenData{
-							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
-							Services:        []string{"validator"},
-							Network:         network,
-							ConsensusApiUrl: "http://localhost:4000",
-						},
-					},
-					genTestData{
-						name: fmt.Sprintf("validator: %s, network: %s, only validator, mev-boost on", consensusCl, network),
-						genData: generate.GenData{
-							ValidatorClient:     &clients.Client{Name: consensusCl, Type: "validator"},
-							Services:            []string{"validator"},
-							Network:             network,
-							ConsensusApiUrl:     "http://localhost:4000",
-							MevBoostOnValidator: true,
-						},
-					},
-					genTestData{
-						name: fmt.Sprintf("validator: %s, network: %s, only validator with tag, https", consensusCl, network),
-						genData: generate.GenData{
-							ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
-							Services:        []string{"validator"},
-							Network:         network,
-							ContainerTag:    "sampleTag",
-							ConsensusApiUrl: "https://localhost:4000",
-						},
-					},
 				)
+				// Only add the "only validator" test case if consensus client is not "grandine"
+				if consensusCl != "grandine" {
+					tests = append(tests,
+						genTestData{
+							name: fmt.Sprintf("validator: %s, network: %s, only validator", consensusCl, network),
+							genData: generate.GenData{
+								ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
+								Services:        []string{"validator"},
+								Network:         network,
+								ConsensusApiUrl: "http://localhost:4000",
+							},
+						},
+						genTestData{
+							name: fmt.Sprintf("validator: %s, network: %s, only validator, mev-boost on", consensusCl, network),
+							genData: generate.GenData{
+								ValidatorClient:     &clients.Client{Name: consensusCl, Type: "validator"},
+								Services:            []string{"validator"},
+								Network:             network,
+								ConsensusApiUrl:     "http://localhost:4000",
+								MevBoostOnValidator: true,
+							},
+						},
+						genTestData{
+							name: fmt.Sprintf("validator: %s, network: %s, only validator with tag, https", consensusCl, network),
+							genData: generate.GenData{
+								ValidatorClient: &clients.Client{Name: consensusCl, Type: "validator"},
+								Services:        []string{"validator"},
+								Network:         network,
+								ContainerTag:    "sampleTag",
+								ConsensusApiUrl: "https://localhost:4000",
+							},
+						},
+					)
+				}
 				if utils.Contains(validatorClients, consensusCl) {
 					tests = append(tests,
 						genTestData{
