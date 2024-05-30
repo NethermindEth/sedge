@@ -307,7 +307,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 							CheckFunctions: []CheckFunc{defaultFunc, checkOnlyValidator, checkValidatorBlocker},
 						},
 					)
-			}
+				}
 				if utils.Contains(validatorClients, consensusCl) {
 					tests = append(tests,
 						genTestData{
