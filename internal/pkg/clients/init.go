@@ -27,7 +27,7 @@ var AllClients map[string][]string = map[string][]string{
 		"prysm",
 		"teku",
 		"lodestar",
-		"grandine",
+		"grandine",//add grandine
 	},
 	"validator": {
 		"lighthouse",
