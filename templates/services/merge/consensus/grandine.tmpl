@@ -32,8 +32,9 @@
       - --http-address=0.0.0.0
       - --http-port={{.ClApiPort}}{{if not .CustomConsensusConfigs}}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
-      - --timeout=10000{{range $flag := .ClExtraFlags}}
-      - --{{$flag}}{{end}}{{if .MevBoostEndpoint}}
+      - --metrics
+      - --metrics-port={{.ClMetricsPort}}
+      - --metrics-address=0.0.0.0{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
       - --checkpoint-sync-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{end}}{{range $flag := .ClExtraFlags}}
       - --{{$flag}}{{end}}{{if .MevBoostEndpoint}}
       - --builder={{.MevBoostEndpoint}}{{end}}{{if .LoggingDriver}}
