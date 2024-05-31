@@ -17,11 +17,11 @@ func TestGenerate_FullNode_GoerliNotSupported(t *testing.T) {
 		// Arrange
 		nil,
 		// Act
-		func(t *testing.T, binaryPath string) {
+		func(t *testing.T, binaryPath, dataDirPath string) {
 			runErr = runSedge(t, binaryPath, "generate", "full-node", "--network", "goerli")
 		},
 		// Assert
-		func(t *testing.T) {
+		func(t *testing.T, dataDirPath string) {
 			assert.Error(t, runErr, "generate command should fail without arguments")
 		},
 	)

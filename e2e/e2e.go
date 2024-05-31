@@ -9,8 +9,8 @@ import (
 
 type (
 	e2eArranger func(t *testing.T, sedgePath string) error
-	e2eAct      func(t *testing.T, sedgePath string)
-	e2eAssert   func(t *testing.T)
+	e2eAct      func(t *testing.T, sedgePath, dataDirPath string)
+	e2eAssert   func(t *testing.T, dataDirPath string)
 )
 
 type e2eTestCase struct {
@@ -54,10 +54,10 @@ func (e *e2eTestCase) run() {
 		}
 	}
 	if e.act != nil {
-		e.act(e.t, e.BinaryPath())
+		e.act(e.t, e.BinaryPath(), e.dataDirPath())
 	}
 	if e.assert != nil {
-		e.assert(e.t)
+		e.assert(e.t, e.dataDirPath())
 	}
 }
 
