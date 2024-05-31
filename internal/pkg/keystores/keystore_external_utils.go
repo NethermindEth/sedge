@@ -328,15 +328,16 @@ func CreateDepositData(
 			withdrPrefix = common.ETH1_ADDRESS_WITHDRAWAL_PREFIX
 			eth1Addr, err := hex.DecodeString(vkgd.WithdrawalAddress)
 			if err != nil {
-				return fmt.Errorf(configs.WithdrawalEth1SecretKeyCreationError, vkgd.WithdrawalAddress, err)
+				return fmt.Errorf(configs.ErrWithdrawalEth1SecretKeyCreation, vkgd.WithdrawalAddress, err)
 			}
-			copy(withdrCreds[32-len(eth1Addr):], eth1Addr)
+			// eleven zero bytes, then the address
+			copy(withdrCreds[12:], eth1Addr)
 		} else {
 			withdrPrefix = common.BLS_WITHDRAWAL_PREFIX
 			withdrAccPath := fmt.Sprintf("m/12381/3600/%d/0", i)
 			withdr, err := util.PrivateKeyFromSeedAndPath(withdrSeed, withdrAccPath)
 			if err != nil {
-				return fmt.Errorf(configs.WithdrawalBLSSecretKeyCreationError, withdrAccPath, err)
+				return fmt.Errorf(configs.ErrWithdrawalBLSSecretKeyCreation, withdrAccPath, err)
 			}
 			copy(withdrPub[:], withdr.PublicKey().Marshal())
 			withdrCreds = hashing.Hash(withdrPub[:])

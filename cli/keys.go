@@ -23,8 +23,8 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
-	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/internal/ui"
+	"github.com/NethermindEth/sedge/internal/utils"
 	eth2 "github.com/protolambda/zrnt/eth2/configs"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -86,7 +86,7 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 			}
 			// Validate fee recipient
 			if flags.eth1WithdrawalAddress != "" && !utils.IsAddress(flags.eth1WithdrawalAddress) {
-				log.Fatal(configs.InvalidWithdrawalAddrError)
+				log.Fatal(configs.ErrInvalidWithdrawalAddr)
 			}
 			// Ensure that path is absolute
 			log.Debugf("Path to keystore folder: %s", flags.path)
