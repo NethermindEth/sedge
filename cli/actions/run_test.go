@@ -28,9 +28,10 @@ import (
 
 func TestRunContainers(t *testing.T) {
 	tests := []struct {
-		name            string
-		options         actions.RunContainersOptions
-		expectedCommand string
+		name              string
+		options           actions.RunContainersOptions
+		expectedUpCommand string
+		expectedPsCommand string
 	}{
 		{
 			name: "with services",
@@ -38,27 +39,39 @@ func TestRunContainers(t *testing.T) {
 				GenerationPath: filepath.Join("a", "b", "c", "d"),
 				Services:       []string{"validator", "consensus", "execution"},
 			},
-			expectedCommand: fmt.Sprintf("docker compose -f %s up -d validator consensus execution", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
+			expectedUpCommand: fmt.Sprintf("docker compose -f %s up -d validator consensus execution", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
+			expectedPsCommand: fmt.Sprintf("docker compose -f %s ps --filter status=running", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
 		},
 		{
 			name: "without services",
 			options: actions.RunContainersOptions{
-				GenerationPath: filepath.Join("a", "b", "c", "d"),
+				GenerationPath: filepath.Join("a", "b", "c"),
 				Services:       []string{},
 			},
-			expectedCommand: fmt.Sprintf("docker compose -f %s up -d", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
+			expectedUpCommand: fmt.Sprintf("docker compose -f %s up -d", filepath.Join("a", "b", "c", "docker-compose.yml")),
+			expectedPsCommand: fmt.Sprintf("docker compose -f %s ps --filter status=running", filepath.Join("a", "b", "c", "docker-compose.yml")),
 		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			up, ps := 0, 0
 			commandRunner := &test.SimpleCMDRunner{
-				SRunCMD: func(c commands.Command) (string, error) {
-					assert.Equal(t, tc.expectedCommand, c.Cmd)
-					return "", nil
+				SRunCMD: func(c commands.Command) (string, int, error) {
+					if c.Cmd == tc.expectedUpCommand {
+						up++
+					}
+					if c.Cmd == tc.expectedPsCommand {
+						ps++
+					}
+					return "", 0, nil
 				},
 			}
-			sedgeActions := actions.NewSedgeActions(nil, nil, commandRunner)
+			sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{
+				CommandRunner: commandRunner,
+			})
 			sedgeActions.RunContainers(tc.options)
+			assert.Equal(t, 1, up)
+			assert.Equal(t, 1, ps)
 		})
 	}
 }

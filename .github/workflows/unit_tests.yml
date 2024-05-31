@@ -11,16 +11,19 @@ jobs:
     name: Run unit tests
     strategy:
       matrix:
-        go: ["1.18.2"]
-        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            go: '1.21'
+          - os: windows-latest
+            go: '1.21'
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
 
@@ -33,10 +36,10 @@ jobs:
 
       - name: Run tests other
         if: matrix.os != 'ubuntu-latest'
-        run: go test ./...
+        run: make generate && go test ./...
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v4
         if: matrix.os == 'ubuntu-latest'
         with:
           fail_ci_if_error: true

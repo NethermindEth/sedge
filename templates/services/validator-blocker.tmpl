@@ -1,11 +1,24 @@
 {{/* validator-blocker.tmpl */}}
 {{ define "validator-blocker" }}
   validator-blocker:
-    image: busybox:latest
+    container_name: sedge-validator-blocker{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    image: busybox
+    networks:
+    - sedge
     command: >
       sh -c "
         echo 'Waiting {{ .VLStartGracePeriod }} seconds of grace period before starting the validator';
         sleep {{ .VLStartGracePeriod }};
         echo 'Done';
+        while true; do
+          response=$$(wget -S ${CC_API_URL}/eth/v1/node/health -O /dev/null 2>&1 | grep -m 1 "HTTP/" | awk '{print $$2}')
+          if [ $$response -eq 200 ]; then
+            echo 'Endpoint is up!'
+            break
+          else
+            echo 'Endpoint is down, waiting 30 seconds before checking again...'
+            sleep 30
+          fi
+        done
       "
 {{ end }}

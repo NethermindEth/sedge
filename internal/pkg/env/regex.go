@@ -18,7 +18,6 @@ package env
 import "regexp"
 
 var (
-	ReTTD         = regexp.MustCompile(`TTD=(.*)`)
 	ReMEV         = regexp.MustCompile(`MEV=(.*)`)
 	ReXEEV        = regexp.MustCompile(`XEE_VERSION=(.*)`)
 	ReClBOOTNODES = regexp.MustCompile(`CC_BOOTNODES=(.*)`)

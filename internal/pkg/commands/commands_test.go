@@ -45,7 +45,7 @@ func TestBuildCommands(t *testing.T) {
 					Tag:  "test:latest",
 				}).Cmd
 			},
-			output: "docker build ./testdir/dockerfile -t test:latest",
+			output: "docker build -t test:latest ./testdir/dockerfile",
 		},
 		{
 			descr: `BuildDockerBuildCMD(DockerBuildOptions{

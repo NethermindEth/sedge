@@ -17,87 +17,12 @@ package utils
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	log "github.com/sirupsen/logrus"
 )
-
-/*
-CheckDependencies :
-This function is responsible for checking if on-premise setup dependencies are installed on host machine
-
-params :-
-a. dependencies []string
-List of dependencies to be checked
-
-returns :-
-a. []string
-List of dependencies that are not installed
-*/
-func CheckDependencies(dependencies []string) (pending []string) {
-	for _, dependency := range dependencies {
-		_, err := exec.LookPath(dependency)
-		if err != nil {
-			log.Errorf(configs.DependencyNotInstalledError, dependency)
-			pending = append(pending, dependency)
-		}
-	}
-	return
-}
-
-/*
-PreCheck :
-Check if docker-compose can be used to interact with the generated docker-compose script
-
-params :-
-a. generationPath string
-Path to the generated docker-compose script
-
-returns :-
-a. error
-Error if any
-*/
-func PreCheck(cmdRunner commands.CommandRunner, generationPath string) error {
-	// Check docker is installed
-	pending := CheckDependencies([]string{"docker"})
-	for _, dependency := range pending {
-		log.Errorf(configs.DependencyNotInstalledError, dependency)
-	}
-	if len(pending) > 0 {
-		return fmt.Errorf(configs.DependenciesMissingError)
-	}
-
-	// Check docker engine is on
-	dockerPsCMD := cmdRunner.BuildDockerPSCMD(commands.DockerPSOptions{All: true})
-	log.Debugf(configs.RunningCommand, dockerPsCMD.Cmd)
-	dockerPsCMD.GetOutput = true
-	_, err := cmdRunner.RunCMD(dockerPsCMD)
-	if err != nil {
-		return fmt.Errorf(configs.DockerEngineOffError, err)
-	}
-
-	// Check if docker-compose script was generated
-	file := filepath.Join(generationPath, configs.DefaultDockerComposeScriptName)
-	if _, err := os.Stat(file); os.IsNotExist(err) {
-		log.Errorf(configs.OpeningFileError, file, err)
-		return fmt.Errorf(configs.DockerComposeScriptNotFoundError, generationPath, configs.DefaultAbsSedgeDataPath)
-	}
-
-	// Check that compose plugin is installed with docker running 'docker compose ps'
-	dockerComposePsCMD := cmdRunner.BuildDockerComposePSCMD(commands.DockerComposePsOptions{Path: file})
-	log.Debugf(configs.RunningCommand, dockerComposePsCMD.Cmd)
-	dockerComposePsCMD.GetOutput = true
-	_, err = cmdRunner.RunCMD(dockerComposePsCMD)
-	if err != nil {
-		return fmt.Errorf(configs.DockerComposeOffError, err)
-	}
-
-	return nil
-}
 
 /*
 CheckContainers :
@@ -122,7 +47,7 @@ func CheckContainers(cmdRunner commands.CommandRunner, generationPath string) (s
 	})
 	log.Debugf(configs.RunningCommand, psCMD.Cmd)
 	psCMD.GetOutput = true
-	rawServices, err := cmdRunner.RunCMD(psCMD)
+	rawServices, _, err := cmdRunner.RunCMD(psCMD)
 	if err != nil || rawServices == "\n" {
 		if rawServices == "\n" && err == nil {
 			err = fmt.Errorf(configs.DockerComposePsReturnedEmptyError)

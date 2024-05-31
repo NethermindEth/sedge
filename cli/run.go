@@ -16,49 +16,61 @@ limitations under the License.
 package cli
 
 import (
+	"fmt"
+	"path/filepath"
+
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
-	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-func RunCmd(cmdRunner commands.CommandRunner, sedgeActions actions.SedgeActions) *cobra.Command {
+func RunCmd(sedgeActions actions.SedgeActions, depsMgr dependencies.DependenciesManager) *cobra.Command {
 	// Flags
 	var (
 		generationPath string
-		services       *[]string
+		services       []string
+		skipPull       bool
 	)
 
 	cmd := &cobra.Command{
 		Use:   "run [flags]",
 		Short: "Run services",
 		Long:  "Run all the generated services",
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := sedgeActions.InstallDependencies(actions.InstallDependenciesOptions{
-				Dependencies: []string{"docker"},
-				Install:      true,
-			}); err != nil {
-				log.Fatalf("dependency error: %s", err.Error())
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) != 0 {
+				return fmt.Errorf(configs.ErrCMDArgsNotSupported, "run")
 			}
+			if err := checkDependencies(depsMgr, true, dependencies.Docker); err != nil {
+				log.Error("Failed to check dependencies. Run 'sedge deps check' to check dependencies")
+				return err
+			}
+			return sedgeActions.ValidateDockerComposeFile(filepath.Join(generationPath, configs.DefaultDockerComposeScriptName), services...)
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
 			err := sedgeActions.SetupContainers(actions.SetupContainersOptions{
 				GenerationPath: generationPath,
-				Services:       *services,
+				Services:       services,
+				SkipPull:       skipPull,
 			})
 			if err != nil {
-				log.Fatalf("error setting up service containers: %s", err.Error())
+				return fmt.Errorf(configs.SetupContainersErr, err)
 			}
 			err = sedgeActions.RunContainers(actions.RunContainersOptions{
 				GenerationPath: generationPath,
-				Services:       *services,
+				Services:       services,
 			})
 			if err != nil {
-				log.Fatalf("error starting service containers: %s", err.Error())
+				return fmt.Errorf(configs.StartingContainersErr, err)
 			}
+
+			return nil
 		},
 	}
 
 	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data")
-	services = cmd.Flags().StringSlice("services", []string{}, "List of services to run. If this flag is not provided, all services will run.")
+	cmd.Flags().StringSliceVar(&services, "services", []string{}, "List of services to run. If this flag is not provided, all services will run.")
+	cmd.Flags().BoolVar(&skipPull, "skip-pull", false, "Avoid pulling images before running containers. If the images are not available locally, this flag could cause an error.")
 	return cmd
 }

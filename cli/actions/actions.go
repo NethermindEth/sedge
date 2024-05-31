@@ -17,18 +17,23 @@ package actions
 
 import (
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/docker/docker/client"
 )
 
+//go:generate mockgen -package=sedge_mocks -destination=../../mocks/sedgeActions.go github.com/NethermindEth/sedge/cli/actions SedgeActions
 type SedgeActions interface {
+	GetCommandRunner() commands.CommandRunner
 	ImportSlashingInterchangeData(SlashingImportOptions) error
 	ExportSlashingInterchangeData(SlashingExportOptions) error
 	SetupContainers(SetupContainersOptions) error
 	RunContainers(RunContainersOptions) error
-	InstallDependencies(InstallDependenciesOptions) error
-	Generate(GenerateOptions) error
+	Generate(GenerateOptions) (generate.GenData, error)
 	CreateJWTSecrets(CreateJWTSecretOptions) (string, error)
+	ImportValidatorKeys(ImportValidatorKeysOptions) error
+	ValidateDockerComposeFile(path string, services ...string) error
+	GetContainersData(GetContainersDataOptions) (ContainersData, error)
 }
 
 type sedgeActions struct {
@@ -37,10 +42,20 @@ type sedgeActions struct {
 	commandRunner  commands.CommandRunner
 }
 
-func NewSedgeActions(dockerClient client.APIClient, serviceManager services.ServiceManager, commandRunner commands.CommandRunner) SedgeActions {
+type SedgeActionsOptions struct {
+	DockerClient   client.APIClient
+	ServiceManager services.ServiceManager
+	CommandRunner  commands.CommandRunner
+}
+
+func NewSedgeActions(options SedgeActionsOptions) SedgeActions {
 	return &sedgeActions{
-		dockerClient:   dockerClient,
-		serviceManager: serviceManager,
-		commandRunner:  commandRunner,
+		dockerClient:   options.DockerClient,
+		serviceManager: options.ServiceManager,
+		commandRunner:  options.CommandRunner,
 	}
+}
+
+func (s *sedgeActions) GetCommandRunner() commands.CommandRunner {
+	return s.commandRunner
 }

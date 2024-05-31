@@ -36,15 +36,6 @@ func TestCheckVariable(t *testing.T) {
 		isErr      bool
 	}{
 		{
-			"Test case 1, mainnet, no TTD",
-			ReMEV,
-			"mainnet",
-			"execution",
-			"nethermind",
-			false,
-			false,
-		},
-		{
 			"Test case 2, invalid network, error",
 			ReMEV,
 			"testnet",
@@ -81,13 +72,13 @@ func TestCheckVariable(t *testing.T) {
 			false,
 		},
 		{
-			"Test case 6, goerli, no prysm config in nethermind",
+			"Test case 6, no goerli, no prysm config in nethermind",
 			ReMEV,
 			"goerli",
 			"execution",
 			"nethermind",
 			false,
-			false,
+			true,
 		},
 		{
 			"Test case 7, chiado, prysm config, no consensus config",

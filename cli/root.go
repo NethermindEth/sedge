@@ -44,7 +44,7 @@ func RootCmd() *cobra.Command {
 	// Disable completion default cmd
 	cmd.CompletionOptions.DisableDefaultCmd = true
 	// Persistent flags
-	cmd.PersistentFlags().StringVar(&logLevel, "logLevel", "info", "Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace")
+	cmd.PersistentFlags().StringVar(&logLevel, "log-level", "info", "Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace")
 	return cmd
 }
 
@@ -52,7 +52,7 @@ func checkVersion() {
 	// Check version
 	ok, err := utils.IsLatestVersion()
 	if err != nil {
-		log.Warnf("%s %e", configs.UnableToCheckVersion, err)
+		log.Warnf("%s %v", configs.UnableToCheckVersion, err)
 	} else if !ok {
 		log.Warnf("%s %s", configs.NeedVersionUpdate, utils.CurrentVersion())
 	} else {

@@ -16,15 +16,18 @@ limitations under the License.
 package cli
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-func SlashingExportCmd(sedgeActions actions.SedgeActions) *cobra.Command {
+func SlashingExportCmd(sedgeActions actions.SedgeActions, depsMgr dependencies.DependenciesManager) *cobra.Command {
 	// Flags
 	var (
 		validatorClient string
@@ -33,6 +36,7 @@ func SlashingExportCmd(sedgeActions actions.SedgeActions) *cobra.Command {
 		startValidator  bool
 		generationPath  string
 		out             string
+		containerTag    string
 	)
 
 	cmd := &cobra.Command{
@@ -66,27 +70,45 @@ sedge slashing-export --out slashing-data.json --start-validator lighthouse`,
 			}
 			return nil
 		},
-		PreRun: func(cmd *cobra.Command, args []string) {
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if f, err := os.Stat(generationPath); os.IsNotExist(err) || !f.IsDir() {
+				return fmt.Errorf("generation path %s does not exist or is not a directory", generationPath)
+			}
 			if out == "" {
-				out = filepath.Join(generationPath, "slashing_export.json")
+				out = filepath.Join(generationPath, "slashing_protection.json")
 			}
 			if err := configs.NetworkCheck(network); err != nil {
-				log.Fatal(err)
+				return err
 			}
 			validatorClient = args[0]
+			if err := checkDependencies(depsMgr, true, "docker"); err != nil {
+				log.Error("Failed to check dependencies. Run 'sedge deps check' to check dependencies")
+				return err
+			}
+			return sedgeActions.ValidateDockerComposeFile(filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
 		},
-		Run: func(cmd *cobra.Command, args []string) {
-			err := sedgeActions.ExportSlashingInterchangeData(actions.SlashingExportOptions{
+		RunE: func(cmd *cobra.Command, args []string) error {
+			err := sedgeActions.SetupContainers(actions.SetupContainersOptions{
+				GenerationPath: generationPath,
+				Services:       []string{validator},
+			})
+			if err != nil {
+				return err
+			}
+			err = sedgeActions.ExportSlashingInterchangeData(actions.SlashingExportOptions{
 				ValidatorClient: validatorClient,
 				Network:         network,
 				StopValidator:   stopValidator,
 				StartValidator:  startValidator,
 				GenerationPath:  generationPath,
 				Out:             out,
+				ContainerTag:    containerTag,
 			})
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
+
+			return nil
 		},
 	}
 
@@ -94,6 +116,7 @@ sedge slashing-export --out slashing-data.json --start-validator lighthouse`,
 	cmd.Flags().BoolVar(&startValidator, "start-validator", false, "starts the validator client after export, regardless of the state the validator was in before")
 	cmd.Flags().BoolVar(&stopValidator, "stop-validator", false, "stops the validator client after export, regardless of the state the validator was in before")
 	cmd.Flags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "path to the generation directory")
-	cmd.Flags().StringVarP(&out, "out", "o", "", `path to write slashing protection data (default "[GENERATION_PATH]/slashing_export.json")`)
+	cmd.Flags().StringVarP(&out, "out", "o", "", `path to write slashing protection data (default "[GENERATION_PATH]/slashing_protection.json")`)
+	cmd.PersistentFlags().StringVar(&containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.")
 	return cmd
 }

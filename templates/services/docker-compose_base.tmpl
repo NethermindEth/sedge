@@ -1,15 +1,14 @@
 {{/* docker-compose_base.tmpl */}}
 {{ define "docker-compose" }}
-version: "3.9"
 
 services:
 {{template "execution" .}}
 {{if .Mev}}
-  mevboost:
+  mev-boost:
     image: {{if .MevImage}}{{.MevImage}}{{else}}flashbots/mev-boost:latest{{end}}
     networks:
       - sedge
-    container_name: mev-boost
+    container_name: sedge-mev-boost{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: on-failure
     entrypoint:
       - /app/mev-boost
@@ -18,12 +17,13 @@ services:
       - -{{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
       - -relay-check
       - -relays
-      - ${RELAY_URL}{{end}}
+      - ${RELAY_URLS}{{end}}
 {{template "consensus" .}}
-{{template "validator-blocker" .}}
+{{ if .WithValidatorClient}}
+{{template "validator-blocker" .}}{{end}}
 {{template "validator" .}}
 
 networks:
   sedge:
-    name: sedge_network
+    name: sedge-network{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
 {{ end }}

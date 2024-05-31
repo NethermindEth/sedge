@@ -1,11 +1,11 @@
 ---
-sidebar_position: 6
+sidebar_position: 8
 id: logs
 ---
 
 # Logs
 
-Running `sedge logs` will shut down running containers using docker compose CLI.
+Running `sedge logs` will get running container logs using docker compose CLI.
 
 ## Help
 
@@ -26,22 +26,4 @@ Flags:
 
 Global Flags:
       --logLevel string   Set Log Level (default "info")
-```
-
-## Execution Example
-
-The execution of `sedge down` will close and remove all the opened containers and networks used by sedge.
-
-```
-$ sedge down
-2022-00-00 00:00:00 -- [INFO] [Logger Init] Log level: info
-2022-00-00 00:00:00 -- [INFO] You are running the latest version of sedge. Version:  v0.5.1
-[sudo] password for maceo:
-[+] Running 7/7
- ⠿ Container execution-client                            Removed                                                                 93.8s
- ⠿ Container validator-client                            Removed                                                                  0.0s
- ⠿ Container consensus-client                            Removed                                                                  3.8s
- ⠿ Container validator-import-client                     Removed                                                                  0.0s
- ⠿ Network docker-compose-scripts_default                Removed                                                                  0.2s
- ⠿ Network sedge_network                                 Removed                                                                  0.1s
 ```

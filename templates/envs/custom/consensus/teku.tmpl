@@ -6,8 +6,7 @@ CC_LOG_LEVEL=info
 EC_API_URL={{.ExecutionApiURL}}
 EC_AUTH_URL={{.ExecutionAuthURL}}
 CC_INSTANCE_NAME=Teku
-CC_IMAGE_VERSION={{if .CcImage}}{{.CcImage}}{{else}}consensys/teku:22.9.0{{end}}
+CC_IMAGE_VERSION={{.CcImage}}
 CC_DATA_DIR={{.CcDataDir}}
 CC_JWT_SECRET_PATH={{.JWTSecretPath}}
-CC_FEE_RECIPIENT={{.FeeRecipient}}
 {{ end }}

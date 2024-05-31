@@ -5,7 +5,7 @@ id: sepolia
 
 # Sepolia
 
-Sepolia is a permissioned Ethereum test network. Along Goerli, it is one of the testnets that is maintained after The Merge. The initial version of Sepolia used a proof-of-work (PoW) consensus mechanism. However, in the light of The Merge, Sepolia followed the mainnet’s example and merged with the proof-of-stake (PoS) Sepolia Beacon Chain. So, Sepolia is now, just like Ethereum, a PoS chain. Furthermore, Sepolia is almost an identical copy of Ethereum, so it accurately mimics the mainnet and supports accurate testing. This enables developers to design, create, test, and track their project’s public performance before going live. 
+Sepolia is a permissioned Ethereum test network. It is one of the testnets that is maintained after The Merge. The initial version of Sepolia used a proof-of-work (PoW) consensus mechanism. However, in the light of The Merge, Sepolia followed the mainnet’s example and merged with the proof-of-stake (PoS) Sepolia Beacon Chain. So, Sepolia is now, just like Ethereum, a PoS chain. Furthermore, Sepolia is almost an identical copy of Ethereum, so it accurately mimics the mainnet and supports accurate testing. This enables developers to design, create, test, and track their project’s public performance before going live. 
 
 ## Supported Execution Clients
 - [Nethermind](https://docs.nethermind.io/)
@@ -28,26 +28,26 @@ Sepolia is a permissioned Ethereum test network. Along Goerli, it is one of the 
 ## MEV-Boost
 
 We support [mev-boost](https://github.com/flashbots/mev-boost) on sepolia by default, in case you want to remove it,
-run `sedge cli` using the `--no-mev-boost` flag, for example:
+run `sedge generate full-node` using the `--no-mev-boost` flag, for example:
 
 ```
-sedge cli --network=sepolia --no-mev-boost=true
+sedge generate full-node --network=sepolia --no-mev-boost=true
 ```
 
-## Running a Full Node
+## Generating a Full Node
 
-For running a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge cli`. For example:
+To generate a setup of a full node (without a validator node) with random clients, you only need to add the `--no-validator` to `sedge generate full-node`. For example:
 
 ```bash
-sedge cli --no-validator --network=sepolia
+sedge generate full-node --no-validator --network=sepolia
 ```
 
-## Running a Validator
+## Generating a Full Node with a Validator
 
-For running a validator with random clients, you need to omit the `--no-validator` flag. For example:
+To generate a setup of a validator with random clients, you need to omit the `--no-validator` flag. For example:
 
 ```bash
-sedge cli --network=sepolia
+sedge generate full-node --network=sepolia
 ```
 
 ## Create keystore for validator
@@ -56,4 +56,12 @@ To create a keystore for a validator, you need to run the following command:
 
 ```bash
 sedge keys --network sepolia
+```
+
+## Running your setup
+
+Once you have generated your setup, you can run it with the following command:
+
+```
+sedge run
 ```

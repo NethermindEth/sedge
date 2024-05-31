@@ -1,19 +1,14 @@
 {{/* teku.tmpl */}}
 {{ define "consensus" }}
-  consensus:{{if and (ge .UID 0) (ge .GID 0)}}
-    user: "{{.UID}}:{{.GID}}"{{end}}
+  consensus:
+    user: "root:root"
     stop_grace_period: 30s
-    container_name: consensus-client
+    container_name: sedge-consensus-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
     image: ${CC_IMAGE_VERSION}{{if .Mev}}
     depends_on:{{if .Mev}}
-      mevboost:
+      mev-boost:
         condition: service_started{{end}}{{end}}
-    healthcheck:
-      test: "(curl -s -o /dev/null -w \"%{http_code}\" -X GET http://127.0.0.1:4000/eth/v1/node/health | grep -q 200) || exit 1"
-      interval: 5m
-      retries: 4032
-      start_period: 1m
     networks:
       - sedge
     volumes:
@@ -50,9 +45,8 @@
       - --data-storage-mode=PRUNE
       - --data-storage-non-canonical-blocks-enabled=false
       - --ee-endpoint=${EC_AUTH_URL}{{with .FeeRecipient}}
-      - --validators-proposer-default-fee-recipient=${CC_FEE_RECIPIENT}{{end}}
-      - --ee-jwt-secret-file=/tmp/jwt/jwtsecret{{if .TTD}}
-      - --Xnetwork-total-terminal-difficulty-override={{.TTD}}{{end}}
+      - --validators-proposer-default-fee-recipient=${FEE_RECIPIENT}{{end}}
+      - --ee-jwt-secret-file=/tmp/jwt/jwtsecret
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0

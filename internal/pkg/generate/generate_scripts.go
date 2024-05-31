@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -28,6 +29,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/NethermindEth/sedge/templates"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -154,7 +156,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	cls := mapClients(gd)
-
+	networkConfig := configs.NetworksConfigs()[gd.Network]
 	for tmpKind, client := range cls {
 		var name string
 		if client == nil {
@@ -164,7 +166,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		}
 		tmp, err := templates.Services.ReadFile(strings.Join([]string{
 			"services",
-			configs.NetworksConfigs()[gd.Network].NetworkService,
+			networkConfig.NetworkService,
 			tmpKind,
 			name + ".tmpl",
 		}, "/"))
@@ -176,12 +178,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 			return err
 		}
 	}
-	validatorBlockerTemplate := ""
-	if cls[validator] != nil {
-		validatorBlockerTemplate = "validator-blocker"
-	} else {
-		validatorBlockerTemplate = "empty-validator-blocker"
-	}
+	validatorBlockerTemplate := "validator-blocker"
 
 	// Parse validator-blocker template
 	tmp, err := templates.Services.ReadFile(strings.Join([]string{"services", validatorBlockerTemplate + ".tmpl"}, "/"))
@@ -219,27 +216,14 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		}
 	}
 
-	ttd := gd.CustomTTD
-	if len(ttd) == 0 {
-		ttd = configs.NetworksConfigs()[gd.Network].DefaultTTD
+	// Check for CL Bootnode nodes
+	if len(gd.CCBootnodes) == 0 {
+		gd.CCBootnodes = configs.NetworksConfigs()[gd.Network].DefaultCCBootnodes
 	}
 
-	// Check for CC Bootnode nodes
-	var ccBootnodes []string
-	if gd.CCBootnodes != nil {
-		ccBootnodes = *gd.CCBootnodes
-	}
-	if len(ccBootnodes) == 0 {
-		ccBootnodes = configs.NetworksConfigs()[gd.Network].DefaultCCBootnodes
-	}
-
-	// Check for Bootnode nodes
-	var ecBootnodes []string
-	if gd.ECBootnodes != nil {
-		ecBootnodes = *gd.ECBootnodes
-	}
-	if len(ecBootnodes) == 0 {
-		ecBootnodes = configs.NetworksConfigs()[gd.Network].DefaultECBootnodes
+	// Check for EL Bootnode nodes
+	if len(gd.ECBootnodes) == 0 {
+		gd.ECBootnodes = configs.NetworksConfigs()[gd.Network].DefaultECBootnodes
 	}
 	var mevSupported bool
 	if cls[validator] != nil {
@@ -261,9 +245,10 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 
 	data := DockerComposeData{
 		Services:            gd.Services,
-		TTD:                 ttd,
+		Network:             gd.Network,
 		XeeVersion:          xeeVersion,
-		Mev:                 gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
+		Mev:                 networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev)),
+		MevBoostOnValidator: gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
 		MevPort:             gd.Ports["MevPort"],
 		MevBoostEndpoint:    gd.MevBoostEndpoint,
 		MevImage:            gd.MevImage,
@@ -279,20 +264,19 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ClApiPort:           gd.Ports["CLApi"],
 		ClAdditionalApiPort: gd.Ports["CLAdditionalApi"],
 		VlMetricsPort:       gd.Ports["VLMetrics"],
-		FallbackELUrls:      arrayOrEmpty(gd.FallbackELUrls),
-		ElExtraFlags:        arrayOrEmpty(gd.ElExtraFlags),
-		ClExtraFlags:        arrayOrEmpty(gd.ClExtraFlags),
-		VlExtraFlags:        arrayOrEmpty(gd.VlExtraFlags),
-		ECBootnodesList:     ecBootnodes,
-		CCBootnodesList:     ccBootnodes,
-		ECBootnodes:         strings.Join(ecBootnodes, ","),
-		CCBootnodes:         strings.Join(ccBootnodes, ","),
+		FallbackELUrls:      gd.FallbackELUrls,
+		ElExtraFlags:        gd.ElExtraFlags,
+		ClExtraFlags:        gd.ClExtraFlags,
+		VlExtraFlags:        gd.VlExtraFlags,
+		ECBootnodes:         strings.Join(gd.ECBootnodes, ","),
+		CCBootnodes:         strings.Join(gd.CCBootnodes, ","),
+		CCBootnodesList:     gd.CCBootnodes,
 		MapAllPorts:         gd.MapAllPorts,
 		SplittedNetwork:     splittedNetwork,
 		ClCheckpointSyncUrl: clCheckpointSyncUrl,
 		LoggingDriver:       gd.LoggingDriver,
 		VLStartGracePeriod:  gd.VLStartGracePeriod,
-		CustomNetwork:       gd.Network == configs.CustomNetwork.Name, // Used custom templates
+		CustomNetwork:       gd.Network == configs.NetworkCustom, // Used custom templates
 		CustomConsensusConfigs: gd.CustomNetworkConfigPath != "" ||
 			gd.CustomGenesisPath != "" ||
 			gd.CustomDeployBlockPath != "", // Have custom configs paths
@@ -302,6 +286,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		CustomDeployBlockPath:   gd.CustomDeployBlockPath,   // Path to deploy_block.txt
 		UID:                     os.Geteuid(),
 		GID:                     os.Getegid(),
+		ContainerTag:            gd.ContainerTag,
 	}
 
 	// Save to writer
@@ -311,14 +296,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 
 	return nil
-}
-
-// arrayOrEmpty returns an empty array if the input is nil, otherwise returns the input
-func arrayOrEmpty(array *[]string) []string {
-	if array == nil {
-		return []string{}
-	}
-	return *array
 }
 
 // EnvFile generates a .env file with the provided GenData
@@ -334,13 +311,13 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	}
 
 	cls := mapClients(gd)
-
+	networkConfig := configs.NetworksConfigs()[gd.Network]
 	for tmpKind, client := range cls {
 		var tmp []byte
 		if client == nil {
 			tmp, err = templates.Services.ReadFile(strings.Join([]string{
 				"services",
-				configs.NetworksConfigs()[gd.Network].NetworkService,
+				networkConfig.NetworkService,
 				tmpKind,
 				"empty.tmpl",
 			}, "/"))
@@ -369,13 +346,22 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		}
 	}
 	consensusApiUrl := gd.ConsensusApiUrl
-	var consensusAdditionalApiUrl string
+	consensusAdditionalApiUrl := consensusApiUrl
 	if consensusApiUrl == "" {
 		consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLAdditionalApi"])
 		consensusApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLApi"])
+
+		// Prysm urls must be without http:// or https://
+		if cls[validator] != nil && cls[validator].Name == "prysm" {
+			consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", "consensus", gd.Ports["CLAdditionalApi"])
+		}
 	} else {
 		if cls[consensus] != nil && cls[consensus].Name == "prysm" {
 			consensusAdditionalApiUrl = fmt.Sprintf("%s:%v", "consensus", gd.Ports["CLAdditionalApi"])
+		} else if cls[validator] != nil && cls[validator].Name == "prysm" {
+			// Strip the http:// or https:// from the url
+			consensusAdditionalApiUrl = strings.TrimPrefix(consensusAdditionalApiUrl, "http://")
+			consensusAdditionalApiUrl = strings.TrimPrefix(consensusAdditionalApiUrl, "https://")
 		} else {
 			consensusAdditionalApiUrl = consensusApiUrl
 		}
@@ -398,14 +384,28 @@ func EnvFile(gd *GenData, at io.Writer) error {
 			gd.MevBoostEndpoint = fmt.Sprintf("%s:%v", configs.DefaultMevBoostEndpoint, gd.Ports["MevPort"])
 		}
 	}
-	// TODO: Use OS wise delimiter for these data structs
+
+	graffiti := gd.Graffiti
+	if graffiti == "" {
+		graffiti = generateGraffiti(gd.ExecutionClient, gd.ConsensusClient, gd.ValidatorClient)
+	}
+
+	if len(gd.RelayURLs) == 0 {
+		gd.RelayURLs = configs.NetworksConfigs()[gd.Network].RelayURLs
+	}
+
+	if gd.CheckpointSyncUrl == "" {
+		gd.CheckpointSyncUrl = configs.NetworksConfigs()[gd.Network].CheckpointSyncURL
+	}
+
 	data := EnvData{
-		Mev:                       gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
-		ElImage:                   imageOrEmpty(cls[execution]),
+		Services:                  gd.Services,
+		Mev:                       networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
+		ElImage:                   imageOrEmpty(cls[execution], gd.LatestVersion),
 		ElDataDir:                 "./" + configs.ExecutionDir,
-		CcImage:                   imageOrEmpty(cls[consensus]),
+		CcImage:                   imageOrEmpty(cls[consensus], gd.LatestVersion),
 		CcDataDir:                 "./" + configs.ConsensusDir,
-		VlImage:                   imageOrEmpty(cls[validator]),
+		VlImage:                   imageOrEmpty(cls[validator], gd.LatestVersion),
 		VlDataDir:                 "./" + configs.ValidatorDir,
 		ExecutionApiURL:           executionApiUrl,
 		ExecutionAuthURL:          executionAuthUrl,
@@ -416,13 +416,9 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ExecutionEngineName:       nameOrEmpty(cls[execution]),
 		ConsensusClientName:       nameOrEmpty(cls[consensus]),
 		KeystoreDir:               "./" + configs.KeystoreDir,
-		Graffiti:                  gd.Graffiti,
-		RelayURL:                  gd.RelayURL,
-	}
-
-	// Fix prysm rpc url
-	if cls[validator] != nil && cls[validator].Name == "prysm" {
-		data.ConsensusAdditionalApiURL = fmt.Sprintf("%s:%d", "consensus", gd.Ports["CLAdditionalApi"])
+		Graffiti:                  graffiti,
+		RelayURLs:                 strings.Join(gd.RelayURLs, ","),
+		CheckpointSyncUrl:         gd.CheckpointSyncUrl,
 	}
 
 	// Save to writer
@@ -432,6 +428,110 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	}
 
 	return nil
+}
+
+type CustomConfigsSources struct {
+	ChainSpecSrc     string
+	NetworkConfigSrc string
+	GenesisSrc       string
+	DeployBlockSrc   string
+}
+
+type CustomNetworkConfigsData struct {
+	ChainSpecPath     string
+	NetworkConfigPath string
+	GenesisPath       string
+	DeployBlockPath   string
+}
+
+func CustomNetworkConfigs(generationPath, network string, sources CustomConfigsSources) (CustomNetworkConfigsData, error) {
+	var customNetworkConfigsData CustomNetworkConfigsData
+	networkData, ok := configs.NetworksConfigs()[network]
+	if !ok {
+		return customNetworkConfigsData, fmt.Errorf(configs.UnknownNetworkError, network)
+	}
+	valueOrDefault := func(value, def string) string {
+		if value != "" {
+			return value
+		}
+		return def
+	}
+	chainSpecSrc := valueOrDefault(sources.ChainSpecSrc, networkData.DefaultCustomChainSpecSrc)
+	networkConfigSrc := valueOrDefault(sources.NetworkConfigSrc, networkData.DefaultCustomConfigSrc)
+	genesisSrc := valueOrDefault(sources.GenesisSrc, networkData.DefaultCustomGenesisSrc)
+	deployBlock := valueOrDefault(sources.DeployBlockSrc, networkData.DefaultCustomDeployBlock)
+
+	// Check if any custom config is needed
+	if chainSpecSrc == "" && networkConfigSrc == "" && genesisSrc == "" && deployBlock == "" {
+		return customNetworkConfigsData, nil
+	}
+
+	// Setup destination folder
+	destFolder := filepath.Join(generationPath, configs.CustomNetworkConfigsFolder)
+	if _, err := os.Stat(destFolder); err != nil {
+		if os.IsNotExist(err) {
+			err = os.Mkdir(destFolder, os.ModePerm)
+			if err != nil {
+				return customNetworkConfigsData, err
+			}
+		} else {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if chainSpecSrc != "" {
+		customNetworkConfigsData.ChainSpecPath = filepath.Join(destFolder, configs.ExecutionNetworkConfigFileName)
+		log.Info(configs.GettingCustomChainSpec)
+		err := utils.DownloadOrCopy(chainSpecSrc, customNetworkConfigsData.ChainSpecPath, true)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+		customNetworkConfigsData.ChainSpecPath, err = filepath.Abs(customNetworkConfigsData.ChainSpecPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if networkConfigSrc != "" {
+		customNetworkConfigsData.NetworkConfigPath = filepath.Join(destFolder, configs.ConsensusNetworkConfigFileName)
+		log.Info(configs.GettingCustomNetworkConfig)
+		err := utils.DownloadOrCopy(networkConfigSrc, customNetworkConfigsData.NetworkConfigPath, true)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+		customNetworkConfigsData.NetworkConfigPath, err = filepath.Abs(customNetworkConfigsData.NetworkConfigPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if genesisSrc != "" {
+		customNetworkConfigsData.GenesisPath = filepath.Join(destFolder, configs.ConsensusNetworkGenesisFileName)
+		log.Info(configs.GettingCustomGenesis)
+		err := utils.DownloadOrCopy(genesisSrc, customNetworkConfigsData.GenesisPath, true)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+		customNetworkConfigsData.GenesisPath, err = filepath.Abs(customNetworkConfigsData.GenesisPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	if deployBlock != "" {
+		customNetworkConfigsData.DeployBlockPath = filepath.Join(destFolder, configs.ConsensusNetworkDeployBlockFileName)
+		log.Info(configs.WritingCustomDeployBlock)
+		err := os.WriteFile(customNetworkConfigsData.DeployBlockPath, []byte(deployBlock), os.ModePerm)
+		if err != nil {
+			return customNetworkConfigsData, fmt.Errorf(configs.ErrorWritingDeployBlockFile, customNetworkConfigsData.DeployBlockPath, err)
+		}
+		customNetworkConfigsData.DeployBlockPath, err = filepath.Abs(customNetworkConfigsData.DeployBlockPath)
+		if err != nil {
+			return customNetworkConfigsData, err
+		}
+	}
+
+	return customNetworkConfigsData, nil
 }
 
 // endpointOrEmpty returns the endpoint of the client if it is not nil, otherwise returns an empty string
@@ -450,9 +550,37 @@ func nameOrEmpty(cls *clients.Client) string {
 	return ""
 }
 
+// generateGraffiti generates a graffiti string based on the execution, consensus and validator clients
+func generateGraffiti(execution, consensus, validator *clients.Client) string {
+	if consensus != nil && execution != nil {
+		if validator != nil {
+			if consensus.Name == validator.Name {
+				return strings.Join([]string{nameOrEmpty(execution), nameOrEmpty(consensus)}, "-")
+			}
+		}
+	}
+	return joinIfNotEmpty(nameOrEmpty(execution), nameOrEmpty(consensus), nameOrEmpty(validator))
+}
+
+// joinIfNotEmpty joins the strings if they are not empty
+func joinIfNotEmpty(strs ...string) string {
+	var result []string
+	for _, str := range strs {
+		if str != "" {
+			result = append(result, str)
+		}
+	}
+	return strings.Join(result, "-")
+}
+
 // imageOrEmpty returns the image of the client if it is not nil, otherwise returns an empty string
-func imageOrEmpty(cls *clients.Client) string {
+func imageOrEmpty(cls *clients.Client, latest bool) string {
 	if cls != nil {
+		if latest {
+			splits := strings.Split(cls.Image, ":")
+			splits[len(splits)-1] = "latest"
+			return strings.Join(splits, ":")
+		}
 		return cls.Image
 	}
 	return ""

@@ -54,16 +54,29 @@ func TestSetupContainers(t *testing.T) {
 			expectedPullCmd:   fmt.Sprintf("docker compose -f %s pull", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
 			expectedCreateCmd: fmt.Sprintf("docker compose -f %s create", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
 		},
+		{
+			name: "skip-pull",
+			options: actions.SetupContainersOptions{
+				GenerationPath: filepath.Join("a", "b", "c", "d"),
+				Services:       []string{"execution", "consensus"},
+				SkipPull:       true,
+			},
+			expectedBuildCmd:  fmt.Sprintf("docker compose -f %s build execution consensus", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
+			expectedPullCmd:   "",
+			expectedCreateCmd: fmt.Sprintf("docker compose -f %s create execution consensus", filepath.Join("a", "b", "c", "d", "docker-compose.yml")),
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			commandRunner := &test.SimpleCMDRunner{
-				SRunCMD: func(c commands.Command) (string, error) {
+				SRunCMD: func(c commands.Command) (string, int, error) {
 					assert.Contains(t, []string{tc.expectedBuildCmd, tc.expectedPullCmd, tc.expectedCreateCmd}, c.Cmd)
-					return "", nil
+					return "", 0, nil
 				},
 			}
-			sedgeActions := actions.NewSedgeActions(nil, nil, commandRunner)
+			sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{
+				CommandRunner: commandRunner,
+			})
 			sedgeActions.SetupContainers(tc.options)
 		})
 	}

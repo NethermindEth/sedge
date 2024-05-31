@@ -125,14 +125,24 @@ func (cr *WindowsCMDRunner) BuildDockerComposeLogsCMD(options DockerComposeLogsO
 	return Command{Cmd: command}
 }
 
+func (cr *WindowsCMDRunner) BuildDockerComposeVersionCMD() Command {
+	return Command{Cmd: "docker compose version"}
+}
+
 func (cr *WindowsCMDRunner) BuildDockerBuildCMD(options DockerBuildOptions) Command {
-	command := fmt.Sprintf("docker build %s", options.Path)
+	command := "docker build"
 	if len(options.Tag) > 0 {
 		log.Debug(`Command "docker build" built with "-t" flag.`)
 		command += " -t " + options.Tag
 	} else {
-		log.Debug(`Command "docker build" built withot "-t" flag.`)
+		log.Debug(`Command "docker build" built without "-t" flag.`)
 	}
+	if len(options.Args) > 0 {
+		for key, value := range options.Args {
+			command += fmt.Sprintf(" --build-arg %s=%s", key, value)
+		}
+	}
+	command += " " + options.Path
 	return Command{Cmd: command}
 }
 
@@ -167,7 +177,7 @@ func (cr *WindowsCMDRunner) BuildOpenTextEditor(options OpenTextEditorOptions) C
 	return Command{Cmd: fmt.Sprintf("notepad %s", options.FilePath), IgnoreTerminal: true}
 }
 
-func (cr *WindowsCMDRunner) RunCMD(cmd Command) (string, error) {
+func (cr *WindowsCMDRunner) RunCMD(cmd Command) (string, int, error) {
 	var out string
 	r := strings.ReplaceAll(cmd.Cmd, "\n", "")
 
@@ -190,16 +200,17 @@ func (cr *WindowsCMDRunner) RunCMD(cmd Command) (string, error) {
 	}
 
 	if err := exc.Start(); err != nil {
-		return out, err
+		return out, -1, err
 	}
 
 	err := exc.Wait()
+	exitCode := exc.ProcessState.ExitCode()
 	if cmd.GetOutput {
 		out = combinedOut.String()
 		out = strings.ReplaceAll(out, "\r", "") // Remove windows \r character
 	}
 
-	return out, err
+	return out, exitCode, err
 }
 
 func (cr *WindowsCMDRunner) RunScript(script ScriptFile) (string, error) {

@@ -1,9 +1,9 @@
 ---
-sidebar_position: 10
+sidebar_position: 12
 id: slashing-import 
 ---
 
-# slashing-import
+# Slashing Import
 
 Running `sedge slashing-import` will import slashing protection data to the current validator client. The slashing protection data is a JSON file that meets with the [EIP-3076](https://eips.ethereum.org/EIPS/eip-3076) specification.
 
@@ -39,6 +39,7 @@ sedge slashing-import --from slashing-data.json --stop-validator lodestar
 sedge slashing-import --from slashing-data.json --start-validator lighthouse
 
 Flags:
+      --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
   -f, --from string       path to the JSON file in the EIP-3076 format with the slashing protection data to import (default: <generation-dir>/slashing_export.json)
   -h, --help              help for slashing-import
   -n, --network string    network (default "mainnet")
@@ -57,7 +58,7 @@ This is an example of importing slashing protection data to a setup using sepoli
 ```shell
 $ sedge slashing-import prysm -f slashing-export.json -n sepolia
 2023-01-06 14:59:11 -- [INFO] [Logger Init] Log level: info
-2023-01-06 14:59:11 -- [INFO] You are running the latest version of sedge. Version:  v0.6.0
+2023-01-06 14:59:11 -- [INFO] You are running the latest version of sedge. Version:  v1.3.1
 # highlight-next-line
 2023-01-06 14:59:11 -- [INFO] Importing slashing data to client prysm from slashing-export.json
 # highlight-next-line
@@ -71,7 +72,7 @@ Notice in this case the validator client remains stopped because it has been sto
 ```shell
 $ sedge slashing-import prysm -f slashing-export.json -n sepolia --start-validator
 2023-01-06 15:08:05 -- [INFO] [Logger Init] Log level: info
-2023-01-06 15:08:06 -- [INFO] You are running the latest version of sedge. Version:  v0.6.0
+2023-01-06 15:08:06 -- [INFO] You are running the latest version of sedge. Version:  v1.3.1
 2023-01-06 15:08:06 -- [INFO] Importing slashing data to client prysm from slashing-export.json
 2023-01-06 15:08:06 -- [INFO] The slashing protection container is starting...
 2023-01-06 15:08:06 -- [INFO] The slashing container ends successfully.
@@ -86,7 +87,7 @@ Another case may be importing the slashing data protection when the validator is
 ```shell
 $ sedge slashing-import prysm -f slashing-export.json -n sepolia 
 2023-01-06 15:10:27 -- [INFO] [Logger Init] Log level: info
-2023-01-06 15:10:27 -- [INFO] You are running the latest version of sedge. Version:  v0.6.0
+2023-01-06 15:10:27 -- [INFO] You are running the latest version of sedge. Version:  v1.3.1
 # highlight-next-line
 2023-01-06 15:10:27 -- [INFO] Stopping validator client...
 # highlight-next-line
@@ -107,7 +108,7 @@ In this case, the validator client is stopped before the import and started agai
  ```shell
 $ sedge slashing-import prysm -f slashing-export.json -n sepolia --stop-validator
 2023-01-06 15:12:22 -- [INFO] [Logger Init] Log level: info
-2023-01-06 15:12:22 -- [INFO] You are running the latest version of sedge. Version:  v0.6.0
+2023-01-06 15:12:22 -- [INFO] You are running the latest version of sedge. Version:  v1.3.1
 # highlight-next-line
 2023-01-06 15:12:22 -- [INFO] Stopping validator client...
 # highlight-next-line

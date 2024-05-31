@@ -1,0 +1,44 @@
+---
+sidebar_position: 14
+id: show
+---
+
+# Show
+
+Running `sedge show` will give you some information about the containers created by Sedge for a specific `sedge-data` directory.
+
+## Help
+
+```
+$ sedge show -h
+Show useful information about sedge running containers
+
+Usage:
+  sedge show [flags]
+
+Flags:
+  -h, --help          help for show
+  -p, --path string   generation path for sedge data (default "path/to/sedge-data")
+
+Global Flags:
+      --log-level string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
+```
+
+## Execution Example
+
+```
+$ sedge show
+2023-00-00 00:00:00 -- [INFO] [Logger Init] Log level: info
+2023-00-00 00:00:00 -- [INFO] You are running the latest version of sedge. Version:  v1.3.1
+2023-00-00 00:00:00 -- [INFO] Showing existing containers information
+2023-00-00 00:00:00 -- [INFO] containers:
+    - name: sedge-execution-client
+      image: nethermind/nethermind:1.17.3
+      internal_ip: 192.168.0.1
+    - name: sedge-consensus-client
+      image: sigp/lighthouse:v4.0.1
+      internal_ip: 192.168.0.2
+    - name: sedge-validator-client
+      image: sigp/lighthouse:v4.0.1
+      internal_ip: 192.168.0.3
+```

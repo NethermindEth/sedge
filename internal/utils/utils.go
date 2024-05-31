@@ -18,6 +18,7 @@ package utils
 import (
 	"fmt"
 	"net"
+	"net/url"
 	"regexp"
 	"sort"
 	"strings"
@@ -26,7 +27,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var reAddr = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
+var (
+	reAddr     = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
+	regexEnode = regexp.MustCompile(`^enode:\/\/[0-9a-fA-F]{128}@.*:[1-9][0-9]*$`)
+	regexEnr   = regexp.MustCompile(`enr:-.*$`)
+)
 
 /*
 SkipLines :
@@ -202,14 +207,59 @@ returns :-
 a. []K
 Filtered list
 */
-func Filter[K any](list []K, filter func(K) bool) []K {
-	n := 0
+func Filter[T any](list []T, filter func(T) bool) (ret []T) {
 	for _, v := range list {
 		if filter(v) {
-			list[n] = v
-			n++
+			ret = append(ret, v)
 		}
 	}
+	return
+}
 
-	return list[:n]
+// UriValidator validates a URI and returns true if it is valid.
+func UriValidator(input []string) (string, bool) {
+	for _, uri := range input {
+		u, err := url.Parse(uri)
+		if err != nil {
+			return uri, false
+		}
+		wrongScheme := u.Scheme != "http" && u.Scheme != "https"
+
+		if wrongScheme || u.Host == "" {
+			return uri, false
+		}
+	}
+	return "", true
+}
+
+// ENodesValidator validates a list of EL boot nodes and returns an error if any
+// of them is invalid.
+func ENodesValidator(bootNodes []string) error {
+	set := make(map[string]struct{})
+	for _, bootNode := range bootNodes {
+		if _, ok := set[bootNode]; ok {
+			return fmt.Errorf("%s: %s", configs.ErrDuplicatedBootNode, bootNode)
+		}
+		if !regexEnode.MatchString(bootNode) {
+			return fmt.Errorf(configs.InvalidEnodeError, bootNode)
+		}
+		set[bootNode] = struct{}{}
+	}
+	return nil
+}
+
+// ENRValidator validates a list of CL boot nodes and returns an error if any
+// of them is invalid.
+func ENRValidator(bootNodes []string) error {
+	set := make(map[string]struct{})
+	for _, bootNode := range bootNodes {
+		if _, ok := set[bootNode]; ok {
+			return fmt.Errorf("%s: %s", configs.ErrDuplicatedBootNode, bootNode)
+		}
+		if !regexEnr.MatchString(bootNode) {
+			return fmt.Errorf(configs.InvalidEnrError, bootNode)
+		}
+		set[bootNode] = struct{}{}
+	}
+	return nil
 }

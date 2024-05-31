@@ -18,24 +18,24 @@ package clients
 import (
 	"fmt"
 	"testing"
+
+	"github.com/NethermindEth/sedge/internal/utils"
+	"github.com/stretchr/testify/assert"
 )
-
-// TODO: Add testcases for other networks
-
-func validateSupportedClients(t *testing.T, clientType string, supportedClients []string) {
-	// TODO: validate supported clients
-}
 
 func TestSupportedClients(t *testing.T) {
 	inputs := [...]struct {
 		clientType string
 		network    string
+		want       []string
 		isErr      bool
 	}{
-		{"execution", "mainnet", false},
-		{"consensus", "mainnet", false},
-		{"validator", "mainnet", false},
-		{"random", "mainnet", true},
+		{"execution", "gnosis", []string{"nethermind", "erigon"}, false},
+		{"consensus", "gnosis", utils.Filter(AllClients["consensus"], func(c string) bool { return c != "prysm" }), false},
+		{"execution", "mainnet", AllClients["execution"], false},
+		{"consensus", "mainnet", AllClients["consensus"], false},
+		{"validator", "mainnet", AllClients["validator"], false},
+		{"random", "mainnet", []string{}, true},
 	}
 
 	for _, input := range inputs {
@@ -48,7 +48,7 @@ func TestSupportedClients(t *testing.T) {
 			if err != nil {
 				t.Errorf("%s failed: %v", descr, err)
 			} else {
-				validateSupportedClients(t, input.clientType, res)
+				assert.EqualValues(t, input.want, res, descr)
 			}
 		}
 	}
@@ -132,7 +132,7 @@ func TestClients(t *testing.T) {
 			map[string][]string{
 				"validator": {"lighthouse", "teku", "lodestar"},
 				"consensus": {"lighthouse", "teku", "lodestar"},
-				"execution": {"nethermind"},
+				"execution": {"nethermind", "erigon"},
 			},
 			[]string{"consensus", "execution", "validator"},
 			"gnosis",

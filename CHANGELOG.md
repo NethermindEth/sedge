@@ -7,33 +7,162 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update client images to Dencun-ready versions. 
+- 
+
+### Removed
+- Removed support for Goerli. 
+
+## [v1.3.1] - 2024-02-14
+
+### Fixed
+
+- Remove the Lodestar `--eth1.providerUrls` flag
+- Replace the Lighthouse `--eth1-endpoints` flag with `--eth1`.
+
+### Changed
+
+- Update client images.
+
+## [v1.3.0] - 2023-12-11
+
 ### Added
 
-- Documentation for all supported networks and clients.
-- Support for custom networks
-- When generating new mnemonic, show it without a trace.
+- New `--latest` flag to `sedge generate` subcommands to use the latest version of the image in the clients.
+- Integrate Holesky network.
+
+### Fixed
+
+- Remove TTD of the params, test cases, command flags and geth patch for custom testnets.
+
+### Changed
+
+- Remove default bootnodes for networks managed by clients.
+- Remove custom configurations for Chiado and instead use the clients configuration.
+- Update client images.
+
+## [v1.2.3] - 2023-08-16
+
+### Added
+
+- Support for Erigon in Gnosis.
+
+### Fixed
+
+- Issue in Chiado templates with checkpoint sync.
+- Fix show error when using containers tags.
+
+### Changed
+
+- Update client images.
+- Moved xdai to gnosis on Nethermind config.
+
+## [v1.2.2] - 2023-07-24
+
+### Changed
+
+- Update client images to Shapella-ready version for Gnosis.
+
+### Fixed
+
+- Issue in Chiado templates with checkpoint sync.
+- Fix show error when using containers tags.
+- Fix chiado checkpoint sync url.
+
+## [v1.2.1] - 2023-06-22
+
+### Changed
+
+- Update client images.
+- Update Nethermind's configuration to show new logging format and colors.
+
+### Fixed
+
+- Missing symbol in validator-blocker container main command.
+
+## [v1.2.0] - 2023-06-06
+
+### Added
+
+- New command to show Sedge container info: `sedge show`.
+- Add default [checkpoint sync url]( https://checkpoint.chiadochain.net ) for Chiado.
+- New `--skip-pull` flag to skip pulling docker images when running `sedge run`.
+
+### Changed
+
+- Update client images.
+
+### Fixed
+
+- Change validator blocker container image to [busybox](https://hub.docker.com/_/busybox).
+- Erigon command line flags.
+
+## [v1.1.0] - 2023-04-07
+
+### Added
+
+- Unit tests.
+
+### Changed
+
+- Update client images to Shapella-ready version.
+- Update Nethermind client settings. Use default JSON-RPC modules, Prunning Cache size, and Snap Sync mode.
+- Update Goerli checkpoint sync to use [this]( https://goerli.checkpoint-sync.ethpandaops.io).
+
+### Fixed
+
+- Fix Erigon command line flags.
+- Checkpoint sync URL prompt is not longer mandatory.
+
+## [v1.0.0] - 2023-3-23
+
+### Added
+
+- Add `generate` command to generate only an execution, consensus, or validator setup code.
 - Support import slashing protection interchange data [EIP-3076](https://eips.ethereum.org/EIPS/eip-3076)
   while running the setup with the `cli` command or with the new command `slashing-import`.
 - Support export slashing protection interchange data [EIP-3076](https://eips.ethereum.org/EIPS/eip-3076)
   with the new command `slashing-export`.
-- Support the new command `run`, used to run all the services generated
-- Support for PPA packaging (apt install)
+- Support the new command `run`, used to run all the services generated.
+- Support for PPA packaging (apt install).
+- Add flag `--container-tag` to add a suffix to sedge containers name.
+- Support the new command `import-key` to import validator keys in an existing configuration.
+- New command to check dependencies: `sedge deps check`
+- New command to install dependencies: `sedge deps install`
+- All the commands that needs dependencies will check if they are installed
+  as a pre-requisite. If not, the command will fail and suggest to run `sedge deps check`.
+- Documentation for all supported networks and clients.
+- Add guides and descriptions for new commands in the Documentation.
+- When generating new mnemonic, show it without a trace in the Terminal.
 
 ### Changed
 
-- Updated installation script for docker and docker compose in Linux flavours.
-- Use newed created action for JWT secret handling
-- Fixed validator restart failure:
-  - Validator waits a grace period (2 epochs) before starting.
-  - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint returns with the HTTP code 200 in its docker-compose `healthcheck` condition so that the validator waits for the consensus be healthy. This replace the older track sync method.
-  - Validator service now always restarts unless stopped.
-  - Removed `v` from the tag on release scripts. Now we should use `Tag=v1.0.0` instead of `Tag=1.0.0`.
+- Improved test coverage
+- Updated client versions
+- Refactor `sedge cli` command to use the new sedge actions in a more interactive way.
 - Rename sedge data directory name to `sedge-data` instead of `docker-compose-scripts`.
+- Update mev-boost relay URLs.
+- Fixed validator restart failure. Validator never restarts, but has a better and safer start-up method:
+  - Validator waits a grace period (2 epochs) before starting.
+  - Validator waits for the consensus sync to finish: verifying that the `/eth/v1/node/health` consensus endpoint
+      returns with the HTTP code 200 in the newly added `validator-blocker` docker-compose service. This replace the
+      older track sync method.
+- Updated installation script for docker and docker compose in Linux flavours.
+- Updated Checkpoint Sync Url for Goerli.
+- Use new created action for JWT secret handling.
+- Removed `v` from the tag on release scripts. Now we should use `Tag=v1.0.0` instead of `Tag=1.0.0`.
 
 ### Removed
 
 - Removed config file dependency.
 - Removed `prysm` from consensus templates on Gnosis as supported client.
+
+### Fixed
+
+- Add missing params at teku validator template.
+- Remove double params at prysm validator template.
 
 ## [v0.6.0] - 2022-12-23
 

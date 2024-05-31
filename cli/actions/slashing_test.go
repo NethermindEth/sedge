@@ -17,14 +17,16 @@ package actions_test
 
 import (
 	"errors"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
-	mock_client "github.com/NethermindEth/sedge/test/mock_docker"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -52,18 +54,21 @@ func TestSlashingExport_ValidatorNotFound(t *testing.T) {
 
 func validatorNotFoundHelper(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
 	t.Helper()
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
 			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return(make([]types.Container, 0), nil).
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
+	return actions.NewSedgeActions(actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+	})
 }
 
 func TestSlashingImport_CheckValidatorFailure(t *testing.T) {
@@ -89,24 +94,30 @@ func TestSlashingExport_CheckValidatorFailure(t *testing.T) {
 }
 
 func checkValidatorFailureHelper(t *testing.T, ctrl *gomock.Controller, wantError error) actions.SedgeActions {
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
 			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
-			{ID: "validatorctid"},
+			{
+				ID:    "validatorctid",
+				Names: []string{"/" + services.DefaultSedgeValidatorClient},
+			},
 		}, nil).
 		Times(1)
 	dockerClient.EXPECT().
-		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
+		ContainerInspect(gomock.Any(), services.DefaultSedgeValidatorClient).
 		Return(types.ContainerJSON{}, wantError).
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
+	return actions.NewSedgeActions(actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+	})
 }
 
 func TestSlashingImport_ValidatorStopFailure(t *testing.T) {
@@ -130,21 +141,24 @@ func TestSlashingExport_ValidatorStopFailure(t *testing.T) {
 }
 
 func validatorStopFailureHelper(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
 
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
 			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
-			{ID: validatorCtId},
+			{
+				ID:    validatorCtId,
+				Names: []string{"/" + services.DefaultSedgeValidatorClient},
+			},
 		}, nil).
 		Times(1)
 	dockerClient.EXPECT().
-		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
+		ContainerInspect(gomock.Any(), services.DefaultSedgeValidatorClient).
 		Return(types.ContainerJSON{
 			ContainerJSONBase: &types.ContainerJSONBase{
 				ID: validatorCtId,
@@ -160,7 +174,10 @@ func validatorStopFailureHelper(t *testing.T, ctrl *gomock.Controller) actions.S
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
+	return actions.NewSedgeActions(actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+	})
 }
 
 func TestSlashingImport_ValidatorRunning(t *testing.T) {
@@ -170,7 +187,7 @@ func TestSlashingImport_ValidatorRunning(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			s := slashingGoldenPath(t, ctrl)
+			s := slashingGoldenPath(t, ctrl, "")
 
 			generationPath := t.TempDir()
 			from := setupSlashingDataFile(t, filepath.Join(t.TempDir(), "slashing-data.json"))
@@ -199,7 +216,9 @@ func TestSlashingExport_ValidatorRunning(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			s := slashingGoldenPath(t, ctrl)
+			tag := "sampleTag"
+
+			s := slashingGoldenPath(t, ctrl, tag)
 
 			generationPath := t.TempDir()
 
@@ -210,6 +229,7 @@ func TestSlashingExport_ValidatorRunning(t *testing.T) {
 				Network:         "sepolia",
 				GenerationPath:  generationPath,
 				Out:             out,
+				ContainerTag:    tag,
 			})
 			assert.Nil(t, err)
 			assert.FileExists(t, out)
@@ -225,26 +245,30 @@ func TestSlashingExport_ValidatorRunning(t *testing.T) {
 // slashingGoldenPath returns a SedgeActions interface with a mocked docker client
 // with all the required responses for a correct slashing container execution.
 // This setup is valid for the export and import process.
-func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag string) actions.SedgeActions {
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
-	slashingCtName := "validator-slashing-data"
+	slashingCtName := services.ContainerNameWithTag(services.ServiceCtSlashingData, containerTag)
 	slashingCtId := "slashing-ct-id"
 
+	validatorContainerName := services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, containerTag)
 	// Mock ContainerList
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
 			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+			Filters: filters.NewArgs(filters.Arg("name", validatorContainerName)),
 		}).
 		Return([]types.Container{
-			{ID: validatorCtId},
+			{
+				ID:    validatorCtId,
+				Names: []string{"/" + validatorContainerName},
+			},
 		}, nil).
 		Times(1)
 	// Mock ContainerInspect
 	dockerClient.EXPECT().
-		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
+		ContainerInspect(gomock.Any(), validatorContainerName).
 		Return(types.ContainerJSON{
 			ContainerJSONBase: &types.ContainerJSONBase{
 				ID: validatorCtId,
@@ -262,7 +286,7 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller) actions.SedgeActi
 	// Mock ContainerCreate
 	dockerClient.EXPECT().
 		ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), slashingCtName).
-		Return(container.ContainerCreateCreatedBody{ID: slashingCtId}, nil).
+		Return(container.CreateResponse{ID: slashingCtId}, nil).
 		Times(1)
 	// Mock ContainerStart
 	dockerClient.EXPECT().
@@ -270,17 +294,22 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller) actions.SedgeActi
 		Return(nil).
 		Times(1)
 	dockerClient.EXPECT().
-		ContainerStart(gomock.Any(), services.ServiceCtValidator, gomock.Any()).
+		ContainerStart(gomock.Any(), validatorContainerName, gomock.Any()).
 		Return(nil).
 		Times(1)
 	// Mock ContainerWait
-	exitCh := make(chan container.ContainerWaitOKBody, 1)
-	exitCh <- container.ContainerWaitOKBody{
+	exitCh := make(chan container.WaitResponse, 1)
+	exitCh <- container.WaitResponse{
 		StatusCode: 0,
 	}
 	dockerClient.EXPECT().
 		ContainerWait(gomock.Any(), slashingCtName, container.WaitConditionNextExit).
 		Return(exitCh, make(chan error)).
+		Times(1)
+	// Mock container logs
+	dockerClient.EXPECT().
+		ContainerLogs(gomock.Any(), slashingCtId, gomock.Any()).
+		Return(ioutil.NopCloser(strings.NewReader("logs")), nil).
 		Times(1)
 	// Mock ContainerRemove
 	dockerClient.EXPECT().
@@ -289,7 +318,10 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller) actions.SedgeActi
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
+	return actions.NewSedgeActions(actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+	})
 }
 
 func TestSlashingImport_UnsupportedClient(t *testing.T) {
@@ -347,7 +379,7 @@ func TestSlashingExport_UnsupportedClient(t *testing.T) {
 }
 
 func unsupportedClientsHelper(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 
 	validatorCtId := "validatorctid"
 
@@ -355,15 +387,18 @@ func unsupportedClientsHelper(t *testing.T, ctrl *gomock.Controller) actions.Sed
 	dockerClient.EXPECT().
 		ContainerList(gomock.Any(), types.ContainerListOptions{
 			All:     true,
-			Filters: filters.NewArgs(filters.Arg("name", services.ServiceCtValidator)),
+			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
 		Return([]types.Container{
-			{ID: validatorCtId},
+			{
+				ID:    validatorCtId,
+				Names: []string{"/" + services.DefaultSedgeValidatorClient, "name-0"},
+			},
 		}, nil).
 		Times(1)
 	// Mock ContainerInspect
 	dockerClient.EXPECT().
-		ContainerInspect(gomock.Any(), services.ServiceCtValidator).
+		ContainerInspect(gomock.Any(), services.DefaultSedgeValidatorClient).
 		Return(types.ContainerJSON{
 			ContainerJSONBase: &types.ContainerJSONBase{
 				ID: validatorCtId,
@@ -380,7 +415,10 @@ func unsupportedClientsHelper(t *testing.T, ctrl *gomock.Controller) actions.Sed
 		Times(1)
 
 	serviceManager := services.NewServiceManager(dockerClient)
-	return actions.NewSedgeActions(dockerClient, serviceManager, nil)
+	return actions.NewSedgeActions(actions.SedgeActionsOptions{
+		DockerClient:   dockerClient,
+		ServiceManager: serviceManager,
+	})
 }
 
 const (

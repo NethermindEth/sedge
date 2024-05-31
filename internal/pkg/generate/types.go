@@ -15,10 +15,13 @@ limitations under the License.
 */
 package generate
 
-import "github.com/NethermindEth/sedge/internal/pkg/clients"
+import (
+	"github.com/NethermindEth/sedge/internal/pkg/clients"
+)
 
 // EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
 type EnvData struct {
+	Services                  []string
 	Mev                       bool
 	ElImage                   string
 	ElDataDir                 string
@@ -36,7 +39,8 @@ type EnvData struct {
 	ConsensusClientName       string
 	KeystoreDir               string
 	Graffiti                  string
-	RelayURL                  string
+	RelayURLs                 string
+	CheckpointSyncUrl         string
 }
 
 // GenData : Struct Data object for script's generation
@@ -49,13 +53,13 @@ type GenData struct {
 	CheckpointSyncUrl       string
 	FeeRecipient            string
 	JWTSecretPath           string
-	FallbackELUrls          *[]string
-	ElExtraFlags            *[]string
-	ClExtraFlags            *[]string
-	VlExtraFlags            *[]string
+	FallbackELUrls          []string
+	ElExtraFlags            []string
+	ClExtraFlags            []string
+	VlExtraFlags            []string
 	MapAllPorts             bool
 	Mev                     bool
-	RelayURL                string
+	RelayURLs               []string
 	MevImage                string
 	MevBoostService         bool
 	MevBoostEndpoint        string
@@ -63,9 +67,8 @@ type GenData struct {
 	Ports                   map[string]uint16
 	Graffiti                string
 	LoggingDriver           string
-	ECBootnodes             *[]string
-	CCBootnodes             *[]string
-	CustomTTD               string
+	ECBootnodes             []string
+	CCBootnodes             []string
 	CustomChainSpecPath     string
 	CustomNetworkConfigPath string
 	CustomGenesisPath       string
@@ -75,14 +78,17 @@ type GenData struct {
 	ExecutionApiUrl         string
 	ExecutionAuthUrl        string
 	ConsensusApiUrl         string
+	ContainerTag            string
+	LatestVersion           bool
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
 	Services                []string
-	TTD                     string
+	Network                 string
 	XeeVersion              bool
 	Mev                     bool
+	MevBoostOnValidator     bool
 	MevPort                 uint16
 	MevImage                string
 	MevBoostEndpoint        string
@@ -103,7 +109,6 @@ type DockerComposeData struct {
 	ClExtraFlags            []string
 	VlExtraFlags            []string
 	ECBootnodes             string
-	ECBootnodesList         []string
 	CCBootnodes             string
 	CCBootnodesList         []string
 	MapAllPorts             bool
@@ -120,10 +125,10 @@ type DockerComposeData struct {
 	VLStartGracePeriod      uint
 	UID                     int // Needed for teku
 	GID                     int // Needed for teku
+	ContainerTag            string
 }
 
-// WithConsensusClient returns true if the consensus client is explicitly required
-// by the user, with the --run-clients flag.
+// WithConsensusClient returns true if the consensus client is set
 func (d DockerComposeData) WithConsensusClient() bool {
 	for _, service := range d.Services {
 		if service == consensus {
@@ -133,10 +138,30 @@ func (d DockerComposeData) WithConsensusClient() bool {
 	return false
 }
 
+// WithValidatorClient returns true if the validator client is set
+func (d DockerComposeData) WithValidatorClient() bool {
+	for _, service := range d.Services {
+		if service == validator {
+			return true
+		}
+	}
+	return false
+}
+
+// WithMevBoostClient returns true if the Mev-Boost client is set
+func (d EnvData) WithMevBoostClient() bool {
+	for _, service := range d.Services {
+		if service == mevBoost {
+			return true
+		}
+	}
+	return false
+}
+
 type ComposeData struct {
-	Version  string    `yaml:"version"`
+	Version  string    `yaml:"version,omitempty"`
 	Services *Services `yaml:"services"`
-	Networks *Networks `yaml:"networks"`
+	Networks *Networks `yaml:"networks,omitempty"`
 }
 type Options struct {
 	MaxSize string `yaml:"max-size"`
@@ -156,7 +181,7 @@ type Execution struct {
 	Ports           []string `yaml:"ports"`
 	Expose          []int    `yaml:"expose"`
 	Command         []string `yaml:"command"`
-	Logging         *Logging `yaml:"logging"`
+	Logging         *Logging `yaml:"logging,omitempty"`
 }
 type Mevboost struct {
 	Image         string   `yaml:"image"`
@@ -175,19 +200,12 @@ type Consensus struct {
 	Ports           []string `yaml:"ports"`
 	Expose          []int    `yaml:"expose"`
 	Command         []string `yaml:"command"`
-	Logging         *Logging `yaml:"logging"`
-}
-type ValidatorImport struct {
-	ContainerName string   `yaml:"container_name"`
-	Image         string   `yaml:"image"`
-	Networks      []string `yaml:"networks"`
-	Volumes       []string `yaml:"volumes"`
-	Command       string   `yaml:"command"`
-	Logging       *Logging `yaml:"logging"`
+	Logging         *Logging `yaml:"logging,omitempty"`
 }
 type ValidatorBlocker struct {
-	Image   string `yaml:"image"`
-	Command string `yaml:"command"`
+	Image         string `yaml:"image"`
+	ContainerName string `yaml:"container_name"`
+	Command       string `yaml:"command"`
 }
 type ValidatorImportDependsOn struct {
 	Condition string `yaml:"condition"`
@@ -203,23 +221,22 @@ type Validator struct {
 	Ports         []string   `yaml:"ports"`
 	Volumes       []string   `yaml:"volumes"`
 	Command       []string   `yaml:"command"`
-	Logging       *Logging   `yaml:"logging"`
+	Logging       *Logging   `yaml:"logging,omitempty"`
 }
 type ConfigConsensus struct {
 	ContainerName string   `yaml:"container_name"`
 	Image         string   `yaml:"image"`
 	Volumes       []string `yaml:"volumes"`
 	Command       []string `yaml:"command"`
-	Logging       *Logging `yaml:"logging"`
+	Logging       *Logging `yaml:"logging,omitempty"`
 }
 type Services struct {
-	Execution        *Execution        `yaml:"execution"`
-	Mevboost         *Mevboost         `yaml:"mevboost"`
-	Consensus        *Consensus        `yaml:"consensus"`
-	ValidatorImport  *ValidatorImport  `yaml:"validator-import"`
-	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker"`
-	Validator        *Validator        `yaml:"validator"`
-	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus"`
+	Execution        *Execution        `yaml:"execution,omitempty"`
+	Mevboost         *Mevboost         `yaml:"mev-boost,omitempty"`
+	Consensus        *Consensus        `yaml:"consensus,omitempty"`
+	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker,omitempty"`
+	Validator        *Validator        `yaml:"validator,omitempty"`
+	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus,omitempty"`
 }
 type Sedge struct {
 	Name string `yaml:"name"`

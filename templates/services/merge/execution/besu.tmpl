@@ -2,7 +2,7 @@
 {{ define "execution" }}
   execution:
     stop_grace_period: 30m
-    container_name: execution-client
+    container_name: sedge-execution-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
     image: ${EC_IMAGE_VERSION}
     networks:
@@ -21,8 +21,7 @@
     expose:
       - {{.ElApiPort}}
       - {{.ElAuthPort}}
-    command:{{if .TTD}}
-    - --override-genesis-config=terminalTotalDifficulty={{.TTD}}{{end}}
+    command:
     - --sync-mode=X_SNAP
     - --data-storage-format=BONSAI{{if .CustomChainSpecPath}}
     - --genesis-file=/nethermind/custom_config/chainspec.json{{else}}

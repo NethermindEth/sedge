@@ -1,59 +1,32 @@
 {{/* lodestar.tmpl */}}
 {{ define "validator" }}
-  validator-import:
-    container_name: validator-import-client
-    image: ${VL_IMAGE_VERSION}
-    networks:
-      - sedge
-    volumes:
-      - ${KEYSTORE_DIR}:/keystore
-      - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
-      - {{.CustomNetworkConfigPath}}:/network_config/config.yaml{{end}}{{end}}
-    command: |
-      validator import
-      --preset=${VL_LODESTAR_PRESET}{{if not .CustomConsensusConfigs}}
-      --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{else}}
-      --paramsFile /network_config/config.yaml{{end}}
-      --dataDir=/data
-      --importKeystores=/keystore/validator_keys
-      --importKeystoresPassword=/keystore/keystore_password.txt{{if .LoggingDriver}}
-    logging:
-      driver: "{{.LoggingDriver}}"
-      options:
-        max-size: "10m"
-        max-file: "10"{{end}}
   validator:
-    container_name: validator-client
+    container_name: sedge-validator-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     image: ${VL_IMAGE_VERSION}
-    restart: unless-stopped
     depends_on:
-      validator-import:
-        condition: service_completed_successfully
       validator-blocker:
-        condition: service_completed_successfully{{if .WithConsensusClient}}
-      consensus:
-        condition: service_healthy{{end}}
+        condition: service_completed_successfully
     networks:
       - sedge
     ports:
       - "{{.VlMetricsPort}}:{{.VlMetricsPort}}"
     volumes:
-      - ${VL_DATA_DIR}:/data/validator{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
     command: 
-      - validator
-      - --preset=${VL_LODESTAR_PRESET}{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
+      - validator{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       - --paramsFile=/network_config/config.yml{{end}}{{else}}
+      - --preset=${VL_LODESTAR_PRESET}
       - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
-      - --dataDir=/data/validator
-      - --logFile=/data/validator/logs/validator.log
+      - --dataDir=/data
+      - --logFile=/data/logs/validator.log
       - --logFileLevel=${VL_LOG_LEVEL}
       - --server=${CC_API_URL}
       - --metrics=true
       - --metrics.address=0.0.0.0
       - --metrics.port={{.VlMetricsPort}}{{with .FeeRecipient}}
-      - --suggestedFeeRecipient=${CC_FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
-      - --{{$flag}}{{end}}{{if .Mev}}
+      - --suggestedFeeRecipient=${FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
+      - --{{$flag}}{{end}}{{if .MevBoostOnValidator}}
       - --builder=true{{end}}
       - --graffiti=${GRAFFITI}{{if .LoggingDriver}}
     logging:

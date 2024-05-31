@@ -24,10 +24,10 @@ import (
 const (
 	// Network names
 	NetworkMainnet = "mainnet"
-	NetworkGoerli  = "goerli"
 	NetworkSepolia = "sepolia"
 	NetworkGnosis  = "gnosis"
 	NetworkChiado  = "chiado"
+	NetworkHolesky = "holesky"
 	NetworkCustom  = "custom"
 )
 
@@ -35,7 +35,7 @@ var ErrInvalidNetwork = errors.New("invalid network")
 
 func NetworkCheck(value string) error {
 	switch value {
-	case NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkCustom:
+	case NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky, NetworkCustom:
 		return nil
 	default:
 		return fmt.Errorf("%w: %s", ErrInvalidNetwork, value)
@@ -43,23 +43,29 @@ func NetworkCheck(value string) error {
 }
 
 func NetworkSupported() []string {
+	// notest
 	return []string{
 		NetworkMainnet,
-		NetworkGoerli,
 		NetworkSepolia,
 		NetworkGnosis,
 		NetworkChiado,
+		NetworkHolesky,
 		NetworkCustom,
 	}
 }
 
 func NetworkEpochTime(network string) time.Duration {
 	switch network {
-	case NetworkMainnet, NetworkGoerli, NetworkSepolia:
+	case NetworkMainnet, NetworkSepolia:
 		return 7 * time.Minute
 	case NetworkGnosis, NetworkChiado:
 		return 2 * time.Minute
 	default:
 		return 7 * time.Minute
 	}
+}
+
+func SupportsMEVBoost(network string) bool {
+	out, ok := networksConfigs[network]
+	return ok && out.SupportsMEVBoost
 }

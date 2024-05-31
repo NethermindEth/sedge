@@ -1,0 +1,51 @@
+---
+sidebar_position: 2
+slug: new-networks
+---
+
+# Adding new Networks
+
+We support Ethereum Mainnet and Gnosis Chain, and over time we will update the different testnets on those networks.
+
+We support only active testnets, like Sepolia for Ethereum and Chiado for Gnosis, and in the past we supported
+other networks now deprecated, we will give our best to keep our pipeline updated.
+
+If you want to contribute to Sedge adding a new network, you can follow the next steps:
+
+1. Create a folder with the name of the network under `templates/envs`.
+2. Create an envs base that contains network base information at `templates/envs/[network]/env_base.tmpl`, like in the
+above example for sepolia:
+```
+{{/* docker-compose_base.tmpl */}}
+{{ define "env" }}
+# --- Global configuration ---
+NETWORK=sepolia{{if .WithMevBoostClient}}
+RELAY_URLS={{.RelayURLs}}{{end}}{{if .FeeRecipient}}
+FEE_RECIPIENT={{.FeeRecipient}}{{end}}
+{{template "execution" .}}
+{{template "consensus" .}}
+{{template "validator" .}}
+{{ end }}
+```
+3. Add configs for each of the clients (consensus, execution, validator) in the respective folders inside
+`templates/envs/[network]/[client]`, and fill with the needed environment variables.
+4. Create an entry on `configs/init.go`, in the method `InitNetworksConfigs()` with the network information, for example:
+```
+{
+	NetworkSepolia: {
+		Name:               NetworkSepolia,
+		NetworkService:     "merge",
+		GenesisForkVersion: "0x90000069",
+		SupportsMEVBoost:   true,
+		CheckpointSyncURL:  "https://sepolia.checkpoint-sync.ethpandaops.io",
+		RelayURLs: []string{
+			"https://0x845bd072b7cd566f02faeb0a4033ce9399e42839ced64e8b2adcfc859ed1e8e1a5a293336a49feac6d9a5edb779be53a@builder-relay-sepolia.flashbots.net",
+		},
+	},
+},
+```
+5. Update documentation, including all the references on `docs/docs` folder, that are going to be displayed on Sedge
+official documentation, and on the `Readme.md`
+6. Add entry on the `CHANGELOG.md`
+7. Run tests, and add new tests if needed.
+8. Create a PR with your changes, and we will review it as soon as possible.

@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/NethermindEth/sedge/internal/pkg/services"
-	mock_client "github.com/NethermindEth/sedge/test/mock_docker"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/docker/docker/api/types"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -29,7 +29,7 @@ import (
 
 func TestIsRunningError(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	expectedError := errors.New("error")
@@ -47,7 +47,7 @@ func TestIsRunningError(t *testing.T) {
 
 func TestIsRunningFalse(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	dockerClient.EXPECT().
@@ -69,7 +69,7 @@ func TestIsRunningFalse(t *testing.T) {
 
 func TestIsRunningTrue(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	dockerClient := mock_client.NewMockAPIClient(ctrl)
+	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
 
 	dockerClient.EXPECT().

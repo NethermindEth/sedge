@@ -1,11 +1,8 @@
 {{/* nethermind.tmpl */}}
 {{ define "execution" }}
 # --- Execution Layer - Execution Node - configuration ---
-EC_IMAGE_VERSION={{if .ElImage}}{{.ElImage}}{{else}}nethermind/nethermind:1.14.7{{end}}
+EC_IMAGE_VERSION={{.ElImage}}
 NETHERMIND_LOG_LEVEL=INFO
-EC_ENABLED_MODULES=[Web3,Eth,Subscribe,Net,]
-NETHERMIND_PRUNING_CACHEMB=2048
 EC_DATA_DIR={{.ElDataDir}}
-EC_SNAP_SYNC_ENABLED=true
 EC_JWT_SECRET_PATH={{.JWTSecretPath}}
 {{ end }}

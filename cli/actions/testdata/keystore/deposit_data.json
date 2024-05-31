@@ -1,0 +1,15 @@
+[
+    {
+        "account": "m/12381/3600/0/0/0",
+        "amount": 32000000000,
+        "deposit_cli_version": "2.3.0",
+        "deposit_data_root": "40e2439274062f6388cfc4aecaf07c7112fcd044d2806418512d65c6410f0d8b",
+        "deposit_message_root": "6ac41ba6b64472887eec532cd6fd62ecd8bbfd3b913bb6bd74459d0d92f00e29",
+        "fork_version": "90000069",
+        "network_name": "sepolia",
+        "pubkey": "a5f8b813573f9f091f5be0bd14791e09e279239265a2e65386800a1c254eae1e0d824ef07f5010f5709e2aecb74ecc33",
+        "signature": "a83b11c248fd91770fed5a54b47eb8f03628f5de5aadfea8dde938d43b939d578bf1eda14e608e6ab4b6fe4b3c4fdfb004417c7e88b93fe2c1eaa0dfd05482b8c53c8c69dde31c6a047c23288f07b608cb5daa77da6add2205ad0c0e9eb06c81",
+        "version": 1,
+        "withdrawal_credentials": "00bec62b3f2d322dfbdba40dcc115ca0d0c568391affbe251a07804f6ba3a345"
+    }
+]

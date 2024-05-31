@@ -1,0 +1,48 @@
+services:
+  consensus:
+    stop_grace_period: 30s
+    container_name: sedge-consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    depends_on:
+      mev-boost:
+        condition: service_started
+    networks:
+      - sedge
+    volumes:
+      - ${CC_DATA_DIR}:/var/lib/lighthouse
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+      - 9000:9000/tcp
+      - 9000:9000/udp
+      - 5054:5054/tcp
+      - 4000:4000
+    expose:
+      - 4000
+    command:
+      - lighthouse
+      - bn
+      - --disable-upnp
+      - --datadir=/var/lib/lighthouse
+      - --port=9000
+      - --http
+      - --http-address=0.0.0.0
+      - --http-port=4000
+      - --network=${NETWORK}
+      - --target-peers=${CC_PEER_COUNT}
+      - --execution-endpoints=${EC_AUTH_URL}
+      - --execution-jwt=/tmp/jwt/jwtsecret
+      - --eth1=${EC_API_URL}
+      - --debug-level=${CC_LOG_LEVEL}
+      - --suggested-fee-recipient=${FEE_RECIPIENT}
+      - --validator-monitor-auto
+      - --subscribe-all-subnets
+      - --import-all-attestations
+      - --metrics
+      - --metrics-port=5054
+      - --metrics-address=0.0.0.0
+      - --checkpoint-sync-url=https://beaconstate.ethstaker.cc
+      - --builder=http://mev-boost:18550
+networks:
+  sedge:
+    name: sedge-network

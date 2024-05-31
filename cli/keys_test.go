@@ -18,15 +18,16 @@ package cli
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/NethermindEth/sedge/cli/prompts"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
+	"github.com/NethermindEth/sedge/internal/ui"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/test"
-	"github.com/NethermindEth/sedge/test/mock_prompts"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 )
@@ -40,7 +41,7 @@ type keysCmdTestCase struct {
 	existingVal    int64
 	numVal         int64
 	runner         commands.CommandRunner
-	prompt         prompts.Prompt
+	prompt         ui.Prompter
 	fdOut          *bytes.Buffer
 	isErr          bool
 }
@@ -49,7 +50,7 @@ func buildKeysTestCase(t *testing.T, caseName, caseDataPath, caseNetwork string,
 	tc := keysCmdTestCase{}
 	configPath := t.TempDir()
 
-	err := test.PrepareTestCaseDir(filepath.Join("testdata", "keys_tests", caseDataPath, "config"), configPath)
+	err := test.PrepareTestCaseDir(filepath.Join("testdata", "keys_tests", caseDataPath), configPath)
 	if err != nil {
 		t.Fatalf("Can't build test case: %v", err)
 	}
@@ -81,7 +82,7 @@ func buildKeysTestCase(t *testing.T, caseName, caseDataPath, caseNetwork string,
 	tc.existingVal = existing
 	tc.numVal = num
 	tc.runner = &test.SimpleCMDRunner{} // TODO: mock this
-	tc.prompt = prompts.NewPromptCli()
+	tc.prompt = ui.NewPrompter()
 	tc.fdOut = new(bytes.Buffer)
 	tc.isErr = isErr
 	return &tc
@@ -89,6 +90,8 @@ func buildKeysTestCase(t *testing.T, caseName, caseDataPath, caseNetwork string,
 
 func TestKeysCmd(t *testing.T) {
 	// TODO: allow to test error programs
+	// Silence logger
+	log.SetOutput(io.Discard)
 	tcs := []keysCmdTestCase{
 		*buildKeysTestCase(t, "Mainnet", "case_1", "mainnet", 0, 1, false),
 		*buildKeysTestCase(t, "Bigger number", "case_1", "sepolia", 0, 100, false),
@@ -128,12 +131,12 @@ func TestKeysCmd_RandomPassphrase(t *testing.T) {
 
 	t.Run("no passphrase prompt when random-passphrase flag is used", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		prompt := mock_prompts.NewMockPrompt(ctrl)
+		prompt := sedge_mocks.NewMockPrompter(ctrl)
 		defer ctrl.Finish()
 
 		prompt.
 			EXPECT().
-			Passphrase().
+			InputSecret(gomock.Any()).
 			Times(0)
 
 		rootCmd := RootCmd()

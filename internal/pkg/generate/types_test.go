@@ -30,7 +30,14 @@ func TestDockerComposeData_WithConsensusClient(t *testing.T) {
 		{
 			name: "with consensus client",
 			data: DockerComposeData{
-				Services: []string{"execution", "consensus", "validator"},
+				Services: []string{"execution", "consensus", "validator", "mev-boost"},
+			},
+			want: true,
+		},
+		{
+			name: "with consensus client",
+			data: DockerComposeData{
+				Services: []string{"consensus"},
 			},
 			want: true,
 		},
@@ -38,6 +45,13 @@ func TestDockerComposeData_WithConsensusClient(t *testing.T) {
 			name: "without consensus client",
 			data: DockerComposeData{
 				Services: []string{"execution", "validator"},
+			},
+			want: false,
+		},
+		{
+			name: "without consensus client",
+			data: DockerComposeData{
+				Services: []string{"execution", "mev-boost"},
 			},
 			want: false,
 		},
@@ -52,7 +66,107 @@ func TestDockerComposeData_WithConsensusClient(t *testing.T) {
 	for _, tC := range tests {
 		t.Run(tC.name, func(t *testing.T) {
 			out := tC.data.WithConsensusClient()
-			assert.Equal(t, out, tC.want)
+			assert.Equal(t, out, tC.want, "services: %v", tC.data.Services)
+		})
+	}
+}
+
+func TestDockerComposeData_WithValidatorClient(t *testing.T) {
+	tests := []struct {
+		name string
+		data DockerComposeData
+		want bool
+	}{
+		{
+			name: "with validator client",
+			data: DockerComposeData{
+				Services: []string{"execution", "consensus", "validator", "mev-boost"},
+			},
+			want: true,
+		},
+		{
+			name: "with validator client",
+			data: DockerComposeData{
+				Services: []string{"validator"},
+			},
+			want: true,
+		},
+		{
+			name: "without validator client",
+			data: DockerComposeData{
+				Services: []string{"execution", "consensus", "mev-boost"},
+			},
+			want: false,
+		},
+		{
+			name: "without validator client",
+			data: DockerComposeData{
+				Services: []string{"execution"},
+			},
+			want: false,
+		},
+		{
+			name: "with nil services",
+			data: DockerComposeData{
+				Services: nil,
+			},
+			want: false,
+		},
+	}
+	for _, tC := range tests {
+		t.Run(tC.name, func(t *testing.T) {
+			out := tC.data.WithValidatorClient()
+			assert.Equal(t, out, tC.want, "services: %v", tC.data.Services)
+		})
+	}
+}
+
+func TestDockerComposeData_WithMevBoostClient(t *testing.T) {
+	tests := []struct {
+		name string
+		data EnvData
+		want bool
+	}{
+		{
+			name: "with mev-boost client",
+			data: EnvData{
+				Services: []string{"execution", "consensus", "validator", "mev-boost"},
+			},
+			want: true,
+		},
+		{
+			name: "with mev-boost client",
+			data: EnvData{
+				Services: []string{"mev-boost"},
+			},
+			want: true,
+		},
+		{
+			name: "without mev-boost client",
+			data: EnvData{
+				Services: []string{"execution", "consensus"},
+			},
+			want: false,
+		},
+		{
+			name: "without mev-boost client",
+			data: EnvData{
+				Services: []string{"execution"},
+			},
+			want: false,
+		},
+		{
+			name: "with nil services",
+			data: EnvData{
+				Services: nil,
+			},
+			want: false,
+		},
+	}
+	for _, tC := range tests {
+		t.Run(tC.name, func(t *testing.T) {
+			out := tC.data.WithMevBoostClient()
+			assert.Equal(t, out, tC.want, "services: %v", tC.data.Services)
 		})
 	}
 }

@@ -1,0 +1,81 @@
+---
+sidebar_position: 3
+id: deps
+---
+
+# Deps
+
+Running `sedge deps` will allows you to check and install dependencies for needed to run Sedge.
+
+## Help
+
+```
+$ sedge deps --help
+Checks and install dependencies needed to run Sedge.
+
+Usage:
+  sedge deps [command]
+
+Available Commands:
+  check       Check dependencies
+  install     Install dependencies
+
+Flags:
+  -h, --help   help for deps
+
+Global Flags:
+      --log-level string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
+
+Use "sedge deps [command] --help" for more information about a command.
+```
+
+## Check
+`sedge deps check` will check if all dependencies are installed and if not, it will print a list of missing dependencies.
+```
+$ sedge deps check
+Checks if the following dependencies are installed on the host machine:
+	- docker
+	- docker compose
+
+Also checks if the docker engine is running
+
+Usage:
+  sedge deps check [flags]
+
+Flags:
+  -h, --help   help for check
+
+Global Flags:
+      --log-level string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
+```
+
+## Install
+
+`sedge deps install` will install all missing dependencies.
+
+```
+$ sedge deps install
+Checks if docker is installed in the host machine. If not, it will try to install it.
+Installation is only supported on Linux.
+
+Usage:
+  sedge deps install [flags]
+
+Flags:
+  -h, --help   help for install
+
+Global Flags:
+      --log-level string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
+```
+
+## Execution Example
+
+The execution of `sedge deps check` will result in an output like this if everything looks good:
+
+```
+$ sedge deps check
+2023-03-21 02:56:04 -- [INFO] [Logger Init] Log level: info
+2023-03-21 02:56:05 -- [INFO] You are running the latest version of sedge. Version:  v1.3.1
+2023-03-21 02:56:05 -- [INFO] docker is installed
+2023-03-21 02:56:06 -- [INFO] All dependencies are installed and running
+```

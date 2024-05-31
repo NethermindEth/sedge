@@ -1,0 +1,109 @@
+version: "3.9"
+services:
+  mev-boost:
+    image: flashbots/mev-boost:latest
+    networks:
+      - sedge
+    container_name: sedge-mev-boost
+    restart: on-failure
+    entrypoint:
+      - /app/mev-boost
+      - -addr
+      - 0.0.0.0:18550
+      - -${NETWORK}
+      - -relay-check
+      - -relays
+      - ${RELAY_URLS}
+  consensus:
+    stop_grace_period: 30s
+    container_name: sedge-consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    depends_on:
+      mev-boost:
+        condition: service_started
+    networks:
+      - sedge
+    volumes:
+      - ${CC_DATA_DIR}:/var/lib/lighthouse
+      - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+      - 9000:9000/tcp
+      - 9000:9000/udp
+      - 5054:5054/tcp
+      - 4000:4000
+    expose:
+      - 4000
+    command:
+      - lighthouse
+      - bn
+      - --disable-upnp
+      - --datadir=/var/lib/lighthouse
+      - --port=9000
+      - --http
+      - --http-address=0.0.0.0
+      - --http-port=4000
+      - --network=${NETWORK}
+      - --target-peers=${CC_PEER_COUNT}
+      - --execution-endpoints=${EC_AUTH_URL}
+      - --execution-jwt=/tmp/jwt/jwtsecret
+      - --eth1=${EC_API_URL}
+      - --debug-level=${CC_LOG_LEVEL}
+      - --suggested-fee-recipient=${FEE_RECIPIENT}
+      - --validator-monitor-auto
+      - --subscribe-all-subnets
+      - --import-all-attestations
+      - --metrics
+      - --metrics-port=5054
+      - --metrics-address=0.0.0.0
+      - --checkpoint-sync-url=https://beaconstate.ethstaker.cc
+      - --builder=http://mev-boost:18550
+  validator-blocker:
+    container_name: sedge-validator-blocker
+    image: yauritux/busybox-curl:latest
+    networks:
+      - sedge
+    command: |-
+      sh -c "
+        echo 'Waiting 420 seconds of grace period before starting the validator';
+        sleep 420;
+        echo 'Done';
+        while true; do
+          response=$$(curl -s -o /dev/null -w \"%{http_code}\" ${CC_API_URL}/eth/v1/node/health)
+          if [ $$response -eq 200 ]; then
+            echo 'Endpoint is up!'
+            break
+          else
+            echo 'Endpoint is down, waiting 30 seconds before checking again...'
+            sleep 30
+          fi
+        done
+      "
+  validator:
+    container_name: sedge-validator-client
+    image: ${VL_IMAGE_VERSION}
+    depends_on:
+      validator-blocker:
+        condition: service_completed_successfully
+    networks:
+      - sedge
+    ports:
+      - 5056:5056
+    volumes:
+      - ${VL_DATA_DIR}:/data
+    command:
+      - lighthouse
+      - vc
+      - --network=${NETWORK}
+      - --beacon-nodes=${CC_API_URL}
+      - --graffiti=${GRAFFITI}
+      - --debug-level=${VL_LOG_LEVEL}
+      - --validators-dir=/data/validators
+      - --suggested-fee-recipient=${FEE_RECIPIENT}
+      - --metrics
+      - --metrics-port=5056
+      - --metrics-address=0.0.0.0
+      - --builder-proposals
+networks:
+  sedge:
+    name: sedge-network

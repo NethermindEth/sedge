@@ -30,6 +30,8 @@ type CommandRunner interface {
 
 	BuildDockerComposeLogsCMD(options DockerComposeLogsOptions) Command
 
+	BuildDockerComposeVersionCMD() Command
+
 	BuildDockerBuildCMD(options DockerBuildOptions) Command
 
 	BuildDockerPullCMD(options DockerBuildOptions) Command
@@ -44,7 +46,7 @@ type CommandRunner interface {
 
 	BuildOpenTextEditor(options OpenTextEditorOptions) Command
 
-	RunCMD(cmd Command) (string, error)
+	RunCMD(cmd Command) (string, int, error)
 
 	RunScript(script ScriptFile) (string, error)
 }

@@ -81,6 +81,7 @@ func NewKeyEntry(priv e2types.PrivateKey, keyPath string, ww *WalletWriter, inse
 			return nil, err
 		}
 		if n != 32 {
+			// notest
 			return nil, errors.New(configs.KeyEntryGenerationError)
 		}
 		// Convert it to human readable characters, to keep it manageable
@@ -133,17 +134,18 @@ func (ke *KeyEntry) MarshalJSON() ([]byte, error) {
 	return json.Marshal(keystore)
 }
 
-func (ke *KeyEntry) PubHex() string {
-	return "0x" + hex.EncodeToString(ke.publicKey.Marshal())
-}
+// not being used
+// func (ke *KeyEntry) PubHex() string {
+// 	return "0x" + hex.EncodeToString(ke.publicKey.Marshal())
+// }
 
-func (ke *KeyEntry) Path() string {
-	return ke.path
-}
+// func (ke *KeyEntry) Path() string {
+// 	return ke.path
+// }
 
-func (ke *KeyEntry) PubHexBare() string {
-	return hex.EncodeToString(ke.publicKey.Marshal())
-}
+// func (ke *KeyEntry) PubHexBare() string {
+// 	return hex.EncodeToString(ke.publicKey.Marshal())
+// }
 
 type WalletWriter struct {
 	sync.RWMutex

@@ -1,0 +1,36 @@
+services:
+  execution:
+    stop_grace_period: 30m
+    container_name: execution-client
+    restart: unless-stopped
+    image: ${EC_IMAGE_VERSION}
+    networks:
+    - sedge
+    volumes:
+    - ${EC_DATA_DIR}:/home/erigon/.local/share/erigon
+    - ${EC_JWT_SECRET_PATH}:/home/erigon/.local/share/erigon/jwt.hex
+    ports:
+    - 30303:30303/tcp
+    - 30303:30303/udp
+    - 8008:8008/tcp
+    expose:
+    - 8545
+    - 8551
+    user: root
+    command:
+    - erigon
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+  consensus:
+    image: ${CC_IMAGE_VERSION}
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+networks:
+  sedge:
+    name: sedge_network

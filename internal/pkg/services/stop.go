@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
 )
@@ -33,9 +34,11 @@ func (s *serviceManager) Stop(service string) error {
 		return err
 	}
 	if ctInfo.State.Running {
-		log.Infof("stopping service: %s, currently on %s status", service, ctInfo.State.Status)
-		timeout := 5 * time.Minute
-		if err := s.dockerClient.ContainerStop(context.Background(), ctInfo.ID, &timeout); err != nil {
+		log.Infof("Stopping service: %s, currently on %s status", service, ctInfo.State.Status)
+		timeout := 5 * int(time.Minute)
+		if err := s.dockerClient.ContainerStop(context.Background(), ctInfo.ID, container.StopOptions{
+			Timeout: &timeout,
+		}); err != nil {
 			return fmt.Errorf("%w %s: %s", ErrStoppingContainer, service, err)
 		}
 	}

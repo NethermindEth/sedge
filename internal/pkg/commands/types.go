@@ -89,7 +89,7 @@ type DockerComposePsOptions struct {
 	Path string
 	// Services : use with --services to display services
 	Services bool
-	// Quiet : use with --quietto display only IDs
+	// Quiet : use with --quiet to display only IDs
 	Quiet bool
 	// ServiceName: Service argument
 	ServiceName string
@@ -115,6 +115,8 @@ type DockerBuildOptions struct {
 	Path string
 	// Tag : docker build --tag tag
 	Tag string
+	// Args : docker --build-arg tags
+	Args map[string]string
 }
 
 // DockerInspectOptions : Represents docker inspect command options

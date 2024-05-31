@@ -16,134 +16,150 @@ limitations under the License.
 package cli
 
 import (
-	"bytes"
+	"errors"
 	"fmt"
-	"os"
+	"io"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/NethermindEth/sedge/configs"
+	sedge_mocks "github.com/NethermindEth/sedge/mocks"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/test"
 	log "github.com/sirupsen/logrus"
 )
 
-type logsTestCase struct {
-	name          string
-	runner        commands.CommandRunner
-	generatedPath string
-	fdOut         *bytes.Buffer
-	services      []string
-	isErr         bool
-	dcPsRuns      int
-	dcLogsRuns    int
-	tail          int
-}
-
-func prepareLogsTestCaseDCScripts(name, dest string) (string, error) {
-	caseDCScriptsPath := filepath.Join("testdata", "logs_tests", name, configs.DefaultSedgeDataFolderName)
-	dcPath := filepath.Join(dest, configs.DefaultSedgeDataFolderName)
-	if err := os.MkdirAll(dcPath, os.ModePerm); err != nil {
-		return "", err
+func TestLogs(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+	tests := []struct {
+		name  string
+		args  []string
+		setup func(*sedge_mocks.MockDependenciesManager, *sedge_mocks.MockSedgeActions)
+		cmd   commands.CommandRunner
+		err   string
+	}{
+		{
+			name: "docker not installed",
+			setup: func(depsMgr *sedge_mocks.MockDependenciesManager, sedgeActions *sedge_mocks.MockSedgeActions) {
+				depsMgr.EXPECT().Check([]string{"docker"}).Return(nil, []string{"docker"}).Times(1)
+			},
+			err: "missing dependencies: docker",
+		},
+		{
+			name: "docker compose not installed",
+			setup: func(depsMgr *sedge_mocks.MockDependenciesManager, sedgeActions *sedge_mocks.MockSedgeActions) {
+				gomock.InOrder(
+					depsMgr.EXPECT().Check([]string{"docker"}).Return([]string{"docker"}, nil).Times(1),
+					depsMgr.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+					depsMgr.EXPECT().DockerComposeIsInstalled().Return(fmt.Errorf("%w: %s", dependencies.ErrDependencyNotInstalled, "docker-compose")).Times(1),
+				)
+			},
+			err: "dependency not installed: docker-compose",
+		},
+		{
+			name: "docker engine not running",
+			setup: func(depsMgr *sedge_mocks.MockDependenciesManager, sedgeActions *sedge_mocks.MockSedgeActions) {
+				gomock.InOrder(
+					depsMgr.EXPECT().Check([]string{"docker"}).Return([]string{"docker"}, nil).Times(1),
+					depsMgr.EXPECT().DockerEngineIsOn().Return(dependencies.ErrDockerEngineIsNotRunning).Times(1),
+				)
+			},
+			err: "docker engine is not running",
+		},
+		{
+			name: "logs stopped by user",
+			setup: func(depsMgr *sedge_mocks.MockDependenciesManager, sedgeActions *sedge_mocks.MockSedgeActions) {
+				gomock.InOrder(
+					depsMgr.EXPECT().Check([]string{"docker"}).Return([]string{"docker"}, nil).Times(1),
+					depsMgr.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+					sedgeActions.EXPECT().ValidateDockerComposeFile(filepath.Join(configs.DefaultAbsSedgeDataPath, "docker-compose.yml")).Return(nil).Times(1),
+				)
+			},
+			cmd: &test.SimpleCMDRunner{
+				SRunCMD: func(c commands.Command) (string, int, error) {
+					if strings.Contains(c.Cmd, "docker compose -f") && strings.Contains(c.Cmd, "logs") {
+						return "", 130, nil
+					}
+					return "", 0, nil
+				},
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
+					return "", nil
+				},
+			},
+		},
+		{
+			name: "error",
+			setup: func(depsMgr *sedge_mocks.MockDependenciesManager, sedgeActions *sedge_mocks.MockSedgeActions) {
+				gomock.InOrder(
+					depsMgr.EXPECT().Check([]string{"docker"}).Return([]string{"docker"}, nil).Times(1),
+					depsMgr.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+					sedgeActions.EXPECT().ValidateDockerComposeFile(filepath.Join(configs.DefaultAbsSedgeDataPath, "docker-compose.yml")).Return(nil).Times(1),
+				)
+			},
+			cmd: &test.SimpleCMDRunner{
+				SRunCMD: func(c commands.Command) (string, int, error) {
+					if strings.Contains(c.Cmd, "docker compose -f") && strings.Contains(c.Cmd, "logs") {
+						return "", 1, errors.New("error")
+					}
+					return "", 0, nil
+				},
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
+					return "", nil
+				},
+			},
+			err: "failed to get logs for services . Error: error",
+		},
+		{
+			name: "services arg",
+			args: []string{"execution", "consensus"},
+			setup: func(depsMgr *sedge_mocks.MockDependenciesManager, sedgeActions *sedge_mocks.MockSedgeActions) {
+				gomock.InOrder(
+					depsMgr.EXPECT().Check([]string{"docker"}).Return([]string{"docker"}, nil).Times(1),
+					depsMgr.EXPECT().DockerEngineIsOn().Return(nil).Times(1),
+					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
+					sedgeActions.EXPECT().ValidateDockerComposeFile(filepath.Join(configs.DefaultAbsSedgeDataPath, "docker-compose.yml")).Return(nil).Times(1),
+				)
+			},
+			cmd: &test.SimpleCMDRunner{
+				SRunCMD: func(c commands.Command) (string, int, error) {
+					if strings.Contains(c.Cmd, "docker compose -f") && strings.Contains(c.Cmd, "logs") {
+						return "", 0, nil
+					}
+					return "", 0, nil
+				},
+				SRunBash: func(bs commands.ScriptFile) (string, error) {
+					return "", nil
+				},
+			},
+		},
 	}
-	err := test.PrepareTestCaseDir(caseDCScriptsPath, dcPath)
-	return dcPath, err
-}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-func prepareFiles(t *testing.T, tc *logsTestCase) {
-	tempDir := t.TempDir()
-	tcGeneratedPath, err := prepareLogsTestCaseDCScripts(tc.name, tempDir)
-	if err != nil {
-		t.Fatalf("Can't build test case: %v", err)
-	}
+			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
+			sedgeActions := sedge_mocks.NewMockSedgeActions(ctrl)
 
-	tc.generatedPath = tcGeneratedPath
-}
+			tc.setup(depsMgr, sedgeActions)
 
-func buildLogsTestCase(t *testing.T, testName string, tail int, services []string, isErr bool) logsTestCase {
-	tc := logsTestCase{}
-	tc.name = testName
-
-	fdOut := new(bytes.Buffer)
-
-	// TODO: allow modification of the simple runner
-	runner := test.SimpleCMDRunner{
-		SRunCMD: func(c commands.Command) (string, error) {
-			if strings.Contains(c.Cmd, "docker compose") {
-				if strings.Contains(c.Cmd, "logs") {
-					tc.dcLogsRuns += 1
-					return "some logs", nil
-				}
-				if strings.Contains(c.Cmd, "ps") {
-					tc.dcPsRuns += 1
-					return ` Name             Command           State                       Ports
-					----------------------------------------------------------------------------
-					execution            bash              Up                  0.0.0.0:80->80/tcp
-					consensus            bash              Up                  0.0.0.0:80->80/tcp
-					validator            bash              Up                  0.0.0.0:80->80/tcp`, nil
-				}
+			cmd := LogsCmd(tc.cmd, sedgeActions, depsMgr)
+			cmd.SetOutput(io.Discard)
+			cmd.SetArgs(tc.args)
+			err := cmd.Execute()
+			if tc.err != "" {
+				assert.EqualError(t, err, tc.err)
+			} else {
+				assert.NoError(t, err)
 			}
-			return "", nil
-		},
-		SRunBash: func(bs commands.ScriptFile) (string, error) {
-			return "", nil
-		},
-	}
-
-	prepareFiles(t, &tc)
-
-	tc.runner = &runner
-	tc.fdOut = fdOut
-	tc.services = services
-	tc.isErr = isErr
-	tc.tail = tail
-	return tc
-}
-
-func TestLogsCmd(t *testing.T) {
-	tc1 := buildLogsTestCase(
-		t,
-		"case_1",
-		0,
-		[]string{"execution", "consensus", "validator"},
-		false,
-	)
-	tc2 := buildLogsTestCase(
-		t,
-		"case_1",
-		50,
-		[]string{"execution", "consensus", "validator"},
-		false,
-	)
-
-	tcs := []logsTestCase{
-		tc1,
-		tc2,
-	}
-
-	for _, tc := range tcs {
-		rootCmd := RootCmd()
-		rootCmd.AddCommand(LogsCmd(tc.runner))
-		var args []string
-		if tc.tail != 0 {
-			args = []string{"logs", "--path", tc.generatedPath, "--tail", fmt.Sprintf("%d", tc.tail)}
-		} else {
-			args = []string{"logs", "--path", tc.generatedPath}
-		}
-		args = append(args, tc.services...)
-		rootCmd.SetArgs(args)
-		rootCmd.SetOut(tc.fdOut)
-		log.SetOutput(tc.fdOut)
-
-		descr := fmt.Sprintf("sedge logs --tail %s", strings.Join(tc.services, " "))
-
-		err := rootCmd.Execute()
-		if tc.isErr && err == nil {
-			t.Errorf("%s expected to fail", descr)
-		} else if !tc.isErr && err != nil {
-			t.Errorf("%s failed: %v", descr, err)
-		}
+		})
 	}
 }
