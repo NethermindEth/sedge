@@ -122,7 +122,7 @@ func TestClients(t *testing.T) {
 			map[string][]string{
 				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
 				"consensus": {"lighthouse", "prysm", "teku", "lodestar"},
-				"execution": {"nethermind", "geth", "besu", "erigon","reth"},
+				"execution": {"nethermind", "geth", "besu", "erigon", "reth"},
 			},
 			[]string{"consensus", "other"},
 			"mainnet",

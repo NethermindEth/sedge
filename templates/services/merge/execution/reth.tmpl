@@ -19,26 +19,24 @@
     expose:
       - {{.ElApiPort}}
       - {{.ElAuthPort}}
-    pid: host
     command:
       - node
       - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
-      - --log.file.directory /root/logs
-      - --authrpc.addr 0.0.0.0
-      - --authrpc.port {{.ElAuthPort}}
-      - --authrpc.jwtsecret /root/jwt/jwt.hex
+      - --log.file.directory=/root/logs
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.port={{.ElAuthPort}}
+      - --authrpc.jwtsecret=/root/jwt/jwt.hex
       - --http 
-      - --http.addr = 0.0.0.0 
-      - --http.port = {{.ElApiPort}}
+      - --http.addr=0.0.0.0 
+      - --http.port={{.ElApiPort}}
       - --http.api 
       - eth,net,web3
       - --metrics
       - --metrics.port={{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}
-      logging:
+    logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:
         max-size: "10m"
         max-file: "10"{{end}}{{end}}
-
 {{ end }}
