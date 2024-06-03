@@ -9,7 +9,8 @@
       - sedge
     volumes:
       - ${EC_DATA_DIR}:/root/.local/share/reth/mainnet
-      - ${EC_JWT_SECRET_PATH}:/root/jwt:ro
+      - ${EC_JWT_SECRET_PATH}:/root/jwt
+    pid: host
     ports:
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
       - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
@@ -25,14 +26,13 @@
       - --log.file.directory=/root/logs
       - --authrpc.addr=0.0.0.0
       - --authrpc.port={{.ElAuthPort}}
-      - --authrpc.jwtsecret=/root/jwt/jwt.hex
+      - --authrpc.jwtsecret=/root/jwt
       - --http 
       - --http.addr=0.0.0.0 
       - --http.port={{.ElApiPort}}
       - --http.api 
       - eth,net,web3
-      - --metrics
-      - --metrics.port={{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
+      - --metrics=0.0.0.0:{{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
