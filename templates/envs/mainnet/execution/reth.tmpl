@@ -1,0 +1,9 @@
+{{/* reth.tmpl */}}
+{{ define "execution" }}
+# --- Execution Layer - Execution Node - configuration ---
+EC_IMAGE_VERSION={{.ElImage}}
+RETH_LOG_LEVEL=info   
+EC_DATA_DIR={{.ElDataDir}}
+EC_SYNC_MODE=snap     
+EC_JWT_SECRET_PATH={{.JWTSecretPath}}
+{{ end }}
