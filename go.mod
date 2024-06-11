@@ -10,6 +10,7 @@ require (
 	github.com/compose-spec/compose-go v1.12.0
 	github.com/distribution/reference v0.5.0
 	github.com/docker/docker v24.0.7+incompatible
+	github.com/ethereum/go-ethereum v1.14.5
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v47 v47.1.0
 	github.com/google/uuid v1.4.0
