@@ -1,7 +1,7 @@
 // Code generated - DO NOT EDIT.
 // This file is a generated binding and any manual changes will be lost.
 
-package mevboostrelaylist 
+package mevboostrelaylist
 
 import (
 	"errors"
@@ -216,7 +216,6 @@ func (_Api *ApiTransactorRaw) Transact(opts *bind.TransactOpts, method string, p
 func (_Api *ApiCaller) GetAllowedListVersion(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
 	err := _Api.contract.Call(opts, &out, "get_allowed_list_version")
-
 	if err != nil {
 		return *new(*big.Int), err
 	}
@@ -224,7 +223,6 @@ func (_Api *ApiCaller) GetAllowedListVersion(opts *bind.CallOpts) (*big.Int, err
 	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
 
 	return out0, err
-
 }
 
 // GetAllowedListVersion is a free data retrieval call binding the contract method 0x76650ad3.
@@ -247,7 +245,6 @@ func (_Api *ApiCallerSession) GetAllowedListVersion() (*big.Int, error) {
 func (_Api *ApiCaller) GetManager(opts *bind.CallOpts) (common.Address, error) {
 	var out []interface{}
 	err := _Api.contract.Call(opts, &out, "get_manager")
-
 	if err != nil {
 		return *new(common.Address), err
 	}
@@ -255,7 +252,6 @@ func (_Api *ApiCaller) GetManager(opts *bind.CallOpts) (common.Address, error) {
 	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
 
 	return out0, err
-
 }
 
 // GetManager is a free data retrieval call binding the contract method 0x9e4a0fc4.
@@ -278,7 +274,6 @@ func (_Api *ApiCallerSession) GetManager() (common.Address, error) {
 func (_Api *ApiCaller) GetOwner(opts *bind.CallOpts) (common.Address, error) {
 	var out []interface{}
 	err := _Api.contract.Call(opts, &out, "get_owner")
-
 	if err != nil {
 		return *new(common.Address), err
 	}
@@ -286,7 +281,6 @@ func (_Api *ApiCaller) GetOwner(opts *bind.CallOpts) (common.Address, error) {
 	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
 
 	return out0, err
-
 }
 
 // GetOwner is a free data retrieval call binding the contract method 0x0ac298dc.
@@ -309,7 +303,6 @@ func (_Api *ApiCallerSession) GetOwner() (common.Address, error) {
 func (_Api *ApiCaller) GetRelayByUri(opts *bind.CallOpts, relay_uri string) (Struct0, error) {
 	var out []interface{}
 	err := _Api.contract.Call(opts, &out, "get_relay_by_uri", relay_uri)
-
 	if err != nil {
 		return *new(Struct0), err
 	}
@@ -317,7 +310,6 @@ func (_Api *ApiCaller) GetRelayByUri(opts *bind.CallOpts, relay_uri string) (Str
 	out0 := *abi.ConvertType(out[0], new(Struct0)).(*Struct0)
 
 	return out0, err
-
 }
 
 // GetRelayByUri is a free data retrieval call binding the contract method 0xf5f33c7b.
@@ -340,7 +332,6 @@ func (_Api *ApiCallerSession) GetRelayByUri(relay_uri string) (Struct0, error) {
 func (_Api *ApiCaller) GetRelays(opts *bind.CallOpts) ([]Struct0, error) {
 	var out []interface{}
 	err := _Api.contract.Call(opts, &out, "get_relays")
-
 	if err != nil {
 		return *new([]Struct0), err
 	}
@@ -348,7 +339,6 @@ func (_Api *ApiCaller) GetRelays(opts *bind.CallOpts) ([]Struct0, error) {
 	out0 := *abi.ConvertType(out[0], new([]Struct0)).(*[]Struct0)
 
 	return out0, err
-
 }
 
 // GetRelays is a free data retrieval call binding the contract method 0x04e469ea.
@@ -371,7 +361,6 @@ func (_Api *ApiCallerSession) GetRelays() ([]Struct0, error) {
 func (_Api *ApiCaller) GetRelaysAmount(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
 	err := _Api.contract.Call(opts, &out, "get_relays_amount")
-
 	if err != nil {
 		return *new(*big.Int), err
 	}
@@ -379,7 +368,6 @@ func (_Api *ApiCaller) GetRelaysAmount(opts *bind.CallOpts) (*big.Int, error) {
 	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
 
 	return out0, err
-
 }
 
 // GetRelaysAmount is a free data retrieval call binding the contract method 0x312c3165.
@@ -620,7 +608,6 @@ type ApiAllowedListUpdated struct {
 //
 // Solidity: event AllowedListUpdated(uint256 indexed allowed_list_version)
 func (_Api *ApiFilterer) FilterAllowedListUpdated(opts *bind.FilterOpts, allowed_list_version []*big.Int) (*ApiAllowedListUpdatedIterator, error) {
-
 	var allowed_list_versionRule []interface{}
 	for _, allowed_list_versionItem := range allowed_list_version {
 		allowed_list_versionRule = append(allowed_list_versionRule, allowed_list_versionItem)
@@ -637,7 +624,6 @@ func (_Api *ApiFilterer) FilterAllowedListUpdated(opts *bind.FilterOpts, allowed
 //
 // Solidity: event AllowedListUpdated(uint256 indexed allowed_list_version)
 func (_Api *ApiFilterer) WatchAllowedListUpdated(opts *bind.WatchOpts, sink chan<- *ApiAllowedListUpdated, allowed_list_version []*big.Int) (event.Subscription, error) {
-
 	var allowed_list_versionRule []interface{}
 	for _, allowed_list_versionItem := range allowed_list_version {
 		allowed_list_versionRule = append(allowed_list_versionRule, allowed_list_versionItem)
@@ -766,7 +752,6 @@ type ApiERC20Recovered struct {
 //
 // Solidity: event ERC20Recovered(address indexed token, uint256 amount, address indexed recipient)
 func (_Api *ApiFilterer) FilterERC20Recovered(opts *bind.FilterOpts, token []common.Address, recipient []common.Address) (*ApiERC20RecoveredIterator, error) {
-
 	var tokenRule []interface{}
 	for _, tokenItem := range token {
 		tokenRule = append(tokenRule, tokenItem)
@@ -788,7 +773,6 @@ func (_Api *ApiFilterer) FilterERC20Recovered(opts *bind.FilterOpts, token []com
 //
 // Solidity: event ERC20Recovered(address indexed token, uint256 amount, address indexed recipient)
 func (_Api *ApiFilterer) WatchERC20Recovered(opts *bind.WatchOpts, sink chan<- *ApiERC20Recovered, token []common.Address, recipient []common.Address) (event.Subscription, error) {
-
 	var tokenRule []interface{}
 	for _, tokenItem := range token {
 		tokenRule = append(tokenRule, tokenItem)
@@ -920,7 +904,6 @@ type ApiManagerChanged struct {
 //
 // Solidity: event ManagerChanged(address indexed new_manager)
 func (_Api *ApiFilterer) FilterManagerChanged(opts *bind.FilterOpts, new_manager []common.Address) (*ApiManagerChangedIterator, error) {
-
 	var new_managerRule []interface{}
 	for _, new_managerItem := range new_manager {
 		new_managerRule = append(new_managerRule, new_managerItem)
@@ -937,7 +920,6 @@ func (_Api *ApiFilterer) FilterManagerChanged(opts *bind.FilterOpts, new_manager
 //
 // Solidity: event ManagerChanged(address indexed new_manager)
 func (_Api *ApiFilterer) WatchManagerChanged(opts *bind.WatchOpts, sink chan<- *ApiManagerChanged, new_manager []common.Address) (event.Subscription, error) {
-
 	var new_managerRule []interface{}
 	for _, new_managerItem := range new_manager {
 		new_managerRule = append(new_managerRule, new_managerItem)
@@ -1064,7 +1046,6 @@ type ApiOwnerChanged struct {
 //
 // Solidity: event OwnerChanged(address indexed new_owner)
 func (_Api *ApiFilterer) FilterOwnerChanged(opts *bind.FilterOpts, new_owner []common.Address) (*ApiOwnerChangedIterator, error) {
-
 	var new_ownerRule []interface{}
 	for _, new_ownerItem := range new_owner {
 		new_ownerRule = append(new_ownerRule, new_ownerItem)
@@ -1081,7 +1062,6 @@ func (_Api *ApiFilterer) FilterOwnerChanged(opts *bind.FilterOpts, new_owner []c
 //
 // Solidity: event OwnerChanged(address indexed new_owner)
 func (_Api *ApiFilterer) WatchOwnerChanged(opts *bind.WatchOpts, sink chan<- *ApiOwnerChanged, new_owner []common.Address) (event.Subscription, error) {
-
 	var new_ownerRule []interface{}
 	for _, new_ownerItem := range new_owner {
 		new_ownerRule = append(new_ownerRule, new_ownerItem)
@@ -1209,7 +1189,6 @@ type ApiRelayAdded struct {
 //
 // Solidity: event RelayAdded(string indexed uri_hash, (string,string,bool,string) relay)
 func (_Api *ApiFilterer) FilterRelayAdded(opts *bind.FilterOpts, uri_hash []string) (*ApiRelayAddedIterator, error) {
-
 	var uri_hashRule []interface{}
 	for _, uri_hashItem := range uri_hash {
 		uri_hashRule = append(uri_hashRule, uri_hashItem)
@@ -1226,7 +1205,6 @@ func (_Api *ApiFilterer) FilterRelayAdded(opts *bind.FilterOpts, uri_hash []stri
 //
 // Solidity: event RelayAdded(string indexed uri_hash, (string,string,bool,string) relay)
 func (_Api *ApiFilterer) WatchRelayAdded(opts *bind.WatchOpts, sink chan<- *ApiRelayAdded, uri_hash []string) (event.Subscription, error) {
-
 	var uri_hashRule []interface{}
 	for _, uri_hashItem := range uri_hash {
 		uri_hashRule = append(uri_hashRule, uri_hashItem)
@@ -1354,7 +1332,6 @@ type ApiRelayRemoved struct {
 //
 // Solidity: event RelayRemoved(string indexed uri_hash, string uri)
 func (_Api *ApiFilterer) FilterRelayRemoved(opts *bind.FilterOpts, uri_hash []string) (*ApiRelayRemovedIterator, error) {
-
 	var uri_hashRule []interface{}
 	for _, uri_hashItem := range uri_hash {
 		uri_hashRule = append(uri_hashRule, uri_hashItem)
@@ -1371,7 +1348,6 @@ func (_Api *ApiFilterer) FilterRelayRemoved(opts *bind.FilterOpts, uri_hash []st
 //
 // Solidity: event RelayRemoved(string indexed uri_hash, string uri)
 func (_Api *ApiFilterer) WatchRelayRemoved(opts *bind.WatchOpts, sink chan<- *ApiRelayRemoved, uri_hash []string) (event.Subscription, error) {
-
 	var uri_hashRule []interface{}
 	for _, uri_hashItem := range uri_hash {
 		uri_hashRule = append(uri_hashRule, uri_hashItem)
