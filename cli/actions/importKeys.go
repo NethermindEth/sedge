@@ -25,6 +25,7 @@ import (
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/images/validator-import/lighthouse"
+	"github.com/NethermindEth/sedge/internal/images/validator-import/prysm"
 	"github.com/NethermindEth/sedge/internal/images/validator-import/teku"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
@@ -49,6 +50,7 @@ type ImportValidatorKeysOptions struct {
 	GenerationPath  string
 	ContainerTag    string
 	CustomConfig    ImportValidatorKeysCustomOptions
+	Distributed     bool
 }
 type ImportValidatorKeysCustomOptions struct {
 	NetworkConfigPath string
@@ -97,6 +99,72 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 	}
 	options.GenerationPath = absGenerationPath
 
+	if options.Distributed {
+		cwd, err := os.Getwd()
+		if err != nil {
+			fmt.Println("Error:", err)
+			return err
+		}
+		charonPath := filepath.Join(cwd, ".charon")
+		charonValidatorKeysPath := filepath.Join(charonPath, "validator_keys")
+		defaultKeystorePath := filepath.Join(cwd, "keystore")
+		log.Infof("Copying the keys to the default path %s", defaultKeystorePath)
+		if err := os.MkdirAll(defaultKeystorePath, os.ModePerm); err != nil {
+			return err
+		}
+
+		validatorKeysPath := filepath.Join(defaultKeystorePath, "validator_keys")
+		if err := os.MkdirAll(validatorKeysPath, os.ModePerm); err != nil {
+			return err
+		}
+
+		depositDataPath := filepath.Join(charonPath, "deposit-data.json")
+		depositDataPathDest := filepath.Join(defaultKeystorePath, "deposit-data.json")
+		if err := copy.Copy(depositDataPath, depositDataPathDest); err != nil {
+			return err
+		}
+
+		files, err := os.ReadDir(charonValidatorKeysPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		len := len(files)
+		for i := 0; i < len/2; i++ {
+			keystorePath := filepath.Join(charonValidatorKeysPath, fmt.Sprintf("keystore-%d.json", i))
+			validatorPath := filepath.Join(validatorKeysPath, fmt.Sprintf("keystore-%d.json", i))
+			if err := copy.Copy(keystorePath, validatorPath); err != nil {
+				return err
+			}
+
+			keystoreTxtPath := filepath.Join(charonValidatorKeysPath, fmt.Sprintf("keystore-%d.txt", i))
+			keystorePasswordPath := filepath.Join(defaultKeystorePath, fmt.Sprintf("keystore-%d.txt", i))
+			if err := copy.Copy(keystoreTxtPath, keystorePasswordPath); err != nil {
+				return err
+			}
+		}
+		// Copy import scripts
+		if options.ValidatorClient == "lodestar" {
+			importScriptsPath := filepath.Join(cwd, "/scripts/charon/import_lodestar_keys.sh")
+			importScriptsPathDest := filepath.Join(defaultKeystorePath, "import_lodestar_keys.sh")
+			if err := copy.Copy(importScriptsPath, importScriptsPathDest); err != nil {
+				return err
+			}
+			// modify permissions
+			if err := os.Chmod(importScriptsPathDest, 0755); err != nil {
+				return err
+			}
+		}
+		if options.ValidatorClient == "prysm" {
+			keystorePasswordPath := filepath.Join(defaultKeystorePath, "keystore_password.txt")
+			f, err := os.Create(keystorePasswordPath)
+			if err != nil {
+				return err
+			}
+			f.WriteString("prysm-validator-secret")
+			defer f.Close()
+		}
+	}
+
 	if !isDefaultKeysPath(options.GenerationPath, options.From) {
 		defaultKeystorePath := filepath.Join(options.GenerationPath, "keystore")
 		log.Warnf("The keys path is not the default one, copying the keys to the default path %s", defaultKeystorePath)
@@ -106,7 +174,12 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 	var ctID string
 	switch options.ValidatorClient {
 	case "prysm":
-		prysmCtID, err := setupPrysmValidatorImportContainer(s.dockerClient, s.serviceManager, options)
+		prysmCtID := ""
+		if options.Distributed {
+			prysmCtID, err = setupPrysmValidatorImportContainerDV(s.dockerClient, s.commandRunner, s.serviceManager, options)
+		} else {
+			prysmCtID, err = setupPrysmValidatorImportContainer(s.dockerClient, s.serviceManager, options)
+		}
 		if err != nil {
 			return err
 		}
@@ -254,11 +327,20 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 		cmd = append(cmd, "--preset", preset)
 	}
 	log.Debugf("Creating %s container", validatorImportCtName)
-	ct, err := dockerClient.ContainerCreate(context.Background(),
-		&container.Config{
+	containerConfig := &container.Config{
+		Image: validatorImage,
+		Cmd:   cmd,
+	}
+	if options.Distributed {
+		containerConfig = &container.Config{
 			Image: validatorImage,
-			Cmd:   cmd,
-		},
+			Entrypoint: []string{
+				"/keystore/import_lodestar_keys.sh",
+			},
+		}
+	}
+	ct, err := dockerClient.ContainerCreate(context.Background(),
+		containerConfig,
 		&container.HostConfig{
 			Mounts:      mounts,
 			VolumesFrom: []string{validatorCtName},
@@ -437,4 +519,55 @@ func runAndWaitImportKeys(dockerClient client.APIClient, serviceManager services
 			return exitErr
 		}
 	}
+}
+
+func setupPrysmValidatorImportContainerDV(dockerClient client.APIClient, commandRunner commands.CommandRunner, serviceManager services.ServiceManager, options ImportValidatorKeysOptions) (string, error) {
+	var (
+		validatorCtName       = services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
+		validatorImportCtName = services.ContainerNameWithTag(services.ServiceCtValidatorImport, options.ContainerTag)
+	)
+	// Init build context
+	contextDir, err := prysm.InitContext()
+	if err != nil {
+		return "", err
+	}
+	// Build image
+	buildCmd := commandRunner.BuildDockerBuildCMD(commands.DockerBuildOptions{
+		Path: contextDir,
+		Tag:  "sedge/prysm-import-teku",
+		Args: map[string]string{
+			"NETWORK":       options.Network,
+			"PRYSM_VERSION": configs.ClientImages.Validator.Prysm.String(),
+		},
+	})
+	log.Infof(configs.RunningCommand, buildCmd.Cmd)
+	if _, _, err := commandRunner.RunCMD(buildCmd); err != nil {
+		return "", err
+	}
+	// Mounts
+	mounts := []mount.Mount{
+		{
+			Type:   mount.TypeBind,
+			Source: options.From,
+			Target: "/keystore",
+		},
+	}
+	log.Debugf("Creating %s container", validatorImportCtName)
+	containerConfig := &container.Config{
+		Image: "sedge/prysm-import-teku",
+	}
+	ct, err := dockerClient.ContainerCreate(context.Background(),
+		containerConfig,
+		&container.HostConfig{
+			Mounts:      mounts,
+			VolumesFrom: []string{validatorCtName},
+		},
+		&network.NetworkingConfig{},
+		&v1.Platform{},
+		validatorImportCtName,
+	)
+	if err != nil {
+		return "", err
+	}
+	return ct.ID, nil
 }
