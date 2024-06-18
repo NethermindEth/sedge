@@ -26,7 +26,6 @@ type MEVBoostRelayAllowedListTestSuite struct {
 	tx              *types.Transaction
 	apiContract     *Api
 	callOpts        *bind.CallOpts
-	
 }
 
 func TestMEVBoostRelayAllowedListSuite(t *testing.T) {
@@ -80,20 +79,6 @@ func (s *MEVBoostRelayAllowedListTestSuite) TearDownSuite() {
 	}
 }
 
-// func (s *MEVBoostRelayAllowedListTestSuite) TestDeployApi() {
-
-
-// 	if s.contractAddress == (common.Address{}) {
-// 		s.T().Errorf("Contract address is empty")
-// 	}
-// 	if s.tx == nil {
-// 		s.T().Errorf("Transaction is nil")
-// 	}
-// 	if s.apiContract == nil {
-// 		s.T().Errorf("Api contract instance is nil")
-// 	}
-// }
-
 func (s *MEVBoostRelayAllowedListTestSuite) TestGetOwner() {
 	ownerAddress, err := s.apiContract.GetOwner(s.callOpts)
 	if err != nil {
@@ -105,13 +90,9 @@ func (s *MEVBoostRelayAllowedListTestSuite) TestGetOwner() {
 }
 
 func (s *MEVBoostRelayAllowedListTestSuite) TestSetAndGetManager() {
-	newManagerKey, err := crypto.GenerateKey()
-	if err != nil {
-		s.T().Fatalf("Failed to generate new manager private key: %v", err)
-	}
-	newManagerAddress := crypto.PubkeyToAddress(newManagerKey.PublicKey)
+	newManagerAddress := common.HexToAddress("0xabcdefabcdefabcdefabcdefabcdefabcdef1234")
 
-	_, err = s.apiContract.SetManager(s.auth, newManagerAddress)
+	_, err := s.apiContract.SetManager(s.auth, newManagerAddress)
 	if err != nil {
 		s.T().Fatalf("Failed to call SetManager: %v", err)
 	}
@@ -127,13 +108,9 @@ func (s *MEVBoostRelayAllowedListTestSuite) TestSetAndGetManager() {
 }
 
 func (s *MEVBoostRelayAllowedListTestSuite) TestDismissManager() {
-	newManagerKey, err := crypto.GenerateKey()
-	if err != nil {
-		s.T().Fatalf("Failed to generate new manager private key: %v", err)
-	}
-	newManagerAddress := crypto.PubkeyToAddress(newManagerKey.PublicKey)
+	newManagerAddress := common.HexToAddress("0x1234567890123456789012345678901234567890")
 
-	_, err = s.apiContract.SetManager(s.auth, newManagerAddress)
+	_, err := s.apiContract.SetManager(s.auth, newManagerAddress)
 	if err != nil {
 		s.T().Fatalf("Failed to call SetManager: %v", err)
 	}
@@ -154,7 +131,7 @@ func (s *MEVBoostRelayAllowedListTestSuite) TestDismissManager() {
 func (s *MEVBoostRelayAllowedListTestSuite) TestGetRelaysAmount() {
 	amount, err := s.apiContract.GetRelaysAmount(s.callOpts)
 	if err != nil {
-		s.T().Fatalf("Failed to call GetRelaysAmmount: %v", err)
+		s.T().Fatalf("Failed to call GetRelaysAmount: %v", err)
 	}
 
 	relays, err := s.apiContract.GetRelays(s.callOpts)
@@ -163,7 +140,7 @@ func (s *MEVBoostRelayAllowedListTestSuite) TestGetRelaysAmount() {
 	}
 	expectedAmount := big.NewInt(int64(len(relays)))
 	if amount.Cmp(expectedAmount) != 0 {
-		s.T().Errorf("Incorrect relays ammount. Expected: %s, Got: %s", expectedAmount, amount)
+		s.T().Errorf("Incorrect relays amount. Expected: %s, Got: %s", expectedAmount, amount)
 	}
 }
 
@@ -216,35 +193,3 @@ func (s *MEVBoostRelayAllowedListTestSuite) TestGetAllowedListVersion() {
 		s.T().Errorf("Incorrect relays amount. Expected: %s, Got: %s", expectedVersion, updatedVersion)
 	}
 }
-
-// func (s *MEVBoostRelayAllowedListTestSuite) TestChangeOwner() {
-// 	ownerAddress := s.address
-// 	newOwnerKey, err := crypto.GenerateKey()
-// 	if err != nil {
-// 		s.T().Fatalf("Failed to generate new owner private key: %v", err)
-// 	}
-// 	newOwnerAddress := crypto.PubkeyToAddress(newOwnerKey.PublicKey)
-
-// 	_, err = s.apiContract.ChangeOwner(s.auth, newOwnerAddress)
-// 	if err != nil {
-// 		s.T().Fatalf("Failed to call ChangeOwner: %v", err)
-// 	}
-// 	s.sim.Commit()
-// 	s.address=newOwnerAddress
-
-// 	Currentaddress, err:= s.apiContract.GetOwner(s.callOpts)
-// 	if err != nil {
-// 		s.T().Fatalf("Failed to call GetOwner: %v", err)
-// 	}
-// 	if Currentaddress != newOwnerAddress {
-// 		s.T().Errorf("Incorrect owner address. Expected: %s, Got: %s", newOwnerAddress.Hex(), Currentaddress.Hex())
-// 	}
-
-// 	_, err = s.apiContract.ChangeOwner(s.auth, ownerAddress)
-// 	if err != nil {
-// 		s.T().Fatalf("Failed to call ChangeOwner: %v", err)
-// 	}
-// 	s.sim.Commit()
-// 	s.address=ownerAddress
-// }
-
