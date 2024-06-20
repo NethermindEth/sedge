@@ -15,6 +15,18 @@ type RelayData struct {
 	Holesky []Relay `yaml:"holesky"`
 }
 
+/*
+loadRelays :
+This function is responsible for:
+loading relays for each network from .yaml file
+params :-
+filename (string): .yaml file that has the relays
+returns :-
+a. map[string][]Relay
+Map of network name and its relays
+b. error
+Error if any
+*/
 func loadRelays(filename string) (map[string][]Relay, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {

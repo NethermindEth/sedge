@@ -8,13 +8,15 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/rpc"
 )
-// Relay : Struct represent data of MEV-Boost Relay 
+
+// Relay : Struct represent data of MEV-Boost Relay
 type Relay struct {
-    Uri         string `yaml:"Uri"`
-    Operator    string `yaml:"Operator"`
-    IsMandatory bool   `yaml:"IsMandatory"`
-    Description string `yaml:"Description"`
+	Uri         string `yaml:"Uri"`
+	Operator    string `yaml:"Operator"`
+	IsMandatory bool   `yaml:"IsMandatory"`
+	Description string `yaml:"Description"`
 }
+
 // Network configuration structs
 type NetworkConfig struct {
 	ContractAddress string
@@ -112,7 +114,7 @@ func GetRelays(network string) ([]Relay, error) {
 		return relays, fmt.Errorf("failed to get network config: %w", err)
 	}
 
-	 // Connect to the RPC endpoint
+	// Connect to the RPC endpoint
 	client, err := connectToRPC(config.RPCs)
 	if err != nil {
 		return relays, fmt.Errorf("failed to connect to RPC: %w", err)
