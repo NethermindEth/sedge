@@ -65,28 +65,47 @@ func getNetworkConfig(network string) (*NetworkConfig, error) {
 	}
 }
 
+/*
+GetRelays :
+This function is responsible for :-
+retrieving a list of relays from the MEV-Boost Allowed List contract for a given network.
+params :-
+network (string): The name of the network (e.g., "mainnet", "holesky").
+returns :-
+a. []Struct0
+List of relays
+b. error
+Error if any
+*/
 func GetRelays(network string) ([]Struct0, error) {
 	var relays []Struct0
 
+	// Fetch network configuration
 	config, err := getNetworkConfig(network)
 	if err != nil {
 		return relays, fmt.Errorf("Failed to get network config: %w", err)
 	}
+
+	 // Connect to the RPC endpoint
 	client, err := connectToRPC(config.RPCs)
 	if err != nil {
 		return relays, fmt.Errorf("Failed to connect to RPC: %w", err)
 	}
 	defer client.Close()
 
+	// Parse the ABI of the contract
 	parsedABI, err := abi.JSON(strings.NewReader(ApiABI))
 	if err != nil {
 		return relays, fmt.Errorf("Failed to parse ABI: %w", err)
 	}
+
+	// Pack the data for the "get_relays" method
 	data, err := parsedABI.Pack("get_relays")
 	if err != nil {
 		return relays, fmt.Errorf("Failed to pack ABI data: %w", err)
 	}
 
+	// Prepare the RPC call arguments
 	type CallArgs struct {
 		To   string `json:"to"`
 		Data string `json:"data"`
@@ -96,15 +115,19 @@ func GetRelays(network string) ([]Struct0, error) {
 		Data: "0x" + hex.EncodeToString(data),
 	}
 
+	// Execute the RPC call
 	var result string
 	if err := client.Call(&result, "eth_call", args, "latest"); err != nil {
 		return relays, fmt.Errorf("Failed to make RPC call: %w", err)
 	}
 
+	// Decode the result from the RPC call
 	output, err := hex.DecodeString(result[2:]) // Remove the '0x' prefix
 	if err != nil {
 		return relays, fmt.Errorf("Failed to decode result hex: %w", err)
 	}
+
+	// Unpack the result into the relays slice
 	err = parsedABI.UnpackIntoInterface(&relays, "get_relays", output)
 	if err != nil {
 		return relays, fmt.Errorf("Failed to unpack ABI output: %w", err)
