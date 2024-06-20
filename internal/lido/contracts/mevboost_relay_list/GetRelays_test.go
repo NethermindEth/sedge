@@ -38,7 +38,7 @@ func TestGetRelays(t *testing.T) {
 	log.SetOutput(io.Discard)
 
 	// Load relays from the YAML file
-	relaysMap, err := loadRelays("relays.yaml")
+	expectedRelaysMap, err := loadRelays("relays.yaml")
 	if err != nil {
 		t.Fatalf("Failed to load relays: %v", err)
 	}
@@ -49,10 +49,10 @@ func TestGetRelays(t *testing.T) {
 		expectedRelays []Relay
 	}{
 		{
-			"GetRelays Mainnet", "mainnet", relaysMap["mainnet"],
+			"GetRelays Mainnet", "mainnet", expectedRelaysMap["mainnet"],
 		},
 		{
-			"GetRelays Holesky", "holesky", relaysMap["holesky"],
+			"GetRelays Holesky", "holesky", expectedRelaysMap["holesky"],
 		},
 	}
 
