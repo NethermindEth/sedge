@@ -1,8 +1,8 @@
 package configs
 
-type RPC struct{
+type RPC struct {
 	NetworkName string
-	PublicRPCs []string
+	PublicRPCs  []string
 }
 
 var networkRPCs = map[string]RPC{
