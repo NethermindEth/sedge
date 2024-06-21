@@ -72,7 +72,7 @@ func TestGetRelays(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			relays, err := GetRelays(tc.network)
 			if err != nil {
-				t.Fatalf("Failed to call GetRelays %v", err)
+				t.Fatalf("Failed to call GetRelays: %v", err)
 			}
 
 			if !reflect.DeepEqual(relays, tc.expectedRelays) {

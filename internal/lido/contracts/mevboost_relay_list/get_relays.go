@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/NethermindEth/sedge/configs"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/rpc"
 )
@@ -17,31 +18,10 @@ type Relay struct {
 	Description string `yaml:"Description"`
 }
 
-// Network configuration structs
-type NetworkConfig struct {
-	ContractAddress string
-	RPCs            []string
-}
-
-// Define configurations for mainnet and Holesky
-var mainnetConfig = NetworkConfig{
-	ContractAddress: "0xF95f069F9AD107938F6ba802a3da87892298610E",
-	RPCs: []string{
-		"https://eth.llamarpc.com",
-		"https://eth-pokt.nodies.app",
-		"https://rpc.mevblocker.io",
-		"https://ethereum-rpc.publicnode.com",
-		"https://rpc.flashbots.net",
-	},
-}
-
-var holeskyConfig = NetworkConfig{
-	ContractAddress: "0x2d86C5855581194a386941806E38cA119E50aEA3",
-	RPCs: []string{
-		"https://1rpc.io/holesky",
-		"https://ethereum-holesky-rpc.publicnode.com",
-		"https://endpoints.omniatech.io/v1/eth/holesky/public",
-	},
+// Define deployed contract addresses for Mainnet and Holesky
+var deployedContractAddresses = map[string]string{
+	configs.NetworkMainnet: "0xF95f069F9AD107938F6ba802a3da87892298610E",
+	configs.NetworkHolesky: "0x2d86C5855581194a386941806E38cA119E50aEA3",
 }
 
 /*
@@ -71,29 +51,6 @@ func connectToRPC(RPCs []string) (*rpc.Client, error) {
 }
 
 /*
-getNetworkConfig :
-This function is responsible for:
-retrieving the network configuration based on the provided network name.
-params :-
-network (string): The name of the network (e.g., "mainnet", "holesky").
-returns :-
-a. *NetworkConfig
-The network configuration
-b. error
-Error if the network is unsupported
-*/
-func getNetworkConfig(network string) (*NetworkConfig, error) {
-	switch network {
-	case "mainnet":
-		return &mainnetConfig, nil
-	case "holesky":
-		return &holeskyConfig, nil
-	default:
-		return nil, fmt.Errorf("unsupported network: %s", network)
-	}
-}
-
-/*
 GetRelays :
 This function is responsible for :-
 retrieving a list of relays from the MEV-Boost Allowed List contract for a given network.
@@ -107,15 +64,13 @@ Error if any
 */
 func GetRelays(network string) ([]Relay, error) {
 	var relays []Relay
-
-	// Fetch network configuration
-	config, err := getNetworkConfig(network)
+	rpcs, err := configs.GetPublicRPCs(network)
 	if err != nil {
-		return relays, fmt.Errorf("failed to get network config: %w", err)
+		return relays, fmt.Errorf("failed to get public RPC: %w", err)
 	}
 
 	// Connect to the RPC endpoint
-	client, err := connectToRPC(config.RPCs)
+	client, err := connectToRPC(rpcs)
 	if err != nil {
 		return relays, fmt.Errorf("failed to connect to RPC: %w", err)
 	}
@@ -139,7 +94,7 @@ func GetRelays(network string) ([]Relay, error) {
 		Data string `json:"data"`
 	}
 	args := CallArgs{
-		To:   config.ContractAddress,
+		To:   deployedContractAddresses[network],
 		Data: "0x" + hex.EncodeToString(data),
 	}
 
