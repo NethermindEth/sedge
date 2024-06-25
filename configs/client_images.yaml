@@ -24,6 +24,9 @@ consensus:
   prysm:
     name: gcr.io/prysmaticlabs/prysm/beacon-chain
     version: v5.0.0
+  nimbus:
+    name: statusim/nimbus-eth2
+    version: multiarch-v24.3.0
 validator:
   lighthouse:
     name: sigp/lighthouse
@@ -37,3 +40,6 @@ validator:
   prysm:
     name: gcr.io/prysmaticlabs/prysm/validator
     version: v5.0.0
+  nimbus:
+    name: statusim/nimbus-validator-client
+    version: multiarch-v24.5.1
