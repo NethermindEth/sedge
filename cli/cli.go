@@ -25,6 +25,8 @@ import (
 
 	eth2 "github.com/protolambda/zrnt/eth2/configs"
 
+	"github.com/NethermindEth/sedge/internal/lido/contracts"
+	"github.com/NethermindEth/sedge/internal/lido/contracts/mevboostrelaylist"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
@@ -67,6 +69,7 @@ type CliCmdOptions struct {
 	nodeType                 string
 	withValidator            bool
 	withMevBoost             bool
+	withLido                 bool
 	importSlashingProtection bool
 	slashingProtectionFrom   string
 	jwtSourceType            string
@@ -96,12 +99,16 @@ func CliCmd(p ui.Prompter, actions actions.SedgeActions, depsMgr dependencies.De
 - Execution Node
 - Consensus Node
 - Validator Node
+- Lido CSM Node
 
 Follow the prompts to select the options you want for your node. At the end of the process, you will
 be asked to run the generated setup or not. If you chose to run the setup, it will be executed for you
 using docker compose command behind the scenes.
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := confirmWithLido(p, o); err != nil {
+				return err
+			}
 			if err := runPromptActions(p, o,
 				selectNetwork,
 				selectNodeType,
@@ -793,6 +800,25 @@ func confirmInstallDependencies(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.withMevBoost, err = p.Confirm("Enable MEV Boost?", true)
+	if o.withLido && o.withMevBoost {
+		_, ok := mevboostrelaylist.DeployedContractAddresses[o.genData.Network]
+		if !ok {
+			options := []string{}
+			for option := range mevboostrelaylist.DeployedContractAddresses {
+				options = append(options, option)
+			}
+			index, err := p.Select("Invalid network: Choose valid network for Lido with MEV-Boost", "", options)
+			if err != nil {
+				return err
+			}
+			o.genData.Network = options[index]
+		}
+	}
+	return
+}
+
+func confirmWithLido(p ui.Prompter, o *CliCmdOptions) (err error) {
+	o.withLido, err = p.Confirm("Do you want to set up a Lido CSM node?", false)
 	return
 }
 
@@ -847,6 +873,14 @@ func inputMevBoostEndpoint(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
+	if o.withLido {
+		relayURLs, err := mevboostrelaylist.GetRelaysURI(o.genData.Network)
+		if err != nil {
+			return err
+		}
+		o.genData.RelayURLs = relayURLs
+		return nil
+	}
 	var defaultValue []string = configs.NetworksConfigs()[o.genData.Network].RelayURLs
 	relayURLs, err := p.InputList("Insert relay URLs if you don't want to use the default values listed below", defaultValue, func(list []string) error {
 		badUri, ok := utils.UriValidator(list)
@@ -870,11 +904,45 @@ func inputCheckpointSyncURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
+	if o.withLido {
+		_, ok := contracts.FeeRecipient[o.genData.Network]
+		if !ok {
+			options := []string{}
+			for option := range contracts.FeeRecipient {
+				options = append(options, option)
+			}
+			index, err := p.Select("Invalid network: Choose valid network for Lido", "", options)
+			if err != nil {
+				return err
+			}
+			o.genData.Network = options[index]
+		}
+		feeRecipient := contracts.FeeRecipient[o.genData.Network]
+		o.genData.FeeRecipient = feeRecipient.FeeRecipientAddress
+		return
+	}
 	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address", "", true)
 	return
 }
 
 func inputFeeRecipientNoValidator(p ui.Prompter, o *CliCmdOptions) (err error) {
+	if o.withLido {
+		_, ok := contracts.FeeRecipient[o.genData.Network]
+		if !ok {
+			options := []string{}
+			for option := range contracts.FeeRecipient {
+				options = append(options, option)
+			}
+			index, err := p.Select("Choose valid network for Lido with MEV-Boost", "", options)
+			if err != nil {
+				return err
+			}
+			o.genData.Network = options[index]
+		}
+		feeRecipient, ok := contracts.FeeRecipient[o.genData.Network]
+		o.genData.FeeRecipient = feeRecipient.FeeRecipientAddress
+		return
+	}
 	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false)
 	return
 }

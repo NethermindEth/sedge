@@ -133,12 +133,12 @@ Error if any
 */
 func GetRelaysURI(network string) ([]string, error) {
 	relays, err := GetRelays(network)
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 	relayURIs := []string{}
-            for _, relay := range relays {
-                relayURIs = append(relayURIs, relay.Uri)
-            }
+	for _, relay := range relays {
+		relayURIs = append(relayURIs, relay.Uri)
+	}
 	return relayURIs, err
 }
