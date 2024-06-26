@@ -19,7 +19,7 @@ type Relay struct {
 }
 
 // Define deployed contract addresses for Mainnet and Holesky
-var deployedContractAddresses = map[string]string{
+var DeployedContractAddresses = map[string]string{
 	configs.NetworkMainnet: "0xF95f069F9AD107938F6ba802a3da87892298610E",
 	configs.NetworkHolesky: "0x2d86C5855581194a386941806E38cA119E50aEA3",
 }
@@ -94,7 +94,7 @@ func GetRelays(network string) ([]Relay, error) {
 		Data string `json:"data"`
 	}
 	args := CallArgs{
-		To:   deployedContractAddresses[network],
+		To:   DeployedContractAddresses[network],
 		Data: "0x" + hex.EncodeToString(data),
 	}
 
@@ -117,4 +117,28 @@ func GetRelays(network string) ([]Relay, error) {
 	}
 
 	return relays, nil
+}
+
+/*
+GetRelaysURI :
+This function is responsible for :-
+retrieving a list of relays URI from the MEV-Boost Allowed List contract for a given network.
+params :-
+network (string): The name of the network (e.g., "mainnet", "holesky").
+returns :-
+a. []string
+List of relays URI
+b. error
+Error if any
+*/
+func GetRelaysURI(network string) ([]string, error) {
+	relays, err := GetRelays(network)
+	if err != nil{
+		return nil, err
+	}
+	relayURIs := []string{}
+            for _, relay := range relays {
+                relayURIs = append(relayURIs, relay.Uri)
+            }
+	return relayURIs, err
 }
