@@ -55,7 +55,7 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			if err := validateLido(network, &flags); err != nil && lidoNode  {
+			if err := validateLido(network, &flags); err != nil && lidoNode {
 				return err
 			}
 			return preValidationGenerateCmd(network, logging, &flags)
@@ -130,7 +130,7 @@ func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			if err := validateLido(network, &flags); err != nil && lidoNode  {
+			if err := validateLido(network, &flags); err != nil && lidoNode {
 				return err
 			}
 			return preValidationGenerateCmd(network, logging, &flags)
@@ -178,7 +178,7 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			if err := validateLido(network, &flags); err != nil && lidoNode  {
+			if err := validateLido(network, &flags); err != nil && lidoNode {
 				return err
 			}
 			return preValidationGenerateCmd(network, logging, &flags)
@@ -241,7 +241,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			if err := validateLido(network, &flags); err != nil && lidoNode  {
+			if err := validateLido(network, &flags); err != nil && lidoNode {
 				return err
 			}
 			return preValidationGenerateCmd(network, logging, &flags)
@@ -288,7 +288,7 @@ func MevBoostSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	}
 	// Bind flags
 	cmd.Flags().StringSliceVar(&flags.relayURLs, "relay-urls", []string{}, "List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate full-node --relay-urls=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money'\n"+
-		"Note: When setting up a Lido node, the provided relay URLs will be automatically set by the system.")	
+		"Note: When setting up a Lido node, the provided relay URLs will be automatically set by the system.")
 	cmd.Flags().StringVarP(&flags.mevImage, "mev-boost-image", "m", "", "Custom docker image to use for Mev Boost. Example: 'sedge generate mev-boost --mev-boost-image flashbots/mev-boost:latest-portable'")
 	cmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, sepolia etc.")
 	cmd.Flags().SortFlags = false
