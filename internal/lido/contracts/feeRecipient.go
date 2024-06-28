@@ -23,3 +23,11 @@ var FeeRecipient = map[string]FeeRecipientConfig{
 		FeeRecipientAddress: "0x94B1B8e2680882f8652882e7F196169dE3d9a3B2",
 	},
 }
+
+func GetLidoSupportedNetworks()[]string{
+	networks := []string{}
+	for network := range FeeRecipient {
+		networks = append(networks, network)
+	}
+	return networks
+}

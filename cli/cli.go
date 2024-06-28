@@ -53,6 +53,9 @@ const (
 	NodeTypeConsensus = "consensus"
 	NodeTypeValidator = "validator"
 
+	EthereumNode = "ethereum-node"
+	LidoNode = "lido-node"
+	
 	Randomize = "randomize"
 
 	SourceTypeExisting = "existing"
@@ -69,7 +72,6 @@ type CliCmdOptions struct {
 	nodeType                 string
 	withValidator            bool
 	withMevBoost             bool
-	withLido                 bool
 	importSlashingProtection bool
 	slashingProtectionFrom   string
 	jwtSourceType            string
@@ -82,6 +84,7 @@ type CliCmdOptions struct {
 	keystorePassphrasePath   string
 	keystorePassphrase       string
 	withdrawalAddress        string
+	nodeSetup                string
 	numberOfValidators       int64
 	existingValidators       int64
 	installDependencies      bool
@@ -106,10 +109,8 @@ be asked to run the generated setup or not. If you chose to run the setup, it wi
 using docker compose command behind the scenes.
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := confirmWithLido(p, o); err != nil {
-				return err
-			}
 			if err := runPromptActions(p, o,
+				selectNodeSetup,
 				selectNetwork,
 				selectNodeType,
 				inputGenerationPath,
@@ -621,8 +622,24 @@ func runPromptActions(p ui.Prompter, o *CliCmdOptions, actions ...promptAction) 
 	return nil
 }
 
+
+func selectNodeSetup(p ui.Prompter, o *CliCmdOptions) (err error) {
+	options := []string{EthereumNode, LidoNode}
+	index, err := p.Select("Select node setup", "", options)
+	if err != nil {
+		return err
+	}
+	o.nodeSetup = options[index]
+	return
+}
+
 func selectNetwork(p ui.Prompter, o *CliCmdOptions) error {
-	options := []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}
+	var options []string
+	if o.nodeSetup == LidoNode{
+		options = contracts.GetLidoSupportedNetworks()
+	}else{
+		options = []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}
+	}
 	index, err := p.Select("Select network", "", options)
 	if err != nil {
 		return err
@@ -799,26 +816,13 @@ func confirmInstallDependencies(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.withMevBoost, err = p.Confirm("Enable MEV Boost?", true)
-	if o.withLido && o.withMevBoost {
+	if o.nodeSetup == LidoNode {
 		_, ok := mevboostrelaylist.DeployedContractAddresses[o.genData.Network]
 		if !ok {
-			options := []string{}
-			for option := range mevboostrelaylist.DeployedContractAddresses {
-				options = append(options, option)
-			}
-			index, err := p.Select("Invalid network: Choose valid network for Lido with MEV-Boost", "", options)
-			if err != nil {
-				return err
-			}
-			o.genData.Network = options[index]
+			return
 		}
 	}
-	return
-}
-
-func confirmWithLido(p ui.Prompter, o *CliCmdOptions) (err error) {
-	o.withLido, err = p.Confirm("Do you want to set up a Lido CSM node?", false)
+	o.withMevBoost, err = p.Confirm("Enable MEV Boost?", true)
 	return
 }
 
@@ -873,7 +877,7 @@ func inputMevBoostEndpoint(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
-	if o.withLido {
+	if o.nodeSetup == LidoNode {
 		relayURLs, err := mevboostrelaylist.GetRelaysURI(o.genData.Network)
 		if err != nil {
 			return err
@@ -904,19 +908,7 @@ func inputCheckpointSyncURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
-	if o.withLido {
-		_, ok := contracts.FeeRecipient[o.genData.Network]
-		if !ok {
-			options := []string{}
-			for option := range contracts.FeeRecipient {
-				options = append(options, option)
-			}
-			index, err := p.Select("Invalid network: Choose valid network for Lido", "", options)
-			if err != nil {
-				return err
-			}
-			o.genData.Network = options[index]
-		}
+	if o.nodeSetup == LidoNode {
 		feeRecipient := contracts.FeeRecipient[o.genData.Network]
 		o.genData.FeeRecipient = feeRecipient.FeeRecipientAddress
 		return
@@ -926,20 +918,8 @@ func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputFeeRecipientNoValidator(p ui.Prompter, o *CliCmdOptions) (err error) {
-	if o.withLido {
-		_, ok := contracts.FeeRecipient[o.genData.Network]
-		if !ok {
-			options := []string{}
-			for option := range contracts.FeeRecipient {
-				options = append(options, option)
-			}
-			index, err := p.Select("Choose valid network for Lido with MEV-Boost", "", options)
-			if err != nil {
-				return err
-			}
-			o.genData.Network = options[index]
-		}
-		feeRecipient, ok := contracts.FeeRecipient[o.genData.Network]
+	if o.nodeSetup == LidoNode {
+		feeRecipient:= contracts.FeeRecipient[o.genData.Network]
 		o.genData.FeeRecipient = feeRecipient.FeeRecipientAddress
 		return
 	}

@@ -97,7 +97,7 @@ func TestCli(t *testing.T) {
 				}
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
 				gomock.InOrder(
-					prompter.EXPECT().Confirm("Do you want to set up a Lido CSM node?", false).Return(false, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
@@ -168,7 +168,7 @@ func TestCli(t *testing.T) {
 					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
 				}
 				gomock.InOrder(
-					prompter.EXPECT().Confirm("Do you want to set up a Lido CSM node?", false).Return(false, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
@@ -212,7 +212,7 @@ func TestCli(t *testing.T) {
 					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
 				}
 				gomock.InOrder(
-					prompter.EXPECT().Confirm("Do you want to set up a Lido CSM node?", false).Return(false, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(4, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
@@ -249,7 +249,7 @@ func TestCli(t *testing.T) {
 				}
 
 				gomock.InOrder(
-					prompter.EXPECT().Confirm("Do you want to set up a Lido CSM node?", false).Return(false, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(1, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
@@ -293,7 +293,7 @@ func TestCli(t *testing.T) {
 				}
 
 				gomock.InOrder(
-					prompter.EXPECT().Confirm("Do you want to set up a Lido CSM node?", false).Return(false, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(4, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(1, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
@@ -343,7 +343,7 @@ func TestCli(t *testing.T) {
 				}
 
 				gomock.InOrder(
-					prompter.EXPECT().Confirm("Do you want to set up a Lido CSM node?", false).Return(false, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
@@ -387,7 +387,7 @@ func TestCli(t *testing.T) {
 				}
 
 				gomock.InOrder(
-					prompter.EXPECT().Confirm("Do you want to set up a Lido CSM node?", false).Return(false, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(4, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
@@ -431,7 +431,7 @@ func TestCli(t *testing.T) {
 				}
 
 				gomock.InOrder(
-					prompter.EXPECT().Confirm("Do you want to set up a Lido CSM node?", false).Return(false, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(3, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
@@ -494,7 +494,7 @@ func TestCli(t *testing.T) {
 				}
 
 				gomock.InOrder(
-					prompter.EXPECT().Confirm("Do you want to set up a Lido CSM node?", false).Return(false, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
@@ -550,8 +550,8 @@ func TestCli(t *testing.T) {
 				}
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
 				gomock.InOrder(
-					prompter.EXPECT().Confirm("Do you want to set up a Lido CSM node?", false).Return(true, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(0, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(1, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHolesky, NetworkSepolia}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),

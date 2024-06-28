@@ -142,3 +142,11 @@ func GetRelaysURI(network string) ([]string, error) {
 	}
 	return relayURIs, err
 }
+
+func GetLidoSupportedNetworksMevBoost()[]string{
+	networks := []string{}
+	for network := range DeployedContractAddresses {
+		networks= append(networks, network)
+	}
+	return networks
+}
