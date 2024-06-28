@@ -54,8 +54,8 @@ const (
 	NodeTypeValidator = "validator"
 
 	EthereumNode = "ethereum-node"
-	LidoNode = "lido-node"
-	
+	LidoNode     = "lido-node"
+
 	Randomize = "randomize"
 
 	SourceTypeExisting = "existing"
@@ -622,7 +622,6 @@ func runPromptActions(p ui.Prompter, o *CliCmdOptions, actions ...promptAction) 
 	return nil
 }
 
-
 func selectNodeSetup(p ui.Prompter, o *CliCmdOptions) (err error) {
 	options := []string{EthereumNode, LidoNode}
 	index, err := p.Select("Select node setup", "", options)
@@ -635,9 +634,9 @@ func selectNodeSetup(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func selectNetwork(p ui.Prompter, o *CliCmdOptions) error {
 	var options []string
-	if o.nodeSetup == LidoNode{
+	if o.nodeSetup == LidoNode {
 		options = contracts.GetLidoSupportedNetworks()
-	}else{
+	} else {
 		options = []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}
 	}
 	index, err := p.Select("Select network", "", options)
@@ -919,7 +918,7 @@ func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func inputFeeRecipientNoValidator(p ui.Prompter, o *CliCmdOptions) (err error) {
 	if o.nodeSetup == LidoNode {
-		feeRecipient:= contracts.FeeRecipient[o.genData.Network]
+		feeRecipient := contracts.FeeRecipient[o.genData.Network]
 		o.genData.FeeRecipient = feeRecipient.FeeRecipientAddress
 		return
 	}

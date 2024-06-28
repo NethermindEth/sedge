@@ -24,7 +24,7 @@ var FeeRecipient = map[string]FeeRecipientConfig{
 	},
 }
 
-func GetLidoSupportedNetworks()[]string{
+func GetLidoSupportedNetworks() []string {
 	networks := []string{}
 	for network := range FeeRecipient {
 		networks = append(networks, network)

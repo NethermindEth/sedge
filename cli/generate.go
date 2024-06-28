@@ -28,7 +28,6 @@ import (
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	"github.com/NethermindEth/sedge/internal/lido/contracts/mevboostrelaylist"
 
-
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
@@ -45,7 +44,7 @@ var (
 	network        string
 	logging        string
 	containerTag   string
-	lidoNode	   bool
+	lidoNode       bool
 )
 
 const (
@@ -114,7 +113,7 @@ You can generate:
 	cmd.AddCommand(ConsensusSubCmd(sedgeAction))
 	cmd.AddCommand(ValidatorSubCmd(sedgeAction))
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
-	
+
 	cmd.PersistentFlags().BoolVar(&lidoNode, "lido", false, "generate Lido CSM node")
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
 	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet,sepolia, holesky, gnosis, chiado, etc.")
@@ -263,11 +262,11 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		}
 	}
 
-	//Overwrite feeRecipient and relayURLs for Lido Node
-	if lidoNode{
+	// Overwrite feeRecipient and relayURLs for Lido Node
+	if lidoNode {
 		feeRecipient := contracts.FeeRecipient[network]
 		flags.feeRecipient = feeRecipient.FeeRecipientAddress
-		
+
 		flags.relayURLs, _ = mevboostrelaylist.GetRelaysURI(network)
 	}
 
@@ -493,7 +492,7 @@ func loadJWTSecret(from string) (absFrom string, err error) {
 }
 
 func validateLido(network string, flags *GenCmdFlags) error {
-	if !flags.noMev{
+	if !flags.noMev {
 		_, ok := mevboostrelaylist.DeployedContractAddresses[network]
 		if !ok {
 			options := mevboostrelaylist.GetLidoSupportedNetworksMevBoost()
@@ -505,6 +504,6 @@ func validateLido(network string, flags *GenCmdFlags) error {
 		options := contracts.GetLidoSupportedNetworks()
 		return fmt.Errorf("invalid network: Choose valid network for Lido: %v", options)
 	}
-	
+
 	return nil
 }
