@@ -25,6 +25,9 @@ import (
 	"time"
 
 	"github.com/NethermindEth/sedge/internal/crypto"
+	"github.com/NethermindEth/sedge/internal/lido/contracts"
+	"github.com/NethermindEth/sedge/internal/lido/contracts/mevboostrelaylist"
+
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
@@ -42,6 +45,7 @@ var (
 	network        string
 	logging        string
 	containerTag   string
+	lidoNode	   bool
 )
 
 const (
@@ -100,6 +104,7 @@ You can generate:
 - Consensus Node
 - Validator Node
 - Mev-Boost Instance
+- Lido CSM node
 `,
 		Args: cobra.NoArgs,
 	}
@@ -109,7 +114,8 @@ You can generate:
 	cmd.AddCommand(ConsensusSubCmd(sedgeAction))
 	cmd.AddCommand(ValidatorSubCmd(sedgeAction))
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
-
+	
+	cmd.PersistentFlags().BoolVar(&lidoNode, "lido", false, "generate Lido CSM node")
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
 	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet,sepolia, holesky, gnosis, chiado, etc.")
 	cmd.PersistentFlags().StringVar(&logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
@@ -255,6 +261,14 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		if err != nil {
 			return err
 		}
+	}
+
+	//Overwrite feeRecipient and relayURLs for Lido Node
+	if lidoNode{
+		feeRecipient := contracts.FeeRecipient[network]
+		flags.feeRecipient = feeRecipient.FeeRecipientAddress
+		
+		flags.relayURLs, _ = mevboostrelaylist.GetRelaysURI(network)
 	}
 
 	// Warning if no fee recipient is set
@@ -476,4 +490,21 @@ func loadJWTSecret(from string) (absFrom string, err error) {
 		return "", fmt.Errorf("jwt secret must be 32 bytes long")
 	}
 	return
+}
+
+func validateLido(network string, flags *GenCmdFlags) error {
+	if !flags.noMev{
+		_, ok := mevboostrelaylist.DeployedContractAddresses[network]
+		if !ok {
+			options := mevboostrelaylist.GetLidoSupportedNetworksMevBoost()
+			return fmt.Errorf("invalid network: Choose valid network for Lido with MEV-Boost: %v", options)
+		}
+	}
+	_, ok := contracts.FeeRecipient[network]
+	if !ok {
+		options := contracts.GetLidoSupportedNetworks()
+		return fmt.Errorf("invalid network: Choose valid network for Lido: %v", options)
+	}
+	
+	return nil
 }
