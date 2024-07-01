@@ -635,7 +635,7 @@ func selectNodeSetup(p ui.Prompter, o *CliCmdOptions) (err error) {
 func selectNetwork(p ui.Prompter, o *CliCmdOptions) error {
 	var options []string
 	if o.nodeSetup == LidoNode {
-		options = contracts.GetLidoSupportedNetworks()
+		options = []string{NetworkMainnet, NetworkHolesky, NetworkSepolia}
 	} else {
 		options = []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}
 	}
