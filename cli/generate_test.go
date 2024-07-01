@@ -26,6 +26,7 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/lido/contracts/mevboostrelaylist"
 	"github.com/NethermindEth/sedge/test"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -48,6 +49,7 @@ type globalFlags struct {
 	generationPath string
 	network        string
 	logging        string
+	lidoNode       bool
 }
 
 type generateCmdTestCase struct {
@@ -71,6 +73,9 @@ func (flags *globalFlags) argsList() []string {
 	}
 	if flags.logging != "" {
 		s = append(s, "--logging", flags.logging)
+	}
+	if flags.lidoNode {
+		s = append(s, "--lido")
 	}
 	return s
 }
@@ -1309,6 +1314,34 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			globalFlags{},
 			nil,
+		},
+		{
+			"Lido Full-node - Sepolia without MEV",
+			subCmd{
+				name: "full-node",
+			},
+			GenCmdFlags{
+				noMev: true,
+			},
+			globalFlags{
+				network:  NetworkSepolia,
+				lidoNode: true,
+			},
+			nil,
+		},
+		{
+			"Lido Full-node - unsupported Sepolia with MEV",
+			subCmd{
+				name: "full-node",
+			},
+			GenCmdFlags{
+				noMev: false,
+			},
+			globalFlags{
+				network:  NetworkSepolia,
+				lidoNode: true,
+			},
+			fmt.Errorf("invalid network: Choose valid network for Lido with MEV-Boost: %v", mevboostrelaylist.GetLidoSupportedNetworksMevBoost()),
 		},
 	}
 
