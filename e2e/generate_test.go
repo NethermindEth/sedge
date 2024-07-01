@@ -68,7 +68,7 @@ func TestGenerate_FullNode_Lido_Sepolia(t *testing.T) {
 		},
 		// Assert
 		func(t *testing.T) {
-			assert.NoError(t, runErr, "generate command should fail")
+			assert.Error(t, runErr, "generate command should fail")
 		},
 	)
 	// Run test case
