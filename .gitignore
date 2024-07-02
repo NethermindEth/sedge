@@ -17,3 +17,9 @@ build/sedge
 courtney/
 
 mocks/
+
+cluster/
+
+.charon/
+
+keystore*

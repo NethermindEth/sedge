@@ -1,15 +1,25 @@
-#!/bin/bash
 set -e
 
-for key in /keystore/validator_keys/*; do
-  if [ -f "$key" ]; then
-    echo "Found validator key in $key"
-    echo "Importing validator..."
-    if [ $VAL_NETWORK = "custom" ]; then
-      ./lighthouse account validator import --testnet-dir /network_config --password-file /keystore/keystore_password.txt --keystore $key --reuse-password --datadir /data  
-    else
-      ./lighthouse account validator import --network $VAL_NETWORK --password-file /keystore/keystore_password.txt --keystore $key --reuse-password --datadir /data
-    fi
-    echo "Validator imported"
-  fi
-done
+if [[ "$(ls /data/keys)" ]]; then
+    echo "Keystore directory is not empty. Skipping." && exit 0
+else
+    mkdir -p /data/keys /data/passwords
+    cd /keystore/validator_keys
+    for key in *; do
+        FILENAME=`echo ${key} | sed 's/.json//g'`
+        cp "$key" "/data/keys/${FILENAME}.json"
+        
+        # Check if password file exists for the key
+        if [[ -f "../${FILENAME}.txt" ]]; then
+            cp "../${FILENAME}.txt" "/data/passwords/${FILENAME}.txt"
+        else
+            # Use default password file
+            cp "../keystore_password.txt" "/data/passwords/${FILENAME}.txt"
+        fi
+        
+        echo "Copying ${key}"
+    done
+fi
+
+# Ensure teku access for new keys
+chmod -R 777 /data
