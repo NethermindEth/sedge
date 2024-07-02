@@ -40,7 +40,6 @@ import (
 
 const (
 	NetworkMainnet = "mainnet"
-	NetworkGoerli  = "goerli"
 	NetworkSepolia = "sepolia"
 	NetworkGnosis  = "gnosis"
 	NetworkChiado  = "chiado"
@@ -616,7 +615,7 @@ func runPromptActions(p ui.Prompter, o *CliCmdOptions, actions ...promptAction) 
 }
 
 func selectNetwork(p ui.Prompter, o *CliCmdOptions) error {
-	options := []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}
+	options := []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}
 	index, err := p.Select("Select network", "", options)
 	if err != nil {
 		return err

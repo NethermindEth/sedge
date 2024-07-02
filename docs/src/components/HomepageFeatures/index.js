@@ -8,7 +8,7 @@ const FeatureList = [
         Svg: require('@site/static/img/ethereum.svg').default,
         description: (
             <>
-                We fully support Mainnet, and Testnets (Goerli, Sepolia, and Holesky).
+                We fully support Mainnet, and Testnets (Sepolia, and Holesky).
 
             </>
         ),

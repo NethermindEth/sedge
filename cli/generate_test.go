@@ -1102,7 +1102,7 @@ func TestGenerateCmd(t *testing.T) {
 				consensusApiUrl: "http://localhost:4000",
 			},
 			globalFlags{
-				network: "goerli",
+				network: "holesky",
 			},
 			nil,
 		},
@@ -1117,7 +1117,7 @@ func TestGenerateCmd(t *testing.T) {
 				consensusApiUrl: "localhost/4000",
 			},
 			globalFlags{
-				network: "goerli",
+				network: "gnosis",
 			},
 			fmt.Errorf(configs.InvalidUrlFlagError, "consensus api", "localhost/4000"),
 		},
@@ -1147,7 +1147,7 @@ func TestGenerateCmd(t *testing.T) {
 				consensusApiUrl: "localhost:4000",
 			},
 			globalFlags{
-				network: "goerli",
+				network: "gnosis",
 			},
 			fmt.Errorf(configs.InvalidUrlFlagError, "consensus api", "localhost:4000"),
 		},
@@ -1223,7 +1223,7 @@ func TestGenerateCmd(t *testing.T) {
 				graffiti:        "sedge-graffiti-sedge",
 			},
 			globalFlags{
-				network: "goerli",
+				network: "holesky",
 			},
 			fmt.Errorf(configs.ErrGraffitiLength, "sedge-graffiti-sedge", 20),
 		},

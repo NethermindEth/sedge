@@ -1,9 +1,9 @@
 ---
 sidebar_position: 2
-id: run-mev-boost-goerli
+id: run-mev-boost-sepolia
 ---
 
-# Run a validator with mev-boost on Goerli
+# Run a validator with mev-boost on Sepolia
 
 This guide shows you how to setup and run a validator using [Teku](https://github.com/Consensys/teku/) as consensus layer, with a random execution client, and mev-boost.
 
@@ -15,16 +15,16 @@ If you don't have Sedge in your PATH, just open your terminal on the folder whic
 
 :::
 
-Run the following command from your terminal to set up a Teku consensus and validator nodes on Goerli with a random execution client:
+Run the following command from your terminal to set up a Teku consensus and validator nodes on Sepolia with a random execution client:
 
 ```
-sedge generate full-node --network goerli -c teku 
+sedge generate full-node --network sepolia -c teku 
 ```
 
 Set up your keys running the following command from your terminal:
 
 ```
-sedge keys --network goerli
+sedge keys --network sepolia
 ```
 
 Import the keys that you just generate in the command above using the following command:

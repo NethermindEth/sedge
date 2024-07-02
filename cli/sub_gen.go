@@ -45,7 +45,7 @@ func FullNodeSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 
 It will not generate a validator configuration if the --no-validator flag is set to true.
 
-On mainnet, sepolia and goerli, mev-boost will be activated by default unless you run it with --no-mev-boost flag.
+On mainnet and sepolia mev-boost will be activated by default unless you run it with --no-mev-boost flag.
 
 If you don't provide a execution, consensus or validator client, it will be chosen randomly. If one of the consensus or validator is provided, but the other one is omitted, then the same pair of clients will be used for both consensus and validator.
 
@@ -277,7 +277,7 @@ func MevBoostSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	// Bind flags
 	cmd.Flags().StringSliceVar(&flags.relayURLs, "relay-urls", []string{}, "List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate mev-boost --relay-urls=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money'")
 	cmd.Flags().StringVarP(&flags.mevImage, "mev-boost-image", "m", "", "Custom docker image to use for Mev Boost. Example: 'sedge generate mev-boost --mev-boost-image flashbots/mev-boost:latest-portable'")
-	cmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia etc.")
+	cmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, sepolia etc.")
 	cmd.Flags().SortFlags = false
 	return cmd
 }
