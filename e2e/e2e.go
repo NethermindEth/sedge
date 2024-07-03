@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -62,7 +63,11 @@ func (e *e2eTestCase) run() {
 }
 
 func (e *e2eTestCase) BinaryPath() string {
-	return filepath.Join(e.testDir, "sedge")
+	binaryName := "sedge"
+	if runtime.GOOS == "windows" {
+		binaryName += ".exe"
+	}
+	return filepath.Join(e.testDir, binaryName)
 }
 
 func (e *e2eTestCase) Cleanup() {
@@ -98,7 +103,11 @@ func (e *e2eTestCase) installGoModules() {
 
 func (e *e2eTestCase) build() {
 	e.t.Helper()
-	outPath := filepath.Join(e.testDir, "sedge")
+	binaryName := "sedge"
+	if runtime.GOOS == "windows" {
+		binaryName += ".exe"
+	}
+	outPath := filepath.Join(e.testDir, binaryName)
 	e.t.Logf("Building binary to %s", outPath)
 	err := exec.Command("go", "build", "-o", outPath, filepath.Join(e.repoPath, "cmd", "sedge", "main.go")).Run()
 	if err != nil {
