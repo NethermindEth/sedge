@@ -16,6 +16,7 @@ require (
 	github.com/google/uuid v1.4.0
 	github.com/herumi/bls-eth-go-binary v1.29.1
 	github.com/jarcoal/httpmock v1.2.0
+	github.com/joho/godotenv v1.5.1
 	github.com/opencontainers/image-spec v1.0.2
 	github.com/otiai10/copy v1.9.0
 	github.com/protolambda/go-keystorev4 v0.0.0-20211007151826-f20444f6d564
@@ -91,9 +92,12 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
+	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/term v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/tools v0.20.0 // indirect
+	mvdan.cc/gofumpt v0.6.0 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
 )

@@ -26,6 +26,7 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	"github.com/NethermindEth/sedge/internal/lido/contracts/mevboostrelaylist"
 	"github.com/NethermindEth/sedge/test"
 	log "github.com/sirupsen/logrus"
@@ -1342,6 +1343,32 @@ func TestGenerateCmd(t *testing.T) {
 				lidoNode: true,
 			},
 			fmt.Errorf("invalid network: Choose valid network for Lido with MEV-Boost: %v", mevboostrelaylist.GetLidoSupportedNetworksMevBoost()),
+		},
+		{
+			"Lido Full-node - Holesky no validator",
+			subCmd{
+				name: "full-node",
+			},
+			GenCmdFlags{
+				noValidator: true,
+			},
+			globalFlags{
+				network:  NetworkHolesky,
+				lidoNode: true,
+			},
+			nil,
+		},
+		{
+			"Lido Full-node - unsupported Gnosis",
+			subCmd{
+				name: "full-node",
+			},
+			GenCmdFlags{},
+			globalFlags{
+				network:  NetworkGnosis,
+				lidoNode: true,
+			},
+			fmt.Errorf("invalid network: Choose valid network for Lido: %v", contracts.GetLidoSupportedNetworks()),
 		},
 	}
 
