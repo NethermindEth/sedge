@@ -1363,7 +1363,9 @@ func TestGenerateCmd(t *testing.T) {
 			subCmd{
 				name: "full-node",
 			},
-			GenCmdFlags{},
+			GenCmdFlags{
+				noMev: true,
+			},
 			globalFlags{
 				network:  NetworkGnosis,
 				lidoNode: true,
