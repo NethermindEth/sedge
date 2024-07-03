@@ -1,4 +1,4 @@
-{{/* lodestar.tmpl */}}
+{{/* nimbus.tmpl */}}
 {{ define "validator" }}
   validator:
     container_name: sedge-validator-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
@@ -23,7 +23,7 @@
       - --metrics-address=0.0.0.0
       - --metrics-port={{.VlMetricsPort}}{{with .FeeRecipient}}
       - --suggested-fee-recipient=${FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
-      - --{{$flag}}
+      - --{{$flag}}{{end}}
       - --graffiti=${GRAFFITI}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
