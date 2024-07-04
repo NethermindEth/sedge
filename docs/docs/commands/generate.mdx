@@ -36,6 +36,7 @@ Available Commands:
 Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
   -h, --help                   help for generate
+      --lido                   generate Lido CSM node
       --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
   -n, --network string         Target network. e.g. mainnet, sepolia, holesky, gnosis, chiado, etc. (default "mainnet")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge-data")
@@ -45,6 +46,15 @@ Global Flags:
 
 Use "sedge generate [command] --help" for more information about a command.
 ```
+
+### Lido Flow
+
+With the `--lido` flag, you can generate a Lido CSM node. This will generate a full node, a execution, a consensus, a validator o a mev-boost node with the Lido CSM configuration.
+
+It will include in the configuration of the selected node:
+- Lido Withdrawal Credentials
+- Lido Fee Recipient Address
+- Designated MEV-Boost Relay URL
 
 ### Sub Commands
 
