@@ -60,6 +60,8 @@ func (c *Client) setConsensusImage(image string) {
 		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Teku.String())
 	case "lodestar":
 		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Lodestar.String())
+	case "nimbus":
+		c.Image = valueOrDefault(image, configs.ClientImages.Consensus.Nimbus.String())
 	}
 }
 
@@ -73,6 +75,8 @@ func (c *Client) setValidatorImage(image string) {
 		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Teku.String())
 	case "lodestar":
 		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Lodestar.String())
+	case "nimbus":
+		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Nimbus.String())
 	}
 }
 

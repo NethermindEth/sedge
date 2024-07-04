@@ -111,6 +111,12 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 			return err
 		}
 		ctID = prysmCtID
+	case "nimbus":
+		nimbusCtID, err := setupNimbusValidatorImport(s.dockerClient, s.serviceManager, options)
+		if err != nil {
+			return err
+		}
+		ctID = nimbusCtID
 	case "lodestar":
 		lodestarCtID, err := setupLodestarValidatorImport(s.dockerClient, s.serviceManager, options)
 		if err != nil {
@@ -198,6 +204,63 @@ func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceMa
 		&container.HostConfig{
 			Mounts:      mounts,
 			VolumesFrom: []string{validatorCtName},
+		},
+		&network.NetworkingConfig{},
+		&v1.Platform{},
+		validatorImportCtName,
+	)
+	if err != nil {
+		return "", err
+	}
+	return ct.ID, nil
+}
+
+func setupNimbusValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, options ImportValidatorKeysOptions) (string, error) {
+	var (
+		// In the case of Nimbus, it's the consensus client the one that import the keys.
+		consensusCtName       = services.ContainerNameWithTag(services.DefaultSedgeConsensusClient, options.ContainerTag)
+		validatorImportCtName = services.ContainerNameWithTag(services.ServiceCtValidatorImport, options.ContainerTag)
+	)
+	validatorImage, err := serviceManager.Image(consensusCtName)
+	if err != nil {
+		return "", err
+	}
+	// Mounts
+	mounts := []mount.Mount{
+		{
+			Type:   mount.TypeBind,
+			Source: options.From,
+			Target: "/keystore",
+		},
+	}
+	// CMD
+	cmd := []string{
+		"--",
+		"deposits",
+		"import",
+		"--data-dir==/data",
+		"/keystore/validator_keys",
+	}
+	// Custom options
+	if options.CustomConfig.NetworkConfigPath != "" {
+		mounts = append(mounts, mount.Mount{
+			Type:   mount.TypeBind,
+			Source: options.CustomConfig.NetworkConfigPath,
+			Target: "/network_config/config.yml",
+		})
+		cmd = append(cmd, "--chain-config-file=/network_config/config.yml")
+	} else {
+		cmd = append(cmd, "--"+options.Network)
+	}
+	log.Debugf("Creating %s container", validatorImportCtName)
+	ct, err := dockerClient.ContainerCreate(context.Background(),
+		&container.Config{
+			Image: validatorImage,
+			Cmd:   cmd,
+		},
+		&container.HostConfig{
+			Mounts:      mounts,
+			VolumesFrom: []string{consensusCtName},
 		},
 		&network.NetworkingConfig{},
 		&v1.Platform{},
