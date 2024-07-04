@@ -73,6 +73,7 @@ func TestGenerate_FullNode_Lido_SepoliaNotSupported(t *testing.T) {
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
+			// Sepolia not supported Lido with MEV-Boost
 			assert.Error(t, runErr, "generate command should fail")
 		},
 	)

@@ -87,7 +87,7 @@ const (
 	ErrWithdrawalEth1SecretKeyCreation = "failed to create withdrawal private key for address 0x%s: %v"
 	ErrWithdrawalBLSSecretKeyCreation  = "failed to create withdrawal private key for path %q: %v"
 	ErrInvalidWithdrawalAddr           = "provided withdrawal address is not a valid Ethereum address"
-	IncompatibleLidoAndEth1Withdrawal  = "incompatible flags --lido, and --eth1-withdrawal-address can't be used together"
+	IncompatibleLidoAndEth1Withdrawal  = "incompatible flags --lido, and --eth-withdrawal-address can't be used together"
 	InvalidNetworkForLido              = "invalid network: Choose valid network for Lido: %v"
 	InvalidNetworkForLidoMevBoost      = "invalid network: Choose valid network for Lido with MEV-Boost: %v"
 )
