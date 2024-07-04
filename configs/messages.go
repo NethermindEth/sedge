@@ -114,6 +114,7 @@ Happy Staking!
 	GettingCustomGenesis       = "Getting custom genesis..."
 	GettingCustomNetworkConfig = "Getting custom network config..."
 	WritingCustomDeployBlock   = "Writing custom deploy block..."
+	IncompatibleLidoAndEth1Withdrawal = "Incompatible flags --lido, and --eth1-withdrawal-address can't be used together"
 )
 
 var DefaultAbsSedgeDataPath string

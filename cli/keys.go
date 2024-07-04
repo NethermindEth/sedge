@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
 	"github.com/NethermindEth/sedge/internal/ui"
@@ -40,6 +41,7 @@ type KeysCmdFlags struct {
 	numberVal             int64
 	randomPassphrase      bool
 	install               bool
+	lidoNode              bool
 }
 
 func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
@@ -98,6 +100,18 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
+			// Incompatible --lido and --eth1-withdrawal-address together
+			if flags.lidoNode && flags.eth1WithdrawalAddress != ""{
+				log.Fatalf(configs.IncompatibleLidoAndEth1Withdrawal)
+			}
+			// validate network for Lido
+			if flags.lidoNode{
+				_, ok := contracts.FeeRecipient[network]
+				if !ok {
+				options := contracts.GetLidoKeysSupportedNetworks()
+				log.Fatalf("invalid network: Choose valid network for Lido: %v", options)
+				}
+			}
 			// Warn about withdrawal address
 			if flags.eth1WithdrawalAddress != "" {
 				log.Warn(configs.WithdrawalAddressDefinedWarning)
@@ -164,7 +178,9 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 			keystorePath := filepath.Join(flags.path, "keystore")
 
 			var withdrawalAddress string
-			if flags.eth1WithdrawalAddress != "" {
+			if flags.lidoNode{
+				withdrawalAddress = contracts.WithdrawalAddress[flags.network].WithdrawalAddress[2:]
+			}else if flags.eth1WithdrawalAddress != "" {
 				withdrawalAddress = flags.eth1WithdrawalAddress[2:]
 			}
 
@@ -197,6 +213,7 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 		},
 	}
 	// Flag binds
+	cmd.PersistentFlags().BoolVar(&flags.lidoNode, "lido", false, "Lido CSM node")
 	cmd.Flags().StringVarP(&flags.network, "network", "n", "mainnet", "Target network. e.g. mainnet,sepolia, holesky, gnosis, chiado etc.")
 	cmd.Flags().StringVarP(&flags.path, "path", "p", configs.DefaultAbsSedgeDataPath, "Absolute path to keystore folder. e.g. /home/user/keystore")
 	cmd.Flags().StringVar(&flags.eth1WithdrawalAddress, "eth1-withdrawal-address", "", "If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
