@@ -1342,7 +1342,7 @@ func TestGenerateCmd(t *testing.T) {
 				network:  NetworkSepolia,
 				lidoNode: true,
 			},
-			fmt.Errorf("invalid network: Choose valid network for Lido with MEV-Boost: %v", mevboostrelaylist.GetLidoSupportedNetworksMevBoost()),
+			fmt.Errorf(configs.InvalidNetworkForLidoMevBoost, mevboostrelaylist.GetLidoSupportedNetworksMevBoost()),
 		},
 		{
 			"Lido Full-node - Holesky no validator",
@@ -1370,7 +1370,7 @@ func TestGenerateCmd(t *testing.T) {
 				network:  NetworkGnosis,
 				lidoNode: true,
 			},
-			fmt.Errorf("invalid network: Choose valid network for Lido: %v", contracts.GetLidoSupportedNetworks()),
+			fmt.Errorf(configs.InvalidNetworkForLido, contracts.GetLidoSupportedNetworks()),
 		},
 	}
 

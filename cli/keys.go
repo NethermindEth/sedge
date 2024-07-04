@@ -101,15 +101,15 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			// Incompatible --lido and --eth1-withdrawal-address together
-			if flags.lidoNode && flags.eth1WithdrawalAddress != ""{
+			if flags.lidoNode && flags.eth1WithdrawalAddress != "" {
 				log.Fatalf(configs.IncompatibleLidoAndEth1Withdrawal)
 			}
 			// validate network for Lido
-			if flags.lidoNode{
+			if flags.lidoNode {
 				_, ok := contracts.WithdrawalAddress[network]
 				if !ok {
-				options := contracts.GetLidoKeysSupportedNetworks()
-				log.Fatalf("invalid network: Choose valid network for Lido: %v", options)
+					options := contracts.GetLidoKeysSupportedNetworks()
+					log.Fatalf("invalid network: Choose valid network for Lido: %v", options)
 				}
 			}
 			// Warn about withdrawal address
@@ -178,9 +178,9 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 			keystorePath := filepath.Join(flags.path, "keystore")
 
 			var withdrawalAddress string
-			if flags.lidoNode{
+			if flags.lidoNode {
 				withdrawalAddress = contracts.WithdrawalAddress[flags.network].WithdrawalAddress[2:]
-			}else if flags.eth1WithdrawalAddress != "" {
+			} else if flags.eth1WithdrawalAddress != "" {
 				withdrawalAddress = flags.eth1WithdrawalAddress[2:]
 			}
 

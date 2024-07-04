@@ -978,7 +978,7 @@ func inputKeystorePassphrase(p ui.Prompter, o *CliCmdOptions) (err error) {
 func inputWithdrawalAddress(p ui.Prompter, o *CliCmdOptions) (err error) {
 	if o.nodeSetup == LidoNode {
 		_, ok := contracts.WithdrawalAddress[network]
-		if ok{
+		if ok {
 			o.withdrawalAddress = contracts.WithdrawalAddress[network].WithdrawalAddress
 		}
 		return

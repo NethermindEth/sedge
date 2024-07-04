@@ -496,13 +496,13 @@ func validateLido(network string, flags *GenCmdFlags) error {
 		_, ok := mevboostrelaylist.DeployedContractAddresses[network]
 		if !ok {
 			options := mevboostrelaylist.GetLidoSupportedNetworksMevBoost()
-			return fmt.Errorf("invalid network: Choose valid network for Lido with MEV-Boost: %v", options)
+			return fmt.Errorf(configs.InvalidNetworkForLidoMevBoost, options)
 		}
 	}
 	_, ok := contracts.FeeRecipient[network]
 	if !ok {
 		options := contracts.GetLidoSupportedNetworks()
-		return fmt.Errorf("invalid network: Choose valid network for Lido: %v", options)
+		return fmt.Errorf(configs.InvalidNetworkForLido, options)
 	}
 
 	return nil
