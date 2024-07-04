@@ -34,13 +34,26 @@ func TestKeys_Eth1_Withdrawal_Keys_Mainnet(t *testing.T) {
 	e2eTest := newE2ETestCase(
 		t,
 		// Arrange
-		nil,
+		func(t *testing.T, binaryPath string) error {
+			mnemonicPathFile := filepath.Join(filepath.Dir(binaryPath), "mnemonic.txt")
+			file, err := os.Create(mnemonicPathFile)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+			mnemonicText := "science ill robust clump oxygen intact barely horror athlete eyebrow cave target hero input entry citizen wink affair entire alert sick flight gossip refuse"
+			_, err = file.WriteString(mnemonicText)
+			return err
+		},
 		// Act
 		func(t *testing.T, binaryPath, dataDirPath string) {
+			mnemonicPathFile := filepath.Join(filepath.Dir(binaryPath), "mnemonic.txt")
 			runErr = runSedge(t, binaryPath, "keys",
 				"--eth1-withdrawal-address", "0xb794f5ea0ba39494ce839613fffba74279579268",
 				"--network", "mainnet",
 				"--num-validators", "10",
+				"--mnemonic-path", mnemonicPathFile,
+				"--existing", "0",
 				"--random-passphrase",
 				"--path", dataDirPath)
 		},
