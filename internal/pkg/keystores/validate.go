@@ -21,9 +21,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/santhosh-tekuri/jsonschema/v5"
 )
@@ -31,13 +32,18 @@ import (
 //go:embed keystore_schema_eip2335.json
 var keystoreJSONSchema []byte
 
+//go:embed keystore_schema_deposit_data.json
+var depositDataJSONSchema []byte
+
 var (
 	ErrDepositDataNotFound              = errors.New("deposit_data.json not found")
 	ErrKeystorePasswordNotFound         = errors.New("keystore_password.txt not found")
 	ErrValidatorKeysDirNotFound         = errors.New("validator_keys directory not found")
 	ErrValidatorKeysDirWithoutKeystores = errors.New("validator_keys directory does not contain any keystores")
 	ErrInvalidKeystoreFile              = errors.New("invalid keystore file")
+	ErrInvalidKeystoreFileName          = errors.New("invalid keystore file name")
 	ErrInvalidKeystoreFileSchema        = errors.New("file does not match keystore schema (EIP-2335)")
+	ErrInvalidDepositDataFileSchema     = errors.New("file does not match deposit data schema")
 )
 
 const (
@@ -57,15 +63,6 @@ func ValidateKeystoreDir(dir string) (errors []error) {
 		errors = append(errors, err)
 	}
 	return
-}
-
-func validateDepositDataFile(keystoreDirPath string) error {
-	depositDataFile, err := os.Stat(filepath.Join(keystoreDirPath, DepositDataFileName))
-	if err != nil || depositDataFile.IsDir() {
-		return ErrDepositDataNotFound
-	}
-	// TODO check deposit_data.json is valid json
-	return nil
 }
 
 func validateKeystorePasswordFile(keystoreDirPath string) error {
@@ -101,19 +98,38 @@ func validateValidatorKeysFolder(keystoreDirPath string) error {
 }
 
 func validateKeystoreFile(path string) error {
-	// TODO validate file name
+	pattern := `^keystore-m_12381_3600_\d+_0_0\.json$`
+	regex := regexp.MustCompile(pattern)
+	if !regex.MatchString(filepath.Base(path)) {
+		return ErrInvalidKeystoreFileName
+	}
+
+	return validateFileWithSchema(path, "keystore_schema", keystoreJSONSchema, ErrInvalidKeystoreFileSchema)
+}
+
+func validateDepositDataFile(path string) error {
+	depositDataFile, err := os.Stat(filepath.Join(path, DepositDataFileName))
+	if err != nil || depositDataFile.IsDir() {
+		return ErrDepositDataNotFound
+	}
+
+	return nil
+	return validateFileWithSchema(path, "deposit_data_schema", depositDataJSONSchema, ErrInvalidDepositDataFileSchema)
+}
+
+func validateFileWithSchema(path, schemaName string, schema []byte, schemaErr error) error {
 	compiler := jsonschema.NewCompiler()
-	if err := compiler.AddResource("keystore_schema", bytes.NewReader(keystoreJSONSchema)); err != nil {
+	if err := compiler.AddResource(schemaName, bytes.NewReader(schema)); err != nil {
 		return err
 	}
-	schema := compiler.MustCompile("keystore_schema")
+	schemaCmp := compiler.MustCompile(schemaName)
 
 	f, err := os.Open(path)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	data, err := ioutil.ReadAll(f)
+	data, err := io.ReadAll(f)
 	if err != nil {
 		return err
 	}
@@ -121,8 +137,8 @@ func validateKeystoreFile(path string) error {
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	if err := schema.Validate(value); err != nil {
-		return ErrInvalidKeystoreFileSchema
+	if err := schemaCmp.Validate(value); err != nil {
+		return schemaErr
 	}
 	return nil
 }

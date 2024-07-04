@@ -24,6 +24,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
 	"github.com/NethermindEth/sedge/internal/ui"
+	"github.com/NethermindEth/sedge/internal/utils"
 	eth2 "github.com/protolambda/zrnt/eth2/configs"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -83,6 +84,10 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 			if err := configs.NetworkCheck(flags.network); err != nil {
 				log.Fatal(err.Error())
 			}
+			// Validate fee recipient
+			if flags.eth1WithdrawalAddress != "" && !utils.IsAddress(flags.eth1WithdrawalAddress) {
+				log.Fatal(configs.ErrInvalidWithdrawalAddr)
+			}
 			// Ensure that path is absolute
 			log.Debugf("Path to keystore folder: %s", flags.path)
 			absPath, err := filepath.Abs(flags.path)
@@ -93,7 +98,10 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			// TODO: allow usage of withdrawal address
+			// Warn about withdrawal address
+			if flags.eth1WithdrawalAddress != "" {
+				log.Warn(configs.WithdrawalAddressDefinedWarning)
+			}
 			// Get keystore passphrase
 			if !flags.randomPassphrase && flags.passphrasePath != "" {
 				content, err := readFileContent(flags.passphrasePath)
@@ -153,14 +161,22 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 				flags.numberVal = numberVal
 			}
 
+			keystorePath := filepath.Join(flags.path, "keystore")
+
+			var withdrawalAddress string
+			if flags.eth1WithdrawalAddress != "" {
+				withdrawalAddress = flags.eth1WithdrawalAddress[2:]
+			}
+
 			data := keystores.ValidatorKeysGenData{
-				Mnemonic:    mnemonic,
-				Passphrase:  passphrase,
-				OutputPath:  keystorePath,
-				MinIndex:    uint64(flags.existingVal),
-				MaxIndex:    uint64(flags.existingVal) + uint64(flags.numberVal),
-				NetworkName: flags.network,
-				ForkVersion: configs.NetworksConfigs()[flags.network].GenesisForkVersion,
+				Mnemonic:          mnemonic,
+				Passphrase:        passphrase,
+				OutputPath:        keystorePath,
+				MinIndex:          uint64(flags.existingVal),
+				MaxIndex:          uint64(flags.existingVal) + uint64(flags.numberVal),
+				NetworkName:       flags.network,
+				ForkVersion:       configs.NetworksConfigs()[flags.network].GenesisForkVersion,
+				WithdrawalAddress: withdrawalAddress,
 				// Constants
 				UseUniquePassphrase: true,
 				Insecure:            false,
