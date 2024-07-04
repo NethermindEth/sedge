@@ -197,7 +197,7 @@ func TestKeys_Lido_Holesky(t *testing.T) {
 				assert.Regexp(t, regex, key.WithdrawalCredentials, "withdrawal_credentials should match the pattern")
 				assert.Equal(t, key.NetworkName, "holesky", "network_name should be holesky")
 				expectedWithdrawalCredentials := "010000000000000000000000" + (contracts.WithdrawalAddress["holesky"].WithdrawalAddress[2:])
-				strings.ToLower(expectedWithdrawalCredentials)
+				expectedWithdrawalCredentials = strings.ToLower(expectedWithdrawalCredentials)
 				assert.Equal(t, expectedWithdrawalCredentials, key.WithdrawalCredentials, "WithdrawalAddress value should match expected value")
 			}
 		},
