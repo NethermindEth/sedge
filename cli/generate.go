@@ -392,6 +392,12 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 	}
 	// consensus client
 	if utils.Contains(services, consensus) {
+		// TODO: fix path for nimbus on gnosis
+		if network == NetworkGnosis || network == NetworkChiado {
+			if flags.consensusName == "nimbus" {
+				flags.consensusName = "nimbus:ghcr.io/gnosischain/gnosis-nimbus-eth2:v24.4"
+			}
+		}
 		consensusParts := strings.Split(flags.consensusName, ":")
 		consensusClient, err = clients.RandomChoice(allClients[consensus])
 		if err != nil {
