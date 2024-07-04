@@ -10,51 +10,93 @@ import TabItem from '@theme/TabItem';
 
 ## What is the Lido Community Staking Module (CSM)?
 
-The Lido Community Staking Module (CSM) is a protocol that allows anyone, especially community stakers and solo stakers,
-to become a Lido Node Operator by providing an ETH-based bond as security collateral. CSM offers various benefits,
-such as smoothed rewards, lower bond requirements, and a user-friendly experience.
+The [Lido Community Staking Module](https://operatorportal.lido.fi/modules/community-staking-module) (CSM) is a protocol that allows anyone, especially community stakers and solo stakers,
+to become a Lido Node Operator in a permissionless manner by providing an ETH-based bond as security collateral. CSM offers various benefits,
+such as [smoothed rewards](https://operatorportal.lido.fi/modules/community-staking-module#block-b449869616354425a1c616f292cd43db) with other Lido modules received via stETH, reasonable low bond requirements (accepted in ETH, stETH, wstETH), and a user-friendly experience.
 
 Sedge supports the Lido CSM, allowing users to generate validator keys and set up their full nodes with ease. This guide
-will walk you through the process of staking with Lido using Sedge.
+will walk you through the process of staking with Lido CSM using Sedge.
 
-## Generating Validator Keys with Sedge
+If you are interested in becoming a Lido node operator, make sure to read the [Node Operator Expectations](https://operatorportal.lido.fi/modules/community-staking-module#block-c58d307283e942ecab5eeb96f9a89235)
 
-To get started with CSM using Sedge, you first need to generate your validator keys. Sedge simplifies this process
-with the `sedge keys` command, to generate keys compatible with Lido CSM, use the `--lido` flag:
+:::info
+
+Lido CSM is **currently available on the Holesky testnet for [early adopters](https://operatorportal.lido.fi/modules/community-staking-module#block-ef60a1fa96ae4c7995dd7794de2a3e22)**. Check your eligibility on the Early Adoption program [here](https://lidofinance.github.io/csm-ea-checker/). The Mainnet launch is expected soon.
+
+:::
+
+## Workflow breakdown
+
+The Lido CSM staking process involves several steps:
+
+1. **Generate Validator Keys and Deposit Data**: Generate validator keys compatible with Lido CSM with withdrawal credentials set to Lido Withdrawal Vault.
+2. **Set Up Your Full Node**: Set up your full node with Lido CSM settings enabled (Fee recipient pointing to Lido Execution Layer Rewards Vault, and using designated MEV relays for Lido CSM) and the designed validator keys.
+3. **Upload Deposit Data**: Upload the deposit data to the Lido CSM Widget and provide the required bond amount in ETH, stETH, or wstETH.
+4. **Wait for Deposit Confirmation**: Wait for your CSM validator keys to be deposited through the protocol and ensure your node remains online in the meantime. 
+
+Sedge simplifies the process of staking with Lido CSM by providing a seamless workflow for:
+
+- Generating validator keys with the respective deposit data (Step 1)
+- Setting up your full node with Lido CSM settings enabled (Step 2)
+- Importing existing Lido CSM validator keys to your Sedge node (In case you already have validator keys generated and running but want to migrate your clients or to Sedge)
+
+This means you only have to [upload the deposit data to Lido CSM and purchase the bond manually](#uploading-deposit-data-and-registering-the-node-operator). Sedge will take care of the rest.
+
+Let's dive into each step in detail.
+
+## Using Sedge for Lido CSM
+
+You can run `sedge cli` to kickstart Sedge's [one-click interactive setup](./complete-guide#21-one-click-interactive-setup). In this step, you will be guided through generating validator keys and setting up your full node with Lido CSM settings enabled.
+
+Alternatively, for a more controlled setup, you can use the following commands to generate validator keys and set up your full node with Lido CSM settings enabled.
+
+### Generating Validator Keys with the respective deposit data
+
+To get started with CSM using Sedge, you first need to generate your validator keys and deposit data. Sedge simplifies this process
+with the `sedge keys` [command](../commands/keys.mdx). Use the `--lido` flag to generate keys compatible with Lido CSM:
 
 ```bash
 sedge keys --lido
 ```
 
-Once generated the keys, you can setup your full node:
+### Setting up your full node with Lido CSM settings enabled
+
+Once the keys are generated, you can set up your full node:
 
 ```bash
-sedge generate full-node --lido -n holesky
+sedge generate full-node --lido --network holesky
+```
 
 :::note
 
-This command will generate a setup with the Lido Community Staking Module (CSM) enabled for the Holesky testnet.
-You can set other networks by changing the `-n` flag, if supported.
+This command will generate a setup with the Lido CSM enabled for the Holesky testnet.
+If supported, you can set other networks by changing the `--network` flag.
 
 :::
 
-```
 This command will generate a new set of validator keys with the following parameters:
 
 - `withdrawal_address` set to the Lido Withdrawal Vault address
-- `deposit_amount` set to 32 ETH
 - `chain` set to the appropriate network (e.g., `holesky`, `mainnet`)
 - `fee_recipient` set to the Lido Execution Layer Rewards Vault address
 - `mev_relay` set to the designated MEV relays for Lido CSM on the appropriate network
 
-## Configuring Your Node Operator
+You can now proceed to run the generated setup for your full node with the Lido CSM settings enabled and the validator keys you want to run with [`sedge run`](../commands/run.mdx) (although not filled and registered yet).
 
-After generating your validator keys and setting up your node, you need to configure yourself as a node operator to
+## Uploading deposit data and registering the Node Operator
+
+After generating your validator keys and setting up your node, you need to register your wallet as a Node Operator to
 work with Lido CSM:
 
 1. Upload the newly generated deposit data file pertaining to your CSM keystores onto the Lido CSM Widget
 and provide the required bond amount in ETH, stETH, or wstETH. Before uploading, ensure that your nodes are synced,
-running, and ready for validator activation.
+running and ready for validator activation.
+
+:::info
+
+The official [instructions guide] (https://dvt-homestaker.stakesaurus.com/bonded-validators-setup/lido-csm/upload-remove-view-validator-keys#upload-keys) provides detailed instructions on how to upload the deposit data and register your Node Operatort.
+
+:::
 
 2. Wait for your CSM validator keys to be deposited through the protocol and ensure your node remains online in the
 meantime.
@@ -72,4 +114,4 @@ CSM Widget. This interface allows you to:
 Remember to keep your node running smoothly and follow the Lido protocol rules to avoid any penalties or bond confiscation.
 
 For more detailed information on managing your Node Operator, refer to the
-[Lido CSM documentation](https://operatorportal.lido.fi/modules/community-staking-module).
+[Lido CSM documentation](https://operatorportal.lido.fi/modules/community-staking-module#block-d3ad2b2bd3994a06b19dccc0794ac8d6).
