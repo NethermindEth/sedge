@@ -69,3 +69,11 @@ func SupportsMEVBoost(network string) bool {
 	out, ok := networksConfigs[network]
 	return ok && out.SupportsMEVBoost
 }
+
+func GetPublicRPCs(network string) ([]string, error) {
+	rpcs, exists := networkRPCs[network]
+	if !exists {
+		return nil, fmt.Errorf("invalid network")
+	}
+	return rpcs.PublicRPCs, nil
+}
