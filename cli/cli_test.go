@@ -573,7 +573,6 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					prompter.EXPECT().Select("Select mnemonic source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
 					prompter.EXPECT().Select("Select passphrase source", "", []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}).Return(0, nil),
-					prompter.EXPECT().Input("Withdrawal address", "", false, gomock.AssignableToTypeOf(func(s string) error { return ui.EthAddressValidator(s, true) })).Return("0x00000007abca72jmd83jd8u3jd9kdn32j38abc", nil),
 					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
 					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
 					depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil),

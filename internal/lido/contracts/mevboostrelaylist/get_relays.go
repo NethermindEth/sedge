@@ -3,6 +3,7 @@ package mevboostrelaylist
 import (
 	"encoding/hex"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -148,5 +149,6 @@ func GetLidoSupportedNetworksMevBoost() []string {
 	for network := range DeployedContractAddresses {
 		networks = append(networks, network)
 	}
+	sort.Strings(networks)
 	return networks
 }

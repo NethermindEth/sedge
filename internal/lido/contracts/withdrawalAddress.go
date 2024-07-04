@@ -1,6 +1,8 @@
 package contracts
 
 import (
+	"sort"
+
 	"github.com/NethermindEth/sedge/configs"
 )
 
@@ -25,5 +27,6 @@ func GetLidoKeysSupportedNetworks() []string {
 	for network := range WithdrawalAddress {
 		networks = append(networks, network)
 	}
+	sort.Strings(networks)
 	return networks
 }

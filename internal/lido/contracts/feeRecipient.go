@@ -1,6 +1,8 @@
 package contracts
 
 import (
+	"sort"
+
 	"github.com/NethermindEth/sedge/configs"
 )
 
@@ -29,5 +31,6 @@ func GetLidoSupportedNetworks() []string {
 	for network := range FeeRecipient {
 		networks = append(networks, network)
 	}
+	sort.Strings(networks)
 	return networks
 }

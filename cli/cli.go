@@ -976,6 +976,13 @@ func inputKeystorePassphrase(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputWithdrawalAddress(p ui.Prompter, o *CliCmdOptions) (err error) {
+	if o.nodeSetup == LidoNode {
+		_, ok := contracts.WithdrawalAddress[network]
+		if ok{
+			o.withdrawalAddress = contracts.WithdrawalAddress[network].WithdrawalAddress
+		}
+		return
+	}
 	o.withdrawalAddress, err = p.Input("Withdrawal address", "", false, func(s string) error { return ui.EthAddressValidator(s, true) })
 	return
 }
