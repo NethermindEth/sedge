@@ -817,9 +817,10 @@ func confirmInstallDependencies(p ui.Prompter, o *CliCmdOptions) (err error) {
 func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
 	if o.nodeSetup == LidoNode {
 		_, ok := mevboostrelaylist.DeployedContractAddresses[o.genData.Network]
-		if !ok {
-			return
+		if ok {
+			o.withMevBoost = true
 		}
+		return
 	}
 	o.withMevBoost, err = p.Confirm("Enable MEV Boost?", true)
 	return

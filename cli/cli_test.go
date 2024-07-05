@@ -556,7 +556,6 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
 					prompter.EXPECT().Confirm("Do you want to set up a validator?", true).Return(true, nil),
-					prompter.EXPECT().Confirm("Enable MEV Boost?", true).Return(true, nil),
 					prompter.EXPECT().Input("Mev-Boost image", "flashbots/mev-boost:latest", false, nil).Return("flashbots/mev-boost:latest", nil),
 					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
 					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(1, nil),
