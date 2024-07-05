@@ -25,8 +25,6 @@ import (
 
 	eth2 "github.com/protolambda/zrnt/eth2/configs"
 
-	"github.com/NethermindEth/sedge/internal/lido/contracts"
-	"github.com/NethermindEth/sedge/internal/lido/contracts/mevboostrelaylist"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
@@ -815,11 +813,10 @@ func confirmInstallDependencies(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
-	if o.nodeSetup == LidoNode {
-		_, supported := mevboostrelaylist.NetworkSupportedByLidoMevBoost(o.genData.Network)
-		if supported {
-			o.withMevBoost = true
-		}
+	factory := GetNodeOptions(o.nodeSetup)
+	enableMev, overwrite := factory.EnableMEVBoost(o.genData.Network)
+	if overwrite{
+		o.withMevBoost = enableMev
 		return
 	}
 	o.withMevBoost, err = p.Confirm("Enable MEV Boost?", true)
@@ -877,16 +874,17 @@ func inputMevBoostEndpoint(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
-	if o.nodeSetup == LidoNode {
-		relayURLs, err := mevboostrelaylist.GetRelaysURI(o.genData.Network)
-		if err != nil {
-			return err
-		}
+	factory := GetNodeOptions(o.nodeSetup)
+	relayURLs, err := factory.GetRelayURLs(o.genData.Network)
+	if err != nil {
+		return err
+	}
+	if relayURLs != nil{
 		o.genData.RelayURLs = relayURLs
-		return nil
+		return
 	}
 	var defaultValue []string = configs.NetworksConfigs()[o.genData.Network].RelayURLs
-	relayURLs, err := p.InputList("Insert relay URLs if you don't want to use the default values listed below", defaultValue, func(list []string) error {
+	relayURLs, err = p.InputList("Insert relay URLs if you don't want to use the default values listed below", defaultValue, func(list []string) error {
 		badUri, ok := utils.UriValidator(list)
 		if !ok {
 			return fmt.Errorf(configs.InvalidUrlFlagError, "relay", badUri)
@@ -908,9 +906,10 @@ func inputCheckpointSyncURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
-	if o.nodeSetup == LidoNode {
-		feeRecipient := contracts.FeeRecipient[o.genData.Network]
-		o.genData.FeeRecipient = feeRecipient.FeeRecipientAddress
+	factory := GetNodeOptions(o.nodeSetup)
+	feeRecipient, overwrite := factory.GetFeeRecipient(o.genData.Network)
+	if overwrite {
+		o.genData.FeeRecipient = feeRecipient
 		return
 	}
 	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address", "", true)
@@ -918,9 +917,10 @@ func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputFeeRecipientNoValidator(p ui.Prompter, o *CliCmdOptions) (err error) {
-	if o.nodeSetup == LidoNode {
-		feeRecipient := contracts.FeeRecipient[o.genData.Network]
-		o.genData.FeeRecipient = feeRecipient.FeeRecipientAddress
+	factory := GetNodeOptions(o.nodeSetup)
+	feeRecipient, overwrite := factory.GetFeeRecipient(o.genData.Network)
+	if overwrite {
+		o.genData.FeeRecipient = feeRecipient
 		return
 	}
 	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false)
@@ -977,11 +977,10 @@ func inputKeystorePassphrase(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputWithdrawalAddress(p ui.Prompter, o *CliCmdOptions) (err error) {
-	if o.nodeSetup == LidoNode {
-		_, supported := contracts.NetworkSupportedByLidoKeys(o.genData.Network)
-		if supported {
-			o.withdrawalAddress = contracts.WithdrawalAddress[o.genData.Network].WithdrawalAddress
-		}
+	factory := GetNodeOptions(o.nodeSetup)
+	withdrawalAddress, overwrite := factory.GetWithdrawalAddress(o.genData.Network)
+	if overwrite {
+		o.withdrawalAddress = withdrawalAddress
 		return
 	}
 	o.withdrawalAddress, err = p.Input("Withdrawal address", "", false, func(s string) error { return ui.EthAddressValidator(s, true) })
