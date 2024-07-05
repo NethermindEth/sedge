@@ -90,4 +90,5 @@ const (
 	IncompatibleLidoAndEth1Withdrawal  = "incompatible flags --lido, and --eth-withdrawal-address can't be used together"
 	InvalidNetworkForLido              = "invalid network: Choose valid network for Lido: %v"
 	InvalidNetworkForLidoMevBoost      = "invalid network: Choose valid network for Lido with MEV-Boost: %v"
+	InvalidNetworkForLidoKeys          = "invalid network: Choose valid network for Lido Withdrawal Address: %v"
 )

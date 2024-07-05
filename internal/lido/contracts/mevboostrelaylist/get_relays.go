@@ -152,3 +152,17 @@ func GetLidoSupportedNetworksMevBoost() []string {
 	sort.Strings(networks)
 	return networks
 }
+
+func NetworkSupportedByLidoMevBoost(network string) ([]string, bool) {
+	supportedNetworks := GetLidoSupportedNetworksMevBoost()
+	var supported bool
+	for _, supportedNetwork := range supportedNetworks {
+		if network == supportedNetwork {
+			supported = true
+		}
+	}
+	if !supported {
+		return supportedNetworks, supported
+	}
+	return nil, supported
+}

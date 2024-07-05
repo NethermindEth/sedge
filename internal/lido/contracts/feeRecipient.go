@@ -34,3 +34,17 @@ func GetLidoSupportedNetworks() []string {
 	sort.Strings(networks)
 	return networks
 }
+
+func NetworkSupportedByLido(network string) ([]string, bool) {
+	supportedNetworks := GetLidoSupportedNetworks()
+	var supported bool
+	for _, supportedNetwork := range supportedNetworks {
+		if network == supportedNetwork {
+			supported = true
+		}
+	}
+	if !supported {
+		return supportedNetworks, supported
+	}
+	return nil, supported
+}

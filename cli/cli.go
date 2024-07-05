@@ -816,8 +816,8 @@ func confirmInstallDependencies(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
 	if o.nodeSetup == LidoNode {
-		_, ok := mevboostrelaylist.DeployedContractAddresses[o.genData.Network]
-		if ok {
+		_, supported := mevboostrelaylist.NetworkSupportedByLidoMevBoost(o.genData.Network)
+		if supported {
 			o.withMevBoost = true
 		}
 		return
@@ -978,9 +978,9 @@ func inputKeystorePassphrase(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func inputWithdrawalAddress(p ui.Prompter, o *CliCmdOptions) (err error) {
 	if o.nodeSetup == LidoNode {
-		_, ok := contracts.WithdrawalAddress[network]
-		if ok {
-			o.withdrawalAddress = contracts.WithdrawalAddress[network].WithdrawalAddress
+		_, supported := contracts.NetworkSupportedByLidoKeys(o.genData.Network)
+		if supported {
+			o.withdrawalAddress = contracts.WithdrawalAddress[o.genData.Network].WithdrawalAddress
 		}
 		return
 	}

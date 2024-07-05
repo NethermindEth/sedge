@@ -106,10 +106,9 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 			}
 			// validate network for Lido
 			if flags.lidoNode {
-				_, ok := contracts.WithdrawalAddress[network]
-				if !ok {
-					options := contracts.GetLidoKeysSupportedNetworks()
-					log.Fatalf("invalid network: Choose valid network for Lido: %v", options)
+				options, supported := contracts.NetworkSupportedByLidoKeys(flags.network)
+				if !supported {
+					log.Fatalf(configs.InvalidNetworkForLidoKeys, options)
 				}
 			}
 			// Warn about withdrawal address

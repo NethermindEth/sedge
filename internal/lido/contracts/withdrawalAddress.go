@@ -30,3 +30,17 @@ func GetLidoKeysSupportedNetworks() []string {
 	sort.Strings(networks)
 	return networks
 }
+
+func NetworkSupportedByLidoKeys(network string) ([]string, bool) {
+	supportedNetworks := GetLidoKeysSupportedNetworks()
+	var supported bool
+	for _, supportedNetwork := range supportedNetworks {
+		if network == supportedNetwork {
+			supported = true
+		}
+	}
+	if !supported {
+		return supportedNetworks, supported
+	}
+	return nil, supported
+}
