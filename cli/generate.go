@@ -491,17 +491,12 @@ func loadJWTSecret(from string) (absFrom string, err error) {
 	return
 }
 
-func validateLido(network string, flags *GenCmdFlags) error {
-	if !flags.noMev {
-		options, supported := mevboostrelaylist.NetworkSupportedByLidoMevBoost(network)
-		if !supported {
-			return fmt.Errorf(configs.InvalidNetworkForLidoMevBoost, options)
-		}
+func nodeType() string {
+	var nodeType string
+	if lidoNode {
+		nodeType = LidoNode
+	} else {
+		nodeType = EthereumNode
 	}
-	options, supported := contracts.NetworkSupportedByLido(network)
-	if !supported {
-		return fmt.Errorf(configs.InvalidNetworkForLido, options)
-	}
-
-	return nil
+	return nodeType
 }

@@ -55,7 +55,8 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			if err := validateLido(network, &flags); err != nil && lidoNode {
+			factory := GetNodeOptions(nodeType())
+			if err := factory.ValidateNode(network, &flags); err != nil {
 				return err
 			}
 			return preValidationGenerateCmd(network, logging, &flags)
@@ -130,7 +131,8 @@ func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			if err := validateLido(network, &flags); err != nil && lidoNode {
+			factory := GetNodeOptions(nodeType())
+			if err := factory.ValidateNode(network, &flags); err != nil {
 				return err
 			}
 			return preValidationGenerateCmd(network, logging, &flags)
@@ -178,7 +180,8 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			if err := validateLido(network, &flags); err != nil && lidoNode {
+			factory := GetNodeOptions(nodeType())
+			if err := factory.ValidateNode(network, &flags); err != nil {
 				return err
 			}
 			return preValidationGenerateCmd(network, logging, &flags)
@@ -241,7 +244,8 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			if err := validateLido(network, &flags); err != nil && lidoNode {
+			factory := GetNodeOptions(nodeType())
+			if err := factory.ValidateNode(network, &flags); err != nil {
 				return err
 			}
 			return preValidationGenerateCmd(network, logging, &flags)

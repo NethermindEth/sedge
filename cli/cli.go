@@ -815,7 +815,7 @@ func confirmInstallDependencies(p ui.Prompter, o *CliCmdOptions) (err error) {
 func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
 	factory := GetNodeOptions(o.nodeSetup)
 	enableMev, overwrite := factory.EnableMEVBoost(o.genData.Network)
-	if overwrite{
+	if overwrite {
 		o.withMevBoost = enableMev
 		return
 	}
@@ -879,7 +879,7 @@ func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 	if err != nil {
 		return err
 	}
-	if relayURLs != nil{
+	if relayURLs != nil {
 		o.genData.RelayURLs = relayURLs
 		return
 	}
