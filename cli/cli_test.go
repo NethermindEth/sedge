@@ -372,6 +372,7 @@ func TestCli(t *testing.T) {
 					MapAllPorts:       false,
 					ExecutionApiUrl:   "http://execution:5051",
 					ExecutionAuthUrl:  "http://execution:5051",
+					MevBoostEndpoint:  "http://mev-boost:3030",
 					ContainerTag:      "tag",
 					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
 				}
@@ -383,6 +384,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
 					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(3, nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("https://checkpoint-sync.holesky.ethpandaops.io/", nil),
+					prompter.EXPECT().InputURL("Mev-Boost endpoint", "", false).Return("http://mev-boost:3030", nil),
 					prompter.EXPECT().InputURL("Execution API URL", "", true).Return("http://execution:5051", nil),
 					prompter.EXPECT().InputURL("Execution Auth API URL", "", true).Return("http://execution:5051", nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e8b91022a7e5732eb6bf5d5", nil),
