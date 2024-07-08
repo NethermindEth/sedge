@@ -58,7 +58,7 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 	NetworkHolesky: {
 		Name:               NetworkHolesky,
 		NetworkService:     "merge",
-		GenesisForkVersion: "0x00017000",
+		GenesisForkVersion: "0x01017000",
 		SupportsMEVBoost:   true,
 		CheckpointSyncURL:  "https://checkpoint-sync.holesky.ethpandaops.io/",
 		RelayURLs: []string{
