@@ -32,6 +32,7 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 			"https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net",
 			"https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money",
 		},
+		Weight: 1,
 	},
 	NetworkSepolia: {
 		Name:               NetworkSepolia,
@@ -42,18 +43,21 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		RelayURLs: []string{
 			"https://0x845bd072b7cd566f02faeb0a4033ce9399e42839ced64e8b2adcfc859ed1e8e1a5a293336a49feac6d9a5edb779be53a@builder-relay-sepolia.flashbots.net",
 		},
+		Weight: 3,
 	},
 	NetworkChiado: {
 		Name:               NetworkChiado,
 		NetworkService:     "merge",
 		GenesisForkVersion: "0x0000006f",
 		CheckpointSyncURL:  "https://checkpoint.chiadochain.net",
+		Weight:             5,
 	},
 	NetworkGnosis: {
 		Name:               NetworkGnosis,
 		NetworkService:     "merge",
 		GenesisForkVersion: "0x00000064",
 		CheckpointSyncURL:  "https://checkpoint.gnosischain.com",
+		Weight:             4,
 	},
 	NetworkHolesky: {
 		Name:               NetworkHolesky,
@@ -67,11 +71,13 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 			"https://0xab78bf8c781c58078c3beb5710c57940874dd96aef2835e7742c866b4c7c0406754376c2c8285a36c630346aa5c5f833@holesky.aestus.live",
 			"https://0xaa58208899c6105603b74396734a6263cc7d947f444f396a90f7b7d3e65d102aec7e5e5291b27e08d02c50a050825c2f@holesky.titanrelay.xyz",
 		},
+		Weight: 2,
 	},
 	NetworkCustom: {
 		Name:               NetworkCustom,
 		NetworkService:     "merge",
 		GenesisForkVersion: "0x00000000", // TODO: only affects keystores generation, ensure the deposit method does not conflict over this.
+		Weight:             6,
 	},
 }
 

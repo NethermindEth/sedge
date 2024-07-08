@@ -106,9 +106,9 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 			}
 			// validate network for Lido
 			if flags.lidoNode {
-				options, supported := contracts.NetworkSupportedByLidoKeys(flags.network)
+				supported := contracts.NetworkSupportedByLidoWithdrawal(flags.network)
 				if !supported {
-					log.Fatalf(configs.InvalidNetworkForLidoKeys, options)
+					log.Fatalf(configs.InvalidNetworkForLidoKeys, contracts.LidoWithdrawalSupportedNetworks())
 				}
 			}
 			// Warn about withdrawal address
@@ -178,7 +178,8 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 
 			var withdrawalAddress string
 			if flags.lidoNode {
-				withdrawalAddress = contracts.WithdrawalAddress[flags.network].WithdrawalAddress[2:]
+				withdrawalAddress, _ = contracts.WithdrawalAddress(flags.network)
+				withdrawalAddress = withdrawalAddress[2:]
 			} else if flags.ethWithdrawalAddress != "" {
 				withdrawalAddress = flags.ethWithdrawalAddress[2:]
 			}

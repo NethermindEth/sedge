@@ -1317,7 +1317,7 @@ func TestGenerateCmd(t *testing.T) {
 			nil,
 		},
 		{
-			"Lido Full-node - Sepolia without MEV",
+			"Lido Full-node - Holesky without MEV",
 			subCmd{
 				name: "full-node",
 			},
@@ -1325,24 +1325,22 @@ func TestGenerateCmd(t *testing.T) {
 				noMev: true,
 			},
 			globalFlags{
-				network:  NetworkSepolia,
+				network:  NetworkHolesky,
 				lidoNode: true,
 			},
 			nil,
 		},
 		{
-			"Lido Full-node - unsupported Sepolia with MEV",
+			"Lido Full-node - Sepolia",
 			subCmd{
 				name: "full-node",
 			},
-			GenCmdFlags{
-				noMev: false,
-			},
+			GenCmdFlags{},
 			globalFlags{
 				network:  NetworkSepolia,
 				lidoNode: true,
 			},
-			fmt.Errorf(configs.InvalidNetworkForLidoMevBoost, mevboostrelaylist.GetLidoSupportedNetworksMevBoost()),
+			fmt.Errorf(configs.InvalidNetworkForLidoMevBoost, mevboostrelaylist.LidoSupportedNetworksMevBoost()),
 		},
 		{
 			"Lido Full-node - Holesky no validator",
@@ -1370,7 +1368,7 @@ func TestGenerateCmd(t *testing.T) {
 				network:  NetworkGnosis,
 				lidoNode: true,
 			},
-			fmt.Errorf(configs.InvalidNetworkForLido, contracts.GetLidoSupportedNetworks()),
+			fmt.Errorf(configs.InvalidNetworkForLido, contracts.LidoSupportedNetworks()),
 		},
 	}
 

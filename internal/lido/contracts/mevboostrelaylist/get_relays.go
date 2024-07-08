@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package mevboostrelaylist
 
 import (
@@ -20,7 +35,7 @@ type Relay struct {
 }
 
 // Define deployed contract addresses for Mainnet and Holesky
-var DeployedContractAddresses = map[string]string{
+var deployedContractAddresses = map[string]string{
 	configs.NetworkMainnet: "0xF95f069F9AD107938F6ba802a3da87892298610E",
 	configs.NetworkHolesky: "0x2d86C5855581194a386941806E38cA119E50aEA3",
 }
@@ -52,7 +67,7 @@ func connectToRPC(RPCs []string) (*rpc.Client, error) {
 }
 
 /*
-GetRelays :
+Relays :
 This function is responsible for :-
 retrieving a list of relays from the MEV-Boost Allowed List contract for a given network.
 params :-
@@ -63,7 +78,7 @@ List of relays
 b. error
 Error if any
 */
-func GetRelays(network string) ([]Relay, error) {
+func Relays(network string) ([]Relay, error) {
 	var relays []Relay
 	rpcs, err := configs.GetPublicRPCs(network)
 	if err != nil {
@@ -95,7 +110,7 @@ func GetRelays(network string) ([]Relay, error) {
 		Data string `json:"data"`
 	}
 	args := CallArgs{
-		To:   DeployedContractAddresses[network],
+		To:   deployedContractAddresses[network],
 		Data: "0x" + hex.EncodeToString(data),
 	}
 
@@ -121,7 +136,7 @@ func GetRelays(network string) ([]Relay, error) {
 }
 
 /*
-GetRelaysURI :
+RelaysURI :
 This function is responsible for :-
 retrieving a list of relays URI from the MEV-Boost Allowed List contract for a given network.
 params :-
@@ -132,8 +147,8 @@ List of relays URI
 b. error
 Error if any
 */
-func GetRelaysURI(network string) ([]string, error) {
-	relays, err := GetRelays(network)
+func RelaysURI(network string) ([]string, error) {
+	relays, err := Relays(network)
 	if err != nil {
 		return nil, err
 	}
@@ -144,9 +159,9 @@ func GetRelaysURI(network string) ([]string, error) {
 	return relayURIs, err
 }
 
-func GetLidoSupportedNetworksMevBoost() []string {
+func LidoSupportedNetworksMevBoost() []string {
 	networks := []string{}
-	for network := range DeployedContractAddresses {
+	for network := range deployedContractAddresses {
 		networks = append(networks, network)
 	}
 	sort.Strings(networks)
@@ -154,7 +169,7 @@ func GetLidoSupportedNetworksMevBoost() []string {
 }
 
 func NetworkSupportedByLidoMevBoost(network string) ([]string, bool) {
-	supportedNetworks := GetLidoSupportedNetworksMevBoost()
+	supportedNetworks := LidoSupportedNetworksMevBoost()
 	var supported bool
 	for _, supportedNetwork := range supportedNetworks {
 		if network == supportedNetwork {

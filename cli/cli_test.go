@@ -26,6 +26,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
@@ -38,7 +39,7 @@ func TestCli(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
 
-	mevboostRelayListUris, _ := mevboostrelaylist.GetRelaysURI("mainnet")
+	mevboostRelayListUris, _ := mevboostrelaylist.RelaysURI("mainnet")
 
 	ETHClients := map[string][]string{
 		"execution": clients.AllClients["execution"],
@@ -97,8 +98,8 @@ func TestCli(t *testing.T) {
 				}
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
 				gomock.InOrder(
-					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(0, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -168,8 +169,8 @@ func TestCli(t *testing.T) {
 					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
 				}
 				gomock.InOrder(
-					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(0, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -212,8 +213,8 @@ func TestCli(t *testing.T) {
 					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
 				}
 				gomock.InOrder(
-					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(4, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(1, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -249,8 +250,8 @@ func TestCli(t *testing.T) {
 				}
 
 				gomock.InOrder(
-					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(0, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(1, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -293,8 +294,8 @@ func TestCli(t *testing.T) {
 				}
 
 				gomock.InOrder(
-					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(4, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(1, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(1, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -343,8 +344,8 @@ func TestCli(t *testing.T) {
 				}
 
 				gomock.InOrder(
-					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(0, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -387,8 +388,8 @@ func TestCli(t *testing.T) {
 				}
 
 				gomock.InOrder(
-					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(4, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(1, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -431,8 +432,8 @@ func TestCli(t *testing.T) {
 				}
 
 				gomock.InOrder(
-					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(0, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(3, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -494,8 +495,8 @@ func TestCli(t *testing.T) {
 				}
 
 				gomock.InOrder(
-					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}).Return(0, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -550,7 +551,7 @@ func TestCli(t *testing.T) {
 				}
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
 				gomock.InOrder(
-					prompter.EXPECT().Select("Select node setup", "", []string{EthereumNode, LidoNode}).Return(1, nil),
+					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(1, nil),
 					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHolesky, NetworkSepolia}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),

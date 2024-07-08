@@ -108,7 +108,8 @@ func TestGenerate_FullNode_Lido_Sepolia_NoMEV(t *testing.T) {
 			// Read FEE_RECIPIENT value
 			feeRecipient, exists := envMap["FEE_RECIPIENT"]
 			assert.True(t, exists, "FEE_RECIPIENT should exist in .env file")
-			expectedFeeRecipient := contracts.FeeRecipient["sepolia"].FeeRecipientAddress
+			expectedFeeRecipient, ok := contracts.FeeRecipient("sepolia")
+			assert.True(t, ok, "FeeRecipient should be found")
 			assert.Equal(t, expectedFeeRecipient, feeRecipient, "FEE_RECIPIENT value should match expected value")
 
 			// Read RELAY_URLS value
@@ -147,14 +148,15 @@ func TestGenerate_FullNode_Lido_Mainnet(t *testing.T) {
 			// Read FEE_RECIPIENT value
 			feeRecipient, exists := envMap["FEE_RECIPIENT"]
 			assert.True(t, exists, "FEE_RECIPIENT should exist in .env file")
-			expectedFeeRecipient := contracts.FeeRecipient["mainnet"].FeeRecipientAddress
+			expectedFeeRecipient, ok := contracts.FeeRecipient("mainnet")
+			assert.True(t, ok, "FeeRecipient should be found")
 			assert.Equal(t, expectedFeeRecipient, feeRecipient, "FEE_RECIPIENT value should match expected value")
 
 			// Read RELAY_URLS value
 			relayURLs, exists := envMap["RELAY_URLS"]
 			assert.True(t, exists, "RELAY_URLS should exist in .env file")
 			relayURLsList := strings.Split(relayURLs, ",")
-			expectedRelayURLs, _ := mevboostrelaylist.GetRelaysURI("mainnet")
+			expectedRelayURLs, _ := mevboostrelaylist.RelaysURI("mainnet")
 			assert.Equal(t, expectedRelayURLs, relayURLsList, "RELAY_URLS value should match expected value")
 		},
 	)

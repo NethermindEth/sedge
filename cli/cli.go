@@ -28,6 +28,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/NethermindEth/sedge/internal/ui"
 
 	"github.com/NethermindEth/sedge/cli/actions"
@@ -50,9 +51,6 @@ const (
 	NodeTypeExecution = "execution"
 	NodeTypeConsensus = "consensus"
 	NodeTypeValidator = "validator"
-
-	EthereumNode = "ethereum-node"
-	LidoNode     = "lido-node"
 
 	Randomize = "randomize"
 
@@ -621,7 +619,7 @@ func runPromptActions(p ui.Prompter, o *CliCmdOptions, actions ...promptAction) 
 }
 
 func selectNodeSetup(p ui.Prompter, o *CliCmdOptions) (err error) {
-	options := []string{EthereumNode, LidoNode}
+	options := []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}
 	index, err := p.Select("Select node setup", "", options)
 	if err != nil {
 		return err
@@ -631,12 +629,9 @@ func selectNodeSetup(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func selectNetwork(p ui.Prompter, o *CliCmdOptions) error {
-	var options []string
-	if o.nodeSetup == LidoNode {
-		options = []string{NetworkMainnet, NetworkHolesky, NetworkSepolia}
-	} else {
-		options = []string{NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}
-	}
+	opts := sedgeOpts.CreateSedgeOptions(o.nodeSetup)
+	options := opts.SupportedNetworks()
+
 	index, err := p.Select("Select network", "", options)
 	if err != nil {
 		return err
@@ -813,9 +808,9 @@ func confirmInstallDependencies(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
-	factory := GetNodeOptions(o.nodeSetup)
-	enableMev, overwrite := factory.EnableMEVBoost(o.genData.Network)
-	if overwrite {
+	opts := sedgeOpts.CreateSedgeOptions(o.nodeSetup)
+	enableMev := opts.MEVBoostEnabled(o.genData.Network)
+	if opts.OverwriteSettings().MevBoost {
 		o.withMevBoost = enableMev
 		return
 	}
@@ -874,17 +869,16 @@ func inputMevBoostEndpoint(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
-	factory := GetNodeOptions(o.nodeSetup)
-	relayURLs, err := factory.GetRelayURLs(o.genData.Network)
+	opts := sedgeOpts.CreateSedgeOptions(o.nodeSetup)
+	relayURLs, err := opts.RelayURLs(o.genData.Network)
 	if err != nil {
 		return err
 	}
-	if relayURLs != nil {
+	if relayURLs != nil && opts.OverwriteSettings().RelayURLs {
 		o.genData.RelayURLs = relayURLs
 		return
 	}
-	var defaultValue []string = configs.NetworksConfigs()[o.genData.Network].RelayURLs
-	relayURLs, err = p.InputList("Insert relay URLs if you don't want to use the default values listed below", defaultValue, func(list []string) error {
+	relayURLs, err = p.InputList("Insert relay URLs if you don't want to use the default values listed below", relayURLs, func(list []string) error {
 		badUri, ok := utils.UriValidator(list)
 		if !ok {
 			return fmt.Errorf(configs.InvalidUrlFlagError, "relay", badUri)
@@ -906,9 +900,9 @@ func inputCheckpointSyncURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
-	factory := GetNodeOptions(o.nodeSetup)
-	feeRecipient, overwrite := factory.GetFeeRecipient(o.genData.Network)
-	if overwrite {
+	opts := sedgeOpts.CreateSedgeOptions(o.nodeSetup)
+	feeRecipient := opts.FeeRecipient(o.genData.Network)
+	if opts.OverwriteSettings().FeeRecipient {
 		o.genData.FeeRecipient = feeRecipient
 		return
 	}
@@ -917,9 +911,9 @@ func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputFeeRecipientNoValidator(p ui.Prompter, o *CliCmdOptions) (err error) {
-	factory := GetNodeOptions(o.nodeSetup)
-	feeRecipient, overwrite := factory.GetFeeRecipient(o.genData.Network)
-	if overwrite {
+	opts := sedgeOpts.CreateSedgeOptions(o.nodeSetup)
+	feeRecipient := opts.FeeRecipient(o.genData.Network)
+	if opts.OverwriteSettings().FeeRecipient {
 		o.genData.FeeRecipient = feeRecipient
 		return
 	}
@@ -977,9 +971,9 @@ func inputKeystorePassphrase(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputWithdrawalAddress(p ui.Prompter, o *CliCmdOptions) (err error) {
-	factory := GetNodeOptions(o.nodeSetup)
-	withdrawalAddress, overwrite := factory.GetWithdrawalAddress(o.genData.Network)
-	if overwrite {
+	opts := sedgeOpts.CreateSedgeOptions(o.nodeSetup)
+	withdrawalAddress := opts.WithdrawalAddress(o.genData.Network)
+	if opts.OverwriteSettings().WithdrawalAddress {
 		o.withdrawalAddress = withdrawalAddress
 		return
 	}

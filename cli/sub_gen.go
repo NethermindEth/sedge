@@ -19,6 +19,7 @@ import (
 	"errors"
 
 	"github.com/NethermindEth/sedge/cli/actions"
+	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/spf13/cobra"
 )
 
@@ -55,11 +56,15 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			factory := GetNodeOptions(nodeType())
-			if err := factory.ValidateNode(network, &flags); err != nil {
+			if err := preValidationGenerateCmd(network, logging, &flags); err != nil {
 				return err
 			}
-			return preValidationGenerateCmd(network, logging, &flags)
+			opts := sedgeOpts.CreateSedgeOptions(nodeType())
+			settings := sedgeOpts.OptionSettings{
+				Network:         network,
+				MEVBoostEnabled: !flags.noMev && !flags.noValidator,
+			}
+			return opts.ValidateSettings(settings)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			services := []string{execution, consensus}
@@ -131,11 +136,15 @@ func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			factory := GetNodeOptions(nodeType())
-			if err := factory.ValidateNode(network, &flags); err != nil {
+			if err := preValidationGenerateCmd(network, logging, &flags); err != nil {
 				return err
 			}
-			return preValidationGenerateCmd(network, logging, &flags)
+			opts := sedgeOpts.CreateSedgeOptions(nodeType())
+			settings := sedgeOpts.OptionSettings{
+				Network:         network,
+				MEVBoostEnabled: false, // MEV Boost is not supported for execution nodes only
+			}
+			return opts.ValidateSettings(settings)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{execution})
@@ -180,11 +189,15 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			factory := GetNodeOptions(nodeType())
-			if err := factory.ValidateNode(network, &flags); err != nil {
+			if err := preValidationGenerateCmd(network, logging, &flags); err != nil {
 				return err
 			}
-			return preValidationGenerateCmd(network, logging, &flags)
+			opts := sedgeOpts.CreateSedgeOptions(nodeType())
+			settings := sedgeOpts.OptionSettings{
+				Network:         network,
+				MEVBoostEnabled: false, // MEV Boost is not supported for consensus nodes only
+			}
+			return opts.ValidateSettings(settings)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{consensus})
@@ -244,11 +257,15 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			factory := GetNodeOptions(nodeType())
-			if err := factory.ValidateNode(network, &flags); err != nil {
+			if err := preValidationGenerateCmd(network, logging, &flags); err != nil {
 				return err
 			}
-			return preValidationGenerateCmd(network, logging, &flags)
+			opts := sedgeOpts.CreateSedgeOptions(nodeType())
+			settings := sedgeOpts.OptionSettings{
+				Network:         network,
+				MEVBoostEnabled: !flags.noMev && !flags.noValidator,
+			}
+			return opts.ValidateSettings(settings)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			flags.noMev = true

@@ -131,12 +131,14 @@ func TestKeys_Lido_Mainnet(t *testing.T) {
 			err = json.Unmarshal([]byte(jsonData), &keys)
 			assert.NoError(t, err, "error unmarshalling json")
 
+			wa, ok := contracts.WithdrawalAddress("mainnet")
+			assert.True(t, ok, "WithdrawalAddress should be found")
 			pattern := `^010000000000000000000000[a-fA-F0-9]{40}$`
 			regex := regexp.MustCompile(pattern)
 			for _, key := range keys {
 				assert.Regexp(t, regex, key.WithdrawalCredentials, "withdrawal_credentials should match the pattern")
 				assert.Equal(t, key.NetworkName, "mainnet", "network_name should be mainnet")
-				expectedWithdrawalAddress := "010000000000000000000000" + (contracts.WithdrawalAddress["mainnet"].WithdrawalAddress[2:])
+				expectedWithdrawalAddress := "010000000000000000000000" + (wa[2:])
 				assert.Equal(t, expectedWithdrawalAddress, key.WithdrawalCredentials, "WithdrawalAddress value should match expected value")
 			}
 		},
@@ -191,12 +193,14 @@ func TestKeys_Lido_Holesky(t *testing.T) {
 			err = json.Unmarshal([]byte(jsonData), &keys)
 			assert.NoError(t, err, "error unmarshalling json")
 
+			wa, ok := contracts.WithdrawalAddress("holesky")
+			assert.True(t, ok, "WithdrawalAddress should be found")
 			pattern := `^010000000000000000000000[a-fA-F0-9]{40}$`
 			regex := regexp.MustCompile(pattern)
 			for _, key := range keys {
 				assert.Regexp(t, regex, key.WithdrawalCredentials, "withdrawal_credentials should match the pattern")
 				assert.Equal(t, key.NetworkName, "holesky", "network_name should be holesky")
-				expectedWithdrawalCredentials := "010000000000000000000000" + (contracts.WithdrawalAddress["holesky"].WithdrawalAddress[2:])
+				expectedWithdrawalCredentials := "010000000000000000000000" + (wa[2:])
 				expectedWithdrawalCredentials = strings.ToLower(expectedWithdrawalCredentials)
 				assert.Equal(t, expectedWithdrawalCredentials, key.WithdrawalCredentials, "WithdrawalAddress value should match expected value")
 			}

@@ -25,13 +25,12 @@ import (
 	"time"
 
 	"github.com/NethermindEth/sedge/internal/crypto"
-	"github.com/NethermindEth/sedge/internal/lido/contracts"
-	"github.com/NethermindEth/sedge/internal/lido/contracts/mevboostrelaylist"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
 	log "github.com/sirupsen/logrus"
@@ -264,10 +263,9 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 
 	// Overwrite feeRecipient and relayURLs for Lido Node
 	if lidoNode {
-		feeRecipient := contracts.FeeRecipient[network]
-		flags.feeRecipient = feeRecipient.FeeRecipientAddress
-
-		flags.relayURLs, _ = mevboostrelaylist.GetRelaysURI(network)
+		opts := sedgeOpts.CreateSedgeOptions(sedgeOpts.LidoNode)
+		flags.feeRecipient = opts.FeeRecipient(network)
+		flags.relayURLs, _ = opts.RelayURLs(network)
 	}
 
 	// Warning if no fee recipient is set
@@ -494,9 +492,9 @@ func loadJWTSecret(from string) (absFrom string, err error) {
 func nodeType() string {
 	var nodeType string
 	if lidoNode {
-		nodeType = LidoNode
+		nodeType = sedgeOpts.LidoNode
 	} else {
-		nodeType = EthereumNode
+		nodeType = sedgeOpts.EthereumNode
 	}
 	return nodeType
 }
