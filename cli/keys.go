@@ -210,6 +210,7 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 				log.Fatal(err)
 			}
 			log.Info(configs.DepositDataGenerated)
+			log.Infof(configs.KeystorePath, keystorePath)
 		},
 	}
 	// Flag binds
