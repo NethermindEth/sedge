@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Remove arguments for Lighthouse `--eth1` flag.
+
 ### Added
 
 - Add support for MEV-boost on Holesky.
@@ -18,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Update client images to Dencun-ready versions. 
 - Renamed `--eth1-withdrawal-address` flag from `sedge keys` to `--eth-withdrawal-address`.
+- Update client images to latest versions.
 
 ### Removed
 
