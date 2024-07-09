@@ -20,6 +20,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -242,6 +243,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 			gd.MevBoostEndpoint = fmt.Sprintf("%s:%v", configs.DefaultMevBoostEndpoint, gd.Ports["MevPort"])
 		}
 	}
+	gd.MevBoostService = slices.Contains(gd.Services, "mev-boost")
 
 	data := DockerComposeData{
 		Services:            gd.Services,
