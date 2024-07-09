@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New flag `--lido` to `generate` command for Lido CSM setup.
 - New Sedge setup flow with `sedge cli` command for Lido CSM setup.
 - Support for `sedge keys` to generate 0x01 withdrawal credentials.
+- Support for installing Docker in Ubuntu 24.04 LTS.
 
 ### Changed
 
