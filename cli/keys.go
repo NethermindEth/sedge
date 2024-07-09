@@ -100,7 +100,7 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			// Incompatible --lido and --eth1-withdrawal-address together
+			// Incompatible --lido and --eth-withdrawal-address together
 			if flags.lidoNode && flags.ethWithdrawalAddress != "" {
 				log.Fatalf(configs.IncompatibleLidoAndEth1Withdrawal)
 			}
