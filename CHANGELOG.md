@@ -10,13 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add support for MEV-boost on Holesky.
+- New flag `--lido` to `generate` command for Lido CSM setup.
+- New Sedge setup flow with `sedge cli` command for Lido CSM setup.
+- Support for `sedge keys` to generate 0x01 withdrawal credentials.
 
 ### Changed
 
 - Update client images to Dencun-ready versions. 
-- 
+- Renamed `--eth1-withdrawal-address` flag from `sedge keys` to `--eth-withdrawal-address`.
 
 ### Removed
+
 - Removed support for Goerli. 
 
 ## [v1.3.1] - 2024-02-14
