@@ -14,9 +14,9 @@ func TestNetworkCheck(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "Valid network, goerli",
+			name:    "Invalid network, goerli",
 			network: "goerli",
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name:    "Valid network, sepolia",
@@ -65,13 +65,18 @@ func TestSupportMEVBoost(t *testing.T) {
 			want:    true,
 		},
 		{
-			name:    "Valid network, goerli",
+			name:    "Invalid network, goerli",
 			network: "goerli",
-			want:    true,
+			want:    false,
 		},
 		{
 			name:    "Valid network, sepolia",
 			network: "sepolia",
+			want:    true,
+		},
+		{
+			name:    "Valid network, holesky",
+			network: "holesky",
 			want:    true,
 		},
 		{

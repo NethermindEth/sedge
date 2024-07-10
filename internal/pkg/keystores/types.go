@@ -27,4 +27,5 @@ type ValidatorKeysGenData struct {
 	ForkVersion         string
 	AmountGwei          uint64
 	AsJsonList          bool
+	WithdrawalAddress   string
 }

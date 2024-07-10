@@ -43,7 +43,7 @@ func TestImportKeys_NumberOfArguments(t *testing.T) {
 		},
 		{
 			name: "with flags",
-			args: []string{"--network", "goerli"},
+			args: []string{"--network", "mainnet"},
 		},
 	}
 	for _, tt := range tests {
@@ -85,7 +85,7 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 			name: "with flags",
 			args: []string{
 				"prysm",
-				"--network", "goerli",
+				"--network", "mainnet",
 				"--from", "/tmp/keystore",
 				"--path", "/tmp/sedge",
 				"--start-validator",
@@ -96,7 +96,7 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 			},
 			expectedOptions: actions.ImportValidatorKeysOptions{
 				ValidatorClient: "prysm",
-				Network:         "goerli",
+				Network:         "mainnet",
 				StartValidator:  true,
 				GenerationPath:  "/tmp/sedge",
 				From:            "/tmp/keystore",
@@ -106,7 +106,7 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 			name: "with shorthand flags",
 			args: []string{
 				"teku",
-				"-n", "goerli",
+				"-n", "mainnet",
 				"--from", "/tmp/keystore",
 				"-p", "/tmp/sedge",
 				"--stop-validator",
@@ -117,7 +117,7 @@ func TestImportKeys_ArgsAndFlags(t *testing.T) {
 			},
 			expectedOptions: actions.ImportValidatorKeysOptions{
 				ValidatorClient: "teku",
-				Network:         "goerli",
+				Network:         "mainnet",
 				From:            "/tmp/keystore",
 				GenerationPath:  "/tmp/sedge",
 				StopValidator:   true,

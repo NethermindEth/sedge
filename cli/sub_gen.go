@@ -19,6 +19,7 @@ import (
 	"errors"
 
 	"github.com/NethermindEth/sedge/cli/actions"
+	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/spf13/cobra"
 )
 
@@ -45,7 +46,7 @@ func FullNodeSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 
 It will not generate a validator configuration if the --no-validator flag is set to true.
 
-On mainnet, sepolia and goerli, mev-boost will be activated by default unless you run it with --no-mev-boost flag.
+On mainnet and sepolia mev-boost will be activated by default unless you run it with --no-mev-boost flag.
 
 If you don't provide a execution, consensus or validator client, it will be chosen randomly. If one of the consensus or validator is provided, but the other one is omitted, then the same pair of clients will be used for both consensus and validator.
 
@@ -55,7 +56,15 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			return preValidationGenerateCmd(network, logging, &flags)
+			if err := preValidationGenerateCmd(network, logging, &flags); err != nil {
+				return err
+			}
+			opts := sedgeOpts.CreateSedgeOptions(nodeType())
+			settings := sedgeOpts.OptionSettings{
+				Network:         network,
+				MEVBoostEnabled: !flags.noMev && !flags.noValidator,
+			}
+			return opts.ValidateSettings(settings)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			services := []string{execution, consensus}
@@ -79,10 +88,12 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 	cmd.Flags().StringVarP(&flags.validatorName, "validator", "v", "", "Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")
 	cmd.Flags().StringVar(&flags.checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.")
-	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
+	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption.\n"+
+		"Note: When setting up a Lido node, fee recipient address will be automatically set by the system.")
 	cmd.Flags().BoolVar(&flags.noMev, "no-mev-boost", false, "Not use mev-boost if supported")
 	cmd.Flags().StringVarP(&flags.mevImage, "mev-boost-image", "m", "", "Custom docker image to use for Mev Boost. Example: 'sedge generate full-node --mev-boost-image flashbots/mev-boost:latest-portable'")
-	cmd.Flags().StringSliceVar(&flags.relayURLs, "relay-urls", []string{}, "List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate full-node --relay-urls=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money'")
+	cmd.Flags().StringSliceVar(&flags.relayURLs, "relay-urls", []string{}, "List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate full-node --relay-urls=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money'\n"+
+		"Note: When setting up a Lido node, the provided relay URLs will be automatically set by the system.")
 	cmd.Flags().BoolVar(&flags.noValidator, "no-validator", false, "Exclude the validator from the full node setup. Designed for execution and consensus nodes setup without a validator node. Exclude also the validator from other flags. If set, mev-boost will not be used.")
 	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 	cmd.Flags().StringVar(&flags.graffiti, "graffiti", "", "Graffiti to be used by the validator")
@@ -125,7 +136,15 @@ func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			return preValidationGenerateCmd(network, logging, &flags)
+			if err := preValidationGenerateCmd(network, logging, &flags); err != nil {
+				return err
+			}
+			opts := sedgeOpts.CreateSedgeOptions(nodeType())
+			settings := sedgeOpts.OptionSettings{
+				Network:         network,
+				MEVBoostEnabled: false, // MEV Boost is not supported for execution nodes only
+			}
+			return opts.ValidateSettings(settings)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{execution})
@@ -170,7 +189,15 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			return preValidationGenerateCmd(network, logging, &flags)
+			if err := preValidationGenerateCmd(network, logging, &flags); err != nil {
+				return err
+			}
+			opts := sedgeOpts.CreateSedgeOptions(nodeType())
+			settings := sedgeOpts.OptionSettings{
+				Network:         network,
+				MEVBoostEnabled: false, // MEV Boost is not supported for consensus nodes only
+			}
+			return opts.ValidateSettings(settings)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, []string{consensus})
@@ -181,7 +208,8 @@ func ConsensusSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().StringVar(&flags.executionApiUrl, "execution-api-url", "", "Execution API endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-api-url=https://api.url.endpoint'")
 	cmd.Flags().StringVar(&flags.executionAuthUrl, "execution-auth-url", "", "Execution AUTH endpoint for the consensus client. Example: 'sedge generate consensus -r --execution-auth-url=https://auth.url.endpoint'")
 	cmd.Flags().StringVar(&flags.checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.")
-	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
+	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption.\n"+
+		"Note: When setting up a Lido node, fee recipient address will be automatically set by the system.")
 	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 	cmd.Flags().StringVar(&flags.mevBoostUrl, "mev-boost-url", "", "If you are running a mev boost node, and you want to connect to it, you need to set mev-boost-url, if not set, node will not load any mev boost related config.")
 	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
@@ -229,7 +257,15 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			return preValidationGenerateCmd(network, logging, &flags)
+			if err := preValidationGenerateCmd(network, logging, &flags); err != nil {
+				return err
+			}
+			opts := sedgeOpts.CreateSedgeOptions(nodeType())
+			settings := sedgeOpts.OptionSettings{
+				Network:         network,
+				MEVBoostEnabled: !flags.noMev && !flags.noValidator,
+			}
+			return opts.ValidateSettings(settings)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			flags.noMev = true
@@ -239,7 +275,8 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	// Bind flags
 	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")
 	cmd.Flags().StringVar(&flags.consensusApiUrl, "consensus-url", "", "Consensus endpoint for the validator client to connect to. Example: 'sedge generate validator --consensus-url http://localhost:4000'")
-	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
+	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption.\n"+
+		"Note: When setting up a Lido node, fee recipient address will be automatically set by the system.")
 	cmd.Flags().StringVar(&flags.graffiti, "graffiti", "", "Graffiti to be used by the validator")
 	cmd.Flags().BoolVar(&flags.mevBoostOnVal, "mev-boost", false, "Use mev-boost while turning on validator node")
 	cmd.Flags().StringVar(&flags.customNetworkConfig, "custom-config", "", "File path or url to use as custom network config file for consensus client.")
@@ -271,9 +308,10 @@ func MevBoostSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		},
 	}
 	// Bind flags
-	cmd.Flags().StringSliceVar(&flags.relayURLs, "relay-urls", []string{}, "List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate mev-boost --relay-urls=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money'")
+	cmd.Flags().StringSliceVar(&flags.relayURLs, "relay-urls", []string{}, "List of comma separated relay URLs used to connect to mev relay. Example: 'sedge generate full-node --relay-urls=https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net,https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money'\n"+
+		"Note: When setting up a Lido node, the provided relay URLs will be automatically set by the system.")
 	cmd.Flags().StringVarP(&flags.mevImage, "mev-boost-image", "m", "", "Custom docker image to use for Mev Boost. Example: 'sedge generate mev-boost --mev-boost-image flashbots/mev-boost:latest-portable'")
-	cmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, goerli, sepolia etc.")
+	cmd.Flags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet, sepolia etc.")
 	cmd.Flags().SortFlags = false
 	return cmd
 }
