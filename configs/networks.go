@@ -24,7 +24,7 @@ import (
 const (
 	// Network names
 	NetworkMainnet   = "mainnet"
-	NetworkGoerli    = "goerli"
+
 	NetworkSepolia   = "sepolia"
 	NetworkGnosis    = "gnosis"
 	NetworkChiado    = "chiado"
@@ -39,7 +39,7 @@ var ErrInvalidNetwork = errors.New("invalid network")
 // added volta and EnergyWeb
 func NetworkCheck(value string) error {
 	switch value {
-	case NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky, NetworkCustom, NetworkVolta, NetworkEnergyWeb:
+	case NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky, NetworkCustom, NetworkVolta, NetworkEnergyWeb:
 		return nil
 	default:
 		return fmt.Errorf("%w: %s", ErrInvalidNetwork, value)
@@ -50,7 +50,6 @@ func NetworkSupported() []string {
 	// notest
 	return []string{
 		NetworkMainnet,
-		NetworkGoerli,
 		NetworkSepolia,
 		NetworkGnosis,
 		NetworkChiado,
@@ -63,7 +62,7 @@ func NetworkSupported() []string {
 
 func NetworkEpochTime(network string) time.Duration {
 	switch network {
-	case NetworkMainnet, NetworkGoerli, NetworkSepolia:
+	case NetworkMainnet, NetworkSepolia:
 		return 7 * time.Minute
 	case NetworkGnosis, NetworkChiado:
 		return 2 * time.Minute
@@ -75,4 +74,12 @@ func NetworkEpochTime(network string) time.Duration {
 func SupportsMEVBoost(network string) bool {
 	out, ok := networksConfigs[network]
 	return ok && out.SupportsMEVBoost
+}
+
+func GetPublicRPCs(network string) ([]string, error) {
+	rpcs, exists := networkRPCs[network]
+	if !exists {
+		return nil, fmt.Errorf("invalid network")
+	}
+	return rpcs.PublicRPCs, nil
 }

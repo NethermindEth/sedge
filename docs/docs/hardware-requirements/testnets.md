@@ -5,7 +5,7 @@ id: testnet-requirements
 
 # Testnets
 
-The Testnets (Sepolia, Goerli) are lighter than Mainnet and hence the requirements are lower. The requirements depend heavily from the particular set of clients involved in the setup, but from our experience we can identify general requirements:
+The Testnets (Sepolia) are lighter than Mainnet and hence the requirements are lower. The requirements depend heavily from the particular set of clients involved in the setup, but from our experience we can identify general requirements:
 
 ### Minimum
 

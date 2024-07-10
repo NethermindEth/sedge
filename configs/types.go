@@ -34,4 +34,5 @@ type NetworkConfig struct {
 	SupportsMEVBoost          bool
 	CheckpointSyncURL         string
 	RelayURLs                 []string
+	Weight                    int // Weight of the network for sorting purposes
 }

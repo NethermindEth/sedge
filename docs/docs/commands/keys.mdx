@@ -17,26 +17,26 @@ Users acknowledge that generating the keystore for any network is an unaudited f
 
 ```
 $ sedge keys -h
-Initializing configuration
 Generate keystore folder using the eth2.0-deposit-cli tool
 
 Usage:
   sedge keys [flags]
 
 Flags:
-      --eth1-withdrawal-address string   If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.
-      --existing int                     Number of validators generated with the provided mnemonic. Will be ignored if "--mnemonic-path" its not set. This number will be used as the initial index for the generated keystores. (default -1)
-  -h, --help                             help for keys
-  -i, --install                          Install dependencies if not installed without asking
-      --mnemonic-path string             Path to file with a existing mnemonic to use.
-  -n, --network string                   Target network. e.g. mainnet, goerli, sepolia, holesky, gnosis, chiado etc. (default "mainnet")
-      --num-validators int               Number of validators to generate. This number will be used in addition to the existing flag as the end index for the generated keystores. (default -1)
-      --passphrase-path string           Path to file with a keystores passphrase to use.
-  -p, --path string                      Absolute path to keystore folder. e.g. /home/user/keystore (default "./docker-compose-scripts")
-      --random-passphrase                Usa a randomly generated passphrase to encrypt keystores.
+      --eth-withdrawal-address string   If this field is set and valid, the given Eth address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.
+      --existing int                    Number of validators generated with the provided mnemonic. Will be ignored if "--mnemonic-path" its not set. This number will be used as the initial index for the generated keystores. (default -1)
+  -h, --help                            help for keys
+  -i, --install                         Install dependencies if not installed without asking
+      --lido                            Enable Lido CSM compatible keys. Similar to using --eth-withdrawal-address with the Lido Withdrawal Vault address.
+      --mnemonic-path string            Path to file with a existing mnemonic to use.
+  -n, --network string                  Target network. e.g. mainnet,sepolia, holesky, gnosis, chiado etc. (default "mainnet")
+      --num-validators int              Number of validators to generate. This number will be used in addition to the existing flag as the end index for the generated keystores. (default -1)
+      --passphrase-path string          Path to file with a keystores passphrase to use.
+  -p, --path string                     Absolute path to keystore folder. e.g. /home/user/keystore (default "/path/to/sedge-data")
+      --random-passphrase               Usa a randomly generated passphrase to encrypt keystores.
 
 Global Flags:
-      --logLevel string   Set Log Level (default "info")
+      --log-level string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
 ```
 
 ## Execution Example

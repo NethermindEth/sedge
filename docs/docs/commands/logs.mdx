@@ -11,7 +11,6 @@ Running `sedge logs` will get running container logs using docker compose CLI.
 
 ```
 $ sedge logs -h
-Initializing configuration
 Get running container logs using docker-compose CLI. If no services are provided, the logs of all running services will be displayed.
 
 	By default will run 'docker compose -f <script> logs --follow <service>'
@@ -21,9 +20,9 @@ Usage:
 
 Flags:
   -h, --help          help for logs
-  -p, --path string   docker-compose script path (default "./docker-compose-scripts")
+  -p, --path string   generation path for sedge data (default "/path/to/sedge-data")
   -t, --tail int      Tail the number of desired logs. If not set, or set to 0, logs are followed.
 
 Global Flags:
-      --logLevel string   Set Log Level (default "info")
+      --log-level string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
 ```

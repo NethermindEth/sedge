@@ -28,7 +28,6 @@ Sedge is a one-click node setup tool for PoS network/chain validators and nodes 
   - [Supported networks and clients](#supported-networks-and-clients)
     - [Mainnet](#mainnet)
     - [Sepolia](#sepolia)
-    - [Goerli](#goerli)
     - [Holesky](#holesky)
     - [Gnosis](#gnosis)
     - [Chiado (Gnosis testnet)](#chiado-gnosis-testnet)
@@ -148,15 +147,6 @@ Users acknowledge that no warranty is being made of a successful installation. S
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
 
-### Goerli
-
-| Execution  | Consensus  | Validator  |
-| ---------- | ---------- | ---------- |
-| Geth       | Lighthouse | Lighthouse |
-| Nethermind | Lodestar   | Lodestar   |
-| Erigon     | Prysm      | Prysm      |
-| Besu       | Teku       | Teku       |
-
 ### Holesky
 
 | Execution  | Consensus  | Validator  |
@@ -184,12 +174,12 @@ Users acknowledge that no warranty is being made of a successful installation. S
 
 ### CL clients with Mev-Boost
 
-| Client     | Mev-Boost | Networks                 |
-| ---------- | --------- |--------------------------|
-| Lighthouse | yes       | Mainnet, Goerli, Sepolia |
-| Lodestar   | yes       | Mainnet, Goerli, Sepolia |
-| Prysm      | yes       | Mainnet, Goerli, Sepolia |
-| Teku       | yes       | Mainnet, Goerli, Sepolia |
+| Client     | Mev-Boost | Networks                  |
+| ---------- | --------- |---------------------------|
+| Lighthouse | yes       | Mainnet, Sepolia, Holesky |
+| Lodestar   | yes       | Mainnet, Sepolia, Holesky |
+| Prysm      | yes       | Mainnet, Sepolia, Holesky |
+| Teku       | yes       | Mainnet, Sepolia, Holesky |
 
 ## Supported Linux flavours for dependency installation
 

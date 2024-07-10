@@ -32,20 +32,7 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 			"https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net",
 			"https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money",
 		},
-	},
-	NetworkGoerli: {
-		Name:               NetworkGoerli,
-		NetworkService:     "merge",
-		GenesisForkVersion: "0x00001020",
-		SupportsMEVBoost:   true,
-		CheckpointSyncURL:  "https://goerli.checkpoint-sync.ethpandaops.io",
-		RelayURLs: []string{
-			"https://0xafa4c6985aa049fb79dd37010438cfebeb0f2bd42b115b89dd678dab0670c1de38da0c4e9138c9290a398ecd9a0b3110@builder-relay-goerli.flashbots.net",
-			"https://0x821f2a65afb70e7f2e820a925a9b4c80a159620582c1766b1b09729fec178b11ea22abb3a51f07b288be815a1a2ff516@bloxroute.max-profit.builder.goerli.blxrbdn.com",
-			"https://0x8f7b17a74569b7a57e9bdafd2e159380759f5dc3ccbd4bf600414147e8c4e1dc6ebada83c0139ac15850eb6c975e82d0@builder-relay-goerli.blocknative.com",
-			"https://0xb1d229d9c21298a87846c7022ebeef277dfc321fe674fa45312e20b5b6c400bfde9383f801848d7837ed5fc449083a12@relay-goerli.edennetwork.io",
-			"https://0xb1559beef7b5ba3127485bbbb090362d9f497ba64e177ee2c8e7db74746306efad687f2cf8574e38d70067d40ef136dc@relay-stag.ultrasound.money",
-		},
+		Weight: 1,
 	},
 	NetworkSepolia: {
 		Name:               NetworkSepolia,
@@ -56,25 +43,35 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		RelayURLs: []string{
 			"https://0x845bd072b7cd566f02faeb0a4033ce9399e42839ced64e8b2adcfc859ed1e8e1a5a293336a49feac6d9a5edb779be53a@builder-relay-sepolia.flashbots.net",
 		},
+		Weight: 3,
 	},
 	NetworkChiado: {
 		Name:               NetworkChiado,
 		NetworkService:     "merge",
 		GenesisForkVersion: "0x0000006f",
 		CheckpointSyncURL:  "https://checkpoint.chiadochain.net",
+		Weight:             5,
 	},
 	NetworkGnosis: {
 		Name:               NetworkGnosis,
 		NetworkService:     "merge",
 		GenesisForkVersion: "0x00000064",
 		CheckpointSyncURL:  "https://checkpoint.gnosis.gateway.fm",
+		Weight:             4,
 	},
 	NetworkHolesky: {
 		Name:               NetworkHolesky,
 		NetworkService:     "merge",
-		GenesisForkVersion: "0x00017000",
-		SupportsMEVBoost:   false,
+		GenesisForkVersion: "0x01017000",
+		SupportsMEVBoost:   true,
 		CheckpointSyncURL:  "https://checkpoint-sync.holesky.ethpandaops.io/",
+		RelayURLs: []string{
+			"https://0xafa4c6985aa049fb79dd37010438cfebeb0f2bd42b115b89dd678dab0670c1de38da0c4e9138c9290a398ecd9a0b3110@boost-relay-holesky.flashbots.net",
+			"https://0x8db06236d88cf080e541f894507f6c933d40333405c36c8ea00158c165628ea57ad59b024467fe7d4d31113fadc0e187@holesky.agnostic-relay.net",
+			"https://0xab78bf8c781c58078c3beb5710c57940874dd96aef2835e7742c866b4c7c0406754376c2c8285a36c630346aa5c5f833@holesky.aestus.live",
+			"https://0xaa58208899c6105603b74396734a6263cc7d947f444f396a90f7b7d3e65d102aec7e5e5291b27e08d02c50a050825c2f@holesky.titanrelay.xyz",
+		},
+		Weight: 2,
 	},
 	NetworkVolta: {
 		Name:               NetworkVolta,
@@ -94,6 +91,7 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		Name:               NetworkCustom,
 		NetworkService:     "merge",
 		GenesisForkVersion: "0x00000000", // TODO: only affects keystores generation, ensure the deposit method does not conflict over this.
+		Weight:             6,
 	},
 }
 

@@ -5,7 +5,6 @@ keywords:
   - installation
   - validator
   - mainnet
-  - goerli
   - sepolia
   - holesky
   - chiado
