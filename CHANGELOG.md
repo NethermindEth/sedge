@@ -7,16 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Remove arguments for Lighthouse `--eth1` flag.
+
 ### Added
 
 - Add support for MEV-boost on Holesky.
+- New flag `--lido` to `generate` command for Lido CSM setup.
+- New Sedge setup flow with `sedge cli` command for Lido CSM setup.
+- Support for `sedge keys` to generate 0x01 withdrawal credentials.
+- Support for installing Docker in Ubuntu 24.04 LTS.
 
 ### Changed
 
 - Update client images to Dencun-ready versions. 
-- 
+- Renamed `--eth1-withdrawal-address` flag from `sedge keys` to `--eth-withdrawal-address`.
+- Update client images to latest versions.
 
 ### Removed
+
 - Removed support for Goerli. 
 
 ## [v1.3.1] - 2024-02-14

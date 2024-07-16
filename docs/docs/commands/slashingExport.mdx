@@ -11,7 +11,6 @@ Running `sedge slashing-export` will export slashing protection data from the cu
 
 ```shell
 $ sedge slashing-export --help
-
 Export Slashing Protection Interchange Format (EIP-3076) data. This command assumes
 that the validator client container exists, stopped or not and that its database
 is already initialized. Take in mind that the validator client generates slashing
@@ -36,20 +35,20 @@ Usage:
 Examples:
 
 sedge slashing-export --out slashing-data.json prysm
-sedge slashing-export --out slashing-data.json --stop-validator lodestar 
+sedge slashing-export --out slashing-data.json --stop-validator lodestar
 sedge slashing-export --out slashing-data.json --start-validator lighthouse
 
 Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
-  -h, --help              help for slashing-export
-  -n, --network string    network (default "mainnet")
-  -o, --out string        path to write the JSON file in the EIP-3076 format with the slashing protection data (default "<generation-dir>/slashing_export.json")
-  -p, --path string       path to the generation directory (default "./docker-compose-scripts")
-      --start-validator   starts the validator client after export, regardless of the state the validator was in before
-      --stop-validator    stops the validator client after export, regardless of the state the validator was in before
+  -h, --help                   help for slashing-export
+  -n, --network string         network (default "mainnet")
+  -o, --out string             path to write slashing protection data (default "[GENERATION_PATH]/slashing_protection.json")
+  -p, --path string            path to the generation directory (default "/path/to/sedge-data")
+      --start-validator        starts the validator client after export, regardless of the state the validator was in before
+      --stop-validator         stops the validator client after export, regardless of the state the validator was in before
 
 Global Flags:
-      --logLevel string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
+      --log-level string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
 ```
 
 ## Execution Example

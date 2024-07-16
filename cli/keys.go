@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
 	"github.com/NethermindEth/sedge/internal/ui"
@@ -31,15 +32,16 @@ import (
 )
 
 type KeysCmdFlags struct {
-	network               string
-	path                  string
-	eth1WithdrawalAddress string
-	mnemonicPath          string
-	passphrasePath        string
-	existingVal           int64
-	numberVal             int64
-	randomPassphrase      bool
-	install               bool
+	network              string
+	path                 string
+	ethWithdrawalAddress string
+	mnemonicPath         string
+	passphrasePath       string
+	existingVal          int64
+	numberVal            int64
+	randomPassphrase     bool
+	install              bool
+	lidoNode             bool
 }
 
 func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
@@ -85,7 +87,7 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 				log.Fatal(err.Error())
 			}
 			// Validate fee recipient
-			if flags.eth1WithdrawalAddress != "" && !utils.IsAddress(flags.eth1WithdrawalAddress) {
+			if flags.ethWithdrawalAddress != "" && !utils.IsAddress(flags.ethWithdrawalAddress) {
 				log.Fatal(configs.ErrInvalidWithdrawalAddr)
 			}
 			// Ensure that path is absolute
@@ -98,8 +100,19 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
+			// Incompatible --lido and --eth-withdrawal-address together
+			if flags.lidoNode && flags.ethWithdrawalAddress != "" {
+				log.Fatalf(configs.IncompatibleLidoAndEth1Withdrawal)
+			}
+			// validate network for Lido
+			if flags.lidoNode {
+				supported := contracts.NetworkSupportedByLidoWithdrawal(flags.network)
+				if !supported {
+					log.Fatalf(configs.InvalidNetworkForLidoKeys, contracts.LidoWithdrawalSupportedNetworks())
+				}
+			}
 			// Warn about withdrawal address
-			if flags.eth1WithdrawalAddress != "" {
+			if flags.ethWithdrawalAddress != "" {
 				log.Warn(configs.WithdrawalAddressDefinedWarning)
 			}
 			// Get keystore passphrase
@@ -164,8 +177,11 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 			keystorePath := filepath.Join(flags.path, "keystore")
 
 			var withdrawalAddress string
-			if flags.eth1WithdrawalAddress != "" {
-				withdrawalAddress = flags.eth1WithdrawalAddress[2:]
+			if flags.lidoNode {
+				withdrawalAddress, _ = contracts.WithdrawalAddress(flags.network)
+				withdrawalAddress = withdrawalAddress[2:]
+			} else if flags.ethWithdrawalAddress != "" {
+				withdrawalAddress = flags.ethWithdrawalAddress[2:]
 			}
 
 			data := keystores.ValidatorKeysGenData{
@@ -194,12 +210,14 @@ func KeysCmd(cmdRunner commands.CommandRunner, p ui.Prompter) *cobra.Command {
 				log.Fatal(err)
 			}
 			log.Info(configs.DepositDataGenerated)
+			log.Infof(configs.KeystorePath, keystorePath)
 		},
 	}
 	// Flag binds
+	cmd.PersistentFlags().BoolVar(&flags.lidoNode, "lido", false, "Enable Lido CSM compatible keys. Similar to using --eth-withdrawal-address with the Lido Withdrawal Vault address.")
 	cmd.Flags().StringVarP(&flags.network, "network", "n", "mainnet", "Target network. e.g. mainnet,sepolia, holesky, gnosis, chiado etc.")
 	cmd.Flags().StringVarP(&flags.path, "path", "p", configs.DefaultAbsSedgeDataPath, "Absolute path to keystore folder. e.g. /home/user/keystore")
-	cmd.Flags().StringVar(&flags.eth1WithdrawalAddress, "eth1-withdrawal-address", "", "If this field is set and valid, the given Eth1 address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
+	cmd.Flags().StringVar(&flags.ethWithdrawalAddress, "eth-withdrawal-address", "", "If this field is set and valid, the given Eth address will be used to create the withdrawal credentials. Otherwise, it will generate withdrawal credentials with the mnemonic-derived withdrawal public key in EIP-2334 format.")
 	cmd.Flags().StringVar(&flags.mnemonicPath, "mnemonic-path", "", "Path to file with a existing mnemonic to use.")
 	cmd.Flags().StringVar(&flags.passphrasePath, "passphrase-path", "", "Path to file with a keystores passphrase to use.")
 	cmd.Flags().Int64Var(&flags.existingVal, "existing", -1, `Number of validators generated with the provided mnemonic. Will be ignored if "--mnemonic-path" its not set. This number will be used as the initial index for the generated keystores.`)

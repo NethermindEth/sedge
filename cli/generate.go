@@ -30,6 +30,7 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
 	log "github.com/sirupsen/logrus"
@@ -42,6 +43,7 @@ var (
 	network        string
 	logging        string
 	containerTag   string
+	lidoNode       bool
 )
 
 const (
@@ -101,6 +103,7 @@ You can generate:
 - Consensus Node
 - Validator Node
 - Mev-Boost Instance
+- Lido CSM node
 `,
 		Args: cobra.NoArgs,
 	}
@@ -111,6 +114,7 @@ You can generate:
 	cmd.AddCommand(ValidatorSubCmd(sedgeAction))
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
 
+	cmd.PersistentFlags().BoolVar(&lidoNode, "lido", false, "generate Lido CSM node")
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
 	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet,sepolia, holesky, gnosis, chiado, etc.")
 	cmd.PersistentFlags().StringVar(&logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
@@ -256,6 +260,13 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		if err != nil {
 			return err
 		}
+	}
+
+	// Overwrite feeRecipient and relayURLs for Lido Node
+	if lidoNode {
+		opts := sedgeOpts.CreateSedgeOptions(sedgeOpts.LidoNode)
+		flags.feeRecipient = opts.FeeRecipient(network)
+		flags.relayURLs, _ = opts.RelayURLs(network)
 	}
 
 	// Warning if no fee recipient is set
@@ -492,4 +503,14 @@ func loadJWTSecret(from string) (absFrom string, err error) {
 		return "", fmt.Errorf("jwt secret must be 32 bytes long")
 	}
 	return
+}
+
+func nodeType() string {
+	var nodeType string
+	if lidoNode {
+		nodeType = sedgeOpts.LidoNode
+	} else {
+		nodeType = sedgeOpts.EthereumNode
+	}
+	return nodeType
 }

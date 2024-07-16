@@ -26,6 +26,8 @@ import (
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/lido/contracts"
+	"github.com/NethermindEth/sedge/internal/lido/contracts/mevboostrelaylist"
 	"github.com/NethermindEth/sedge/test"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -48,6 +50,7 @@ type globalFlags struct {
 	generationPath string
 	network        string
 	logging        string
+	lidoNode       bool
 }
 
 type generateCmdTestCase struct {
@@ -71,6 +74,9 @@ func (flags *globalFlags) argsList() []string {
 	}
 	if flags.logging != "" {
 		s = append(s, "--logging", flags.logging)
+	}
+	if flags.lidoNode {
+		s = append(s, "--lido")
 	}
 	return s
 }
@@ -1320,9 +1326,63 @@ func TestGenerateCmd(t *testing.T) {
 				distributed: true,
 			},
 			globalFlags{
-				network: "goerli",
+				network: "holesky",
 			},
 			nil,
+		},
+		{
+			"Lido Full-node - Holesky without MEV",
+			subCmd{
+				name: "full-node",
+			},
+			GenCmdFlags{
+				noMev: true,
+			},
+			globalFlags{
+				network:  NetworkHolesky,
+				lidoNode: true,
+			},
+			nil,
+		},
+		{
+			"Lido Full-node - Sepolia",
+			subCmd{
+				name: "full-node",
+			},
+			GenCmdFlags{},
+			globalFlags{
+				network:  NetworkSepolia,
+				lidoNode: true,
+			},
+			fmt.Errorf(configs.InvalidNetworkForLidoMevBoost, mevboostrelaylist.LidoSupportedNetworksMevBoost()),
+		},
+		{
+			"Lido Full-node - Holesky no validator",
+			subCmd{
+				name: "full-node",
+			},
+			GenCmdFlags{
+				noValidator: true,
+			},
+			globalFlags{
+				network:  NetworkHolesky,
+				lidoNode: true,
+			},
+			nil,
+		},
+		{
+			"Lido Full-node - unsupported Gnosis",
+			subCmd{
+				name: "full-node",
+			},
+			GenCmdFlags{
+				noMev: true,
+			},
+			globalFlags{
+				network:  NetworkGnosis,
+				lidoNode: true,
+			},
+			fmt.Errorf(configs.InvalidNetworkForLido, contracts.LidoSupportedNetworks()),
 		},
 	}
 

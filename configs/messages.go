@@ -57,6 +57,7 @@ const (
 	KeystoresGenerated              = "Keystores generated successfully"
 	GeneratingDepositData           = "Generating deposit data..."
 	DepositDataGenerated            = "Deposit data generated successfully"
+	KeystorePath                    = "Keystore path: %s"
 	KeysFoundAt                     = "If everything went well, your keys can be found at: %s"
 	ImageNotFoundBuilding           = "Image %s not found, building it"
 	ImageNotFoundPulling            = "Image %s not found, pulling it"

@@ -1,8 +1,24 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package mevboostrelaylist
 
 import (
 	"encoding/hex"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/NethermindEth/sedge/configs"
@@ -51,7 +67,7 @@ func connectToRPC(RPCs []string) (*rpc.Client, error) {
 }
 
 /*
-GetRelays :
+Relays :
 This function is responsible for :-
 retrieving a list of relays from the MEV-Boost Allowed List contract for a given network.
 params :-
@@ -62,7 +78,7 @@ List of relays
 b. error
 Error if any
 */
-func GetRelays(network string) ([]Relay, error) {
+func Relays(network string) ([]Relay, error) {
 	var relays []Relay
 	rpcs, err := configs.GetPublicRPCs(network)
 	if err != nil {
@@ -117,4 +133,51 @@ func GetRelays(network string) ([]Relay, error) {
 	}
 
 	return relays, nil
+}
+
+/*
+RelaysURI :
+This function is responsible for :-
+retrieving a list of relays URI from the MEV-Boost Allowed List contract for a given network.
+params :-
+network (string): The name of the network (e.g., "mainnet", "holesky").
+returns :-
+a. []string
+List of relays URI
+b. error
+Error if any
+*/
+func RelaysURI(network string) ([]string, error) {
+	relays, err := Relays(network)
+	if err != nil {
+		return nil, err
+	}
+	relayURIs := []string{}
+	for _, relay := range relays {
+		relayURIs = append(relayURIs, relay.Uri)
+	}
+	return relayURIs, err
+}
+
+func LidoSupportedNetworksMevBoost() []string {
+	networks := []string{}
+	for network := range deployedContractAddresses {
+		networks = append(networks, network)
+	}
+	sort.Strings(networks)
+	return networks
+}
+
+func NetworkSupportedByLidoMevBoost(network string) ([]string, bool) {
+	supportedNetworks := LidoSupportedNetworksMevBoost()
+	var supported bool
+	for _, supportedNetwork := range supportedNetworks {
+		if network == supportedNetwork {
+			supported = true
+		}
+	}
+	if !supported {
+		return supportedNetworks, supported
+	}
+	return nil, supported
 }
