@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.18.3 AS build
+FROM --platform=$BUILDPLATFORM golang:1.23rc2 AS build
 WORKDIR /src
 ARG TARGETOS
 ARG TARGETARCH
@@ -14,5 +14,5 @@ RUN if [ "$TARGETARCH" = "arm64" ] ;  \
       CGO_ENABLED=1 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags "${LDFLAGS}" -o /src/sedge $PACKAGE;  \
     fi
 
-FROM golang:1.18.3
+FROM golang:1.23rc2
 COPY --from=build /src/sedge /sedge
