@@ -4,7 +4,6 @@ import (
 	"io"
 	"log"
 	"math/big"
-	"reflect"
 	"testing"
 )
 
@@ -16,7 +15,7 @@ func TestNodeOpIDs(t *testing.T) {
 		network string
 	}{
 		{
-			"NodeOpIDs Holesky", "holesky",
+			"NodeOpIDs, Holesky", "holesky",
 		},
 	}
 	for _, tc := range tcs {
@@ -38,42 +37,71 @@ func TestNodeOpIDs(t *testing.T) {
 	}
 }
 
-func TestNodeID(t *testing.T) {
-	// Silence logger
+func TestNodeOperatorInfo(t *testing.T) {
 	log.SetOutput(io.Discard)
 	tcs := []struct {
 		name            string
 		network         string
 		nodeID          *big.Int
 		expectedAddress string
+		wantErr         bool
 	}{
 		{
-			"NodeID Holesky", "holesky", big.NewInt(13), "0xC870Fd7316956C1582A2c8Fd2c42552cCEC70C88",
+			"Valid NodeID, Holesky", "holesky", big.NewInt(13), "0xC870Fd7316956C1582A2c8Fd2c42552cCEC70C88", false,
 		},
 		{
-			"NodeID Holesky", "holesky", big.NewInt(4), "0xed1Fc097b5B9B007d40502e08aa0cddF477AaeaA",
+			"Valid Address, Holesky", "holesky", big.NewInt(4), "0xed1Fc097b5B9B007d40502e08aa0cddF477AaeaA", false,
+		},
+		{
+			"Invalid Address, Holesky", "holesky", big.NewInt(4), "0xC870Fd7316956C1582A2c8Fd2c46752cCEC70C99", true,
 		},
 	}
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			expectedNodeOp, err := NodeOperatorInfo(tc.network, tc.nodeID)
-			if err != nil {
-				t.Fatalf("failed to call NodeOpIDs: %v", err)
-			}
-			expectedNodeID, err := NodeID(tc.network, tc.expectedAddress)
-			if err != nil {
-				t.Fatalf("failed to call NodeID: %v", err)
-			}
-			if tc.nodeID.Cmp(expectedNodeID) != 0 {
-				t.Errorf("Not same nodeID, expected %v, got: %v", expectedNodeID, tc.nodeID)
-			}
 			nodeOp, err := NodeOperatorInfo(tc.network, tc.nodeID)
 			if err != nil {
 				t.Fatalf("failed to call NodeOperatorInfo: %v", err)
 			}
-			if !reflect.DeepEqual(expectedNodeOp, nodeOp) {
-				t.Errorf("Nodes do not match expected values\nGot: %+v\nExpected: %+v", nodeOp, expectedNodeOp)
+			if nodeOp.RewardAddress.String() != tc.expectedAddress && !tc.wantErr {
+				t.Errorf("Not same Reward Address, expected %v, got: %v", tc.expectedAddress, nodeOp.RewardAddress.Hex())
+			}
+		})
+	}
+}
+
+func TestNodeID(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+	tcs := []struct {
+		name           string
+		network        string
+		expectedNodeID *big.Int
+		wantErr        bool
+	}{
+		{
+			"Valid NodeID, Holesky #1", "holesky", big.NewInt(13), false,
+		},
+		{
+			"Valid NodeID, Holesky #2", "holesky", big.NewInt(4), false,
+		},
+		{
+			"Invalid NodeID, Holesky ", "holesky", big.NewInt(-4), true,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			nodeOp, err := NodeOperatorInfo(tc.network, tc.expectedNodeID)
+			if err != nil {
+				t.Fatalf("failed to call NodeOperatorInfo: %v", err)
+			}
+			nodeID, err := NodeID(tc.network, nodeOp.RewardAddress.Hex())
+			if err != nil {
+				t.Fatalf("failed to call NodeID: %v", err)
+			}
+			if nodeID.Cmp(tc.expectedNodeID) != 0 && !tc.wantErr {
+				t.Errorf("Not same nodeID, expected %v, got: %v", tc.expectedNodeID, nodeID)
 			}
 		})
 	}

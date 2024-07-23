@@ -21,7 +21,7 @@ func connectToRPCETH(RPCs []string) (*ethclient.Client, error) {
 	return nil, fmt.Errorf("failed to connect to any RPC URL")
 }
 
-func ConnectContract(network string) (*ethclient.Client, error) {
+func ConnectClient(network string) (*ethclient.Client, error) {
 	rpcs, err := configs.GetPublicRPCs(network)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get public RPC: %w", err)

@@ -14,7 +14,7 @@ var deployedContractAddresses = map[string]string{
 }
 
 func csModuleContract(network string) (*CSModule, error) {
-	client, err := contracts.ConnectContract(network)
+	client, err := contracts.ConnectClient(network)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call ConnectContract: %w", err)
 	}
@@ -27,6 +27,19 @@ func csModuleContract(network string) (*CSModule, error) {
 	return contract, nil
 }
 
+/*
+NodeID :
+This function is responsible for:
+retrieving NodeOperatorID for Lido CSM node
+params :-
+network (string): The name of the network (e.g."holesky").
+rewardaddress (string): The reward address of the node operator
+returns :-
+a. *big.Int
+Node Operator ID
+b. error
+Error if any
+*/
 func NodeID(network string, rewardAddress string) (*big.Int, error) {
 	nodeOperatorIDs, err := nodeOpIDs(network)
 	if err != nil {
@@ -46,6 +59,19 @@ func NodeID(network string, rewardAddress string) (*big.Int, error) {
 	return nil, fmt.Errorf("invalid reward address: %s", rewardAddress)
 }
 
+/*
+NodeOperatorInfo :
+This function is responsible for:
+retrieving NodeOperator info for Lido CSM node
+params :-
+network (string): The name of the network (e.g."holesky").
+nodeID (*big.Int): Node Operator ID
+returns :-
+a. NodeOperator
+struct that includes Node Operator info
+b. error
+Error if any
+*/
 func NodeOperatorInfo(network string, nodeID *big.Int) (NodeOperator, error) {
 	var nodeOperator NodeOperator
 	contract, err := csModuleContract(network)
