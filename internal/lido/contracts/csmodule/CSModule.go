@@ -40,21 +40,21 @@ type ICSAccountingPermitInput struct {
 
 // NodeOperator is an auto generated low-level Go binding around an user-defined struct.
 type NodeOperator struct {
-	TotalAddedKeys             uint32     
-	TotalWithdrawnKeys         uint32      
-	TotalDepositedKeys         uint32      
-	TotalVettedKeys            uint32       
-	StuckValidatorsCount       uint32        
-	DepositableValidatorsCount uint32        
-	TargetLimit                uint32        
-	TargetLimitMode            uint8        
-	TotalExitedKeys            uint32        
-	EnqueuedCount              uint32        
-	ManagerAddress             common.Address 
-	ProposedManagerAddress     common.Address 
-	RewardAddress              common.Address 
-	ProposedRewardAddress      common.Address 
-	ExtendedManagerPermissions bool          
+	TotalAddedKeys             uint32
+	TotalWithdrawnKeys         uint32
+	TotalDepositedKeys         uint32
+	TotalVettedKeys            uint32
+	StuckValidatorsCount       uint32
+	DepositableValidatorsCount uint32
+	TargetLimit                uint32
+	TargetLimitMode            uint8
+	TotalExitedKeys            uint32
+	EnqueuedCount              uint32
+	ManagerAddress             common.Address
+	ProposedManagerAddress     common.Address
+	RewardAddress              common.Address
+	ProposedRewardAddress      common.Address
+	ExtendedManagerPermissions bool
 }
 
 // NodeOperatorManagementProperties is an auto generated low-level Go binding around an user-defined struct.
