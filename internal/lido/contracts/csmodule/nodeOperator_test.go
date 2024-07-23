@@ -21,7 +21,7 @@ func TestNodeOpIDs(t *testing.T) {
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			nodeOperatorIDs, err := NodeOpIDs(tc.network)
+			nodeOperatorIDs, err := nodeOpIDs(tc.network)
 			if err != nil {
 				t.Errorf("failed to call  NodeOpIDs: %v", err)
 			}
