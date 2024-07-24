@@ -5,7 +5,7 @@ WORKDIR /
 ARG LH_VERSION
 ARG NETWORK
 
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update && apt-get install -y curl dos2unix bash
 
 RUN version=$(echo $LH_VERSION | cut -d':' -f 2) \
 && curl -L https://github.com/sigp/lighthouse/releases/download/$version/lighthouse-$version-x86_64-unknown-linux-gnu.tar.gz --output lh.gz
@@ -13,6 +13,8 @@ RUN version=$(echo $LH_VERSION | cut -d':' -f 2) \
 RUN tar -xvf lh.gz
 
 COPY validator-init.sh .
+
+RUN dos2unix validator-init.sh
 
 RUN chmod +x validator-init.sh
 
