@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/big"
 	"testing"
+	"unicode/utf8"
 )
 
 func TestNodeOpIDs(t *testing.T) {
@@ -86,7 +87,10 @@ func TestNodeID(t *testing.T) {
 			"Valid NodeID, Holesky #2", "holesky", big.NewInt(4), false,
 		},
 		{
-			"Invalid NodeID, Holesky ", "holesky", big.NewInt(-4), true,
+			"Invalid NodeID, Holesky #1", "holesky", big.NewInt(-4), true,
+		},
+		{
+			"Invalid NodeID, Holesky #2", "holesky", big.NewInt(20000), true,
 		},
 	}
 
@@ -97,12 +101,54 @@ func TestNodeID(t *testing.T) {
 				t.Fatalf("failed to call NodeOperatorInfo: %v", err)
 			}
 			nodeID, err := NodeID(tc.network, nodeOp.RewardAddress.Hex())
-			if err != nil {
+			if err != nil && !tc.wantErr {
 				t.Fatalf("failed to call NodeID: %v", err)
 			}
-			if nodeID.Cmp(tc.expectedNodeID) != 0 && !tc.wantErr {
-				t.Errorf("Not same nodeID, expected %v, got: %v", tc.expectedNodeID, nodeID)
+			if nodeID != nil && nodeID.Cmp(tc.expectedNodeID) != 0 {
+				t.Errorf("not same nodeID, expected %v, got: %v", tc.expectedNodeID, nodeID)
 			}
 		})
 	}
+}
+
+func FuzzTestNodeID(f *testing.F) {
+	testcases := []struct {
+		network string
+		nodeID  *big.Int
+	}{
+		{"holesky", big.NewInt(13)},
+		{"holesky", big.NewInt(-1)},
+		{"holesky", big.NewInt(40000)},
+	}
+
+	for _, tc := range testcases {
+		f.Add(tc.network, tc.nodeID.String())
+	}
+
+	f.Fuzz(func(t *testing.T, network string, nodeIDStr string) {
+		// Convert nodeIDStr back to *big.Int
+		nodeID, ok := new(big.Int).SetString(nodeIDStr, 10)
+		if !ok {
+			t.Skip("Skipping invalid big.Int string")
+		}
+
+		// Silence logger
+		log.SetOutput(io.Discard)
+
+		nodeOp, err := NodeOperatorInfo(network, nodeID)
+		if err != nil {
+			t.Logf("Expected failure in NodeOperatorInfo: %v", err)
+			return
+		}
+
+		nodeIDReturned, err := NodeID(network, nodeOp.RewardAddress.Hex())
+		if err != nil {
+			t.Logf("Expected failure in NodeID: %v", err)
+			return
+		}
+
+		if nodeIDReturned != nil && utf8.ValidString(network) && nodeIDReturned.Cmp(nodeID) != 0 {
+			t.Errorf("not same nodeID, expected %v, got: %v", nodeID, nodeIDReturned)
+		}
+	})
 }
