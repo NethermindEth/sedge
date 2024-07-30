@@ -30,7 +30,7 @@ func NodeID(network string, rewardAddress string) (*big.Int, error) {
 	// Convert the reward address to a common.Address and check if it's zero
 	rewardAddr := common.HexToAddress(rewardAddress)
 	if rewardAddr == (common.Address{}) {
-		return nil, fmt.Errorf("invalid reward address: %s", rewardAddress)
+		return nil, fmt.Errorf("invalid reward address: can't be zero address")
 	}
 
 	nodeOperatorIDs, err := nodeOpIDs(network)
