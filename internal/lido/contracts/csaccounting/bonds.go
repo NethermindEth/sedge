@@ -65,33 +65,6 @@ func BondSummary(network string, nodeID *big.Int) (BondInfo, error) {
 	return bondsInfo, nil
 }
 
-/*
-BondShares :
-This function is responsible for:
-retrieving bond shares for Lido CSM node
-params :-
-network (string): The name of the network (e.g."holesky").
-nodeID (*big.Int): Node Operator ID
-returns :-
-a. *big.Int
-Struct that include keys status
-b. error
-Error if any
-*/
-func BondShares(network string, nodeID *big.Int) (*big.Int, error) {
-	var shares *big.Int
-	contract, err := csAccountingContract(network)
-	if err != nil {
-		return nil, fmt.Errorf("failed to call csAccountingContract: %w", err)
-	}
-
-	shares, err = contract.GetBondShares(nil, nodeID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to call GetBondShares: %w", err)
-	}
-	return shares, nil
-}
-
 func csAccountingContract(network string) (*CSAccounting, error) {
 	client, err := contracts.ConnectClient(network)
 	if err != nil {
