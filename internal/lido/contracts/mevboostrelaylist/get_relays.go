@@ -93,7 +93,7 @@ func Relays(network string) ([]Relay, error) {
 	defer client.Close()
 
 	// Parse the ABI of the contract
-	parsedABI, err := abi.JSON(strings.NewReader(ApiABI))
+	parsedABI, err := abi.JSON(strings.NewReader(MevboostrelaylistABI))
 	if err != nil {
 		return relays, fmt.Errorf("failed to parse ABI: %w", err)
 	}

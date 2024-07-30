@@ -65,7 +65,7 @@ func BondSummary(network string, nodeID *big.Int) (BondInfo, error) {
 	return bondsInfo, nil
 }
 
-func csAccountingContract(network string) (*CSAccounting, error) {
+func csAccountingContract(network string) (*Csaccounting, error) {
 	client, err := contracts.ConnectClient(network)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call ConnectContract: %w", err)
@@ -73,7 +73,7 @@ func csAccountingContract(network string) (*CSAccounting, error) {
 	defer client.Close()
 
 	address := common.HexToAddress(deployedContractAddresses[network])
-	contract, err := NewCSAccounting(address, client)
+	contract, err := NewCsaccounting(address, client)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create CSAccounting instance: %w", err)
 	}

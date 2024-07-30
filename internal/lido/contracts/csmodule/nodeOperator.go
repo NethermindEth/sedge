@@ -77,14 +77,14 @@ func NodeOperatorInfo(network string, nodeID *big.Int) (NodeOperator, error) {
 	return nodeOperator, nil
 }
 
-func csModuleContract(network string) (*CSModule, error) {
+func csModuleContract(network string) (*Csmodule, error) {
 	client, err := contracts.ConnectClient(network)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call ConnectContract: %w", err)
 	}
 	defer client.Close()
 	address := common.HexToAddress(deployedContractAddresses[network])
-	contract, err := NewCSModule(address, client)
+	contract, err := NewCsmodule(address, client)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create CSModule instance: %w", err)
 	}
