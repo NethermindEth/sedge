@@ -1,10 +1,24 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package csaccounting
 
 import (
 	"fmt"
 	"math/big"
 
-	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -15,10 +29,6 @@ type BondInfo struct {
 	Required *big.Int
 	Excess   *big.Int
 	Missed   *big.Int
-}
-
-var deployedContractAddresses = map[string]string{
-	configs.NetworkHolesky: "0xc093e53e8F4b55A223c18A2Da6fA00e60DD5EFE1",
 }
 
 /*
@@ -72,7 +82,8 @@ func csAccountingContract(network string) (*Csaccounting, error) {
 	}
 	defer client.Close()
 
-	address := common.HexToAddress(deployedContractAddresses[network])
+	contractName := contracts.CSAccounting
+	address := common.HexToAddress(contracts.DeployedAddresses(contractName)[network])
 	contract, err := NewCsaccounting(address, client)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create CSAccounting instance: %w", err)

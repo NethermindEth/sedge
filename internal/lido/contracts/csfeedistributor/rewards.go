@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package csfeedistributor
 
 import (
@@ -8,7 +23,6 @@ import (
 	"math/big"
 	"net/http"
 
-	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	bond "github.com/NethermindEth/sedge/internal/lido/contracts/csaccounting"
 	"github.com/ethereum/go-ethereum/common"
@@ -23,10 +37,6 @@ type Tree struct {
 		Value     []interface{} `json:"value"`
 		TreeIndex int           `json:"treeIndex"`
 	} `json:"values"`
-}
-
-var deployedContractAddresses = map[string]string{
-	configs.NetworkHolesky: "0xD7ba648C8F72669C6aE649648B516ec03D07c8ED",
 }
 
 /*
@@ -188,7 +198,8 @@ func csFeeDistributorContract(network string) (*Csfeedistributor, error) {
 	}
 	defer client.Close()
 
-	address := common.HexToAddress(deployedContractAddresses[network])
+	contractName := contracts.CSFeeDistributor
+	address := common.HexToAddress(contracts.DeployedAddresses(contractName)[network])
 	contract, err := NewCsfeedistributor(address, client)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create CSAccounting instance: %w", err)

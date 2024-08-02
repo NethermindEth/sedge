@@ -1,17 +1,27 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package csmodule
 
 import (
 	"fmt"
 	"math/big"
 
-	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	"github.com/ethereum/go-ethereum/common"
 )
-
-var deployedContractAddresses = map[string]string{
-	configs.NetworkHolesky: "0x4562c3e63c2e586cD1651B958C22F88135aCAd4f",
-}
 
 /*
 NodeID :
@@ -77,20 +87,6 @@ func NodeOperatorInfo(network string, nodeID *big.Int) (NodeOperator, error) {
 	return nodeOperator, nil
 }
 
-func csModuleContract(network string) (*Csmodule, error) {
-	client, err := contracts.ConnectClient(network)
-	if err != nil {
-		return nil, fmt.Errorf("failed to call ConnectContract: %w", err)
-	}
-	defer client.Close()
-	address := common.HexToAddress(deployedContractAddresses[network])
-	contract, err := NewCsmodule(address, client)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create CSModule instance: %w", err)
-	}
-	return contract, nil
-}
-
 func nodeOpIDs(network string) ([]*big.Int, error) {
 	var nodeOperatorIDs []*big.Int
 	contract, err := csModuleContract(network)
@@ -124,4 +120,20 @@ func nodeOpsCount(network string) (*big.Int, error) {
 	}
 
 	return nodeOperatorCount, nil
+}
+
+func csModuleContract(network string) (*Csmodule, error) {
+	client, err := contracts.ConnectClient(network)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call ConnectContract: %w", err)
+	}
+	defer client.Close()
+
+	contractName := contracts.CSModule
+	address := common.HexToAddress(contracts.DeployedAddresses(contractName)[network])
+	contract, err := NewCsmodule(address, client)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create CSModule instance: %w", err)
+	}
+	return contract, nil
 }
