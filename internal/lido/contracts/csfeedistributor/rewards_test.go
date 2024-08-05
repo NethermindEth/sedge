@@ -94,7 +94,6 @@ func TestRewards(t *testing.T) {
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Log(convertProofToByte(tc.proofStrings))
 			treeCID, err := treeCID(tc.network)
 			if err != nil {
 				t.Fatalf("failed to call treeCID: %v", err)
