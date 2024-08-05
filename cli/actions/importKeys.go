@@ -99,13 +99,23 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 	}
 	options.GenerationPath = absGenerationPath
 
-	if options.Distributed {
-		cwd, err := os.Getwd()
-		if err != nil {
-			fmt.Println("Error:", err)
-			return err
+	if !isDefaultKeysPath(options.GenerationPath, options.From) {
+		if !options.Distributed {
+			defaultKeystorePath := filepath.Join(options.GenerationPath, "keystore")
+			log.Warnf("The keys path is not the default one, copying the keys to the default path %s", defaultKeystorePath)
+			copy.Copy(options.From, defaultKeystorePath)
 		}
+	}
+
+	if options.Distributed {
+		cwd, _ := os.Getwd()
 		charonPath := filepath.Join(cwd, ".charon")
+
+		if !isDefaultKeysPath(options.GenerationPath, options.From) {
+			charonPath = options.From
+			log.Infof("Copying the keys from %s", charonPath)
+			options.From = filepath.Join(options.GenerationPath, "keystore")
+		}
 		charonValidatorKeysPath := filepath.Join(charonPath, "validator_keys")
 		defaultKeystorePath := filepath.Join(configs.DefaultAbsSedgeDataPath, "keystore")
 		log.Infof("Copying the keys to the default path %s", defaultKeystorePath)
@@ -142,18 +152,6 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 				return err
 			}
 		}
-		// Copy import scripts
-		if options.ValidatorClient == "lodestar" {
-			importScriptsPath := filepath.Join(cwd, "/scripts/charon/import_lodestar_keys.sh")
-			importScriptsPathDest := filepath.Join(defaultKeystorePath, "import_lodestar_keys.sh")
-			if err := copy.Copy(importScriptsPath, importScriptsPathDest); err != nil {
-				return err
-			}
-			// modify permissions
-			if err := os.Chmod(importScriptsPathDest, 0755); err != nil {
-				return err
-			}
-		}
 		if options.ValidatorClient == "prysm" {
 			keystorePasswordPath := filepath.Join(defaultKeystorePath, "keystore_password.txt")
 			f, err := os.Create(keystorePasswordPath)
@@ -163,12 +161,6 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 			f.WriteString("prysm-validator-secret")
 			defer f.Close()
 		}
-	}
-
-	if !isDefaultKeysPath(options.GenerationPath, options.From) {
-		defaultKeystorePath := filepath.Join(options.GenerationPath, "keystore")
-		log.Warnf("The keys path is not the default one, copying the keys to the default path %s", defaultKeystorePath)
-		copy.Copy(options.From, defaultKeystorePath)
 	}
 
 	var ctID string
@@ -335,7 +327,20 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager 
 		containerConfig = &container.Config{
 			Image: validatorImage,
 			Entrypoint: []string{
-				"/keystore/import_lodestar_keys.sh",
+				"sh", "-c", `
+				#!/bin/sh
+				set -e
+				for f in /keystore/validator_keys/keystore-*.json; do
+					echo "Importing key ${f}"
+					pwdfile="/keystore/$(basename "$f" .json).txt"
+					echo "Using password file ${pwdfile}"
+					# Import keystore with password.
+					node /usr/app/packages/cli/bin/lodestar validator import \
+						--dataDir="/data" \
+						--importKeystores="$f" \
+						--importKeystoresPassword="${pwdfile}"
+				done
+			`,
 			},
 		}
 	}
