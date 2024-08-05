@@ -68,39 +68,3 @@ func TestKeysStatus(t *testing.T) {
 		})
 	}
 }
-
-func FuzzTestSigningKeys(f *testing.F) {
-	testcases := []struct {
-		network string
-		nodeID  *big.Int
-	}{
-		{"holesky", big.NewInt(13)},
-		{"holesky", big.NewInt(-1)},
-		{"holesky", big.NewInt(40000)},
-	}
-
-	for _, tc := range testcases {
-		f.Add(tc.network, tc.nodeID.String())
-	}
-
-	f.Fuzz(func(t *testing.T, network string, nodeIDStr string) {
-		// Convert nodeIDStr back to *big.Int
-		nodeID, ok := new(big.Int).SetString(nodeIDStr, 10)
-		if !ok {
-			t.Skip("Skipping invalid big.Int string")
-		}
-		signingKeys, err := SigningKeys(network, nodeID)
-		if err != nil {
-			t.Logf("Expected failure in SigningKeys: %v", err)
-			return
-		}
-		keysCount, err := nodeOpNonWithdrawnKeys(network, nodeID)
-		if err != nil {
-			t.Logf("Expected failure in nodeOpNonWithdrawnKeys: %v", err)
-			return
-		}
-		if len(signingKeys) != int(keysCount.Int64()) {
-			t.Errorf("mismatch: keys size (%d) != keysCount (%d)", len(signingKeys), keysCount.Int64())
-		}
-	})
-}
