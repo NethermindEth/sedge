@@ -47,6 +47,10 @@ Error if any
 */
 func KeysStatus(network string, nodeID *big.Int) (Keys, error) {
 	var keys Keys
+
+	if nodeID.Sign() < 0 {
+		return keys, fmt.Errorf("node ID value out-of-bounds: can't be negative")
+	}
 	contract, err := csModuleContract(network)
 	if err != nil {
 		return keys, fmt.Errorf("failed to call csModuleContract: %w", err)
@@ -80,6 +84,10 @@ Error if any
 */
 func SigningKeys(network string, nodeID *big.Int) ([]string, error) {
 	var keys []string
+
+	if nodeID.Sign() < 0 {
+		return nil, fmt.Errorf("node ID value out-of-bounds: can't be negative")
+	}
 	contract, err := csModuleContract(network)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call csModuleContract: %w", err)

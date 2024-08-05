@@ -79,8 +79,8 @@ func TestNodeOperatorInfo(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed to call NodeOperatorInfo: %v", err)
 			}
-			if nodeOp.RewardAddress.String() != tc.expectedAddress && !tc.wantErr {
-				t.Errorf("Not same Reward Address, expected %v, got: %v", tc.expectedAddress, nodeOp.RewardAddress.Hex())
+			if nodeOp.ManagerAddress.String() != tc.expectedAddress && !tc.wantErr {
+				t.Errorf("Not same Manager Address, expected %v, got: %v", tc.expectedAddress, nodeOp.ManagerAddress.Hex())
 			}
 		})
 	}
