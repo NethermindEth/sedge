@@ -21,14 +21,15 @@ import (
 	"fmt"
 	"io"
 	"math/big"
-	"net/http"
+	"time"
 
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	bond "github.com/NethermindEth/sedge/internal/lido/contracts/csaccounting"
+	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/ethereum/go-ethereum/common"
 )
 
-// Tree : struct that reperesents data of Merkle Tree
+// Tree : struct that reperesents Merkle Tree data
 type Tree struct {
 	Format       string   `json:"format"`
 	LeafEncoding []string `json:"leafEncoding"`
@@ -55,6 +56,10 @@ Error if any
 */
 func Rewards(network string, nodeID *big.Int, proofStrings []string) (*big.Int, error) {
 	var rewards *big.Int
+	if nodeID.Sign() < 0 {
+		return nil, fmt.Errorf("node ID value out-of-bounds: can't be negative")
+	}
+
 	contract, err := csFeeDistributorContract(network)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call csFeeDistributorContract: %w", err)
@@ -70,7 +75,7 @@ func Rewards(network string, nodeID *big.Int, proofStrings []string) (*big.Int, 
 		return nil, fmt.Errorf("failed to call cumulativeFeeShares: %w", err)
 	}
 
-	proof, err := convertToByte(proofStrings)
+	proof, err := convertProofToByte(proofStrings)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call convToByte: %w", err)
 	}
@@ -101,14 +106,14 @@ func cumulativeFeeShares(treeCID string, nodeID *big.Int) (*big.Int, error) {
 	low, high := 0, len(treeData.Values)-1
 	for low <= high {
 		mid := (low + high) / 2
-		nodeOperatorId, err := convertToBigInt(treeData.Values[mid].Value[0])
+		nodeOperatorId, err := convertTreeValuesToBigInt(treeData.Values[mid].Value[0])
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert nodeOperatorId: %v", err)
 		}
 		cmp := nodeOperatorId.Cmp(nodeID)
 		if cmp == 0 {
 			// Node operator ID matches, return the shares
-			shares, err := convertToBigInt(treeData.Values[mid].Value[1])
+			shares, err := convertTreeValuesToBigInt(treeData.Values[mid].Value[1])
 			if err != nil {
 				return nil, fmt.Errorf("failed to convert shares: %v", err)
 			}
@@ -139,7 +144,7 @@ func treeCID(network string) (string, error) {
 func treeData(treeCID string) (Tree, error) {
 	var treeData Tree
 	gatewayURL := fmt.Sprintf("https://ipfs.io/ipfs/%s", treeCID) // Public gateway URL
-	resp, err := http.Get(gatewayURL)
+	resp, err := utils.GetRequest(gatewayURL, time.Second)
 	if err != nil {
 		return treeData, fmt.Errorf("failed to connect to gatewayURL: %w", err)
 	}
@@ -158,13 +163,14 @@ func treeData(treeCID string) (Tree, error) {
 	return treeData, nil
 }
 
-func convertToBigInt(value interface{}) (*big.Int, error) {
+// Converts nodeOperatorId and shares from Tree.Values.Value interface
+func convertTreeValuesToBigInt(value interface{}) (*big.Int, error) {
 	bigIntValue := new(big.Int)
 	bigIntValue.SetString(fmt.Sprintf("%.0f", value), 10)
 	return bigIntValue, nil
 }
 
-func convertToByte(proofStrings []string) ([][32]byte, error) {
+func convertProofToByte(proofStrings []string) ([][32]byte, error) {
 	var proofChunks [][32]byte
 	for _, hexStr := range proofStrings {
 		// Remove the "0x" prefix

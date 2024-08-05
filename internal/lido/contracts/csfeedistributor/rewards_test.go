@@ -19,6 +19,7 @@ import (
 	"io"
 	"log"
 	"math/big"
+	"reflect"
 	"testing"
 
 	bond "github.com/NethermindEth/sedge/internal/lido/contracts/csaccounting"
@@ -75,9 +76,25 @@ func TestRewards(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name:    "Invalid nodeID, Holesky",
+			network: "holesky",
+			nodeID:  big.NewInt(-3),
+			proofStrings: []string{
+				"0x6d20abd8b1d6bd278c57e818ff4984c023509ff6b5ad82d14b04725b19bcc70c",
+				"0xed6bfbd3f1755e450ea146c18bff02dd4ca5e6a2c8a354ba3fa50256294175d6",
+				"0x778ee311998c39a6d013c940e5a4f882adbe565d7656ed01a69b158416f94275",
+				"0x75f2f37a15fc968b78f6fa2f62e2e2c5f77040564a86e437910a22576afbdb5f",
+				"0x2f524e0fdbcf86b1cea60e6939811f5b8d262b33f1bffa1f2956d1228e43ea1c",
+				"0x4bba91a73d5d1974dbb75b61622306ba3742af7dc2a15d3d600473a7a06df426",
+				"0xc5cb054e6f48e9f610c115c212cd2c0125009bf7e63b6c472f2b2262c0868895",
+			},
+			wantErr: true,
+		},
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Log(convertProofToByte(tc.proofStrings))
 			treeCID, err := treeCID(tc.network)
 			if err != nil {
 				t.Fatalf("failed to call treeCID: %v", err)
@@ -98,13 +115,68 @@ func TestRewards(t *testing.T) {
 				t.Fatalf("failed to call BondSummary: %v", err)
 			}
 
-			expectedRewards := new(big.Int).Add(bond.Excess, fees)
-			if rewards == nil || expectedRewards == nil && tc.wantErr {
-				t.SkipNow()
+			if rewards == nil && tc.wantErr {
+				t.Skipf("Expected nil value for rewards")
+			} else if rewards == nil && !tc.wantErr {
+				t.Fatalf("invalid rewards value: expected a value, got nil")
 			}
+			expectedRewards := new(big.Int).Add(bond.Excess, fees)
 			if rewards.Cmp(expectedRewards) != 0 {
 				t.Errorf("invalid rewards amount, expected %v, got: %v", expectedRewards, rewards)
 			}
 		})
+	}
+}
+
+func TestConvertProofToByte(t *testing.T) {
+	proofStrings := []string{
+		"0x6d20abd8b1d6bd278c57e818ff4984c023509ff6b5ad82d14b04725b19bcc70c",
+		"0xed6bfbd3f1755e450ea146c18bff02dd4ca5e6a2c8a354ba3fa50256294175d6",
+		"0x778ee311998c39a6d013c940e5a4f882adbe565d7656ed01a69b158416f94275",
+		"0x75f2f37a15fc968b78f6fa2f62e2e2c5f77040564a86e437910a22576afbdb5f",
+		"0x2f524e0fdbcf86b1cea60e6939811f5b8d262b33f1bffa1f2956d1228e43ea1c",
+		"0x4bba91a73d5d1974dbb75b61622306ba3742af7dc2a15d3d600473a7a06df426",
+		"0xc5cb054e6f48e9f610c115c212cd2c0125009bf7e63b6c472f2b2262c0868895",
+	}
+
+	expectedProofChunks := [][32]byte{
+		{109, 32, 171, 216, 177, 214, 189, 39, 140, 87, 232, 24, 255, 73, 132, 192, 35, 80, 159, 246, 181, 173, 130, 209, 75, 4, 114, 91, 25, 188, 199, 12},
+		{237, 107, 251, 211, 241, 117, 94, 69, 14, 161, 70, 193, 139, 255, 2, 221, 76, 165, 230, 162, 200, 163, 84, 186, 63, 165, 2, 86, 41, 65, 117, 214},
+		{119, 142, 227, 17, 153, 140, 57, 166, 208, 19, 201, 64, 229, 164, 248, 130, 173, 190, 86, 93, 118, 86, 237, 1, 166, 155, 21, 132, 22, 249, 66, 117},
+		{117, 242, 243, 122, 21, 252, 150, 139, 120, 246, 250, 47, 98, 226, 226, 197, 247, 112, 64, 86, 74, 134, 228, 55, 145, 10, 34, 87, 106, 251, 219, 95},
+		{47, 82, 78, 15, 219, 207, 134, 177, 206, 166, 14, 105, 57, 129, 31, 91, 141, 38, 43, 51, 241, 191, 250, 31, 41, 86, 209, 34, 142, 67, 234, 28},
+		{75, 186, 145, 167, 61, 93, 25, 116, 219, 183, 91, 97, 98, 35, 6, 186, 55, 66, 175, 125, 194, 161, 93, 61, 96, 4, 115, 167, 160, 109, 244, 38},
+		{197, 203, 5, 78, 111, 72, 233, 246, 16, 193, 21, 194, 18, 205, 44, 1, 37, 0, 155, 247, 230, 59, 108, 71, 47, 43, 34, 98, 192, 134, 136, 149},
+	}
+
+	actualProofChunks, err := convertProofToByte(proofStrings)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !reflect.DeepEqual(actualProofChunks, expectedProofChunks) {
+		t.Errorf("unexpected proof chunks\nexpected: %v\nactual:   %v", expectedProofChunks, actualProofChunks)
+	}
+}
+
+func TestConvertTreeValuesToBigInt(t *testing.T) {
+	tcs := []struct {
+		input    interface{}
+		expected *big.Int
+	}{
+		{12345.0, big.NewInt(12345)},
+		{67890.0, big.NewInt(67890)},
+		{0.0, big.NewInt(0)},
+	}
+
+	for _, tc := range tcs {
+		result, err := convertTreeValuesToBigInt(tc.input)
+		if err != nil {
+			t.Errorf("convertTreeValuesToBigInt(%v) returned error: %v", tc.input, err)
+		}
+
+		if result.Cmp(tc.expected) != 0 {
+			t.Errorf("convertTreeValuesToBigInt(%v) = %v; expected %v", tc.input, result, tc.expected)
+		}
 	}
 }

@@ -46,6 +46,10 @@ Error if any
 */
 func BondSummary(network string, nodeID *big.Int) (BondInfo, error) {
 	var bondsInfo BondInfo
+	if nodeID.Sign() < 0 {
+		return bondsInfo, fmt.Errorf("node ID value out-of-bounds: can't be negative")
+	}
+
 	contract, err := csAccountingContract(network)
 	if err != nil {
 		return bondsInfo, fmt.Errorf("failed to call csAccountingContract: %w", err)
