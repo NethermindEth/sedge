@@ -65,7 +65,7 @@ services:
       - --rest-api-host-allowlist=*
       - --rest-api-enabled=true
       - --rest-api-port=4000
-      - --eth1-endpoints=${EC_NODE}
+      - --eth1=${EC_NODE}
       - --eth1-deposit-contract-max-request-size=150
     logging:
       driver: "json-file"

@@ -11,7 +11,6 @@ Running `sedge slashing-export` will export slashing protection data from the cu
 
 ```shell
 $ sedge slashing-export --help
-
 Export Slashing Protection Interchange Format (EIP-3076) data. This command assumes
 that the validator client container exists, stopped or not and that its database
 is already initialized. Take in mind that the validator client generates slashing
@@ -36,20 +35,20 @@ Usage:
 Examples:
 
 sedge slashing-export --out slashing-data.json prysm
-sedge slashing-export --out slashing-data.json --stop-validator lodestar 
+sedge slashing-export --out slashing-data.json --stop-validator lodestar
 sedge slashing-export --out slashing-data.json --start-validator lighthouse
 
 Flags:
       --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
-  -h, --help              help for slashing-export
-  -n, --network string    network (default "mainnet")
-  -o, --out string        path to write the JSON file in the EIP-3076 format with the slashing protection data (default "<generation-dir>/slashing_export.json")
-  -p, --path string       path to the generation directory (default "./docker-compose-scripts")
-      --start-validator   starts the validator client after export, regardless of the state the validator was in before
-      --stop-validator    stops the validator client after export, regardless of the state the validator was in before
+  -h, --help                   help for slashing-export
+  -n, --network string         network (default "mainnet")
+  -o, --out string             path to write slashing protection data (default "[GENERATION_PATH]/slashing_protection.json")
+  -p, --path string            path to the generation directory (default "/path/to/sedge-data")
+      --start-validator        starts the validator client after export, regardless of the state the validator was in before
+      --stop-validator         stops the validator client after export, regardless of the state the validator was in before
 
 Global Flags:
-      --logLevel string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
+      --log-level string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
 ```
 
 ## Execution Example
@@ -59,7 +58,7 @@ This is an example of exporting slashing protection data from a setup using sepo
 ```shell
 $ sedge slashing-export lighthouse -n sepolia --out slashing-protection.json
 2023-01-06 15:47:56 -- [INFO] [Logger Init] Log level: info
-2023-01-06 15:47:57 -- [INFO] You are running the latest version of sedge. Version:  v1.3.0
+2023-01-06 15:47:57 -- [INFO] You are running the latest version of sedge. Version:  v1.4.0
 2023-01-06 15:47:57 -- [INFO] Exporting slashing data from client lighthouse
 # highlight-next-line
 2023-01-06 15:47:57 -- [INFO] The slashing protection container is starting...
@@ -72,7 +71,7 @@ Notice in this case the validator client remains stopped because it has been sto
 ```shell
 $ sedge slashing-export lighthouse -n sepolia --out slashing-protection.json --start-validator
 2023-01-06 15:51:11 -- [INFO] [Logger Init] Log level: info
-2023-01-06 15:51:11 -- [INFO] You are running the latest version of sedge. Version:  v1.3.0
+2023-01-06 15:51:11 -- [INFO] You are running the latest version of sedge. Version:  v1.4.0
 2023-01-06 15:51:11 -- [INFO] Exporting slashing data from client lighthouse
 2023-01-06 15:51:11 -- [INFO] The slashing protection container is starting...
 2023-01-06 15:51:12 -- [INFO] The slashing container ends successfully.
@@ -87,7 +86,7 @@ Another case may be exporting the slashing data protection when the validator is
 ```shell
 $ sedge slashing-export lighthouse -n sepolia --out slashing-protection.json                  
 2023-01-06 15:51:46 -- [INFO] [Logger Init] Log level: info
-2023-01-06 15:51:46 -- [INFO] You are running the latest version of sedge. Version:  v1.3.0
+2023-01-06 15:51:46 -- [INFO] You are running the latest version of sedge. Version:  v1.4.0
 # highlight-next-line
 2023-01-06 15:51:46 -- [INFO] Stopping validator client
 # highlight-next-line
@@ -108,7 +107,7 @@ In this case, the validator client is stopped before the export and started agai
  ```shell
 $ sedge slashing-export lighthouse -n sepolia --out slashing-protection.json --stop-validator
 2023-01-06 15:52:07 -- [INFO] [Logger Init] Log level: info
-2023-01-06 15:52:07 -- [INFO] You are running the latest version of sedge. Version:  v1.3.0
+2023-01-06 15:52:07 -- [INFO] You are running the latest version of sedge. Version:  v1.4.0
 # highlight-next-line
 2023-01-06 15:52:07 -- [INFO] Stopping validator client
 # highlight-next-line

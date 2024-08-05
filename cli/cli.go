@@ -28,6 +28,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
+	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/NethermindEth/sedge/internal/ui"
 
 	"github.com/NethermindEth/sedge/cli/actions"
@@ -40,7 +41,6 @@ import (
 
 const (
 	NetworkMainnet = "mainnet"
-	NetworkGoerli  = "goerli"
 	NetworkSepolia = "sepolia"
 	NetworkGnosis  = "gnosis"
 	NetworkChiado  = "chiado"
@@ -80,6 +80,7 @@ type CliCmdOptions struct {
 	keystorePassphrasePath   string
 	keystorePassphrase       string
 	withdrawalAddress        string
+	nodeSetup                string
 	numberOfValidators       int64
 	existingValidators       int64
 	installDependencies      bool
@@ -97,6 +98,7 @@ func CliCmd(p ui.Prompter, actions actions.SedgeActions, depsMgr dependencies.De
 - Execution Node
 - Consensus Node
 - Validator Node
+- Lido CSM Node
 
 Follow the prompts to select the options you want for your node. At the end of the process, you will
 be asked to run the generated setup or not. If you chose to run the setup, it will be executed for you
@@ -104,6 +106,7 @@ using docker compose command behind the scenes.
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := runPromptActions(p, o,
+				selectNodeSetup,
 				selectNetwork,
 				selectNodeType,
 				inputGenerationPath,
@@ -615,8 +618,20 @@ func runPromptActions(p ui.Prompter, o *CliCmdOptions, actions ...promptAction) 
 	return nil
 }
 
+func selectNodeSetup(p ui.Prompter, o *CliCmdOptions) (err error) {
+	options := []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}
+	index, err := p.Select("Select node setup", "", options)
+	if err != nil {
+		return err
+	}
+	o.nodeSetup = options[index]
+	return
+}
+
 func selectNetwork(p ui.Prompter, o *CliCmdOptions) error {
-	options := []string{NetworkMainnet, NetworkGoerli, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky}
+	opts := sedgeOpts.CreateSedgeOptions(o.nodeSetup)
+	options := opts.SupportedNetworks()
+
 	index, err := p.Select("Select network", "", options)
 	if err != nil {
 		return err
@@ -793,6 +808,12 @@ func confirmInstallDependencies(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
+	opts := sedgeOpts.CreateSedgeOptions(o.nodeSetup)
+	enableMev := opts.MEVBoostEnabled(o.genData.Network)
+	if opts.OverwriteSettings().MevBoost {
+		o.withMevBoost = enableMev
+		return
+	}
 	o.withMevBoost, err = p.Confirm("Enable MEV Boost?", true)
 	return
 }
@@ -848,8 +869,16 @@ func inputMevBoostEndpoint(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
-	var defaultValue []string = configs.NetworksConfigs()[o.genData.Network].RelayURLs
-	relayURLs, err := p.InputList("Insert relay URLs if you don't want to use the default values listed below", defaultValue, func(list []string) error {
+	opts := sedgeOpts.CreateSedgeOptions(o.nodeSetup)
+	relayURLs, err := opts.RelayURLs(o.genData.Network)
+	if err != nil {
+		return err
+	}
+	if relayURLs != nil && opts.OverwriteSettings().RelayURLs {
+		o.genData.RelayURLs = relayURLs
+		return
+	}
+	relayURLs, err = p.InputList("Insert relay URLs if you don't want to use the default values listed below", relayURLs, func(list []string) error {
 		badUri, ok := utils.UriValidator(list)
 		if !ok {
 			return fmt.Errorf(configs.InvalidUrlFlagError, "relay", badUri)
@@ -871,11 +900,23 @@ func inputCheckpointSyncURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
+	opts := sedgeOpts.CreateSedgeOptions(o.nodeSetup)
+	feeRecipient := opts.FeeRecipient(o.genData.Network)
+	if opts.OverwriteSettings().FeeRecipient {
+		o.genData.FeeRecipient = feeRecipient
+		return
+	}
 	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address", "", true)
 	return
 }
 
 func inputFeeRecipientNoValidator(p ui.Prompter, o *CliCmdOptions) (err error) {
+	opts := sedgeOpts.CreateSedgeOptions(o.nodeSetup)
+	feeRecipient := opts.FeeRecipient(o.genData.Network)
+	if opts.OverwriteSettings().FeeRecipient {
+		o.genData.FeeRecipient = feeRecipient
+		return
+	}
 	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false)
 	return
 }
@@ -930,6 +971,12 @@ func inputKeystorePassphrase(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func inputWithdrawalAddress(p ui.Prompter, o *CliCmdOptions) (err error) {
+	opts := sedgeOpts.CreateSedgeOptions(o.nodeSetup)
+	withdrawalAddress := opts.WithdrawalAddress(o.genData.Network)
+	if opts.OverwriteSettings().WithdrawalAddress {
+		o.withdrawalAddress = withdrawalAddress
+		return
+	}
 	o.withdrawalAddress, err = p.Input("Withdrawal address", "", false, func(s string) error { return ui.EthAddressValidator(s, true) })
 	return
 }

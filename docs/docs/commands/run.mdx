@@ -21,6 +21,7 @@ when the images are already pulled or the user wants to use a local custom image
 ## Help
 
 ```shell
+$ sedge run -h
 Run all the generated services
 
 Usage:
@@ -28,7 +29,7 @@ Usage:
 
 Flags:
   -h, --help               help for run
-  -p, --path string        generation path for sedge data (default "/home/root/sedge/sedge-data")
+  -p, --path string        generation path for sedge data (default "/path/to/sedge-data")
       --services strings   List of services to run. If this flag is not provided, all services will run.
       --skip-pull          Avoid pulling images before running containers. If the images are not available locally, this flag could cause an error.
 
@@ -58,7 +59,7 @@ the following command to start all services in the default generation path
 $ sedge run
 Using config file: /root/.sedge.yaml
 2022-12-29 19:55:55 -- [INFO] [Logger Init] Logging configuration: {Level:debug}
-2022-12-29 19:55:55 -- [INFO] You are running the latest version of sedge. Version:  v1.3.0
+2022-12-29 19:55:55 -- [INFO] You are running the latest version of sedge. Version:  v1.4.0
 2022-12-29 20:40:24 -- [INFO] Checking dependencies: docker
 2022-12-29 20:40:24 -- [INFO] All dependencies are installed on host machine
 2022-12-29 19:55:55 -- [INFO] Setting up containers
@@ -109,7 +110,7 @@ start the validator.
 $ sedge run --services execution,consensus
 Using config file: /root/.sedge.yaml
 2022-12-29 21:03:29 -- [INFO] [Logger Init] Logging configuration: {Level:debug}
-2022-12-29 21:03:29 -- [INFO] You are running the latest version of sedge. Version:  v1.3.0
+2022-12-29 21:03:29 -- [INFO] You are running the latest version of sedge. Version:  v1.4.0
 2022-12-29 21:03:29 -- [INFO] Checking dependencies: docker
 2022-12-29 21:03:29 -- [INFO] All dependencies are installed on host machine
 2022-12-29 21:03:29 -- [INFO] Setting up containers
@@ -154,7 +155,7 @@ Now you can start the validator client like follow:
 $ sedge run --services validator
 Using config file: /root/.sedge.yaml
 2022-12-29 21:24:12 -- [INFO] [Logger Init] Logging configuration: {Level:debug}
-2022-12-29 21:24:12 -- [INFO] You are running the latest version of sedge. Version:  v1.3.0
+2022-12-29 21:24:12 -- [INFO] You are running the latest version of sedge. Version:  v1.4.0
 2022-12-29 21:24:12 -- [INFO] Checking dependencies: docker
 2022-12-29 21:24:12 -- [INFO] All dependencies are installed on host machine
 2022-12-29 21:24:12 -- [INFO] Setting up containers

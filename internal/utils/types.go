@@ -24,7 +24,7 @@ type DistroInfo struct {
 
 // DepositCLI : Struct Data for eth2.0-deposit-cli command template
 type DepositCLI struct {
-	// Network : Network name, e.g. "mainnet", "goerli"
+	// Network : Network name, e.g. "mainnet", "sepolia"
 	Network string
 	// Path : Path to the keystore folder
 	Path string

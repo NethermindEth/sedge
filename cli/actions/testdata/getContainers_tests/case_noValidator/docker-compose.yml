@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   execution:
     stop_grace_period: 30s
@@ -86,7 +85,7 @@ services:
       - --target-peers=${CC_PEER_COUNT}
       - --execution-endpoints=${EC_AUTH_URL}
       - --execution-jwt=/tmp/jwt/jwtsecret
-      - --eth1-endpoints=${EC_API_URL}
+      - --eth1
       - --debug-level=${CC_LOG_LEVEL}
       - --suggested-fee-recipient=${FEE_RECIPIENT}
       - --validator-monitor-auto
