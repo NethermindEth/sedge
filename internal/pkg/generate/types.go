@@ -21,71 +21,79 @@ import (
 
 // EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
 type EnvData struct {
-	Services                  []string
-	Mev                       bool
-	ElImage                   string
-	ElDataDir                 string
-	CcImage                   string
-	CcDataDir                 string
-	VlImage                   string
-	VlDataDir                 string
-	ExecutionApiURL           string
-	ExecutionAuthURL          string
-	ConsensusApiURL           string
-	ConsensusAdditionalApiURL string
-	FeeRecipient              string
-	JWTSecretPath             string
-	ExecutionEngineName       string
-	ConsensusClientName       string
-	KeystoreDir               string
-	Graffiti                  string
-	RelayURLs                 string
-	CheckpointSyncUrl         string
+	Services                   []string
+	Mev                        bool
+	ElImage                    string
+	ElDataDir                  string
+	CcImage                    string
+	CcDataDir                  string
+	VlImage                    string
+	VlDataDir                  string
+	ExecutionApiURL            string
+	ExecutionAuthURL           string
+	ConsensusApiURL            string
+	ConsensusAdditionalApiURL  string
+	Distributed                bool
+	FeeRecipient               string
+	JWTSecretPath              string
+	ExecutionEngineName        string
+	ConsensusClientName        string
+	KeystoreDir                string
+	Graffiti                   string
+	RelayURLs                  string
+	CheckpointSyncUrl          string
+	DistributedValidatorApiUrl string
+	DvDataDir                  string
+	DvImage                    string
 }
 
 // GenData : Struct Data object for script's generation
 type GenData struct {
-	Services                []string
-	ExecutionClient         *clients.Client
-	ConsensusClient         *clients.Client
-	ValidatorClient         *clients.Client
-	Network                 string
-	CheckpointSyncUrl       string
-	FeeRecipient            string
-	JWTSecretPath           string
-	FallbackELUrls          []string
-	ElExtraFlags            []string
-	ClExtraFlags            []string
-	VlExtraFlags            []string
-	MapAllPorts             bool
-	Mev                     bool
-	RelayURLs               []string
-	MevImage                string
-	MevBoostService         bool
-	MevBoostEndpoint        string
-	MevBoostOnValidator     bool
-	Ports                   map[string]uint16
-	Graffiti                string
-	LoggingDriver           string
-	ECBootnodes             []string
-	CCBootnodes             []string
-	CustomChainSpecPath     string
-	CustomNetworkConfigPath string
-	CustomGenesisPath       string
-	CustomDeployBlock       string
-	CustomDeployBlockPath   string
-	VLStartGracePeriod      uint
-	ExecutionApiUrl         string
-	ExecutionAuthUrl        string
-	ConsensusApiUrl         string
-	ContainerTag            string
-	LatestVersion           bool
+	Services                   []string
+	ExecutionClient            *clients.Client
+	ConsensusClient            *clients.Client
+	ValidatorClient            *clients.Client
+	DistributedValidatorClient *clients.Client
+	Distributed                bool
+	Network                    string
+	CheckpointSyncUrl          string
+	FeeRecipient               string
+	JWTSecretPath              string
+	FallbackELUrls             []string
+	ElExtraFlags               []string
+	ClExtraFlags               []string
+	VlExtraFlags               []string
+	MapAllPorts                bool
+	Mev                        bool
+	RelayURLs                  []string
+	MevImage                   string
+	MevBoostService            bool
+	MevBoostEndpoint           string
+	MevBoostOnValidator        bool
+	Ports                      map[string]uint16
+	Graffiti                   string
+	LoggingDriver              string
+	ECBootnodes                []string
+	CCBootnodes                []string
+	CustomChainSpecPath        string
+	CustomNetworkConfigPath    string
+	CustomGenesisPath          string
+	CustomDeployBlock          string
+	CustomDeployBlockPath      string
+	VLStartGracePeriod         uint
+	ExecutionApiUrl            string
+	ExecutionAuthUrl           string
+	ConsensusApiUrl            string
+	ContainerTag               string
+	LatestVersion              bool
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
-	Services                []string
-	Network                 string
+	Services    []string
+	Network     string
+	Distributed bool
+	// DistributedValidatorEndpoint string
 	XeeVersion              bool
 	Mev                     bool
 	MevBoostOnValidator     bool
@@ -126,6 +134,9 @@ type DockerComposeData struct {
 	UID                     int // Needed for teku
 	GID                     int // Needed for teku
 	ContainerTag            string
+	DVDiscoveryPort         uint16
+	DVMetricsPort           uint16
+	DVApiPort               uint16
 }
 
 // WithConsensusClient returns true if the consensus client is set
@@ -152,6 +163,16 @@ func (d DockerComposeData) WithValidatorClient() bool {
 func (d EnvData) WithMevBoostClient() bool {
 	for _, service := range d.Services {
 		if service == mevBoost {
+			return true
+		}
+	}
+	return false
+}
+
+// WithDistributedValidatorClient returns true if the DistributedValidator client is set
+func (d EnvData) WithDistributedValidatorClient() bool {
+	for _, service := range d.Services {
+		if service == distributedValidator {
 			return true
 		}
 	}
@@ -230,13 +251,26 @@ type ConfigConsensus struct {
 	Command       []string `yaml:"command"`
 	Logging       *Logging `yaml:"logging,omitempty"`
 }
+
+type DistributedValidator struct {
+	ContainerName string   `yaml:"container_name"`
+	Image         string   `yaml:"image"`
+	DependsOn     []string `yaml:"depends_on"`
+	Networks      []string `yaml:"networks"`
+	Ports         []string `yaml:"ports"`
+	Volumes       []string `yaml:"volumes"`
+	Command       []string `yaml:"command"`
+	Logging       *Logging `yaml:"logging,omitempty"`
+}
+
 type Services struct {
-	Execution        *Execution        `yaml:"execution,omitempty"`
-	Mevboost         *Mevboost         `yaml:"mev-boost,omitempty"`
-	Consensus        *Consensus        `yaml:"consensus,omitempty"`
-	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker,omitempty"`
-	Validator        *Validator        `yaml:"validator,omitempty"`
-	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus,omitempty"`
+	Execution            *Execution            `yaml:"execution,omitempty"`
+	Mevboost             *Mevboost             `yaml:"mev-boost,omitempty"`
+	Consensus            *Consensus            `yaml:"consensus,omitempty"`
+	ValidatorBlocker     *ValidatorBlocker     `yaml:"validator-blocker,omitempty"`
+	Validator            *Validator            `yaml:"validator,omitempty"`
+	ConfigConsensus      *ConfigConsensus      `yaml:"config_consensus,omitempty"`
+	DistributedValidator *DistributedValidator `yaml:"dv,omitempty"`
 }
 type Sedge struct {
 	Name string `yaml:"name"`

@@ -1,4 +1,4 @@
-package teku
+package prysm
 
 import (
 	"embed"
@@ -10,20 +10,20 @@ import (
 )
 
 //go:embed context
-var tekuContext embed.FS
+var prysmContext embed.FS
 
 func InitContext() (string, error) {
 	tempDir, err := os.MkdirTemp(os.TempDir(), "sedge-validator-import-context-*")
 	if err != nil {
-		return "", fmt.Errorf("error creating teku validator import dir context: %s", err.Error())
+		return "", fmt.Errorf("error creating prysm validator import dir context: %s", err.Error())
 	}
 
-	contextDir, err := tekuContext.ReadDir("context")
+	contextDir, err := prysmContext.ReadDir("context")
 	if err != nil {
 		return "", err
 	}
 	for _, item := range contextDir {
-		itemData, err := tekuContext.ReadFile(strings.Join([]string{"context", item.Name()}, "/"))
+		itemData, err := prysmContext.ReadFile(strings.Join([]string{"context", item.Name()}, "/"))
 		if err != nil {
 			return "", err
 		}

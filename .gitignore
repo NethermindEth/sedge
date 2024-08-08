@@ -17,3 +17,10 @@ build/sedge
 courtney/
 
 mocks/
+
+cluster/
+
+.charon/
+node*/
+
+keystore*

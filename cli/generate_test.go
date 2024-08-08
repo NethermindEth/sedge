@@ -1317,6 +1317,20 @@ func TestGenerateCmd(t *testing.T) {
 			nil,
 		},
 		{
+			"full-node random client Distributed",
+			subCmd{
+				name: "distributed",
+				args: []string{},
+			},
+			GenCmdFlags{
+				distributed: true,
+			},
+			globalFlags{
+				network: "holesky",
+			},
+			nil,
+		},
+		{
 			"Lido Full-node - Holesky without MEV",
 			subCmd{
 				name: "full-node",
