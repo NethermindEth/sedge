@@ -16,7 +16,6 @@ limitations under the License.
 package csfeedistributor
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -47,22 +46,16 @@ retrieving non-claimed rewards for Lido CSM node
 params :-
 network (string): The name of the network (e.g."holesky").
 nodeID (*big.Int): Node Operator ID
-proofStrings ([]string): Merkle Proof of Node Operator Rewards
 returns :-
 a. *big.Int
 Non-claimed rewards
 b. error
 Error if any
 */
-func Rewards(network string, nodeID *big.Int, proofStrings []string) (*big.Int, error) {
+func Rewards(network string, nodeID *big.Int) (*big.Int, error) {
 	var rewards *big.Int
 	if nodeID.Sign() < 0 {
 		return nil, fmt.Errorf("node ID value out-of-bounds: can't be negative")
-	}
-
-	contract, err := csFeeDistributorContract(network)
-	if err != nil {
-		return nil, fmt.Errorf("failed to call csFeeDistributorContract: %w", err)
 	}
 
 	treeCID, err := treeCID(network)
@@ -75,22 +68,12 @@ func Rewards(network string, nodeID *big.Int, proofStrings []string) (*big.Int, 
 		return nil, fmt.Errorf("failed to call cumulativeFeeShares: %w", err)
 	}
 
-	proof, err := convertProofToByte(proofStrings)
-	if err != nil {
-		return nil, fmt.Errorf("failed to call convToByte: %w", err)
-	}
-
-	fees, err := contract.GetFeesToDistribute(nil, nodeID, shares, proof)
-	if err != nil {
-		return nil, fmt.Errorf("failed to call GetFeesToDistribute: %w", err)
-	}
-
 	bondInfo, err := bond.BondSummary(network, nodeID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call BondSummary: %w", err)
 	}
 
-	rewards = new(big.Int).Add(bondInfo.Excess, fees)
+	rewards = new(big.Int).Add(bondInfo.Excess, shares)
 	return rewards, nil
 }
 
@@ -170,37 +153,10 @@ func convertTreeValuesToBigInt(value interface{}) (*big.Int, error) {
 	return bigIntValue, nil
 }
 
-func convertProofToByte(proofStrings []string) ([][32]byte, error) {
-	var proofChunks [][32]byte
-	for _, hexStr := range proofStrings {
-		// Remove the "0x" prefix
-		if len(hexStr) >= 2 && hexStr[:2] == "0x" {
-			hexStr = hexStr[2:]
-		}
-
-		// Decode the hex string to a byte slice
-		bytes, err := hex.DecodeString(hexStr)
-		if err != nil {
-			return proofChunks, fmt.Errorf("failed to decode hex string: %v", err)
-		}
-
-		// Ensure the byte slice is exactly 32 bytes long
-		if len(bytes) != 32 {
-			return proofChunks, fmt.Errorf("decoded byte slice is not 32 bytes long: %v", bytes)
-		}
-
-		// Convert the byte slice to a [32]byte array
-		var chunk [32]byte
-		copy(chunk[:], bytes)
-		proofChunks = append(proofChunks, chunk)
-	}
-	return proofChunks, nil
-}
-
 func csFeeDistributorContract(network string) (*Csfeedistributor, error) {
 	client, err := contracts.ConnectClient(network)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call ConnectContract: %w", err)
+		return nil, fmt.Errorf("failed to connect to client: %w", err)
 	}
 	defer client.Close()
 
@@ -208,7 +164,7 @@ func csFeeDistributorContract(network string) (*Csfeedistributor, error) {
 	address := common.HexToAddress(contracts.DeployedAddresses(contractName)[network])
 	contract, err := NewCsfeedistributor(address, client)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create CSAccounting instance: %w", err)
+		return nil, fmt.Errorf("failed to create CSFeeDistributor instance: %w", err)
 	}
 	return contract, nil
 }
