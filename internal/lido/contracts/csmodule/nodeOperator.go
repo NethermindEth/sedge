@@ -29,7 +29,7 @@ This function is responsible for:
 retrieving NodeOperatorID for Lido CSM node
 params :-
 network (string): The name of the network (e.g."holesky").
-rewardaddress (string): The reward address of the node operator
+rewardAddress (string): The reward address of the node operator
 returns :-
 a. *big.Int
 Node Operator ID
@@ -53,7 +53,7 @@ func NodeID(network string, rewardAddress string) (*big.Int, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to get NodeOperatorInfo: %w", err)
 		}
-		if node.RewardAddress == rewardAddr || node.ProposedRewardAddress == rewardAddr {
+		if node.RewardAddress == rewardAddr {
 			return nodeID, nil
 		}
 	}
@@ -125,7 +125,7 @@ func nodeOpsCount(network string) (*big.Int, error) {
 func csModuleContract(network string) (*Csmodule, error) {
 	client, err := contracts.ConnectClient(network)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call ConnectContract: %w", err)
+		return nil, fmt.Errorf("failed to connect to client: %w", err)
 	}
 	defer client.Close()
 

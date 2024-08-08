@@ -82,7 +82,7 @@ func BondSummary(network string, nodeID *big.Int) (BondInfo, error) {
 func csAccountingContract(network string) (*Csaccounting, error) {
 	client, err := contracts.ConnectClient(network)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call ConnectContract: %w", err)
+		return nil, fmt.Errorf("failed to connect to client: %w", err)
 	}
 	defer client.Close()
 

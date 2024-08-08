@@ -119,7 +119,7 @@ func NetworkSupportedByLidoMevBoost(network string) ([]string, bool) {
 func mevBoostRelayListContract(network string) (*Mevboostrelaylist, error) {
 	client, err := contracts.ConnectClient(network)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call ConnectContract: %w", err)
+		return nil, fmt.Errorf("failed to connect to client: %w", err)
 	}
 	defer client.Close()
 
