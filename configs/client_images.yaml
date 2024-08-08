@@ -40,4 +40,4 @@ validator:
 distributed:
   charon:
     name: ghcr.io/obolnetwork/charon
-    version: v0.19.2
+    version: v1.0.1

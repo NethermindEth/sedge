@@ -116,6 +116,15 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 			log.Infof("Copying the keys from %s", charonPath)
 			options.From = filepath.Join(options.GenerationPath, "keystore")
 		}
+		defaultCharonPath := filepath.Join(configs.DefaultAbsSedgeDataPath, ".charon")
+		//Copy the folder from charonPath to defaultCharonPath
+		log.Infof("Copying Charon contents to the default path %s", defaultCharonPath)
+		if err := os.MkdirAll(defaultCharonPath, os.ModePerm); err != nil {
+			return err
+		}
+		if err := copy.Copy(charonPath, defaultCharonPath); err != nil {
+			return err
+		}
 		charonValidatorKeysPath := filepath.Join(charonPath, "validator_keys")
 		defaultKeystorePath := filepath.Join(configs.DefaultAbsSedgeDataPath, "keystore")
 		log.Infof("Copying the keys to the default path %s", defaultKeystorePath)
