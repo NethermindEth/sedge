@@ -77,6 +77,7 @@ type GenCmdFlags struct {
 	elExtraFlags      []string
 	clExtraFlags      []string
 	vlExtraFlags      []string
+	dvExtraFlags      []string
 	relayURLs         []string
 	mevBoostUrl       string
 	executionApiUrl   string
@@ -292,6 +293,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ElExtraFlags:               flags.elExtraFlags,
 		ClExtraFlags:               flags.clExtraFlags,
 		VlExtraFlags:               flags.vlExtraFlags,
+		DvExtraFlags:               flags.dvExtraFlags,
 		MapAllPorts:                flags.mapAllPorts,
 		Mev:                        !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
 		MevImage:                   flags.mevImage,

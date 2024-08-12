@@ -389,6 +389,7 @@ func TestGenerateComposeServices(t *testing.T) {
 				Distributed:                true,
 				Network:                    "holesky",
 				Services:                   []string{execution, consensus, validator, distributedValidator},
+				DvExtraFlags:               []string{"extra", "flag"},
 			},
 			CheckFunctions: []CheckFunc{defaultFunc, checkValidatorBlocker},
 		},

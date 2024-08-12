@@ -63,6 +63,7 @@ type GenData struct {
 	ElExtraFlags               []string
 	ClExtraFlags               []string
 	VlExtraFlags               []string
+	DvExtraFlags               []string
 	MapAllPorts                bool
 	Mev                        bool
 	RelayURLs                  []string
@@ -116,6 +117,7 @@ type DockerComposeData struct {
 	ElExtraFlags            []string
 	ClExtraFlags            []string
 	VlExtraFlags            []string
+	DvExtraFlags            []string
 	ECBootnodes             string
 	CCBootnodes             string
 	CCBootnodesList         []string
