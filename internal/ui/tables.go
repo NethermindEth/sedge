@@ -133,15 +133,40 @@ func WriteSimpleTable(w io.Writer, data *SimpleTableData) {
 			n = len(column)
 		}
 	}
+
 	m := len(data.Headers)
 
 	if len(data.Headers) == 0 && !data.Enumerate {
 		return
 	}
 
+	// Get maximum width
+	width := 0
+	for _, header := range data.Headers {
+		if width < len(header.Text) {
+			width = len(header.Text)
+		}
+	}
+
+	r, _ := glamour.NewTermRenderer(
+		glamour.WithAutoStyle(),
+		glamour.WithWordWrap(width+5),
+	)
+
+	// Render the headers using Glamour
+	renderedHeaders := make([]*simpletable.Cell, len(data.Headers))
+	for i, headerCell := range data.Headers {
+		headerText := fmt.Sprintf(`# %s`, headerCell.Text)
+		renderedText, _ := r.Render(headerText)
+		renderedHeaders[i] = &simpletable.Cell{
+			Align: headerCell.Align,
+			Text:  strings.TrimSpace(renderedText),
+		}
+	}
+
 	// Add headers to table
 	table.Header = &simpletable.Header{
-		Cells: data.Headers,
+		Cells: renderedHeaders,
 	}
 
 	if data.Enumerate { // Add number header
