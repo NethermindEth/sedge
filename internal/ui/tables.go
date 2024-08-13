@@ -18,8 +18,10 @@ package ui
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/alexeyco/simpletable"
+	"github.com/charmbracelet/glamour"
 )
 
 /*
@@ -174,7 +176,7 @@ func WriteSimpleTable(w io.Writer, data *SimpleTableData) {
 	}
 	// Print table
 	table.SetStyle(simpletable.StyleCompact)
-	fmt.Fprintln(w, table.String())
+	fmt.Fprint(w, table.String())
 	fmt.Fprintln(w)
 }
 
@@ -215,4 +217,33 @@ func WriteListNetworksTable(w io.Writer, data []string) {
 		DefaultAlign: simpletable.AlignLeft,
 		Enumerate:    true,
 	})
+}
+
+/*
+WriteLidoStatusTable :
+Prints the Lido Node Operator Information
+
+params :-
+a. w io.Writer
+Where the data is to be printed
+b. data []string
+Node Operator data
+c. string
+Data Header
+returns :-
+None
+*/
+func WriteLidoStatusTable(w io.Writer, data []string, header string) {
+	var allData []string
+
+	allData = append(allData, header)
+	allData = append(allData, data...)
+	info := strings.Join(allData, "\n")
+	renderedInfo, err := glamour.Render(info, "dark")
+
+	if err != nil {
+		fmt.Fprint(w, info) // Fallback to plain text if rendering fails
+	} else {
+		fmt.Fprint(w, renderedInfo)
+	}
 }
