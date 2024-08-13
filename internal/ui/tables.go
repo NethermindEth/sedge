@@ -261,14 +261,10 @@ None
 func WriteLidoStatusTable(w io.Writer, data []string, header string) {
 	var allData []string
 
-	allData = append(allData, header)
+	headerText := fmt.Sprintf(`# %s`, header)
+	allData = append(allData, headerText)
 	allData = append(allData, data...)
 	info := strings.Join(allData, "\n")
-	renderedInfo, err := glamour.Render(info, "dark")
-
-	if err != nil {
-		fmt.Fprint(w, info) // Fallback to plain text if rendering fails
-	} else {
-		fmt.Fprint(w, renderedInfo)
-	}
+	renderedInfo, _ := glamour.Render(info, "dark")
+	fmt.Fprint(w, renderedInfo)
 }

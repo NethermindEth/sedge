@@ -47,11 +47,11 @@ var (
 )
 
 const (
-	nodeOpInfo  = `# Node Operator Info`
-	keysInfo    = `# Keys`
-	queueInfo   = `# Queue`
-	bondInfo    = `# Bond`
-	rewardsInfo = `# Rewards`
+	nodeOpInfo  = `Node Operator Info`
+	keysInfo    = `Keys`
+	queueInfo   = `Queue`
+	bondInfo    = `Bond`
+	rewardsInfo = `Rewards`
 )
 
 func LidoStatusCmd() *cobra.Command {
