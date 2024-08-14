@@ -12,7 +12,10 @@
       - CHARON_P2P_TCP_ADDRESS=0.0.0.0:{{.DVDiscoveryPort}}
       - CHARON_VALIDATOR_API_ADDRESS=127.0.0.1:{{.DVApiPort}}
       - CHARON_MONITORING_ADDRESS=0.0.0.0:{{.DVMetricsPort}}{{if .MevBoostOnValidator}}
-      - CHARON_BUILDER_API={{.MevBoostOnValidator}}{{end}}
+      - CHARON_BUILDER_API={{.MevBoostOnValidator}}{{end}} 
+      {{- range $i, $flag := .DvExtraFlags }}
+      - {{$flag}}
+      {{- end }} 
     ports:
       - ${CHARON_PORT_P2P_TCP:-{{.DVDiscoveryPort}}}:${CHARON_PORT_P2P_TCP:-{{.DVDiscoveryPort}}}/tcp
     expose:
