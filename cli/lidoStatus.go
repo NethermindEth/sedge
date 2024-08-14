@@ -32,12 +32,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type LidoData struct {
-	NodeID   *big.Int
-	NodeInfo csmodule.NodeOperator
-	Keys     csmodule.Keys
-	BondInfo bonds.BondInfo
-	Rewards  *big.Int
+type lidoData struct {
+	nodeID   *big.Int
+	nodeInfo csmodule.NodeOperator
+	keys     csmodule.Keys
+	bondInfo bonds.BondInfo
+	rewards  *big.Int
 }
 
 var (
@@ -115,8 +115,8 @@ func runListLidoStatusCmd(cmd *cobra.Command, args []string) error {
 }
 
 // Get the data for the Node Operator
-func nodeData() (*LidoData, error) {
-	nodeData := &LidoData{}
+func nodeData() (*lidoData, error) {
+	nodeData := &lidoData{}
 
 	progressBar := pb.StartNew(5)
 	defer progressBar.Finish()
@@ -153,22 +153,22 @@ func nodeData() (*LidoData, error) {
 	}
 	progressBar.Increment()
 
-	nodeData.NodeID = nodeID
-	nodeData.NodeInfo = nodeInfo
-	nodeData.Keys = keys
-	nodeData.BondInfo = bond
-	nodeData.Rewards = reward
+	nodeData.nodeID = nodeID
+	nodeData.nodeInfo = nodeInfo
+	nodeData.keys = keys
+	nodeData.bondInfo = bond
+	nodeData.rewards = reward
 
 	return nodeData, nil
 }
 
 // Structure the data to be displayed
-func buildLidoData(node *LidoData) map[string]struct {
+func buildLidoData(node *lidoData) map[string]struct {
 	data   []string
 	weight int
 } {
 	var nodeOpDetailed, keysDetailed, queueDetailed, bondDetailed, rewardsDetailed string
-	rewardAddressLink := fmt.Sprintf(`https://etherscan.io/address/%s`, node.NodeInfo.RewardAddress)
+	rewardAddressLink := fmt.Sprintf(`https://etherscan.io/address/%s`, node.nodeInfo.RewardAddress)
 
 	detailedDescriptions := map[string]string{
 		nodeOpInfo: `
@@ -216,9 +216,9 @@ func buildLidoData(node *LidoData) map[string]struct {
 	}{
 		nodeOpInfo: {
 			data: []string{
-				fmt.Sprintf(`- **Node Operator ID:** %s`, node.NodeID.String()),
-				fmt.Sprintf(`- **Reward Address:** %s`, node.NodeInfo.RewardAddress.String()),
-				fmt.Sprintf(`- **Manager Address:** %s`, node.NodeInfo.ManagerAddress.String()),
+				fmt.Sprintf(`- **Node Operator ID:** %s`, node.nodeID.String()),
+				fmt.Sprintf(`- **Reward Address:** %s`, node.nodeInfo.RewardAddress.String()),
+				fmt.Sprintf(`- **Manager Address:** %s`, node.nodeInfo.ManagerAddress.String()),
 				fmt.Sprintf(`- [Reward Address Link on etherscan](%s)`, rewardAddressLink),
 				nodeOpDetailed,
 			},
@@ -226,35 +226,35 @@ func buildLidoData(node *LidoData) map[string]struct {
 		},
 		keysInfo: {
 			data: []string{
-				fmt.Sprintf(`- **Stuck Keys Count:** %s`, node.Keys.StuckValidatorsCount.String()),
-				fmt.Sprintf(`- **Refunded Keys Count:** %s`, node.Keys.RefundedValidatorsCount.String()),
-				fmt.Sprintf(`- **Exited Keys Count:** %s`, node.Keys.ExitedValidators.String()),
-				fmt.Sprintf(`- **Deposited Keys Count:** %s`, node.Keys.DepositedValidators.String()),
-				fmt.Sprintf(`- **Depositable Keys Count:** %s`, node.Keys.DepositableValidatorsCount.String()),
+				fmt.Sprintf(`- **Stuck Keys Count:** %s`, node.keys.StuckValidatorsCount.String()),
+				fmt.Sprintf(`- **Refunded Keys Count:** %s`, node.keys.RefundedValidatorsCount.String()),
+				fmt.Sprintf(`- **Exited Keys Count:** %s`, node.keys.ExitedValidators.String()),
+				fmt.Sprintf(`- **Deposited Keys Count:** %s`, node.keys.DepositedValidators.String()),
+				fmt.Sprintf(`- **Depositable Keys Count:** %s`, node.keys.DepositableValidatorsCount.String()),
 				keysDetailed,
 			},
 			weight: 2,
 		},
 		queueInfo: {
 			data: []string{
-				fmt.Sprintf(`- **Keys in the deposit queue:** %d`, node.NodeInfo.EnqueuedCount),
+				fmt.Sprintf(`- **Keys in the deposit queue:** %d`, node.nodeInfo.EnqueuedCount),
 				queueDetailed,
 			},
 			weight: 3,
 		},
 		bondInfo: {
 			data: []string{
-				fmt.Sprintf(`- **Current Bond:** %s`, weiToEth(node.BondInfo.Current).String()),
-				fmt.Sprintf(`- **Required Bond:** %s`, weiToEth(node.BondInfo.Required).String()),
-				fmt.Sprintf(`- **Excess Bond:** %s`, weiToEth(node.BondInfo.Excess).String()),
-				fmt.Sprintf(`- **Missed Bond:** %s`, weiToEth(node.BondInfo.Missed).String()),
+				fmt.Sprintf(`- **Current Bond:** %s`, weiToEth(node.bondInfo.Current).String()),
+				fmt.Sprintf(`- **Required Bond:** %s`, weiToEth(node.bondInfo.Required).String()),
+				fmt.Sprintf(`- **Excess Bond:** %s`, weiToEth(node.bondInfo.Excess).String()),
+				fmt.Sprintf(`- **Missed Bond:** %s`, weiToEth(node.bondInfo.Missed).String()),
 				bondDetailed,
 			},
 			weight: 4,
 		},
 		rewardsInfo: {
 			data: []string{
-				fmt.Sprintf(`- **Non-claimed Rewards:** %s`, weiToEth(node.Rewards).String()),
+				fmt.Sprintf(`- **Non-claimed Rewards:** %s`, weiToEth(node.rewards).String()),
 				rewardsDetailed,
 			},
 			weight: 5,
