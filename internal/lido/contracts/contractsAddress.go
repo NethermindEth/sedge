@@ -17,6 +17,8 @@ package contracts
 
 import "github.com/NethermindEth/sedge/configs"
 
+type address = map[string]string
+
 const (
 	// Contract names
 	CSModule                 = "csmodule"
@@ -25,7 +27,7 @@ const (
 	MEVBoostRelayAllowedList = "mevboostrelayallowedlist"
 )
 
-var deployedAddresses = map[string]map[string]string{
+var deployedAddresses = map[string]address{
 	CSModule: {
 		configs.NetworkHolesky: "0x4562c3e63c2e586cD1651B958C22F88135aCAd4f",
 	},
@@ -41,6 +43,6 @@ var deployedAddresses = map[string]map[string]string{
 	},
 }
 
-func DeployedAddresses(contractName string) map[string]string {
+func DeployedAddresses(contractName string) address {
 	return deployedAddresses[contractName]
 }
