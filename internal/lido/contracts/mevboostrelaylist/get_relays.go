@@ -21,6 +21,7 @@ import (
 
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 // Relay : Struct represent data of MEV-Boost Relay
@@ -47,10 +48,12 @@ Error if any
 */
 func Relays(network string) ([]Relay, error) {
 	var relays []Relay
-	contract, err := mevBoostRelayListContract(network)
+	contract, client, err := mevBoostRelayListContract(network)
 	if err != nil {
 		return relays, fmt.Errorf("failed to call mevBoostRelayListContract: %w", err)
 	}
+	defer client.Close()
+
 	result, err := contract.GetRelays(nil)
 	if err != nil {
 		return relays, fmt.Errorf("failed to call GetRelays: %w", err)
@@ -116,17 +119,16 @@ func NetworkSupportedByLidoMevBoost(network string) ([]string, bool) {
 	return nil, supported
 }
 
-func mevBoostRelayListContract(network string) (*Mevboostrelaylist, error) {
+func mevBoostRelayListContract(network string) (*Mevboostrelaylist, *ethclient.Client, error) {
 	client, err := contracts.ConnectClient(network)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to client: %w", err)
+		return nil, nil, fmt.Errorf("failed to connect to client: %w", err)
 	}
-	defer client.Close()
 
 	address := common.HexToAddress(contracts.DeployedAddresses(contractName)[network])
 	contract, err := NewMevboostrelaylist(address, client)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create Mevboostrelaylist instance: %w", err)
+		return nil, nil, fmt.Errorf("failed to create Mevboostrelaylist instance: %w", err)
 	}
-	return contract, nil
+	return contract, client, nil
 }

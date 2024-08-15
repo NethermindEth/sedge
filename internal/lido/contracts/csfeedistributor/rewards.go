@@ -26,6 +26,7 @@ import (
 	bond "github.com/NethermindEth/sedge/internal/lido/contracts/csaccounting"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 // Tree : struct that reperesents Merkle Tree data
@@ -98,10 +99,11 @@ func cumulativeFeeShares(treeCID string, nodeID *big.Int) (*big.Int, error) {
 
 func treeCID(network string) (string, error) {
 	var treeCIDString string
-	contract, err := csFeeDistributorContract(network)
+	contract, client, err := csFeeDistributorContract(network)
 	if err != nil {
 		return treeCIDString, fmt.Errorf("failed to call csFeeDistributorContract: %w", err)
 	}
+	defer client.Close()
 
 	treeCIDString, err = contract.TreeCid(nil)
 	if err != nil {
@@ -160,18 +162,17 @@ func binarySearchNodeID(nodeID *big.Int, treeData Tree) (int, error) {
 	return 0, fmt.Errorf("invalid nodeId")
 }
 
-func csFeeDistributorContract(network string) (*Csfeedistributor, error) {
+func csFeeDistributorContract(network string) (*Csfeedistributor, *ethclient.Client, error) {
 	client, err := contracts.ConnectClient(network)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to client: %w", err)
+		return nil, nil, fmt.Errorf("failed to connect to client: %w", err)
 	}
-	defer client.Close()
 
 	contractName := contracts.CSFeeDistributor
 	address := common.HexToAddress(contracts.DeployedAddresses(contractName)[network])
 	contract, err := NewCsfeedistributor(address, client)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create CSFeeDistributor instance: %w", err)
+		return nil, nil, fmt.Errorf("failed to create CSFeeDistributor instance: %w", err)
 	}
-	return contract, nil
+	return contract, client, nil
 }

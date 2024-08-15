@@ -21,6 +21,7 @@ import (
 
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 /*
@@ -75,7 +76,8 @@ Error if any
 */
 func NodeOperatorInfo(network string, nodeID *big.Int) (NodeOperator, error) {
 	var nodeOperator NodeOperator
-	contract, err := csModuleContract(network)
+	contract, client, err := csModuleContract(network)
+	defer client.Close()
 	if err != nil {
 		return nodeOperator, fmt.Errorf("failed to call csModuleContract: %w", err)
 	}
@@ -89,10 +91,11 @@ func NodeOperatorInfo(network string, nodeID *big.Int) (NodeOperator, error) {
 
 func nodeOpIDs(network string) ([]*big.Int, error) {
 	var nodeOperatorIDs []*big.Int
-	contract, err := csModuleContract(network)
+	contract, client, err := csModuleContract(network)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call csModuleContract: %w", err)
 	}
+	defer client.Close()
 
 	limit, err := nodeOpsCount(network)
 	if err != nil {
@@ -109,7 +112,8 @@ func nodeOpIDs(network string) ([]*big.Int, error) {
 
 func nodeOpsCount(network string) (*big.Int, error) {
 	var nodeOperatorCount *big.Int
-	contract, err := csModuleContract(network)
+	contract, client, err := csModuleContract(network)
+	defer client.Close()
 	if err != nil {
 		return nil, fmt.Errorf("failed to call csModuleContract: %w", err)
 	}
@@ -122,18 +126,17 @@ func nodeOpsCount(network string) (*big.Int, error) {
 	return nodeOperatorCount, nil
 }
 
-func csModuleContract(network string) (*Csmodule, error) {
+func csModuleContract(network string) (*Csmodule, *ethclient.Client, error) {
 	client, err := contracts.ConnectClient(network)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to client: %w", err)
+		return nil, nil, fmt.Errorf("failed to connect to client: %w", err)
 	}
-	defer client.Close()
 
 	contractName := contracts.CSModule
 	address := common.HexToAddress(contracts.DeployedAddresses(contractName)[network])
 	contract, err := NewCsmodule(address, client)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create CSModule instance: %w", err)
+		return nil, nil, fmt.Errorf("failed to create CSModule instance: %w", err)
 	}
-	return contract, nil
+	return contract, client, nil
 }

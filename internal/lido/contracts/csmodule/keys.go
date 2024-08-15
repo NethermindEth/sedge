@@ -48,10 +48,11 @@ func KeysStatus(network string, nodeID *big.Int) (Keys, error) {
 	if nodeID.Sign() < 0 {
 		return keys, fmt.Errorf("node ID value out-of-bounds: can't be negative")
 	}
-	contract, err := csModuleContract(network)
+	contract, client, err := csModuleContract(network)
 	if err != nil {
 		return keys, fmt.Errorf("failed to call csModuleContract: %w", err)
 	}
+	defer client.Close()
 
 	nodeOp, err := contract.GetNodeOperatorSummary(nil, nodeID)
 	if err != nil {
