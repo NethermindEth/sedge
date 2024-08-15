@@ -113,3 +113,72 @@ func TestConvertTreeValuesToBigInt(t *testing.T) {
 		}
 	}
 }
+
+func TestBinarySearchNodeID(t *testing.T) {
+	tcs := []struct {
+		name      string
+		treeData  Tree
+		nodeID    *big.Int
+		expected  int
+		expectErr bool
+	}{
+		{
+			name: "Node ID found at index 1",
+			treeData: Tree{
+				Values: []struct {
+					Value     []interface{} `json:"value"`
+					TreeIndex int           `json:"treeIndex"`
+				}{
+					{Value: []interface{}{1.0, 5000.0}, TreeIndex: 0},
+					{Value: []interface{}{2.0, 6000.0}, TreeIndex: 1},
+					{Value: []interface{}{30.0, 7000.0}, TreeIndex: 2},
+				},
+			},
+			nodeID:   big.NewInt(2),
+			expected: 1,
+		},
+		{
+			name: "Node ID found at index 0",
+			treeData: Tree{
+				Values: []struct {
+					Value     []interface{} `json:"value"`
+					TreeIndex int           `json:"treeIndex"`
+				}{
+					{Value: []interface{}{100.0, 5000.0}, TreeIndex: 0},
+					{Value: []interface{}{200.0, 6000.0}, TreeIndex: 1},
+					{Value: []interface{}{330.0, 7000.0}, TreeIndex: 2},
+				},
+			},
+			nodeID:   big.NewInt(100),
+			expected: 0,
+		},
+		{
+			name: "Node ID not found",
+			treeData: Tree{
+				Values: []struct {
+					Value     []interface{} `json:"value"`
+					TreeIndex int           `json:"treeIndex"`
+				}{
+					{Value: []interface{}{10.0, 5000}, TreeIndex: 0},
+					{Value: []interface{}{20.0, 6000}, TreeIndex: 1},
+					{Value: []interface{}{30.0, 7000}, TreeIndex: 2},
+				},
+			},
+			nodeID:    big.NewInt(400),
+			expected:  0,
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			index, err := binarySearchNodeID(tc.nodeID, tc.treeData)
+			if (err != nil) != tc.expectErr {
+				t.Errorf("expected error: %v, got: %v", tc.expectErr, err)
+			}
+			if err == nil && index != tc.expected {
+				t.Errorf("expected index: %v, got: %v", tc.expected, index)
+			}
+		})
+	}
+}
