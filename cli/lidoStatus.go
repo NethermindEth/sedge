@@ -58,13 +58,15 @@ func LidoStatusCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "lido-status [flags] [args]",
 		Short: "Display status and information of Lido Node Operator",
-		Long: `This command retrieves and displays the status and detailed information of Lido Node Operators. The information includes:
-		- Node Operator ID.
-		- Keys and queue information: available for deposit (in the queue), stuck, refunded, exited, deposited.
-		- Bond and rewards information: total amount, amounts lower and higher than required, non-claimed rewards.
-		- Alerts for penalties and exit requests.
-		
-		Valid args: reward address of Node Operator (rewards recipient)`,
+		Long: `This command retrieves and displays the status and detailed information of Lido Node Operators. 
+
+This information includes:
+- Node Operator ID.
+- Keys and queue information: available for deposit (in the queue), stuck, refunded, exited, deposited.
+- Bond and rewards information: total amount, amounts lower and higher than required, non-claimed rewards.
+- Alerts for penalties and exit requests.
+
+Valid args: reward address of Node Operator (rewards recipient)`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
