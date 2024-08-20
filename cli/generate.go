@@ -60,33 +60,34 @@ type CustomFlags struct {
 // GenCmdFlags is a struct that holds the flags of the generate command
 type GenCmdFlags struct {
 	CustomFlags
-	executionName     string
-	consensusName     string
-	validatorName     string
-	distributed       bool
-	checkpointSyncUrl string
-	feeRecipient      string
-	noMev             bool
-	mevImage          string
-	mevBoostOnVal     bool
-	noValidator       bool
-	jwtPath           string
-	graffiti          string
-	mapAllPorts       bool
-	fallbackEL        []string
-	elExtraFlags      []string
-	clExtraFlags      []string
-	vlExtraFlags      []string
-	dvExtraFlags      []string
-	relayURLs         []string
-	mevBoostUrl       string
-	executionApiUrl   string
-	executionAuthUrl  string
-	consensusApiUrl   string
-	waitEpoch         int
-	customEnodes      []string
-	customEnrs        []string
-	latestVersion     bool
+	executionName            string
+	consensusName            string
+	validatorName            string
+	distributed              bool
+	distributedValidatorName string
+	checkpointSyncUrl        string
+	feeRecipient             string
+	noMev                    bool
+	mevImage                 string
+	mevBoostOnVal            bool
+	noValidator              bool
+	jwtPath                  string
+	graffiti                 string
+	mapAllPorts              bool
+	fallbackEL               []string
+	elExtraFlags             []string
+	clExtraFlags             []string
+	vlExtraFlags             []string
+	dvExtraFlags             []string
+	relayURLs                []string
+	mevBoostUrl              string
+	executionApiUrl          string
+	executionAuthUrl         string
+	consensusApiUrl          string
+	waitEpoch                int
+	customEnodes             []string
+	customEnrs               []string
+	latestVersion            bool
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -415,9 +416,17 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 	// distributed validator client
 	if utils.Contains(services, distributedValidator) {
 		distributedValidatorClient, _ = clients.RandomChoice(allClients[distributedValidator])
-		//TODO: Add support for custom images,
-		distributedValidatorClient.Name = "charon"
-		distributedValidatorClient.SetImageOrDefault("")
+		if flags.distributedValidatorName != "" {
+			distributedValidatorParts := strings.Split(flags.distributedValidatorName, ":")
+			distributedValidatorClient.Name = distributedValidatorParts[0]
+			if len(distributedValidatorParts) > 1 {
+				distributedValidatorClient.Image = strings.Join(distributedValidatorParts[1:], ":")
+			}
+			distributedValidatorClient.SetImageOrDefault(strings.Join(distributedValidatorParts[1:], ":"))
+		} else {
+			distributedValidatorClient.Name = "charon"
+			distributedValidatorClient.SetImageOrDefault("")
+		}
 		if err = clients.ValidateClient(distributedValidatorClient, distributedValidator); err != nil {
 			return nil, err
 		}

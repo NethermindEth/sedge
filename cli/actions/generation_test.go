@@ -96,7 +96,7 @@ func TestGenerateDockerCompose(t *testing.T) {
 			t.Errorf("SupportedClients(\"validator\") failed: %v", err)
 		}
 		var distributedValidatorClients []string
-		if network == "goerli" || network == "holesky" {
+		if network == "holesky" {
 			distributedValidatorClients, err = c.SupportedClients("distributedValidator")
 			if err != nil {
 				t.Errorf("SupportedClients(\"distributedValidator\") failed: %v", err)
