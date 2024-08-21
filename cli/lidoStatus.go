@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"math/big"
 	"sort"
-	"time"
 
 	bonds "github.com/NethermindEth/sedge/internal/lido/contracts/csaccounting"
 	rewards "github.com/NethermindEth/sedge/internal/lido/contracts/csfeedistributor"
@@ -64,7 +63,6 @@ This information includes:
 - Node Operator ID.
 - Keys and queue information: available for deposit (in the queue), stuck, refunded, exited, deposited.
 - Bond and rewards information: total amount, amounts lower and higher than required, non-claimed rewards.
-- Alerts for penalties and exit requests.
 
 Valid args: reward address of Node Operator (rewards recipient)`,
 		Args: func(cmd *cobra.Command, args []string) error {
@@ -91,7 +89,7 @@ Valid args: reward address of Node Operator (rewards recipient)`,
 }
 
 func runListLidoStatusCmd(cmd *cobra.Command, args []string) error {
-	log.Infof("Retrieving Lido Node Operator Info\n")
+	log.Infof("Retrieving Lido Node Operator Information\n")
 	nodeData, err := nodeData()
 	if err != nil {
 		return err
@@ -123,8 +121,6 @@ func nodeData() (*lidoData, error) {
 	progressBar := pb.StartNew(5)
 	defer progressBar.Finish()
 	progressBar.SetCurrent(0)
-	time.Sleep(1 * time.Second) // Simulate work
-	progressBar.Increment()
 
 	nodeID, err := csmodule.NodeID(networkName, rewardAddress)
 	if err != nil {
@@ -148,6 +144,7 @@ func nodeData() (*lidoData, error) {
 	if err != nil {
 		return nodeData, err
 	}
+	progressBar.Increment()
 
 	reward, err := rewards.Rewards(networkName, nodeID)
 	if err != nil {
@@ -176,7 +173,7 @@ func buildLidoData(node *lidoData) map[string]struct {
 		nodeOpInfo: `
 ## Description 
 - Node Operator ID: Unique identifier for the node operator.
-- Reward Address: Address tha is the ultimate recipient of the rewards
+- Reward Address: Address that is the ultimate recipient of the rewards
 - Manager Address: Address used to perform routine management operations regarding the CSM Node Operator.`,
 
 		keysInfo: `

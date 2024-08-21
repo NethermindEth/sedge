@@ -168,6 +168,18 @@ func TestBinarySearchNodeID(t *testing.T) {
 			expected:  0,
 			expectErr: true,
 		},
+		{
+			name: "empty tree",
+			treeData: Tree{
+				Values: []struct {
+					Value     []interface{} `json:"value"`
+					TreeIndex int           `json:"treeIndex"`
+				}{},
+			},
+			nodeID:    big.NewInt(4),
+			expected:  0,
+			expectErr: true,
+		},
 	}
 
 	for _, tc := range tcs {
