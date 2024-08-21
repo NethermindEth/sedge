@@ -84,6 +84,22 @@ func TestLidoStatusCmd(t *testing.T) {
 			},
 			isErr: true,
 		},
+		{
+			name: "Invalid: incorrect address, Holesky",
+			flags: flags{
+				rewardAddress: "0xC870Fd",
+				networkName:   "holesky",
+			},
+			isErr: true,
+		},
+		{
+			name: "Invalid: address missing 0x prefix, Holesky",
+			flags: flags{
+				rewardAddress: "22bA5CaFB5E26E6Fe51f330294209034013A5A4c",
+				networkName:   "holesky",
+			},
+			isErr: true,
+		},
 	}
 
 	for _, tc := range tcs {
@@ -134,6 +150,21 @@ func TestWeiToEth(t *testing.T) {
 			name:     "0 Wei",
 			wei:      big.NewInt(0),
 			expected: decimal.NewFromFloat(0),
+		},
+		{
+			name:     "expected 1 ETH",
+			wei:      new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil),
+			expected: decimal.NewFromFloat(1),
+		},
+		{
+			name:     "expected 1.5 ETH",
+			wei:      new(big.Int).Set(new(big.Int).Mul(big.NewInt(15), new(big.Int).Exp(big.NewInt(10), big.NewInt(17), nil))),
+			expected: decimal.NewFromFloat(1.5),
+		},
+		{
+			name:     "expected 200 ETH",
+			wei:      new(big.Int).Set(new(big.Int).Mul(big.NewInt(200), new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil))),
+			expected: decimal.NewFromFloat(200),
 		},
 	}
 
