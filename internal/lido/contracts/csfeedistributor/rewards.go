@@ -61,17 +61,17 @@ func Rewards(network string, nodeID *big.Int) (*big.Int, error) {
 
 	treeCID, err := treeCID(network)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call treeCID: %w", err)
+		return nil, fmt.Errorf("error getting treeCID: %w", err)
 	}
 
 	shares, err := cumulativeFeeShares(treeCID, nodeID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call cumulativeFeeShares: %w", err)
+		return nil, fmt.Errorf("error getting Node Operator shares: %w", err)
 	}
 
 	bondInfo, err := bond.BondSummary(network, nodeID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call BondSummary: %w", err)
+		return nil, fmt.Errorf("error getting Node Operator bond: %w", err)
 	}
 
 	rewards = new(big.Int).Add(bondInfo.Excess, shares)
@@ -82,7 +82,7 @@ func cumulativeFeeShares(treeCID string, nodeID *big.Int) (*big.Int, error) {
 	// Get tree data from IPFS
 	treeData, err := treeData(treeCID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call treeData: %v", err)
+		return nil, fmt.Errorf("error getting tree data: %v", err)
 	}
 
 	index, err := binarySearchNodeID(nodeID, treeData)
@@ -107,7 +107,7 @@ func treeCID(network string) (string, error) {
 
 	treeCIDString, err = contract.TreeCid(nil)
 	if err != nil {
-		return treeCIDString, fmt.Errorf("failed to call TreeCid: %w", err)
+		return treeCIDString, fmt.Errorf("failed to call TreeCid contract method: %w", err)
 	}
 	return treeCIDString, nil
 }
@@ -159,7 +159,7 @@ func binarySearchNodeID(nodeID *big.Int, treeData Tree) (int, error) {
 			high = mid - 1
 		}
 	}
-	return 0, fmt.Errorf("invalid nodeId")
+	return 0, fmt.Errorf("invalid node ID")
 }
 
 func csFeeDistributorContract(network string) (*Csfeedistributor, *ethclient.Client, error) {
@@ -169,7 +169,13 @@ func csFeeDistributorContract(network string) (*Csfeedistributor, *ethclient.Cli
 	}
 
 	contractName := contracts.CSFeeDistributor
-	address := common.HexToAddress(contracts.DeployedAddresses(contractName)[network])
+
+	contractAddress, err := contracts.ContractAddressByNetwork(contractName, network)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get deployed contract address: %w", err)
+	}
+
+	address := common.HexToAddress(contractAddress)
 	contract, err := NewCsfeedistributor(address, client)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create CSFeeDistributor instance: %w", err)

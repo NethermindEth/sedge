@@ -59,7 +59,7 @@ func BondSummary(network string, nodeID *big.Int) (BondInfo, error) {
 
 	result, err := contract.GetBondSummary(nil, nodeID)
 	if err != nil {
-		return bondsInfo, fmt.Errorf("failed to call GetBondSummary: %w", err)
+		return bondsInfo, fmt.Errorf("failed to call GetBondSummary contract method: %w", err)
 	}
 	bondsInfo.Current = result.Current
 	bondsInfo.Required = result.Required
@@ -88,7 +88,13 @@ func csAccountingContract(network string) (*Csaccounting, *ethclient.Client, err
 	}
 
 	contractName := contracts.CSAccounting
-	address := common.HexToAddress(contracts.DeployedAddresses(contractName)[network])
+
+	contractAddress, err := contracts.ContractAddressByNetwork(contractName, network)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get deployed contract address: %w", err)
+	}
+
+	address := common.HexToAddress(contractAddress)
 	contract, err := NewCsaccounting(address, client)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create CSAccounting instance: %w", err)

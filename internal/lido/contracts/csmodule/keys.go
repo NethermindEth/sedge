@@ -56,7 +56,7 @@ func KeysStatus(network string, nodeID *big.Int) (Keys, error) {
 
 	nodeOp, err := contract.GetNodeOperatorSummary(nil, nodeID)
 	if err != nil {
-		return keys, fmt.Errorf("failed to call GetNodeOperator: %w", err)
+		return keys, fmt.Errorf("failed to call GetNodeOperatorSummary contract method: %w", err)
 	}
 	keys.DepositableValidatorsCount = nodeOp.DepositableValidatorsCount
 	keys.DepositedValidators = nodeOp.TotalDepositedValidators

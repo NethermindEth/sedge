@@ -56,7 +56,7 @@ func Relays(network string) ([]Relay, error) {
 
 	result, err := contract.GetRelays(nil)
 	if err != nil {
-		return relays, fmt.Errorf("failed to call GetRelays: %w", err)
+		return relays, fmt.Errorf("failed to call GetRelays contract method: %w", err)
 	}
 
 	for _, r := range result {
@@ -125,10 +125,15 @@ func mevBoostRelayListContract(network string) (*Mevboostrelaylist, *ethclient.C
 		return nil, nil, fmt.Errorf("failed to connect to client: %w", err)
 	}
 
-	address := common.HexToAddress(contracts.DeployedAddresses(contractName)[network])
+	contractAddress, err := contracts.ContractAddressByNetwork(contractName, network)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get deployed contract address: %w", err)
+	}
+
+	address := common.HexToAddress(contractAddress)
 	contract, err := NewMevboostrelaylist(address, client)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create Mevboostrelaylist instance: %w", err)
+		return nil, nil, fmt.Errorf("failed to create Mevboostrelaylist contract instance: %w", err)
 	}
 	return contract, client, nil
 }
