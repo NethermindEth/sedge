@@ -20,12 +20,14 @@ import (
 	"fmt"
 	"math/big"
 	"sort"
+	"strings"
 
 	bonds "github.com/NethermindEth/sedge/internal/lido/contracts/csaccounting"
 	rewards "github.com/NethermindEth/sedge/internal/lido/contracts/csfeedistributor"
 	"github.com/NethermindEth/sedge/internal/lido/contracts/csmodule"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/cheggaaa/pb/v3"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -71,6 +73,11 @@ Valid args: reward address of Node Operator (rewards recipient)`,
 					return errors.New("requires one argument")
 				}
 				rewardAddress = args[0]
+				if err := validateRewardAddress(rewardAddress); err != nil {
+					return err
+				}
+			} else {
+				return errors.New("reward address is required")
 			}
 			return nil
 		},
@@ -268,4 +275,20 @@ func weiToEth(wei *big.Int) decimal.Decimal {
 	weiToEther := decimal.NewFromBigInt(big.NewInt(1e18), 0)
 	weiDecimal := decimal.NewFromBigInt(wei, 0)
 	return weiDecimal.Div(weiToEther)
+}
+
+func validateRewardAddress(rewardAddress string) error {
+	if !strings.HasPrefix(rewardAddress, "0x") {
+		return fmt.Errorf("address must start with '0x'")
+	}
+
+	if len(rewardAddress) != 42 {
+		return fmt.Errorf("address must be 42 characters long including '0x' prefix")
+	}
+
+	rewardAddr := common.HexToAddress(rewardAddress)
+	if rewardAddr == (common.Address{}) {
+		return fmt.Errorf("invalid reward address: can't be zero address")
+	}
+	return nil
 }
