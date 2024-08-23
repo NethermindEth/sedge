@@ -21,7 +21,9 @@ import (
 	"math/big"
 	"sort"
 	"strings"
+	"time"
 
+	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	bonds "github.com/NethermindEth/sedge/internal/lido/contracts/csaccounting"
 	rewards "github.com/NethermindEth/sedge/internal/lido/contracts/csfeedistributor"
 	"github.com/NethermindEth/sedge/internal/lido/contracts/csmodule"
@@ -45,6 +47,7 @@ var (
 	rewardAddress    string
 	networkName      string
 	longDescriptions bool
+	nodeIDInt        int64
 )
 
 const (
@@ -73,11 +76,15 @@ Valid args: reward address of Node Operator (rewards recipient)`,
 					return errors.New("requires one argument")
 				}
 				rewardAddress = args[0]
-				if err := validateRewardAddress(rewardAddress); err != nil {
-					return err
-				}
-			} else {
-				return errors.New("reward address is required")
+			}
+			return nil
+		},
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := validateRewardAddress(rewardAddress); err != nil && len(args) != 0 {
+				return err
+			}
+			if len(args) == 0 && nodeIDInt < 0 {
+				return errors.New("must provide reward address or node ID")
 			}
 			return nil
 		},
@@ -91,13 +98,30 @@ Valid args: reward address of Node Operator (rewards recipient)`,
 	}
 	cmd.Flags().StringVarP(&networkName, "network", "n", "holesky", "Target network. e.g. holesky, mainnet etc.")
 	cmd.Flags().BoolVar(&longDescriptions, "l", false, "Show detailed descriptions for each value")
+	cmd.Flags().Int64VarP(&nodeIDInt, "nodeID", "i", -1, "Your Node Operator ID (optional)")
 	cmd.Flags().SortFlags = false
 	return cmd
 }
 
 func runListLidoStatusCmd(cmd *cobra.Command, args []string) error {
 	log.Infof("Retrieving Lido Node Operator Information\n")
-	nodeData, err := nodeData()
+	var nodeID *big.Int
+	var err error
+
+	progressBar := pb.StartNew(5)
+	defer progressBar.Finish()
+	progressBar.SetCurrent(0)
+
+	if nodeIDInt < 0 {
+		nodeID, err = csmodule.NodeID(networkName, rewardAddress)
+		if err != nil {
+			return err
+		}
+	} else {
+		nodeID = big.NewInt(nodeIDInt)
+	}
+
+	nodeData, err := nodeData(nodeID)
 	if err != nil {
 		return err
 	}
@@ -114,50 +138,38 @@ func runListLidoStatusCmd(cmd *cobra.Command, args []string) error {
 		return dataMap[headers[i]].weight < dataMap[headers[j]].weight
 	})
 
-	log.Infof("Listing Lido Node Operator Info\n")
 	for _, header := range headers {
+		log.Infof("Listing %s \n", header)
 		ui.WriteLidoStatusTable(cmd.OutOrStdout(), dataMap[header].data, header)
+		progressBar.Increment()
+		time.Sleep(time.Second)
 	}
 	return nil
 }
 
 // Get the data for the Node Operator
-func nodeData() (*lidoData, error) {
+func nodeData(nodeID *big.Int) (*lidoData, error) {
 	nodeData := &lidoData{}
-
-	progressBar := pb.StartNew(5)
-	defer progressBar.Finish()
-	progressBar.SetCurrent(0)
-
-	nodeID, err := csmodule.NodeID(networkName, rewardAddress)
-	if err != nil {
-		return nodeData, err
-	}
-	progressBar.Increment()
 
 	nodeInfo, err := csmodule.NodeOperatorInfo(networkName, nodeID)
 	if err != nil {
 		return nodeData, err
 	}
-	progressBar.Increment()
 
 	keys, err := csmodule.KeysStatus(networkName, nodeID)
 	if err != nil {
 		return nodeData, err
 	}
-	progressBar.Increment()
 
 	bond, err := bonds.BondSummary(networkName, nodeID)
 	if err != nil {
 		return nodeData, err
 	}
-	progressBar.Increment()
 
 	reward, err := rewards.Rewards(networkName, nodeID)
 	if err != nil {
 		return nodeData, err
 	}
-	progressBar.Increment()
 
 	nodeData.nodeID = nodeID
 	nodeData.nodeInfo = nodeInfo
@@ -174,7 +186,9 @@ func buildLidoData(node *lidoData) map[string]struct {
 	weight int
 } {
 	var nodeOpDetailed, keysDetailed, queueDetailed, bondDetailed, rewardsDetailed string
+	var currentBond, requiredBond, excessBond, missedBond, rewards decimal.Decimal
 	rewardAddressLink := fmt.Sprintf(`https://etherscan.io/address/%s`, node.nodeInfo.RewardAddress)
+	claimRewardsLink := fmt.Sprintf(`https://%s.etherscan.io/address/%s#writeProxyContract#F10`, networkName, contracts.DeployedAddresses(contracts.CSModule)[networkName])
 
 	detailedDescriptions := map[string]string{
 		nodeOpInfo: `
@@ -214,6 +228,17 @@ func buildLidoData(node *lidoData) map[string]struct {
 		queueDetailed = detailedDescriptions[queueInfo]
 		bondDetailed = detailedDescriptions[bondInfo]
 		rewardsDetailed = detailedDescriptions[rewardsInfo]
+		currentBond = weiToEth(node.bondInfo.Current)
+		excessBond = weiToEth(node.bondInfo.Excess)
+		missedBond = weiToEth(node.bondInfo.Missed)
+		requiredBond = weiToEth(node.bondInfo.Required)
+		rewards = weiToEth(node.rewards)
+	} else {
+		currentBond = weiToEth(node.bondInfo.Current).Round(1)
+		excessBond = weiToEth(node.bondInfo.Excess).Round(1)
+		missedBond = weiToEth(node.bondInfo.Missed).Round(1)
+		requiredBond = weiToEth(node.bondInfo.Required).Round(1)
+		rewards = weiToEth(node.rewards).Round(1)
 	}
 
 	data := map[string]struct {
@@ -250,17 +275,18 @@ func buildLidoData(node *lidoData) map[string]struct {
 		},
 		bondInfo: {
 			data: []string{
-				fmt.Sprintf(`- **Current Bond:** %s`, weiToEth(node.bondInfo.Current).String()),
-				fmt.Sprintf(`- **Required Bond:** %s`, weiToEth(node.bondInfo.Required).String()),
-				fmt.Sprintf(`- **Excess Bond:** %s`, weiToEth(node.bondInfo.Excess).String()),
-				fmt.Sprintf(`- **Missed Bond:** %s`, weiToEth(node.bondInfo.Missed).String()),
+				fmt.Sprintf(`- **Current Bond:** %s ETH`, currentBond.String()),
+				fmt.Sprintf(`- **Required Bond:** %s ETH`, requiredBond.String()),
+				fmt.Sprintf(`- **Excess Bond:** %s ETH`, excessBond.String()),
+				fmt.Sprintf(`- **Missed Bond:** %s ETH`, missedBond.String()),
 				bondDetailed,
 			},
 			weight: 4,
 		},
 		rewardsInfo: {
 			data: []string{
-				fmt.Sprintf(`- **Non-claimed Rewards:** %s`, weiToEth(node.rewards).String()),
+				fmt.Sprintf(`- **Non-claimed Rewards:** %s ETH`, rewards.String()),
+				fmt.Sprintf(`- [Claim your rewards here!](%s)`, claimRewardsLink),
 				rewardsDetailed,
 			},
 			weight: 5,
