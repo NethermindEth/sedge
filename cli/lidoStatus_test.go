@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"io"
 	"math/big"
+	"strconv"
 	"testing"
 
 	"github.com/shopspring/decimal"
@@ -29,6 +30,7 @@ type flags struct {
 	rewardAddress    string
 	networkName      string
 	longDescriptions bool
+	nodeIDInt        int64
 }
 
 type lidoStatusCmdTestCase struct {
@@ -45,6 +47,9 @@ func (f flags) argsList() []string {
 	}
 	if f.longDescriptions {
 		s = append(s, "--l")
+	}
+	if f.nodeIDInt >= 0 {
+		s = append(s, "--nodeID", strconv.FormatInt(f.nodeIDInt, 10))
 	}
 
 	return s
@@ -97,6 +102,22 @@ func TestLidoStatusCmd(t *testing.T) {
 			flags: flags{
 				rewardAddress: "22bA5CaFB5E26E6Fe51f330294209034013A5A4c",
 				networkName:   "holesky",
+			},
+			isErr: true,
+		},
+		{
+			name: "Valid node ID, Holesky",
+			flags: flags{
+				networkName: "holesky",
+				nodeIDInt:   1,
+			},
+			isErr: true,
+		},
+		{
+			name: "Invalid: negative node ID, Holesky",
+			flags: flags{
+				networkName: "holesky",
+				nodeIDInt:   -2,
 			},
 			isErr: true,
 		},
