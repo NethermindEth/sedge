@@ -21,7 +21,6 @@ import (
 	"math/big"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	bonds "github.com/NethermindEth/sedge/internal/lido/contracts/csaccounting"
@@ -105,23 +104,8 @@ Valid args: reward address of Node Operator (rewards recipient)`,
 
 func runListLidoStatusCmd(cmd *cobra.Command, args []string) error {
 	log.Infof("Retrieving Lido Node Operator Information\n")
-	var nodeID *big.Int
-	var err error
 
-	progressBar := pb.StartNew(5)
-	defer progressBar.Finish()
-	progressBar.SetCurrent(0)
-
-	if nodeIDInt < 0 {
-		nodeID, err = csmodule.NodeID(networkName, rewardAddress)
-		if err != nil {
-			return err
-		}
-	} else {
-		nodeID = big.NewInt(nodeIDInt)
-	}
-
-	nodeData, err := nodeData(nodeID)
+	nodeData, err := nodeData()
 	if err != nil {
 		return err
 	}
@@ -138,38 +122,56 @@ func runListLidoStatusCmd(cmd *cobra.Command, args []string) error {
 		return dataMap[headers[i]].weight < dataMap[headers[j]].weight
 	})
 
+	log.Infof("Listing Lido Node Operator Information\n")
 	for _, header := range headers {
-		log.Infof("Listing %s \n", header)
 		ui.WriteLidoStatusTable(cmd.OutOrStdout(), dataMap[header].data, header)
-		progressBar.Increment()
-		time.Sleep(time.Second)
 	}
 	return nil
 }
 
 // Get the data for the Node Operator
-func nodeData(nodeID *big.Int) (*lidoData, error) {
+func nodeData() (*lidoData, error) {
 	nodeData := &lidoData{}
+	var nodeID *big.Int
+	var err error
+
+	progressBar := pb.StartNew(5)
+	defer progressBar.Finish()
+	progressBar.SetCurrent(0)
+
+	if nodeIDInt < 0 {
+		nodeID, err = csmodule.NodeID(networkName, rewardAddress)
+		if err != nil {
+			return nodeData, err
+		}
+	} else {
+		nodeID = big.NewInt(nodeIDInt)
+	}
+	progressBar.Increment()
 
 	nodeInfo, err := csmodule.NodeOperatorInfo(networkName, nodeID)
 	if err != nil {
 		return nodeData, err
 	}
+	progressBar.Increment()
 
 	keys, err := csmodule.KeysStatus(networkName, nodeID)
 	if err != nil {
 		return nodeData, err
 	}
+	progressBar.Increment()
 
 	bond, err := bonds.BondSummary(networkName, nodeID)
 	if err != nil {
 		return nodeData, err
 	}
+	progressBar.Increment()
 
 	reward, err := rewards.Rewards(networkName, nodeID)
 	if err != nil {
 		return nodeData, err
 	}
+	progressBar.Increment()
 
 	nodeData.nodeID = nodeID
 	nodeData.nodeInfo = nodeInfo
