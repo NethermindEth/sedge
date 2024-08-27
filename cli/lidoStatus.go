@@ -20,15 +20,14 @@ import (
 	"fmt"
 	"math/big"
 	"sort"
-	"strings"
+	"time"
 
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	bonds "github.com/NethermindEth/sedge/internal/lido/contracts/csaccounting"
 	rewards "github.com/NethermindEth/sedge/internal/lido/contracts/csfeedistributor"
 	"github.com/NethermindEth/sedge/internal/lido/contracts/csmodule"
 	"github.com/NethermindEth/sedge/internal/ui"
-	"github.com/cheggaaa/pb/v3"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/gosuri/uiprogress"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -79,7 +78,7 @@ Valid args: reward address of Node Operator (rewards recipient)`,
 			return nil
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			if err := validateRewardAddress(rewardAddress); err != nil && len(args) != 0 {
+			if err := ui.EthAddressValidator(rewardAddress, false); err != nil && len(args) != 0 {
 				return err
 			}
 			if len(args) == 0 && nodeIDInt < 0 {
@@ -122,7 +121,7 @@ func runListLidoStatusCmd(cmd *cobra.Command, args []string) error {
 		return dataMap[headers[i]].weight < dataMap[headers[j]].weight
 	})
 
-	log.Infof("Listing Lido Node Operator Information\n")
+	log.Infof("Listing Node Operator Information")
 	for _, header := range headers {
 		ui.WriteLidoStatusTable(cmd.OutOrStdout(), dataMap[header].data, header)
 	}
@@ -135,9 +134,24 @@ func nodeData() (*lidoData, error) {
 	var nodeID *big.Int
 	var err error
 
-	progressBar := pb.StartNew(5)
-	defer progressBar.Finish()
-	progressBar.SetCurrent(0)
+	steps := []string{
+		"Fetching NO Info",
+		"Fetching Keys & Queue",
+		"Fetching Bond Info",
+		"Fetching Rewards Data",
+	}
+
+	uiprogress.Start()
+	defer uiprogress.Stop()
+
+	bar := uiprogress.AddBar(len(steps)).AppendCompleted()
+	// Progress bar label setup
+	bar.PrependFunc(func(b *uiprogress.Bar) string {
+		if b.Current() > 0 {
+			return steps[b.Current()-1]
+		}
+		return "Retrieving Node Operator.."
+	})
 
 	if nodeIDInt < 0 {
 		nodeID, err = csmodule.NodeID(networkName, rewardAddress)
@@ -147,31 +161,35 @@ func nodeData() (*lidoData, error) {
 	} else {
 		nodeID = big.NewInt(nodeIDInt)
 	}
-	progressBar.Increment()
+	bar.Incr()
 
 	nodeInfo, err := csmodule.NodeOperatorInfo(networkName, nodeID)
 	if err != nil {
 		return nodeData, err
 	}
-	progressBar.Increment()
+	time.Sleep(time.Second / 10)
+	bar.Incr()
 
 	keys, err := csmodule.KeysStatus(networkName, nodeID)
 	if err != nil {
 		return nodeData, err
 	}
-	progressBar.Increment()
+	time.Sleep(time.Second / 10)
+	bar.Incr()
 
 	bond, err := bonds.BondSummary(networkName, nodeID)
 	if err != nil {
 		return nodeData, err
 	}
-	progressBar.Increment()
+	time.Sleep(time.Second / 10)
+	bar.Incr()
 
 	reward, err := rewards.Rewards(networkName, nodeID)
 	if err != nil {
 		return nodeData, err
 	}
-	progressBar.Increment()
+	time.Sleep(time.Second / 10)
+	bar.Incr()
 
 	nodeData.nodeID = nodeID
 	nodeData.nodeInfo = nodeInfo
@@ -303,20 +321,4 @@ func weiToEth(wei *big.Int) decimal.Decimal {
 	weiToEther := decimal.NewFromBigInt(big.NewInt(1e18), 0)
 	weiDecimal := decimal.NewFromBigInt(wei, 0)
 	return weiDecimal.Div(weiToEther)
-}
-
-func validateRewardAddress(rewardAddress string) error {
-	if !strings.HasPrefix(rewardAddress, "0x") {
-		return fmt.Errorf("address must start with '0x'")
-	}
-
-	if len(rewardAddress) != 42 {
-		return fmt.Errorf("address must be 42 characters long including '0x' prefix")
-	}
-
-	rewardAddr := common.HexToAddress(rewardAddress)
-	if rewardAddr == (common.Address{}) {
-		return fmt.Errorf("invalid reward address: can't be zero address")
-	}
-	return nil
 }
