@@ -8,14 +8,15 @@ require (
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
 	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/charmbracelet/glamour v0.8.0
-	github.com/cheggaaa/pb/v3 v3.1.5
 	github.com/compose-spec/compose-go v1.12.0
 	github.com/distribution/reference v0.5.0
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/ethereum/go-ethereum v1.14.5
+	github.com/gofrs/flock v0.8.1
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v47 v47.1.0
 	github.com/google/uuid v1.4.0
+	github.com/gosuri/uiprogress v0.0.1
 	github.com/herumi/bls-eth-go-binary v1.29.1
 	github.com/jarcoal/httpmock v1.2.0
 	github.com/joho/godotenv v1.5.1
@@ -42,7 +43,6 @@ require (
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
-	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/alecthomas/chroma/v2 v2.14.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
@@ -63,7 +63,6 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/ethereum/c-kzg-4844 v1.0.0 // indirect
-	github.com/fatih/color v1.16.0 // indirect
 	github.com/ferranbt/fastssz v0.1.3 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
@@ -73,7 +72,6 @@ require (
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/gosuri/uilive v0.0.4 // indirect
-	github.com/gosuri/uiprogress v0.0.1 // indirect
 	github.com/holiman/uint256 v1.2.4 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -112,12 +110,9 @@ require (
 	github.com/yuin/goldmark v1.7.4 // indirect
 	github.com/yuin/goldmark-emoji v1.0.3 // indirect
 	golang.org/x/crypto v0.25.0 // indirect
-	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/term v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
-	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
-	mvdan.cc/gofumpt v0.7.0 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
