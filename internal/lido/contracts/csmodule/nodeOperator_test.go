@@ -16,7 +16,6 @@ limitations under the License.
 package csmodule
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"math/big"
@@ -167,56 +166,4 @@ func FuzzTestNodeID(f *testing.F) {
 			t.Errorf("not same nodeID, expected %v, got: %v", nodeID, nodeIDReturned)
 		}
 	})
-}
-
-func TestValidateRewardAddress(t *testing.T) {
-	tcs := []struct {
-		name          string
-		rewardAddress string
-		expectedError error
-	}{
-		{
-			name:          "Valid Address",
-			rewardAddress: "0x1234567890abcdef1234567890abcdef12345678",
-			expectedError: nil,
-		},
-		{
-			name:          "Missing 0x Prefix",
-			rewardAddress: "1234567890abcdef1234567890abcdef12345678",
-			expectedError: fmt.Errorf("address must start with '0x'"),
-		},
-		{
-			name:          "Too Short Address",
-			rewardAddress: "0x1234567890abcdef1234567890abcdef1234567",
-			expectedError: fmt.Errorf("address must be 42 characters long including '0x' prefix"),
-		},
-		{
-			name:          "Too Long Address",
-			rewardAddress: "0x1234567890abcdef1234567890abcdef123456789",
-			expectedError: fmt.Errorf("address must be 42 characters long including '0x' prefix"),
-		},
-		{
-			name:          "Empty String",
-			rewardAddress: "",
-			expectedError: fmt.Errorf("address must start with '0x'"),
-		},
-		{
-			name:          "0x Only",
-			rewardAddress: "0x",
-			expectedError: fmt.Errorf("address must be 42 characters long including '0x' prefix"),
-		},
-	}
-
-	for _, tc := range tcs {
-		t.Run(tc.name, func(t *testing.T) {
-			err := validateRewardAddress(tc.rewardAddress)
-			if tc.expectedError != nil {
-				if err == nil || err.Error() != tc.expectedError.Error() {
-					t.Errorf("expected error %v, got %v", tc.expectedError, err)
-				}
-			} else if err != nil {
-				t.Errorf("expected no error, got %v", err)
-			}
-		})
-	}
 }

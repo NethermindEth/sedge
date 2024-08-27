@@ -18,9 +18,9 @@ package csmodule
 import (
 	"fmt"
 	"math/big"
-	"strings"
 
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
+	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -39,7 +39,7 @@ b. error
 Error if any
 */
 func NodeID(network string, rewardAddress string) (*big.Int, error) {
-	err := validateRewardAddress(rewardAddress)
+	err := ui.EthAddressValidator(rewardAddress, false)
 	if err != nil {
 		return nil, fmt.Errorf("invalid reward address: %w", err)
 	}
@@ -129,17 +129,6 @@ func nodeOpsCount(network string) (*big.Int, error) {
 	}
 
 	return nodeOperatorCount, nil
-}
-
-func validateRewardAddress(rewardAddress string) error {
-	if !strings.HasPrefix(rewardAddress, "0x") {
-		return fmt.Errorf("address must start with '0x'")
-	}
-
-	if len(rewardAddress) != 42 {
-		return fmt.Errorf("address must be 42 characters long including '0x' prefix")
-	}
-	return nil
 }
 
 func csModuleContract(network string) (*Csmodule, *ethclient.Client, error) {
