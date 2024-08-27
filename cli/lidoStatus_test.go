@@ -82,14 +82,6 @@ func TestLidoStatusCmd(t *testing.T) {
 			isErr: true,
 		},
 		{
-			name: "Invalid: zero address, Holesky",
-			flags: flags{
-				rewardAddress: "0x0000000000000000000000000000000000000000",
-				networkName:   "holesky",
-			},
-			isErr: true,
-		},
-		{
 			name: "Invalid: incorrect address, Holesky",
 			flags: flags{
 				rewardAddress: "0xC870Fd",

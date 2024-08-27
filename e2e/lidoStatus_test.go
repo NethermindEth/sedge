@@ -121,3 +121,26 @@ func TestLidoStatus_RewardAddressNotFound(t *testing.T) {
 	// Run test case
 	e2eTest.run()
 }
+
+func TestLidoStatus_InvalidZeroRewardAddress(t *testing.T) {
+	// Test context
+	var (
+		runErr error
+	)
+	// Build test case
+	e2eTest := newE2ETestCase(
+		t,
+		// Arrange
+		nil,
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			runErr = runCommand(t, binaryPath, "lido-status", "0x0000000000000000000000000000000000000000", "--network", "holesky")
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.Error(t, runErr, "lido status command should fail")
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}

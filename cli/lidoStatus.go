@@ -17,6 +17,7 @@ package cli
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"math/big"
 	"sort"
@@ -141,8 +142,9 @@ func nodeData() (*lidoData, error) {
 		"Fetching Rewards Data",
 	}
 
-	uiprogress.Start()
-	defer uiprogress.Stop()
+	if !isTestEnv() {
+		uiprogress.Start()
+	}
 
 	bar := uiprogress.AddBar(len(steps)).AppendCompleted()
 	// Progress bar label setup
@@ -190,6 +192,10 @@ func nodeData() (*lidoData, error) {
 	}
 	time.Sleep(time.Second / 10)
 	bar.Incr()
+
+	if !isTestEnv() {
+		uiprogress.Stop()
+	}
 
 	nodeData.nodeID = nodeID
 	nodeData.nodeInfo = nodeInfo
@@ -321,4 +327,9 @@ func weiToEth(wei *big.Int) decimal.Decimal {
 	weiToEther := decimal.NewFromBigInt(big.NewInt(1e18), 0)
 	weiDecimal := decimal.NewFromBigInt(wei, 0)
 	return weiDecimal.Div(weiToEther)
+}
+
+// Used to disable progress bar when running tests
+func isTestEnv() bool {
+	return flag.Lookup("test.v") != nil
 }
