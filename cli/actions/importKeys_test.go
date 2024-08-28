@@ -301,7 +301,7 @@ func TestImportKeys_DistributedMode(t *testing.T) {
 	generationPath := t.TempDir()
 
 	err = s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
-		ValidatorClient: "lighthouse",
+		ValidatorClient: "teku",
 		Network:         "holesky",
 		GenerationPath:  generationPath,
 		Distributed:     true,
