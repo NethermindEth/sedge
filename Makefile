@@ -6,11 +6,11 @@ SEDGE_VERSION = $(shell git tag | sort | tail -n 1)
 LDFLAGS=-X github.com/NethermindEth/sedge/internal/utils.Version="${SEDGE_VERSION}"
 
 # Commands
-compile: ## compile:
+compile: generate ## compile:
 	@mkdir -p build
 	@go build -ldflags "${LDFLAGS}" -o build/sedge cmd/sedge/main.go
 
-compile-linux: ## compile:
+compile-linux: generate ## compile:
 	@mkdir -p build
 	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/sedge cmd/sedge/main.go
 
