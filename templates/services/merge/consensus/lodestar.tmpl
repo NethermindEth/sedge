@@ -41,7 +41,6 @@
       - --rest.cors=*
       - --discv5=true{{range $enr := .CCBootnodesList}}
       - --bootnodes={{$enr}}{{end}}
-      - --targetPeers=${CC_PEER_COUNT}
       - --metrics=true
       - --metrics.port={{.ClMetricsPort}}
       - --jwt-secret=/tmp/jwt/jwtsecret{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
