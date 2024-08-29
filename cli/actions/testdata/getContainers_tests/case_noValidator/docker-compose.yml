@@ -69,7 +69,7 @@ services:
       - 9000:9000/tcp
       - 9000:9000/udp
       - 5054:5054/tcp
-      - 4000:4000
+      - 4000:4000ś
     expose:
       - 4000
     command:
@@ -82,7 +82,6 @@ services:
       - --http-address=0.0.0.0
       - --http-port=4000
       - --network=${NETWORK}
-      - --target-peers=${CC_PEER_COUNT}
       - --execution-endpoints=${EC_AUTH_URL}
       - --execution-jwt=/tmp/jwt/jwtsecret
       - --eth1
