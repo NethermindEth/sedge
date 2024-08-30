@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  main-service:
+    container_name: ${MAIN_SERVICE_NAME}
+    build:
+      context: ./src
+    command:
+      - uvicorn
+      - app.main:app
+      - --host=0.0.0.0
+      - --port=${MAIN_PORT}
+    ports:
+      - "${MAIN_PORT}:${MAIN_PORT}"
+    networks:
+      - eigenlayer 
+    environment:
+      - MAIN_SERVICE_NAME=${MAIN_SERVICE_NAME}
+      - MAIN_PORT=${MAIN_PORT}
+      - NETWORK_NAME=${NETWORK_NAME}
+      - TEST_OPTION_INT=${TEST_OPTION_INT}
+      - TEST_OPTION_FLOAT=${TEST_OPTION_FLOAT}
+      - TEST_OPTION_BOOL=${TEST_OPTION_BOOL}
+      - TEST_OPTION_PATH_DIR=${TEST_OPTION_PATH_DIR}
+      - TEST_OPTION_PATH_FILE=${TEST_OPTION_PATH_FILE}
+      - TEST_OPTION_URI=${TEST_OPTION_URI}
+      - TEST_OPTION_ENUM=${TEST_OPTION_ENUM}
+networks:  
+  eigenlayer:  
+    name: ${NETWORK_NAME}

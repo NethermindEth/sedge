@@ -1,0 +1,56 @@
+version: "3.9"
+services:
+  grafana:
+    container_name: sedge_grafana
+    image: ${GRAFANA_IMAGE}
+    restart: unless-stopped
+    ports:
+      - ${GRAFANA_PORT}:3000
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ${GRAFANA_PROV}:/etc/grafana/provisioning
+      - ${GRAFANA_DATA}:/etc/grafana/data
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    networks:
+      - sedge
+
+  prometheus:
+    container_name: sedge_prometheus
+    image: ${PROM_IMAGE}
+    restart: unless-stopped
+    ports:
+      - ${PROM_PORT}:9090
+    volumes:
+      - ${PROM_CONF}:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    networks:
+      - sedge
+
+  node-exporter:
+    container_name: sedge_node_exporter
+    image: ${NODE_EXPORTER_IMAGE}
+    restart: unless-stopped
+    ports:
+      - ${NODE_EXPORTER_PORT}:9100
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)($$|/)"'
+    networks:
+      - sedge
+
+networks:
+  sedge:
+    name: sedge-network
+
+volumes:
+  grafana-storage:
