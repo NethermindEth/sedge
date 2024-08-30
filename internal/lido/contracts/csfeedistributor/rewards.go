@@ -26,6 +26,7 @@ import (
 	bond "github.com/NethermindEth/sedge/internal/lido/contracts/csaccounting"
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 // Tree : struct that reperesents Merkle Tree data
@@ -60,17 +61,17 @@ func Rewards(network string, nodeID *big.Int) (*big.Int, error) {
 
 	treeCID, err := treeCID(network)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call treeCID: %w", err)
+		return nil, fmt.Errorf("error getting treeCID: %w", err)
 	}
 
 	shares, err := cumulativeFeeShares(treeCID, nodeID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call cumulativeFeeShares: %w", err)
+		return nil, fmt.Errorf("error getting Node Operator shares: %w", err)
 	}
 
 	bondInfo, err := bond.BondSummary(network, nodeID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call BondSummary: %w", err)
+		return nil, fmt.Errorf("error getting Node Operator bond: %w", err)
 	}
 
 	rewards = new(big.Int).Add(bondInfo.Excess, shares)
@@ -81,45 +82,32 @@ func cumulativeFeeShares(treeCID string, nodeID *big.Int) (*big.Int, error) {
 	// Get tree data from IPFS
 	treeData, err := treeData(treeCID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call treeData: %v", err)
+		return nil, fmt.Errorf("error getting tree data: %v", err)
 	}
 
-	// Compare nodeOperatorID in tree with nodeId to get shares
-	// Binary search for the nodeOperatorId
-	low, high := 0, len(treeData.Values)-1
-	for low <= high {
-		mid := (low + high) / 2
-		nodeOperatorId, err := convertTreeValuesToBigInt(treeData.Values[mid].Value[0])
-		if err != nil {
-			return nil, fmt.Errorf("failed to convert nodeOperatorId: %v", err)
-		}
-		cmp := nodeOperatorId.Cmp(nodeID)
-		if cmp == 0 {
-			// Node operator ID matches, return the shares
-			shares, err := convertTreeValuesToBigInt(treeData.Values[mid].Value[1])
-			if err != nil {
-				return nil, fmt.Errorf("failed to convert shares: %v", err)
-			}
-			return shares, nil
-		} else if cmp < 0 {
-			low = mid + 1
-		} else {
-			high = mid - 1
-		}
+	index, err := binarySearchNodeID(nodeID, treeData)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find node ID: %v", err)
 	}
-	return nil, fmt.Errorf("invalid nodeId")
+
+	shares, err := convertTreeValuesToBigInt(treeData.Values[index].Value[1])
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert shares: %v", err)
+	}
+	return shares, nil
 }
 
 func treeCID(network string) (string, error) {
 	var treeCIDString string
-	contract, err := csFeeDistributorContract(network)
+	contract, client, err := csFeeDistributorContract(network)
 	if err != nil {
 		return treeCIDString, fmt.Errorf("failed to call csFeeDistributorContract: %w", err)
 	}
+	defer client.Close()
 
 	treeCIDString, err = contract.TreeCid(nil)
 	if err != nil {
-		return treeCIDString, fmt.Errorf("failed to call TreeCid: %w", err)
+		return treeCIDString, fmt.Errorf("failed to call TreeCid contract method: %w", err)
 	}
 	return treeCIDString, nil
 }
@@ -153,18 +141,44 @@ func convertTreeValuesToBigInt(value interface{}) (*big.Int, error) {
 	return bigIntValue, nil
 }
 
-func csFeeDistributorContract(network string) (*Csfeedistributor, error) {
+func binarySearchNodeID(nodeID *big.Int, treeData Tree) (int, error) {
+	// Compare nodeOperatorID in tree with nodeId to get shares
+	low, high := 0, len(treeData.Values)-1
+	for low <= high {
+		mid := (low + high) / 2
+		nodeOperatorId, err := convertTreeValuesToBigInt(treeData.Values[mid].Value[0])
+		if err != nil {
+			return 0, fmt.Errorf("failed to convert nodeOperatorId: %v", err)
+		}
+		cmp := nodeOperatorId.Cmp(nodeID)
+		if cmp == 0 {
+			return mid, nil
+		} else if cmp < 0 {
+			low = mid + 1
+		} else {
+			high = mid - 1
+		}
+	}
+	return 0, fmt.Errorf("invalid node ID")
+}
+
+func csFeeDistributorContract(network string) (*Csfeedistributor, *ethclient.Client, error) {
 	client, err := contracts.ConnectClient(network)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to client: %w", err)
+		return nil, nil, fmt.Errorf("failed to connect to client: %w", err)
 	}
-	defer client.Close()
 
 	contractName := contracts.CSFeeDistributor
-	address := common.HexToAddress(contracts.DeployedAddresses(contractName)[network])
+
+	contractAddress, err := contracts.ContractAddressByNetwork(contractName, network)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get deployed contract address: %w", err)
+	}
+
+	address := common.HexToAddress(contractAddress)
 	contract, err := NewCsfeedistributor(address, client)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create CSFeeDistributor instance: %w", err)
+		return nil, nil, fmt.Errorf("failed to create CSFeeDistributor instance: %w", err)
 	}
-	return contract, nil
+	return contract, client, nil
 }
