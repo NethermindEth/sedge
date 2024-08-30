@@ -37,22 +37,22 @@ type SedgeActions interface {
 }
 
 type sedgeActions struct {
-	dockerClient   client.APIClient
-	serviceManager services.ServiceManager
-	commandRunner  commands.CommandRunner
+	dockerClient         client.APIClient
+	dockerServiceManager DockerServiceManager
+	commandRunner        commands.CommandRunner
 }
 
 type SedgeActionsOptions struct {
-	DockerClient   client.APIClient
-	ServiceManager services.ServiceManager
-	CommandRunner  commands.CommandRunner
+	DockerClient         client.APIClient
+	dockerServiceManager DockerServiceManager
+	CommandRunner        commands.CommandRunner
 }
 
 func NewSedgeActions(options SedgeActionsOptions) SedgeActions {
 	return &sedgeActions{
-		dockerClient:   options.DockerClient,
-		serviceManager: options.ServiceManager,
-		commandRunner:  options.CommandRunner,
+		dockerClient:         options.DockerClient,
+		dockerServiceManager: options.dockerServiceManager,
+		commandRunner:        options.CommandRunner,
 	}
 }
 

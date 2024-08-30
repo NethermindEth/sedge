@@ -64,10 +64,10 @@ func validatorNotFoundHelper(t *testing.T, ctrl *gomock.Controller) actions.Sedg
 		Return(make([]types.Container, 0), nil).
 		Times(1)
 
-	serviceManager := services.NewServiceManager(dockerClient)
+	dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 	return actions.NewSedgeActions(actions.SedgeActionsOptions{
-		DockerClient:   dockerClient,
-		ServiceManager: serviceManager,
+		DockerClient:         dockerClient,
+		DockerServiceManager: dockerServiceManager,
 	})
 }
 
@@ -113,10 +113,10 @@ func checkValidatorFailureHelper(t *testing.T, ctrl *gomock.Controller, wantErro
 		Return(types.ContainerJSON{}, wantError).
 		Times(1)
 
-	serviceManager := services.NewServiceManager(dockerClient)
+	dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 	return actions.NewSedgeActions(actions.SedgeActionsOptions{
-		DockerClient:   dockerClient,
-		ServiceManager: serviceManager,
+		DockerClient:         dockerClient,
+		DockerServiceManager: dockerServiceManager,
 	})
 }
 
@@ -173,10 +173,10 @@ func validatorStopFailureHelper(t *testing.T, ctrl *gomock.Controller) actions.S
 		Return(errors.New("error")).
 		Times(1)
 
-	serviceManager := services.NewServiceManager(dockerClient)
+	dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 	return actions.NewSedgeActions(actions.SedgeActionsOptions{
-		DockerClient:   dockerClient,
-		ServiceManager: serviceManager,
+		DockerClient:         dockerClient,
+		DockerServiceManager: dockerServiceManager,
 	})
 }
 
@@ -317,10 +317,10 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag stri
 		Return(nil).
 		Times(1)
 
-	serviceManager := services.NewServiceManager(dockerClient)
+	dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 	return actions.NewSedgeActions(actions.SedgeActionsOptions{
-		DockerClient:   dockerClient,
-		ServiceManager: serviceManager,
+		DockerClient:         dockerClient,
+		DockerServiceManager: dockerServiceManager,
 	})
 }
 
@@ -414,10 +414,10 @@ func unsupportedClientsHelper(t *testing.T, ctrl *gomock.Controller) actions.Sed
 		Return(nil).
 		Times(1)
 
-	serviceManager := services.NewServiceManager(dockerClient)
+	dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 	return actions.NewSedgeActions(actions.SedgeActionsOptions{
-		DockerClient:   dockerClient,
-		ServiceManager: serviceManager,
+		DockerClient:         dockerClient,
+		DockerServiceManager: dockerServiceManager,
 	})
 }
 

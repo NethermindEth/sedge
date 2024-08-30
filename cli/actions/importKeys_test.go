@@ -79,12 +79,12 @@ func TestImportKeys_ValidatorRunning(t *testing.T) {
 				defer ctrl.Finish()
 
 				dockerClient := importKeysGoldenPath(t, ctrl, false)
-				serviceManager := services.NewServiceManager(dockerClient)
+				dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 				cmdRunner := test.SimpleCMDRunner{}
 				s := actions.NewSedgeActions(actions.SedgeActionsOptions{
-					DockerClient:   dockerClient,
-					ServiceManager: serviceManager,
-					CommandRunner:  &cmdRunner,
+					DockerClient:         dockerClient,
+					DockerServiceManager: dockerServiceManager,
+					CommandRunner:        &cmdRunner,
 				})
 
 				from, err := setupKeystoreDir(t)
@@ -114,12 +114,12 @@ func TestImportKeysCustom_ValidatorRunning(t *testing.T) {
 			defer ctrl.Finish()
 
 			dockerClient := importKeysGoldenPath(t, ctrl, true)
-			serviceManager := services.NewServiceManager(dockerClient)
+			dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 			cmdRunner := test.SimpleCMDRunner{}
 			s := actions.NewSedgeActions(actions.SedgeActionsOptions{
-				DockerClient:   dockerClient,
-				ServiceManager: serviceManager,
-				CommandRunner:  &cmdRunner,
+				DockerClient:         dockerClient,
+				DockerServiceManager: dockerServiceManager,
+				CommandRunner:        &cmdRunner,
 			})
 
 			from, err := setupKeystoreDir(t)
@@ -198,12 +198,12 @@ func TestImportKeys_CustomOptions(t *testing.T) {
 			defer ctrl.Finish()
 
 			dockerClient := importKeysGoldenPath(t, ctrl, tt.customImage)
-			serviceManager := services.NewServiceManager(dockerClient)
+			dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 			cmdRunner := test.SimpleCMDRunner{}
 			s := actions.NewSedgeActions(actions.SedgeActionsOptions{
-				DockerClient:   dockerClient,
-				ServiceManager: serviceManager,
-				CommandRunner:  &cmdRunner,
+				DockerClient:         dockerClient,
+				DockerServiceManager: dockerServiceManager,
+				CommandRunner:        &cmdRunner,
 			})
 
 			from, err := setupKeystoreDir(t)
@@ -256,12 +256,12 @@ func TestImportKeys_UnexpectedExitCode(t *testing.T) {
 	defer ctrl.Finish()
 
 	dockerClient := importKeysExitError(t, ctrl)
-	serviceManager := services.NewServiceManager(dockerClient)
+	dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 	cmdRunner := test.SimpleCMDRunner{}
 	s := actions.NewSedgeActions(actions.SedgeActionsOptions{
-		DockerClient:   dockerClient,
-		ServiceManager: serviceManager,
-		CommandRunner:  &cmdRunner,
+		DockerClient:         dockerClient,
+		DockerServiceManager: dockerServiceManager,
+		CommandRunner:        &cmdRunner,
 	})
 
 	from, err := setupKeystoreDir(t)
