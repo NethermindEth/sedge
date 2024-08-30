@@ -20,7 +20,9 @@ import (
 	"math/big"
 
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
+	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 /*
@@ -37,6 +39,10 @@ b. error
 Error if any
 */
 func NodeID(network string, rewardAddress string) (*big.Int, error) {
+	err := ui.EthAddressValidator(rewardAddress, false)
+	if err != nil {
+		return nil, fmt.Errorf("invalid reward address: %w", err)
+	}
 	// Convert the reward address to a common.Address and check if it's zero
 	rewardAddr := common.HexToAddress(rewardAddress)
 	if rewardAddr == (common.Address{}) {
@@ -45,13 +51,13 @@ func NodeID(network string, rewardAddress string) (*big.Int, error) {
 
 	nodeOperatorIDs, err := nodeOpIDs(network)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call NodeOpIDs: %w", err)
+		return nil, fmt.Errorf("error getting Node Operators ID: %w", err)
 	}
 
 	for _, nodeID := range nodeOperatorIDs {
 		node, err := NodeOperatorInfo(network, nodeID)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get NodeOperatorInfo: %w", err)
+			return nil, fmt.Errorf("error getting Node Operator Information: %w", err)
 		}
 		if node.RewardAddress == rewardAddr {
 			return nodeID, nil
@@ -75,65 +81,73 @@ Error if any
 */
 func NodeOperatorInfo(network string, nodeID *big.Int) (NodeOperator, error) {
 	var nodeOperator NodeOperator
-	contract, err := csModuleContract(network)
+	contract, client, err := csModuleContract(network)
+	defer client.Close()
 	if err != nil {
 		return nodeOperator, fmt.Errorf("failed to call csModuleContract: %w", err)
 	}
 
 	nodeOperator, err = contract.GetNodeOperator(nil, nodeID)
 	if err != nil {
-		return nodeOperator, fmt.Errorf("failed to call GetNodeOperator: %w", err)
+		return nodeOperator, fmt.Errorf("failed to call GetNodeOperator contract method: %w", err)
 	}
 	return nodeOperator, nil
 }
 
 func nodeOpIDs(network string) ([]*big.Int, error) {
 	var nodeOperatorIDs []*big.Int
-	contract, err := csModuleContract(network)
+	contract, client, err := csModuleContract(network)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call csModuleContract: %w", err)
 	}
+	defer client.Close()
 
 	limit, err := nodeOpsCount(network)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call nodeOpsCount: %w", err)
+		return nil, fmt.Errorf("error getting total number of Node Operators: %w", err)
 	}
 	offset := big.NewInt(0)
 
 	nodeOperatorIDs, err = contract.GetNodeOperatorIds(nil, offset, limit)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call GetNodeOperatorIds: %w", err)
+		return nil, fmt.Errorf("failed to call GetNodeOperatorIds contract method: %w", err)
 	}
 	return nodeOperatorIDs, nil
 }
 
 func nodeOpsCount(network string) (*big.Int, error) {
 	var nodeOperatorCount *big.Int
-	contract, err := csModuleContract(network)
+	contract, client, err := csModuleContract(network)
+	defer client.Close()
 	if err != nil {
 		return nil, fmt.Errorf("failed to call csModuleContract: %w", err)
 	}
 
 	nodeOperatorCount, err = contract.GetNodeOperatorsCount(nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call GetNodeOperatorsCount: %w", err)
+		return nil, fmt.Errorf("failed to call GetNodeOperatorsCount contract method: %w", err)
 	}
 
 	return nodeOperatorCount, nil
 }
 
-func csModuleContract(network string) (*Csmodule, error) {
+func csModuleContract(network string) (*Csmodule, *ethclient.Client, error) {
 	client, err := contracts.ConnectClient(network)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to client: %w", err)
+		return nil, nil, fmt.Errorf("failed to connect to client: %w", err)
 	}
-	defer client.Close()
 
 	contractName := contracts.CSModule
-	address := common.HexToAddress(contracts.DeployedAddresses(contractName)[network])
+
+	contractAddress, err := contracts.ContractAddressByNetwork(contractName, network)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get deployed contract address: %w", err)
+	}
+
+	address := common.HexToAddress(contractAddress)
 	contract, err := NewCsmodule(address, client)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create CSModule instance: %w", err)
+		return nil, nil, fmt.Errorf("failed to create CSModule instance: %w", err)
 	}
-	return contract, nil
+	return contract, client, nil
 }
