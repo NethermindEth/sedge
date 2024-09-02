@@ -1,0 +1,5 @@
+name: valid-uri
+target: URI
+type: uri
+default: ftp://ftp.example.com/example.tar.gz
+help: "Valid type uri"

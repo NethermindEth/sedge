@@ -1,0 +1,87 @@
+version: "3.9"
+services:
+  execution:
+    stop_grace_period: 30s
+    container_name: sedge-execution-client
+    restart: unless-stopped
+    image: ${EC_IMAGE_VERSION}
+    networks:
+    - sedge
+    volumes:
+    - ${EC_DATA_DIR}:/nethermind/data
+    - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+    - 30303:30303/tcp
+    - 30303:30303/udp
+    - 8008:8008
+    expose:
+    - 8545
+    - 8551
+    command:
+    - --config=${NETWORK}
+    - --datadir=/nethermind/data
+    - --log=${NETHERMIND_LOG_LEVEL}
+    - --Merge.TerminalTotalDifficulty=17000000000000000
+    - --JsonRpc.Enabled=true
+    - --JsonRpc.Host=0.0.0.0
+    - --JsonRpc.Port=8545
+    - --JsonRpc.JwtSecretFile=/tmp/jwt/jwtsecret
+    - --JsonRpc.EngineHost=0.0.0.0
+    - --JsonRpc.EnginePort=8551
+    - --Network.DiscoveryPort=30303
+    - --HealthChecks.Enabled=true
+    - --Metrics.Enabled=true
+    - --Metrics.ExposePort=8008
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+  consensus:
+    stop_grace_period: 30s
+    container_name: sedge-consensus-client
+    restart: unless-stopped
+    image: ${CC_IMAGE_VERSION}
+    networks:
+    - sedge
+    volumes:
+    - ${CC_DATA_DIR}:/var/lib/prysm
+    - ${CC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+    - 9000:9000/tcp
+    - 9000:9000/udp
+    - 5054:5054/tcp
+    expose:
+    - 4000
+    - 4001
+    command:
+    - --${NETWORK}
+    - --bootstrap-node=enr:-Iq4QMCTfIMXnow27baRUb35Q8iiFHSIDBJh6hQM5Axohhf4b6Kr_cOCu0htQ5WvVqKvFgY28893DHAg8gnBAXsAVqmGAX53x8JggmlkgnY0gmlwhLKAlv6Jc2VjcDI1NmsxoQK6S-Cii_KmfFdUJL2TANL3ksaKUnNXvTCv1tLwXs0QgIN1ZHCCIyk
+    - --bootstrap-node=enr:-Ly4QFoZTWR8ulxGVsWydTNGdwEESueIdj-wB6UmmjUcm-AOPxnQi7wprzwcdo7-1jBW_JxELlUKJdJES8TDsbl1EdNlh2F0dG5ldHOI__78_v2bsV-EZXRoMpA2-lATkAAAcf__________gmlkgnY0gmlwhBLYJjGJc2VjcDI1NmsxoQI0gujXac9rMAb48NtMqtSTyHIeNYlpjkbYpWJw46PmYYhzeW5jbmV0cw-DdGNwgiMog3VkcIIjKA
+    - --bootstrap-node=enr:-KG4QE5OIg5ThTjkzrlVF32WT_-XT14WeJtIz2zoTqLLjQhYAmJlnk4ItSoH41_2x0RX0wTFIe5GgjRzU2u7Q1fN4vADhGV0aDKQqP7o7pAAAHAyAAAAAAAAAIJpZIJ2NIJpcISlFsStiXNlY3AyNTZrMaEC-Rrd_bBZwhKpXzFCrStKp1q_HmGOewxY3KwM8ofAj_ODdGNwgiMog3VkcIIjKA
+    - --bootstrap-node=enr:-L64QC9Hhov4DhQ7mRukTOz4_jHm4DHlGL726NWH4ojH1wFgEwSin_6H95Gs6nW2fktTWbPachHJ6rUFu0iJNgA0SB2CARqHYXR0bmV0c4j__________4RldGgykDb6UBOQAABx__________-CaWSCdjSCaXCEA-2vzolzZWNwMjU2azGhA17lsUg60R776rauYMdrAz383UUgESoaHEzMkvm4K6k6iHN5bmNuZXRzD4N0Y3CCIyiDdWRwgiMo
+    - --terminal-total-difficulty-override=17000000000000000
+    - --p2p-tcp-port=9000
+    - --p2p-udp-port=9000
+    - --jwt-secret=/tmp/jwt/jwtsecret
+    - --rpc-host=0.0.0.0
+    - --rpc-port=4001
+    - --grpc-gateway-host=0.0.0.0
+    - --grpc-gateway-port=4000
+    - --datadir=/var/lib/prysm/
+    - --verbosity=${CC_LOG_LEVEL}
+    - --p2p-max-peers=${CC_PEER_COUNT}
+    - --execution-endpoint=${EC_AUTH_URL}
+    - --accept-terms-of-use
+    - --monitoring-host=0.0.0.0
+    - --monitoring-port=5054
+    - --checkpoint-sync-url=${CHECKPOINT_SYNC_URL}
+    - --genesis-beacon-api-url=${CHECKPOINT_SYNC_URL}
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "10"
+networks:
+  sedge:
+    name: sedge-network

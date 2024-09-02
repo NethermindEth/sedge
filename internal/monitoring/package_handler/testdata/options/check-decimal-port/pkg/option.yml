@@ -1,0 +1,5 @@
+name: invalid-port
+target: PORT
+type: port
+default: 80.80
+help: "invalid type port with decimal value"

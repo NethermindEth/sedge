@@ -1,5 +1,20 @@
-package services
+/*
+Copyright 2022 Nethermind
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+package services_test
+//TestContainerLogs, TestStopContainer
 import (
 	"bytes"
 	"context"
@@ -24,6 +39,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/NethermindEth/sedge/internal/common"
+	"github.com/NethermindEth/sedge/internal/monitoring/utils"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	mocks "github.com/NethermindEth/sedge/mocks"
 )
@@ -45,7 +61,7 @@ func TestImageFound(t *testing.T) {
 			},
 		}, nil)
 
-	dockerServicemanager := services.NewDockerServicemanager(dockerClient)
+	dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 	image, err := dockerServicemanager.Image("sedge")
 	assert.Nil(t, err)
 	assert.Equal(t, expectedImage, image)
@@ -62,7 +78,7 @@ func TestImageNotFound(t *testing.T) {
 		ContainerInspect(context.Background(), "sedge").
 		Return(types.ContainerJSON{}, expectedError)
 
-	dockerServicemanager := services.NewDockerServicemanager(dockerClient)
+	dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 	image, err := dockerServicemanager.Image("sedge")
 	assert.ErrorIs(t, err, expectedError)
 	assert.True(t, errdefs.IsNotFound(err))
@@ -78,7 +94,7 @@ func ExampleDockerServiceManager_Image() {
 	defer dockerClient.Close()
 
 	// Create a new dockerServicemanager
-	dm := NewDockerServiceManager(dockerClient)
+	dm := services.NewDockerServiceManager(dockerClient)
 
 	// Get the image name of a running container
 	_, err = dm.Image("myContainer")
@@ -130,9 +146,10 @@ func TestStopContainerNotFound(t *testing.T) {
 
 	dockerClient.EXPECT().
 		ContainerInspect(context.Background(), "sedge").
-		Return(types.ContainerJSON{}, expectedError)
+		Return(types.ContainerJSON{}, expectedError).
+		Times(1)
 
-	dockerServicemanager := services.NewDockerServicemanager(dockerClient)
+	dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 	err := dockerServicemanager.Stop("sedge")
 	assert.Nil(t, err)
 }
@@ -146,9 +163,10 @@ func TestStopError(t *testing.T) {
 
 	dockerClient.EXPECT().
 		ContainerInspect(context.Background(), "sedge").
-		Return(types.ContainerJSON{}, expectedError)
+		Return(types.ContainerJSON{}, expectedError).
+		Times(1)
 
-	dockerServicemanager := services.NewDockerServicemanager(dockerClient)
+	dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 	err := dockerServicemanager.Stop("sedge")
 	assert.ErrorIs(t, err, expectedError)
 }
@@ -217,7 +235,7 @@ func TestStopContainer(t *testing.T) {
 				ContainerStop(context.Background(), sedgeCtId, gomock.Any()).
 				Return(nil)
 
-			dockerServicemanager := services.NewDockerServicemanager(dockerClient)
+			dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 			err := dockerServicemanager.Stop("sedge")
 			assert.Nil(t, err)
 		})
@@ -230,13 +248,13 @@ func TestStopContainerError(t *testing.T) {
 	defer ctrl.Finish()
 
 	expectedError := errors.New("error")
-	validatorCtId := "sedgectid"
+	sedgeCtId := "sedgectid"
 
 	dockerClient.EXPECT().
 		ContainerInspect(context.Background(), "sedge").
 		Return(types.ContainerJSON{
 			ContainerJSONBase: &types.ContainerJSONBase{
-				ID: validatorCtId,
+				ID: sedgeCtId,
 				State: &types.ContainerState{
 					Running: true,
 				},
@@ -244,18 +262,18 @@ func TestStopContainerError(t *testing.T) {
 		}, nil).
 		Times(1)
 	dockerClient.EXPECT().
-		ContainerStop(context.Background(), validatorCtId, gomock.Any()).
+		ContainerStop(context.Background(), sedgeCtId, gomock.Any()).
 		Return(expectedError).
 		Times(1)
 
-	serviceManager := services.NewServiceManager(dockerClient)
-	err := serviceManager.Stop("sedge")
+	dockerServiceManager := services.NewDockerServiceManager(dockerClient)
+	err := dockerServiceManager.Stop("sedge")
 	assert.ErrorIs(t, err, services.ErrStoppingContainer)
 }
 
 // ContainerID tests
 
-func TestContainerId(t *testing.T) {
+func TestContainerID(t *testing.T) {
 	ctName := "container-name"
 	tests := []struct {
 		name       string
@@ -306,21 +324,21 @@ func TestContainerId(t *testing.T) {
 		defer ctrl.Finish()
 
 		dockerClient.EXPECT().
-			ContainerList(gomock.Any(), types.ContainerListOptions{
+			ContainerList(gomock.Any(), container.ListOptions{
 				All:     true,
 				Filters: filters.NewArgs(filters.Arg("name", ctName)),
 			}).
 			Return(tt.containers, nil).
 			Times(1)
 		dockerServiceManager := services.NewDockerServiceManager(dockerClient)
-		id, err := dockerServiceManager.ContainerId(ctName)
+		id, err := dockerServiceManager.ContainerID(ctName)
 		assert.ErrorIs(t, err, tt.err)
 		assert.Equal(t, tt.wantId, id)
 
 	}
 }
 
-func TestContainerIdError(t *testing.T) {
+func TestContainerIDError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	dockerClient := mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
@@ -329,19 +347,19 @@ func TestContainerIdError(t *testing.T) {
 	containerName := "container-name"
 
 	dockerClient.EXPECT().
-		ContainerList(gomock.Any(), types.ContainerListOptions{
+		ContainerList(gomock.Any(), container.ListOptions{
 			All:     true,
 			Filters: filters.NewArgs(filters.Arg("name", containerName)),
 		}).
 		Return(nil, wantErr)
 
-	dockerServicemanager := services.NewDockerServicemanager(dockerClient)
+	dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 	id, err := dockerServicemanager.ContainerID(containerName)
 	assert.ErrorIs(t, err, wantErr)
 	assert.Equal(t, "", id)
 }
 
-func TestContainerIdNotFound(t *testing.T) {
+func TestContainerIDNotFound(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	dockerClient := mocks.NewMockAPIClient(ctrl)
 	defer ctrl.Finish()
@@ -349,13 +367,13 @@ func TestContainerIdNotFound(t *testing.T) {
 	containerName := "container-name"
 
 	dockerClient.EXPECT().
-		ContainerList(gomock.Any(), types.ContainerListOptions{
+		ContainerList(gomock.Any(), container.ListOptions{
 			All:     true,
 			Filters: filters.NewArgs(filters.Arg("name", containerName)),
 		}).
 		Return(make([]types.Container, 0), nil)
 
-	dockerServicemanager := services.NewDockerServicemanager(dockerClient)
+	dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 	id, err := dockerServicemanager.ContainerID(containerName)
 	assert.ErrorIs(t, err, services.ErrContainerNotFound)
 	assert.Equal(t, "", id)
@@ -375,7 +393,7 @@ func TestPullError(t *testing.T) {
 		ImagePull(gomock.Any(), imageName, gomock.Any()).
 		Return(nil, wantErr)
 
-	dockerServicemanager := NewDockerServicemanager(dockerClient)
+	dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 	err := dockerServicemanager.Pull(imageName)
 	assert.ErrorIs(t, err, wantErr)
 }
@@ -391,7 +409,7 @@ func TestPull(t *testing.T) {
 		ImagePull(gomock.Any(), imageName, gomock.Any()).
 		Return(nil, nil)
 
-	dockerServicemanager := NewDockerServicemanager(dockerClient)
+	dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 	err := dockerServicemanager.Pull(imageName)
 	assert.Nil(t, err)
 }
@@ -410,7 +428,7 @@ func TestContainerLogsError(t *testing.T) {
 		ContainerLogs(gomock.Any(), containerName, gomock.Any()).
 		Return(nil, wantErr)
 
-	dockerServicemanager := NewDockerServicemanager(dockerClient)
+	dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 	logs, err := dockerServicemanager.ContainerLogs(containerName, containerName)
 	assert.ErrorIs(t, err, wantErr)
 	assert.Empty(t, logs)
@@ -436,14 +454,14 @@ func TestContainerLogs(t *testing.T) {
 	logReader := mockReadCloser{Reader: strings.NewReader(wantLogs)}
 
 	dockerClient.EXPECT().
-		ContainerLogs(gomock.Any(), containerName, containerName, types.ContainerLogsOptions{
+		ContainerLogs(gomock.Any(), containerName, container.LogsOptions{
 			ShowStdout: true,
 			ShowStderr: true,
 			Follow:     false,
 		}).
 		Return(logReader, nil)
 
-	dockerServicemanager := NewDockerServicemanager(dockerClient)
+	dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 	logs, err := dockerServicemanager.ContainerLogs(containerName, containerName)
 	assert.Nil(t, err)
 	assert.Equal(t, wantLogs, logs)
@@ -459,7 +477,7 @@ func TestContainerLogsMerged(t *testing.T) {
 	type testCase struct {
 		name      string
 		services  map[string]string
-		opts      ContainerLogsMergedOptions
+		opts      services.ContainerLogsMergedOptions
 		mocker    func(t *testing.T, dockerClient *mocks.MockAPIClient)
 		wantLines []string
 		wantErr   error
@@ -477,7 +495,7 @@ func TestContainerLogsMerged(t *testing.T) {
 				for i := 0; i < 3; i++ {
 					serviceReader := new(bytes.Buffer)
 					serviceReader.WriteString(serviceLogs)
-					dockerClient.EXPECT().ContainerLogs(context.Background(), fmt.Sprintf("id%d", i+1), types.ContainerLogsOptions{
+					dockerClient.EXPECT().ContainerLogs(context.Background(), fmt.Sprintf("id%d", i+1), container.LogsOptions{
 						ShowStdout: true,
 						ShowStderr: true,
 					}).Return(io.NopCloser(serviceReader), nil)
@@ -516,12 +534,12 @@ func TestContainerLogsMerged(t *testing.T) {
 				for i := 0; i < 2; i++ {
 					serviceReader := new(bytes.Buffer)
 					serviceReader.WriteString(serviceLogs)
-					dockerClient.EXPECT().ContainerLogs(context.Background(), fmt.Sprintf("id%d", i+1), types.ContainerLogsOptions{
+					dockerClient.EXPECT().ContainerLogs(context.Background(), fmt.Sprintf("id%d", i+1), container.LogsOptions{
 						ShowStdout: true,
 						ShowStderr: true,
 					}).Return(io.NopCloser(serviceReader), nil)
 				}
-				dockerClient.EXPECT().ContainerLogs(context.Background(), "id3", types.ContainerLogsOptions{
+				dockerClient.EXPECT().ContainerLogs(context.Background(), "id3", container.LogsOptions{
 					ShowStdout: true,
 					ShowStderr: true,
 				}).Return(nil, assert.AnError)
@@ -551,7 +569,7 @@ func TestContainerLogsMerged(t *testing.T) {
 			dockerClient := mocks.NewMockAPIClient(ctrl)
 			tt.mocker(t, dockerClient)
 			out := new(bytes.Buffer)
-			dockerServicemanager := NewDockerServicemanager(dockerClient)
+			dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 			err := dockerServicemanager.ContainerLogsMerged(context.Background(), out, tt.services, tt.opts)
 			if tt.wantErr != nil {
 				assert.EqualError(t, err, tt.wantErr.Error())
@@ -634,7 +652,7 @@ func TestWaitExitCh(t *testing.T) {
 				Return(wantWaitCh, make(chan error)).
 				Times(1)
 
-			dockerServicemanager := services.NewDockerServicemanager(dockerClient)
+			dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 			exitCh, errCh := dockerServicemanager.Wait("sedge", container.WaitConditionNextExit)
 			select {
 			case <-waitCh:
@@ -734,7 +752,7 @@ func TestContainerStatus(t *testing.T) {
 					Return(container, nil)
 			}
 
-			dockerServicemanager := NewDockerServicemanager(dockerClient)
+			dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 			status, err := dockerServicemanager.ContainerStatus(container.ID)
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -750,7 +768,7 @@ func TestPS(t *testing.T) {
 	tests := []struct {
 		name       string
 		containers []types.Container
-		want       []ContainerInfo
+		want       []services.ContainerInfo
 		wantErr    error
 	}{
 		{
@@ -774,14 +792,14 @@ func TestPS(t *testing.T) {
 					State:  "state1",
 				},
 			},
-			want: []ContainerInfo{
+			want: []services.ContainerInfo{
 				{
 					ID:      "container-id1",
 					Names:   []string{"/name1"},
 					Image:   "image1",
 					Command: "command1",
 					Created: 1234,
-					Ports: []Port{
+					Ports: []services.Port{
 						{
 							IP:          "127.0.0.1",
 							PrivatePort: 3000,
@@ -831,14 +849,14 @@ func TestPS(t *testing.T) {
 					State:  "state2",
 				},
 			},
-			want: []ContainerInfo{
+			want: []services.ContainerInfo{
 				{
 					ID:      "container-id1",
 					Names:   []string{"/name1"},
 					Image:   "image1",
 					Command: "command1",
 					Created: 1234,
-					Ports: []Port{
+					Ports: []services.Port{
 						{
 							IP:          "127.0.0.1",
 							PrivatePort: 3000,
@@ -853,7 +871,7 @@ func TestPS(t *testing.T) {
 					Image:   "image2",
 					Command: "command2",
 					Created: 5678,
-					Ports: []Port{
+					Ports: []services.Port{
 						{
 							IP:          "127.0.0.10",
 							PrivatePort: 4000,
@@ -867,7 +885,7 @@ func TestPS(t *testing.T) {
 		{
 			name:       "none containers",
 			containers: []types.Container{},
-			want:       []ContainerInfo{},
+			want:       []services.ContainerInfo{},
 		},
 		{
 			name:       "returning error",
@@ -882,9 +900,9 @@ func TestPS(t *testing.T) {
 			dockerClient := mocks.NewMockAPIClient(ctrl)
 			defer ctrl.Finish()
 
-			dockerClient.EXPECT().ContainerList(gomock.Any(), types.ContainerListOptions{}).Return(tt.containers, tt.wantErr)
+			dockerClient.EXPECT().ContainerList(gomock.Any(), container.ListOptions{}).Return(tt.containers, tt.wantErr)
 
-			dockerServicemanager := NewDockerServicemanager(dockerClient)
+			dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 			got, err := dockerServicemanager.PS()
 			assert.ErrorIs(t, err, tt.wantErr, "Unexpected error returned")
 			assert.Equal(t, tt.want, got, "Expected containers does not match with containers obtained.")
@@ -937,7 +955,7 @@ func TestContainerIP(t *testing.T) {
 				},
 			},
 			want:        "",
-			expectedErr: ErrNetworksNotFound,
+			expectedErr: services.ErrNetworksNotFound,
 		},
 		{
 			name: "returning correct IP",
@@ -969,7 +987,7 @@ func TestContainerIP(t *testing.T) {
 				ContainerInspect(context.Background(), tt.arg).
 				Return(tt.response, tt.wantErr)
 
-			dockerServicemanager := NewDockerServicemanager(dockerClient)
+			dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 			got, err := dockerServicemanager.ContainerIP(tt.arg)
 			if tt.wantErr == nil {
 				assert.ErrorIs(t, err, tt.expectedErr, "Unexpected error returned")
@@ -1071,7 +1089,7 @@ func TestContainerNetworks(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			dockerClient := tt.mocker(t, tt.container)
-			dockerServicemanager := NewDockerServicemanager(dockerClient)
+			dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 			got, err := dockerServicemanager.ContainerNetworks(tt.container)
 			if tt.wantErr {
 				assert.Error(t, err, "Expected error not returned")
@@ -1126,7 +1144,7 @@ func TestNetworkConnect(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			dockerClient := tt.mocker(t, tt.container, tt.network)
-			dockerServicemanager := NewDockerServicemanager(dockerClient)
+			dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 			err := dockerServicemanager.NetworkConnect(tt.container, tt.network)
 			if tt.wantErr {
 				assert.Error(t, err, "Expected error not returned")
@@ -1177,7 +1195,7 @@ func TestNetworkDisconnect(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			dockerClient := tt.mocker(t, tt.container, tt.network)
-			dockerServicemanager := NewDockerServicemanager(dockerClient)
+			dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 			err := dockerServicemanager.NetworkDisconnect(tt.container, tt.network)
 			if tt.wantErr {
 				assert.Error(t, err, "Expected error not returned")
@@ -1223,8 +1241,8 @@ func TestBuildImageFromURI(t *testing.T) {
 		},
 		func(t *testing.T) testCase {
 			buildArgs := map[string]*string{
-				"key1": StringPtr("value1"),
-				"key2": StringPtr("value2"),
+				"key1": utils.StringPtr("value1"),
+				"key2": utils.StringPtr("value2"),
 			}
 			return testCase{
 				name:      "success, with build args",
@@ -1294,7 +1312,7 @@ func TestBuildImageFromURI(t *testing.T) {
 			tt.setup(dockerClient)
 			defer ctrl.Finish()
 
-			dockerServicemanager := NewDockerServicemanager(dockerClient)
+			dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 			err := dockerServicemanager.BuildImageFromURI(tt.remote, tt.tag, tt.buildArgs)
 
 			if tt.expectedError != nil {
@@ -1332,7 +1350,7 @@ func TestLoadImageContext(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			path := tt.path(t)
-			dockerServicemanager := NewDockerServicemanager(nil)
+			dockerServicemanager := services.NewDockerServiceManager(nil)
 			_, err := dockerServicemanager.LoadImageContext(path)
 			if tt.wantErr != nil {
 				assert.EqualError(t, err, tt.wantErr.Error())
@@ -1348,7 +1366,7 @@ func TestDockerServiceManager_Run(t *testing.T) {
 		name          string
 		setupMock     func(*gomock.Controller) *mocks.MockAPIClient
 		image         string
-		options       RunOptions
+		options       services.RunOptions
 		expectedError error
 	}{
 		{
@@ -1364,17 +1382,17 @@ func TestDockerServiceManager_Run(t *testing.T) {
 				waitCh <- container.WaitResponse{StatusCode: 0}
 
 				gomock.InOrder(
-					dockerClient.EXPECT().ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(container.CreateResponse{ID: "containerID"}, nil),
+					dockerClient.EXPECT().ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(container.CreateResponse{ID: "ContainerID"}, nil),
 					dockerClient.EXPECT().NetworkConnect(gomock.Any(), "my-network", gomock.Any(), gomock.Any()).Return(nil),
-					dockerClient.EXPECT().ContainerWait(gomock.Any(), "containerID", gomock.Any()).Return(waitCh, errCh),
-					dockerClient.EXPECT().ContainerStart(gomock.Any(), "containerID", gomock.Any()).Return(nil),
-					dockerClient.EXPECT().ContainerLogs(gomock.Any(), "containerID", types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true}).Return(io.NopCloser(bytes.NewBuffer([]byte{})), nil),
-					dockerClient.EXPECT().ContainerRemove(gomock.Any(), "containerID", gomock.Any()).Return(nil),
+					dockerClient.EXPECT().ContainerWait(gomock.Any(), "ContainerID", gomock.Any()).Return(waitCh, errCh),
+					dockerClient.EXPECT().ContainerStart(gomock.Any(), "ContainerID", gomock.Any()).Return(nil),
+					dockerClient.EXPECT().ContainerLogs(gomock.Any(), "ContainerID", container.LogsOptions{ShowStdout: true, ShowStderr: true}).Return(io.NopCloser(bytes.NewBuffer([]byte{})), nil),
+					dockerClient.EXPECT().ContainerRemove(gomock.Any(), "ContainerID", gomock.Any()).Return(nil),
 				)
 				return dockerClient
 			},
 			image:   "my-image",
-			options: RunOptions{Network: "my-network", Args: []string{"arg1", "arg2"}},
+			options: services.RunOptions{Network: "my-network", Args: []string{"arg1", "arg2"}},
 		},
 		{
 			name: "Container create error",
@@ -1386,7 +1404,7 @@ func TestDockerServiceManager_Run(t *testing.T) {
 				return dockerClient
 			},
 			image:         "my-image",
-			options:       RunOptions{Network: "my-network", Args: []string{"arg1", "arg2"}},
+			options:       services.RunOptions{Network: "my-network", Args: []string{"arg1", "arg2"}},
 			expectedError: errors.New("creation error"),
 		},
 		{
@@ -1402,17 +1420,17 @@ func TestDockerServiceManager_Run(t *testing.T) {
 				waitCh <- container.WaitResponse{StatusCode: 0}
 
 				gomock.InOrder(
-					dockerClient.EXPECT().ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(container.CreateResponse{ID: "containerID"}, nil),
+					dockerClient.EXPECT().ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(container.CreateResponse{ID: "ContainerID"}, nil),
 					dockerClient.EXPECT().NetworkConnect(gomock.Any(), "my-network", gomock.Any(), gomock.Any()).Return(nil),
-					dockerClient.EXPECT().ContainerWait(gomock.Any(), "containerID", gomock.Any()).Return(waitCh, errCh),
-					dockerClient.EXPECT().ContainerStart(gomock.Any(), "containerID", gomock.Any()).Return(nil),
-					dockerClient.EXPECT().ContainerLogs(gomock.Any(), "containerID", types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true}).Return(io.NopCloser(bytes.NewBuffer([]byte{})), nil),
-					dockerClient.EXPECT().ContainerRemove(gomock.Any(), "containerID", gomock.Any()).Return(errors.New("remove error")),
+					dockerClient.EXPECT().ContainerWait(gomock.Any(), "ContainerID", gomock.Any()).Return(waitCh, errCh),
+					dockerClient.EXPECT().ContainerStart(gomock.Any(), "ContainerID", gomock.Any()).Return(nil),
+					dockerClient.EXPECT().ContainerLogs(gomock.Any(), "ContainerID", container.LogsOptions{ShowStdout: true, ShowStderr: true}).Return(io.NopCloser(bytes.NewBuffer([]byte{})), nil),
+					dockerClient.EXPECT().ContainerRemove(gomock.Any(), "ContainerID", gomock.Any()).Return(errors.New("remove error")),
 				)
 				return dockerClient
 			},
 			image:         "my-image",
-			options:       RunOptions{Network: "my-network", Args: []string{"arg1", "arg2"}},
+			options:       services.RunOptions{Network: "my-network", Args: []string{"arg1", "arg2"}},
 			expectedError: errors.New("remove error"),
 		},
 		{
@@ -1420,14 +1438,14 @@ func TestDockerServiceManager_Run(t *testing.T) {
 			setupMock: func(ctrl *gomock.Controller) *mocks.MockAPIClient {
 				dockerClient := mocks.NewMockAPIClient(ctrl)
 				gomock.InOrder(
-					dockerClient.EXPECT().ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(container.CreateResponse{ID: "containerID"}, nil),
+					dockerClient.EXPECT().ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(container.CreateResponse{ID: "ContainerID"}, nil),
 					dockerClient.EXPECT().NetworkConnect(gomock.Any(), "my-network", gomock.Any(), gomock.Any()).Return(errors.New("network connection error")),
-					dockerClient.EXPECT().ContainerRemove(gomock.Any(), "containerID", gomock.Any()).Return(nil),
+					dockerClient.EXPECT().ContainerRemove(gomock.Any(), "ContainerID", gomock.Any()).Return(nil),
 				)
 				return dockerClient
 			},
 			image:         "my-image",
-			options:       RunOptions{Network: "my-network", Args: []string{"arg1", "arg2"}},
+			options:       services.RunOptions{Network: "my-network", Args: []string{"arg1", "arg2"}},
 			expectedError: errors.New("network connection error"),
 		},
 		{
@@ -1440,16 +1458,16 @@ func TestDockerServiceManager_Run(t *testing.T) {
 				errCh := make(chan error, 1)
 
 				gomock.InOrder(
-					dockerClient.EXPECT().ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(container.CreateResponse{ID: "containerID"}, nil),
+					dockerClient.EXPECT().ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(container.CreateResponse{ID: "ContainerID"}, nil),
 					dockerClient.EXPECT().NetworkConnect(gomock.Any(), "my-network", gomock.Any(), gomock.Any()).Return(nil),
-					dockerClient.EXPECT().ContainerWait(gomock.Any(), "containerID", gomock.Any()).Return(waitCh, errCh),
-					dockerClient.EXPECT().ContainerStart(gomock.Any(), "containerID", gomock.Any()).Return(errors.New("start container error")),
-					dockerClient.EXPECT().ContainerRemove(gomock.Any(), "containerID", gomock.Any()).Return(nil),
+					dockerClient.EXPECT().ContainerWait(gomock.Any(), "ContainerID", gomock.Any()).Return(waitCh, errCh),
+					dockerClient.EXPECT().ContainerStart(gomock.Any(), "ContainerID", gomock.Any()).Return(errors.New("start container error")),
+					dockerClient.EXPECT().ContainerRemove(gomock.Any(), "ContainerID", gomock.Any()).Return(nil),
 				)
 				return dockerClient
 			},
 			image:         "my-image",
-			options:       RunOptions{Network: "my-network", Args: []string{"arg1", "arg2"}},
+			options:       services.RunOptions{Network: "my-network", Args: []string{"arg1", "arg2"}},
 			expectedError: errors.New("start container error"),
 		},
 		{
@@ -1465,18 +1483,18 @@ func TestDockerServiceManager_Run(t *testing.T) {
 				errCh <- errors.New("container wait error")
 
 				gomock.InOrder(
-					dockerClient.EXPECT().ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(container.CreateResponse{ID: "containerID"}, nil),
+					dockerClient.EXPECT().ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(container.CreateResponse{ID: "ContainerID"}, nil),
 					dockerClient.EXPECT().NetworkConnect(gomock.Any(), "my-network", gomock.Any(), gomock.Any()).Return(nil),
-					dockerClient.EXPECT().ContainerWait(gomock.Any(), "containerID", gomock.Any()).Return(waitCh, errCh),
-					dockerClient.EXPECT().ContainerStart(gomock.Any(), "containerID", gomock.Any()).Return(nil),
-					dockerClient.EXPECT().ContainerLogs(gomock.Any(), "containerID", types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true}).Return(io.NopCloser(bytes.NewBufferString("container logs")), nil),
-					dockerClient.EXPECT().ContainerRemove(gomock.Any(), "containerID", gomock.Any()).Return(nil),
+					dockerClient.EXPECT().ContainerWait(gomock.Any(), "ContainerID", gomock.Any()).Return(waitCh, errCh),
+					dockerClient.EXPECT().ContainerStart(gomock.Any(), "ContainerID", gomock.Any()).Return(nil),
+					dockerClient.EXPECT().ContainerLogs(gomock.Any(), "ContainerID", container.LogsOptions{ShowStdout: true, ShowStderr: true}).Return(io.NopCloser(bytes.NewBufferString("container logs")), nil),
+					dockerClient.EXPECT().ContainerRemove(gomock.Any(), "ContainerID", gomock.Any()).Return(nil),
 				)
 				return dockerClient
 			},
 			image:         "my-image",
-			options:       RunOptions{Network: "my-network", Args: []string{"arg1", "arg2"}},
-			expectedError: errors.New("error waiting for container containerID: container wait error. container logs: container logs"),
+			options:       services.RunOptions{Network: "my-network", Args: []string{"arg1", "arg2"}},
+			expectedError: errors.New("error waiting for container ContainerID: container wait error. container logs: container logs"),
 		},
 		{
 			name: "Non-zero exit status",
@@ -1491,23 +1509,23 @@ func TestDockerServiceManager_Run(t *testing.T) {
 				waitCh <- container.WaitResponse{StatusCode: 1}
 
 				gomock.InOrder(
-					dockerClient.EXPECT().ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(container.CreateResponse{ID: "containerID"}, nil),
+					dockerClient.EXPECT().ContainerCreate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(container.CreateResponse{ID: "ContainerID"}, nil),
 					dockerClient.EXPECT().NetworkConnect(gomock.Any(), "my-network", gomock.Any(), gomock.Any()).Return(nil),
-					dockerClient.EXPECT().ContainerWait(gomock.Any(), "containerID", gomock.Any()).Return(waitCh, errCh),
-					dockerClient.EXPECT().ContainerStart(gomock.Any(), "containerID", gomock.Any()).Return(nil),
-					dockerClient.EXPECT().ContainerLogs(gomock.Any(), "containerID", types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true}).Return(io.NopCloser(bytes.NewBufferString("container logs")), nil),
-					dockerClient.EXPECT().ContainerRemove(gomock.Any(), "containerID", gomock.Any()).Return(nil),
+					dockerClient.EXPECT().ContainerWait(gomock.Any(), "ContainerID", gomock.Any()).Return(waitCh, errCh),
+					dockerClient.EXPECT().ContainerStart(gomock.Any(), "ContainerID", gomock.Any()).Return(nil),
+					dockerClient.EXPECT().ContainerLogs(gomock.Any(), "ContainerID", container.LogsOptions{ShowStdout: true, ShowStderr: true}).Return(io.NopCloser(bytes.NewBufferString("container logs")), nil),
+					dockerClient.EXPECT().ContainerRemove(gomock.Any(), "ContainerID", gomock.Any()).Return(nil),
 				)
 				return dockerClient
 			},
 			image:         "my-image",
-			options:       RunOptions{Network: "my-network", Args: []string{"arg1", "arg2"}},
-			expectedError: fmt.Errorf("unexpected exit code 1 for container containerID. container logs: container logs"),
+			options:       services.RunOptions{Network: "my-network", Args: []string{"arg1", "arg2"}},
+			expectedError: fmt.Errorf("unexpected exit code 1 for container ContainerID. container logs: container logs"),
 		},
 		{
 			name:    "Running on host network",
 			image:   "my-image",
-			options: RunOptions{Network: "host", Args: []string{}},
+			options: services.RunOptions{Network: "host", Args: []string{}},
 			setupMock: func(ctrl *gomock.Controller) *mocks.MockAPIClient {
 				dockerClient := mocks.NewMockAPIClient(ctrl)
 
@@ -1523,11 +1541,11 @@ func TestDockerServiceManager_Run(t *testing.T) {
 						gomock.Nil(),
 						gomock.Nil(),
 						"").
-						Return(container.CreateResponse{ID: "containerID"}, nil),
-					dockerClient.EXPECT().ContainerWait(context.Background(), "containerID", container.WaitConditionNextExit).Return(waitCh, errCh),
-					dockerClient.EXPECT().ContainerStart(context.Background(), "containerID", types.ContainerStartOptions{}).Return(nil),
-					dockerClient.EXPECT().ContainerLogs(context.Background(), "containerID", types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true}).Return(io.NopCloser(bytes.NewBuffer([]byte{})), nil),
-					dockerClient.EXPECT().ContainerRemove(context.Background(), "containerID", types.ContainerRemoveOptions{}).Return(nil),
+						Return(container.CreateResponse{ID: "ContainerID"}, nil),
+					dockerClient.EXPECT().ContainerWait(context.Background(), "ContainerID", container.WaitConditionNextExit).Return(waitCh, errCh),
+					dockerClient.EXPECT().ContainerStart(context.Background(), "ContainerID", container.StartOptions{}).Return(nil),
+					dockerClient.EXPECT().ContainerLogs(context.Background(), "ContainerID", container.LogsOptions{ShowStdout: true, ShowStderr: true}).Return(io.NopCloser(bytes.NewBuffer([]byte{})), nil),
+					dockerClient.EXPECT().ContainerRemove(context.Background(), "ContainerID", container.RemoveOptions{}).Return(nil),
 				)
 				return dockerClient
 			},
@@ -1535,17 +1553,17 @@ func TestDockerServiceManager_Run(t *testing.T) {
 		{
 			name:  "with mounts",
 			image: "my-image",
-			options: RunOptions{
+			options: services.RunOptions{
 				Network: "my-network",
 				Args:    []string{},
-				Mounts: []Mount{
+				Mounts: []services.Mount{
 					{
-						Type:   VolumeTypeBind,
+						Type:   services.VolumeTypeBind,
 						Source: "/home/user/dir",
 						Target: "/container/dir1",
 					},
 					{
-						Type:   VolumeTypeVolume,
+						Type:   services.VolumeTypeVolume,
 						Source: "volume-name",
 						Target: "/container/dir2",
 					},
@@ -1579,12 +1597,12 @@ func TestDockerServiceManager_Run(t *testing.T) {
 						gomock.Nil(),
 						gomock.Nil(),
 						"").
-						Return(container.CreateResponse{ID: "containerID"}, nil),
-					dockerClient.EXPECT().NetworkConnect(context.Background(), "my-network", "containerID", gomock.Nil()).Return(nil),
-					dockerClient.EXPECT().ContainerWait(context.Background(), "containerID", container.WaitConditionNextExit).Return(waitCh, errCh),
-					dockerClient.EXPECT().ContainerStart(context.Background(), "containerID", types.ContainerStartOptions{}).Return(nil),
-					dockerClient.EXPECT().ContainerLogs(context.Background(), "containerID", types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true}).Return(io.NopCloser(bytes.NewBuffer([]byte{})), nil),
-					dockerClient.EXPECT().ContainerRemove(context.Background(), "containerID", types.ContainerRemoveOptions{}).Return(nil),
+						Return(container.CreateResponse{ID: "ContainerID"}, nil),
+					dockerClient.EXPECT().NetworkConnect(context.Background(), "my-network", "ContainerID", gomock.Nil()).Return(nil),
+					dockerClient.EXPECT().ContainerWait(context.Background(), "ContainerID", container.WaitConditionNextExit).Return(waitCh, errCh),
+					dockerClient.EXPECT().ContainerStart(context.Background(), "ContainerID", container.StartOptions{}).Return(nil),
+					dockerClient.EXPECT().ContainerLogs(context.Background(), "ContainerID", container.LogsOptions{ShowStdout: true, ShowStderr: true}).Return(io.NopCloser(bytes.NewBuffer([]byte{})), nil),
+					dockerClient.EXPECT().ContainerRemove(context.Background(), "ContainerID", container.RemoveOptions{}).Return(nil),
 				)
 				return dockerClient
 			},
@@ -1598,7 +1616,7 @@ func TestDockerServiceManager_Run(t *testing.T) {
 
 			dockerClient := tt.setupMock(ctrl)
 
-			dockerServicemanager := NewDockerServicemanager(dockerClient)
+			dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 
 			err := dockerServicemanager.Run(tt.image, tt.options)
 
@@ -1661,7 +1679,7 @@ func TestImageExist(t *testing.T) {
 			dockerClient := mocks.NewMockAPIClient(ctrl)
 			tt.setup(dockerClient)
 			defer ctrl.Finish()
-			dockerServicemanager := NewDockerServicemanager(dockerClient)
+			dockerServicemanager := services.NewDockerServiceManager(dockerClient)
 
 			ok, err := dockerServicemanager.ImageExist(image)
 
@@ -1689,8 +1707,8 @@ func TestIsRunningError(t *testing.T) {
 		Return(types.ContainerJSON{}, expectedError).
 		Times(1)
 
-	serviceManager := services.NewServiceManager(dockerClient)
-	ok, err := serviceManager.IsRunning("validator-client")
+	dockerServiceManager := services.NewDockerServiceManager(dockerClient)
+	ok, err := dockerServiceManager.IsRunning("validator-client")
 	assert.ErrorIs(t, err, expectedError)
 	assert.False(t, ok)
 }

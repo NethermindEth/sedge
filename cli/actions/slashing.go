@@ -26,7 +26,6 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/NethermindEth/sedge/internal/utils"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
@@ -50,7 +49,7 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 	validatorContainerName := services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 	slashingContainerName := services.ContainerNameWithTag(services.ServiceCtSlashingData, options.ContainerTag)
 	// Check validator container exists
-	_, err := s.dockerServiceManager.ContainerId(validatorContainerName)
+	_, err := s.dockerServiceManager.ContainerID(validatorContainerName)
 	if err != nil {
 		return err
 	}
@@ -139,7 +138,7 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 	validatorContainerName := services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 	slashingContainerName := services.ContainerNameWithTag(services.ServiceCtSlashingData, options.ContainerTag)
 	// Check validator container exists
-	_, err := s.dockerServiceManager.ContainerId(validatorContainerName)
+	_, err := s.dockerServiceManager.ContainerID(validatorContainerName)
 	if err != nil {
 		return err
 	}
@@ -241,7 +240,7 @@ func runSlashingContainer(dockerClient client.APIClient, dockerServiceManager Do
 	log.Debugf("Slashing protection container id: %s", ct.ID)
 	ctExit, errChan := dockerServiceManager.Wait(slashingContainerName, container.WaitConditionNextExit)
 	log.Info("The slashing protection container is starting...")
-	if err := dockerClient.ContainerStart(context.Background(), ct.ID, types.ContainerStartOptions{}); err != nil {
+	if err := dockerClient.ContainerStart(context.Background(), ct.ID, container.StartOptions{}); err != nil {
 		return err
 	}
 	osSignals := make(chan os.Signal, 1)
@@ -275,10 +274,10 @@ func runSlashingContainer(dockerClient client.APIClient, dockerServiceManager Do
 	}
 }
 
-func deleteContainer(dockerClient client.APIClient, container string) error {
-	log.Debugf("Removing container %s", container)
-	if err := dockerClient.ContainerRemove(context.Background(), container, types.ContainerRemoveOptions{}); err != nil && !client.IsErrNotFound(err) {
-		return fmt.Errorf("error removing container %s: %w", container, err)
+func deleteContainer(dockerClient client.APIClient, containerVar string) error {
+	log.Debugf("Removing container %s", containerVar)
+	if err := dockerClient.ContainerRemove(context.Background(), containerVar, container.RemoveOptions{}); err != nil && !client.IsErrNotFound(err) {
+		return fmt.Errorf("error removing container %s: %w", containerVar, err)
 	}
 	return nil
 }

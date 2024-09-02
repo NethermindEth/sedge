@@ -1,0 +1,7 @@
+targets:
+  - service: main-service
+    port: 9090
+    path: /metrics
+  - service: helper
+    port: 8000
+    path: /api/helper 

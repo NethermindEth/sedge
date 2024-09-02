@@ -1,0 +1,5 @@
+name: invalid-port
+target: PORT
+type: port
+default: -8080
+help: "invalid type port with negative value"

@@ -1,0 +1,5 @@
+name: invalid-int
+target: INT
+type: int
+default: 12.34
+help: "invalid type int"

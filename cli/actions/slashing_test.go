@@ -57,7 +57,7 @@ func validatorNotFoundHelper(t *testing.T, ctrl *gomock.Controller) actions.Sedg
 	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 
 	dockerClient.EXPECT().
-		ContainerList(gomock.Any(), types.ContainerListOptions{
+		ContainerList(gomock.Any(), container.ListOptions{
 			All:     true,
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
@@ -97,7 +97,7 @@ func checkValidatorFailureHelper(t *testing.T, ctrl *gomock.Controller, wantErro
 	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
 
 	dockerClient.EXPECT().
-		ContainerList(gomock.Any(), types.ContainerListOptions{
+		ContainerList(gomock.Any(), container.ListOptions{
 			All:     true,
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
@@ -146,7 +146,7 @@ func validatorStopFailureHelper(t *testing.T, ctrl *gomock.Controller) actions.S
 	validatorCtId := "validatorctid"
 
 	dockerClient.EXPECT().
-		ContainerList(gomock.Any(), types.ContainerListOptions{
+		ContainerList(gomock.Any(), container.ListOptions{
 			All:     true,
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
@@ -255,7 +255,7 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag stri
 	validatorContainerName := services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, containerTag)
 	// Mock ContainerList
 	dockerClient.EXPECT().
-		ContainerList(gomock.Any(), types.ContainerListOptions{
+		ContainerList(gomock.Any(), container.ListOptions{
 			All:     true,
 			Filters: filters.NewArgs(filters.Arg("name", validatorContainerName)),
 		}).
@@ -313,7 +313,7 @@ func slashingGoldenPath(t *testing.T, ctrl *gomock.Controller, containerTag stri
 		Times(1)
 	// Mock ContainerRemove
 	dockerClient.EXPECT().
-		ContainerRemove(gomock.Any(), slashingCtId, types.ContainerRemoveOptions{}).
+		ContainerRemove(gomock.Any(), slashingCtId, container.RemoveOptions{}).
 		Return(nil).
 		Times(1)
 
@@ -385,7 +385,7 @@ func unsupportedClientsHelper(t *testing.T, ctrl *gomock.Controller) actions.Sed
 
 	// Mock ContainerList
 	dockerClient.EXPECT().
-		ContainerList(gomock.Any(), types.ContainerListOptions{
+		ContainerList(gomock.Any(), container.ListOptions{
 			All:     true,
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).

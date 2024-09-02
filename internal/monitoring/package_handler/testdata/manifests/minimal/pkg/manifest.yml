@@ -1,0 +1,6 @@
+version: "v1.0.0"
+name: sample-avs
+upgrade: required
+profiles:
+  - "profile1"
+  - "profile2"

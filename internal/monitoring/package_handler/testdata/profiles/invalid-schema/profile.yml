@@ -1,0 +1,18 @@
+monitoring:
+  targets:
+    - service: "main-service"
+      port: 8080
+      path: "/metrics"
+api:
+  service: "main-service"
+options:
+  - name: "main-port"
+    target: MAIN_PORT
+    type: port
+    default: 8070
+    help: "Main service server port"
+hardware_requirements_overrides:
+  min_cpu_cores: 20
+  min_ram: 65536         # ~= 64 Gb
+  min_free_space: 5242880  # ~= 5  Tb
+  stop_if_requirements_are_not_met: true

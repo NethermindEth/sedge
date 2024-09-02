@@ -1,0 +1,12 @@
+version: "v1.0.0"
+name: sample-avs
+upgrade: required
+hardware_requirements:
+  min_cpu_cores: -1
+  min_ram: -1
+  min_free_space: -1
+  stop_if_requirements_are_not_met: false
+plugin:
+  image: "http://your-organization/plugin-service"
+profiles:
+  - "profile1"

@@ -1,0 +1,7 @@
+name: invalid-uri
+target: URI
+type: uri
+default: "noturi/" #"noturi:" is valid
+help: "invalid type uri with scheme"
+validate: 
+  uri_scheme: ["http","ftp","noturi"] 

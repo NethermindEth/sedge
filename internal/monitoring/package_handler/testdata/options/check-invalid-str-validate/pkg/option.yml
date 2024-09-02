@@ -1,0 +1,7 @@
+name: check-str
+target: STR
+type: str
+default: THIS message IS not VALID
+help: "checking type str with validation"
+validate:
+  re2_regex: "^[A-Z ]+$"

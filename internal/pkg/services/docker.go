@@ -1,8 +1,22 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package services
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -11,16 +25,16 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
 	dockerCt "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
-	"github.com/docker/docker/pkg/stdcopy"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/NethermindEth/sedge/internal/common"
+	"github.com/NethermindEth/sedge/internal/utils"
 )
 
 const NetworkHost = "host"
@@ -53,14 +67,14 @@ func (d *DockerServiceManager) Image(container string) (string, error) {
 // It uses the ContainerStart method of the Docker client to start the container.
 // If the container is successfully started, the function returns nil.
 // If an error occurs during the start process, the function wraps the error with a custom message and returns it.
-func (d *DockerServiceManager) Start(container string) error {
-	if err := d.dockerClient.ContainerStart(context.Background(), container, types.ContainerStartOptions{}); err != nil {
-		return fmt.Errorf("%w %s: %s", ErrStartingContainer, container, err)
+func (d *DockerServiceManager) Start(containerVar string) error {
+	if err := d.dockerClient.ContainerStart(context.Background(), containerVar, dockerCt.StartOptions{}); err != nil {
+		return fmt.Errorf("%w %s: %s", ErrStartingContainer, containerVar, err)
 	}
 	return nil
 }
 
-// Stop attempts to stop a specified Docker container.
+// Stop attempts to stop a specified Docker dockerCt.
 // The function first inspects the container to check if it's running. If the container is not found, it returns nil.
 // If the container is running, it attempts to stop the container and returns any error that occurs during the process.
 func (d *DockerServiceManager) Stop(container string) error {
@@ -71,7 +85,7 @@ func (d *DockerServiceManager) Stop(container string) error {
 		}
 		return err
 	}
-	if ctInfo.State.Running {
+	if ctInfo.State.Running || ctInfo.State.Restarting{
 		log.Infof("Stopping service: %s, currently on %s status", container, ctInfo.State.Status)
 		timeout := 5 * int(time.Minute)
 		if err := d.dockerClient.ContainerStop(context.Background(), ctInfo.ID, dockerCt.StopOptions{
@@ -87,7 +101,7 @@ func (d *DockerServiceManager) Stop(container string) error {
 // The function lists all containers and filters them by name. If a container with the specified name is found, its ID is returned.
 // If no container with the specified name is found, the function returns an error.
 func (d *DockerServiceManager) ContainerID(containerName string) (string, error) {
-	containers, err := d.dockerClient.ContainerList(context.Background(), types.ContainerListOptions{
+	containers, err := d.dockerClient.ContainerList(context.Background(), dockerCt.ListOptions{
 		All:     true,
 		Filters: filters.NewArgs(filters.Arg("name", containerName)),
 	})
@@ -95,7 +109,7 @@ func (d *DockerServiceManager) ContainerID(containerName string) (string, error)
 		return "", err
 	}
 	for _, c := range containers {
-		if Contains(c.Names, "/"+containerName) {
+		if utils.Contains(c.Names, "/"+containerName) {
 			return c.ID, nil
 		}
 	}
@@ -104,33 +118,31 @@ func (d *DockerServiceManager) ContainerID(containerName string) (string, error)
 
 // Pull pulls a specified Docker image.
 // The function attempts to pull the image and returns any error that occurs during the process.
-func (d *DockerServiceManager) Pull(image string) error {
-	log.Debugf("Pulling image: %s", image)
-	_, err := d.dockerClient.ImagePull(context.Background(), image, types.ImagePullOptions{})
+func (d *DockerServiceManager) Pull(imageVar string) error {
+	log.Debugf("Pulling image: %s", imageVar)
+	_, err := d.dockerClient.ImagePull(context.Background(), imageVar, image.PullOptions{})
 	return err
 }
 
 // ContainerLogs returns the logs of a container. <service> is the name of the container for logging purposes.
 // The function accepts a string parameter 'ctID', which represents the name or ID of the Docker container.
 // The function attempts to fetch the logs and returns them as a string. If an error occurs during the process, it returns the error.
-func (d *DockerServiceManager) ContainerLogs(ctID, service string) (string, error) {
-	logReader, err := d.dockerClient.ContainerLogs(context.Background(), ctID, types.ContainerLogsOptions{
-		ShowStdout: true,
-		ShowStderr: true,
-		Follow:     false,
-	})
-	if err != nil {
-		return "", err
-	}
-	defer logReader.Close()
+func (d *DockerServiceManager) ContainerLogs(containerVar, service string) (string, error) {
+    logReader, err := d.dockerClient.ContainerLogs(context.Background(), containerVar, dockerCt.LogsOptions{
+        ShowStdout: true,
+        ShowStderr: true,
+        Follow:     false,
+    })
+    if err != nil {
+        return "", err
+    }
+    defer logReader.Close()
 
-	var logs bytes.Buffer
-	written, err := stdcopy.StdCopy(&logs, &logs, logReader)
-	log.Debugf("Logs written %d bytes", written)
-	if err == nil {
-		log.Debugf("%s container logs: %s", service, logs.String())
-	}
-	return logs.String(), err
+    logs, err := io.ReadAll(logReader)
+    if err == nil {
+        log.Debugf("%s container logs: %s",service, string(logs))
+    }
+    return string(logs), err
 }
 
 // ContainerLogsMerged retrieves the merge of all logs of specified Docker containers.
@@ -146,7 +158,7 @@ func (d *DockerServiceManager) ContainerLogsMerged(ctx context.Context, w io.Wri
 		go func(serviceName, id string, out chan error) {
 			defer waitGroup.Done()
 
-			logReader, err := d.dockerClient.ContainerLogs(ctx, id, types.ContainerLogsOptions{
+			logReader, err := d.dockerClient.ContainerLogs(ctx, id, dockerCt.LogsOptions{
 				ShowStdout: true,
 				ShowStderr: true,
 				Follow:     opts.Follow,
@@ -200,7 +212,7 @@ func (d *DockerServiceManager) ContainerLogsMerged(ctx context.Context, w io.Wri
 
 // Wait waits for a specified Docker container to reach a certain condition.
 // The function returns two channels: one for the wait response and one for any error that occurs during the wait process.
-func (d *DockerServiceManager) Wait(container string, condition container.WaitCondition) (<-chan container.WaitResponse, <-chan error) {
+func (d *DockerServiceManager) Wait(container string, condition dockerCt.WaitCondition) (<-chan dockerCt.WaitResponse, <-chan error) {
 	return d.dockerClient.ContainerWait(context.Background(), container, dockerCt.WaitCondition(condition))
 }
 
@@ -238,7 +250,7 @@ func (d *DockerServiceManager) ContainerStatus(container string) (common.Status,
 // function returns nil and the error.
 func (d *DockerServiceManager) PS() ([]ContainerInfo, error) {
 	log.Debugf("Listing containers")
-	containerList, err := d.dockerClient.ContainerList(context.Background(), types.ContainerListOptions{})
+	containerList, err := d.dockerClient.ContainerList(context.Background(), dockerCt.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -353,9 +365,9 @@ func (m Mount) mount() mount.Mount {
 }
 
 // ImageRemove removes a specified Docker image.
-func (d *DockerServiceManager) ImageRemove(image string) error {
-	log.Debugf("Removing image %s", image)
-	_, err := d.dockerClient.ImageRemove(context.Background(), image, types.ImageRemoveOptions{
+func (d *DockerServiceManager) ImageRemove(imageVar string) error {
+	log.Debugf("Removing image %s", imageVar)
+	_, err := d.dockerClient.ImageRemove(context.Background(), imageVar, image.RemoveOptions{
 		PruneChildren: true,
 	})
 	return err
@@ -397,7 +409,7 @@ func (d *DockerServiceManager) Run(image string, options RunOptions) (err error)
 			return
 		}
 		log.Debugf("Removing container %s", createResponse.ID)
-		removeErr := d.dockerClient.ContainerRemove(context.Background(), createResponse.ID, types.ContainerRemoveOptions{})
+		removeErr := d.dockerClient.ContainerRemove(context.Background(), createResponse.ID, dockerCt.RemoveOptions{})
 		if removeErr != nil {
 			// If the main function did not return an error, but the deferred function did,
 			// the deferred function's error is returned.
@@ -418,7 +430,7 @@ func (d *DockerServiceManager) Run(image string, options RunOptions) (err error)
 	}
 	waitChn, errChn := d.dockerClient.ContainerWait(context.Background(), createResponse.ID, dockerCt.WaitConditionNextExit)
 	log.Debugf("Starting container %s", createResponse.ID)
-	err = d.dockerClient.ContainerStart(context.Background(), createResponse.ID, types.ContainerStartOptions{})
+	err = d.dockerClient.ContainerStart(context.Background(), createResponse.ID, dockerCt.StartOptions{})
 	if err != nil {
 		return err
 	}
@@ -463,7 +475,7 @@ func (d *DockerServiceManager) IsRunning(ct string) (bool, error) {
 }
 
 func containerLogs(dockerClient client.APIClient, containerID string) string {
-	logsReader, err := dockerClient.ContainerLogs(context.Background(), containerID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true})
+	logsReader, err := dockerClient.ContainerLogs(context.Background(), containerID, dockerCt.LogsOptions{ShowStdout: true, ShowStderr: true})
 	if err != nil {
 		log.Errorf("Error getting container logs: %v", err)
 		return ""

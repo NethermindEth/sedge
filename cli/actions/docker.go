@@ -9,6 +9,6 @@ type DockerServiceManager interface {
 	Start(service string) error
 	IsRunning(service string) (bool, error)
 	Wait(service string, condition container.WaitCondition) (<-chan container.WaitResponse, <-chan error)
-	ContainerId(service string) (string, error)
+	ContainerID(service string) (string, error)
 	ContainerLogs(ctID, service string) (string, error)
 }

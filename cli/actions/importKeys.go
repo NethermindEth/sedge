@@ -28,7 +28,6 @@ import (
 	"github.com/NethermindEth/sedge/internal/images/validator-import/teku"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
@@ -70,7 +69,7 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 	}
 	validatorCtName := services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 	// Check validator container exists
-	_, err := s.dockerServiceManager.ContainerId(validatorCtName)
+	_, err := s.dockerServiceManager.ContainerID(validatorCtName)
 	if err != nil {
 		return err
 	}
@@ -406,7 +405,7 @@ func runAndWaitImportKeys(dockerClient client.APIClient, dockerServiceManager Do
 	log.Debugf("import keys container id: %s", ctID)
 	ctExit, errChan := dockerServiceManager.Wait(ctID, container.WaitConditionNextExit)
 	log.Info("The keys import container is starting")
-	if err := dockerClient.ContainerStart(context.Background(), ctID, types.ContainerStartOptions{}); err != nil {
+	if err := dockerClient.ContainerStart(context.Background(), ctID, container.StartOptions{}); err != nil {
 		return err
 	}
 	osSignals := make(chan os.Signal, 1)

@@ -1,0 +1,4 @@
+targets:
+  - service: main-service
+    port: 9090
+    path: metrics

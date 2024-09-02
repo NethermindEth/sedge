@@ -1,0 +1,7 @@
+name: check-str
+target: STR
+type: str
+default: CAPITAL LETTERS AND BLANK SPACES ONLY
+help: "checking type str with validation"
+validate:
+  re2_regex: "^[A-Z ]+$"

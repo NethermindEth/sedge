@@ -1,0 +1,6 @@
+name: invalid-select
+target: SELECT
+type: select
+default: "not"
+help: "not validate"
+validate:

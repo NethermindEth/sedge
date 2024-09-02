@@ -1,0 +1,3 @@
+targets:
+  - port: 9090
+    path: /metrics

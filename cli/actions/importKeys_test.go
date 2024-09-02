@@ -327,7 +327,7 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 
 	// Mock ContainerList
 	dockerClient.EXPECT().
-		ContainerList(gomock.Any(), types.ContainerListOptions{
+		ContainerList(gomock.Any(), container.ListOptions{
 			All:     true,
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
@@ -387,7 +387,7 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 		Times(1)
 	// Mock ContainerRemove
 	dockerClient.EXPECT().
-		ContainerRemove(gomock.Any(), validatorImportCtId, types.ContainerRemoveOptions{}).
+		ContainerRemove(gomock.Any(), validatorImportCtId, container.RemoveOptions{}).
 		Return(nil).
 		Times(1)
 
@@ -403,7 +403,7 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 
 	// Mock ContainerList
 	dockerClient.EXPECT().
-		ContainerList(gomock.Any(), types.ContainerListOptions{
+		ContainerList(gomock.Any(), container.ListOptions{
 			All:     true,
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
@@ -459,7 +459,7 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 		Times(1)
 	// Mock ContainerRemove
 	dockerClient.EXPECT().
-		ContainerRemove(gomock.Any(), validatorImportCtId, types.ContainerRemoveOptions{}).
+		ContainerRemove(gomock.Any(), validatorImportCtId, container.RemoveOptions{}).
 		Return(nil).
 		Times(1)
 

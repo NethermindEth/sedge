@@ -1,0 +1,15 @@
+options:
+  - name: el-port
+    target: PORT
+    type: port
+    default: 8080
+    help: "Port of the harbor bay crocodile in the horse window within upside Coca Cola"
+  - name: graffiti
+    target: GRAFFITI
+    type: str
+    help: "Graffiti code of Donatello tattoo in DevCon restroom while hanging out with a Bored Ape"
+monitoring:
+  targets:
+    - service: main-service
+      port: 9090
+      path: /metrics

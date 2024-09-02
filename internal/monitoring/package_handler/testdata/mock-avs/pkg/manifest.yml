@@ -1,0 +1,7 @@
+version: v0.1.0
+name: eth-cl
+upgrade: recommended
+# TODO: add hardware requirements
+# TODO: add plugin
+profiles:
+  - "sepolia"

@@ -1,0 +1,8 @@
+name: valid-float
+target: FLOAT
+type: float
+default: 123.4
+help: "valid type float with min and max"
+validate: 
+  min_value: 123.1
+  max_value: 124.2

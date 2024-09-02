@@ -1,0 +1,5 @@
+name: check-str
+target: STR
+type: str
+default: this could be anything
+help: "checking type str"

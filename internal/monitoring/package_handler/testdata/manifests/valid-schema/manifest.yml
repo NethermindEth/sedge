@@ -1,0 +1,14 @@
+version: v0.1.0
+name: python-mock-server
+upgrade: recommended
+hardware_requirements:
+  min_cpu_cores: 2
+  min_ram: 1024         # ~= 1 Gb
+  min_free_space: 5120  # ~= 5 Gb
+  stop_if_requirements_are_not_met: true
+plugin:
+  image: mock-avs-plugin:latest
+profiles:
+  - "high-requirements"
+  - "option-returner"
+  - "health-checker"
