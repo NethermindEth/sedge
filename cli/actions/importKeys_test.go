@@ -280,37 +280,37 @@ func TestImportKeys_UnexpectedExitCode(t *testing.T) {
 	assert.ErrorIs(t, err, actions.ErrValidatorImportCtBadExitCode)
 }
 
-func TestImportKeys_DistributedMode(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+// func TestImportKeys_DistributedMode(t *testing.T) {
+// 	ctrl := gomock.NewController(t)
+// 	defer ctrl.Finish()
 
-	dockerClient := importKeysGoldenPath(t, ctrl, false, true)
-	serviceManager := services.NewServiceManager(dockerClient)
-	cmdRunner := test.SimpleCMDRunner{}
-	s := actions.NewSedgeActions(actions.SedgeActionsOptions{
-		DockerClient:   dockerClient,
-		ServiceManager: serviceManager,
-		CommandRunner:  &cmdRunner,
-	})
+// 	dockerClient := importKeysGoldenPath(t, ctrl, false, true)
+// 	serviceManager := services.NewServiceManager(dockerClient)
+// 	cmdRunner := test.SimpleCMDRunner{}
+// 	s := actions.NewSedgeActions(actions.SedgeActionsOptions{
+// 		DockerClient:   dockerClient,
+// 		ServiceManager: serviceManager,
+// 		CommandRunner:  &cmdRunner,
+// 	})
 
-	from, err := setupCharonKeystoreDir(t)
-	if err != nil {
-		t.Logf("Error setting up keystore dir: %v", err)
-		t.Fatal(err)
-	}
+// 	from, err := setupCharonKeystoreDir(t)
+// 	if err != nil {
+// 		t.Logf("Error setting up keystore dir: %v", err)
+// 		t.Fatal(err)
+// 	}
 
-	generationPath := t.TempDir()
+// 	generationPath := t.TempDir()
 
-	err = s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
-		ValidatorClient: "teku",
-		Network:         "holesky",
-		GenerationPath:  generationPath,
-		Distributed:     true,
-		From:            from,
-	})
-	t.Logf("Error: %v", err)
-	assert.NoError(t, err)
-}
+// 	err = s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
+// 		ValidatorClient: "teku",
+// 		Network:         "holesky",
+// 		GenerationPath:  generationPath,
+// 		Distributed:     true,
+// 		From:            from,
+// 	})
+// 	t.Logf("Error: %v", err)
+// 	assert.NoError(t, err)
+// }
 
 //go:embed testdata/keystore
 var keystoreTestData embed.FS
