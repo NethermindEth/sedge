@@ -119,7 +119,7 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		defaultCharonPath := filepath.Join(configs.DefaultAbsSedgeDataPath, ".charon")
 		// Copy the folder from charonPath to defaultCharonPath
 		log.Infof("Copying Charon contents to the default path %s", defaultCharonPath)
-		if err := os.MkdirAll(defaultCharonPath, os.ModePerm); err != nil {
+		if err := os.MkdirAll(defaultCharonPath, 0o755); err != nil {
 			return err
 		}
 		if err := copy.Copy(charonPath, defaultCharonPath); err != nil {
@@ -128,12 +128,12 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		charonValidatorKeysPath := filepath.Join(charonPath, "validator_keys")
 		defaultKeystorePath := filepath.Join(configs.DefaultAbsSedgeDataPath, "keystore")
 		log.Infof("Copying the keys to the default path %s", defaultKeystorePath)
-		if err := os.MkdirAll(defaultKeystorePath, os.ModePerm); err != nil {
+		if err := os.MkdirAll(defaultKeystorePath, 0o755); err != nil {
 			return err
 		}
 
 		validatorKeysPath := filepath.Join(defaultKeystorePath, "validator_keys")
-		if err := os.MkdirAll(validatorKeysPath, os.ModePerm); err != nil {
+		if err := os.MkdirAll(validatorKeysPath, 0o755); err != nil {
 			return err
 		}
 
