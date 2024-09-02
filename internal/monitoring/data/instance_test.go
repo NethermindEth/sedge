@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NethermindEth/eigenlayer/internal/common"
-	"github.com/NethermindEth/eigenlayer/internal/data/testdata"
-	"github.com/NethermindEth/eigenlayer/internal/locker/mocks"
+	"github.com/NethermindEth/sedge/internal/monitoring/common"
+	"github.com/NethermindEth/sedge/internal/monitoring/data/testdata"
+	mocks"github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/NethermindEth/docker-volumes-snapshotter/pkg/backuptar"
-	"github.com/NethermindEth/eigenlayer/internal/locker"
+	"github.com/NethermindEth/sedge/internal/monitoring/locker"
 	"github.com/NethermindEth/eigenlayer/internal/package_handler"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"

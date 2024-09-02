@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/NethermindEth/eigenlayer/internal/data/testdata"
-	"github.com/NethermindEth/eigenlayer/internal/locker/mocks"
+	"github.com/NethermindEth/sedge/internal/monitoring/locker"
+	mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"

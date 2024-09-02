@@ -10,8 +10,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/NethermindEth/eigenlayer/internal/env"
-	"github.com/NethermindEth/eigenlayer/internal/locker"
+	"github.com/NethermindEth/sedge/internal/monitoring/env"
+	"github.com/NethermindEth/sedge/internal/monitoring/locker"
 	"github.com/NethermindEth/eigenlayer/internal/profile"
 	"github.com/compose-spec/compose-go/cli"
 	"github.com/compose-spec/compose-go/types"

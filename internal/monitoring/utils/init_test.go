@@ -1,7 +1,7 @@
-package data
+package utils
 
 import (
-	"github.com/NethermindEth/sedge/internal/common"
+	"github.com/NethermindEth/sedge/internal/monitoring/common"
 )
 
 func init() {

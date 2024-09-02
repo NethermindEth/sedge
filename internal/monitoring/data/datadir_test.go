@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/NethermindEth/sedge/internal/monitoring/common"
-	"github.com/NethermindEth/eigenlayer/internal/monitoring/locker"
+	"github.com/NethermindEth/sedge/internal/monitoring/locker"
 	mocks"github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/afero"

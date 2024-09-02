@@ -5,8 +5,8 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/NethermindEth/sedge/internal/pkg/monitoring"
-	"github.com/NethermindEth/sedge/internal/pkg/monitoring/services/types"
+	"github.com/NethermindEth/sedge/internal/monitoring/monitoring"
+	"github.com/NethermindEth/sedge/internal/monitoring/monitoring/services/types"
 )
 
 var _ monitoring.ServiceAPI = &NodeExporterService{}

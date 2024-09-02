@@ -3,7 +3,7 @@ package types
 import (
 	"strconv"
 
-	"github.com/NethermindEth/sedge/internal/data"
+	"github.com/NethermindEth/sedge/internal/monitoring/data"
 )
 
 // ServiceOptions defines the options for initializing a monitoring service. It includes a reference to the monitoring stack

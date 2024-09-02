@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/NethermindEth/eigenlayer/internal/locker"
+	"github.com/NethermindEth/sedge/internal/monitoring/locker"
 	"github.com/spf13/afero"
 )
 

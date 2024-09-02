@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/NethermindEth/sedge/internal/data"
-	"github.com/NethermindEth/sedge/internal/pkg/monitoring"
-	"github.com/NethermindEth/sedge/internal/pkg/monitoring/services/types"
+	"github.com/NethermindEth/sedge/internal/monitoring/data"
+	"github.com/NethermindEth/sedge/internal/monitoring/monitoring"
+	"github.com/NethermindEth/sedge/internal/monitoring/monitoring/services/types"
 	"github.com/cenkalti/backoff/v4"
 	log "github.com/sirupsen/logrus"
 	"github.com/thoas/go-funk"

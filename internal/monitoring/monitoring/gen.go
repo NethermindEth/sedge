@@ -4,4 +4,4 @@ package monitoring
 
 //go:generate mockgen -package=sedge_mocks -destination=../../mocks/compose.go -package=mocks github.com/NethermindEth/sedge/internal/pkg/monitoring ComposeManager
 
-//go:generate mockgen -package=sedge_mocks -destination=../../mocks/docker.go -package=mocks github.com/NethermindEth/sedge/internal/pkg/monitoring DockerManager
+//go:generate mockgen -package=sedge_mocks -destination=../../mocks/docker.go -package=mocks github.com/NethermindEth/sedge/internal/pkg/monitoring DockerServiManager
