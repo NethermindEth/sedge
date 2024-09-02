@@ -295,6 +295,7 @@ func TestImportKeys_DistributedMode(t *testing.T) {
 
 	from, err := setupCharonKeystoreDir(t)
 	if err != nil {
+		t.Logf("Error setting up keystore dir: %v", err)
 		t.Fatal(err)
 	}
 
@@ -307,6 +308,7 @@ func TestImportKeys_DistributedMode(t *testing.T) {
 		Distributed:     true,
 		From:            from,
 	})
+	t.Logf("Error: %v", err)
 	assert.NoError(t, err)
 }
 
