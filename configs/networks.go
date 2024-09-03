@@ -18,6 +18,7 @@ package configs
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"time"
 )
 
@@ -68,4 +69,22 @@ func NetworkEpochTime(network string) time.Duration {
 func SupportsMEVBoost(network string) bool {
 	out, ok := networksConfigs[network]
 	return ok && out.SupportsMEVBoost
+}
+
+func GetPublicRPCs(network string) ([]string, error) {
+	rpcs, exists := networkRPCs[network]
+	if !exists {
+		return nil, fmt.Errorf("invalid network")
+	}
+	// Create a copy of the slice to avoid modifying the original
+	shuffledRPCs := make([]string, len(rpcs.PublicRPCs))
+	copy(shuffledRPCs, rpcs.PublicRPCs)
+
+	// Shuffle the slice to randomize the order
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(shuffledRPCs), func(i, j int) {
+		shuffledRPCs[i], shuffledRPCs[j] = shuffledRPCs[j], shuffledRPCs[i]
+	})
+
+	return shuffledRPCs, nil
 }

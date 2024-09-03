@@ -33,12 +33,11 @@
       - --http
       - --http-address=0.0.0.0
       - --http-port={{.ClApiPort}}{{if not .CustomConsensusConfigs}}
-      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
-      - --target-peers=${CC_PEER_COUNT}{{if .CCBootnodes}}
+      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}{{if .CCBootnodes}}
       - --boot-nodes={{.CCBootnodes}}{{end}}
       - --execution-endpoints=${EC_AUTH_URL}
       - --execution-jwt=/tmp/jwt/jwtsecret
-      - --eth1=${EC_API_URL}{{range $url := .FallbackELUrls}},{{$url}}{{end}}
+      - --eth1
       - --debug-level=${CC_LOG_LEVEL}{{with .FeeRecipient}}
       - --suggested-fee-recipient=${FEE_RECIPIENT}{{end}}
       - --validator-monitor-auto
