@@ -1,1 +1,0 @@
-This file helps fix a Go Embed issue with file-less directories.

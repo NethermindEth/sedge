@@ -27,7 +27,7 @@ import (
 
 	"github.com/NethermindEth/sedge/internal/common"
 	"github.com/NethermindEth/sedge/internal/monitoring/locker"
-	mocks"github.com/NethermindEth/sedge/mocks"
+	mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
@@ -932,7 +932,7 @@ func TestMonitoringStack(t *testing.T) {
 	fs := afero.NewMemMapFs()
 	userHome, err := os.UserHomeDir()
 	require.NoError(t, err)
-	basePath := filepath.Join(userHome, ".local", "share", ".eigen")
+	basePath := filepath.Join(userHome, ".local", "share", ".sedge")
 
 	// Create a mock locker
 	ctrl := gomock.NewController(t)

@@ -29,14 +29,17 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const (
-	dataFile                = "/tmp/mock-avs-versions.yml"
-	cacheFile               = "/tmp/mock-avs-versions-cache.json"
+const(
 	mockAVSRepo             = "https://github.com/NethermindEth/mock-avs"
 	mockAVSPkgRepo          = "https://github.com/NethermindEth/mock-avs-pkg"
 	optionReturnerImageName = "mock-avs-option-returner"
 	healthCheckerImageName  = "mock-avs-health-checker"
 	pluginImageName         = "mock-avs-plugin"
+)
+
+var(
+	dataFile string
+	cacheFile string
 )
 
 // Global variables to store the latest versions of the mock-avs and
@@ -119,6 +122,17 @@ func (m *MockAVSImage) FullImage() string {
 // PluginImage data structures using as tag the latest version of the
 // mock-avs repository.
 func SetMockAVSs() error {
+
+	// Get the current working directory
+	wd, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Error getting current working directory:", err)
+		return err
+	}
+	// Construct the file paths
+	dataFile = fmt.Sprintf("%s/tmp/mock-avs-versions.yml", wd)
+	cacheFile = fmt.Sprintf("%s/tmp/mock-avs-versions-cache.json", wd)
+
 	if err := checkCache(); err != nil {
 		return fmt.Errorf("error checking cache for mock-avs data: %w", err)
 	}

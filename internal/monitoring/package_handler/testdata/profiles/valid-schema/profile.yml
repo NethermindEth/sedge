@@ -21,8 +21,8 @@ options:
     target: NETWORK_NAME
     type: str
     validate:
-      re2_regex: "^eigen.*" # Words that start with eigen
-    default: eigenlayer
+      re2_regex: "^sedge.*" # Words that start with sedge
+    default: sedge
     help: "Docker network name"
   - name: "test-option-int"
     target: TEST_OPTION_INT

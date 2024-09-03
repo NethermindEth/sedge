@@ -25,7 +25,7 @@ import (
 	"strings"
 
 	"github.com/NethermindEth/sedge/internal/common"
-	"github.com/NethermindEth/sedge/internal/monitoring/compose"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/monitoring/data"
 	"github.com/NethermindEth/sedge/internal/monitoring/locker"
 	"github.com/NethermindEth/sedge/internal/monitoring/monitoring/services/types"
@@ -42,7 +42,7 @@ var script embed.FS
 type MonitoringManager struct {
 	services       []ServiceAPI
 	composeManager ComposeManager
-	dockerManager  DockerManager
+	dockerServiceManager  DockerServiceManager
 	stack          *data.MonitoringStack
 }
 
@@ -50,7 +50,7 @@ type MonitoringManager struct {
 func NewMonitoringManager(
 	services []ServiceAPI,
 	cmpMgr ComposeManager,
-	dockerMgr DockerManager,
+	dockerMgr DockerServiceManager,
 	fs afero.Fs,
 	locker locker.Locker,
 ) *MonitoringManager {
@@ -67,7 +67,7 @@ func NewMonitoringManager(
 	return &MonitoringManager{
 		services:       services,
 		composeManager: cmpMgr,
-		dockerManager:  dockerMgr,
+		dockerServiceManager:  dockerMgr,
 		stack:          stack,
 	}
 }
@@ -159,12 +159,12 @@ func (m *MonitoringManager) InstallStack() error {
 	}
 
 	// Create containers
-	if err = m.composeManager.Create(compose.DockerComposeCreateOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
+	if err = m.composeManager.Create(commands.DockerComposeCreateOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
 		return fmt.Errorf("%w: %w", ErrInstallingMonitoringMngr, err)
 	}
 
 	log.Debug("Starting monitoring stack...")
-	if err := m.composeManager.Up(compose.DockerComposeUpOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
+	if err := m.composeManager.Up(commands.DockerComposeUpOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
 		return fmt.Errorf("%w: %w", ErrRunningMonitoringStack, err)
 	}
 
@@ -184,12 +184,12 @@ func (m *MonitoringManager) AddTarget(target types.MonitoringTarget, labels map[
 		// Check if network was already added to service
 		containerName := service.ContainerName()
 		if containerName == PrometheusContainerName {
-			networks, err := m.dockerManager.ContainerNetworks(containerName)
+			networks, err := m.dockerServiceManager.ContainerNetworks(containerName)
 			if err != nil {
 				return err
 			}
 			if !funk.Contains(networks, dockerNetwork) {
-				if err := m.dockerManager.NetworkConnect(containerName, dockerNetwork); err != nil {
+				if err := m.dockerServiceManager.NetworkConnect(containerName, dockerNetwork); err != nil {
 					return err
 				}
 			}
@@ -212,7 +212,7 @@ func (m *MonitoringManager) RemoveTarget(instanceID string) error {
 		// Disconnect may fail if the network was already disconnected or if the container was already removed
 		// so we ignore the error
 		serviceName := service.ContainerName()
-		if err := m.dockerManager.NetworkDisconnect(serviceName, network); err != nil {
+		if err := m.dockerServiceManager.NetworkDisconnect(serviceName, network); err != nil {
 			log.Debugf("Error disconnecting %s from %s: %s", serviceName, network, err)
 		}
 	}
@@ -222,7 +222,7 @@ func (m *MonitoringManager) RemoveTarget(instanceID string) error {
 // Run starts the monitoring stack by shutting down any existing stack and starting a new one.
 func (m *MonitoringManager) Run() error {
 	log.Info("Starting monitoring stack...")
-	if err := m.composeManager.Up(compose.DockerComposeUpOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
+	if err := m.composeManager.Up(commands.DockerComposeUpOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
 		return fmt.Errorf("%w: %w", ErrRunningMonitoringStack, err)
 	}
 
@@ -237,7 +237,7 @@ func (m *MonitoringManager) Run() error {
 // Stop shuts down the monitoring stack.
 func (m *MonitoringManager) Stop() error {
 	log.Info("Shutting down monitoring stack...")
-	if err := m.composeManager.Down(compose.DockerComposeDownOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
+	if err := m.composeManager.Down(commands.DockerComposeDownOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
 		return fmt.Errorf("%w: %w", ErrRunningMonitoringStack, err)
 	}
 
@@ -253,7 +253,7 @@ func (m *MonitoringManager) Status() (status common.Status, err error) {
 	}
 
 	for _, container := range containers {
-		status, err = m.dockerManager.ContainerStatus(container)
+		status, err = m.dockerServiceManager.ContainerStatus(container)
 		if err != nil {
 			return common.Unknown, fmt.Errorf("%w: %w", ErrCheckingMonitoringStack, err)
 		}
@@ -284,7 +284,7 @@ func (m *MonitoringManager) InstallationStatus() (common.Status, error) {
 func (m *MonitoringManager) Cleanup(force bool) error {
 	if !force {
 		log.Info("Shutting down monitoring stack...")
-		if err := m.composeManager.Down(compose.DockerComposeDownOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml"), Volumes: true}); err != nil {
+		if err := m.composeManager.Down(commands.DockerComposeDownOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
 			return fmt.Errorf("%w: %w", ErrRunningMonitoringStack, err)
 		}
 	}
@@ -307,7 +307,7 @@ func (m *MonitoringManager) ServiceEndpoints() map[string]string {
 }
 
 func (m *MonitoringManager) idToIP(id string) (string, error) {
-	ip, err := m.dockerManager.ContainerIP(id)
+	ip, err := m.dockerServiceManager.ContainerIP(id)
 	if err != nil {
 		return "", err
 	}

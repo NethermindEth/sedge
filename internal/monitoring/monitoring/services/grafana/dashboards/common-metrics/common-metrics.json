@@ -99,7 +99,7 @@
 			},
 			"editorMode": "builder",
 			"exemplar": false,
-			"expr": "eigen_performance_score",
+			"expr": "sedge_performance_score",
 			"format": "table",
 			"instant": true,
 			"legendFormat": "__auto",
@@ -175,7 +175,7 @@
 			  "uid": "egn-prom"
 			},
 			"editorMode": "builder",
-			"expr": "eigen_performance_score{instanceID=\"$InstanceID\"}",
+			"expr": "sedge_performance_score{instanceID=\"$InstanceID\"}",
 			"legendFormat": "__auto",
 			"range": true,
 			"refId": "A"
@@ -242,7 +242,7 @@
 			},
 			"editorMode": "code",
 			"exemplar": false,
-			"expr": "label_replace(eigen_performance_score, \"short_commit_hash\", \"$1\", \"instance_commit_hash\", \"(.{12}).*\")",
+			"expr": "label_replace(sedge_performance_score, \"short_commit_hash\", \"$1\", \"instance_commit_hash\", \"(.{12}).*\")",
 			"format": "table",
 			"instant": true,
 			"legendFormat": "__auto",
@@ -311,7 +311,7 @@
 			},
 			"editorMode": "builder",
 			"exemplar": false,
-			"expr": "eigen_performance_score",
+			"expr": "sedge_performance_score",
 			"format": "table",
 			"instant": true,
 			"legendFormat": "__auto",
@@ -380,7 +380,7 @@
 			},
 			"editorMode": "builder",
 			"exemplar": false,
-			"expr": "eigen_performance_score",
+			"expr": "sedge_performance_score",
 			"format": "table",
 			"instant": true,
 			"legendFormat": "__auto",
@@ -458,7 +458,7 @@
 			},
 			"editorMode": "builder",
 			"exemplar": false,
-			"expr": "eigen_balance_total{instanceID=\"$InstanceID\"}",
+			"expr": "sedge_balance_total{instanceID=\"$InstanceID\"}",
 			"legendFormat": "${{token}}",
 			"range": true,
 			"refId": "A"
@@ -520,7 +520,7 @@
 			  "uid": "egn-prom"
 			},
 			"editorMode": "builder",
-			"expr": "eigen_slashing_incurred_total{instanceID=\"$InstanceID\"}",
+			"expr": "sedge_slashing_incurred_total{instanceID=\"$InstanceID\"}",
 			"legendFormat": "${{token}}",
 			"range": true,
 			"refId": "A"
@@ -582,7 +582,7 @@
 			  "uid": "egn-prom"
 			},
 			"editorMode": "builder",
-			"expr": "eigen_fees_earned_total{instanceID=\"$InstanceID\"}",
+			"expr": "sedge_fees_earned_total{instanceID=\"$InstanceID\"}",
 			"legendFormat": "${{token}}",
 			"range": true,
 			"refId": "A"
@@ -688,7 +688,7 @@
 			  "uid": "egn-prom"
 			},
 			"editorMode": "code",
-			"expr": "rate(eigen_rpc_request_duration_seconds_sum{method=~\".*\", instanceID=\"$InstanceID\"}[5m])",
+			"expr": "rate(sedge_rpc_request_duration_seconds_sum{method=~\".*\", instanceID=\"$InstanceID\"}[5m])",
 			"legendFormat": "__auto",
 			"range": true,
 			"refId": "A"
@@ -777,7 +777,7 @@
 			  "uid": "egn-prom"
 			},
 			"editorMode": "builder",
-			"expr": "eigen_rpc_request_total{instanceID=\"$InstanceID\"}",
+			"expr": "sedge_rpc_request_total{instanceID=\"$InstanceID\"}",
 			"legendFormat": "{{method}}",
 			"range": true,
 			"refId": "A"
@@ -854,7 +854,7 @@
 			},
 			"editorMode": "builder",
 			"exemplar": false,
-			"expr": "rate(eigen_rpc_request_duration_seconds_count{instanceID=\"$InstanceID\"}[$__rate_interval])",
+			"expr": "rate(sedge_rpc_request_duration_seconds_count{instanceID=\"$InstanceID\"}[$__rate_interval])",
 			"format": "time_series",
 			"instant": false,
 			"legendFormat": "{{method}}",

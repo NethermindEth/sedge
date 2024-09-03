@@ -17,7 +17,7 @@ package monitoring
 
 import "github.com/NethermindEth/sedge/internal/common"
 
-// DockerManager is an interface for managing Docker containers.
+// DockerServiceManager is an interface for managing Docker containers.
 type DockerServiceManager interface {
 	// ContainerStatus returns the status of a container.
 	ContainerStatus(container string) (common.Status, error)

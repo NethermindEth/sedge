@@ -45,7 +45,7 @@ func main() {
 	defer dockerClient.Close()
 
 	// Docker service
-	serviceManager := services.NewServiceManager(dockerClient)
+	dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 
 	// Init dependencies manager
 	depsMgr := dependencies.NewDependenciesManager(cmdRunner)
@@ -53,7 +53,7 @@ func main() {
 	// Init Sedge Actions
 	sdgOpts := actions.SedgeActionsOptions{
 		DockerClient:   dockerClient,
-		ServiceManager: serviceManager,
+		DockerServiceManager: dockerServiceManager,
 		CommandRunner:  cmdRunner,
 	}
 	sedgeActions := actions.NewSedgeActions(sdgOpts)

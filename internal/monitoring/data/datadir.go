@@ -59,7 +59,7 @@ func (d *DataDir) Path() string {
 }
 
 // NewDataDirDefault creates a new DataDir instance with the default path as root.
-// Default path is $XDG_DATA_HOME/.eigen or $HOME/.local/share/.eigen if $XDG_DATA_HOME is not set
+// Default path is $XDG_DATA_HOME/.sedge or $HOME/.local/share/.sedge if $XDG_DATA_HOME is not set
 // as defined in the XDG Base Directory Specification
 func NewDataDirDefault(fs afero.Fs, locker locker.Locker) (*DataDir, error) {
 	userDataHome := os.Getenv("XDG_DATA_HOME")
@@ -70,7 +70,7 @@ func NewDataDirDefault(fs afero.Fs, locker locker.Locker) (*DataDir, error) {
 		}
 		userDataHome = filepath.Join(userHome, ".local", "share")
 	}
-	dataDir := filepath.Join(userDataHome, ".eigen")
+	dataDir := filepath.Join(userDataHome, ".sedge")
 	err := fs.MkdirAll(dataDir, 0o755)
 	if err != nil {
 		return nil, err

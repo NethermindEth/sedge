@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package data
+package data_test
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ import (
 
 	"github.com/NethermindEth/sedge/internal/common"
 	"github.com/NethermindEth/sedge/internal/monitoring/data/testdata"
-	mocks"github.com/NethermindEth/sedge/mocks"
+	mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
@@ -376,7 +376,7 @@ func TestInstance_Env(t *testing.T) {
 			wantEnv: map[string]string{
 				"MAIN_SERVICE_NAME": "main-service",
 				"MAIN_PORT":         "8080",
-				"NETWORK_NAME":      "eigenlayer",
+				"NETWORK_NAME":      "sedge",
 			},
 			wantErr: false,
 		},

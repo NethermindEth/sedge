@@ -107,7 +107,7 @@
               "uid": "egn-prom"
             },
             "editorMode": "builder",
-            "expr": "eigen_performance_score",
+            "expr": "sedge_performance_score",
             "legendFormat": "{{instanceID}}",
             "range": true,
             "refId": "A"
@@ -213,7 +213,7 @@
               "uid": "egn-prom"
             },
             "editorMode": "code",
-            "expr": "rate(eigen_rpc_request_duration_seconds_sum{method=~\".*\"}[5m])",
+            "expr": "rate(sedge_rpc_request_duration_seconds_sum{method=~\".*\"}[5m])",
             "legendFormat": "{{instanceID}} -> {{method}}",
             "range": true,
             "refId": "A"
@@ -302,7 +302,7 @@
               "uid": "egn-prom"
             },
             "editorMode": "builder",
-            "expr": "eigen_rpc_request_total",
+            "expr": "sedge_rpc_request_total",
             "legendFormat": "${{token}} -> {{instanceID}}",
             "range": true,
             "refId": "A"
@@ -379,7 +379,7 @@
             },
             "editorMode": "builder",
             "exemplar": false,
-            "expr": "rate(eigen_rpc_request_duration_seconds_count[$__rate_interval])",
+            "expr": "rate(sedge_rpc_request_duration_seconds_count[$__rate_interval])",
             "format": "time_series",
             "instant": false,
             "legendFormat": "{{instanceID}} -> {{method}}",

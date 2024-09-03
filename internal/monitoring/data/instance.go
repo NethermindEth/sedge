@@ -51,9 +51,9 @@ type Instance struct {
 	MonitoringTargets MonitoringTargets `json:"monitoring"`
 	APITarget         *APITarget        `json:"api,omitempty"`
 	Plugin            *Plugin           `json:"plugin,omitempty"`
-	path              string
-	fs                afero.Fs
-	locker            locker.Locker
+	Path              string
+	Fs                afero.Fs
+	Locker            locker.Locker
 }
 
 func (i *Instance) ID() string {
@@ -90,10 +90,10 @@ func (p *Plugin) validate() error {
 // state.json file and validates it.
 func newInstance(path string, fs afero.Fs, locker locker.Locker) (*Instance, error) {
 	i := Instance{
-		path: path,
-		fs:   fs,
+		Path: path,
+		Fs:   fs,
 	}
-	stateFile, err := i.fs.Open(filepath.Join(i.path, "state.json"))
+	stateFile, err := i.Fs.Open(filepath.Join(i.Path, "state.json"))
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return nil, fmt.Errorf("%w %s: state.json not found", ErrInvalidInstanceDir, path)
@@ -119,35 +119,35 @@ func newInstance(path string, fs afero.Fs, locker locker.Locker) (*Instance, err
 	if err != nil {
 		return nil, err
 	}
-	i.locker = locker.New(filepath.Join(path, ".lock"))
+	i.Locker = locker.New(filepath.Join(path, ".lock"))
 	return &i, nil
 }
 
 // init initializes a new instance with the given path as root. It creates the
 // .lock and state.json files. If the instance is invalid, an error is returned.
 func (i *Instance) init(instancePath string, fs afero.Fs, locker locker.Locker) error {
-	i.fs = fs
-	i.locker = locker
-	i.path = instancePath
+	i.Fs = fs
+	i.Locker = locker
+	i.Path = instancePath
 	err := i.validate()
 	if err != nil {
 		return err
 	}
-	err = i.fs.MkdirAll(instancePath, 0o755)
+	err = i.Fs.MkdirAll(instancePath, 0o755)
 	if err != nil {
 		return err
 	}
 
 	// Create the lock file
-	_, err = i.fs.Create(filepath.Join(i.path, ".lock"))
+	_, err = i.Fs.Create(filepath.Join(i.Path, ".lock"))
 	if err != nil {
 		return err
 	}
 	// Set lock
-	i.locker = i.locker.New(filepath.Join(i.path, ".lock"))
+	i.Locker = i.Locker.New(filepath.Join(i.Path, ".lock"))
 
 	// Create state file
-	stateFile, err := i.fs.Create(filepath.Join(i.path, "state.json"))
+	stateFile, err := i.Fs.Create(filepath.Join(i.Path, "state.json"))
 	if err != nil {
 		return err
 	}
@@ -181,7 +181,7 @@ func (i *Instance) Setup(env map[string]string, profilePath string) (err error) 
 		}
 	}()
 	// Create .env file
-	envFile, err := i.fs.Create(filepath.Join(i.path, ".env"))
+	envFile, err := i.Fs.Create(filepath.Join(i.Path, ".env"))
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func (i *Instance) Setup(env map[string]string, profilePath string) (err error) 
 	defer envFile.Close()
 
 	// Copy src directory
-	err = afero.Walk(i.fs, profilePath, func(path string, info fs.FileInfo, err error) error {
+	err = afero.Walk(i.Fs, profilePath, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -199,9 +199,9 @@ func (i *Instance) Setup(env map[string]string, profilePath string) (err error) 
 		if err != nil {
 			return err
 		}
-		targetPath := filepath.Join(i.path, relPath)
+		targetPath := filepath.Join(i.Path, relPath)
 		if info.IsDir() {
-			if err := i.fs.MkdirAll(targetPath, 0o755); err != nil {
+			if err := i.Fs.MkdirAll(targetPath, 0o755); err != nil {
 				return err
 			}
 		} else {
@@ -209,12 +209,12 @@ func (i *Instance) Setup(env map[string]string, profilePath string) (err error) 
 			if info.Name() == ".env" {
 				return nil
 			}
-			pkgFile, err := i.fs.Open(path)
+			pkgFile, err := i.Fs.Open(path)
 			if err != nil {
 				return err
 			}
 			defer pkgFile.Close()
-			targetFile, err := i.fs.Create(targetPath)
+			targetFile, err := i.Fs.Create(targetPath)
 			if err != nil {
 				return err
 			}
@@ -229,7 +229,7 @@ func (i *Instance) Setup(env map[string]string, profilePath string) (err error) 
 	}
 
 	// Check if docker-compose.yml exists
-	exists, err := afero.Exists(i.fs, i.ComposePath())
+	exists, err := afero.Exists(i.Fs, i.ComposePath())
 	if err != nil {
 		return fmt.Errorf("could not check if docker-compose.yml exists: %w", err)
 	}
@@ -241,7 +241,7 @@ func (i *Instance) Setup(env map[string]string, profilePath string) (err error) 
 
 // ComposePath returns the path to the docker-compose.yml file of the instance.
 func (i *Instance) ComposePath() string {
-	return filepath.Join(i.path, "docker-compose.yml")
+	return filepath.Join(i.Path, "docker-compose.yml")
 }
 
 // ComposeProject returns the compose project of the instance.
@@ -269,15 +269,15 @@ func (i *Instance) ProfileFile() (*profile.Profile, error) {
 	defer i.unlock()
 
 	var p profile.Profile
-	profileFilePath := filepath.Join(i.path, "profile.yml")
-	exists, err := afero.Exists(i.fs, profileFilePath)
+	profileFilePath := filepath.Join(i.Path, "profile.yml")
+	exists, err := afero.Exists(i.Fs, profileFilePath)
 	if err != nil {
 		return nil, err
 	}
 	if !exists {
 		return nil, fmt.Errorf("profile file not found for instance %s", i.ID())
 	}
-	profileFile, err := i.fs.Open(profileFilePath)
+	profileFile, err := i.Fs.Open(profileFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -299,21 +299,21 @@ func (i *Instance) Env() (map[string]string, error) {
 		return nil, err
 	}
 	defer i.unlock()
-	envPath := filepath.Join(i.path, ".env")
-	return env.LoadEnv(i.fs, envPath)
+	envPath := filepath.Join(i.Path, ".env")
+	return env.LoadEnv(i.Fs, envPath)
 }
 
 // lock locks the .lock file of the instance.
 func (i *Instance) lock() error {
-	return i.locker.Lock()
+	return i.Locker.Lock()
 }
 
 // unlock unlocks the .lock file of the instance.
 func (i *Instance) unlock() error {
-	if i.locker == nil || !i.locker.Locked() {
+	if i.Locker == nil || !i.Locker.Locked() {
 		return errors.New("instance is not locked")
 	}
-	return i.locker.Unlock()
+	return i.Locker.Unlock()
 }
 
 func (i *Instance) validate() error {

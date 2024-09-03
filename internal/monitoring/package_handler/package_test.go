@@ -42,7 +42,7 @@ func TestNewPackageHandlerFromURL(t *testing.T) {
 	ts := []testCase{
 		func() testCase {
 			t.Helper()
-			afs := afero.NewOsFs()
+			afs := afero.NewMemMapFs()
 			path, err := afero.TempDir(afs, "", "test")
 			require.NoError(t, err)
 
@@ -58,7 +58,7 @@ func TestNewPackageHandlerFromURL(t *testing.T) {
 		}(),
 		func() testCase {
 			t.Helper()
-			afs := afero.NewOsFs()
+			afs := afero.NewMemMapFs()
 			path, err := afero.TempDir(afs, "", "test")
 			require.NoError(t, err)
 
@@ -81,6 +81,7 @@ func TestNewPackageHandlerFromURL(t *testing.T) {
 				GitAuth: nil,
 			})
 			assert.ErrorIs(t, err, tc.err)
+			t.Logf("err: %v", err)
 			if err == nil {
 				assert.Equal(t, tc.pkgHandler.path, pkgHandler.path)
 			}
@@ -531,6 +532,7 @@ func TestVersions(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			defer readmeFile.Close()
 			_, err = readmeFile.WriteString("Test file for test " + tc.name)
 			if err != nil {
 				t.Fatal(err)
@@ -603,6 +605,7 @@ func TestLatestVersion(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			defer readmeFile.Close()
 			_, err = readmeFile.WriteString("Test file for test " + tc.name)
 			if err != nil {
 				t.Fatal(err)

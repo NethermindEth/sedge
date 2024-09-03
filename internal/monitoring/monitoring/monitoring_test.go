@@ -29,10 +29,10 @@ import (
 	"testing"
 
 	"github.com/NethermindEth/sedge/internal/common"
-	"github.com/NethermindEth/sedge/internal/monitoring/compose"
 	"github.com/NethermindEth/sedge/internal/monitoring/data"
-	mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/NethermindEth/sedge/internal/monitoring/monitoring/services/types"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
+	mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
@@ -57,7 +57,7 @@ func TestInit(t *testing.T) {
 
 		// Expect the lock to be acquired
 		gomock.InOrder(
-			locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+			locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 			locker.EXPECT().Lock().Return(nil),
 			locker.EXPECT().Locked().Return(true),
 			locker.EXPECT().Unlock().Return(nil),
@@ -67,7 +67,7 @@ func TestInit(t *testing.T) {
 
 	dotEnvFileWriter := func(t *testing.T, fs afero.Fs, dotenv map[string]string) {
 		// Create the dotenv file
-		dotenvFile, err := fs.Create(filepath.Join(userDataHome, ".eigen", "monitoring", ".env"))
+		dotenvFile, err := fs.Create(filepath.Join(userDataHome, ".sedge", "monitoring", ".env"))
 		require.NoError(t, err)
 
 		// Write the dotenv file
@@ -79,14 +79,14 @@ func TestInit(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		mocker      func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack, dotenv map[string]string) ([]ServiceAPI, *mocks.MockDockerManager)
+		mocker      func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack, dotenv map[string]string) ([]ServiceAPI, *mocks.MockDockerServiceManager)
 		setupDotEnv func(t *testing.T, fs afero.Fs, dotenv map[string]string)
 		dotenv      map[string]string
 		wantErr     bool
 	}{
 		{
 			name: "ok, 1 service",
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack, dotenv map[string]string) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack, dotenv map[string]string) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				servicer := mocks.NewMockServiceAPI(ctrl)
 				// Expect the service to be triggered
 				gomock.InOrder(
@@ -98,12 +98,12 @@ func TestInit(t *testing.T) {
 					servicer.EXPECT().SetContainerIP(net.ParseIP("127.0.0.1")).Return(),
 				)
 
-				dockerManager := mocks.NewMockDockerManager(ctrl)
-				dockerManager.EXPECT().ContainerIP("node").Return("127.0.0.1", nil)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
+				dockerServiceManager.EXPECT().ContainerIP("node").Return("127.0.0.1", nil)
 
 				return []ServiceAPI{
 					servicer,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			setupDotEnv: dotEnvFileWriter,
 			dotenv: map[string]string{
@@ -112,7 +112,7 @@ func TestInit(t *testing.T) {
 		},
 		{
 			name: "ok, 2 services",
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack, dotenv map[string]string) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack, dotenv map[string]string) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				service1 := mocks.NewMockServiceAPI(ctrl)
 				// Expect the service to be triggered
 				gomock.InOrder(
@@ -136,13 +136,13 @@ func TestInit(t *testing.T) {
 				service1.EXPECT().SetContainerIP(net.ParseIP("127.0.0.1")).Return()
 				service2.EXPECT().SetContainerIP(net.ParseIP("127.0.0.2")).Return()
 
-				dockerManager := mocks.NewMockDockerManager(ctrl)
-				dockerManager.EXPECT().ContainerIP("node1").Return("127.0.0.1", nil)
-				dockerManager.EXPECT().ContainerIP("node2").Return("127.0.0.2", nil)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
+				dockerServiceManager.EXPECT().ContainerIP("node1").Return("127.0.0.1", nil)
+				dockerServiceManager.EXPECT().ContainerIP("node2").Return("127.0.0.2", nil)
 
 				return []ServiceAPI{
 					service1, service2,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			setupDotEnv: dotEnvFileWriter,
 			dotenv: map[string]string{
@@ -152,7 +152,7 @@ func TestInit(t *testing.T) {
 		},
 		{
 			name: "error, 1 service, init service error",
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack, dotenv map[string]string) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack, dotenv map[string]string) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				servicer := mocks.NewMockServiceAPI(ctrl)
 				// Expect the service to be triggered
 				gomock.InOrder(
@@ -162,11 +162,11 @@ func TestInit(t *testing.T) {
 					}).Return(errors.New("error")),
 				)
 
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 
 				return []ServiceAPI{
 					servicer,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			setupDotEnv: dotEnvFileWriter,
 			dotenv: map[string]string{
@@ -176,7 +176,7 @@ func TestInit(t *testing.T) {
 		},
 		{
 			name: "error, 1 service, ContainerIP error",
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack, dotenv map[string]string) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack, dotenv map[string]string) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				servicer := mocks.NewMockServiceAPI(ctrl)
 				// Expect the service to be triggered
 				gomock.InOrder(
@@ -187,12 +187,12 @@ func TestInit(t *testing.T) {
 					servicer.EXPECT().ContainerName().Return("node"),
 				)
 
-				dockerManager := mocks.NewMockDockerManager(ctrl)
-				dockerManager.EXPECT().ContainerIP("node").Return("", errors.New("error"))
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
+				dockerServiceManager.EXPECT().ContainerIP("node").Return("", errors.New("error"))
 
 				return []ServiceAPI{
 					servicer,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			setupDotEnv: dotEnvFileWriter,
 			dotenv: map[string]string{
@@ -202,7 +202,7 @@ func TestInit(t *testing.T) {
 		},
 		{
 			name: "error, 1 service, ContainerIP gives an invalid IP",
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack, dotenv map[string]string) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack, dotenv map[string]string) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				servicer := mocks.NewMockServiceAPI(ctrl)
 				// Expect the service to be triggered
 				gomock.InOrder(
@@ -213,12 +213,12 @@ func TestInit(t *testing.T) {
 					servicer.EXPECT().ContainerName().Return("node"),
 				)
 
-				dockerManager := mocks.NewMockDockerManager(ctrl)
-				dockerManager.EXPECT().ContainerIP("node").Return("nethermind-loves-eigenlayer", nil)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
+				dockerServiceManager.EXPECT().ContainerIP("node").Return("nethermind-loves-sedge", nil)
 
 				return []ServiceAPI{
 					servicer,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			setupDotEnv: dotEnvFileWriter,
 			dotenv: map[string]string{
@@ -242,14 +242,14 @@ func TestInit(t *testing.T) {
 			manager := NewMonitoringManager(
 				[]ServiceAPI{},
 				mocks.NewMockComposeManager(ctrl),
-				mocks.NewMockDockerManager(ctrl),
+				mocks.NewMockDockerServiceManager(ctrl),
 				afs,
 				locker,
 			)
 
-			services, dockerManager := tt.mocker(t, ctrl, manager.stack, tt.dotenv)
+			services, dockerServiceManager := tt.mocker(t, ctrl, manager.stack, tt.dotenv)
 			manager.services = services
-			manager.dockerManager = dockerManager
+			manager.dockerServiceManager = dockerServiceManager
 
 			// Init the stack
 			err := manager.Init()
@@ -279,7 +279,7 @@ func TestInstallStack(t *testing.T) {
 
 		// Expect the lock to be acquired
 		gomock.InOrder(
-			locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+			locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 			locker.EXPECT().Lock().Return(nil),
 			locker.EXPECT().Locked().Return(true),
 			locker.EXPECT().Unlock().Return(nil),
@@ -297,7 +297,7 @@ func TestInstallStack(t *testing.T) {
 		locker := mocks.NewMockLocker(ctrl)
 
 		// Expect the lock to be acquired
-		locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker)
+		locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker)
 		return locker
 	}
 
@@ -321,13 +321,13 @@ func TestInstallStack(t *testing.T) {
 	tests := []struct {
 		name         string
 		mockerLocker func(t *testing.T, ctrl *gomock.Controller) *mocks.MockLocker
-		mocker       func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager)
+		mocker       func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager)
 		wantErr      bool
 	}{
 		{
 			name:         "ok, 1 service, port not occupied",
 			mockerLocker: okLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager) {
 				dotenv := map[string]string{
 					"NODE_PORT": "9000",
 				}
@@ -345,24 +345,24 @@ func TestInstallStack(t *testing.T) {
 				)
 
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				composeManager.EXPECT().Create(compose.DockerComposeCreateOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
-				composeManager.EXPECT().Up(compose.DockerComposeUpOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
+				composeManager.EXPECT().Create(commands.DockerComposeCreateOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
+				composeManager.EXPECT().Up(commands.DockerComposeUpOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
 
-				dockerManager := mocks.NewMockDockerManager(ctrl)
-				dockerManager.EXPECT().ContainerIP("node").Return("127.0.0.1", nil)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
+				dockerServiceManager.EXPECT().ContainerIP("node").Return("127.0.0.1", nil)
 
 				return []ServiceAPI{
 					servicer,
-				}, composeManager, dockerManager
+				}, composeManager, dockerServiceManager
 			},
 		},
 		{
 			name:         "ok, 2 services",
 			mockerLocker: okLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager) {
 				dotenv := map[string]string{
 					"NODE1_PORT": "9000",
-					"NODE2_PORT": "9001",
+					"NODE2_PORT": "9003",
 				}
 				service1, service2 := mocks.NewMockServiceAPI(ctrl), mocks.NewMockServiceAPI(ctrl)
 
@@ -380,7 +380,7 @@ func TestInstallStack(t *testing.T) {
 				)
 				gomock.InOrder(
 					service2.EXPECT().DotEnv().Return(map[string]string{
-						"NODE2_PORT": "9000",
+						"NODE2_PORT": "9003",
 					}),
 					service2.EXPECT().Init(types.ServiceOptions{
 						Stack:  stack,
@@ -393,23 +393,23 @@ func TestInstallStack(t *testing.T) {
 				service2.EXPECT().SetContainerIP(net.ParseIP("168.0.3.1")).Return()
 
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				composeManager.EXPECT().Create(compose.DockerComposeCreateOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
-				composeManager.EXPECT().Up(compose.DockerComposeUpOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
+				composeManager.EXPECT().Create(commands.DockerComposeCreateOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
+				composeManager.EXPECT().Up(commands.DockerComposeUpOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
 
-				dockerManager := mocks.NewMockDockerManager(ctrl)
-				dockerManager.EXPECT().ContainerIP("node1").Return("168.0.2.1", nil)
-				dockerManager.EXPECT().ContainerIP("node2").Return("168.0.3.1", nil)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
+				dockerServiceManager.EXPECT().ContainerIP("node1").Return("168.0.2.1", nil)
+				dockerServiceManager.EXPECT().ContainerIP("node2").Return("168.0.3.1", nil)
 
 				return []ServiceAPI{
 					service1,
 					service2,
-				}, composeManager, dockerManager
+				}, composeManager, dockerServiceManager
 			},
 		},
 		{
 			name:         "ok, 1 service, port occupied",
 			mockerLocker: okLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager) {
 				// Convert serverPort to int
 				p, err := strconv.Atoi(serverPort)
 				require.NoError(t, err)
@@ -432,21 +432,21 @@ func TestInstallStack(t *testing.T) {
 				)
 
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				composeManager.EXPECT().Create(compose.DockerComposeCreateOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
-				composeManager.EXPECT().Up(compose.DockerComposeUpOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
+				composeManager.EXPECT().Create(commands.DockerComposeCreateOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
+				composeManager.EXPECT().Up(commands.DockerComposeUpOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
 
-				dockerManager := mocks.NewMockDockerManager(ctrl)
-				dockerManager.EXPECT().ContainerIP("node").Return("127.1.1.6", nil)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
+				dockerServiceManager.EXPECT().ContainerIP("node").Return("127.1.1.6", nil)
 
 				return []ServiceAPI{
 					servicer,
-				}, composeManager, dockerManager
+				}, composeManager, dockerServiceManager
 			},
 		},
 		{
 			name:         "error, 1 service, port not int",
 			mockerLocker: onlyNewLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager) {
 				dotenv := map[string]string{
 					"NODE_PORT": "3RR0R",
 				}
@@ -455,18 +455,18 @@ func TestInstallStack(t *testing.T) {
 				servicer.EXPECT().DotEnv().Return(dotenv)
 
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 
 				return []ServiceAPI{
 					servicer,
-				}, composeManager, dockerManager
+				}, composeManager, dockerServiceManager
 			},
 			wantErr: true,
 		},
 		{
 			name:         "error, 1 service, invalid port",
 			mockerLocker: onlyNewLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager) {
 				dotenv := map[string]string{
 					"NODE_PORT": "0",
 				}
@@ -475,18 +475,18 @@ func TestInstallStack(t *testing.T) {
 				servicer.EXPECT().DotEnv().Return(dotenv)
 
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 
 				return []ServiceAPI{
 					servicer,
-				}, composeManager, dockerManager
+				}, composeManager, dockerServiceManager
 			},
 			wantErr: true,
 		},
 		{
 			name:         "error, 1 service, init service error",
 			mockerLocker: onlyNewLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager) {
 				dotenv := map[string]string{
 					"NODE_PORT": "9000",
 				}
@@ -501,11 +501,11 @@ func TestInstallStack(t *testing.T) {
 				)
 
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 
 				return []ServiceAPI{
 					servicer,
-				}, composeManager, dockerManager
+				}, composeManager, dockerServiceManager
 			},
 			wantErr: true,
 		},
@@ -517,12 +517,12 @@ func TestInstallStack(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 					locker.EXPECT().Lock().Return(errors.New("error")),
 				)
 				return locker
 			},
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager) {
 				dotenv := map[string]string{
 					"NODE_PORT": "9000",
 				}
@@ -537,11 +537,11 @@ func TestInstallStack(t *testing.T) {
 				)
 
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 
 				return []ServiceAPI{
 					servicer,
-				}, composeManager, dockerManager
+				}, composeManager, dockerServiceManager
 			},
 			wantErr: true,
 		},
@@ -553,14 +553,14 @@ func TestInstallStack(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
 				)
 				return locker
 			},
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager) {
 				dotenv := map[string]string{
 					"NODE_PORT": "9000",
 				}
@@ -576,11 +576,11 @@ func TestInstallStack(t *testing.T) {
 				)
 
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 
 				return []ServiceAPI{
 					servicer,
-				}, composeManager, dockerManager
+				}, composeManager, dockerServiceManager
 			},
 			wantErr: true,
 		},
@@ -592,14 +592,14 @@ func TestInstallStack(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
 				)
 				return locker
 			},
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager) {
 				dotenv := map[string]string{
 					"NODE_PORT": "9000",
 				}
@@ -615,13 +615,13 @@ func TestInstallStack(t *testing.T) {
 				)
 
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				composeManager.EXPECT().Create(compose.DockerComposeCreateOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(errors.New("error"))
+				composeManager.EXPECT().Create(commands.DockerComposeCreateOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(errors.New("error"))
 
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 
 				return []ServiceAPI{
 					servicer,
-				}, composeManager, dockerManager
+				}, composeManager, dockerServiceManager
 			},
 			wantErr: true,
 		},
@@ -633,14 +633,14 @@ func TestInstallStack(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
 				)
 				return locker
 			},
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager) {
 				dotenv := map[string]string{
 					"NODE_PORT": "9000",
 				}
@@ -656,14 +656,14 @@ func TestInstallStack(t *testing.T) {
 				)
 
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				composeManager.EXPECT().Create(compose.DockerComposeCreateOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
-				composeManager.EXPECT().Up(compose.DockerComposeUpOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(errors.New("error"))
+				composeManager.EXPECT().Create(commands.DockerComposeCreateOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
+				composeManager.EXPECT().Up(commands.DockerComposeUpOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(errors.New("error"))
 
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 
 				return []ServiceAPI{
 					servicer,
-				}, composeManager, dockerManager
+				}, composeManager, dockerServiceManager
 			},
 			wantErr: true,
 		},
@@ -675,14 +675,14 @@ func TestInstallStack(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
 				)
 				return locker
 			},
-			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager) {
 				dotenv := map[string]string{
 					"NODE_PORT": "9000",
 				}
@@ -699,15 +699,15 @@ func TestInstallStack(t *testing.T) {
 				)
 
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				composeManager.EXPECT().Create(compose.DockerComposeCreateOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
-				composeManager.EXPECT().Up(compose.DockerComposeUpOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
+				composeManager.EXPECT().Create(commands.DockerComposeCreateOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
+				composeManager.EXPECT().Up(commands.DockerComposeUpOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
 
-				dockerManager := mocks.NewMockDockerManager(ctrl)
-				dockerManager.EXPECT().ContainerIP("node").Return("", errors.New("error"))
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
+				dockerServiceManager.EXPECT().ContainerIP("node").Return("", errors.New("error"))
 
 				return []ServiceAPI{
 					servicer,
-				}, composeManager, dockerManager
+				}, composeManager, dockerServiceManager
 			},
 			wantErr: true,
 		},
@@ -724,15 +724,15 @@ func TestInstallStack(t *testing.T) {
 			manager := NewMonitoringManager(
 				[]ServiceAPI{},
 				mocks.NewMockComposeManager(ctrl),
-				mocks.NewMockDockerManager(ctrl),
+				mocks.NewMockDockerServiceManager(ctrl),
 				afero.NewMemMapFs(),
 				locker,
 			)
 
-			services, composeManager, dockerManager := tt.mocker(t, ctrl, manager.stack)
+			services, composeManager, dockerServiceManager := tt.mocker(t, ctrl, manager.stack)
 			manager.services = services
 			manager.composeManager = composeManager
-			manager.dockerManager = dockerManager
+			manager.dockerServiceManager = dockerServiceManager
 
 			// Init the stack
 			err := manager.InstallStack()
@@ -761,7 +761,7 @@ func TestAddAndRemoveTarget(t *testing.T) {
 			require.NoError(t, err)
 			userDataHome = filepath.Join(userHome, ".local", "share")
 		}
-		locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker)
+		locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker)
 
 		return locker
 	}
@@ -769,7 +769,7 @@ func TestAddAndRemoveTarget(t *testing.T) {
 	tests := []struct {
 		name          string
 		mockerLocker  func(t *testing.T, ctrl *gomock.Controller) *mocks.MockLocker
-		mocker        func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerManager)
+		mocker        func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerServiceManager)
 		target        types.MonitoringTarget
 		labels        map[string]string
 		dockerNetwork string
@@ -779,20 +779,20 @@ func TestAddAndRemoveTarget(t *testing.T) {
 		{
 			name:         "add, ok, prometheus service",
 			mockerLocker: okLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				prometheusService := mocks.NewMockServiceAPI(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 
 				gomock.InOrder(
 					prometheusService.EXPECT().ContainerName().Return(PrometheusContainerName),
-					dockerManager.EXPECT().ContainerNetworks(PrometheusContainerName).Return([]string{"eigen_default"}, nil),
-					dockerManager.EXPECT().NetworkConnect(PrometheusContainerName, dockerNetwork).Return(nil),
+					dockerServiceManager.EXPECT().ContainerNetworks(PrometheusContainerName).Return([]string{"sedge_default"}, nil),
+					dockerServiceManager.EXPECT().NetworkConnect(PrometheusContainerName, dockerNetwork).Return(nil),
 					prometheusService.EXPECT().AddTarget(target, labels, fmt.Sprintf("%s--%s++%s", labels[InstanceIDLabel], PrometheusContainerName, dockerNetwork)).Return(nil),
 				)
 
 				return []ServiceAPI{
 					prometheusService,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			target: types.MonitoringTarget{
 				Host: "localhost",
@@ -807,9 +807,9 @@ func TestAddAndRemoveTarget(t *testing.T) {
 		{
 			name:         "add, ok, 1 service",
 			mockerLocker: okLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				service := mocks.NewMockServiceAPI(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 
 				gomock.InOrder(
 					service.EXPECT().ContainerName().Return("service1"),
@@ -818,7 +818,7 @@ func TestAddAndRemoveTarget(t *testing.T) {
 
 				return []ServiceAPI{
 					service,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			target: types.MonitoringTarget{
 				Host: "localhost",
@@ -834,18 +834,18 @@ func TestAddAndRemoveTarget(t *testing.T) {
 		{
 			name:         "add, ok, 1 services, prometheus was already added to network",
 			mockerLocker: okLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				prometheusService := mocks.NewMockServiceAPI(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 				gomock.InOrder(
 					prometheusService.EXPECT().ContainerName().Return(PrometheusContainerName),
-					dockerManager.EXPECT().ContainerNetworks(PrometheusContainerName).Return([]string{"eigen_default", dockerNetwork}, nil),
+					dockerServiceManager.EXPECT().ContainerNetworks(PrometheusContainerName).Return([]string{"sedge_default", dockerNetwork}, nil),
 					prometheusService.EXPECT().AddTarget(target, labels, fmt.Sprintf("%s--%s++%s", labels[InstanceIDLabel], PrometheusContainerName, dockerNetwork)).Return(nil),
 				)
 
 				return []ServiceAPI{
 					prometheusService,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			target: types.MonitoringTarget{
 				Host: "localhost",
@@ -860,14 +860,14 @@ func TestAddAndRemoveTarget(t *testing.T) {
 		{
 			name:         "add, ok, 2 services, 1 AddTarget error",
 			mockerLocker: okLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				prometheusService, service2 := mocks.NewMockServiceAPI(ctrl), mocks.NewMockServiceAPI(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 
 				gomock.InOrder(
 					prometheusService.EXPECT().ContainerName().Return(PrometheusContainerName),
-					dockerManager.EXPECT().ContainerNetworks(PrometheusContainerName).Return([]string{"eigen_default"}, nil),
-					dockerManager.EXPECT().NetworkConnect(PrometheusContainerName, dockerNetwork).Return(nil),
+					dockerServiceManager.EXPECT().ContainerNetworks(PrometheusContainerName).Return([]string{"sedge_default"}, nil),
+					dockerServiceManager.EXPECT().NetworkConnect(PrometheusContainerName, dockerNetwork).Return(nil),
 					prometheusService.EXPECT().AddTarget(target, labels, fmt.Sprintf("%s--%s++%s", labels[InstanceIDLabel], PrometheusContainerName, dockerNetwork)).Return(nil),
 					service2.EXPECT().ContainerName().Return("node2"),
 					service2.EXPECT().AddTarget(target, labels, fmt.Sprintf("%s--node2++%s", labels[InstanceIDLabel], dockerNetwork)).Return(errors.New("error")),
@@ -876,7 +876,7 @@ func TestAddAndRemoveTarget(t *testing.T) {
 				return []ServiceAPI{
 					prometheusService,
 					service2,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			target: types.MonitoringTarget{
 				Host: "localhost",
@@ -892,20 +892,20 @@ func TestAddAndRemoveTarget(t *testing.T) {
 		{
 			name:         "add, ok, 2 services, prometheus ContainerNetworks error",
 			mockerLocker: okLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				prometheusService, service2 := mocks.NewMockServiceAPI(ctrl), mocks.NewMockServiceAPI(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 				gomock.InOrder(
 					service2.EXPECT().ContainerName().Return("node2"),
 					service2.EXPECT().AddTarget(target, labels, fmt.Sprintf("%s--node2++%s", labels[InstanceIDLabel], dockerNetwork)).Return(nil),
 					prometheusService.EXPECT().ContainerName().Return(PrometheusContainerName),
-					dockerManager.EXPECT().ContainerNetworks(PrometheusContainerName).Return(nil, errors.New("error")),
+					dockerServiceManager.EXPECT().ContainerNetworks(PrometheusContainerName).Return(nil, errors.New("error")),
 				)
 
 				return []ServiceAPI{
 					service2,
 					prometheusService,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			target: types.MonitoringTarget{
 				Host: "localhost",
@@ -921,21 +921,21 @@ func TestAddAndRemoveTarget(t *testing.T) {
 		{
 			name:         "add, ok, 2 services, prometheus NetworkConnect error",
 			mockerLocker: okLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				service1, prometheusService := mocks.NewMockServiceAPI(ctrl), mocks.NewMockServiceAPI(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 				gomock.InOrder(
 					service1.EXPECT().ContainerName().Return("node1"),
 					service1.EXPECT().AddTarget(target, labels, fmt.Sprintf("%s--node1++%s", labels[InstanceIDLabel], dockerNetwork)).Return(nil),
 					prometheusService.EXPECT().ContainerName().Return(PrometheusContainerName),
-					dockerManager.EXPECT().ContainerNetworks(PrometheusContainerName).Return([]string{"eigen_default"}, nil),
-					dockerManager.EXPECT().NetworkConnect(PrometheusContainerName, dockerNetwork).Return(errors.New("error")),
+					dockerServiceManager.EXPECT().ContainerNetworks(PrometheusContainerName).Return([]string{"sedge_default"}, nil),
+					dockerServiceManager.EXPECT().NetworkConnect(PrometheusContainerName, dockerNetwork).Return(errors.New("error")),
 				)
 
 				return []ServiceAPI{
 					service1,
 					prometheusService,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			target: types.MonitoringTarget{
 				Host: "localhost",
@@ -951,19 +951,19 @@ func TestAddAndRemoveTarget(t *testing.T) {
 		{
 			name:         "remove, ok, 1 service",
 			mockerLocker: okLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				servicer := mocks.NewMockServiceAPI(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 				// Expect the service to be triggered
 				gomock.InOrder(
 					servicer.EXPECT().RemoveTarget(labels[InstanceIDLabel]).Return(dockerNetwork, nil),
 					servicer.EXPECT().ContainerName().Return("node"),
-					dockerManager.EXPECT().NetworkDisconnect("node", dockerNetwork).Return(nil),
+					dockerServiceManager.EXPECT().NetworkDisconnect("node", dockerNetwork).Return(nil),
 				)
 
 				return []ServiceAPI{
 					servicer,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			target: types.MonitoringTarget{
 				Host: "localhost",
@@ -976,23 +976,23 @@ func TestAddAndRemoveTarget(t *testing.T) {
 		{
 			name:         "remove, ok, 2 services, one of them was already removed from network",
 			mockerLocker: okLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				service1, service2 := mocks.NewMockServiceAPI(ctrl), mocks.NewMockServiceAPI(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 				// Expect the service to be triggered
 				gomock.InOrder(
 					service1.EXPECT().RemoveTarget(labels[InstanceIDLabel]).Return(dockerNetwork, nil),
 					service1.EXPECT().ContainerName().Return("node1"),
-					dockerManager.EXPECT().NetworkDisconnect("node1", dockerNetwork).Return(nil),
+					dockerServiceManager.EXPECT().NetworkDisconnect("node1", dockerNetwork).Return(nil),
 					service2.EXPECT().RemoveTarget(labels[InstanceIDLabel]).Return(dockerNetwork, nil),
 					service2.EXPECT().ContainerName().Return("node2"),
-					dockerManager.EXPECT().NetworkDisconnect("node2", dockerNetwork).Return(assert.AnError),
+					dockerServiceManager.EXPECT().NetworkDisconnect("node2", dockerNetwork).Return(assert.AnError),
 				)
 
 				return []ServiceAPI{
 					service1,
 					service2,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			target: types.MonitoringTarget{
 				Host: "localhost",
@@ -1005,21 +1005,21 @@ func TestAddAndRemoveTarget(t *testing.T) {
 		{
 			name:         "remove, ok, 2 services, 1 RemoveTarget error",
 			mockerLocker: okLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				service1, service2 := mocks.NewMockServiceAPI(ctrl), mocks.NewMockServiceAPI(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 				// Expect the service to be triggered
 				gomock.InOrder(
 					service1.EXPECT().RemoveTarget(labels[InstanceIDLabel]).Return(dockerNetwork, nil),
 					service1.EXPECT().ContainerName().Return("node1"),
-					dockerManager.EXPECT().NetworkDisconnect("node1", dockerNetwork).Return(nil),
+					dockerServiceManager.EXPECT().NetworkDisconnect("node1", dockerNetwork).Return(nil),
 					service2.EXPECT().RemoveTarget(labels[InstanceIDLabel]).Return("", assert.AnError),
 				)
 
 				return []ServiceAPI{
 					service1,
 					service2,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			target: types.MonitoringTarget{
 				Host: "remove",
@@ -1033,23 +1033,23 @@ func TestAddAndRemoveTarget(t *testing.T) {
 		{
 			name:         "remove, ok, 2 services, 1 NetworkDisconnect error",
 			mockerLocker: okLocker,
-			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller, labels map[string]string, dockerNetwork string, target types.MonitoringTarget) ([]ServiceAPI, *mocks.MockDockerServiceManager) {
 				service1, service2 := mocks.NewMockServiceAPI(ctrl), mocks.NewMockServiceAPI(ctrl)
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 				// Expect the service to be triggered
 				gomock.InOrder(
 					service1.EXPECT().RemoveTarget(labels[InstanceIDLabel]).Return(dockerNetwork, nil),
 					service1.EXPECT().ContainerName().Return("node1"),
-					dockerManager.EXPECT().NetworkDisconnect("node1", dockerNetwork).Return(nil),
+					dockerServiceManager.EXPECT().NetworkDisconnect("node1", dockerNetwork).Return(nil),
 					service2.EXPECT().RemoveTarget(labels[InstanceIDLabel]).Return(dockerNetwork, nil),
 					service2.EXPECT().ContainerName().Return("node2"),
-					dockerManager.EXPECT().NetworkDisconnect("node2", dockerNetwork).Return(assert.AnError),
+					dockerServiceManager.EXPECT().NetworkDisconnect("node2", dockerNetwork).Return(assert.AnError),
 				)
 
 				return []ServiceAPI{
 					service1,
 					service2,
-				}, dockerManager
+				}, dockerServiceManager
 			},
 			target: types.MonitoringTarget{
 				Host: "remove",
@@ -1067,13 +1067,13 @@ func TestAddAndRemoveTarget(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			locker := tt.mockerLocker(t, ctrl)
 
-			services, dockerManager := tt.mocker(t, ctrl, tt.labels, tt.dockerNetwork, tt.target)
+			services, dockerServiceManager := tt.mocker(t, ctrl, tt.labels, tt.dockerNetwork, tt.target)
 
 			// Create a monitoring manager
 			manager := NewMonitoringManager(
 				services,
 				mocks.NewMockComposeManager(ctrl),
-				dockerManager,
+				dockerServiceManager,
 				afero.NewMemMapFs(),
 				locker,
 			)
@@ -1105,16 +1105,16 @@ func TestRun(t *testing.T) {
 		require.NoError(t, err)
 		userDataHome = filepath.Join(userHome, ".local", "share")
 	}
-	composePath := filepath.Join(userDataHome, ".eigen", "monitoring", "docker-compose.yml")
+	composePath := filepath.Join(userDataHome, ".sedge", "monitoring", "docker-compose.yml")
 
 	tests := []struct {
 		name    string
-		mocker  func(t *testing.T, ctrl *gomock.Controller) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager)
+		mocker  func(t *testing.T, ctrl *gomock.Controller) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager)
 		wantErr bool
 	}{
 		{
 			name: "ok",
-			mocker: func(t *testing.T, ctrl *gomock.Controller) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager) {
 				service1, service2 := mocks.NewMockServiceAPI(ctrl), mocks.NewMockServiceAPI(ctrl)
 				service1.EXPECT().ContainerName().Return("node1")
 				service2.EXPECT().ContainerName().Return("node2")
@@ -1124,42 +1124,42 @@ func TestRun(t *testing.T) {
 
 				composeManager := mocks.NewMockComposeManager(ctrl)
 				// Expect the compose manager to be triggered
-				composeManager.EXPECT().Up(compose.DockerComposeUpOptions{Path: composePath}).Return(nil)
+				composeManager.EXPECT().Up(commands.DockerComposeUpOptions{Path: composePath}).Return(nil)
 
-				dockerManager := mocks.NewMockDockerManager(ctrl)
-				dockerManager.EXPECT().ContainerIP("node1").Return("168.0.2.1", nil)
-				dockerManager.EXPECT().ContainerIP("node2").Return("168.0.3.1", nil)
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
+				dockerServiceManager.EXPECT().ContainerIP("node1").Return("168.0.2.1", nil)
+				dockerServiceManager.EXPECT().ContainerIP("node2").Return("168.0.3.1", nil)
 
 				return []ServiceAPI{
 					service1, service2,
-				}, composeManager, dockerManager
+				}, composeManager, dockerServiceManager
 			},
 		},
 		{
 			name: "up error",
-			mocker: func(t *testing.T, ctrl *gomock.Controller) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager) {
 				composeManager := mocks.NewMockComposeManager(ctrl)
 				// Expect the compose manager to be triggered
-				composeManager.EXPECT().Up(compose.DockerComposeUpOptions{Path: composePath}).Return(errors.New("error"))
-				return []ServiceAPI{mocks.NewMockServiceAPI(ctrl)}, composeManager, mocks.NewMockDockerManager(ctrl)
+				composeManager.EXPECT().Up(commands.DockerComposeUpOptions{Path: composePath}).Return(errors.New("error"))
+				return []ServiceAPI{mocks.NewMockServiceAPI(ctrl)}, composeManager, mocks.NewMockDockerServiceManager(ctrl)
 			},
 			wantErr: true,
 		},
 		{
 			name: "error, ContainerIP error",
-			mocker: func(t *testing.T, ctrl *gomock.Controller) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerManager) {
+			mocker: func(t *testing.T, ctrl *gomock.Controller) ([]ServiceAPI, *mocks.MockComposeManager, *mocks.MockDockerServiceManager) {
 				servicer := mocks.NewMockServiceAPI(ctrl)
 				servicer.EXPECT().ContainerName().Return("node")
 
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				composeManager.EXPECT().Up(compose.DockerComposeUpOptions{Path: composePath}).Return(nil)
+				composeManager.EXPECT().Up(commands.DockerComposeUpOptions{Path: composePath}).Return(nil)
 
-				dockerManager := mocks.NewMockDockerManager(ctrl)
-				dockerManager.EXPECT().ContainerIP("node").Return("", errors.New("error"))
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
+				dockerServiceManager.EXPECT().ContainerIP("node").Return("", errors.New("error"))
 
 				return []ServiceAPI{
 					servicer,
-				}, composeManager, dockerManager
+				}, composeManager, dockerServiceManager
 			},
 			wantErr: true,
 		},
@@ -1176,15 +1176,15 @@ func TestRun(t *testing.T) {
 			// Create a mock locker
 			locker := mocks.NewMockLocker(ctrl)
 			// Expect the lock to be acquired
-			locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker)
+			locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker)
 
-			services, composeManager, dockerManager := tt.mocker(t, ctrl)
+			services, composeManager, dockerServiceManager := tt.mocker(t, ctrl)
 
 			// Create a monitoring manager
 			manager := NewMonitoringManager(
 				services,
 				composeManager,
-				dockerManager,
+				dockerServiceManager,
 				afs,
 				locker,
 			)
@@ -1210,7 +1210,7 @@ func TestStop(t *testing.T) {
 		require.NoError(t, err)
 		userDataHome = filepath.Join(userHome, ".local", "share")
 	}
-	composePath := filepath.Join(userDataHome, ".eigen", "monitoring", "docker-compose.yml")
+	composePath := filepath.Join(userDataHome, ".sedge", "monitoring", "docker-compose.yml")
 
 	tests := []struct {
 		name    string
@@ -1223,7 +1223,7 @@ func TestStop(t *testing.T) {
 				composeManager := mocks.NewMockComposeManager(ctrl)
 				// Expect the compose manager to be triggered
 				gomock.InOrder(
-					composeManager.EXPECT().Down(compose.DockerComposeDownOptions{Path: composePath}).Return(nil),
+					composeManager.EXPECT().Down(commands.DockerComposeDownOptions{Path: composePath}).Return(nil),
 				)
 				return composeManager
 			},
@@ -1233,7 +1233,7 @@ func TestStop(t *testing.T) {
 			mocker: func(t *testing.T, ctrl *gomock.Controller) *mocks.MockComposeManager {
 				composeManager := mocks.NewMockComposeManager(ctrl)
 				// Expect the compose manager to be triggered
-				composeManager.EXPECT().Down(compose.DockerComposeDownOptions{Path: composePath}).Return(errors.New("error"))
+				composeManager.EXPECT().Down(commands.DockerComposeDownOptions{Path: composePath}).Return(errors.New("error"))
 				return composeManager
 			},
 			wantErr: true,
@@ -1248,13 +1248,13 @@ func TestStop(t *testing.T) {
 			// Create a mock locker
 			locker := mocks.NewMockLocker(ctrl)
 			// Expect the lock to be acquired
-			locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker)
+			locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker)
 
 			// Create a monitoring manager
 			manager := NewMonitoringManager(
 				[]ServiceAPI{mocks.NewMockServiceAPI(ctrl)},
 				tt.mocker(t, ctrl),
-				mocks.NewMockDockerManager(ctrl),
+				mocks.NewMockDockerServiceManager(ctrl),
 				afero.NewMemMapFs(),
 				locker,
 			)
@@ -1280,78 +1280,78 @@ func TestStatus(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		mocker  func(t *testing.T, ctrl *gomock.Controller) *mocks.MockDockerManager
+		mocker  func(t *testing.T, ctrl *gomock.Controller) *mocks.MockDockerServiceManager
 		want    common.Status
 		wantErr bool
 	}{
 		{
 			name: "ok",
-			mocker: func(t *testing.T, ctrl *gomock.Controller) *mocks.MockDockerManager {
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+			mocker: func(t *testing.T, ctrl *gomock.Controller) *mocks.MockDockerServiceManager {
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 				// Expect the docker manager to be triggered
 				gomock.InOrder(
-					dockerManager.EXPECT().ContainerStatus(GrafanaContainerName).Return(common.Running, nil),
-					dockerManager.EXPECT().ContainerStatus(PrometheusContainerName).Return(common.Running, nil),
-					dockerManager.EXPECT().ContainerStatus(NodeExporterContainerName).Return(common.Running, nil),
+					dockerServiceManager.EXPECT().ContainerStatus(GrafanaContainerName).Return(common.Running, nil),
+					dockerServiceManager.EXPECT().ContainerStatus(PrometheusContainerName).Return(common.Running, nil),
+					dockerServiceManager.EXPECT().ContainerStatus(NodeExporterContainerName).Return(common.Running, nil),
 				)
-				return dockerManager
+				return dockerServiceManager
 			},
 			want: common.Running,
 		},
 		{
 			name: "error",
-			mocker: func(t *testing.T, ctrl *gomock.Controller) *mocks.MockDockerManager {
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+			mocker: func(t *testing.T, ctrl *gomock.Controller) *mocks.MockDockerServiceManager {
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 				// Expect the docker manager to be triggered
-				dockerManager.EXPECT().ContainerStatus(GrafanaContainerName).Return(common.Unknown, errors.New("error"))
-				return dockerManager
+				dockerServiceManager.EXPECT().ContainerStatus(GrafanaContainerName).Return(common.Unknown, errors.New("error"))
+				return dockerServiceManager
 			},
 			want:    common.Unknown,
 			wantErr: true,
 		},
 		{
 			name: "Restarting",
-			mocker: func(t *testing.T, ctrl *gomock.Controller) *mocks.MockDockerManager {
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+			mocker: func(t *testing.T, ctrl *gomock.Controller) *mocks.MockDockerServiceManager {
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 				// Expect the docker manager to be triggered
 				gomock.InOrder(
-					dockerManager.EXPECT().ContainerStatus(GrafanaContainerName).Return(common.Restarting, nil),
-					dockerManager.EXPECT().ContainerStatus(PrometheusContainerName).Return(common.Restarting, nil),
-					dockerManager.EXPECT().ContainerStatus(NodeExporterContainerName).Return(common.Restarting, nil),
+					dockerServiceManager.EXPECT().ContainerStatus(GrafanaContainerName).Return(common.Restarting, nil),
+					dockerServiceManager.EXPECT().ContainerStatus(PrometheusContainerName).Return(common.Restarting, nil),
+					dockerServiceManager.EXPECT().ContainerStatus(NodeExporterContainerName).Return(common.Restarting, nil),
 				)
-				return dockerManager
+				return dockerServiceManager
 			},
 			want: common.Restarting,
 		},
 		{
 			name: "Paused",
-			mocker: func(t *testing.T, ctrl *gomock.Controller) *mocks.MockDockerManager {
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+			mocker: func(t *testing.T, ctrl *gomock.Controller) *mocks.MockDockerServiceManager {
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 				// Expect the docker manager to be triggered
-				dockerManager.EXPECT().ContainerStatus(GrafanaContainerName).Return(common.Paused, nil)
-				return dockerManager
+				dockerServiceManager.EXPECT().ContainerStatus(GrafanaContainerName).Return(common.Paused, nil)
+				return dockerServiceManager
 			},
 			want:    common.Broken,
 			wantErr: true,
 		},
 		{
 			name: "Exited",
-			mocker: func(t *testing.T, ctrl *gomock.Controller) *mocks.MockDockerManager {
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+			mocker: func(t *testing.T, ctrl *gomock.Controller) *mocks.MockDockerServiceManager {
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 				// Expect the docker manager to be triggered
-				dockerManager.EXPECT().ContainerStatus(GrafanaContainerName).Return(common.Exited, nil)
-				return dockerManager
+				dockerServiceManager.EXPECT().ContainerStatus(GrafanaContainerName).Return(common.Exited, nil)
+				return dockerServiceManager
 			},
 			want:    common.Broken,
 			wantErr: true,
 		},
 		{
 			name: "Dead",
-			mocker: func(t *testing.T, ctrl *gomock.Controller) *mocks.MockDockerManager {
-				dockerManager := mocks.NewMockDockerManager(ctrl)
+			mocker: func(t *testing.T, ctrl *gomock.Controller) *mocks.MockDockerServiceManager {
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
 				// Expect the docker manager to be triggered
-				dockerManager.EXPECT().ContainerStatus(GrafanaContainerName).Return(common.Dead, nil)
-				return dockerManager
+				dockerServiceManager.EXPECT().ContainerStatus(GrafanaContainerName).Return(common.Dead, nil)
+				return dockerServiceManager
 			},
 			want:    common.Broken,
 			wantErr: true,
@@ -1366,7 +1366,7 @@ func TestStatus(t *testing.T) {
 			// Create a mock locker
 			locker := mocks.NewMockLocker(ctrl)
 			// Expect the lock to be acquired
-			locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker)
+			locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker)
 
 			// Create a monitoring manager
 			manager := NewMonitoringManager(
@@ -1407,15 +1407,15 @@ func TestInstallationStatus(t *testing.T) {
 			mocker: func(t *testing.T, ctrl *gomock.Controller) (afero.Fs, *mocks.MockLocker) {
 				fs := afero.NewMemMapFs()
 				// Recreate installed monitoring
-				fs.MkdirAll(filepath.Join(userDataHome, ".eigen", "monitoring"), 0o755)
-				fs.Create(filepath.Join(userDataHome, ".eigen", "monitoring", "docker-compose.yml"))
-				fs.Create(filepath.Join(userDataHome, ".eigen", "monitoring", ".env"))
+				fs.MkdirAll(filepath.Join(userDataHome, ".sedge", "monitoring"), 0o755)
+				fs.Create(filepath.Join(userDataHome, ".sedge", "monitoring", "docker-compose.yml"))
+				fs.Create(filepath.Join(userDataHome, ".sedge", "monitoring", ".env"))
 
 				// Create a mock locker
 				locker := mocks.NewMockLocker(ctrl)
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -1434,7 +1434,7 @@ func TestInstallationStatus(t *testing.T) {
 				locker := mocks.NewMockLocker(ctrl)
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -1453,7 +1453,7 @@ func TestInstallationStatus(t *testing.T) {
 				locker := mocks.NewMockLocker(ctrl)
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 					locker.EXPECT().Lock().Return(errors.New("error")),
 				)
 
@@ -1471,7 +1471,7 @@ func TestInstallationStatus(t *testing.T) {
 				locker := mocks.NewMockLocker(ctrl)
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(errors.New("error")),
@@ -1495,7 +1495,7 @@ func TestInstallationStatus(t *testing.T) {
 			manager := NewMonitoringManager(
 				[]ServiceAPI{mocks.NewMockServiceAPI(ctrl)},
 				mocks.NewMockComposeManager(ctrl),
-				mocks.NewMockDockerManager(ctrl),
+				mocks.NewMockDockerServiceManager(ctrl),
 				fs,
 				locker,
 			)
@@ -1521,7 +1521,7 @@ func TestCleanup(t *testing.T) {
 		require.NoError(t, err)
 		userDataHome = filepath.Join(userHome, ".local", "share")
 	}
-	composePath := filepath.Join(userDataHome, ".eigen", "monitoring", "docker-compose.yml")
+	composePath := filepath.Join(userDataHome, ".sedge", "monitoring", "docker-compose.yml")
 
 	tests := []struct {
 		name      string
@@ -1534,11 +1534,11 @@ func TestCleanup(t *testing.T) {
 			name: "ok, force false",
 			mocker: func(t *testing.T, ctrl *gomock.Controller) (*mocks.MockComposeManager, *mocks.MockLocker) {
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				composeManager.EXPECT().Down(compose.DockerComposeDownOptions{Path: composePath, Volumes: true}).Return(nil)
+				composeManager.EXPECT().Down(commands.DockerComposeDownOptions{Path: composePath}).Return(nil)
 
 				locker := mocks.NewMockLocker(ctrl)
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -1555,7 +1555,7 @@ func TestCleanup(t *testing.T) {
 
 				locker := mocks.NewMockLocker(ctrl)
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -1569,11 +1569,11 @@ func TestCleanup(t *testing.T) {
 			name: "down error",
 			mocker: func(t *testing.T, ctrl *gomock.Controller) (*mocks.MockComposeManager, *mocks.MockLocker) {
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				composeManager.EXPECT().Down(compose.DockerComposeDownOptions{Path: composePath, Volumes: true}).Return(errors.New("error"))
+				composeManager.EXPECT().Down(commands.DockerComposeDownOptions{Path: composePath}).Return(errors.New("error"))
 
 				locker := mocks.NewMockLocker(ctrl)
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -1587,10 +1587,10 @@ func TestCleanup(t *testing.T) {
 			name: "ok, force false, no install",
 			mocker: func(t *testing.T, ctrl *gomock.Controller) (*mocks.MockComposeManager, *mocks.MockLocker) {
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				composeManager.EXPECT().Down(compose.DockerComposeDownOptions{Path: composePath, Volumes: true}).Return(nil)
+				composeManager.EXPECT().Down(commands.DockerComposeDownOptions{Path: composePath}).Return(nil)
 
 				locker := mocks.NewMockLocker(ctrl)
-				locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker)
+				locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker)
 				locker.EXPECT().Lock().Return(nil)
 
 				return composeManager, locker
@@ -1601,11 +1601,11 @@ func TestCleanup(t *testing.T) {
 			name: "stack cleanup error, lock error",
 			mocker: func(t *testing.T, ctrl *gomock.Controller) (*mocks.MockComposeManager, *mocks.MockLocker) {
 				composeManager := mocks.NewMockComposeManager(ctrl)
-				composeManager.EXPECT().Down(compose.DockerComposeDownOptions{Path: composePath, Volumes: true}).Return(nil)
+				composeManager.EXPECT().Down(commands.DockerComposeDownOptions{Path: composePath}).Return(nil)
 
 				locker := mocks.NewMockLocker(ctrl)
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join(userDataHome, ".eigen", "monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -1632,7 +1632,7 @@ func TestCleanup(t *testing.T) {
 			manager := NewMonitoringManager(
 				[]ServiceAPI{mocks.NewMockServiceAPI(ctrl)},
 				composeMgr,
-				mocks.NewMockDockerManager(ctrl),
+				mocks.NewMockDockerServiceManager(ctrl),
 				afs,
 				locker,
 			)
@@ -1648,7 +1648,7 @@ func TestCleanup(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				// Check that monitoring stack has been removed
-				exists, err := afero.DirExists(afs, filepath.Join(userDataHome, ".eigen", "monitoring"))
+				exists, err := afero.DirExists(afs, filepath.Join(userDataHome, ".sedge", "monitoring"))
 				assert.NoError(t, err)
 				assert.False(t, exists)
 			}

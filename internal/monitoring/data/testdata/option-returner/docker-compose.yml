@@ -12,7 +12,7 @@ services:
     ports:
       - "${MAIN_PORT}:${MAIN_PORT}"
     networks:
-      - eigenlayer 
+      - sedge 
     environment:
       - MAIN_SERVICE_NAME=${MAIN_SERVICE_NAME}
       - MAIN_PORT=${MAIN_PORT}
@@ -25,5 +25,5 @@ services:
       - TEST_OPTION_URI=${TEST_OPTION_URI}
       - TEST_OPTION_ENUM=${TEST_OPTION_ENUM}
 networks:  
-  eigenlayer:  
+  sedge:  
     name: ${NETWORK_NAME}

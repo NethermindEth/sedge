@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package compose
+package compose_test
 
 import (
 	"errors"
@@ -21,6 +21,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/NethermindEth/sedge/internal/monitoring/compose"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
@@ -50,7 +51,7 @@ func TestUp(t *testing.T) {
 				Services: []string{"service1", "service2"},
 			},
 			runCMDError: errors.New("command failed"),
-			wantError:   DockerComposeCmdError{cmd: "up"},
+			wantError:   compose.DockerComposeCmdError{Cmd: "up"},
 		},
 		{
 			name: "it runs the correct command when no services are specified",
@@ -70,7 +71,7 @@ func TestUp(t *testing.T) {
 
 			mockRunner := sedge_mocks.NewMockCommandRunner(ctrl)
 
-			manager := NewComposeManager(mockRunner)
+			manager := compose.NewComposeManager(mockRunner)
 
 			var expectedCmd string
 			if len(tt.opts.Services) > 0 {
@@ -107,7 +108,7 @@ func ExampleComposeManager_Up() {
 	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{RunAsAdmin: true})
 
 	// Create a new ComposeManager with the CMDRunner
-	manager := NewComposeManager(cmdRunner)
+	manager := compose.NewComposeManager(cmdRunner)
 
 	// Define the options for the Docker Compose Up command
 	opts := commands.DockerComposeUpOptions{
@@ -142,7 +143,7 @@ func TestPull(t *testing.T) {
 				Services: []string{"service1", "service2"},
 			},
 			runCMDError: errors.New("command failed"),
-			wantError:   DockerComposeCmdError{cmd: "pull"},
+			wantError:   compose.DockerComposeCmdError{Cmd: "pull"},
 		},
 		{
 			name: "it runs the correct command when no services are specified",
@@ -162,7 +163,7 @@ func TestPull(t *testing.T) {
 
 			mockRunner := sedge_mocks.NewMockCommandRunner(ctrl)
 
-			manager := NewComposeManager(mockRunner)
+			manager := compose.NewComposeManager(mockRunner)
 
 			var expectedCmd string
 			if len(tt.opts.Services) > 0 {
@@ -199,7 +200,7 @@ func ExampleComposeManager_Pull() {
 	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{RunAsAdmin: true})
 
 	// Create a new ComposeManager with the CMDRunner
-	manager := NewComposeManager(cmdRunner)
+	manager := compose.NewComposeManager(cmdRunner)
 
 	// Define the options for the Docker Compose Pull command
 	opts := commands.DockerComposePullOptions{
@@ -234,7 +235,7 @@ func TestCreate(t *testing.T) {
 				Services: []string{"service1", "service2"},
 			},
 			runCMDError: errors.New("command failed"),
-			wantError:   DockerComposeCmdError{cmd: "create"},
+			wantError:   compose.DockerComposeCmdError{Cmd: "create"},
 		},
 		{
 			name: "it runs the correct command when no services are specified",
@@ -254,7 +255,7 @@ func TestCreate(t *testing.T) {
 
 			mockRunner := sedge_mocks.NewMockCommandRunner(ctrl)
 
-			manager := NewComposeManager(mockRunner)
+			manager := compose.NewComposeManager(mockRunner)
 
 			expectedCmd := "docker compose -f " + tt.opts.Path + " create"
 
@@ -291,7 +292,7 @@ func ExampleComposeManager_Create() {
 	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{RunAsAdmin: true})
 
 	// Create a new ComposeManager with the CMDRunner
-	manager := NewComposeManager(cmdRunner)
+	manager := compose.NewComposeManager(cmdRunner)
 
 	// Define the options for the Docker Compose Create command
 	opts := commands.DockerComposeCreateOptions{
@@ -326,7 +327,7 @@ func TestBuild(t *testing.T) {
 				Services: []string{"service1", "service2"},
 			},
 			runCMDError: errors.New("command failed"),
-			wantError:   DockerComposeCmdError{cmd: "build"},
+			wantError:   compose.DockerComposeCmdError{Cmd: "build"},
 		},
 		{
 			name: "it runs the correct command when no services are specified",
@@ -346,7 +347,7 @@ func TestBuild(t *testing.T) {
 
 			mockRunner := sedge_mocks.NewMockCommandRunner(ctrl)
 
-			manager := NewComposeManager(mockRunner)
+			manager := compose.NewComposeManager(mockRunner)
 
 			var expectedCmd string
 			if len(tt.opts.Services) > 0 {
@@ -384,7 +385,7 @@ func ExampleComposeManager_Build() {
 	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{RunAsAdmin: true})
 
 	// Create a new ComposeManager with the CMDRunner
-	manager := NewComposeManager(cmdRunner)
+	manager := compose.NewComposeManager(cmdRunner)
 
 	// Define the options for the Docker Compose Build command
 	opts := commands.DockerComposeBuildOptions{
@@ -467,7 +468,7 @@ func TestPS(t *testing.T) {
 				ServiceName:   "service1",
 			},
 			runCMDError: errors.New("command failed"),
-			wantError:   DockerComposeCmdError{cmd: "ps"},
+			wantError:   compose.DockerComposeCmdError{Cmd: "ps"},
 		},
 	}
 
@@ -478,7 +479,7 @@ func TestPS(t *testing.T) {
 
 			mockRunner := sedge_mocks.NewMockCommandRunner(ctrl)
 
-			manager := NewComposeManager(mockRunner)
+			manager := compose.NewComposeManager(mockRunner)
 
 			var expectedCmd string
 			if tt.opts.Path != "" {
@@ -529,7 +530,7 @@ func ExampleComposeManager_PS() {
 	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{RunAsAdmin: true})
 
 	// Create a new ComposeManager with the CMDRunner
-	manager := NewComposeManager(cmdRunner)
+	manager := compose.NewComposeManager(cmdRunner)
 
 	// Define the options for the Docker Compose PS command
 	opts := commands.DockerComposePsOptions{
@@ -591,7 +592,7 @@ func TestLogs(t *testing.T) {
 				Tail:     10,
 			},
 			runCMDError: errors.New("command failed"),
-			wantError:   DockerComposeCmdError{cmd: "logs"},
+			wantError:   compose.DockerComposeCmdError{Cmd: "logs"},
 		},
 	}
 
@@ -602,7 +603,7 @@ func TestLogs(t *testing.T) {
 
 			mockRunner := sedge_mocks.NewMockCommandRunner(ctrl)
 
-			manager := NewComposeManager(mockRunner)
+			manager := compose.NewComposeManager(mockRunner)
 
 			expectedCmd := "docker compose -f " + tt.opts.Path + " logs"
 			if tt.opts.Follow {
@@ -642,7 +643,7 @@ func ExampleComposeManager_Logs() {
 	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{RunAsAdmin: true})
 
 	// Create a new ComposeManager with the CMDRunner
-	manager := NewComposeManager(cmdRunner)
+	manager := compose.NewComposeManager(cmdRunner)
 
 	// Define the options for the Docker Compose Logs command
 	opts := commands.DockerComposeLogsOptions{
@@ -659,13 +660,13 @@ func ExampleComposeManager_Logs() {
 func TestStop(t *testing.T) {
 	tests := []struct {
 		name        string
-		opts         DockerComposeStopOptions
+		opts         compose.DockerComposeStopOptions
 		runCMDError error
 		wantError   error
 	}{
 		{
 			name: "it runs the correct command",
-			opts:  DockerComposeStopOptions{
+			opts:  compose.DockerComposeStopOptions{
 				Path: "/path/to/docker-compose.yml",
 			},
 			runCMDError: nil,
@@ -673,11 +674,11 @@ func TestStop(t *testing.T) {
 		},
 		{
 			name: "it returns an error if RunCMD fails",
-			opts:  DockerComposeStopOptions{
+			opts:  compose.DockerComposeStopOptions{
 				Path: "/path/to/docker-compose.yml",
 			},
 			runCMDError: errors.New("command failed"),
-			wantError:   DockerComposeCmdError{cmd: "stop"},
+			wantError:   compose.DockerComposeCmdError{Cmd: "stop"},
 		},
 	}
 
@@ -688,7 +689,7 @@ func TestStop(t *testing.T) {
 
 			mockRunner := sedge_mocks.NewMockCommandRunner(ctrl)
 
-			manager := NewComposeManager(mockRunner)
+			manager := compose.NewComposeManager(mockRunner)
 
 			expectedCmd := "docker compose -f " + tt.opts.Path + " stop"
 
@@ -731,7 +732,7 @@ func TestDown(t *testing.T) {
 				Path: "/path/to/docker-compose.yml",
 			},
 			runCMDError: errors.New("command failed"),
-			wantError:   DockerComposeCmdError{cmd: "down"},
+			wantError:   compose.DockerComposeCmdError{Cmd: "down"},
 		},
 	}
 
@@ -742,7 +743,7 @@ func TestDown(t *testing.T) {
 
 			mockRunner := sedge_mocks.NewMockCommandRunner(ctrl)
 
-			manager := NewComposeManager(mockRunner)
+			manager := compose.NewComposeManager(mockRunner)
 
 			expectedCmd := "docker compose -f " + tt.opts.Path + " down"
 
@@ -775,7 +776,7 @@ func ExampleComposeManager_Down() {
 	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{RunAsAdmin: true})
 
 	// Create a new ComposeManager with the CMDRunner
-	manager := NewComposeManager(cmdRunner)
+	manager := compose.NewComposeManager(cmdRunner)
 
 	// Define the options for the Docker Compose Down command
 	opts := commands.DockerComposeDownOptions{

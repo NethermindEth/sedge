@@ -23,6 +23,7 @@ import (
 
 func LoadEnv(fs afero.Fs, path string) (map[string]string, error) {
 	env := make(map[string]string)
+
 	data, err := afero.ReadFile(fs, path)
 	if err != nil {
 		return nil, err
@@ -38,6 +39,17 @@ func LoadEnv(fs afero.Fs, path string) (map[string]string, error) {
 			continue
 		}
 		env[strings.Trim(parts[0], " ")] = strings.Trim(parts[1], " ")
+	}
+	// Remove \r from keys and values
+	for key, value := range env {
+		newKey := strings.TrimRight(key, "\r")
+		newValue := strings.TrimRight(value, "\r")
+		if newKey != key {
+			delete(env, key)
+			env[newKey] = newValue
+		} else {
+			env[key] = newValue
+		}
 	}
 	return env, nil
 }

@@ -19,7 +19,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/docker/distribution/reference"
+	"github.com/distribution/reference"
 )
 
 // Manifest represents the manifest file of a package
