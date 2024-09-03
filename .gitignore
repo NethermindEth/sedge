@@ -31,3 +31,4 @@ cluster/
 node*/
 
 keystore*
+!cli/actions/testdata/charon/validator_keys/keystore*
