@@ -308,7 +308,6 @@ func TestImportKeys_DistributedMode(t *testing.T) {
 		Distributed:     true,
 		From:            from,
 	})
-	t.Logf("Error: %v", err)
 	assert.NoError(t, err)
 }
 
