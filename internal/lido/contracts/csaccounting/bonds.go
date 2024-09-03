@@ -21,6 +21,7 @@ import (
 
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 // BondInfo : Struct represent bond info of Node Operator
@@ -50,14 +51,15 @@ func BondSummary(network string, nodeID *big.Int) (BondInfo, error) {
 		return bondsInfo, fmt.Errorf("node ID value out-of-bounds: can't be negative")
 	}
 
-	contract, err := csAccountingContract(network)
+	contract, client, err := csAccountingContract(network)
 	if err != nil {
 		return bondsInfo, fmt.Errorf("failed to call csAccountingContract: %w", err)
 	}
+	defer client.Close()
 
 	result, err := contract.GetBondSummary(nil, nodeID)
 	if err != nil {
-		return bondsInfo, fmt.Errorf("failed to call GetBondSummary: %w", err)
+		return bondsInfo, fmt.Errorf("failed to call GetBondSummary contract method: %w", err)
 	}
 	bondsInfo.Current = result.Current
 	bondsInfo.Required = result.Required
@@ -79,18 +81,23 @@ func BondSummary(network string, nodeID *big.Int) (BondInfo, error) {
 	return bondsInfo, nil
 }
 
-func csAccountingContract(network string) (*Csaccounting, error) {
+func csAccountingContract(network string) (*Csaccounting, *ethclient.Client, error) {
 	client, err := contracts.ConnectClient(network)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to client: %w", err)
+		return nil, nil, fmt.Errorf("failed to connect to client: %w", err)
 	}
-	defer client.Close()
 
 	contractName := contracts.CSAccounting
-	address := common.HexToAddress(contracts.DeployedAddresses(contractName)[network])
+
+	contractAddress, err := contracts.ContractAddressByNetwork(contractName, network)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get deployed contract address: %w", err)
+	}
+
+	address := common.HexToAddress(contractAddress)
 	contract, err := NewCsaccounting(address, client)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create CSAccounting instance: %w", err)
+		return nil, nil, fmt.Errorf("failed to create CSAccounting instance: %w", err)
 	}
-	return contract, nil
+	return contract, client, nil
 }
