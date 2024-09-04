@@ -26,7 +26,7 @@ consensus:
     version: v5.0.4
   nimbus:
     name: statusim/nimbus-eth2
-    version: multiarch-v24.3.0
+    version: multiarch-v24.8.0
 validator:
   lighthouse:
     name: sigp/lighthouse
@@ -42,4 +42,4 @@ validator:
     version: v5.0.4
   nimbus:
     name: statusim/nimbus-validator-client
-    version: multiarch-v24.5.1
+    version: multiarch-v24.8.0

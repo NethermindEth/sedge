@@ -14,7 +14,6 @@
       - ${VL_DATA_DIR}:/data{{if .CustomConsensusConfigs}}{{if .CustomNetworkConfigPath}}
       - {{.CustomNetworkConfigPath}}:/network_config/config.yml{{end}}{{end}}
     command:
-      - validator
       - --data-dir=/data
       - --log-file=/data/logs/validator.log
       - --log-level=${VL_LOG_LEVEL}
