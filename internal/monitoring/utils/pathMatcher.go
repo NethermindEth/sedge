@@ -15,7 +15,9 @@ limitations under the License.
 */
 package utils
 
-import "path/filepath"
+import (
+	"strings"
+)
 
 // PathMatcher is a custom matcher for filepath comparison that implements the gomock.Matcher interface
 type PathMatcher struct {
@@ -23,14 +25,25 @@ type PathMatcher struct {
 }
 
 func (m PathMatcher) Matches(x interface{}) bool {
-	path, ok := x.(string)
+	actual, ok := x.(string)
 	if !ok {
 		return false
 	}
-	// Remove drive letter if present
+
+	// Normalize paths
+	expectedPath := normalizePath(m.Expected)
+	actualPath := normalizePath(actual)
+
+	return expectedPath == actualPath
+}
+
+func normalizePath(path string) string {
+	// Remove drive letter
 	path = removeDriveLetter(path)
-	expected := removeDriveLetter(m.Expected)
-	return filepath.Clean(path) == filepath.Clean(expected)
+	// Replace backslashes with forward slashes
+	path = strings.ReplaceAll(path, "\\", "/")
+	// Remove leading slash if present
+	return strings.TrimPrefix(path, "/")
 }
 
 func (m PathMatcher) String() string {
