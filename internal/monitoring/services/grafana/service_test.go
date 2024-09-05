@@ -80,7 +80,7 @@ func TestInit(t *testing.T) {
 	locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker)
 
 	// Create a new DataDir with the in-memory filesystem
-	dataDir, err := data.NewDataDir("/", afs, locker)
+	dataDir, err := data.NewDataDir(basePath, afs, locker)
 	require.NoError(t, err)
 	stack, err := dataDir.MonitoringStack()
 	require.NoError(t, err)
