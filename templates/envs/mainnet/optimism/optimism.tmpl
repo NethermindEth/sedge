@@ -1,0 +1,12 @@
+{{/* optimism.tmpl */}}
+{{ define "optimism" }}
+# --- Layer 2 - Optimism Node - configuration ---
+EC_API_URL={{.ExecutionApiURL}}
+EXECUTION_OP_API_URL={{.ExecutionOPApiURL}}
+EC_OP_IMAGE_VERSION={{.ElOpImage}}
+NETHERMIND_OP_LOG_LEVEL=INFO
+EC_OP_DATA_DIR={{.ElDataDir}}-op
+EC_OP_JWT_SECRET_PATH={{.JWTOPSecretPath}}
+EC_OP_RPC_URL=http://execution-l2:{{.ElOPAuthPort}}
+OP_IMAGE_VERSION={{.OPImageVersion}}
+{{ end }}

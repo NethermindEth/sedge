@@ -17,7 +17,6 @@ package cli
 
 import (
 	"errors"
-
 	"github.com/NethermindEth/sedge/cli/actions"
 	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/spf13/cobra"
@@ -42,15 +41,35 @@ func FullNodeSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "full-node [flags]",
 		Short: "Generate a full node config, with or without a validator",
-		Long: `Generate a docker-compose and an environment file with a full node configuration.
+		Long: `Generate a docker-compose and an environment file with a full node configuration for Ethereum networks.
 
-It will not generate a validator configuration if the --no-validator flag is set to true.
+This command sets up an Ethereum full node, which includes:
+- An execution client (e.g., geth, nethermind, besu, erigon)
+- A consensus client (e.g., teku, lodestar, prysm, lighthouse, nimbus)
+- Optionally, a validator client (same options as consensus client)
+- Optionally, MEV-Boost for Maximal Extractable Value
+- Optionally, an Optimism node (when --op-enabled flag is used)
 
-On mainnet and sepolia mev-boost will be activated by default unless you run it with --no-mev-boost flag.
+Key features:
+- It will not generate a validator configuration if the --no-validator flag is set to true.
+- On mainnet and sepolia, MEV-Boost will be activated by default unless you run it with --no-mev-boost flag.
+- If you don't provide an execution, consensus, or validator client, it will be chosen randomly.
+- If only one of consensus or validator is provided, the same client will be used for both.
+- You can use the syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for any client.
+- Supports fallback/backup execution endpoints for the consensus client.
+- Allows adding extra flags for fine-tuning each client's configuration.
+- Supports custom network configurations (chain spec, network config, genesis, deploy block).
+- Offers options for checkpoint sync, fee recipient setting, and port mapping.
+- Supports Optimism node setup when the --op-enabled flag is used.
 
-If you don't provide a execution, consensus or validator client, it will be chosen randomly. If one of the consensus or validator is provided, but the other one is omitted, then the same pair of clients will be used for both consensus and validator.
+Usage examples:
+- Basic setup: 'sedge generate full-node'
+- Custom clients: 'sedge generate full-node --execution geth --consensus prysm'
+- No validator: 'sedge generate full-node --no-validator'
+- Custom image: 'sedge generate full-node --execution nethermind:custom.image'
+- With Optimism: 'sedge generate full-node --op-enabled'
 
-Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate full-node --execution nethermind:docker.image'. If you want to use the default docker image, just use the client name`,
+Use 'sedge generate full-node --help' to see all available flags and options.`,
 		Args: cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
@@ -78,6 +97,9 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 				flags.consensusName = flags.validatorName
 			} else if flags.validatorName == "" {
 				flags.validatorName = flags.consensusName
+			}
+			if flags.optimismEnabled {
+				services = append(services, optimism)
 			}
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, services)
 		},
@@ -109,6 +131,66 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 	cmd.Flags().IntVar(&flags.waitEpoch, "wait-epoch", 1, "Number of epochs to wait before starting and restarting of the validator client.")
 	cmd.Flags().StringSliceVar(&flags.customEnodes, "execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
 	cmd.Flags().StringSliceVar(&flags.customEnrs, "consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
+	cmd.Flags().BoolVar(&flags.optimismEnabled, "op-enabled", false, "Use optimism if supported")
+	cmd.Flags().StringVar(&flags.optimismName, "op-image", "", "Optimism consensus client image.")
+	cmd.Flags().StringVar(&flags.optimismExecutionName, "op-execution-image", "", "Image name set for nethermind client to be used with optimism.")
+	cmd.Flags().StringArrayVar(&flags.elOpExtraFlags, "el-op-extra-flag", []string{}, "Additional flag to configure the execution client for optimism service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringArrayVar(&flags.opExtraFlags, "op-extra-flag", []string{}, "Additional flag to configure the optimism client service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().SortFlags = false
+	return cmd
+}
+
+func OpFullNodeSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
+	var flags GenCmdFlags
+	cmd := &cobra.Command{
+		Use:   "op-full-node [flags]",
+		Short: "Generate a full node config for Optimism or Base",
+		Long: `Generate a docker-compose and an environment file with a full node configuration for Optimism or Base networks.
+
+This command sets up an Optimism or Base full node, which includes an execution client, a consensus client, a Optimism consensus client, and an Optimism node.
+
+If you don't provide images for your clients, they will be chosen randomly. You can specify custom images for the Optimism and other nodes.
+
+Use the --base flag to generate a configuration for a Base node (which is built on Optimism).
+
+The command allows you to use external execution and consensus APIs instead of running your own nodes, by providing the respective URLs.
+
+Additionally, you can use the syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate op-full-node --execution nethermind:custom.image'. If you want to use the default docker image, just use the client name.
+
+This command does not generate a validator configuration, as Optimism and Base use different validation mechanisms compared to standard Ethereum networks.`,
+		Args: cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
+				return err
+			}
+			return preValidationGenerateCmd(network, logging, &flags)
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			services := []string{execution, consensus, optimism}
+			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, services)
+		},
+	}
+	// Bind flags
+	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
+	cmd.Flags().StringVar(&flags.optimismName, "op-image", "", "Optimism consensus client image.")
+	cmd.Flags().StringVar(&flags.optimismExecutionName, "op-execution-image", "", "Image name set for nethermind client to be used with optimism.")
+	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
+	cmd.Flags().StringVarP(&flags.executionApiUrl, "execution-api-url", "", "", "Set execution api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.")
+	cmd.Flags().StringVarP(&flags.consensusApiUrl, "consensus-api-url", "", "", "Set consensus api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.")
+	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")
+	cmd.Flags().StringVar(&flags.checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.")
+	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
+	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
+	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
+	cmd.Flags().BoolVar(&flags.isBase, "base", false, "If set, will generate the docker-compose file for Base L2 config")
+	cmd.Flags().StringSliceVar(&flags.fallbackEL, "fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge generate full-node -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
+	cmd.Flags().StringArrayVar(&flags.elExtraFlags, "el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringArrayVar(&flags.elOpExtraFlags, "el-op-extra-flag", []string{}, "Additional flag to configure the execution client for optimism service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringArrayVar(&flags.opExtraFlags, "op-extra-flag", []string{}, "Additional flag to configure the optimism client service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringArrayVar(&flags.clExtraFlags, "cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge generate full-node --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringSliceVar(&flags.customEnodes, "execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
+	cmd.Flags().StringSliceVar(&flags.customEnrs, "consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
+
 	cmd.Flags().SortFlags = false
 	return cmd
 }
@@ -235,7 +317,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 
 	cmd := &cobra.Command{
-		Use:   "validator [flags] --consensus-url <URL> [args]",
+		Use:   "validator [flags] --consensus-api-url <URL> [args]",
 		Short: "Generate a validator node config",
 		Long: "Generate a docker-compose and an environment file with a validator node configuration\n" +
 			"Valid args: name of execution clients according to network\n\n" +
@@ -243,7 +325,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			"Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate validator prysm:docker.image'. If you want to use the default docker image, just use the client name" +
 			"\n\n" +
 			"Required flags:\n" +
-			"- `--consensus-url`",
+			"- `--consensus-api-url`",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
@@ -274,7 +356,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	}
 	// Bind flags
 	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")
-	cmd.Flags().StringVar(&flags.consensusApiUrl, "consensus-url", "", "Consensus endpoint for the validator client to connect to. Example: 'sedge generate validator --consensus-url http://localhost:4000'")
+	cmd.Flags().StringVar(&flags.consensusApiUrl, "consensus-api-url", "", "Consensus endpoint for the validator client to connect to. Example: 'sedge generate validator --consensus-api-url http://localhost:4000'")
 	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption.\n"+
 		"Note: When setting up a Lido node, fee recipient address will be automatically set by the system.")
 	cmd.Flags().StringVar(&flags.graffiti, "graffiti", "", "Graffiti to be used by the validator")
@@ -284,7 +366,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
 	cmd.Flags().IntVar(&flags.waitEpoch, "wait-epoch", 1, "Number of epochs to wait before starting and restarting of the validator client.")
 	cmd.Flags().StringArrayVar(&flags.vlExtraFlags, "vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge generate validator --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	err := cmd.MarkFlagRequired("consensus-url")
+	err := cmd.MarkFlagRequired("consensus-api-url")
 	if err != nil {
 		return nil
 	}

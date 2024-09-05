@@ -127,13 +127,15 @@ You have other options to run `sedge generate`:
 1. `sedge generate full-node` will generate a `docker-compose.yml` script and a `.env` file with a randomized, if not set,
 execution, consensus, and validator clients, with mev-boost if applicable unless explicitly not set. Validator node
 can also be omitted if you use `--no-validator` flag.
-2. `sedge generate execution` will generate a `docker-compose.yml` script and a `.env` file with a randomized, if not set,
+2. `sedge generate op-full-node` will generate a `docker-compose.yml` script and a `.env` file with a randomized, if not set,
+execution and consensus clients, in addition to L2 execution and op-node for Optimism.
+3. `sedge generate execution` will generate a `docker-compose.yml` script and a `.env` file with a randomized, if not set,
 execution client.
-3. `sedge generate consensus` will generate a `docker-compose.yml` script and a `.env` file with a randomized, if not set,
+4. `sedge generate consensus` will generate a `docker-compose.yml` script and a `.env` file with a randomized, if not set,
 consensus client.
-4. `sedge generate validator` will generate a `docker-compose.yml` script and a `.env` file with a randomized, if not set,
+5. `sedge generate validator` will generate a `docker-compose.yml` script and a `.env` file with a randomized, if not set,
 validator client.
-5. `sedge generate mev-boost` will generate a `docker-compose.yml` script and a `.env` file with a mev-boost client.
+6. `sedge generate mev-boost` will generate a `docker-compose.yml` script and a `.env` file with a mev-boost client.
 
 :::info
 

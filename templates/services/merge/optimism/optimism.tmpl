@@ -1,0 +1,75 @@
+{{/* optimism.tmpl */}}
+{{ define "optimism" }}
+  execution-l2:
+    tty: true
+    environment:
+      - TERM=xterm-256color
+      - COLORTERM=truecolor
+    stop_grace_period: 30s
+    container_name: sedge-execution-op-l2-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: unless-stopped
+    image: ${EC_OP_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${EC_OP_DATA_DIR}:/nethermind/data
+      - ${EC_OP_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+      - "{{.ElOPDiscoveryPort}}:{{.ElOPDiscoveryPort}}/tcp"
+      - "{{.ElOPDiscoveryPort}}:{{.ElOPDiscoveryPort}}/udp"
+      - "{{.ElOPMetricsPort}}:{{.ElOPMetricsPort}}"{{if .MapAllPorts}}
+      - "{{.ElOPApiPort}}:{{.ElOPApiPort}}"
+      - "{{.ElOPAuthPort}}:{{.ElOPAuthPort}}"{{end}}
+    expose:
+      - {{.ElOPApiPort}}
+      - {{.ElOPAuthPort}}
+    command:
+      - --config={{.NetworkPrefix}}-${NETWORK}
+      - --datadir=/nethermind/data
+      - --log=${NETHERMIND_OP_LOG_LEVEL}
+      - --JsonRpc.Enabled=true
+      - --JsonRpc.Host=0.0.0.0
+      - --JsonRpc.Port={{.ElOPApiPort}}
+      - --JsonRpc.JwtSecretFile=/tmp/jwt/jwtsecret
+      - --JsonRpc.EngineHost=0.0.0.0
+      - --JsonRpc.EnginePort={{.ElOPAuthPort}}
+      - --Network.DiscoveryPort={{.ElOPDiscoveryPort}}
+      - --HealthChecks.Enabled=true
+      - --Metrics.Enabled=true
+      - --Metrics.ExposePort={{.ElOPMetricsPort}}{{range $flag := .ElOPExtraFlags}}
+      - --{{$flag}}{{end}}{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
+  l2cl:
+    tty: true
+    environment:
+      - TERM=xterm-256color
+      - COLORTERM=truecolor
+    stop_grace_period: 30s
+    container_name: sedge-consensus-op-l2-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: unless-stopped
+    image: ${OP_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${EC_OP_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    command:
+      - op-node
+      - --l1=${EC_API_URL}
+      - --l1.rpckind=nethermind
+      - --l1.trustrpc
+      - --l2=${EC_OP_RPC_URL}
+      - --l2.jwt-secret=/tmp/jwt/jwtsecret
+      {{if .ConsensusApiURL}}
+      - --l1.beacon={{.ConsensusApiURL}}{{end}}
+      - --network={{.NetworkPrefix}}-${NETWORK}{{range $flag := .OPExtraFlags}}
+      - --{{$flag}}{{end}}{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
+{{ end }}

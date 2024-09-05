@@ -124,7 +124,7 @@ func (flags *GenCmdFlags) argsList() []string {
 		s = append(s, "--graffiti", flags.graffiti)
 	}
 	if flags.consensusApiUrl != "" {
-		s = append(s, "--consensus-url", flags.consensusApiUrl)
+		s = append(s, "--consensus-api-url", flags.consensusApiUrl)
 	}
 	if flags.feeRecipient != "" {
 		s = append(s, "--fee-recipient", flags.feeRecipient)
@@ -771,7 +771,7 @@ func TestGenerateCmd(t *testing.T) {
 			errors.New("invalid consensus client"),
 		},
 		{
-			"Validator missing consensus-api",
+			"Validator missing consensus-api-url",
 			subCmd{
 				name: "validator",
 				args: []string{},
@@ -785,7 +785,7 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
-			errors.New("required flag(s) \"consensus-url\" not set"),
+			errors.New("required flag(s) \"consensus-api-url\" not set"),
 		},
 		{
 			"Validator good client",
@@ -1311,6 +1311,38 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			GenCmdFlags{
 				latestVersion:   true,
+				consensusApiUrl: "https://localhost:8000/api/endpoint",
+			},
+			globalFlags{},
+			nil,
+		},
+		{
+			"Optimism full node",
+			subCmd{
+				name: "op-full-node",
+			},
+			GenCmdFlags{},
+			globalFlags{},
+			nil,
+		},
+		{
+			"Optimism full node with api url",
+			subCmd{
+				name: "op-full-node",
+			},
+			GenCmdFlags{
+				executionApiUrl: "https://localhost:8545",
+				consensusApiUrl: "https://localhost:8000/api/endpoint",
+			},
+			globalFlags{},
+			nil,
+		},
+		{
+			"Optimism full node with only consensus api url",
+			subCmd{
+				name: "op-full-node",
+			},
+			GenCmdFlags{
 				consensusApiUrl: "https://localhost:8000/api/endpoint",
 			},
 			globalFlags{},

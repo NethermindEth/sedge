@@ -328,7 +328,7 @@ func setupJWT(p ui.Prompter, o *CliCmdOptions, skip bool) error {
 	}
 	switch o.jwtSourceType {
 	case SourceTypeCreate:
-		jwtPath, err := handleJWTSecret(o.generationPath)
+		jwtPath, err := handleJWTSecret(o.generationPath, "jwtsecret")
 		o.genData.JWTSecretPath = jwtPath
 		if err != nil {
 			return err
