@@ -1,8 +1,0 @@
-timestamp: 2024-09-02T20:09:05.638296+03:00
-repos:
-    - repo: https://github.com/NethermindEth/mock-avs
-      version: v0.2.1
-      commithash: bf1c4e1eea7209f45c53ceed0f03dd18d3c0a03f
-    - repo: https://github.com/NethermindEth/mock-avs-pkg
-      version: v5.5.2
-      commithash: 691e76b207953361999eac5b6068b74b6a0772bb

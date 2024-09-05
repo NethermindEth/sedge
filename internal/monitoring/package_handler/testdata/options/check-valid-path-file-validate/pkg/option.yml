@@ -1,7 +1,0 @@
-name: valid-path-file
-target: PATH_FILE
-type: path_file
-default: /path/filaname.txt
-help: "valid type path file"
-validate:
-  format: ".txt"

@@ -52,9 +52,9 @@ func main() {
 
 	// Init Sedge Actions
 	sdgOpts := actions.SedgeActionsOptions{
-		DockerClient:   dockerClient,
+		DockerClient:         dockerClient,
 		DockerServiceManager: dockerServiceManager,
-		CommandRunner:  cmdRunner,
+		CommandRunner:        cmdRunner,
 	}
 	sedgeActions := actions.NewSedgeActions(sdgOpts)
 

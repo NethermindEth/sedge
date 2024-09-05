@@ -1,9 +1,0 @@
-name: el-port
-target: PORT
-type: port
-default: 8080
-help: "Port of the harbor bay crocodile in the horse window within upside Coca Cola"
-hidden: true
-validate: 
-  min_value: 1
-  max_value: 10000

@@ -13,14 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package data
+package monitoring
 
-import "errors"
-
-var (
-	ErrMonitoringStackNotFound     = errors.New("monitoring stack not found")
-	ErrInitializingMonitoringStack = errors.New("failed monitoring stack initialization")
-	ErrReadingFile                 = errors.New("failed reading file")
-	ErrWritingFile                 = errors.New("failed writing file")
-	ErrStackNotInitialized         = errors.New("stack not initialized")
+const (
+	PrometheusServiceName     = "prometheus"
+	PrometheusContainerName   = "sedge_prometheus"
+	GrafanaServiceName        = "grafana"
+	GrafanaContainerName      = "sedge_grafana"
+	NodeExporterServiceName   = "node_exporter"
+	NodeExporterContainerName = "sedge_node_exporter"
+	monitoringPath            = "monitoring"
+	InstanceIDLabel           = "instance_id"
 )

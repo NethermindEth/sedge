@@ -1,4 +1,0 @@
-targets:
-  - service: some service
-    port: 9090
-    path: /metrics

@@ -1,8 +1,0 @@
-name: valid-float
-target: FLOAT
-type: float
-default: 12.30
-help: "valid type float"
-validate: 
-  min_value: 1
-  max_value: 10000

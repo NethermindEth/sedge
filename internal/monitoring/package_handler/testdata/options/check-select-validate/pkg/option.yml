@@ -1,7 +1,0 @@
-name: valid-select
-target: SELECT
-type: select
-default: ok
-help: "not validate"
-validate:
-  options: ["ok"]

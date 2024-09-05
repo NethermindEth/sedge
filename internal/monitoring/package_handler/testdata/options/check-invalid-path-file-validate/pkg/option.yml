@@ -1,7 +1,0 @@
-name: invalid-path-file
-target: PATH_FILE
-type: path_file
-default: /path/filaname.txt
-help: "invalid type path_file with validation"
-validate:
-  format: ".docx"

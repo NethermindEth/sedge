@@ -1,5 +1,0 @@
-name: invalid-uri
-type: uri
-target: URI
-default: "http://example.com /#x/y%2Fz"
-help: "invalid type uri"

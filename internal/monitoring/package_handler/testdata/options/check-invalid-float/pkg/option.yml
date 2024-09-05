@@ -1,8 +1,0 @@
-name: invalid-float
-target: FLOAT
-type: float
-default: 12.3O
-help: "invalid type float"
-validate: 
-  min_value: 1
-  max_value: 10000

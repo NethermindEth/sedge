@@ -1,5 +1,0 @@
-name: invalid-path-file
-target: PATH_FILE
-type: path_file
-default: this is an invalid path file
-help: "invalid type path file"

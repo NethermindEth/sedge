@@ -1,5 +1,0 @@
-type: path_dir
-default: path dir
-validate: 
-  min_value: 1
-  max_value: 10000

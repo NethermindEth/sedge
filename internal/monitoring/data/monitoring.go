@@ -87,7 +87,10 @@ func (m *MonitoringStack) Setup(env map[string]string, monitoringFs fs.FS) (err 
 		return err
 	}
 	for k, v := range env {
-		envFile.WriteString(fmt.Sprintf("%s=%s\n", k, v))
+		_, err = envFile.WriteString(fmt.Sprintf("%s=%s\n", k, v))
+		if err != nil {
+			return fmt.Errorf("failed to write to .env file: %w", err)
+		}
 	}
 	defer envFile.Close()
 

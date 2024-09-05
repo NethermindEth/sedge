@@ -32,4 +32,3 @@ type DockerComposeStopOptions struct {
 	// Path specifies the location of the docker-compose.yaml file.
 	Path string
 }
-

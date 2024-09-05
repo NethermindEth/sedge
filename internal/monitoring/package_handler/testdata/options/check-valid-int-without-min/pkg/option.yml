@@ -1,7 +1,0 @@
-name: invalid-float
-target: FLOAT
-type: float
-default: -123.4
-help: "valid type float without min value"
-validate: 
-  max_value: 0

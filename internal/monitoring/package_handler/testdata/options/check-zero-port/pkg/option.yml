@@ -1,5 +1,0 @@
-name: invalid-port
-target: PORT
-type: port
-default:  0
-help: "invalid type port with zero value"

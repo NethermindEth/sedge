@@ -80,7 +80,7 @@ func TestUp(t *testing.T) {
 				expectedCmd = "docker compose -f " + tt.opts.Path + " up -d"
 			}
 			expectedCommand := commands.Command{
-				Cmd:      expectedCmd,
+				Cmd:       expectedCmd,
 				GetOutput: false,
 			}
 			mockRunner.EXPECT().BuildDockerComposeUpCMD(tt.opts).Return(expectedCommand)
@@ -172,7 +172,7 @@ func TestPull(t *testing.T) {
 				expectedCmd = "docker compose -f " + tt.opts.Path + " pull"
 			}
 			expectedCommand := commands.Command{
-				Cmd:      expectedCmd,
+				Cmd:       expectedCmd,
 				GetOutput: false,
 			}
 			mockRunner.EXPECT().BuildDockerComposePullCMD(tt.opts).Return(expectedCommand)
@@ -264,7 +264,7 @@ func TestCreate(t *testing.T) {
 			}
 
 			expectedCommand := commands.Command{
-				Cmd:      expectedCmd,
+				Cmd:       expectedCmd,
 				GetOutput: false,
 			}
 			mockRunner.EXPECT().BuildDockerComposeCreateCMD(tt.opts).Return(expectedCommand)
@@ -357,7 +357,7 @@ func TestBuild(t *testing.T) {
 			}
 
 			expectedCommand := commands.Command{
-				Cmd:      expectedCmd,
+				Cmd:       expectedCmd,
 				GetOutput: false,
 			}
 			mockRunner.EXPECT().BuildDockerComposeBuildCMD(tt.opts).Return(expectedCommand)
@@ -502,7 +502,7 @@ func TestPS(t *testing.T) {
 			}
 
 			expectedCommand := commands.Command{
-				Cmd:      expectedCmd,
+				Cmd:       expectedCmd,
 				GetOutput: false,
 			}
 			mockRunner.EXPECT().BuildDockerComposePSCMD(tt.opts).Return(expectedCommand)
@@ -615,7 +615,7 @@ func TestLogs(t *testing.T) {
 			expectedCmd += " " + strings.Join(tt.opts.Services, " ")
 
 			expectedCommand := commands.Command{
-				Cmd:      expectedCmd,
+				Cmd:       expectedCmd,
 				GetOutput: false,
 			}
 			mockRunner.EXPECT().BuildDockerComposeLogsCMD(tt.opts).Return(expectedCommand)
@@ -660,13 +660,13 @@ func ExampleComposeManager_Logs() {
 func TestStop(t *testing.T) {
 	tests := []struct {
 		name        string
-		opts         compose.DockerComposeStopOptions
+		opts        compose.DockerComposeStopOptions
 		runCMDError error
 		wantError   error
 	}{
 		{
 			name: "it runs the correct command",
-			opts:  compose.DockerComposeStopOptions{
+			opts: compose.DockerComposeStopOptions{
 				Path: "/path/to/docker-compose.yml",
 			},
 			runCMDError: nil,
@@ -674,7 +674,7 @@ func TestStop(t *testing.T) {
 		},
 		{
 			name: "it returns an error if RunCMD fails",
-			opts:  compose.DockerComposeStopOptions{
+			opts: compose.DockerComposeStopOptions{
 				Path: "/path/to/docker-compose.yml",
 			},
 			runCMDError: errors.New("command failed"),
@@ -748,7 +748,7 @@ func TestDown(t *testing.T) {
 			expectedCmd := "docker compose -f " + tt.opts.Path + " down"
 
 			expectedCommand := commands.Command{
-				Cmd:      expectedCmd,
+				Cmd:       expectedCmd,
 				GetOutput: false,
 			}
 			mockRunner.EXPECT().BuildDockerComposeDownCMD(tt.opts).Return(expectedCommand)

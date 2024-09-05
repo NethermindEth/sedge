@@ -1,5 +1,0 @@
-name: invalid-bool
-target: BOOL
-type: bool
-default: "trues"
-help: "invalid type bool"

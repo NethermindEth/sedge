@@ -1,6 +1,0 @@
-name: invalid-type
-type: dog
-default: dog-value
-validate: 
-  min_value: 1
-  max_value: 10000

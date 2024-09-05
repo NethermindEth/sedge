@@ -1,5 +1,0 @@
-name: valid-int
-target: INT
-type: int
-default: 1234
-help: "valid type int"

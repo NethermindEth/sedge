@@ -85,7 +85,7 @@ func (d *DockerServiceManager) Stop(container string) error {
 		}
 		return err
 	}
-	if ctInfo.State.Running || ctInfo.State.Restarting{
+	if ctInfo.State.Running || ctInfo.State.Restarting {
 		log.Infof("Stopping service: %s, currently on %s status", container, ctInfo.State.Status)
 		timeout := 5 * int(time.Minute)
 		if err := d.dockerClient.ContainerStop(context.Background(), ctInfo.ID, dockerCt.StopOptions{
@@ -128,21 +128,21 @@ func (d *DockerServiceManager) Pull(imageVar string) error {
 // The function accepts a string parameter 'ctID', which represents the name or ID of the Docker container.
 // The function attempts to fetch the logs and returns them as a string. If an error occurs during the process, it returns the error.
 func (d *DockerServiceManager) ContainerLogs(containerVar, service string) (string, error) {
-    logReader, err := d.dockerClient.ContainerLogs(context.Background(), containerVar, dockerCt.LogsOptions{
-        ShowStdout: true,
-        ShowStderr: true,
-        Follow:     false,
-    })
-    if err != nil {
-        return "", err
-    }
-    defer logReader.Close()
+	logReader, err := d.dockerClient.ContainerLogs(context.Background(), containerVar, dockerCt.LogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Follow:     false,
+	})
+	if err != nil {
+		return "", err
+	}
+	defer logReader.Close()
 
-    logs, err := io.ReadAll(logReader)
-    if err == nil {
-        log.Debugf("%s container logs: %s",service, string(logs))
-    }
-    return string(logs), err
+	logs, err := io.ReadAll(logReader)
+	if err == nil {
+		log.Debugf("%s container logs: %s", service, string(logs))
+	}
+	return string(logs), err
 }
 
 // ContainerLogsMerged retrieves the merge of all logs of specified Docker containers.
@@ -176,7 +176,10 @@ func (d *DockerServiceManager) ContainerLogsMerged(ctx context.Context, w io.Wri
 			scanner := bufio.NewScanner(logReader)
 			for scanner.Scan() {
 				wLock.Lock()
-				w.Write([]byte(serviceName + ": "))
+				if _, err := w.Write([]byte(serviceName + ": ")); err != nil {
+					out <- fmt.Errorf("error writing service name: %w", err)
+					return
+				}
 				scannerBytes := scanner.Bytes()
 
 				/* Remove the first 8 bytes, which are the logs HEADER from Docker.
@@ -187,8 +190,14 @@ func (d *DockerServiceManager) ContainerLogsMerged(ctx context.Context, w io.Wri
 				The PAYLOAD is the actual log line.*/
 				logPayload := scannerBytes[8:]
 
-				w.Write(logPayload)
-				w.Write([]byte("\n"))
+				if _, err := w.Write(logPayload); err != nil {
+					out <- fmt.Errorf("error writing log payload: %w", err)
+					return
+				}
+				if _, err := w.Write([]byte("\n")); err != nil {
+					out <- fmt.Errorf("error writing newline: %w", err)
+					return
+				}
 				wLock.Unlock()
 			}
 			out <- nil

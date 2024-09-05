@@ -1,3 +1,0 @@
-targets:
-  - service: main-service
-    path: /metrics

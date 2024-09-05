@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 package services_test
-//TestContainerLogs, TestStopContainer
+
+// TestContainerLogs, TestStopContainer
 import (
 	"bytes"
 	"context"
@@ -29,6 +30,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
@@ -1226,7 +1228,7 @@ func TestBuildImageFromURI(t *testing.T) {
 					Body: buildBody,
 				}
 				loadBody := io.NopCloser(bytes.NewReader([]byte{}))
-				loadResponse := types.ImageLoadResponse{
+				loadResponse := image.LoadResponse{
 					Body: loadBody,
 				}
 				dockerClient.EXPECT().ImageBuild(context.Background(), nil, types.ImageBuildOptions{
@@ -1255,7 +1257,7 @@ func TestBuildImageFromURI(t *testing.T) {
 						Body: buildBody,
 					}
 					loadBody := io.NopCloser(bytes.NewReader([]byte{}))
-					loadResponse := types.ImageLoadResponse{
+					loadResponse := image.LoadResponse{
 						Body: loadBody,
 					}
 					dockerClient.EXPECT().ImageBuild(context.Background(), nil, types.ImageBuildOptions{
@@ -1299,7 +1301,7 @@ func TestBuildImageFromURI(t *testing.T) {
 					Remove:        true,
 					ForceRemove:   true,
 				}).Return(buildResponse, nil)
-				dockerClient.EXPECT().ImageLoad(context.Background(), buildResponse.Body, true).Return(types.ImageLoadResponse{}, errors.New("load error"))
+				dockerClient.EXPECT().ImageLoad(context.Background(), buildResponse.Body, true).Return(image.LoadResponse{}, errors.New("load error"))
 			},
 			expectedError: errors.New("load error"),
 		},

@@ -17,7 +17,7 @@ package locker
 
 import "github.com/gofrs/flock"
 
-//go:generate mockgen -package=sedge_mocks -destination=../../../mocks/locker.go github.com/NethermindEth/sedge/internal/monitoring/locker Locker
+//go:generate mockgen -package=mocks -destination=./mocks/locker.go github.com/NethermindEth/sedge/internal/monitoring/locker Locker
 type Locker interface {
 	New(path string) Locker
 	Lock() error

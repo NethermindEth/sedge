@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package data_test
+package data
 
 import (
 	"errors"
@@ -25,7 +25,8 @@ import (
 	"time"
 
 	"github.com/NethermindEth/sedge/internal/monitoring/data/testdata"
-	mocks "github.com/NethermindEth/sedge/mocks"
+	mocks "github.com/NethermindEth/sedge/internal/monitoring/locker/mocks"
+	"github.com/NethermindEth/sedge/internal/monitoring/utils"
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
@@ -41,7 +42,7 @@ func TestInit(t *testing.T) {
 	locker := mocks.NewMockLocker(ctrl)
 
 	// Expect the lock to initialized
-	locker.EXPECT().New("/.lock").Return(locker)
+	locker.EXPECT().New(utils.PathMatcher{Expected: "/.lock"}).Return(locker)
 
 	// Create a new MonitoringStack with the in-memory filesystem
 	stack := &MonitoringStack{
@@ -833,7 +834,7 @@ func TestCleanup(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join("/monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("/monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -851,7 +852,7 @@ func TestCleanup(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join("/monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("/monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -882,7 +883,7 @@ func TestCleanup(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(filepath.Join("/monitoring", ".lock")).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("/monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
