@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - New command `lido-status` to display data of Lido Node Operator.
+- Monitoring setup for Lido CSM Node.
 
 ### Fixed
 -  Teku and Lighthouse import keys container error on Windows.
