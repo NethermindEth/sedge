@@ -15,4 +15,4 @@ limitations under the License.
 */
 package compose
 
-//go:generate mockgen -package=sedge_mocks -destination= ../../../mocks/commandRunner.go github.com/NethermindEth/sedge/internal/pkg/commands CommandRunner
+//go:generate mockgen -package=sedge_mocks -destination=../../../mocks/commandRunner.go github.com/NethermindEth/sedge/internal/pkg/commands CommandRunner
