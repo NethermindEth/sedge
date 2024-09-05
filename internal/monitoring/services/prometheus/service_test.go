@@ -20,6 +20,8 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -39,15 +41,18 @@ import (
 func TestInit(t *testing.T) {
 	// Create an in-memory filesystem
 	afs := afero.NewMemMapFs()
+	userHome, err := os.UserHomeDir()
+	require.NoError(t, err)
+	basePath := filepath.Join(userHome, ".sedge")
 
 	// Create a mock locker
 	ctrl := gomock.NewController(t)
 	locker := mocks.NewMockLocker(ctrl)
 
 	// Expect the lock to be acquired with the platform-independent path
-	locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker)
+	locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker)
 	// Create a new DataDir with the in-memory filesystem
-	dataDir, err := data.NewDataDir("/", afs, locker)
+	dataDir, err := data.NewDataDir(basePath, afs, locker)
 	require.NoError(t, err)
 	stack, err := dataDir.MonitoringStack()
 	require.NoError(t, err)
@@ -118,7 +123,7 @@ func TestInitError(t *testing.T) {
 			locker := mocks.NewMockLocker(ctrl)
 
 			// Expect the lock to be acquired with the platform-independent path
-			locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker)
+			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("/monitoring", ".lock")}).Return(locker)
 
 			// Create a new DataDir with the in-memory filesystem
 			dataDir, err := data.NewDataDir("/", afs, locker)
@@ -146,6 +151,10 @@ func TestDotEnv(t *testing.T) {
 }
 
 func TestSetup(t *testing.T) {
+	userHome, err := os.UserHomeDir()
+	require.NoError(t, err)
+	basePath := filepath.Join(userHome, ".sedge")
+
 	okLocker := func(t *testing.T) *mocks.MockLocker {
 		// Create a mock locker
 		ctrl := gomock.NewController(t)
@@ -153,7 +162,7 @@ func TestSetup(t *testing.T) {
 
 		// Expect the lock to be acquired
 		gomock.InOrder(
-			locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker),
+			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
 			locker.EXPECT().Lock().Return(nil),
 			locker.EXPECT().Locked().Return(true),
 			locker.EXPECT().Unlock().Return(nil),
@@ -171,7 +180,7 @@ func TestSetup(t *testing.T) {
 		locker := mocks.NewMockLocker(ctrl)
 
 		// Expect the lock to be acquired
-		locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker)
+		locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker)
 		return locker
 	}
 
@@ -219,7 +228,7 @@ func TestSetup(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(fmt.Errorf("error")),
 				)
 				return locker
@@ -239,7 +248,7 @@ func TestSetup(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(false),
 				)
@@ -259,7 +268,7 @@ func TestSetup(t *testing.T) {
 			afs := afero.NewMemMapFs()
 
 			// Create a new DataDir with the in-memory filesystem
-			dataDir, err := data.NewDataDir("/", afs, tt.mocker(t))
+			dataDir, err := data.NewDataDir(basePath, afs, tt.mocker(t))
 			require.NoError(t, err)
 			stack, err := dataDir.MonitoringStack()
 			require.NoError(t, err)
@@ -278,13 +287,13 @@ func TestSetup(t *testing.T) {
 				require.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				ok, err := afero.Exists(afs, "/monitoring/prometheus/prometheus.yml")
+				ok, err := afero.Exists(afs, filepath.Join(basePath, "monitoring", "prometheus", "prometheus.yml"))
 				assert.True(t, ok)
 				assert.NoError(t, err)
 
 				// Read the prom.yml file
 				var prom Config
-				promYml, err := afero.ReadFile(afs, "/monitoring/prometheus/prometheus.yml")
+				promYml, err := afero.ReadFile(afs, filepath.Join(basePath, "monitoring", "prometheus", "prometheus.yml"))
 				assert.NoError(t, err)
 				err = yaml.Unmarshal(promYml, &prom)
 				assert.NoError(t, err)
@@ -300,6 +309,10 @@ func TestSetup(t *testing.T) {
 }
 
 func TestAddTarget(t *testing.T) {
+	userHome, err := os.UserHomeDir()
+	require.NoError(t, err)
+	basePath := filepath.Join(userHome, ".sedge")
+
 	okLocker := func(t *testing.T, times int) *mocks.MockLocker {
 		// Create a mock locker
 		ctrl := gomock.NewController(t)
@@ -307,7 +320,7 @@ func TestAddTarget(t *testing.T) {
 
 		// Expect the lock to be acquired
 		gomock.InOrder(
-			locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker),
+			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
 			locker.EXPECT().Lock().Return(nil),
 			locker.EXPECT().Locked().Return(true),
 			locker.EXPECT().Unlock().Return(nil),
@@ -548,7 +561,7 @@ func TestAddTarget(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -584,7 +597,7 @@ func TestAddTarget(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -622,7 +635,7 @@ func TestAddTarget(t *testing.T) {
 			afs := afero.NewMemMapFs()
 
 			// Create a new DataDir with the in-memory filesystem
-			dataDir, err := data.NewDataDir("/", afs, tt.mocker(t, len(tt.toAdd)))
+			dataDir, err := data.NewDataDir(basePath, afs, tt.mocker(t, len(tt.toAdd)))
 			require.NoError(t, err)
 			stack, err := dataDir.MonitoringStack()
 			require.NoError(t, err)
@@ -677,7 +690,7 @@ func TestAddTarget(t *testing.T) {
 			}
 			// Read the prom.yml file
 			var prom Config
-			promYml, err := afero.ReadFile(afs, "/monitoring/prometheus/prometheus.yml")
+			promYml, err := afero.ReadFile(afs, filepath.Join(basePath, "monitoring", "prometheus", "prometheus.yml"))
 			assert.NoError(t, err)
 			err = yaml.Unmarshal(promYml, &prom)
 			assert.NoError(t, err)
@@ -695,6 +708,10 @@ func TestAddTarget(t *testing.T) {
 }
 
 func TestRemoveTarget(t *testing.T) {
+	userHome, err := os.UserHomeDir()
+	require.NoError(t, err)
+	basePath := filepath.Join(userHome, ".sedge")
+
 	okLocker := func(t *testing.T, times int) *mocks.MockLocker {
 		// Create a mock locker
 		ctrl := gomock.NewController(t)
@@ -702,7 +719,7 @@ func TestRemoveTarget(t *testing.T) {
 
 		// Expect the lock to be acquired
 		gomock.InOrder(
-			locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker),
+			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
 			locker.EXPECT().Lock().Return(nil),
 			locker.EXPECT().Locked().Return(true),
 			locker.EXPECT().Unlock().Return(nil),
@@ -829,7 +846,7 @@ func TestRemoveTarget(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -894,7 +911,7 @@ func TestRemoveTarget(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -926,7 +943,7 @@ func TestRemoveTarget(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -961,7 +978,7 @@ func TestRemoveTarget(t *testing.T) {
 			afs := afero.NewMemMapFs()
 
 			// Create a new DataDir with the in-memory filesystem
-			dataDir, err := data.NewDataDir("/", afs, tt.mocker(t, len(tt.toRem)))
+			dataDir, err := data.NewDataDir(basePath, afs, tt.mocker(t, len(tt.toRem)))
 			require.NoError(t, err)
 			stack, err := dataDir.MonitoringStack()
 			require.NoError(t, err)
@@ -1004,7 +1021,7 @@ func TestRemoveTarget(t *testing.T) {
 
 			// Read the prom.yml file
 			var prom Config
-			promYml, err := afero.ReadFile(afs, "/monitoring/prometheus/prometheus.yml")
+			promYml, err := afero.ReadFile(afs, filepath.Join(basePath, "monitoring", "prometheus", "prometheus.yml"))
 			assert.NoError(t, err)
 			err = yaml.Unmarshal(promYml, &prom)
 			assert.NoError(t, err)
@@ -1024,7 +1041,7 @@ func TestRemoveTarget(t *testing.T) {
 			// Save the prom.yml file
 			promYml, err = yaml.Marshal(prom)
 			assert.NoError(t, err)
-			err = afero.WriteFile(afs, "/monitoring/prometheus/prometheus.yml", promYml, 0o644)
+			err = afero.WriteFile(afs, filepath.Join(basePath, "monitoring", "prometheus", "prometheus.yml"), promYml, 0o644)
 			assert.NoError(t, err)
 
 			// Remove the targets
@@ -1039,7 +1056,7 @@ func TestRemoveTarget(t *testing.T) {
 			}
 
 			// Read the prom.yml file
-			promYml, err = afero.ReadFile(afs, "/monitoring/prometheus/prometheus.yml")
+			promYml, err = afero.ReadFile(afs, filepath.Join(basePath, "monitoring", "prometheus", "prometheus.yml"))
 			assert.NoError(t, err)
 			err = yaml.Unmarshal(promYml, &prom)
 			assert.NoError(t, err)

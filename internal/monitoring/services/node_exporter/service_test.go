@@ -17,6 +17,7 @@ package node_exporter
 
 import (
 	"net"
+	"path/filepath"
 	"strconv"
 	"testing"
 
@@ -40,7 +41,7 @@ func TestInit(t *testing.T) {
 	locker := mocks.NewMockLocker(ctrl)
 
 	// Expect the lock to be acquired
-	locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker)
+	locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("/monitoring", ".lock")}).Return(locker)
 
 	// Create a new DataDir with the in-memory filesystem
 	dataDir, err := data.NewDataDir("/", afs, locker)

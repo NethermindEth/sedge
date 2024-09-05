@@ -68,13 +68,16 @@ type ExemplarTraceIdDestination struct {
 func TestInit(t *testing.T) {
 	// Create an in-memory filesystem
 	afs := afero.NewMemMapFs()
+	userHome, err := os.UserHomeDir()
+	require.NoError(t, err)
+	basePath := filepath.Join(userHome, ".sedge")
 
 	// Create a mock locker
 	ctrl := gomock.NewController(t)
 	locker := mocks.NewMockLocker(ctrl)
 
 	// Expect the lock to be acquired
-	locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker)
+	locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker)
 
 	// Create a new DataDir with the in-memory filesystem
 	dataDir, err := data.NewDataDir("/", afs, locker)
@@ -122,6 +125,10 @@ func TestInit(t *testing.T) {
 }
 
 func TestSetup(t *testing.T) {
+	userHome, err := os.UserHomeDir()
+	require.NoError(t, err)
+	basePath := filepath.Join(userHome, ".sedge")
+
 	okLocker := func(t *testing.T) *mocks.MockLocker {
 		// Create a mock locker
 		ctrl := gomock.NewController(t)
@@ -129,7 +136,7 @@ func TestSetup(t *testing.T) {
 
 		// Expect the lock to be acquired
 		gomock.InOrder(
-			locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker),
+			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
 			locker.EXPECT().Lock().Return(nil),
 			locker.EXPECT().Locked().Return(true),
 			locker.EXPECT().Unlock().Return(nil),
@@ -149,7 +156,7 @@ func TestSetup(t *testing.T) {
 		locker := mocks.NewMockLocker(ctrl)
 
 		// Expect the lock to be acquired
-		locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker)
+		locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker)
 		return locker
 	}
 
@@ -193,7 +200,7 @@ func TestSetup(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(fmt.Errorf("error")),
 				)
 				return locker
@@ -213,7 +220,7 @@ func TestSetup(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: "/monitoring/.lock"}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(false),
 				)
@@ -232,13 +239,8 @@ func TestSetup(t *testing.T) {
 			// Create an in-memory filesystem
 			afs := afero.NewMemMapFs()
 
-			// Create necessary directories
-			monitoringDir := filepath.Join(string(os.PathSeparator), "monitoring")
-			err := afs.MkdirAll(monitoringDir, 0o755)
-			require.NoError(t, err)
-
 			// Create a new DataDir with the in-memory filesystem
-			dataDir, err := data.NewDataDir(monitoringDir, afs, tt.mocker(t))
+			dataDir, err := data.NewDataDir(basePath, afs, tt.mocker(t))
 			require.NoError(t, err)
 			stack, err := dataDir.MonitoringStack()
 			require.NoError(t, err)
@@ -258,7 +260,7 @@ func TestSetup(t *testing.T) {
 				assert.NoError(t, err)
 
 				// Check the Grafana config file
-				promYmlPath := filepath.Join(monitoringDir, "grafana", "provisioning", "datasources", "prom.yml")
+				promYmlPath := filepath.Join(basePath, "monitoring", "grafana", "provisioning", "datasources", "prom.yml")
 				ok, err := afero.Exists(afs, promYmlPath)
 				assert.True(t, ok)
 				assert.NoError(t, err)
@@ -275,21 +277,21 @@ func TestSetup(t *testing.T) {
 				assert.Equal(t, promEndpoint, prom.Datasources[0].URL)
 
 				// Check the Dashboards config file
-				dashboardsYmlPath := filepath.Join(monitoringDir, "grafana", "provisioning", "dashboards", "dashboards.yml")
+				dashboardsYmlPath := filepath.Join(basePath, "monitoring", "grafana", "provisioning", "dashboards", "dashboards.yml")
 				ok, err = afero.Exists(afs, dashboardsYmlPath)
 				assert.True(t, ok)
 				assert.NoError(t, err)
 
 				// Check the provisioned dashboards
 				foldersToCheck := []string{
-					filepath.Join(monitoringDir, "grafana", "data", "dashboards"),
-					filepath.Join(monitoringDir, "grafana", "data", "dashboards", "common-metrics"),
-					filepath.Join(monitoringDir, "grafana", "data", "dashboards", "node-exporter"),
+					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards"),
+					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "common-metrics"),
+					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "node-exporter"),
 				}
 				filesToCheck := []string{
-					filepath.Join(monitoringDir, "grafana", "data", "dashboards", "common-metrics", "common-metrics.json"),
-					filepath.Join(monitoringDir, "grafana", "data", "dashboards", "common-metrics", "common-metrics-global.json"),
-					filepath.Join(monitoringDir, "grafana", "data", "dashboards", "node-exporter", "node-exporter.json"),
+					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "common-metrics", "common-metrics.json"),
+					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "common-metrics", "common-metrics-global.json"),
+					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "node-exporter", "node-exporter.json"),
 				}
 				for _, folder := range foldersToCheck {
 					ok, err = afero.DirExists(afs, folder)

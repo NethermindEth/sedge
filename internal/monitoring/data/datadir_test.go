@@ -45,15 +45,7 @@ func TestNewDataDir(t *testing.T) {
 			locker := mocks.NewMockLocker(ctrl)
 
 			testDir := t.TempDir()
-			wd, err := os.Getwd()
-			if err != nil {
-				t.Fatal(err)
-			}
-			relativePth, err := filepath.Rel(wd, testDir)
-			if err != nil {
-				t.Fatal(err)
-			}
-			absPath, err := filepath.Abs(relativePth)
+			absPath, err := filepath.Abs(testDir)
 			if err != nil {
 				t.Fatal(err)
 			}
