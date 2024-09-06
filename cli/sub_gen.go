@@ -17,6 +17,7 @@ package cli
 
 import (
 	"errors"
+
 	"github.com/NethermindEth/sedge/cli/actions"
 	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/spf13/cobra"

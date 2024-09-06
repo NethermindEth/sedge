@@ -457,7 +457,6 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			opClient.Name = "optimism"
 			if len(optimismParts) > 1 {
 				opClient.Image = strings.Join(optimismParts[1:], ":")
-
 			}
 		}
 		opClient.SetImageOrDefault(strings.Join(optimismParts[1:], ":"))
@@ -471,7 +470,6 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			executionOpClient.Name = optimismExecutionParts[0]
 			if len(optimismExecutionParts) > 1 {
 				executionOpClient.Image = strings.Join(optimismExecutionParts[1:], ":")
-
 			}
 		}
 		executionOpClient.SetImageOrDefault(strings.Join(optimismExecutionParts[1:], ":"))
