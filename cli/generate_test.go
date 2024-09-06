@@ -124,7 +124,7 @@ func (flags *GenCmdFlags) argsList() []string {
 		s = append(s, "--graffiti", flags.graffiti)
 	}
 	if flags.consensusApiUrl != "" {
-		s = append(s, "--consensus-api-url", flags.consensusApiUrl)
+		s = append(s, "--consensus-url", flags.consensusApiUrl)
 	}
 	if flags.feeRecipient != "" {
 		s = append(s, "--fee-recipient", flags.feeRecipient)
@@ -771,7 +771,7 @@ func TestGenerateCmd(t *testing.T) {
 			errors.New("invalid consensus client"),
 		},
 		{
-			"Validator missing consensus-api-url",
+			"Validator missing consensus-url",
 			subCmd{
 				name: "validator",
 				args: []string{},
@@ -785,7 +785,7 @@ func TestGenerateCmd(t *testing.T) {
 				network:        "",
 				logging:        "",
 			},
-			errors.New("required flag(s) \"consensus-api-url\" not set"),
+			errors.New("required flag(s) \"consensus-url\" not set"),
 		},
 		{
 			"Validator good client",

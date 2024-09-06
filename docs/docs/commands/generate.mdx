@@ -173,7 +173,7 @@ Flags:
       --op-execution-image string         Image name set for nethermind client to be used with optimism.
   -e, --execution string                  Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
       --execution-api-url string          Set execution api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.
-      --consensus-api-url string          Set consensus api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.
+      --consensus-url string          Set consensus api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.
       --latest                            Use the latest version of clients. This sets the "latest" tag on the client's docker images. Latest version might not work.
       --checkpoint-sync-url string        Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.
       --fee-recipient string              Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption
@@ -297,14 +297,14 @@ Should be one of: lighthouse, teku, prysm, lodestar. If you don't provide one, i
 Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate validator prysm:docker.image'. If you want to use the default docker image, just use the client name
 
 Required flags:
-- `--consensus-api-url`
+- `--consensus-url`
 
 Usage:
-  sedge generate validator [flags] --consensus-api-url <URL> [args]
+  sedge generate validator [flags] --consensus-url <URL> [args]
 
 Flags:
       --latest                       Use the latest version of clients. This sets the "latest" tag on the client's docker images. Latest version might not work.
-      --consensus-api-url string     Consensus endpoint for the validator client to connect to. Example: 'sedge generate validator --consensus-api-url http://localhost:4000'
+      --consensus-url string     Consensus endpoint for the validator client to connect to. Example: 'sedge generate validator --consensus-url http://localhost:4000'
       --fee-recipient string         Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption.
                                      Note: When setting up a Lido node, fee recipient address will be automatically set by the system.
       --graffiti string              Graffiti to be used by the validator

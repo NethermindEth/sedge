@@ -176,7 +176,7 @@ This command does not generate a validator configuration, as Optimism and Base u
 	cmd.Flags().StringVar(&flags.optimismExecutionName, "op-execution-image", "", "Image name set for nethermind client to be used with optimism.")
 	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.executionApiUrl, "execution-api-url", "", "", "Set execution api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.")
-	cmd.Flags().StringVarP(&flags.consensusApiUrl, "consensus-api-url", "", "", "Set consensus api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.")
+	cmd.Flags().StringVarP(&flags.consensusApiUrl, "consensus-url", "", "", "Set consensus api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.")
 	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")
 	cmd.Flags().StringVar(&flags.checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.")
 	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
@@ -317,7 +317,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 
 	cmd := &cobra.Command{
-		Use:   "validator [flags] --consensus-api-url <URL> [args]",
+		Use:   "validator [flags] --consensus-url <URL> [args]",
 		Short: "Generate a validator node config",
 		Long: "Generate a docker-compose and an environment file with a validator node configuration\n" +
 			"Valid args: name of execution clients according to network\n\n" +
@@ -325,7 +325,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 			"Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate validator prysm:docker.image'. If you want to use the default docker image, just use the client name" +
 			"\n\n" +
 			"Required flags:\n" +
-			"- `--consensus-api-url`",
+			"- `--consensus-url`",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				if cobra.ExactArgs(1)(cmd, args) != nil {
@@ -356,7 +356,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	}
 	// Bind flags
 	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")
-	cmd.Flags().StringVar(&flags.consensusApiUrl, "consensus-api-url", "", "Consensus endpoint for the validator client to connect to. Example: 'sedge generate validator --consensus-api-url http://localhost:4000'")
+	cmd.Flags().StringVar(&flags.consensusApiUrl, "consensus-url", "", "Consensus endpoint for the validator client to connect to. Example: 'sedge generate validator --consensus-url http://localhost:4000'")
 	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption.\n"+
 		"Note: When setting up a Lido node, fee recipient address will be automatically set by the system.")
 	cmd.Flags().StringVar(&flags.graffiti, "graffiti", "", "Graffiti to be used by the validator")
@@ -366,7 +366,7 @@ func ValidatorSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	cmd.Flags().StringVar(&flags.customDeployBlock, "custom-deploy-block", "", "Custom network deploy block to use for consensus client.")
 	cmd.Flags().IntVar(&flags.waitEpoch, "wait-epoch", 1, "Number of epochs to wait before starting and restarting of the validator client.")
 	cmd.Flags().StringArrayVar(&flags.vlExtraFlags, "vl-extra-flag", []string{}, "Additional flag to configure the validator client service in the generated docker-compose script. Example: 'sedge generate validator --vl-extra-flag \"<flag1>=value1\" --vl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	err := cmd.MarkFlagRequired("consensus-api-url")
+	err := cmd.MarkFlagRequired("consensus-url")
 	if err != nil {
 		return nil
 	}
