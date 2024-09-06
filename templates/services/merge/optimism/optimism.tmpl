@@ -64,6 +64,7 @@
       - --l1.trustrpc
       - --l2=${EC_OP_RPC_URL}
       - --l2.jwt-secret=/tmp/jwt/jwtsecret
+      - --syncmode=execution-layer
       {{if .ConsensusApiURL}}
       - --l1.beacon={{.ConsensusApiURL}}{{end}}
       - --network={{.NetworkPrefix}}-${NETWORK}{{range $flag := .OPExtraFlags}}
