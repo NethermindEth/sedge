@@ -59,7 +59,6 @@ type CustomFlags struct {
 }
 
 type OptimismFlags struct {
-	optimismEnabled       bool
 	optimismName          string
 	optimismExecutionName string
 	elOpExtraFlags        []string
