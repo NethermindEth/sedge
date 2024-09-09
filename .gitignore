@@ -25,3 +25,4 @@ internal/lido/contracts/csfeedistributor/CSFeeDistributor.go
 internal/lido/contracts/csmodule/CSModule.go
 
 internal/lido/contracts/mevboostrelaylist/MEVBoostRelayAllowedList.go
+/internal/app/lido_exporter/my_api_key.go
