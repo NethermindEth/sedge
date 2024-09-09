@@ -2,6 +2,7 @@ services:
   grafana:
     container_name: sedge_grafana
     image: ${GRAFANA_IMAGE}
+    platform: linux/amd64
     restart: unless-stopped
     ports:
       - ${GRAFANA_PORT}:3000
@@ -17,6 +18,7 @@ services:
   prometheus:
     container_name: sedge_prometheus
     image: ${PROM_IMAGE}
+    platform: linux/amd64
     restart: unless-stopped
     ports:
       - ${PROM_PORT}:9090
@@ -32,6 +34,7 @@ services:
   node-exporter:
     container_name: sedge_node_exporter
     image: ${NODE_EXPORTER_IMAGE}
+    platform: linux/amd64
     restart: unless-stopped
     ports:
       - ${NODE_EXPORTER_PORT}:9100

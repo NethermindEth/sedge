@@ -80,7 +80,6 @@ func InitMonitoring(install, run bool, monitoringMgr MonitoringManager) error {
 		}
 	} else if status != common.Running && status != common.Restarting && !run {
 		// If the monitoring stack is not supposed to be running then exit.
-		// This should change when the daemon runs as a real daemon.
 		return nil
 	}
 
