@@ -82,7 +82,6 @@ services:
       - --http-address=0.0.0.0
       - --http-port=4000
       - --network=${NETWORK}
-      - --target-peers=${CC_PEER_COUNT}
       - --execution-endpoints=${EC_AUTH_URL}
       - --execution-jwt=/tmp/jwt/jwtsecret
       - --eth1

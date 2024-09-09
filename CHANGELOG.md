@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.5.0] - 2024-09-06
+
+### Added
+- Add support for Optimism and Base, using Nethermind Client on Mainnet and Sepolia.
+
+### Changed
+- Update client images to latest versions.
+
+#### Fixed
+- Remove Peer upper limit of peers on CL
+
 ##  [v1.4.0] - 2024-07-10
 
 ### Fixed

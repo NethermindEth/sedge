@@ -24,6 +24,7 @@ type EnvData struct {
 	Services                  []string
 	Mev                       bool
 	ElImage                   string
+	ElOpImage                 string
 	ElDataDir                 string
 	CcImage                   string
 	CcDataDir                 string
@@ -41,6 +42,10 @@ type EnvData struct {
 	Graffiti                  string
 	RelayURLs                 string
 	CheckpointSyncUrl         string
+	ExecutionOPApiURL         string
+	JWTOPSecretPath           string
+	OPImageVersion            string
+	ElOPAuthPort              uint16
 }
 
 // GenData : Struct Data object for script's generation
@@ -49,6 +54,8 @@ type GenData struct {
 	ExecutionClient         *clients.Client
 	ConsensusClient         *clients.Client
 	ValidatorClient         *clients.Client
+	ExecutionOPClient       *clients.Client
+	OptimismClient          *clients.Client
 	Network                 string
 	CheckpointSyncUrl       string
 	FeeRecipient            string
@@ -57,6 +64,9 @@ type GenData struct {
 	ElExtraFlags            []string
 	ClExtraFlags            []string
 	VlExtraFlags            []string
+	ElOpExtraFlags          []string
+	OpExtraFlags            []string
+	IsBase                  bool
 	MapAllPorts             bool
 	Mev                     bool
 	RelayURLs               []string
@@ -80,6 +90,7 @@ type GenData struct {
 	ConsensusApiUrl         string
 	ContainerTag            string
 	LatestVersion           bool
+	JWTSecretOP             string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -99,6 +110,10 @@ type DockerComposeData struct {
 	ElApiPort               uint16
 	ElAuthPort              uint16
 	ElWsPort                uint16
+	ElOPDiscoveryPort       uint16
+	ElOPMetricsPort         uint16
+	ElOPApiPort             uint16
+	ElOPAuthPort            uint16
 	ClDiscoveryPort         uint16
 	ClMetricsPort           uint16
 	ClApiPort               uint16
@@ -106,6 +121,9 @@ type DockerComposeData struct {
 	VlMetricsPort           uint16
 	FallbackELUrls          []string
 	ElExtraFlags            []string
+	ElOPExtraFlags          []string
+	OPExtraFlags            []string
+	NetworkPrefix           string
 	ClExtraFlags            []string
 	VlExtraFlags            []string
 	ECBootnodes             string
@@ -126,6 +144,7 @@ type DockerComposeData struct {
 	UID                     int // Needed for teku
 	GID                     int // Needed for teku
 	ContainerTag            string
+	ConsensusApiURL         string
 }
 
 // WithConsensusClient returns true if the consensus client is set
@@ -142,6 +161,16 @@ func (d DockerComposeData) WithConsensusClient() bool {
 func (d DockerComposeData) WithValidatorClient() bool {
 	for _, service := range d.Services {
 		if service == validator {
+			return true
+		}
+	}
+	return false
+}
+
+// WithOptimismClient returns true if the optimism client is set
+func (d DockerComposeData) WithOptimismClient() bool {
+	for _, service := range d.Services {
+		if service == optimism {
 			return true
 		}
 	}
