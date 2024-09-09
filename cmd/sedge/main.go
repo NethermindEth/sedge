@@ -20,12 +20,19 @@ import (
 
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
+	"github.com/NethermindEth/sedge/internal/monitoring"
+	"github.com/NethermindEth/sedge/internal/monitoring/compose"
+	"github.com/NethermindEth/sedge/internal/monitoring/locker"
+	"github.com/NethermindEth/sedge/internal/monitoring/services/grafana"
+	"github.com/NethermindEth/sedge/internal/monitoring/services/node_exporter"
+	"github.com/NethermindEth/sedge/internal/monitoring/services/prometheus"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 )
 
 func main() {
@@ -49,7 +56,30 @@ func main() {
 
 	// Init dependencies manager
 	depsMgr := dependencies.NewDependenciesManager(cmdRunner)
+	// Init compose manager
+	composeManager := compose.NewComposeManager(cmdRunner)
 
+	// Set filesystem
+	// fs := afero.NewMemMapFs() // Uncomment this line if you want to use the in-memory filesystem
+	// fs := afero.NewBasePathFs(afero.NewOsFs(), "/tmp") // Uncomment this line if you want to use the real filesystem with a base path
+	fs := afero.NewOsFs() // Uncomment this line if you want to use the real filesystem
+
+	// Set locker
+	locker := locker.NewFLock()
+
+	// Get the monitoring manager
+	monitoringServices := []monitoring.ServiceAPI{
+		grafana.NewGrafana(),
+		prometheus.NewPrometheus(),
+		node_exporter.NewNodeExporter(),
+	}
+	monitoringManager := monitoring.NewMonitoringManager(
+		monitoringServices,
+		composeManager,
+		dockerServiceManager,
+		fs,
+		locker,
+	)
 	// Init Sedge Actions
 	sdgOpts := actions.SedgeActionsOptions{
 		DockerClient:         dockerClient,
@@ -75,6 +105,7 @@ func main() {
 		cli.DependenciesCommand(depsMgr),
 		cli.ShowCmd(cmdRunner, sedgeActions, depsMgr),
 		cli.LidoStatusCmd(),
+		cli.MonitoringCmd(monitoringManager),
 	)
 	sedgeCmd.SilenceErrors = true
 	sedgeCmd.SilenceUsage = true
