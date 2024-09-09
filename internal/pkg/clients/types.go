@@ -89,6 +89,13 @@ func (c *Client) setOptimismImage(image string) {
 	}
 }
 
+func (c *Client) setOptimismImage(image string) {
+	switch c.Name {
+	case "optimism":
+		c.Image = valueOrDefault(image, configs.ClientImages.Optimism.OpNode.String())
+	}
+}
+
 func valueOrDefault(value string, defaultValue string) string {
 	if value == "" {
 		return defaultValue

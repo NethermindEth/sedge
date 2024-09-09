@@ -41,6 +41,9 @@ var ClientImages struct {
 	Optimism struct {
 		OpNode Image `yaml:"optimism"`
 	}
+	Optimism struct {
+		OpNode Image `yaml:"optimism"`
+	}
 }
 
 //go:embed client_images.yaml
