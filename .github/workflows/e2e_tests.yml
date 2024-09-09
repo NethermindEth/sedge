@@ -27,6 +27,9 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
 
+      - name: Install latest Docker
+        uses: docker-practice/actions-setup-docker@master
+
       - name: Install deps
         run: make install-deps
       
