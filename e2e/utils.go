@@ -107,7 +107,10 @@ func logAndPipeError(t *testing.T, prefix string, err error) error {
 }
 
 func getContainerIDByName(containerName string) (string, error) {
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := client.NewClientWithOpts(
+		client.FromEnv,
+		client.WithAPIVersionNegotiation(),
+	)
 	if err != nil {
 		return "", err
 	}

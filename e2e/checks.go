@@ -70,7 +70,10 @@ func checkMonitoringStackContainers(t *testing.T) {
 
 // checkContainerRunning checks that the given containers are running
 func checkContainerRunning(t *testing.T, containerNames ...string) {
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := client.NewClientWithOpts(
+		client.FromEnv,
+		client.WithAPIVersionNegotiation(),
+	)
 	if err != nil {
 		t.Fatalf("Failed to create Docker client: %v", err)
 	}
@@ -131,25 +134,6 @@ func checkPrometheusTargetsUp(t *testing.T, targets ...string) {
 	assert.NoError(t, err, `targets "%s" should be up, but after %d tries they are not`, targets, tries)
 }
 
-// checkPrometheusTargetsDown checks that the prometheus targets are up
-func checkPrometheusTargetsDown(t *testing.T, targets ...string) {
-	promTargets, err := prometheusTargets(t)
-	if err != nil {
-		t.Fatal(err)
-	}
-	// Check success
-	assert.Equal(t, "success", promTargets.Status)
-
-	var labels []string
-	for _, target := range promTargets.Data.ActiveTargets {
-		assert.Contains(t, target.Labels, "instance")
-		labels = append(labels, target.Labels["instance"])
-	}
-	for _, target := range targets {
-		assert.NotContains(t, labels, target)
-	}
-}
-
 // checkPrometheusHealth checks that the prometheus health is ok
 func checkGrafanaHealth(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -187,7 +171,10 @@ func checkMonitoringStackContainersNotRunning(t *testing.T) {
 
 // checkContainerNotExisting checks that the given containers are not existing
 func checkContainerNotExisting(t *testing.T, containerNames ...string) {
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := client.NewClientWithOpts(
+		client.FromEnv,
+		client.WithAPIVersionNegotiation(),
+	)
 	if err != nil {
 		t.Fatalf("Failed to create Docker client: %v", err)
 	}
