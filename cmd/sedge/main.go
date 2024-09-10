@@ -16,8 +16,6 @@ limitations under the License.
 package main
 
 import (
-	"runtime"
-
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/internal/monitoring"
@@ -38,7 +36,7 @@ import (
 func main() {
 	// Commands Runner
 	cmdRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{
-		RunAsAdmin: runtime.GOOS == "linux",
+		RunAsAdmin: true,
 	})
 
 	// Prompt used to interact with the user input
