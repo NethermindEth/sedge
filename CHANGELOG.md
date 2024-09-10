@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- New command `lido-status` to display data of Lido Node Operator.
+
+### Fixed
+-  Teku and Lighthouse import keys container error on Windows.
+
 ## [v1.5.0] - 2024-09-06
 
 ### Added
@@ -46,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update client images to Dencun-ready versions. 
+- Update client images to Dencun-ready versions.
 
 ## [v1.3.1] - 2024-02-14
 

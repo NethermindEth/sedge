@@ -45,7 +45,10 @@ jobs:
       - name: Install mockgen
         run: make install-mockgen
 
-      - name: Generate mocks
+      - name: Install abigen
+        run: make install-abigen
+
+      - name: Generate mocks and contracts
         run: make generate
 
       - name: Check go mod status

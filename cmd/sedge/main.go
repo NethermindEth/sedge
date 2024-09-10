@@ -74,6 +74,7 @@ func main() {
 		cli.GenerateCmd(sedgeActions),
 		cli.DependenciesCommand(depsMgr),
 		cli.ShowCmd(cmdRunner, sedgeActions, depsMgr),
+		cli.LidoStatusCmd(),
 	)
 	sedgeCmd.SilenceErrors = true
 	sedgeCmd.SilenceUsage = true

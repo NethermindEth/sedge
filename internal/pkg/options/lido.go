@@ -68,10 +68,7 @@ func (l *lidoOptions) RelayURLs(network string) ([]string, error) {
 
 func (l *lidoOptions) MEVBoostEnabled(network string) bool {
 	_, supported := mevboostrelaylist.NetworkSupportedByLidoMevBoost(network)
-	if supported {
-		return true
-	}
-	return false
+	return supported
 }
 
 func (l *lidoOptions) ValidateSettings(settings OptionSettings) error {
