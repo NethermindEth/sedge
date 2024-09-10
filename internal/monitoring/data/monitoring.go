@@ -233,14 +233,11 @@ func (m *MonitoringStack) Cleanup(force bool) (err error) {
 		if err != nil {
 			return err
 		}
-		if !m.l.Locked() {
+		// No unlock as the lock file will be removed
+		defer func() {
+			// Reset locker
 			m.l = nil
-			return nil // Already unlocked
-		}
-		err := m.l.Unlock()
-		if err == nil {
-			m.l = nil
-		}
+		}()
 	}
 	return m.fs.RemoveAll(m.path)
 }

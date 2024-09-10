@@ -842,6 +842,7 @@ func TestCleanup(t *testing.T) {
 				locker.EXPECT().Lock().Return(nil)
 				return locker, afero.NewMemMapFs()
 			},
+			force: false,
 		},
 		{
 			name: "ok, force true",

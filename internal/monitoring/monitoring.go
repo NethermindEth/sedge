@@ -291,7 +291,7 @@ func (m *MonitoringManager) Cleanup(force bool) error {
 	}
 
 	log.Info("Cleaning up monitoring stack...")
-	if err := m.stack.Cleanup(force); err != nil {
+	if err := m.stack.Cleanup(!force); err != nil {
 		return fmt.Errorf("%w: %w", ErrRunningMonitoringStack, err)
 	}
 
