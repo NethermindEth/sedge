@@ -36,5 +36,13 @@ jobs:
           Start-Service docker
           docker info
           
+      - name: Enable Docker experimental features
+        if: runner.os == 'Windows'
+        run: |
+          $config = Get-Content "$env:ProgramData\Docker\config\daemon.json" -Raw | ConvertFrom-Json
+          $config | Add-Member -Name "experimental" -Value $true -MemberType NoteProperty -Force
+          $config | ConvertTo-Json | Set-Content "$env:ProgramData\Docker\config\daemon.json"
+          Restart-Service docker
+
       - name: Run e2e tests
         run: make e2e-test
