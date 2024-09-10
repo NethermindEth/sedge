@@ -258,7 +258,7 @@ func (p *PrometheusService) Setup(options map[string]string) error {
 	}
 
 	// Write the updated YAML data to datadir
-	if err = p.stack.WriteFile("prometheus/prometheus.yml", newConfig); err != nil {
+	if err = p.stack.WriteFile(filepath.Join("prometheus", "prometheus.yml"), newConfig); err != nil {
 		return err
 	}
 
