@@ -1521,12 +1521,11 @@ func TestCleanup(t *testing.T) {
 	tests := []struct {
 		name      string
 		mocker    func(t *testing.T, ctrl *gomock.Controller) (*mocks.MockComposeManager, *mock_locker.MockLocker)
-		force     bool
 		noInstall bool
 		wantErr   bool
 	}{
 		{
-			name: "ok, force false",
+			name: "ok",
 			mocker: func(t *testing.T, ctrl *gomock.Controller) (*mocks.MockComposeManager, *mock_locker.MockLocker) {
 				composeManager := mocks.NewMockComposeManager(ctrl)
 				composeManager.EXPECT().Down(commands.DockerComposeDownOptions{Path: composePath}).Return(nil)
@@ -1538,27 +1537,9 @@ func TestCleanup(t *testing.T) {
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
 				)
-				locker.EXPECT().Lock().Return(nil)
 
 				return composeManager, locker
 			},
-		},
-		{
-			name: "ok, force true",
-			mocker: func(t *testing.T, ctrl *gomock.Controller) (*mocks.MockComposeManager, *mock_locker.MockLocker) {
-				composeManager := mocks.NewMockComposeManager(ctrl)
-
-				locker := mock_locker.NewMockLocker(ctrl)
-				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")}).Return(locker),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
-				)
-
-				return composeManager, locker
-			},
-			force: true,
 		},
 		{
 			name: "down error",
@@ -1579,21 +1560,7 @@ func TestCleanup(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "ok, force false, no install",
-			mocker: func(t *testing.T, ctrl *gomock.Controller) (*mocks.MockComposeManager, *mock_locker.MockLocker) {
-				composeManager := mocks.NewMockComposeManager(ctrl)
-				composeManager.EXPECT().Down(commands.DockerComposeDownOptions{Path: composePath}).Return(nil)
-
-				locker := mock_locker.NewMockLocker(ctrl)
-				locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")}).Return(locker)
-				locker.EXPECT().Lock().Return(nil)
-
-				return composeManager, locker
-			},
-			noInstall: true,
-		},
-		{
-			name: "stack cleanup error, lock error",
+			name: "ok, no install",
 			mocker: func(t *testing.T, ctrl *gomock.Controller) (*mocks.MockComposeManager, *mock_locker.MockLocker) {
 				composeManager := mocks.NewMockComposeManager(ctrl)
 				composeManager.EXPECT().Down(commands.DockerComposeDownOptions{Path: composePath}).Return(nil)
@@ -1601,15 +1568,11 @@ func TestCleanup(t *testing.T) {
 				locker := mock_locker.NewMockLocker(ctrl)
 				gomock.InOrder(
 					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")}).Return(locker),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
 				)
-				locker.EXPECT().Lock().Return(errors.New("lock error"))
 
 				return composeManager, locker
 			},
-			wantErr: true,
+			noInstall: true,
 		},
 	}
 
@@ -1637,7 +1600,7 @@ func TestCleanup(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			err := manager.Cleanup(tt.force)
+			err := manager.Cleanup()
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {

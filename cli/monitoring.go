@@ -60,7 +60,7 @@ func InitMonitoring(install, run bool, monitoringMgr MonitoringManager) error {
 		err = monitoringMgr.InstallStack()
 		if errors.Is(err, monitoring.ErrInstallingMonitoringMngr) {
 			// If the monitoring stack installation fails, remove the monitoring stack directory.
-			if cerr := monitoringMgr.Cleanup(true); cerr != nil {
+			if cerr := monitoringMgr.Cleanup(); cerr != nil {
 				return fmt.Errorf("install failed: %w. Failed to cleanup monitoring stack after installation failure: %w", err, cerr)
 			}
 			return err
@@ -101,7 +101,7 @@ func CleanMonitoring(monitoringMgr MonitoringManager) error {
 	log.Debugf("Monitoring stack installation status: %v", installStatus == common.Installed)
 	// If the monitoring stack is installed, uninstall it.
 	if installStatus == common.Installed {
-		if err := monitoringMgr.Cleanup(false); err != nil {
+		if err := monitoringMgr.Cleanup(); err != nil {
 			return err
 		}
 	}
