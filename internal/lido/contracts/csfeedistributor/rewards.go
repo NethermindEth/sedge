@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"math/big"
 	"time"
 
@@ -86,26 +87,20 @@ func cumulativeFeeShares(treeCID string, nodeID *big.Int) (*big.Int, error) {
 	}
 
 	// Compare nodeOperatorID in tree with nodeId to get shares
-	// Binary search for the nodeOperatorId
-	low, high := 0, len(treeData.Values)-1
-	for low <= high {
-		mid := (low + high) / 2
-		nodeOperatorId, err := convertTreeValuesToBigInt(treeData.Values[mid].Value[0])
-		if err != nil {
-			return nil, fmt.Errorf("failed to convert nodeOperatorId: %v", err)
-		}
-		cmp := nodeOperatorId.Cmp(nodeID)
-		if cmp == 0 {
-			// Node operator ID matches, return the shares
-			shares, err := convertTreeValuesToBigInt(treeData.Values[mid].Value[1])
-			if err != nil {
-				return nil, fmt.Errorf("failed to convert shares: %v", err)
+	for _, item := range treeData.Values {
+		if len(item.Value) == 2 {
+			nodeOperatorId, err1 := convertTreeValuesToBigInt(item.Value[0])
+			shares, err2 := convertTreeValuesToBigInt(item.Value[1])
+			if err1 != nil || err2 != nil {
+				log.Println("Error converting values:", err1, err2)
+				continue
 			}
-			return shares, nil
-		} else if cmp < 0 {
-			low = mid + 1
+			if nodeOperatorId.Cmp(nodeID) == 0 {
+				log.Printf("shares: %v", shares)
+				return shares, nil
+			}
 		} else {
-			high = mid - 1
+			log.Println("Unexpected value format, expected 2 elements")
 		}
 	}
 	return nil, fmt.Errorf("invalid nodeId")
