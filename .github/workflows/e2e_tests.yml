@@ -48,15 +48,15 @@ jobs:
           # Install Docker
           sudo apt-get install -y docker.io
           
-          # Start Docker service
-          sudo service docker start || true
+          # Start Docker daemon manually
+          sudo dockerd &
           
-          # Add current user to docker group
-          sudo usermod -aG docker $USER
+          # Wait for Docker to start
+          sleep 10
           
           # Verify Docker installation
-          docker --version
+          docker version
           docker info
-
+          
       - name: Run e2e tests
         run: make e2e-test
