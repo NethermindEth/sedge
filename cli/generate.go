@@ -59,7 +59,6 @@ type CustomFlags struct {
 }
 
 type OptimismFlags struct {
-	optimismEnabled       bool
 	optimismName          string
 	optimismExecutionName string
 	elOpExtraFlags        []string
@@ -109,6 +108,7 @@ It will create a 'docker-compose.yml' and a '.env', which you will need later to
 You can generate:
 - Full Node (execution + consensus + validator)
 - Full Node without Validator (execution + consensus)
+- Optimism Full Node
 - Execution Node
 - Consensus Node
 - Validator Node
@@ -464,7 +464,6 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			opClient.Name = "optimism"
 			if len(optimismParts) > 1 {
 				opClient.Image = strings.Join(optimismParts[1:], ":")
-
 			}
 		}
 		opClient.SetImageOrDefault(strings.Join(optimismParts[1:], ":"))
@@ -478,7 +477,6 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			executionOpClient.Name = optimismExecutionParts[0]
 			if len(optimismExecutionParts) > 1 {
 				executionOpClient.Image = strings.Join(optimismExecutionParts[1:], ":")
-
 			}
 		}
 		executionOpClient.SetImageOrDefault(strings.Join(optimismExecutionParts[1:], ":"))
@@ -487,7 +485,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		}
 
 		// If set execution-api-url, set execution and beacon to nil
-		if flags.executionApiUrl != "" || flags.consensusApiUrl != "" {
+		if flags.executionApiUrl != "" {
 			executionClient = nil
 			consensusClient = nil
 		}

@@ -24,12 +24,11 @@ run-cli: compile ## run cli
 	@./build/sedge cli --config ./config.yaml
 
 generate: ## generate go files
-	@go generate ./...
 	@abigen --abi ./internal/lido/contracts/csmodule/CSModule.abi --bin ./internal/lido/contracts/csmodule/CSModule.bin --pkg csmodule --out ./internal/lido/contracts/csmodule/CSModule.go
 	@abigen --abi ./internal/lido/contracts/csfeedistributor/CSFeeDistributor.abi --bin ./internal/lido/contracts/csfeedistributor/CSFeeDistributor.bin --pkg csfeedistributor --out ./internal/lido/contracts/csfeedistributor/CSFeeDistributor.go
 	@abigen --abi ./internal/lido/contracts/csaccounting/CSAccounting.abi --bin ./internal/lido/contracts/csaccounting/CSAccounting.bin --pkg csaccounting --out ./internal/lido/contracts/csaccounting/CSAccounting.go
 	@abigen --abi ./internal/lido/contracts/mevboostrelaylist/MEVBoostRelayAllowedList.abi --bin ./internal/lido/contracts/mevboostrelaylist/MEVBoostRelayAllowedList.bin --pkg mevboostrelaylist --out ./internal/lido/contracts/mevboostrelaylist/MEVBoostRelayAllowedList.go
-
+	@go generate ./...
 
 test: generate ## run tests
 	@mkdir -p coverage

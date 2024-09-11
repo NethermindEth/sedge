@@ -393,11 +393,14 @@ func EnvFile(gd *GenData, at io.Writer) error {
 			consensusAdditionalApiUrl = consensusApiUrl
 		}
 	}
-	executionOPApiUrl := gd.ExecutionApiUrl
+
 	if cls[optimism] != nil {
-		if executionOPApiUrl == "" {
-			executionOPApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(gd.ExecutionOPClient), gd.Ports["ApiPortELOP"])
-		}
+		gd.ExecutionOPClient.Endpoint = configs.OnPremiseOpExecutionURL
+	}
+
+	executionOPApiUrl := ""
+	if cls[optimism] != nil {
+		executionOPApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(gd.ExecutionOPClient), gd.Ports["ApiPortELOP"])
 	}
 	var mevSupported bool
 	if cls[validator] != nil {

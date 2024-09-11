@@ -15,7 +15,13 @@ limitations under the License.
 */
 package contracts
 
-import "github.com/NethermindEth/sedge/configs"
+import (
+	"fmt"
+
+	"github.com/NethermindEth/sedge/configs"
+)
+
+type address = map[string]string
 
 const (
 	// Contract names
@@ -25,7 +31,7 @@ const (
 	MEVBoostRelayAllowedList = "mevboostrelayallowedlist"
 )
 
-var deployedAddresses = map[string]map[string]string{
+var deployedAddresses = map[string]address{
 	CSModule: {
 		configs.NetworkHolesky: "0x4562c3e63c2e586cD1651B958C22F88135aCAd4f",
 	},
@@ -41,6 +47,14 @@ var deployedAddresses = map[string]map[string]string{
 	},
 }
 
-func DeployedAddresses(contractName string) map[string]string {
+func DeployedAddresses(contractName string) address {
 	return deployedAddresses[contractName]
+}
+
+func ContractAddressByNetwork(contractName, network string) (string, error) {
+	address, found := deployedAddresses[contractName][network]
+	if !found {
+		return "", fmt.Errorf("no contract code at network %s, please double check a smart contract is deployed on given network", network)
+	}
+	return address, nil
 }

@@ -190,6 +190,61 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 	return cmd
 }
 
+func OpFullNodeSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
+	var flags GenCmdFlags
+	cmd := &cobra.Command{
+		Use:   "op-full-node [flags]",
+		Short: "Generate a full node config for Optimism or Base",
+		Long: `Generate a docker-compose and an environment file with a full node configuration for Optimism or Base networks.
+
+This command sets up an Optimism or Base full node, which includes an execution client, a consensus client, a Optimism consensus client, and an Optimism node.
+
+If you don't provide images for your clients, they will be chosen randomly. You can specify custom images for the Optimism and other nodes.
+
+Use the --base flag to generate a configuration for a Base node (which is built on Optimism).
+
+The command allows you to use external execution and consensus APIs instead of running your own nodes, by providing the respective URLs.
+
+Additionally, you can use the syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate op-full-node --execution nethermind:custom.image'. If you want to use the default docker image, just use the client name.
+
+This command does not generate a validator configuration, as Optimism and Base use different validation mechanisms compared to standard Ethereum networks.`,
+		Args: cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
+				return err
+			}
+			return preValidationGenerateCmd(network, logging, &flags)
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			services := []string{execution, consensus, optimism}
+			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, services)
+		},
+	}
+	// Bind flags
+	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
+	cmd.Flags().StringVar(&flags.optimismName, "op-image", "", "Optimism consensus client image.")
+	cmd.Flags().StringVar(&flags.optimismExecutionName, "op-execution-image", "", "Image name set for nethermind client to be used with optimism.")
+	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
+	cmd.Flags().StringVarP(&flags.executionApiUrl, "execution-api-url", "", "", "Set execution api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.")
+	cmd.Flags().StringVarP(&flags.consensusApiUrl, "consensus-url", "", "", "Set consensus api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.")
+	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")
+	cmd.Flags().StringVar(&flags.checkpointSyncUrl, "checkpoint-sync-url", "", "Initial state endpoint (trusted synced consensus endpoint) for the consensus client to sync from a finalized checkpoint. Provide faster sync process for the consensus client and protect it from long-range attacks affored by Weak Subjetivity. Each network has a default checkpoint sync url.")
+	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
+	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
+	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
+	cmd.Flags().BoolVar(&flags.isBase, "base", false, "If set, will generate the docker-compose file for Base L2 config")
+	cmd.Flags().StringSliceVar(&flags.fallbackEL, "fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge generate full-node -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
+	cmd.Flags().StringArrayVar(&flags.elExtraFlags, "el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringArrayVar(&flags.elOpExtraFlags, "el-op-extra-flag", []string{}, "Additional flag to configure the execution client for optimism service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringArrayVar(&flags.opExtraFlags, "op-extra-flag", []string{}, "Additional flag to configure the optimism client service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringArrayVar(&flags.clExtraFlags, "cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge generate full-node --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
+	cmd.Flags().StringSliceVar(&flags.customEnodes, "execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
+	cmd.Flags().StringSliceVar(&flags.customEnrs, "consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
+
+	cmd.Flags().SortFlags = false
+	return cmd
+}
+
 func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 

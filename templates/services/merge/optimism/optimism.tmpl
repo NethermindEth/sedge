@@ -27,6 +27,7 @@
       - --config={{.NetworkPrefix}}-${NETWORK}
       - --datadir=/nethermind/data
       - --log=${NETHERMIND_OP_LOG_LEVEL}
+      - --Discovery.Discv5Enabled=true
       - --JsonRpc.Enabled=true
       - --JsonRpc.Host=0.0.0.0
       - --JsonRpc.Port={{.ElOPApiPort}}
@@ -63,7 +64,9 @@
       - --l1.trustrpc
       - --l2=${EC_OP_RPC_URL}
       - --l2.jwt-secret=/tmp/jwt/jwtsecret
-      {{if .ConsensusApiURL}}- --l1.beacon={{.ConsensusApiURL}}{{end}}
+      - --syncmode=execution-layer
+      {{if .ConsensusApiURL}}
+      - --l1.beacon={{.ConsensusApiURL}}{{end}}
       - --network={{.NetworkPrefix}}-${NETWORK}{{range $flag := .OPExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:
