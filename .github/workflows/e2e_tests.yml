@@ -48,16 +48,26 @@ jobs:
           # Install Docker
           sudo apt-get install -y docker.io
           
-          # Start Docker daemon with specific options
-          sudo dockerd --iptables=false --ip-masq=false --network-plugin=none &
+          # Set iptables to legacy mode
+          sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
+          
+          # Start Docker daemon manually
+          sudo dockerd &
           
           # Wait for Docker to start
-          sleep 10
+          for i in {1..10}; do
+            if docker info > /dev/null 2>&1; then
+              echo "Docker is ready!"
+              break
+            fi
+            echo "Waiting for Docker to start..."
+            sleep 3
+          done
           
           # Verify Docker installation
           docker version
           docker info
-
+          
       - name: Run e2e tests
         if: runner.os == 'Windows'
         shell: wsl-bash {0}
