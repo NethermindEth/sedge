@@ -37,7 +37,7 @@ jobs:
           distribution: Ubuntu-22.04
           update: true
           additional-packages: docker
-          
+
       - name: Setup Docker in WSL
         if: runner.os == 'Windows'
         shell: wsl-bash {0}
@@ -62,9 +62,9 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: make codecov-test
 
-      - name: Run tests other
+      - name: Run tests other (excluding e2e)
         if: matrix.os != 'ubuntu-latest'
-        run: make generate && go test ./...
+        run: make generate && make test-no-e2e
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

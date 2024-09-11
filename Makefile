@@ -34,6 +34,10 @@ test: generate ## run tests
 	@mkdir -p coverage
 	@go test -coverprofile=coverage/coverage.out -covermode=count ./...
 
+test-no-e2e: generate ## run tests excluding e2e
+	@mkdir -p coverage
+	@go test -coverprofile=coverage/coverage.out -covermode=count $(shell go list ./... | grep -v /e2e/)
+
 e2e-test: generate ## Run e2e tests
 	@go test -timeout 20m -count=1 ./e2e/...
 
