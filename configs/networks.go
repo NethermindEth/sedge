@@ -81,8 +81,8 @@ func GetPublicRPCs(network string) ([]string, error) {
 	copy(shuffledRPCs, rpcs.PublicRPCs)
 
 	// Shuffle the slice to randomize the order
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(shuffledRPCs), func(i, j int) {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	r.Shuffle(len(shuffledRPCs), func(i, j int) {
 		shuffledRPCs[i], shuffledRPCs[j] = shuffledRPCs[j], shuffledRPCs[i]
 	})
 
