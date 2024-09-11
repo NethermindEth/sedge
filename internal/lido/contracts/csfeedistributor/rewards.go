@@ -85,16 +85,30 @@ func cumulativeFeeShares(treeCID string, nodeID *big.Int) (*big.Int, error) {
 		return nil, fmt.Errorf("error getting tree data: %v", err)
 	}
 
-	index, err := binarySearchNodeID(nodeID, treeData)
-	if err != nil {
-		return nil, fmt.Errorf("failed to find node ID: %v", err)
+	// Compare nodeOperatorID in tree with nodeId to get shares
+	// Binary search for the nodeOperatorId
+	low, high := 0, len(treeData.Values)-1
+	for low <= high {
+		mid := (low + high) / 2
+		nodeOperatorId, err := convertTreeValuesToBigInt(treeData.Values[mid].Value[0])
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert nodeOperatorId: %v", err)
+		}
+		cmp := nodeOperatorId.Cmp(nodeID)
+		if cmp == 0 {
+			// Node operator ID matches, return the shares
+			shares, err := convertTreeValuesToBigInt(treeData.Values[mid].Value[1])
+			if err != nil {
+				return nil, fmt.Errorf("failed to convert shares: %v", err)
+			}
+			return shares, nil
+		} else if cmp < 0 {
+			low = mid + 1
+		} else {
+			high = mid - 1
+		}
 	}
-
-	shares, err := convertTreeValuesToBigInt(treeData.Values[index].Value[1])
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert shares: %v", err)
-	}
-	return shares, nil
+	return nil, fmt.Errorf("invalid nodeId")
 }
 
 func treeCID(network string) (string, error) {
@@ -139,27 +153,6 @@ func convertTreeValuesToBigInt(value interface{}) (*big.Int, error) {
 	bigIntValue := new(big.Int)
 	bigIntValue.SetString(fmt.Sprintf("%.0f", value), 10)
 	return bigIntValue, nil
-}
-
-func binarySearchNodeID(nodeID *big.Int, treeData Tree) (int, error) {
-	// Compare nodeOperatorID in tree with nodeId to get shares
-	low, high := 0, len(treeData.Values)-1
-	for low <= high {
-		mid := (low + high) / 2
-		nodeOperatorId, err := convertTreeValuesToBigInt(treeData.Values[mid].Value[0])
-		if err != nil {
-			return 0, fmt.Errorf("failed to convert nodeOperatorId: %v", err)
-		}
-		cmp := nodeOperatorId.Cmp(nodeID)
-		if cmp == 0 {
-			return mid, nil
-		} else if cmp < 0 {
-			low = mid + 1
-		} else {
-			high = mid - 1
-		}
-	}
-	return 0, fmt.Errorf("invalid node ID")
 }
 
 func csFeeDistributorContract(network string) (*Csfeedistributor, *ethclient.Client, error) {
