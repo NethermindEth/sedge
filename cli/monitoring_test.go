@@ -81,7 +81,7 @@ func TestMonitoringCmd(t *testing.T) {
 				mockManager.EXPECT().Init().Return(nil).AnyTimes()
 			} else if tc.flags.action == "clean" {
 				mockManager.EXPECT().InstallationStatus().Return(common.Installed, nil).AnyTimes()
-				mockManager.EXPECT().Cleanup(false).Return(nil).AnyTimes()
+				mockManager.EXPECT().Cleanup().Return(nil).AnyTimes()
 			}
 			log.SetOutput(io.Discard)
 			logsOut := new(bytes.Buffer)
@@ -144,7 +144,7 @@ func TestInitMonitoring(t *testing.T) {
 				gomock.InOrder(
 					monitoringMgr.EXPECT().InstallationStatus().Return(common.NotInstalled, nil),
 					monitoringMgr.EXPECT().InstallStack().Return(monitoring.ErrInstallingMonitoringMngr),
-					monitoringMgr.EXPECT().Cleanup(true).Return(nil),
+					monitoringMgr.EXPECT().Cleanup().Return(nil),
 				)
 				return monitoringMgr
 			},
@@ -157,7 +157,7 @@ func TestInitMonitoring(t *testing.T) {
 				gomock.InOrder(
 					monitoringMgr.EXPECT().InstallationStatus().Return(common.NotInstalled, nil),
 					monitoringMgr.EXPECT().InstallStack().Return(monitoring.ErrInstallingMonitoringMngr),
-					monitoringMgr.EXPECT().Cleanup(true).Return(errors.New("cleanup error")),
+					monitoringMgr.EXPECT().Cleanup().Return(errors.New("cleanup error")),
 				)
 				return monitoringMgr
 			},
@@ -322,7 +322,7 @@ func TestCleanMonitoring(t *testing.T) {
 				monitoringMgr := sedge_mocks.NewMockMonitoringManager(ctrl)
 				gomock.InOrder(
 					monitoringMgr.EXPECT().InstallationStatus().Return(common.Installed, nil),
-					monitoringMgr.EXPECT().Cleanup(false).Return(nil),
+					monitoringMgr.EXPECT().Cleanup().Return(nil),
 				)
 				return monitoringMgr
 			},
@@ -333,7 +333,7 @@ func TestCleanMonitoring(t *testing.T) {
 				monitoringMgr := sedge_mocks.NewMockMonitoringManager(ctrl)
 				gomock.InOrder(
 					monitoringMgr.EXPECT().InstallationStatus().Return(common.Installed, nil),
-					monitoringMgr.EXPECT().Cleanup(false).Return(assert.AnError),
+					monitoringMgr.EXPECT().Cleanup().Return(assert.AnError),
 				)
 				return monitoringMgr
 			},

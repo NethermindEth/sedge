@@ -37,12 +37,25 @@ jobs:
           distribution: Ubuntu-22.04
           update: true
           additional-packages: docker
-
-      - name: Start Docker on Windows
+          
+      - name: Setup Docker in WSL
         if: runner.os == 'Windows'
         shell: wsl-bash {0}
         run: |
-          sudo service docker start
+          # Update package list
+          sudo apt-get update
+          
+          # Install Docker
+          sudo apt-get install -y docker.io
+          
+          # Start Docker service
+          sudo service docker start || true
+          
+          # Add current user to docker group
+          sudo usermod -aG docker $USER
+          
+          # Verify Docker installation
+          docker --version
           docker info
 
       - name: Run tests ubuntu
