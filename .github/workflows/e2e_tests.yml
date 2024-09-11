@@ -68,7 +68,13 @@ jobs:
           docker version
           docker info
           
-      - name: Run e2e tests
+      - name: Run e2e tests (Windows)
         if: runner.os == 'Windows'
         shell: wsl-bash {0}
+        run: |
+          cd /mnt/d/a/sedge/sedge
+          make e2e-test
+  
+      - name: Run e2e tests (Non-Windows)
+        if: runner.os != 'Windows'
         run: make e2e-test
