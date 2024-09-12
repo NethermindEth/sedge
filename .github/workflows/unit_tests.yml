@@ -13,9 +13,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            go: '1.21.0'
+            go: '1.21'
           - os: windows-latest
-            go: '1.21.0'
+            go: '1.21'
     runs-on: ${{ matrix.os }}
 
     steps:

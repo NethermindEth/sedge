@@ -13,9 +13,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            go: '1.21.0'
+            go: '1.21'
           - os: windows-latest
-            go: '1.21.0'
+            go: '1.21'
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -73,7 +73,7 @@ jobs:
         shell: wsl-bash {0}
         run: |
           # Set Go version from matrix
-          GO_VERSION="${{ matrix.go }}"
+          GO_VERSION="1.21.0"
 
           # Download Go
           wget https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz
