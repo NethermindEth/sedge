@@ -16,7 +16,9 @@ limitations under the License.
 package contracts
 
 import (
+	"context"
 	"fmt"
+	"math/big"
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -36,17 +38,39 @@ func connectToRPCETH(RPCs []string) (*ethclient.Client, error) {
 	return nil, fmt.Errorf("failed to connect to any RPC URL")
 }
 
-func ConnectClient(network string) (*ethclient.Client, error) {
-	rpcs, err := configs.GetPublicRPCs(network)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get public RPC: %w", err)
+func ConnectClient(network string, RPCs ...string) (*ethclient.Client, error) {
+	var rpcs []string
+	var err error
+
+	if len(RPCs) == 0 {
+		rpcs, err = configs.GetPublicRPCs(network)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get public RPC: %w", err)
+		}
+	} else {
+		rpcs = RPCs
 	}
 
-	// Connect to the RPC endpoint
 	client, err := connectToRPCETH(rpcs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to RPC: %w", err)
 	}
 
-	return client, nil
+	// Verify that the client is indeed an Ethereum RPC client
+	if client != nil {
+		// Try to get the chain ID, which is a basic operation that should work for any Ethereum client
+		chainID, err := client.ChainID(context.Background())
+		if err == nil {
+			expectedChainID := configs.NetworksConfigs()[network].ChainID
+			if chainID.Cmp(new(big.Int).SetUint64(expectedChainID)) == 0 {
+				// If we successfully got the chain ID and it matches the expected one,
+				// we can be reasonably sure this is the correct Ethereum client
+				return client, nil
+			}
+		}
+		// If there was an error or chain ID mismatch, close the client and continue to the next URL
+		client.Close()
+	}
+
+	return nil, fmt.Errorf("failed to connect to RPC: %w", err)
 }
