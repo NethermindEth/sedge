@@ -45,8 +45,8 @@ jobs:
           # Update package list
           sudo apt-get update
           
-          # Install Docker
-          sudo apt-get install -y docker.io
+          # Install Docker and make
+          sudo apt-get install -y docker.io make
           
           # Set iptables to legacy mode
           sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
@@ -72,7 +72,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: wsl-bash {0}
         run: |
-          cd /mnt/d/a/sedge/sedge
+          cd $GITHUB_WORKSPACE
           make e2e-test
   
       - name: Run e2e tests (Non-Windows)
