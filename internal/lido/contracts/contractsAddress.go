@@ -29,6 +29,7 @@ const (
 	CSAccounting             = "sepolia"
 	CSFeeDistributor         = "gnosis"
 	MEVBoostRelayAllowedList = "mevboostrelayallowedlist"
+	Vebo                     = "vebo"
 )
 
 var deployedAddresses = map[string]address{
@@ -44,6 +45,9 @@ var deployedAddresses = map[string]address{
 	MEVBoostRelayAllowedList: {
 		configs.NetworkMainnet: "0xF95f069F9AD107938F6ba802a3da87892298610E",
 		configs.NetworkHolesky: "0x2d86C5855581194a386941806E38cA119E50aEA3",
+	},
+	Vebo: {
+		configs.NetworkHolesky: "0xffDDF7025410412deaa05E3E1cE68FE53208afcb",
 	},
 }
 
