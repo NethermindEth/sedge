@@ -7,7 +7,7 @@ import (
 )
 
 // TestMonitoringStack_Init tests that the monitoring stack is not initialized if the user does not run the init-monitoring command
-func TestMonitoringStack_NotInitialized(t *testing.T) {
+func TestE2E_MonitoringStack_NotInitialized(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -34,7 +34,7 @@ func TestMonitoringStack_NotInitialized(t *testing.T) {
 }
 
 // TestMonitoringStack_Init tests the monitoring stack initialization
-func TestMonitoringStack_Init(t *testing.T) {
+func TestE2E_MonitoringStack_Init(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -61,7 +61,7 @@ func TestMonitoringStack_Init(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestMonitoringStack_NotReinstalled(t *testing.T) {
+func TestE2E_MonitoringStack_NotReinstalled(t *testing.T) {
 	// Test context
 	var (
 		grafanaContainerID      string
@@ -115,7 +115,7 @@ func TestMonitoringStack_NotReinstalled(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestMonitoringStack_Clean(t *testing.T) {
+func TestE2E_MonitoringStack_Clean(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -146,7 +146,7 @@ func TestMonitoringStack_Clean(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestMonitoringStack_CleanNonExistent(t *testing.T) {
+func TestE2E_MonitoringStack_CleanNonExistent(t *testing.T) {
 	// Test context
 	var (
 		runErr error

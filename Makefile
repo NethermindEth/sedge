@@ -37,6 +37,10 @@ test: generate ## run tests
 e2e-test: generate ## Run e2e tests
 	@go test -timeout 20m -count=1 ./e2e/...
 
+test-no-e2e: generate ## run tests excluding e2e
+	@mkdir -p coverage
+	@go test -coverprofile=coverage/coverage.out -covermode=count ./... -skip TestE2E
+
 codecov-test: generate ## unit tests with coverage using the courtney tool
 	@mkdir -p coverage
 	@courtney/courtney -v -timeout 20m -o coverage/coverage.out ./...
