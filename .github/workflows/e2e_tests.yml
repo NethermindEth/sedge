@@ -68,12 +68,5 @@ jobs:
           docker version
           docker info
           
-      - name: Run e2e tests (Windows)
-        if: runner.os == 'Windows'
-        shell: wsl-bash {0}
-        run: |
-          make e2e-test
-  
-      - name: Run e2e tests (Non-Windows)
-        if: runner.os != 'Windows'
+      - name: Run e2e tests 
         run: make e2e-test

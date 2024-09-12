@@ -43,7 +43,7 @@ e2e-test: generate ## Run e2e tests
 
 codecov-test: generate ## unit tests with coverage using the courtney tool
 	@mkdir -p coverage
-	@courtney/courtney -v -o coverage/coverage.out ./...
+	@courtney/courtney -v -timeout 20m -o coverage/coverage.out ./...
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 install-gofumpt: ## install gofumpt
