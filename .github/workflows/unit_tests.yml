@@ -36,7 +36,7 @@ jobs:
 
       - name: Run tests other
         if: matrix.os != 'ubuntu-latest'
-        run: make generate && go test -timeout 20m ./...
+        run: make generate && make test-no-e2e
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

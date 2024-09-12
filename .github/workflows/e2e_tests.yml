@@ -68,25 +68,29 @@ jobs:
           docker version
           docker info
 
-      - name: Make Go available in WSL
+      - name: Install Go in WSL
         if: runner.os == 'Windows'
         shell: wsl-bash {0}
         run: |
-          # Ensure wget is installed
-          if ! command -v wget &> /dev/null; then
-            sudo apt-get update
-            sudo apt-get install -y wget
-          fi
-    
-          # Download and install Go
-          wget https://go.dev/dl/go${{ matrix.go }}.linux-amd64.tar.gz && \
-          sudo tar -C /usr/local -xzf go${{ matrix.go }}.linux-amd64.tar.gz && \
-          rm go${{ matrix.go }}.linux-amd64.tar.gz
+          # Set Go version from matrix
+          GO_VERSION="${{ matrix.go }}"
+
+          # Download Go
+          wget https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz
+          
+          # Remove any previous Go installation
+          sudo rm -rf /usr/local/go
+          
+          # Extract Go to /usr/local
+          sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
           
           # Add Go to PATH
-          echo 'export PATH=$PATH:/usr/local/go/bin:$(go env GOPATH)/bin' >> ~/.bashrc && \
+          echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
           source ~/.bashrc
           
+          # Verify Go installation
+          go version
+
       - name: Run e2e tests (Windows)
         if: runner.os == 'Windows'
         shell: wsl-bash {0}
