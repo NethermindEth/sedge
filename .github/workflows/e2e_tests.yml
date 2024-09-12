@@ -72,7 +72,6 @@ jobs:
         if: runner.os == 'Windows'
         shell: wsl-bash {0}
         run: |
-          cd $GITHUB_WORKSPACE
           make e2e-test
   
       - name: Run e2e tests (Non-Windows)
