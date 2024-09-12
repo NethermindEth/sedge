@@ -68,13 +68,28 @@ jobs:
           docker version
           docker info
           
+      - name: Make Go available in WSL
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          wsl -e bash -c "echo 'export PATH=$PATH:/mnt/c/hostedtoolcache/go/${{ matrix.go }}/x64/bin' >> ~/.bashrc"
+          wsl -e bash -c "source ~/.bashrc"
+  
+      - name: Verify Go installation in WSL
+        if: runner.os == 'Windows'
+        shell: wsl-bash {0}
+        run: |
+          echo "PATH: $PATH"
+          which go
+          go version
+
       - name: Run e2e tests (Windows)
         if: runner.os == 'Windows'
         shell: wsl-bash {0}
         run: |
           # Install deps
           make install-deps
-          
+
           # Run e2e tests
           make e2e-test
     

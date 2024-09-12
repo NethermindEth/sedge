@@ -34,9 +34,9 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: make codecov-test
 
-      - name: Run tests other (excluding e2e)
+      - name: Run tests other
         if: matrix.os != 'ubuntu-latest'
-        run: make generate && make test-no-e2e
+        run: make generate && go test -timeout 20m ./...
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
