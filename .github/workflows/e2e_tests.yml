@@ -84,8 +84,8 @@ jobs:
           # Extract Go to /usr/local
           sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
           
-          # Add Go to PATH
-          echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
+          # Extract Go to /usr/local
+          export PATH=$PATH:/usr/local/go/bin
           source ~/.bashrc
           
           # Verify Go installation
