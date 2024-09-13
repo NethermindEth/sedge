@@ -27,69 +27,13 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
 
-      - name: Setup WSL
-        if: runner.os == 'Windows'
-        uses: Vampire/setup-wsl@v3
-        with:
-          distribution: Ubuntu-22.04
-          update: true
-          additional-packages: docker
-
       - name: Install deps
         run: make install-deps
-      
-      - name: Setup Docker in WSL
+
+      - name: Run e2e tests Windows
         if: runner.os == 'Windows'
-        shell: wsl-bash {0}
-        run: |
-          # Update package list
-          sudo apt-get update
-          
-          # Install Docker and make
-          sudo apt-get install -y docker.io make
-          
-          # Set iptables to legacy mode
-          sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
-          
-          # Start Docker daemon manually
-          sudo dockerd &
-          
-          # Wait for Docker to start
-          for i in {1..10}; do
-            if docker info > /dev/null 2>&1; then
-              echo "Docker is ready!"
-              break
-            fi
-            echo "Waiting for Docker to start..."
-            sleep 3
-          done
-          
-          # Verify Docker installation
-          docker version
-          docker info
-
-      - name: Install Go in WSL
-        if: runner.os == 'Windows'
-        shell: wsl-bash {0}
-        run: |
-          # Setup Go using actions/setup-go
-          curl -fsSL https://github.com/actions/setup-go/releases/latest/download/setup-go-linux-x64 -o setup-go
-          chmod +x ./setup-go
-          ./setup-go ${{ matrix.go }}
-
-          # Verify Go installation
-          go version
-
-      - name: Run e2e tests (Windows)
-        if: runner.os == 'Windows'
-        shell: wsl-bash {0}
-        run: |
-          # Install deps
-          make install-deps
-
-          # Run e2e tests
-          make e2e-test
+        run: make e2e-test-windows
     
-      - name: Run e2e tests (Non-Windows)
+      - name: Run e2e tests other
         if: runner.os != 'Windows'
         run: make e2e-test
