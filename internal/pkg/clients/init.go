@@ -37,4 +37,7 @@ var AllClients map[string][]string = map[string][]string{
 	"distributedValidator": {
 		"charon",
 	},
+	"optimism": {
+		"optimism",
+	},
 }

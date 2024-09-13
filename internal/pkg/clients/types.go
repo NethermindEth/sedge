@@ -38,6 +38,8 @@ func (c *Client) SetImageOrDefault(image string) {
 		c.setExecutionImage(image)
 	case "distributedValidator":
 		c.setDistributedValidatorImage(image)
+	case "optimism":
+		c.setOptimismImage(image)
 	}
 }
 
@@ -89,6 +91,13 @@ func (c *Client) setDistributedValidatorImage(image string) {
 	}
 }
 
+func (c *Client) setOptimismImage(image string) {
+	switch c.Name {
+	case "optimism":
+		c.Image = valueOrDefault(image, configs.ClientImages.Optimism.OpNode.String())
+	}
+}
+
 func valueOrDefault(value string, defaultValue string) string {
 	if value == "" {
 		return defaultValue
@@ -102,6 +111,8 @@ type Clients struct {
 	Consensus            *Client
 	Validator            *Client
 	DistributedValidator *Client
+	ExecutionOP          *Client
+	Optimism             *Client
 }
 
 type ClientMap map[string]*Client

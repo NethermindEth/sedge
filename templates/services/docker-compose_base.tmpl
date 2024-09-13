@@ -24,6 +24,8 @@ services:
 {{ if .WithValidatorClient}}
 {{template "validator-blocker" .}}{{end}}
 {{template "validator" .}}
+{{ if .WithOptimismClient}}
+{{template "optimism" .}}{{end}}
 networks:
   sedge:
     name: sedge-network{{if .ContainerTag}}-{{.ContainerTag}}{{end}}

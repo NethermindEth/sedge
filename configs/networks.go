@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"sort"
 	"time"
 )
 
@@ -80,10 +81,9 @@ func GetPublicRPCs(network string) ([]string, error) {
 	shuffledRPCs := make([]string, len(rpcs.PublicRPCs))
 	copy(shuffledRPCs, rpcs.PublicRPCs)
 
-	// Shuffle the slice to randomize the order
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(shuffledRPCs), func(i, j int) {
-		shuffledRPCs[i], shuffledRPCs[j] = shuffledRPCs[j], shuffledRPCs[i]
+	// Randomize the slice order
+	sort.Slice(shuffledRPCs, func(i, j int) bool {
+		return rand.Float32() < 0.5
 	})
 
 	return shuffledRPCs, nil

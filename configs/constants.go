@@ -21,4 +21,5 @@ const (
 	OnPremiseExecutionURL            = "http://execution"
 	OnPremiseConsensusURL            = "http://consensus"
 	OnPremiseDistributedValidatorURL = "http://dv"
+	OnPremiseOpExecutionURL          = "http://execution-l2"
 )

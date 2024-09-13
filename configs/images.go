@@ -40,6 +40,9 @@ var ClientImages struct {
 	Distributed struct {
 		Charon Image `yaml:"charon"`
 	}
+	Optimism struct {
+		OpNode Image `yaml:"optimism"`
+	}
 }
 
 //go:embed client_images.yaml
