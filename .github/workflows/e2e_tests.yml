@@ -72,22 +72,11 @@ jobs:
         if: runner.os == 'Windows'
         shell: wsl-bash {0}
         run: |
-          # Set Go version from matrix
-          GO_VERSION="1.21.0"
+          # Setup Go using actions/setup-go
+          curl -fsSL https://github.com/actions/setup-go/releases/latest/download/setup-go-linux-x64 -o setup-go
+          chmod +x ./setup-go
+          ./setup-go ${{ matrix.go }}
 
-          # Download Go
-          wget https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz
-          
-          # Remove any previous Go installation
-          sudo rm -rf /usr/local/go
-          
-          # Extract Go to /usr/local
-          sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
-          
-          # Add Go to PATH
-          echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
-          export PATH=$PATH:/usr/local/go/bin
-          
           # Verify Go installation
           go version
 
