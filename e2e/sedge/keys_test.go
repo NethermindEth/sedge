@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package e2e
 
 import (
@@ -11,6 +26,8 @@ import (
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	"github.com/NethermindEth/sedge/internal/pkg/keystores"
 	"github.com/stretchr/testify/assert"
+
+	base "github.com/NethermindEth/sedge/e2e"
 )
 
 type depositDataKey struct {
@@ -33,7 +50,7 @@ func TestE2E_Keys_Eth_Withdrawal_Keys_Mainnet(t *testing.T) {
 		runErr error
 	)
 	// Build test case
-	e2eTest := newE2ETestCase(
+	e2eTest := newE2ESedgeTestCase(
 		t,
 		// Arrange
 		func(t *testing.T, binaryPath string) error {
@@ -50,7 +67,7 @@ func TestE2E_Keys_Eth_Withdrawal_Keys_Mainnet(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath, dataDirPath string) {
 			mnemonicPathFile := filepath.Join(filepath.Dir(binaryPath), "mnemonic.txt")
-			runErr = runSedge(t, binaryPath, "keys",
+			runErr = base.RunSedge(t, binaryPath, "keys",
 				"--eth-withdrawal-address", "0xb794f5ea0ba39494ce839613fffba74279579268",
 				"--network", "mainnet",
 				"--num-validators", "10",
@@ -91,7 +108,7 @@ func TestE2E_Keys_Lido_Mainnet(t *testing.T) {
 		runErr error
 	)
 	// Build test case
-	e2eTest := newE2ETestCase(
+	e2eTest := newE2ESedgeTestCase(
 		t,
 		// Arrange
 		func(t *testing.T, binaryPath string) error {
@@ -108,7 +125,7 @@ func TestE2E_Keys_Lido_Mainnet(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath, dataDirPath string) {
 			mnemonicPathFile := filepath.Join(filepath.Dir(binaryPath), "mnemonic.txt")
-			runErr = runSedge(t, binaryPath, "keys",
+			runErr = base.RunSedge(t, binaryPath, "keys",
 				"--lido",
 				"--network", "mainnet",
 				"--num-validators", "10",
@@ -153,7 +170,7 @@ func TestE2E_Keys_Lido_Holesky(t *testing.T) {
 		runErr error
 	)
 	// Build test case
-	e2eTest := newE2ETestCase(
+	e2eTest := newE2ESedgeTestCase(
 		t,
 		// Arrange
 		func(t *testing.T, binaryPath string) error {
@@ -170,7 +187,7 @@ func TestE2E_Keys_Lido_Holesky(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath, dataDirPath string) {
 			mnemonicPathFile := filepath.Join(filepath.Dir(binaryPath), "mnemonic.txt")
-			runErr = runSedge(t, binaryPath, "keys",
+			runErr = base.RunSedge(t, binaryPath, "keys",
 				"--lido",
 				"--network", "holesky",
 				"--num-validators", "10",
@@ -216,7 +233,7 @@ func TestE2E_Keys_Lido_EthWithdrawal_HoleskyInvalid(t *testing.T) {
 		runErr error
 	)
 	// Build test case
-	e2eTest := newE2ETestCase(
+	e2eTest := newE2ESedgeTestCase(
 		t,
 		// Arrange
 		func(t *testing.T, binaryPath string) error {
@@ -233,7 +250,7 @@ func TestE2E_Keys_Lido_EthWithdrawal_HoleskyInvalid(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath, dataDirPath string) {
 			mnemonicPathFile := filepath.Join(filepath.Dir(binaryPath), "mnemonic.txt")
-			runErr = runSedge(t, binaryPath, "keys",
+			runErr = base.RunSedge(t, binaryPath, "keys",
 				"--lido",
 				"--eth-withdrawal-address", "0xb794f5ea0ba39494ce839613fffba74279579268",
 				"--network", "holesky",
@@ -259,7 +276,7 @@ func TestE2E_Keys_Lido_GnosisUnsupported(t *testing.T) {
 		runErr error
 	)
 	// Build test case
-	e2eTest := newE2ETestCase(
+	e2eTest := newE2ESedgeTestCase(
 		t,
 		// Arrange
 		func(t *testing.T, binaryPath string) error {
@@ -276,7 +293,7 @@ func TestE2E_Keys_Lido_GnosisUnsupported(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath, dataDirPath string) {
 			mnemonicPathFile := filepath.Join(filepath.Dir(binaryPath), "mnemonic.txt")
-			runErr = runSedge(t, binaryPath, "keys",
+			runErr = base.RunSedge(t, binaryPath, "keys",
 				"--lido",
 				"--eth-withdrawal-address", "0xb794f5ea0ba39494ce839613fffba74279579268",
 				"--network", "gnosis",

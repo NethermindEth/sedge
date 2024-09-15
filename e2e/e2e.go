@@ -1,127 +1,65 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package e2e
 
 import (
-	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"testing"
 )
 
-type (
-	e2eArranger func(t *testing.T, sedgePath string) error
-	e2eAct      func(t *testing.T, sedgePath, dataDirPath string)
-	e2eAssert   func(t *testing.T, dataDirPath string)
-)
-
-type e2eTestCase struct {
-	t        *testing.T
-	testDir  string
-	repoPath string
-	arranger e2eArranger
-	act      e2eAct
-	assert   e2eAssert
+type E2ETestCase struct {
+	T          *testing.T
+	TestDir    string
+	RepoPath   string
+	BinaryName string
 }
 
-func newE2ETestCase(t *testing.T, arranger e2eArranger, act e2eAct, assert e2eAssert) *e2eTestCase {
-	t.Helper()
-	wd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	tc := &e2eTestCase{
-		t:        t,
-		testDir:  t.TempDir(),
-		repoPath: filepath.Dir(wd),
-		arranger: arranger,
-		act:      act,
-		assert:   assert,
-	}
-	t.Logf("Creating new E2E test case (%p). TestDir: %s", tc, tc.testDir)
-	checkGoInstalled(t)
-	tc.installGoModules()
-	tc.build()
-	return tc
-}
-
-func (e *e2eTestCase) run() {
-	// Cleanup environment before and after test
-	e.Cleanup()
-	defer e.Cleanup()
-	if e.arranger != nil {
-		err := e.arranger(e.t, e.BinaryPath())
-		if err != nil {
-			e.t.Fatalf("error in Arrange step: %v", err)
-		}
-	}
-	if e.act != nil {
-		e.act(e.t, e.BinaryPath(), e.dataDirPath())
-	}
-	if e.assert != nil {
-		e.assert(e.t, e.dataDirPath())
-	}
-}
-
-func (e *e2eTestCase) BinaryPath() string {
-	binaryName := "sedge"
+func (e *E2ETestCase) BinaryPath() string {
 	if runtime.GOOS == "windows" {
-		binaryName += ".exe"
+		e.BinaryName += ".exe"
 	}
-	return filepath.Join(e.testDir, binaryName)
+	return filepath.Join(e.TestDir, e.BinaryName)
 }
 
-func (e *e2eTestCase) Cleanup() {
-	dataDir := e.dataDirPath()
-	// Check if data directory exists
-	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
-		return
-	}
-	// Remove docker compose stack
-	err := exec.Command("docker", "compose", "-f", filepath.Join(dataDir, "docker-compose.yml"), "down", "--volumes").Run()
-	if err != nil {
-		e.t.Logf("error removing docker compose stack: %v", err)
-	}
-
-	// Remove sedge-data directory
-	err = os.RemoveAll(dataDir)
-	if err != nil {
-		e.t.Logf("error removing data directory: %v", err)
-	}
-}
-
-func (e *e2eTestCase) installGoModules() {
-	e.t.Helper()
+func (e *E2ETestCase) InstallGoModules() {
+	e.T.Helper()
 	cmd := exec.Command("go", "mod", "download")
-	cmd.Dir = e.repoPath
-	e.t.Logf("Installing Go modules in %s", e.repoPath)
+	cmd.Dir = e.RepoPath
+	e.T.Logf("Installing Go modules in %s", e.RepoPath)
 	if err := cmd.Run(); err != nil {
-		e.t.Fatalf("error installing Go modules: %v", err)
+		e.T.Fatalf("error installing Go modules: %v", err)
 	} else {
-		e.t.Logf("Go modules installed")
+		e.T.Logf("Go modules installed")
 	}
 }
 
-func (e *e2eTestCase) build() {
-	e.t.Helper()
-	binaryName := "sedge"
-	if runtime.GOOS == "windows" {
-		binaryName += ".exe"
-	}
-	outPath := filepath.Join(e.testDir, binaryName)
-	e.t.Logf("Building binary to %s", outPath)
-	err := exec.Command("go", "build", "-o", outPath, filepath.Join(e.repoPath, "cmd", "sedge", "main.go")).Run()
+func (e *E2ETestCase) Build() {
+	e.T.Helper()
+	e.T.Logf("Building binary to %s", e.BinaryPath())
+	err := exec.Command("go", "build", "-o", e.BinaryPath(), filepath.Join(e.RepoPath, "cmd", e.BinaryName, "main.go")).Run()
 	if err != nil {
-		e.t.Fatalf("error building binary: %v", err)
+		e.T.Fatalf("error building binary: %v", err)
 	} else {
-		e.t.Logf("binary built")
+		e.T.Logf("binary built")
 	}
 }
 
-func (e *e2eTestCase) dataDirPath() string {
-	return filepath.Join(e.testDir, "sedge-data")
-}
-
-func checkGoInstalled(t *testing.T) {
+func CheckGoInstalled(t *testing.T) {
 	t.Helper()
 	err := exec.Command("go", "version").Run()
 	if err != nil {
