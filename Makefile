@@ -9,11 +9,13 @@ LDFLAGS=-X github.com/NethermindEth/sedge/internal/utils.Version="${SEDGE_VERSIO
 compile: ## compile:
 	@mkdir -p build
 	@go build -ldflags "${LDFLAGS}" -o build/sedge cmd/sedge/main.go
+	@go build -ldflags "${LDFLAGS}" -o build/lido-exporter cmd/lido-exporter/main.go
 
 compile-linux: ## compile:
 	@mkdir -p build
 	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/sedge cmd/sedge/main.go
-
+	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/lido-exporter cmd/lido-exporter/main.go
+	
 install: compile ## compile the binary and copy it to PATH
 	@sudo cp build/sedge /usr/local/bin
 
@@ -28,11 +30,12 @@ generate: ## generate go files
 	@abigen --abi ./internal/lido/contracts/csfeedistributor/CSFeeDistributor.abi --bin ./internal/lido/contracts/csfeedistributor/CSFeeDistributor.bin --pkg csfeedistributor --out ./internal/lido/contracts/csfeedistributor/CSFeeDistributor.go
 	@abigen --abi ./internal/lido/contracts/csaccounting/CSAccounting.abi --bin ./internal/lido/contracts/csaccounting/CSAccounting.bin --pkg csaccounting --out ./internal/lido/contracts/csaccounting/CSAccounting.go
 	@abigen --abi ./internal/lido/contracts/mevboostrelaylist/MEVBoostRelayAllowedList.abi --bin ./internal/lido/contracts/mevboostrelaylist/MEVBoostRelayAllowedList.bin --pkg mevboostrelaylist --out ./internal/lido/contracts/mevboostrelaylist/MEVBoostRelayAllowedList.go
+	@abigen --abi ./internal/lido/contracts/vebo/VEBO.abi --bin ./internal/lido/contracts/vebo/VEBO.bin --pkg vebo --out ./internal/lido/contracts/vebo/VEBO.go
 	@go generate ./...
 
 test: generate ## run tests
 	@mkdir -p coverage
-	@go test -coverprofile=coverage/coverage.out -covermode=count ./...
+	@go test -coverprofile=coverage/coverage.out -covermode=count -timeout 25m ./...
 
 e2e-test: generate ## Run e2e tests
 	@go test -timeout 20m -count=1 ./e2e/...
