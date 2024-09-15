@@ -49,7 +49,7 @@ test-no-e2e: generate ## run tests excluding e2e
 
 codecov-test: generate ## unit tests with coverage using the courtney tool
 	@mkdir -p coverage
-	@courtney/courtney -v -o coverage/coverage.out -t="-skip=TestE2E" ./...
+	@go test -coverprofile=coverage/coverage.out -covermode=count -timeout 25m -t="-skip=TestE2E" ./...
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 install-gofumpt: ## install gofumpt
@@ -58,15 +58,10 @@ install-gofumpt: ## install gofumpt
 install-mockgen: ## install mockgen
 	go install github.com/golang/mock/mockgen@v1.6.0 
 
-install-courtney: ## Install courtney for code coverage
-	@git clone https://github.com/dave/courtney
-	@(cd courtney && go get  ./... && go build courtney.go)
-	@go get ./...
-
 install-abigen: ## install abigen
 	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
 
-install-deps: | install-gofumpt install-courtney install-mockgen install-abigen ## Install some project dependencies
+install-deps: | install-gofumpt install-mockgen install-abigen ## Install some project dependencies
 
 coverage: ## show tests coverage
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
