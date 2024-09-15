@@ -42,6 +42,7 @@ func collectExitRequests(ctx context.Context, network string, nodeOperatorID *bi
 
 	// Get staking module ID
 	stakingModuleID, err := contracts.StakingModuleID(network)
+	log.Debugf("Staking module ID: %d", stakingModuleID)
 	if err != nil {
 		log.Errorf("Failed to get staking module ID: %v", err)
 		return
@@ -53,13 +54,14 @@ func collectExitRequests(ctx context.Context, network string, nodeOperatorID *bi
 	// Subscribe to ValidatorExitRequest events
 	_, err = veboFilterer.WatchValidatorExitRequest(filterOpts, validatorExitRequestCh, []*big.Int{stakingModuleID}, []*big.Int{nodeOperatorID}, nil)
 	if err != nil {
-		log.Printf("Failed to watch ValidatorExitRequest events: %v", err)
+		log.Errorf("Failed to watch ValidatorExitRequest events: %v", err)
 	}
 
 	for {
 		select {
 		case event := <-validatorExitRequestCh:
 			exitRequestsTotal.WithLabelValues(nodeOperatorID.String(), network, event.Raw.TxHash.Hex()).Inc()
+			log.Infof("Processed exit request event")
 		case <-ctx.Done():
 			return
 		}

@@ -58,6 +58,8 @@ func collectNodeOperatorInfo(ctx context.Context, network string, nodeOperatorID
 			nodeOperatorIDGauge.WithLabelValues(nodeOperatorID.String(), network).Set(float64(nodeOperatorID.Int64()))
 			nodeOperatorManagerAddressGauge.WithLabelValues(nodeOperatorID.String(), network).Set(float64(nodeOperator.ManagerAddress.Big().Int64()))
 			nodeOperatorRewardAddressGauge.WithLabelValues(nodeOperatorID.String(), network).Set(float64(nodeOperator.RewardAddress.Big().Int64()))
+
+			log.Infof("Processed node operator data")
 		}
 	}
 }

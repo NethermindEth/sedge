@@ -44,6 +44,7 @@ func collectRewardsInfo(ctx context.Context, network string, nodeOperatorID *big
 			}
 
 			nonClaimedRewardsGauge.WithLabelValues(nodeOperatorID.String(), network).Set(float64(rewards.Int64()))
+			log.Infof("Processed rewards data")
 		}
 	}
 }

@@ -30,7 +30,7 @@ import (
 var (
 	keysStuckValidatorsCountGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "csm_keys_stuck_validators_count",
-		Help: "Number of keys stuck in the system",
+		Help: "Number of keys stuck in the system. A validator is considered to be stuck if it has not been exited timely following an exit signal from the protocol",
 	}, []string{"node_operator_id", "network"})
 
 	keysRefundedValidatorsCountGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
@@ -91,6 +91,8 @@ func collectKeysInfo(ctx context.Context, network string, nodeOperatorID *big.In
 			keysExitedValidatorsCountGauge.WithLabelValues(nodeOperatorID.String(), network).Set(float64(keysStatus.ExitedValidators.Int64()))
 			keysDepositedValidatorsCountGauge.WithLabelValues(nodeOperatorID.String(), network).Set(float64(keysStatus.DepositedValidators.Int64()))
 			keysDepositableValidatorsCountGauge.WithLabelValues(nodeOperatorID.String(), network).Set(float64(keysStatus.DepositableValidatorsCount.Int64()))
+
+			log.Info("Processed keys data")
 		}
 	}
 }

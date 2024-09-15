@@ -80,8 +80,7 @@ func CollectMetrics(ctx context.Context, client *ethclient.Client, wsClient *eth
 		}
 	}
 
-	go collectPenalties(ctx, network, nodeOperatorID, client, filterOpts)
-	go collectExitRequests(ctx, network, nodeOperatorID, client, filterOpts)
+	log.Infof("Collecting metrics for network %s with start block %d", network, filterOpts.Start)
 	go collectPenalties(ctx, network, nodeOperatorID, wsClient, filterOpts)
 	go collectExitRequests(ctx, network, nodeOperatorID, wsClient, filterOpts)
 	go collectNodeOperatorInfo(ctx, network, nodeOperatorID, scrapeTime)

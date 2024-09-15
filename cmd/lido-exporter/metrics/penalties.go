@@ -67,13 +67,16 @@ func collectPenalties(ctx context.Context, network string, nodeOperatorID *big.I
 		select {
 		case event := <-elRewardsStealingPenaltyReportedCh:
 			penaltiesTotal.WithLabelValues(nodeOperatorID.String(), "el_rewards_stealing", event.Raw.TxHash.Hex()).Inc()
+			log.Infof("Processed EL rewards stealing penalty event")
 		case event := <-initialSlashingSubmittedCh:
 			penaltiesTotal.WithLabelValues(nodeOperatorID.String(), "initial_slashing", event.Raw.TxHash.Hex()).Inc()
+			log.Infof("Processed initial slashing penalty event")
 		case event := <-withdrawalSubmittedCh:
 			// Amount is in Wei, but we want to count only less than 32 ETH
 			if event.Amount.Cmp(new(big.Int).Mul(big.NewInt(32), big.NewInt(1e18))) < 0 {
 				penaltiesTotal.WithLabelValues(nodeOperatorID.String(), "withdrawal", event.Raw.TxHash.Hex()).Inc()
 			}
+			log.Infof("Processed withdrawal penalty event")
 		case <-ctx.Done():
 			return
 		}

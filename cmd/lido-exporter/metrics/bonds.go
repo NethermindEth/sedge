@@ -65,6 +65,7 @@ func collectBondInfo(ctx context.Context, network string, nodeOperatorID *big.In
 			bondRequiredGauge.WithLabelValues(nodeOperatorID.String(), network).Set(float64(bondInfo.Required.Int64()))
 			bondExcessGauge.WithLabelValues(nodeOperatorID.String(), network).Set(float64(bondInfo.Excess.Int64()))
 			bondMissedGauge.WithLabelValues(nodeOperatorID.String(), network).Set(float64(bondInfo.Missed.Int64()))
+			log.Infof("Processed bond data")
 		}
 	}
 }

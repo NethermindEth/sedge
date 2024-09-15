@@ -49,7 +49,13 @@ func RootCmd() *cobra.Command {
 		Short: "Lido Exporter exports Lido CSM metrics to Prometheus",
 		Long:  `Lido Exporter exports Lido CSM metrics to Prometheus`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			initLogging()
+			logLevel = viper.GetString("log-level")
+			level, err := log.ParseLevel(strings.ToLower(logLevel))
+			if err != nil {
+				log.WithField(configs.Component, "Logger Init").Error(err)
+				return
+			}
+			log.SetLevel(level)
 		},
 		Run: run,
 	}
@@ -97,6 +103,10 @@ func run(cmd *cobra.Command, args []string) {
 	}
 
 	network := viper.GetString("network")
+	if !slices.Contains(configs.NetworkSupported(), network) {
+		log.Fatalf("Invalid network: %s", network)
+	}
+
 	var nodeOperatorIDBigInt *big.Int
 	if nodeOperatorID != "" {
 		var ok bool
@@ -105,6 +115,10 @@ func run(cmd *cobra.Command, args []string) {
 			log.Fatalf("Failed to convert Node Operator ID to big.Int: %s", nodeOperatorID)
 		}
 	} else {
+		if !utils.IsAddress(rewardAddress) {
+			log.Fatalf("Invalid reward address: %s", rewardAddress)
+		}
+
 		var err error
 		nodeOperatorIDBigInt, err = csmodule.NodeID(network, rewardAddress)
 		if err != nil {
@@ -142,17 +156,17 @@ func run(cmd *cobra.Command, args []string) {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	<-sigCh
-	fmt.Println("Shutting down Lido Exporter...")
+	log.Info("Shutting down Lido Exporter...")
 }
 
-func initLogging() {
+func init() {
 	log.SetFormatter(&nested.Formatter{
 		HideKeys:        true,
 		FieldsOrder:     []string{configs.Component},
 		TimestampFormat: "2006-01-02 15:04:05 --",
 	})
 
-	level, err := log.ParseLevel(strings.ToLower(logLevel))
+	level, err := log.ParseLevel(strings.ToLower("error"))
 	if err != nil {
 		log.WithField(configs.Component, "Logger Init").Error(err)
 		return
