@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"sort"
 	"time"
 )
 
