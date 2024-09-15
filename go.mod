@@ -25,6 +25,8 @@ require (
 	github.com/opencontainers/image-spec v1.1.0
 	github.com/otiai10/copy v1.9.0
 	github.com/prometheus/client_golang v1.12.1
+	github.com/prometheus/client_model v0.2.1-0.20210607210712-147c58e9608a
+	github.com/prometheus/common v0.32.1
 	github.com/protolambda/go-keystorev4 v0.0.0-20211007151826-f20444f6d564
 	github.com/protolambda/zrnt v0.32.2
 	github.com/protolambda/ztyp v0.2.2
@@ -125,8 +127,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/prometheus/client_model v0.2.1-0.20210607210712-147c58e9608a // indirect
-	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/prometheus/client_golang v1.19.1 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
