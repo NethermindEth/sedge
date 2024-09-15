@@ -41,3 +41,18 @@ var networkRPCs = map[string]RPC{
 		},
 	},
 }
+
+var networkWSs = map[string]RPC{
+	NetworkMainnet: {
+		NetworkName: NetworkMainnet,
+		PublicRPCs: []string{
+			"wss://ethereum-rpc.publicnode.com",
+		},
+	},
+	NetworkHolesky: {
+		NetworkName: NetworkHolesky,
+		PublicRPCs: []string{
+			"wss://ethereum-holesky-rpc.publicnode.com",
+		},
+	},
+}

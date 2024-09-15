@@ -45,7 +45,7 @@ func TestConnectClient(t *testing.T) {
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			client, err := ConnectClient(tc.network)
+			client, err := ConnectClient(tc.network, false)
 			if tc.wantErr {
 				require.Error(t, err)
 			} else {
@@ -66,7 +66,7 @@ func TestConnectClientWithRPCs(t *testing.T) {
 		{
 			name:    "ConnectClientWithRPCs, Holesky",
 			network: "holesky",
-			RPCs:    []string{"https://endpoints.omniatech.io/v1/eth/holesky/public", "https://ethereum-holesky.blockpi.network/v1/rpc/public"},
+			RPCs:    []string{"https://endpoints.omniatech.io/v1/eth/holesky/public", "http://ethereum-holesky.blockpi.network/v1/rpc/public"},
 			wantErr: false,
 		},
 		{
@@ -82,6 +82,18 @@ func TestConnectClientWithRPCs(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "ConnectClientWithRPCs, invalid Network RPCs, no HTTPS",
+			network: "holesky",
+			RPCs:    []string{"wss://ethereum-holesky-rpc.publicnode.com"}, // Mainnet RPC
+			wantErr: false,
+		},
+		{
+			name:    "ConnectClientWithRPCs, mix Network RPCs",
+			network: "holesky",
+			RPCs:    []string{"https://ethereum-holesky-rpc.publicnode.com", "wss://ethereum-rpc.publicnode.com"},
+			wantErr: false,
+		},
+		{
 			name:    "ConnectClient, Mainnet",
 			network: "mainnet",
 			RPCs:    []string{"https://eth.llamarpc.com"},
@@ -90,7 +102,99 @@ func TestConnectClientWithRPCs(t *testing.T) {
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			client, err := ConnectClient(tc.network, tc.RPCs...)
+			client, err := ConnectClient(tc.network, false, tc.RPCs...)
+			if tc.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				require.NotNil(t, client)
+			}
+		})
+	}
+}
+
+func TestConnectClientWS(t *testing.T) {
+	tcs := []struct {
+		name    string
+		network string
+		wantErr bool
+	}{
+		{
+			name:    "ConnectClient, Holesky",
+			network: "holesky",
+			wantErr: false,
+		},
+		{
+			name:    "ConnectClient, invalid Network",
+			network: "invalid",
+			wantErr: true,
+		},
+		{
+			name:    "ConnectClient, Mainnet",
+			network: "mainnet",
+			wantErr: false,
+		},
+	}
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			client, err := ConnectClient(tc.network, true)
+			if tc.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				require.NotNil(t, client)
+			}
+		})
+	}
+}
+
+func TestConnectClientWSWithRPCs(t *testing.T) {
+	tcs := []struct {
+		name    string
+		network string
+		RPCs    []string
+		wantErr bool
+	}{
+		{
+			name:    "ConnectClientWithRPCs, Holesky",
+			network: "holesky",
+			RPCs:    []string{"wss://ethereum-holesky-rpc.publicnode.com", "wss://holesky.drpc.org"},
+			wantErr: false,
+		},
+		{
+			name:    "ConnectClientWithRPCs, Holesky, invalid RPC",
+			network: "holesky",
+			RPCs:    []string{"https://www.google.com"},
+			wantErr: false,
+		},
+		{
+			name:    "ConnectClientWithRPCs, invalid Network RPCs",
+			network: "holesky",
+			RPCs:    []string{"wss://ethereum-rpc.publicnode.com"}, // Mainnet RPC
+			wantErr: true,
+		},
+		{
+			name:    "ConnectClientWithRPCs, invalid Network RPCs, no WS",
+			network: "holesky",
+			RPCs:    []string{"https://ethereum-holesky-rpc.publicnode.com"}, // Mainnet RPC
+			wantErr: false,
+		},
+		{
+			name:    "ConnectClientWithRPCs, mix Network RPCs",
+			network: "mainnet",
+			RPCs:    []string{"https://ethereum-holesky-rpc.publicnode.com", "wss://ethereum-rpc.publicnode.com"},
+			wantErr: false,
+		},
+		{
+			name:    "ConnectClient, Mainnet",
+			network: "mainnet",
+			RPCs:    []string{"wss://ethereum-rpc.publicnode.com"},
+			wantErr: false,
+		},
+	}
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			client, err := ConnectClient(tc.network, true, tc.RPCs...)
 			if tc.wantErr {
 				require.Error(t, err)
 			} else {

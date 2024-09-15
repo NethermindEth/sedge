@@ -58,11 +58,11 @@ func InitMetrics(nodeOperatorID, network string) {
 	nonClaimedRewardsGauge.WithLabelValues(nodeOperatorID, network)
 }
 
-func CollectMetrics(ctx context.Context, client *ethclient.Client, nodeOperatorID *big.Int, network string, scrapeTime time.Duration) {
+func CollectMetrics(ctx context.Context, client *ethclient.Client, wsClient *ethclient.Client, nodeOperatorID *big.Int, network string, scrapeTime time.Duration) {
 	var filterOpts *bind.WatchOpts
 
 	// Get start block
-	// Try to use current block - 1000, if not then use 0
+	// Try to use current block - 50000, if not then use 0
 	currentBlock, err := client.BlockNumber(ctx)
 	if err != nil {
 		log.Errorf("Failed to get current block: %v", err)
@@ -71,7 +71,7 @@ func CollectMetrics(ctx context.Context, client *ethclient.Client, nodeOperatorI
 			Start: &zero,
 		}
 	} else {
-		startBlock := currentBlock - 1000
+		startBlock := currentBlock - 50000
 		if startBlock < 0 {
 			startBlock = 0
 		}
@@ -82,6 +82,8 @@ func CollectMetrics(ctx context.Context, client *ethclient.Client, nodeOperatorI
 
 	go collectPenalties(ctx, network, nodeOperatorID, client, filterOpts)
 	go collectExitRequests(ctx, network, nodeOperatorID, client, filterOpts)
+	go collectPenalties(ctx, network, nodeOperatorID, wsClient, filterOpts)
+	go collectExitRequests(ctx, network, nodeOperatorID, wsClient, filterOpts)
 	go collectNodeOperatorInfo(ctx, network, nodeOperatorID, scrapeTime)
 	go collectKeysInfo(ctx, network, nodeOperatorID, scrapeTime)
 	go collectBondInfo(ctx, network, nodeOperatorID, scrapeTime)

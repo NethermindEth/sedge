@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"slices"
 	"strconv"
 	"strings"
 	"syscall"
@@ -31,6 +32,7 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	"github.com/NethermindEth/sedge/internal/lido/contracts/csmodule"
+	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -52,28 +54,30 @@ func RootCmd() *cobra.Command {
 		Run: run,
 	}
 
-	viper.BindPFlag("node-operator-id", cmd.PersistentFlags().Lookup("node-operator-id"))
-	viper.BindPFlag("reward-address", cmd.PersistentFlags().Lookup("reward-address"))
-	viper.BindPFlag("network", cmd.PersistentFlags().Lookup("network"))
-	viper.BindPFlag("rpc-endpoints", cmd.PersistentFlags().Lookup("rpc-endpoints"))
-	viper.BindPFlag("port", cmd.PersistentFlags().Lookup("port"))
-	viper.BindPFlag("scrape-time", cmd.PersistentFlags().Lookup("scrape-time"))
-	viper.BindPFlag("log-level", cmd.PersistentFlags().Lookup("log-level"))
-	viper.SetEnvPrefix("LIDO_EXPORTER")
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", ""))
-
 	// Disable completion default cmd
 	cmd.CompletionOptions.DisableDefaultCmd = true
 
 	// Persistent flags
 	cmd.PersistentFlags().String("node-operator-id", "", "Node Operator ID")
-	cmd.PersistentFlags().String("reward-address", "", "Reward address of Node Operator")
+	cmd.PersistentFlags().String("reward-address", "", "Reward address of Node Operator. It is used to calculate Node Operator ID if not set")
 	cmd.PersistentFlags().String("network", "holesky", "Network name")
-	cmd.PersistentFlags().StringSlice("rpc-endpoints", nil, "List of Ethereum RPC endpoints")
-	cmd.PersistentFlags().String("port", "8080", "Port where the metrics will be exported")
-	cmd.PersistentFlags().Duration("scrape-time", 10*time.Second, "Time interval for scraping metrics")
+	cmd.PersistentFlags().StringSlice("rpc-endpoints", nil, "List of Ethereum HTTP RPC endpoints")
+	cmd.PersistentFlags().StringSlice("ws-endpoints", nil, "List of Ethereum WebSocket RPC endpoints")
+	cmd.PersistentFlags().String("port", "8080", "Port where the metrics will be exported.")
+	cmd.PersistentFlags().Duration("scrape-time", 10*time.Second, "Time interval for scraping metrics. Values should be in the format of 10s, 1m, 1h, etc.")
 	cmd.PersistentFlags().StringVar(&logLevel, "log-level", "info", "Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace")
+
+	viper.BindPFlag("node-operator-id", cmd.PersistentFlags().Lookup("node-operator-id"))
+	viper.BindPFlag("reward-address", cmd.PersistentFlags().Lookup("reward-address"))
+	viper.BindPFlag("network", cmd.PersistentFlags().Lookup("network"))
+	viper.BindPFlag("rpc-endpoints", cmd.PersistentFlags().Lookup("rpc-endpoints"))
+	viper.BindPFlag("ws-endpoints", cmd.PersistentFlags().Lookup("ws-endpoints"))
+	viper.BindPFlag("port", cmd.PersistentFlags().Lookup("port"))
+	viper.BindPFlag("scrape-time", cmd.PersistentFlags().Lookup("scrape-time"))
+	viper.BindPFlag("log-level", cmd.PersistentFlags().Lookup("log-level"))
+	viper.SetEnvPrefix("LIDO_EXPORTER")
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 
 	return cmd
 }
@@ -109,10 +113,15 @@ func run(cmd *cobra.Command, args []string) {
 	}
 
 	rpcEndpoints := viper.GetStringSlice("rpc-endpoints")
+	wsEndpoints := viper.GetStringSlice("ws-endpoints")
 
-	client, err := contracts.ConnectClient(network, rpcEndpoints...)
+	client, err := contracts.ConnectClient(network, false, rpcEndpoints...)
 	if err != nil {
 		log.Fatalf("Failed to connect to Ethereum RPC: %v", err)
+	}
+	wsClient, err := contracts.ConnectClient(network, true, wsEndpoints...)
+	if err != nil {
+		log.Fatalf("Failed to connect to Ethereum WebSocket: %v", err)
 	}
 
 	// Initialize metrics
@@ -127,7 +136,7 @@ func run(cmd *cobra.Command, args []string) {
 	// Start collecting metrics
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	go metrics.CollectMetrics(ctx, client, nodeOperatorIDBigInt, network, viper.GetDuration("scrape-time"))
+	go metrics.CollectMetrics(ctx, client, wsClient, nodeOperatorIDBigInt, network, viper.GetDuration("scrape-time"))
 
 	// Wait for interrupt signal to gracefully shutdown the exporter
 	sigCh := make(chan os.Signal, 1)
