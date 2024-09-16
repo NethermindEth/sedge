@@ -50,7 +50,7 @@ func TestInit(t *testing.T) {
 	locker := mocks.NewMockLocker(ctrl)
 
 	// Expect the lock to be acquired with the platform-independent path
-	locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker)
+	locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker)
 	// Create a new DataDir with the in-memory filesystem
 	dataDir, err := data.NewDataDir(basePath, afs, locker)
 	require.NoError(t, err)
@@ -123,7 +123,7 @@ func TestInitError(t *testing.T) {
 			locker := mocks.NewMockLocker(ctrl)
 
 			// Expect the lock to be acquired with the platform-independent path
-			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("/monitoring", ".lock")}).Return(locker)
+			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("monitoring", ".lock")}).Return(locker)
 
 			// Create a new DataDir with the in-memory filesystem
 			dataDir, err := data.NewDataDir("/", afs, locker)
@@ -162,7 +162,7 @@ func TestSetup(t *testing.T) {
 
 		// Expect the lock to be acquired
 		gomock.InOrder(
-			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
+			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
 			locker.EXPECT().Lock().Return(nil),
 			locker.EXPECT().Locked().Return(true),
 			locker.EXPECT().Unlock().Return(nil),
@@ -180,7 +180,7 @@ func TestSetup(t *testing.T) {
 		locker := mocks.NewMockLocker(ctrl)
 
 		// Expect the lock to be acquired
-		locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker)
+		locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker)
 		return locker
 	}
 
@@ -228,7 +228,7 @@ func TestSetup(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(fmt.Errorf("error")),
 				)
 				return locker
@@ -248,7 +248,7 @@ func TestSetup(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(false),
 				)
@@ -320,7 +320,7 @@ func TestAddTarget(t *testing.T) {
 
 		// Expect the lock to be acquired
 		gomock.InOrder(
-			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
+			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
 			locker.EXPECT().Lock().Return(nil),
 			locker.EXPECT().Locked().Return(true),
 			locker.EXPECT().Unlock().Return(nil),
@@ -561,7 +561,7 @@ func TestAddTarget(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -597,7 +597,7 @@ func TestAddTarget(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -719,7 +719,7 @@ func TestRemoveTarget(t *testing.T) {
 
 		// Expect the lock to be acquired
 		gomock.InOrder(
-			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
+			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
 			locker.EXPECT().Lock().Return(nil),
 			locker.EXPECT().Locked().Return(true),
 			locker.EXPECT().Unlock().Return(nil),
@@ -846,7 +846,7 @@ func TestRemoveTarget(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -911,7 +911,7 @@ func TestRemoveTarget(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -943,7 +943,7 @@ func TestRemoveTarget(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),

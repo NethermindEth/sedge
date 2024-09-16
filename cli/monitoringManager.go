@@ -20,7 +20,6 @@ type MonitoringManager interface {
 	AddTarget(target types.MonitoringTarget, labels map[string]string, dockerNetwork string) error
 
 	// RemoveTarget removes a target from the monitoring stack.
-	// The dockerNetwork is the name of the network the node is connected to.
 	RemoveTarget(endpoint string) error
 
 	// Status returns the status of the monitoring stack.
@@ -35,7 +34,7 @@ type MonitoringManager interface {
 	// Stop stops the monitoring stack.
 	Stop() error
 
-	// Cleanup removes the monitoring stack. If force is true, it will remove the stack directly bypassing any checks.
+	// Cleanup removes the monitoring stack.
 	Cleanup() error
 
 	// ServiceEndpoints returns the endpoints of the monitoring services.

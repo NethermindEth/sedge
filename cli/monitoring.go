@@ -71,7 +71,7 @@ func InitMonitoring(install, run bool, monitoringMgr MonitoringManager) error {
 	// Check if the monitoring stack is running.
 	status, err := monitoringMgr.Status()
 	if err != nil {
-		log.Debugf("Monitoring stack status: unknown. Got error: %v", err)
+		log.Errorf("Monitoring stack status: unknown. Got error: %v", err)
 	}
 	// If the monitoring stack is not running, start it.
 	if status != common.Running && status != common.Restarting && run {

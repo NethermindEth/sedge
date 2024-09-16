@@ -30,40 +30,47 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type monitoringFlags struct {
-	action string
-}
-
-type monitoringCmdTestCase struct {
-	name  string
-	flags monitoringFlags
-	isErr bool
-}
-
-func (f monitoringFlags) argsList() []string {
-	return []string{f.action}
-}
-
 func TestMonitoringCmd(t *testing.T) {
-	tcs := []monitoringCmdTestCase{
+	tcs := []struct {
+		name   string
+		flags  []string
+		mocker func(t *testing.T, ctrl *gomock.Controller) *sedge_mocks.MockMonitoringManager
+		isErr  bool
+	}{
 		{
-			name: "valid monitoring init",
-			flags: monitoringFlags{
-				action: "init",
+			name:  "valid monitoring init",
+			flags: []string{"init"},
+			mocker: func(t *testing.T, ctrl *gomock.Controller) *sedge_mocks.MockMonitoringManager {
+				mockManager := sedge_mocks.NewMockMonitoringManager(ctrl)
+				gomock.InOrder(
+					mockManager.EXPECT().InstallationStatus().Return(common.NotInstalled, nil).AnyTimes(),
+					mockManager.EXPECT().InstallStack().Return(nil).AnyTimes(),
+					mockManager.EXPECT().Status().Return(common.Created, nil).AnyTimes(),
+					mockManager.EXPECT().Run().Return(nil).AnyTimes(),
+					mockManager.EXPECT().Init().Return(nil).AnyTimes(),
+				)
+				return mockManager
 			},
 			isErr: false,
 		},
 		{
-			name: "valid monitoring clean",
-			flags: monitoringFlags{
-				action: "clean",
+			name:  "valid monitoring clean",
+			flags: []string{"clean"},
+			mocker: func(t *testing.T, ctrl *gomock.Controller) *sedge_mocks.MockMonitoringManager {
+				mockManager := sedge_mocks.NewMockMonitoringManager(ctrl)
+				gomock.InOrder(
+					mockManager.EXPECT().InstallationStatus().Return(common.Installed, nil).AnyTimes(),
+					mockManager.EXPECT().Cleanup().Return(nil).AnyTimes(),
+				)
+				return mockManager
 			},
 			isErr: false,
 		},
 		{
-			name: "invalid action",
-			flags: monitoringFlags{
-				action: "invalid",
+			name:  "invalid action",
+			flags: []string{"invalid"},
+			mocker: func(t *testing.T, ctrl *gomock.Controller) *sedge_mocks.MockMonitoringManager {
+				return sedge_mocks.NewMockMonitoringManager(ctrl)
 			},
 			isErr: true,
 		},
@@ -72,24 +79,13 @@ func TestMonitoringCmd(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
-			mockManager := sedge_mocks.NewMockMonitoringManager(ctrl)
-			if tc.flags.action == "init" {
-				mockManager.EXPECT().InstallationStatus().Return(common.NotInstalled, nil).AnyTimes()
-				mockManager.EXPECT().InstallStack().Return(nil).AnyTimes()
-				mockManager.EXPECT().Status().Return(common.Created, nil).AnyTimes()
-				mockManager.EXPECT().Run().Return(nil).AnyTimes()
-				mockManager.EXPECT().Init().Return(nil).AnyTimes()
-			} else if tc.flags.action == "clean" {
-				mockManager.EXPECT().InstallationStatus().Return(common.Installed, nil).AnyTimes()
-				mockManager.EXPECT().Cleanup().Return(nil).AnyTimes()
-			}
 			log.SetOutput(io.Discard)
 			logsOut := new(bytes.Buffer)
 			tableOut := new(bytes.Buffer)
 			rootCmd := RootCmd()
 			rootCmd.SetOut(tableOut)
-			rootCmd.AddCommand(MonitoringCmd(mockManager))
-			argsL := append([]string{"monitoring"}, tc.flags.argsList()...)
+			rootCmd.AddCommand(MonitoringCmd(tc.mocker(t, ctrl)))
+			argsL := append([]string{"monitoring"}, tc.flags...)
 			rootCmd.SetArgs(argsL)
 			initLogging()
 			log.SetOutput(logsOut)
