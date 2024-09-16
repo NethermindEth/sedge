@@ -20,9 +20,9 @@ import (
 
 	"github.com/NethermindEth/sedge/cli"
 	"github.com/NethermindEth/sedge/cli/actions"
+	"github.com/NethermindEth/sedge/internal/compose"
+	"github.com/NethermindEth/sedge/internal/locker"
 	"github.com/NethermindEth/sedge/internal/monitoring"
-	"github.com/NethermindEth/sedge/internal/monitoring/compose"
-	"github.com/NethermindEth/sedge/internal/monitoring/locker"
 	"github.com/NethermindEth/sedge/internal/monitoring/services/grafana"
 	"github.com/NethermindEth/sedge/internal/monitoring/services/node_exporter"
 	"github.com/NethermindEth/sedge/internal/monitoring/services/prometheus"

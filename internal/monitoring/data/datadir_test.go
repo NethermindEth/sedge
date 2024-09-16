@@ -87,7 +87,7 @@ func TestMonitoringStack(t *testing.T) {
 	// Create a mock locker
 	ctrl := gomock.NewController(t)
 	locker := mocks.NewMockLocker(ctrl)
-	locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "/monitoring", ".lock")}).Return(locker).Times(2)
+	locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).Times(2)
 
 	verify := func(t *testing.T, stack *MonitoringStack) {
 		t.Helper()
@@ -99,7 +99,7 @@ func TestMonitoringStack(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, exists)
 
-		exists, err = afero.Exists(fs, filepath.Join(basePath, "/monitoring", ".lock"))
+		exists, err = afero.Exists(fs, filepath.Join(basePath, "monitoring", ".lock"))
 		assert.NoError(t, err)
 		assert.True(t, exists)
 	}
@@ -126,7 +126,7 @@ func TestRemoveMonitoringStack(t *testing.T) {
 	// Create a mock locker
 	ctrl := gomock.NewController(t)
 	locker := mocks.NewMockLocker(ctrl)
-	locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("/monitoring", ".lock")}).Return(locker)
+	locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("monitoring", ".lock")}).Return(locker)
 
 	// Create a data dir
 	dataDir, err := NewDataDir("/", fs, locker)

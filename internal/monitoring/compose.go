@@ -16,7 +16,7 @@ limitations under the License.
 package monitoring
 
 import (
-	"github.com/NethermindEth/sedge/internal/monitoring/compose"
+	"github.com/NethermindEth/sedge/internal/compose"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 )
 

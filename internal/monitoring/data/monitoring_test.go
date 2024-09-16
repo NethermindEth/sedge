@@ -834,7 +834,7 @@ func TestCleanup(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("/monitoring", ".lock")}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -853,7 +853,7 @@ func TestCleanup(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("/monitoring", ".lock")}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
@@ -884,7 +884,7 @@ func TestCleanup(t *testing.T) {
 
 				// Expect the lock to be acquired
 				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("/monitoring", ".lock")}).Return(locker),
+					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("monitoring", ".lock")}).Return(locker),
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),

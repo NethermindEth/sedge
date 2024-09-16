@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/NethermindEth/sedge/internal/monitoring/compose"
+	"github.com/NethermindEth/sedge/internal/compose"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	sedge_mocks "github.com/NethermindEth/sedge/mocks"
 	"github.com/golang/mock/gomock"
