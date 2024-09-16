@@ -30,10 +30,11 @@ type E2ETestCase struct {
 }
 
 func (e *E2ETestCase) BinaryPath() string {
+	binaryName := e.BinaryName
 	if runtime.GOOS == "windows" {
-		e.BinaryName += ".exe"
+		binaryName += ".exe"
 	}
-	return filepath.Join(e.TestDir, e.BinaryName)
+	return filepath.Join(e.TestDir, binaryName)
 }
 
 func (e *E2ETestCase) InstallGoModules() {

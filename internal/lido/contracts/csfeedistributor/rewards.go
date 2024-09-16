@@ -93,7 +93,7 @@ func cumulativeFeeShares(treeCID string, nodeID *big.Int) (*big.Int, error) {
 			nodeOperatorId, err1 := convertTreeValuesToBigInt(item.Value[0])
 			shares, err2 := convertTreeValuesToBigInt(item.Value[1])
 			if err1 != nil || err2 != nil {
-				log.Debugf("Error converting values:", err1, err2)
+				log.Debugf("Error converting values: %v, %v", err1, err2)
 				continue
 			}
 			if nodeOperatorId.Cmp(nodeID) == 0 {
