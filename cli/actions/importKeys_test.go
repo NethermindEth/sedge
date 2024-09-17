@@ -79,12 +79,12 @@ func TestImportKeys_ValidatorRunning(t *testing.T) {
 				defer ctrl.Finish()
 
 				dockerClient := importKeysGoldenPath(t, ctrl, false)
-				serviceManager := services.NewServiceManager(dockerClient)
+				dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 				cmdRunner := test.SimpleCMDRunner{}
 				s := actions.NewSedgeActions(actions.SedgeActionsOptions{
-					DockerClient:   dockerClient,
-					ServiceManager: serviceManager,
-					CommandRunner:  &cmdRunner,
+					DockerClient:         dockerClient,
+					DockerServiceManager: dockerServiceManager,
+					CommandRunner:        &cmdRunner,
 				})
 
 				from, err := setupKeystoreDir(t)
@@ -114,12 +114,12 @@ func TestImportKeysCustom_ValidatorRunning(t *testing.T) {
 			defer ctrl.Finish()
 
 			dockerClient := importKeysGoldenPath(t, ctrl, true)
-			serviceManager := services.NewServiceManager(dockerClient)
+			dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 			cmdRunner := test.SimpleCMDRunner{}
 			s := actions.NewSedgeActions(actions.SedgeActionsOptions{
-				DockerClient:   dockerClient,
-				ServiceManager: serviceManager,
-				CommandRunner:  &cmdRunner,
+				DockerClient:         dockerClient,
+				DockerServiceManager: dockerServiceManager,
+				CommandRunner:        &cmdRunner,
 			})
 
 			from, err := setupKeystoreDir(t)
@@ -198,12 +198,12 @@ func TestImportKeys_CustomOptions(t *testing.T) {
 			defer ctrl.Finish()
 
 			dockerClient := importKeysGoldenPath(t, ctrl, tt.customImage)
-			serviceManager := services.NewServiceManager(dockerClient)
+			dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 			cmdRunner := test.SimpleCMDRunner{}
 			s := actions.NewSedgeActions(actions.SedgeActionsOptions{
-				DockerClient:   dockerClient,
-				ServiceManager: serviceManager,
-				CommandRunner:  &cmdRunner,
+				DockerClient:         dockerClient,
+				DockerServiceManager: dockerServiceManager,
+				CommandRunner:        &cmdRunner,
 			})
 
 			from, err := setupKeystoreDir(t)
@@ -256,12 +256,12 @@ func TestImportKeys_UnexpectedExitCode(t *testing.T) {
 	defer ctrl.Finish()
 
 	dockerClient := importKeysExitError(t, ctrl)
-	serviceManager := services.NewServiceManager(dockerClient)
+	dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 	cmdRunner := test.SimpleCMDRunner{}
 	s := actions.NewSedgeActions(actions.SedgeActionsOptions{
-		DockerClient:   dockerClient,
-		ServiceManager: serviceManager,
-		CommandRunner:  &cmdRunner,
+		DockerClient:         dockerClient,
+		DockerServiceManager: dockerServiceManager,
+		CommandRunner:        &cmdRunner,
 	})
 
 	from, err := setupKeystoreDir(t)
@@ -327,7 +327,7 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 
 	// Mock ContainerList
 	dockerClient.EXPECT().
-		ContainerList(gomock.Any(), types.ContainerListOptions{
+		ContainerList(gomock.Any(), container.ListOptions{
 			All:     true,
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
@@ -387,7 +387,7 @@ func importKeysGoldenPath(t *testing.T, ctrl *gomock.Controller, withCustomImage
 		Times(1)
 	// Mock ContainerRemove
 	dockerClient.EXPECT().
-		ContainerRemove(gomock.Any(), validatorImportCtId, types.ContainerRemoveOptions{}).
+		ContainerRemove(gomock.Any(), validatorImportCtId, container.RemoveOptions{}).
 		Return(nil).
 		Times(1)
 
@@ -403,7 +403,7 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 
 	// Mock ContainerList
 	dockerClient.EXPECT().
-		ContainerList(gomock.Any(), types.ContainerListOptions{
+		ContainerList(gomock.Any(), container.ListOptions{
 			All:     true,
 			Filters: filters.NewArgs(filters.Arg("name", services.DefaultSedgeValidatorClient)),
 		}).
@@ -459,7 +459,7 @@ func importKeysExitError(t *testing.T, ctrl *gomock.Controller) client.APIClient
 		Times(1)
 	// Mock ContainerRemove
 	dockerClient.EXPECT().
-		ContainerRemove(gomock.Any(), validatorImportCtId, types.ContainerRemoveOptions{}).
+		ContainerRemove(gomock.Any(), validatorImportCtId, container.RemoveOptions{}).
 		Return(nil).
 		Times(1)
 

@@ -1,0 +1,3 @@
+MAIN_SERVICE_NAME=main-service
+MAIN_PORT=8080
+NETWORK_NAME=sedge
