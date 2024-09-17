@@ -70,7 +70,7 @@ func RootCmd() *cobra.Command {
 	cmd.PersistentFlags().StringSlice("rpc-endpoints", nil, "List of Ethereum HTTP RPC endpoints")
 	cmd.PersistentFlags().StringSlice("ws-endpoints", nil, "List of Ethereum WebSocket RPC endpoints")
 	cmd.PersistentFlags().String("port", "8080", "Port where the metrics will be exported.")
-	cmd.PersistentFlags().Duration("scrape-time", 10*time.Second, "Time interval for scraping metrics. Values should be in the format of 10s, 1m, 1h, etc.")
+	cmd.PersistentFlags().Duration("scrape-time", 30*time.Second, "Time interval for scraping metrics. Values should be in the format of 10s, 1m, 1h, etc.")
 	cmd.PersistentFlags().StringVar(&logLevel, "log-level", "info", "Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace")
 
 	viper.BindPFlag("node-operator-id", cmd.PersistentFlags().Lookup("node-operator-id"))

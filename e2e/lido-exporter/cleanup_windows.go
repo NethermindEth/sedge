@@ -24,9 +24,20 @@ import (
 
 func (e *e2eLidoExporterTestCase) Cleanup() {
 	if e.pid != 0 {
-		err := windows.GenerateConsoleCtrlEvent(windows.CTRL_C_EVENT, uint32(e.pid))
-		if err != nil {
-			e.T.Fatalf("error sending CTRL_C_EVENT to process %d: %v", e.pid, err)
+		// Check if the process is still running
+		handle, err := windows.OpenProcess(windows.PROCESS_QUERY_INFORMATION, false, uint32(e.pid))
+		if err == nil {
+			defer func() {
+				if closeErr := windows.CloseHandle(handle); closeErr != nil {
+					e.T.Fatalf("error closing handle: %v", closeErr)
+				}
+			}()
+
+			// Terminate Process
+			err = windows.TerminateProcess(handle, 0) // Exit code 0
+			if err != nil {
+				e.T.Fatalf("error terminating process %d: %v", e.pid, err)
+			}
 		}
 	}
 }
