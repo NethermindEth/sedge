@@ -451,3 +451,33 @@ func TestE2E_ValidEnv_All(t *testing.T) {
 	// Run test case
 	e2eTest.run()
 }
+
+func TestE2E_InvalidArgs_NegativeNodeID(t *testing.T) {
+	t.Parallel()
+	// Test context
+	var (
+		cmd *exec.Cmd
+	)
+	// Build test case
+	e2eTest := newE2ELidoExporterTestCase(
+		t,
+		// Arrange
+		nil,
+		// Act
+		func(t *testing.T, binaryPath string) *exec.Cmd {
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--node-operator-id", "-2", "--network", "holesky", "--port", "9983")
+			return cmd
+		},
+		// Assert
+		func(t *testing.T) {
+			err := cmd.Wait()
+			assert.NotContains(t, err.Error(), "killed")
+			assert.Error(t, err, "lido-exporter command should fail with invalid node operator ID")
+			// cmd should return status code 1
+			assert.Equal(t, 1, cmd.ProcessState.ExitCode(), "lido-exporter command should fail with invalid node operator ID")
+			checkPrometheusServerDown(t, 9983)
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}

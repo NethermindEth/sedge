@@ -114,6 +114,9 @@ func run(cmd *cobra.Command, args []string) {
 		if !ok {
 			log.Fatalf("Failed to convert Node Operator ID to big.Int: %s", nodeOperatorID)
 		}
+		if nodeOperatorIDBigInt.Sign() < 0 { // Check if the value is negative
+			log.Fatalf("Node Operator ID cannot be negative: %s", nodeOperatorID)
+		}
 	} else {
 		if !utils.IsAddress(rewardAddress) {
 			log.Fatalf("Invalid reward address: %s", rewardAddress)
