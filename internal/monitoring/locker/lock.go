@@ -17,8 +17,15 @@ package locker
 
 //go:generate mockgen -package=mocks -destination=./mocks/locker.go github.com/NethermindEth/sedge/internal/monitoring/locker Locker
 type Locker interface {
+	// New creates a new Locker instance with the specified path.
 	New(path string) Locker
+	
+	// Lock acquires the lock, blocking until it is available.
 	Lock() error
+	
+	// Unlock releases the lock, allowing other processes to acquire it.
 	Unlock() error
+	
+	// Locked returns true if the lock is currently held, false otherwise.
 	Locked() bool
 }

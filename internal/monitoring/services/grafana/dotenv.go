@@ -16,7 +16,7 @@ limitations under the License.
 package grafana
 
 var dotEnv map[string]string = map[string]string{
-	"GRAFANA_IMAGE":          "grafana/grafana-oss:11.0.4",
+	"GRAFANA_IMAGE":          "grafana/grafana-oss:11.2.0",
 	"GRAFANA_PORT":           "3000",
 	"GRAFANA_ADMIN_USER":     "admin",
 	"GRAFANA_ADMIN_PASSWORD": "admin",
