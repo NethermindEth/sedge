@@ -27,7 +27,7 @@ type depositDataKey struct {
 	WithdrawalCredentials string `json:"withdrawal_credentials"`
 }
 
-func TestKeys_Eth_Withdrawal_Keys_Mainnet(t *testing.T) {
+func TestE2E_Keys_Eth_Withdrawal_Keys_Mainnet(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -85,7 +85,7 @@ func TestKeys_Eth_Withdrawal_Keys_Mainnet(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestKeys_Lido_Mainnet(t *testing.T) {
+func TestE2E_Keys_Lido_Mainnet(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -147,7 +147,7 @@ func TestKeys_Lido_Mainnet(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestKeys_Lido_Holesky(t *testing.T) {
+func TestE2E_Keys_Lido_Holesky(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -210,7 +210,7 @@ func TestKeys_Lido_Holesky(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestKeys_Lido_EthWithdrawal_HoleskyInvalid(t *testing.T) {
+func TestE2E_Keys_Lido_EthWithdrawal_HoleskyInvalid(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -253,7 +253,7 @@ func TestKeys_Lido_EthWithdrawal_HoleskyInvalid(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestKeys_Lido_GnosisUnsupported(t *testing.T) {
+func TestE2E_Keys_Lido_GnosisUnsupported(t *testing.T) {
 	// Test context
 	var (
 		runErr error

@@ -37,9 +37,16 @@ test: generate ## run tests
 e2e-test: generate ## Run e2e tests
 	@go test -timeout 20m -count=1 ./e2e/...
 
+e2e-test-windows: generate ## Run e2e tests on Windows
+	@go test -timeout 20m -count=1 -skip TestE2E_MonitoringStack ./e2e/...
+
+test-no-e2e: generate ## run tests excluding e2e
+	@mkdir -p coverage
+	@go test -coverprofile=coverage/coverage.out -covermode=count ./... -skip TestE2E
+
 codecov-test: generate ## unit tests with coverage using the courtney tool
 	@mkdir -p coverage
-	@courtney/courtney -v -o coverage/coverage.out ./...
+	@courtney/courtney -v -o coverage/coverage.out -t="-skip=TestE2E" ./...
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 install-gofumpt: ## install gofumpt
