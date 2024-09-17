@@ -41,7 +41,7 @@ func TestLidoStatus_ValidNodeID(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = runCommand(t, binaryPath, "lido-status", "--nodeID", "1", "--l", "--network", "holesky")
+			runErr = runCommand(t, binaryPath, "lido-status", "--nodeID", "10", "--l", "--network", "holesky")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {

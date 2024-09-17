@@ -38,6 +38,9 @@ var ClientImages struct {
 		Prysm      Image `yaml:"prysm"`
 		Nimbus     Image `yaml:"nimbus"`
 	}
+	Optimism struct {
+		OpNode Image `yaml:"optimism"`
+	}
 }
 
 //go:embed client_images.yaml
