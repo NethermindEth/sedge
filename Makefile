@@ -49,7 +49,7 @@ test-no-e2e: generate ## run tests excluding e2e
 
 codecov-test: generate ## unit tests with coverage using the courtney tool
 	@mkdir -p coverage
-	@go test -coverprofile=coverage/coverage.out -covermode=count -timeout 25m -t="-skip=TestE2E" ./...
+	@go test -coverprofile=coverage/coverage.out -covermode=count -timeout 25m ./... -skip TestE2E
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 install-gofumpt: ## install gofumpt
