@@ -35,7 +35,7 @@ func TestE2E_MonitoringStack_NotInitialized(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "--help")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "--help")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -62,7 +62,7 @@ func TestE2E_MonitoringStack_Init(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "monitoring", "init")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -90,7 +90,7 @@ func TestE2E_MonitoringStack_NotReinstalled(t *testing.T) {
 		t,
 		// Arrange
 		func(t *testing.T, sedgePath string) error {
-			err := base.RunCommand(t, sedgePath, "monitoring", "init")
+			err := base.RunCommand(t, sedgePath, "sedge", "monitoring", "init")
 			if err != nil {
 				return err
 			}
@@ -107,7 +107,7 @@ func TestE2E_MonitoringStack_NotReinstalled(t *testing.T) {
 		},
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "monitoring", "init")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -141,11 +141,11 @@ func TestE2E_MonitoringStack_Clean(t *testing.T) {
 		t,
 		// Arrange
 		func(t *testing.T, sedgePath string) error {
-			return base.RunCommand(t, sedgePath, "monitoring", "init")
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "init")
 		},
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "monitoring", "clean")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "clean")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -174,7 +174,7 @@ func TestE2E_MonitoringStack_CleanNonExistent(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "monitoring", "clean")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "clean")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
