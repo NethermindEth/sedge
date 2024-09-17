@@ -17,4 +17,4 @@ package node_exporter
 
 import "errors"
 
-var ErrInvalidOptions = errors.New("invalid options for grafana setup")
+var ErrInvalidOptions = errors.New("invalid options for node exporter setup")
