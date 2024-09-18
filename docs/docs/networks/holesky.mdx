@@ -26,6 +26,14 @@ Holesky is Ethereum's public testnet that serves as a technical experimentation 
 - [Prysm](https://docs.prylabs.network/docs/getting-started/)
 - [Teku](https://docs.teku.consensys.net/en/latest/)
 
+## MEV-Boost
+
+We support [mev-boost](https://github.com/flashbots/mev-boost) on holesky by default, in case you want to remove it,
+run `sedge generate full-node` using the `--no-mev-boost` flag, for example:
+
+```
+sedge generate full-node --network=holesky --no-mev-boost=true
+```
 
 ## Generating a Full Node
 

@@ -4,13 +4,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
 type (
 	e2eArranger func(t *testing.T, sedgePath string) error
-	e2eAct      func(t *testing.T, sedgePath string)
-	e2eAssert   func(t *testing.T)
+	e2eAct      func(t *testing.T, sedgePath, dataDirPath string)
+	e2eAssert   func(t *testing.T, dataDirPath string)
 )
 
 type e2eTestCase struct {
@@ -54,15 +55,19 @@ func (e *e2eTestCase) run() {
 		}
 	}
 	if e.act != nil {
-		e.act(e.t, e.BinaryPath())
+		e.act(e.t, e.BinaryPath(), e.dataDirPath())
 	}
 	if e.assert != nil {
-		e.assert(e.t)
+		e.assert(e.t, e.dataDirPath())
 	}
 }
 
 func (e *e2eTestCase) BinaryPath() string {
-	return filepath.Join(e.testDir, "sedge")
+	binaryName := "sedge"
+	if runtime.GOOS == "windows" {
+		binaryName += ".exe"
+	}
+	return filepath.Join(e.testDir, binaryName)
 }
 
 func (e *e2eTestCase) Cleanup() {
@@ -98,7 +103,11 @@ func (e *e2eTestCase) installGoModules() {
 
 func (e *e2eTestCase) build() {
 	e.t.Helper()
-	outPath := filepath.Join(e.testDir, "sedge")
+	binaryName := "sedge"
+	if runtime.GOOS == "windows" {
+		binaryName += ".exe"
+	}
+	outPath := filepath.Join(e.testDir, binaryName)
 	e.t.Logf("Building binary to %s", outPath)
 	err := exec.Command("go", "build", "-o", outPath, filepath.Join(e.repoPath, "cmd", "sedge", "main.go")).Run()
 	if err != nil {

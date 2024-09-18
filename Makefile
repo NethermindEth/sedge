@@ -24,6 +24,10 @@ run-cli: compile ## run cli
 	@./build/sedge cli --config ./config.yaml
 
 generate: ## generate go files
+	@abigen --abi ./internal/lido/contracts/csmodule/CSModule.abi --bin ./internal/lido/contracts/csmodule/CSModule.bin --pkg csmodule --out ./internal/lido/contracts/csmodule/CSModule.go
+	@abigen --abi ./internal/lido/contracts/csfeedistributor/CSFeeDistributor.abi --bin ./internal/lido/contracts/csfeedistributor/CSFeeDistributor.bin --pkg csfeedistributor --out ./internal/lido/contracts/csfeedistributor/CSFeeDistributor.go
+	@abigen --abi ./internal/lido/contracts/csaccounting/CSAccounting.abi --bin ./internal/lido/contracts/csaccounting/CSAccounting.bin --pkg csaccounting --out ./internal/lido/contracts/csaccounting/CSAccounting.go
+	@abigen --abi ./internal/lido/contracts/mevboostrelaylist/MEVBoostRelayAllowedList.abi --bin ./internal/lido/contracts/mevboostrelaylist/MEVBoostRelayAllowedList.bin --pkg mevboostrelaylist --out ./internal/lido/contracts/mevboostrelaylist/MEVBoostRelayAllowedList.go
 	@go generate ./...
 
 test: generate ## run tests
@@ -33,9 +37,16 @@ test: generate ## run tests
 e2e-test: generate ## Run e2e tests
 	@go test -timeout 20m -count=1 ./e2e/...
 
+e2e-test-windows: generate ## Run e2e tests on Windows
+	@go test -timeout 20m -count=1 -skip TestE2E_MonitoringStack ./e2e/...
+
+test-no-e2e: generate ## run tests excluding e2e
+	@mkdir -p coverage
+	@go test -coverprofile=coverage/coverage.out -covermode=count ./... -skip TestE2E
+
 codecov-test: generate ## unit tests with coverage using the courtney tool
 	@mkdir -p coverage
-	@courtney/courtney -v -o coverage/coverage.out ./...
+	@courtney/courtney -v -o coverage/coverage.out -t="-skip=TestE2E" ./...
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 install-gofumpt: ## install gofumpt
@@ -49,7 +60,10 @@ install-courtney: ## Install courtney for code coverage
 	@(cd courtney && go get  ./... && go build courtney.go)
 	@go get ./...
 
-install-deps: | install-gofumpt install-courtney install-mockgen ## Install some project dependencies
+install-abigen: ## install abigen
+	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
+
+install-deps: | install-gofumpt install-courtney install-mockgen install-abigen ## Install some project dependencies
 
 coverage: ## show tests coverage
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html

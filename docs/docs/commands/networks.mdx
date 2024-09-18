@@ -11,7 +11,6 @@ Running `sedge networks` will give you a list of supported networks
 
 ```
 $ sedge networks
-Initializing configuration
 List supported networks
 
 Usage:
@@ -21,21 +20,27 @@ Flags:
   -h, --help   help for networks
 
 Global Flags:
-      --logLevel string   Set Log Level (default "info")
+      --log-level string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
 ```
 
 ## Execution Example
 
 ```
 $ sedge networks
-2022-00-00 00:00:00 -- [INFO] [Logger Init] Log level: info
-2022-00-00 00:00:00 -- [INFO] You are running the latest version of sedge. Version:  v1.3.1
-2022-00-00 00:00:00 -- [INFO] Listing supported networks
+2024-07-09 12:23:02 -- [INFO] [Logger Init] Log level: info
+2024-07-09 12:23:03 -- [INFO] You are running the latest version of sedge. Version:  v1.5.0
+2024-07-09 12:23:03 -- [INFO] Listing supported networks
 
- #   Supported Networks
-=== ====================
- 1   chiado
- 2   gnosis
- 3   mainnet
- 4   sepolia
+
+  
+  #                              │Supported Networks
+  ───────────────────────────────┼────────────────────────────────────────────────
+  1                              │chiado
+  2                              │custom
+  3                              │gnosis
+  4                              │holesky
+  5                              │mainnet
+  6                              │sepolia
+
+
 ```

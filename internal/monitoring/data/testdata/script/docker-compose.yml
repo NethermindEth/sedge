@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  test:
+    image: alpine
+    command: sleep 1000
+    networks:
+      - test
+
+networks:
+  test:
+    driver: bridge

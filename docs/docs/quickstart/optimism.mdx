@@ -1,0 +1,92 @@
+---
+sidebar_position: 10
+id: running-optimism-node
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Running an Optimism Node with Sedge
+
+## What is Optimism?
+
+[Optimism](https://www.optimism.io/) is a Layer 2 scaling solution for Ethereum that uses optimistic rollups to achieve faster and cheaper transactions while maintaining Ethereum's security. Running an Optimism node allows you to interact with the Optimism network directly, validate transactions, and contribute to the network's decentralization.
+
+Sedge supports setting up and running Optimism nodes, making it easier for users to participate in the Optimism ecosystem. This guide will walk you through the process of setting up an Optimism node using Sedge.
+
+:::info
+
+Running an Optimism node requires significant computational resources and a stable internet connection. Make sure your system meets the [minimum requirements](https://docs.optimism.io/builders/node-operators/tutorials/mainnet#hardware-requirements) before proceeding.
+
+:::
+
+## Workflow breakdown
+
+Setting up an Optimism node with Sedge involves several steps:
+
+2. **Generate Node Configuration**: Use Sedge to generate the necessary configuration files for your Optimism node.
+3. **Run the Node**: Start your Optimism node using the generated configuration.
+4. **Monitor and Maintain**: Keep your node running smoothly and up to date.
+
+Let's dive into each step in detail.
+
+## Using Sedge for Optimism
+
+### Generating Node Configuration
+
+To generate the configuration for your Optimism node, use the following command:
+
+```bash
+sedge generate op-full-node --network mainnet
+```
+
+This command will create a new directory with all the necessary configuration files for running an Optimism node on the mainnet. If you want to run a node on the testnet (Sepolia), use `--network sepolia` instead.
+
+At this time, we are using Nethermind as the execution Optimism node, in the future we will add support for `op-geth`.
+
+:::info
+
+When you use `sedge generate op-full-node`, Sedge will generate a `docker-compose.yml` script and a `.env` file with the necessary configuration for your Optimism node.
+
+That config will include the execution client, the consensus client, and the execution and consensus Optimism client.
+
+:::
+
+:::tip
+
+Setting `--execution-api-url` flag, will only generate execution and consensus Optimism nodes, and the stack will point to that execution node.
+
+This is useful if you already have an endpoint for the execution node. It will save synchronization time.
+
+:::
+
+### Running the Node
+Once the configuration is generated, you can start your Optimism node using:
+
+```
+sedge run
+```
+
+This command will start all the necessary components of your Optimism node, including the execution client and the optimism client.
+
+:::note
+
+The first time you run your node, it will need to sync with the network, which can take several hours or even days depending on your hardware and network connection.
+
+:::
+
+### Monitoring and Maintenance
+
+After your Optimism node is up and running, you should monitor its performance and ensure it stays in sync with the network. Regularly check for updates to the Optimism client and other components to keep your node secure and up to date.
+
+By following these steps, you can set up and run an Optimism node using Sedge, contributing to the growth and decentralization of the Optimism network.
+
+## Base Support
+
+Sedge also support Base, an Ethereum Layer 2 (L2) chain that offers a safe, low-cost, developer-friendly way to build on-chain. Base is an L2 built on OP Stack in collaboration with Optimism.
+
+The only difference between setting up an Optimism node and a Base node is the `--base` flag. To generate a Base node configuration, use the following command:
+
+```bash
+sedge generate op-full-node --base
+```
