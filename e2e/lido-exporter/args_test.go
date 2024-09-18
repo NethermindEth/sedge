@@ -27,7 +27,7 @@ import (
 )
 
 func TestE2E_ValidArgs_NodeOperatorID(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -40,7 +40,7 @@ func TestE2E_ValidArgs_NodeOperatorID(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
 			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--node-operator-id", "250", "--network", "holesky", "--port", "9980")
-			time.Sleep(2 * time.Second)
+			time.Sleep(5 * time.Second)
 			return cmd
 		},
 		// Assert
@@ -59,7 +59,7 @@ func TestE2E_ValidArgs_NodeOperatorID(t *testing.T) {
 }
 
 func TestE2E_ValidArgs_EnvNodeOperatorID(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -75,7 +75,7 @@ func TestE2E_ValidArgs_EnvNodeOperatorID(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
 			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter")
-			time.Sleep(2 * time.Second)
+			time.Sleep(5 * time.Second)
 			return cmd
 		},
 		// Assert
@@ -94,7 +94,7 @@ func TestE2E_ValidArgs_EnvNodeOperatorID(t *testing.T) {
 }
 
 func TestE2E_ValidArgs_RewardAddress(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -107,7 +107,7 @@ func TestE2E_ValidArgs_RewardAddress(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
 			cmd = base.RunCommandCMD(t, binaryPath, "", "lido-exporter", "--reward-address", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c", "--network", "holesky", "--port", "9981")
-			time.Sleep(2 * time.Second)
+			time.Sleep(5 * time.Second)
 
 			return cmd
 		},
@@ -128,7 +128,7 @@ func TestE2E_ValidArgs_RewardAddress(t *testing.T) {
 }
 
 func TestE2E_MissingRequiredArgs(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -163,7 +163,7 @@ func TestE2E_MissingRequiredArgs(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_NodeOperatorID(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -193,7 +193,7 @@ func TestE2E_InvalidArgs_NodeOperatorID(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_RewardAddress(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -223,7 +223,7 @@ func TestE2E_InvalidArgs_RewardAddress(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_Network(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -253,7 +253,7 @@ func TestE2E_InvalidArgs_Network(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_ScrapeTime(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -283,7 +283,7 @@ func TestE2E_InvalidArgs_ScrapeTime(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_Port(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -313,7 +313,7 @@ func TestE2E_InvalidArgs_Port(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_RPCEndpoints(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -343,7 +343,7 @@ func TestE2E_InvalidArgs_RPCEndpoints(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_WSEndpoints(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -372,7 +372,7 @@ func TestE2E_InvalidArgs_WSEndpoints(t *testing.T) {
 }
 
 func TestE2E_ValidFlags_All(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -393,7 +393,7 @@ func TestE2E_ValidFlags_All(t *testing.T) {
 				"--node-operator-id", "250", // should be prioritized over reward address
 				"--reward-address", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c",
 			)
-			time.Sleep(2 * time.Second)
+			time.Sleep(5 * time.Second)
 			return cmd
 		},
 		// Assert
@@ -412,7 +412,7 @@ func TestE2E_ValidFlags_All(t *testing.T) {
 }
 
 func TestE2E_ValidEnv_All(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -434,7 +434,7 @@ func TestE2E_ValidEnv_All(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
 			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter")
-			time.Sleep(2 * time.Second)
+			time.Sleep(5 * time.Second)
 			return cmd
 		},
 		// Assert
@@ -453,7 +453,7 @@ func TestE2E_ValidEnv_All(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_NegativeNodeID(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
