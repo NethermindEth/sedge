@@ -49,5 +49,5 @@ Available settings:
 - `LIDO_EXPORTER_RPC_ENDPOINTS`: Comma-separated list of Ethereum RPC endpoints
 - `LIDO_EXPORTER_WS_ENDPOINTS`: Comma-separated list of Ethereum WebSocket endpoints
 - `LIDO_EXPORTER_PORT`: Port to listen on (default: "8080")
-- `LIDO_EXPORTER_SCRAPE_TIME`: Scrape interval (default: 10s)
+- `LIDO_EXPORTER_SCRAPE_TIME`: Scrape interval (default: 30s)
 - `LIDO_EXPORTER_LOG_LEVEL`: Log level (default: "info")
