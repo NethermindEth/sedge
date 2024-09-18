@@ -16,6 +16,22 @@ compile-linux: ## compile:
 	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/sedge cmd/sedge/main.go
 	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/lido-exporter cmd/lido-exporter/main.go
 	
+compile-sedge:
+	@mkdir -p build
+	@go build -ldflags "${LDFLAGS}" -o build/sedge cmd/sedge/main.go
+
+compile-lido-exporter:
+	@mkdir -p build
+	@go build -ldflags "${LDFLAGS}" -o build/lido-exporter cmd/lido-exporter/main.go
+
+compile-sedge-linux:
+	@mkdir -p build
+	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/sedge cmd/sedge/main.go
+
+compile-lido-exporter-linux:
+	@mkdir -p build
+	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/lido-exporter cmd/lido-exporter/main.go
+
 install: compile ## compile the binary and copy it to PATH
 	@sudo cp build/sedge /usr/local/bin
 
@@ -38,10 +54,10 @@ test: generate ## run tests
 	@go test -coverprofile=coverage/coverage.out -covermode=count -timeout 25m ./...
 
 e2e-test: generate ## Run e2e tests
-	@go test -timeout 120m -count=1 ./e2e/...
+	@go test -timeout 25m -count=1 ./e2e/sedge/...
 
 e2e-test-windows: generate ## Run e2e tests on Windows
-	@go test -timeout 120m -count=1 -skip TestE2E_MonitoringStack ./e2e/...
+	@go test -timeout 25m -count=1 -skip TestE2E_MonitoringStack ./e2e/sedge/...
 
 test-no-e2e: generate ## run tests excluding e2e
 	@mkdir -p coverage
