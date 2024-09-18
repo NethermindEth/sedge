@@ -40,7 +40,7 @@ func TestE2E_ValidArgs_NodeOperatorID(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
 			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--node-operator-id", "250", "--network", "holesky", "--port", "9980")
-			time.Sleep(5 * time.Second)
+			time.Sleep(2 * time.Second)
 			return cmd
 		},
 		// Assert
@@ -75,7 +75,7 @@ func TestE2E_ValidArgs_EnvNodeOperatorID(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
 			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter")
-			time.Sleep(5 * time.Second)
+			time.Sleep(2 * time.Second)
 			return cmd
 		},
 		// Assert
@@ -107,7 +107,7 @@ func TestE2E_ValidArgs_RewardAddress(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
 			cmd = base.RunCommandCMD(t, binaryPath, "", "lido-exporter", "--reward-address", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c", "--network", "holesky", "--port", "9981")
-			time.Sleep(5 * time.Second)
+			time.Sleep(2 * time.Second)
 
 			return cmd
 		},
@@ -388,12 +388,12 @@ func TestE2E_ValidFlags_All(t *testing.T) {
 				"--rpc-endpoints", "https://ethereum-holesky-rpc.publicnode.com", "https://endpoints.omniatech.io/v1/eth/holesky/public", "https://ethereum-holesky.blockpi.network/v1/rpc/public",
 				"--ws-endpoints", "https://ethereum-holesky-rpc.publicnode.com,wss://ethereum-holesky-rpc.publicnode.com", // https endpoint should be ignored
 				"--port", "9989",
-				"--scrape-time", "1s",
+				"--scrape-time", "40s",
 				"--network", "holesky",
 				"--node-operator-id", "250", // should be prioritized over reward address
 				"--reward-address", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c",
 			)
-			time.Sleep(5 * time.Second)
+			time.Sleep(2 * time.Second)
 			return cmd
 		},
 		// Assert
@@ -434,7 +434,7 @@ func TestE2E_ValidEnv_All(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
 			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter")
-			time.Sleep(5 * time.Second)
+			time.Sleep(2 * time.Second)
 			return cmd
 		},
 		// Assert
