@@ -27,7 +27,7 @@ import (
 )
 
 func TestE2E_ValidArgs_NodeOperatorID(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -59,7 +59,7 @@ func TestE2E_ValidArgs_NodeOperatorID(t *testing.T) {
 }
 
 func TestE2E_ValidArgs_EnvNodeOperatorID(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -94,7 +94,7 @@ func TestE2E_ValidArgs_EnvNodeOperatorID(t *testing.T) {
 }
 
 func TestE2E_ValidArgs_RewardAddress(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -128,7 +128,7 @@ func TestE2E_ValidArgs_RewardAddress(t *testing.T) {
 }
 
 func TestE2E_MissingRequiredArgs(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -163,7 +163,7 @@ func TestE2E_MissingRequiredArgs(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_NodeOperatorID(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -193,7 +193,7 @@ func TestE2E_InvalidArgs_NodeOperatorID(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_RewardAddress(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -223,7 +223,7 @@ func TestE2E_InvalidArgs_RewardAddress(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_Network(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -253,7 +253,7 @@ func TestE2E_InvalidArgs_Network(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_ScrapeTime(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -283,7 +283,7 @@ func TestE2E_InvalidArgs_ScrapeTime(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_Port(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -313,7 +313,7 @@ func TestE2E_InvalidArgs_Port(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_RPCEndpoints(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -343,7 +343,7 @@ func TestE2E_InvalidArgs_RPCEndpoints(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_WSEndpoints(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -372,7 +372,7 @@ func TestE2E_InvalidArgs_WSEndpoints(t *testing.T) {
 }
 
 func TestE2E_ValidFlags_All(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -412,7 +412,7 @@ func TestE2E_ValidFlags_All(t *testing.T) {
 }
 
 func TestE2E_ValidEnv_All(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -453,7 +453,7 @@ func TestE2E_ValidEnv_All(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_NegativeNodeID(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
