@@ -132,7 +132,7 @@ func nodeOpsCount(network string) (*big.Int, error) {
 }
 
 func csModuleContract(network string) (*Csmodule, *ethclient.Client, error) {
-	client, err := contracts.ConnectClient(network)
+	client, err := contracts.ConnectClient(network, false)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to connect to client: %w", err)
 	}

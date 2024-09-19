@@ -120,7 +120,7 @@ func NetworkSupportedByLidoMevBoost(network string) ([]string, bool) {
 }
 
 func mevBoostRelayListContract(network string) (*Mevboostrelaylist, *ethclient.Client, error) {
-	client, err := contracts.ConnectClient(network)
+	client, err := contracts.ConnectClient(network, false)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to connect to client: %w", err)
 	}
