@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLidoStatus_ValidFlags(t *testing.T) {
+func TestE2E_LidoStatus_ValidFlags(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -29,7 +29,7 @@ func TestLidoStatus_ValidFlags(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestLidoStatus_ValidNodeID(t *testing.T) {
+func TestE2E_LidoStatus_ValidNodeID(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -52,7 +52,7 @@ func TestLidoStatus_ValidNodeID(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestLidoStatus_InvalidNodeID(t *testing.T) {
+func TestE2E_LidoStatus_InvalidNodeID(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -76,7 +76,7 @@ func TestLidoStatus_InvalidNodeID(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestLidoStatus_InvalidRewardAddress(t *testing.T) {
+func TestE2E_LidoStatus_InvalidRewardAddress(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -99,7 +99,7 @@ func TestLidoStatus_InvalidRewardAddress(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestLidoStatus_RewardAddressNotFound(t *testing.T) {
+func TestE2E_LidoStatus_RewardAddressNotFound(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -122,7 +122,7 @@ func TestLidoStatus_RewardAddressNotFound(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestLidoStatus_InvalidZeroRewardAddress(t *testing.T) {
+func TestE2E_LidoStatus_InvalidZeroRewardAddress(t *testing.T) {
 	// Test context
 	var (
 		runErr error

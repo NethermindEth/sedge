@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGenerate_FullNode_GoerliNotSupported(t *testing.T) {
+func TestE2E_Generate_FullNode_GoerliNotSupported(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -34,7 +34,7 @@ func TestGenerate_FullNode_GoerliNotSupported(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestGenerate_FullNode_Lido_GnosisNotSupported(t *testing.T) {
+func TestE2E_Generate_FullNode_Lido_GnosisNotSupported(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -57,7 +57,7 @@ func TestGenerate_FullNode_Lido_GnosisNotSupported(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestGenerate_FullNode_Lido_SepoliaNotSupported(t *testing.T) {
+func TestE2E_Generate_FullNode_Lido_SepoliaNotSupported(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -81,7 +81,7 @@ func TestGenerate_FullNode_Lido_SepoliaNotSupported(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestGenerate_FullNode_Lido_Sepolia_NoMEV(t *testing.T) {
+func TestE2E_Generate_FullNode_Lido_Sepolia_NoMEV(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -121,7 +121,7 @@ func TestGenerate_FullNode_Lido_Sepolia_NoMEV(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestGenerate_FullNode_Lido_Mainnet(t *testing.T) {
+func TestE2E_Generate_FullNode_Lido_Mainnet(t *testing.T) {
 	// Test context
 	var (
 		runErr error

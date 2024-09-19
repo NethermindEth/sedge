@@ -24,7 +24,6 @@ import (
 	"github.com/NethermindEth/sedge/internal/images/validator-import/teku"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
@@ -72,18 +71,18 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 	}
 	validatorCtName := services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 	// Check validator container exists
-	_, err := s.serviceManager.ContainerId(validatorCtName)
+	_, err := s.dockerServiceManager.ContainerID(validatorCtName)
 	if err != nil {
 		return err
 	}
-	previouslyRunning, err := s.serviceManager.IsRunning(validatorCtName)
+	previouslyRunning, err := s.dockerServiceManager.IsRunning(validatorCtName)
 	if err != nil {
 		return err
 	}
 	// Stop validator
 	if previouslyRunning {
 		log.Info("Stopping validator client")
-		if err := s.serviceManager.Stop(validatorCtName); err != nil {
+		if err := s.dockerServiceManager.Stop(validatorCtName); err != nil {
 			return err
 		}
 	}
@@ -108,19 +107,19 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 	var ctID string
 	switch options.ValidatorClient {
 	case "prysm":
-		prysmCtID, err := setupPrysmValidatorImportContainer(s.dockerClient, s.serviceManager, options)
+		prysmCtID, err := setupPrysmValidatorImportContainer(s.dockerClient, s.dockerServiceManager, options)
 		if err != nil {
 			return err
 		}
 		ctID = prysmCtID
 	case "nimbus":
-		nimbusCtID, err := setupNimbusValidatorImport(s.dockerClient, s.serviceManager, options)
+		nimbusCtID, err := setupNimbusValidatorImport(s.dockerClient, s.dockerServiceManager, options)
 		if err != nil {
 			return err
 		}
 		ctID = nimbusCtID
 	case "lodestar":
-		lodestarCtID, err := setupLodestarValidatorImport(s.dockerClient, s.serviceManager, options)
+		lodestarCtID, err := setupLodestarValidatorImport(s.dockerClient, s.dockerServiceManager, options)
 		if err != nil {
 			return err
 		}
@@ -143,14 +142,14 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 	log.Info("Importing validator keys")
 	var runErr error
 	if options.ValidatorClient == "nimbus" {
-		runErr = runAndWaitImportKeysNimbus(s.dockerClient, s.serviceManager, ctID)
+		runErr = runAndWaitImportKeysNimbus(s.dockerClient, s.dockerServiceManager, ctID)
 	} else {
-		runErr = runAndWaitImportKeys(s.dockerClient, s.serviceManager, ctID)
+		runErr = runAndWaitImportKeys(s.dockerClient, s.dockerServiceManager, ctID)
 	}
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
 		log.Info("The validator container is being restarted")
-		if err := s.serviceManager.Start(validatorCtName); err != nil {
+		if err := s.dockerServiceManager.Start(validatorCtName); err != nil {
 			return err
 		}
 	}
@@ -164,12 +163,12 @@ func isDefaultKeysPath(generationPath, from string) bool {
 	return from == filepath.Join(generationPath, "keystore")
 }
 
-func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, options ImportValidatorKeysOptions) (string, error) {
+func setupPrysmValidatorImportContainer(dockerClient client.APIClient, dockerServiceManager DockerServiceManager, options ImportValidatorKeysOptions) (string, error) {
 	var (
 		validatorCtName       = services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 		validatorImportCtName = services.ContainerNameWithTag(services.ServiceCtValidatorImport, options.ContainerTag)
 	)
-	validatorImage, err := serviceManager.Image(validatorCtName)
+	validatorImage, err := dockerServiceManager.Image(validatorCtName)
 	if err != nil {
 		return "", err
 	}
@@ -222,14 +221,14 @@ func setupPrysmValidatorImportContainer(dockerClient client.APIClient, serviceMa
 	return ct.ID, nil
 }
 
-func setupNimbusValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, options ImportValidatorKeysOptions) (string, error) {
+func setupNimbusValidatorImport(dockerClient client.APIClient, dockerServiceManager DockerServiceManager, options ImportValidatorKeysOptions) (string, error) {
 	var (
 		// In the case of Nimbus, it's the consensus client the one that import the keys.
 		consensusCtName       = services.ContainerNameWithTag(services.DefaultSedgeConsensusClient, options.ContainerTag)
 		validatorCtName       = services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 		validatorImportCtName = services.ContainerNameWithTag(services.ServiceCtValidatorImport, options.ContainerTag)
 	)
-	validatorImage, err := serviceManager.Image(consensusCtName)
+	validatorImage, err := dockerServiceManager.Image(consensusCtName)
 	if err != nil {
 		return "", err
 	}
@@ -285,12 +284,12 @@ func setupNimbusValidatorImport(dockerClient client.APIClient, serviceManager se
 	return ct.ID, nil
 }
 
-func setupLodestarValidatorImport(dockerClient client.APIClient, serviceManager services.ServiceManager, options ImportValidatorKeysOptions) (string, error) {
+func setupLodestarValidatorImport(dockerClient client.APIClient, dockerServiceManager DockerServiceManager, options ImportValidatorKeysOptions) (string, error) {
 	var (
 		validatorCtName       = services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
 		validatorImportCtName = services.ContainerNameWithTag(services.ServiceCtValidatorImport, options.ContainerTag)
 	)
-	validatorImage, err := serviceManager.Image(validatorCtName)
+	validatorImage, err := dockerServiceManager.Image(validatorCtName)
 	if err != nil {
 		return "", err
 	}
@@ -478,11 +477,11 @@ func setupTekuValidatorImport(dockerClient client.APIClient, commandRunner comma
 	return ct.ID, nil
 }
 
-func runAndWaitImportKeys(dockerClient client.APIClient, serviceManager services.ServiceManager, ctID string) error {
+func runAndWaitImportKeys(dockerClient client.APIClient, dockerServiceManager DockerServiceManager, ctID string) error {
 	log.Debugf("import keys container id: %s", ctID)
-	ctExit, errChan := serviceManager.Wait(ctID, container.WaitConditionNextExit)
+	ctExit, errChan := dockerServiceManager.Wait(ctID, container.WaitConditionNextExit)
 	log.Info("The keys import container is starting")
-	if err := dockerClient.ContainerStart(context.Background(), ctID, types.ContainerStartOptions{}); err != nil {
+	if err := dockerClient.ContainerStart(context.Background(), ctID, container.StartOptions{}); err != nil {
 		return err
 	}
 	osSignals := make(chan os.Signal, 1)
@@ -490,7 +489,7 @@ func runAndWaitImportKeys(dockerClient client.APIClient, serviceManager services
 	for {
 		select {
 		case exitResult := <-ctExit:
-			logs, err := serviceManager.ContainerLogs(ctID, "Import keys")
+			logs, err := dockerServiceManager.ContainerLogs(ctID, "Import keys")
 			if err != nil {
 				return err
 			}
@@ -516,11 +515,11 @@ func runAndWaitImportKeys(dockerClient client.APIClient, serviceManager services
 }
 
 // runAndWaitImportKeysNimbus starts the container in interactive mode and waits for it to finish.
-func runAndWaitImportKeysNimbus(dockerClient client.APIClient, serviceManager services.ServiceManager, ctID string) error {
+func runAndWaitImportKeysNimbus(dockerClient client.APIClient, dockerServiceManager DockerServiceManager, ctID string) error {
 	log.Debugf("Starting interactive container with id: %s", ctID)
 
 	// Attach to the container's input/output for direct interaction
-	resp, err := dockerClient.ContainerAttach(context.Background(), ctID, types.ContainerAttachOptions{
+	resp, err := dockerClient.ContainerAttach(context.Background(), ctID, container.AttachOptions{
 		Stream: true,
 		Stdin:  true,
 		Stdout: true,
@@ -545,7 +544,7 @@ func runAndWaitImportKeysNimbus(dockerClient client.APIClient, serviceManager se
 	}()
 
 	// Start the container
-	if err := dockerClient.ContainerStart(context.Background(), ctID, types.ContainerStartOptions{}); err != nil {
+	if err := dockerClient.ContainerStart(context.Background(), ctID, container.StartOptions{}); err != nil {
 		return err
 	}
 
@@ -566,7 +565,7 @@ func runAndWaitImportKeysNimbus(dockerClient client.APIClient, serviceManager se
 	}()
 
 	// Wait for the container to finish execution
-	ctExit, errChan := serviceManager.Wait(ctID, container.WaitConditionNextExit)
+	ctExit, errChan := dockerServiceManager.Wait(ctID, container.WaitConditionNextExit)
 
 	// Handle OS interrupts (e.g., Ctrl+C) to gracefully stop the container
 	osSignals := make(chan os.Signal, 1)
