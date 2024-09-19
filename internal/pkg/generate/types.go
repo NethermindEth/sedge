@@ -219,6 +219,18 @@ type Mevboost struct {
 	Restart       string   `yaml:"restart"`
 	Entrypoint    []string `yaml:"entrypoint"`
 }
+type ConsensusSync struct {
+	StopGracePeriod string   `yaml:"stop_grace_period"`
+	ContainerName   string   `yaml:"container_name"`
+	Restart         string   `yaml:"restart"`
+	Image           string   `yaml:"image"`
+	Networks        []string `yaml:"networks"`
+	Volumes         []string `yaml:"volumes"`
+	Ports           []string `yaml:"ports"`
+	Expose          []int    `yaml:"expose"`
+	Command         []string `yaml:"command"`
+	Logging         *Logging `yaml:"logging,omitempty"`
+}
 type Consensus struct {
 	StopGracePeriod string   `yaml:"stop_grace_period"`
 	ContainerName   string   `yaml:"container_name"`
@@ -263,6 +275,7 @@ type Services struct {
 	Execution        *Execution        `yaml:"execution,omitempty"`
 	Mevboost         *Mevboost         `yaml:"mev-boost,omitempty"`
 	Consensus        *Consensus        `yaml:"consensus,omitempty"`
+	ConsensusSync    *ConsensusSync    `yaml:"consensus-sync,omitempty"`
 	ValidatorBlocker *ValidatorBlocker `yaml:"validator-blocker,omitempty"`
 	Validator        *Validator        `yaml:"validator,omitempty"`
 	ConfigConsensus  *ConfigConsensus  `yaml:"config_consensus,omitempty"`
