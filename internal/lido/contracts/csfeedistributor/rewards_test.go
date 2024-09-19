@@ -39,9 +39,9 @@ func TestRewards(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "Rewards for nodeID 182, Holesky",
+			name:    "Rewards for nodeID 250, Holesky",
 			network: "holesky",
-			nodeID:  big.NewInt(182),
+			nodeID:  big.NewInt(250),
 			wantErr: false,
 		},
 		{

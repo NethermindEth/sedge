@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"math/big"
 	"time"
 
@@ -28,6 +27,8 @@ import (
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Tree : struct that reperesents Merkle Tree data
@@ -92,15 +93,15 @@ func cumulativeFeeShares(treeCID string, nodeID *big.Int) (*big.Int, error) {
 			nodeOperatorId, err1 := convertTreeValuesToBigInt(item.Value[0])
 			shares, err2 := convertTreeValuesToBigInt(item.Value[1])
 			if err1 != nil || err2 != nil {
-				log.Println("Error converting values:", err1, err2)
+				log.Debugf("Error converting values: %v, %v", err1, err2)
 				continue
 			}
 			if nodeOperatorId.Cmp(nodeID) == 0 {
-				log.Printf("shares: %v", shares)
+				log.Debugf("shares: %v", shares)
 				return shares, nil
 			}
 		} else {
-			log.Println("Unexpected value format, expected 2 elements")
+			log.Debugf("Unexpected value format, expected 2 elements")
 		}
 	}
 	return nil, fmt.Errorf("invalid nodeId")
@@ -151,7 +152,7 @@ func convertTreeValuesToBigInt(value interface{}) (*big.Int, error) {
 }
 
 func csFeeDistributorContract(network string) (*Csfeedistributor, *ethclient.Client, error) {
-	client, err := contracts.ConnectClient(network)
+	client, err := contracts.ConnectClient(network, false)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to connect to client: %w", err)
 	}
