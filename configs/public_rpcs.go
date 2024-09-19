@@ -18,6 +18,7 @@ package configs
 type RPC struct {
 	NetworkName string
 	PublicRPCs  []string
+	PublicWSs   []string
 }
 
 var networkRPCs = map[string]RPC{
@@ -31,6 +32,9 @@ var networkRPCs = map[string]RPC{
 			"https://rpc.flashbots.net",
 			"https://eth.drpc.org",
 		},
+		PublicWSs: []string{
+			"wss://ethereum-rpc.publicnode.com",
+		},
 	},
 	NetworkHolesky: {
 		NetworkName: NetworkHolesky,
@@ -39,19 +43,7 @@ var networkRPCs = map[string]RPC{
 			"https://endpoints.omniatech.io/v1/eth/holesky/public",
 			"https://ethereum-holesky.blockpi.network/v1/rpc/public",
 		},
-	},
-}
-
-var networkWSs = map[string]RPC{
-	NetworkMainnet: {
-		NetworkName: NetworkMainnet,
-		PublicRPCs: []string{
-			"wss://ethereum-rpc.publicnode.com",
-		},
-	},
-	NetworkHolesky: {
-		NetworkName: NetworkHolesky,
-		PublicRPCs: []string{
+		PublicWSs: []string{
 			"wss://ethereum-holesky-rpc.publicnode.com",
 		},
 	},

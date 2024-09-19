@@ -81,11 +81,11 @@ func GetPublicRPCs(network string) ([]string, error) {
 }
 
 func GetPublicWSs(network string) ([]string, error) {
-	ws, exists := networkWSs[network]
+	ws, exists := networkRPCs[network]
 	if !exists {
 		return nil, fmt.Errorf("invalid network")
 	}
-	return shuffleRPCs(ws.PublicRPCs), nil
+	return shuffleRPCs(ws.PublicWSs), nil
 }
 
 func shuffleRPCs(rpcs []string) []string {
