@@ -92,9 +92,13 @@ sedge slashing-import --from slashing-data.json --start-validator lighthouse`,
 			return sedgeActions.ValidateDockerComposeFile(filepath.Join(generationPath, configs.DefaultDockerComposeScriptName))
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			services := []string{validator}
+			if validatorClient == "nimbus" {
+				services = append(services, consensus)
+			}
 			err := sedgeActions.SetupContainers(actions.SetupContainersOptions{
 				GenerationPath: generationPath,
-				Services:       []string{validator},
+				Services:       services,
 			})
 			if err != nil {
 				return err
