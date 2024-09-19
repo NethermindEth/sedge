@@ -19,6 +19,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"syscall"
+
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/images/validator-import/lighthouse"
 	"github.com/NethermindEth/sedge/internal/images/validator-import/teku"
@@ -32,11 +38,6 @@ import (
 	"github.com/otiai10/copy"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh/terminal"
-	"io"
-	"os"
-	"os/signal"
-	"path/filepath"
-	"syscall"
 )
 
 var ErrInterrupted = errors.New("interrupt")

@@ -93,7 +93,6 @@ the importation.`,
 					GenerationPath: generationPath,
 					Services:       []string{validator, consensus},
 				})
-
 			} else {
 				err = sedgeActions.SetupContainers(actions.SetupContainersOptions{
 					GenerationPath: generationPath,
