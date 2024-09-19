@@ -37,7 +37,8 @@ var ClientImages struct {
 		Prysm      Image `yaml:"prysm"`
 	}
 	Optimism struct {
-		OpNode Image `yaml:"optimism"`
+		OpNode Image `yaml:"opnode"`
+		OpGeth Image `yaml:"opgeth"`
 	}
 }
 
