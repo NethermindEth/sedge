@@ -1,13 +1,9 @@
 name: Build and Release Lido Exporter Docker Image
 
 on:
-  pull_request:
-    branches: [main, develop]
   push:
     tags:
       - 'lido-exporter-v*.*.*'
-    branches:
-      - fix/lido-exporter-release 
 
 permissions:
   contents: write
@@ -41,7 +37,7 @@ jobs:
       run: |
         echo ${{ env.FULL_VERSION }}
         Ver=${{ env.FULL_VERSION }}
-        echo "version=${Ver#lido-exporter-}" >> $GITHUB_OUTPUT  # Updated to use GITHUB_OUTPUT
+        echo "version=${Ver#lido-exporter-}" >> $GITHUB_OUTPUT  
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
@@ -50,10 +46,10 @@ jobs:
         file: ./cmd/lido-exporter/Dockerfile
         push: true
         tags: |
-          nethermindeth/lido-exporter:${{ steps.extract_version.outputs.version }}  # Uses the extracted version
+          nethermindeth/lido-exporter:${{ steps.extract_version.outputs.version }} 
           nethermindeth/lido-exporter:latest
         build-args: |
-          VERSION=${{ steps.extract_version.outputs.version }}  # Uses the extracted version for build args
+          VERSION=${{ steps.extract_version.outputs.version }}  
 
     - name: Log out of Docker Hub
       run: docker logout
@@ -63,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build  # This makes the create-release job dependent on the build job
     env:
-      FULL_VERSION: ${{ github.ref_name }}  # Same full version
+      FULL_VERSION: ${{ github.ref_name }}  
 
     steps:
       - name: Extract version
@@ -78,7 +74,7 @@ jobs:
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.extract_version.outputs.version }}  # Uses the extracted version for the release tag
+          tag: ${{ steps.extract_version.outputs.version }} 
           draft: true
           prerelease: false
           generateReleaseNotes: true
