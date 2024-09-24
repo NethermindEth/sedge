@@ -35,7 +35,6 @@ jobs:
     - name: Extract version
       id: extract_version
       run: |
-        echo ${{ env.FULL_VERSION }}
         Ver=${{ env.FULL_VERSION }}
         echo "version=${Ver#lido-exporter-}" >> $GITHUB_OUTPUT  
 
