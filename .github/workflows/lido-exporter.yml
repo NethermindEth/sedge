@@ -3,6 +3,11 @@ name: Build and Release Lido Exporter Docker Image
 on:
   pull_request:
     branches: [main, develop]
+  push:
+    tags:
+      - 'lido-exporter-v*.*.*'
+    branches:
+      - fix/lido-exporter-release 
 
 permissions:
   contents: write
@@ -36,8 +41,7 @@ jobs:
       run: |
         echo ${{ env.FULL_VERSION }}
         Ver=${{ env.FULL_VERSION }}
-        echo "Version=${Ver#lido-exporter-}" >> $GITHUB_ENV
-        echo "::set-output name=version::${Ver#lido-exporter-}"
+        echo "version=${Ver#lido-exporter-}" >> $GITHUB_OUTPUT  # Updated to use GITHUB_OUTPUT
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
@@ -66,8 +70,7 @@ jobs:
         id: extract_version
         run: |
           Ver=${{ env.FULL_VERSION }}
-          echo "Version=${Ver#lido-exporter-}" >> $GITHUB_ENV
-          echo "::set-output name=version::${Ver#lido-exporter-}"
+          echo "version=${Ver#lido-exporter-}" >> $GITHUB_OUTPUT  # Updated to use GITHUB_OUTPUT
 
       - name: Checkout code
         uses: actions/checkout@v4
