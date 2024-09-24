@@ -1,11 +1,13 @@
 name: Build and Release Lido Exporter Docker Image
 
 on:
-  pull_request:
-    branches: [main, develop]
+  push:
+    tags:
+      - 'lido-exporter-v*.*.*'
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   build:
@@ -17,10 +19,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Extract version from tag
-      id: extract_version
-      run: echo "VERSION=${FULL_VERSION#lido-exporter-}" >> $GITHUB_ENV
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
@@ -34,6 +32,13 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
+    - name: Extract version
+      id: extract_version
+      run: |
+        Ver=${{ env.FULL_VERSION }}
+        echo "Version=${Ver#lido-exporter-}" >> $GITHUB_ENV
+        echo "::set-output name=version::${Ver#lido-exporter-}"
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
@@ -41,10 +46,10 @@ jobs:
         file: ./cmd/lido-exporter/Dockerfile
         push: true
         tags: |
-          nethermindeth/lido-exporter:${{ env.VERSION }}
+          nethermindeth/lido-exporter:${{ steps.extract_version.outputs.version }}  # Uses the extracted version
           nethermindeth/lido-exporter:latest
         build-args: |
-          VERSION=${{ env.VERSION }}
+          VERSION=${{ steps.extract_version.outputs.version }}  # Uses the extracted version for build args
 
     - name: Log out of Docker Hub
       run: docker logout
@@ -54,17 +59,23 @@ jobs:
     runs-on: ubuntu-latest
     needs: build  # This makes the create-release job dependent on the build job
     env:
-      FULL_VERSION: ${{ github.ref_name }}
-      VERSION: ${{ env.VERSION }}
+      FULL_VERSION: ${{ github.ref_name }}  # Same full version
 
     steps:
+      - name: Extract version
+        id: extract_version
+        run: |
+          Ver=${{ env.FULL_VERSION }}
+          echo "Version=${Ver#lido-exporter-}" >> $GITHUB_ENV
+          echo "::set-output name=version::${Ver#lido-exporter-}"
+
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ env.VERSION }}
+          tag: ${{ steps.extract_version.outputs.version }}  # Uses the extracted version for the release tag
           draft: true
           prerelease: false
           generateReleaseNotes: true
