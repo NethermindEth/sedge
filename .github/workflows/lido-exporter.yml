@@ -1,9 +1,8 @@
 name: Build and Release Lido Exporter Docker Image
 
 on:
-  push:
-    tags:
-      - 'lido-exporter-v*.*.*'
+  pull_request:
+    branches: [main, develop]
 
 permissions:
   contents: write
