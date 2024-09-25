@@ -350,6 +350,7 @@ func (m *MonitoringManager) AddService(service ServiceAPI) error {
 	}); err != nil {
 		return fmt.Errorf("failed to initialize service %s: %w", service.Name(), err)
 	}
+
 	// Setup the new service
 	if err := service.Setup(dotEnv); err != nil {
 		return fmt.Errorf("failed to setup service %s: %w", service.Name(), err)
@@ -364,6 +365,7 @@ func (m *MonitoringManager) AddService(service ServiceAPI) error {
 	if err := m.updateDockerComposeFile(service); err != nil {
 		return fmt.Errorf("failed to update docker-compose.yml: %w", err)
 	}
+
 	// Create and start the new service's container
 	if err := m.composeManager.Create(commands.DockerComposeCreateOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
 		return fmt.Errorf("failed to create service container: %w", err)
@@ -376,6 +378,36 @@ func (m *MonitoringManager) AddService(service ServiceAPI) error {
 	// Save the new service's IP
 	if err := m.saveServiceIP(); err != nil {
 		return fmt.Errorf("failed to save service IP: %w", err)
+	}
+
+	// Split the service's Endpoint into host and port
+	endpoint := service.Endpoint()
+	endpoint = strings.TrimPrefix(endpoint, "http://")
+	endpoint = strings.TrimPrefix(endpoint, "https://")
+	_, portStr, err := net.SplitHostPort(endpoint)
+	if err != nil {
+		return fmt.Errorf("invalid service endpoint %s: %w", endpoint, err)
+	}
+
+	// Convert port to uint16
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		return fmt.Errorf("invalid port in service endpoint %s: %w", portStr, err)
+	}
+	// Add target to the new service
+	monitoringTarget := types.MonitoringTarget{
+		Host: service.ContainerName(),
+		Port: uint16(port),
+		Path: "/metrics",
+	}
+
+	labels := map[string]string{
+		InstanceIDLabel: service.ContainerName(),
+	}
+
+	// Add this new service as a target to the monitoring manager
+	if err := m.AddTarget(monitoringTarget, labels, SedgeNetworkName); err != nil {
+		return fmt.Errorf("failed to add target for service %s: %w", service.Name(), err)
 	}
 
 	return nil

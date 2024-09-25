@@ -29,13 +29,6 @@ import (
 	"github.com/NethermindEth/sedge/internal/ui"
 )
 
-var lido bool
-
-const (
-	initMonitoring  = "init"
-	cleanMonitoring = "clean"
-)
-
 func MonitoringCmd(mgr MonitoringManager) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "monitoring [init|clean]",

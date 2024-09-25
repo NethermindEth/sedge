@@ -209,7 +209,7 @@ func TestE2E_MonitoringStack_InitLido(t *testing.T) {
 		func(t *testing.T, dataDirPath string) {
 			assert.NoError(t, runErr)
 			checkMonitoringStackDir(t)
-			checkMonitoringStackContainers(t)
+			checkMonitoringStackContainers(t, "sedge_lido_exporter")
 			checkPrometheusTargetsUp(t, "sedge_lido_exporter:8080")
 			checkGrafanaHealth(t)
 		},

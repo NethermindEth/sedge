@@ -64,9 +64,10 @@ func checkMonitoringStackNotInstalled(t *testing.T) {
 }
 
 // checkMonitoringStackContainers checks that the monitoring stack containers are running
-func checkMonitoringStackContainers(t *testing.T) {
+func checkMonitoringStackContainers(t *testing.T, containerNames ...string) {
 	t.Logf("Checking monitoring stack containers")
-	checkContainerRunning(t, "sedge_grafana", "sedge_prometheus", "sedge_node_exporter")
+	containerNames = append(containerNames, "sedge_grafana", "sedge_prometheus", "sedge_node_exporter")
+	checkContainerRunning(t, containerNames...)
 }
 
 // checkContainerRunning checks that the given containers are running
