@@ -13,6 +13,12 @@ RUN go mod download
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
+# Install dependencies
+RUN make install-deps
+
+# Generate Go files
+RUN make generate
+
 # Build the Go app
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o lido-exporter ./cmd/lido-exporter
 
