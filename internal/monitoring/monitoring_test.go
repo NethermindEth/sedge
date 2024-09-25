@@ -1670,7 +1670,6 @@ func TestServiceEndpoints(t *testing.T) {
 	assert.Equal(t, want, endpoints)
 }
 
-
 func TestAddService(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
@@ -1713,9 +1712,9 @@ func TestAddService(t *testing.T) {
 				dockerServiceManager.EXPECT().ContainerIP("new-service").Return("172.0.0.2", nil)
 
 				// Mock the template files
-				err := afero.WriteFile(fs, filepath.Join(userDataHome, ".sedge", "monitoring", ".env"), []byte("EXISTING_VAR=value"), 0644)
+				err := afero.WriteFile(fs, filepath.Join(userDataHome, ".sedge", "monitoring", ".env"), []byte("EXISTING_VAR=value"), 0o644)
 				require.NoError(t, err)
-				err = afero.WriteFile(fs, filepath.Join(userDataHome, ".sedge", "monitoring", "docker-compose.yml"), []byte("version: '3'"), 0644)
+				err = afero.WriteFile(fs, filepath.Join(userDataHome, ".sedge", "monitoring", "docker-compose.yml"), []byte("version: '3'"), 0o644)
 				require.NoError(t, err)
 
 				manager := NewMonitoringManager(
@@ -1756,7 +1755,6 @@ func TestAddService(t *testing.T) {
 			},
 			wantErr: true,
 		},
-
 	}
 
 	for _, tt := range tests {
@@ -1825,7 +1823,7 @@ func TestUpdateEnvFile(t *testing.T) {
 				mockLocker,
 			)
 
-			err := afero.WriteFile(fs, filepath.Join(manager.stack.Path(), ".env"), []byte(tt.initialEnv), 0644)
+			err := afero.WriteFile(fs, filepath.Join(manager.stack.Path(), ".env"), []byte(tt.initialEnv), 0o644)
 			require.NoError(t, err)
 
 			err = manager.updateEnvFile(tt.newEnv)
@@ -1898,7 +1896,7 @@ networks:
   sedge:
     name: sedge-network
     external: true`
-			err := afero.WriteFile(fs, filepath.Join(manager.stack.Path(), "docker-compose.yml"), []byte(initialContent), 0644)
+			err := afero.WriteFile(fs, filepath.Join(manager.stack.Path(), "docker-compose.yml"), []byte(initialContent), 0o644)
 			require.NoError(t, err)
 
 			err = manager.updateDockerComposeFile(service)

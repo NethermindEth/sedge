@@ -29,19 +29,18 @@ import (
 var _ monitoring.ServiceAPI = &LidoExporterService{}
 
 type LidoExporterParams struct {
-    NodeOperatorID string
-    RewardAddress  string
-    Network        string
-    RPCEndpoints   []string
-    WSEndpoints    []string
-    Port           uint16
-    ScrapeTime     time.Duration
-    LogLevel       string
+	NodeOperatorID string
+	RewardAddress  string
+	Network        string
+	RPCEndpoints   []string
+	WSEndpoints    []string
+	Port           uint16
+	ScrapeTime     time.Duration
+	LogLevel       string
 }
 
-
 type LidoExporterService struct {
-	containerIP    net.IP
+	containerIP net.IP
 	params      LidoExporterParams
 }
 
@@ -55,9 +54,9 @@ func NewLidoExporter(params LidoExporterParams) *LidoExporterService {
 	dotEnv["LIDO_EXPORTER_SCRAPE_TIME"] = params.ScrapeTime.String()
 	dotEnv["LIDO_EXPORTER_LOG_LEVEL"] = params.LogLevel
 
-    return &LidoExporterService{
-        params: params,
-    }
+	return &LidoExporterService{
+		params: params,
+	}
 }
 
 func (n *LidoExporterService) Init(opts types.ServiceOptions) error {

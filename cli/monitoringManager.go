@@ -4,8 +4,8 @@ package cli
 
 import (
 	"github.com/NethermindEth/sedge/internal/common"
-	"github.com/NethermindEth/sedge/internal/monitoring/services/types"
 	"github.com/NethermindEth/sedge/internal/monitoring"
+	"github.com/NethermindEth/sedge/internal/monitoring/services/types"
 )
 
 type MonitoringManager interface {

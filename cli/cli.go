@@ -23,12 +23,12 @@ import (
 	"strings"
 	"time"
 
-	eth2 "github.com/protolambda/zrnt/eth2/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/NethermindEth/sedge/internal/ui"
+	eth2 "github.com/protolambda/zrnt/eth2/configs"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
@@ -83,7 +83,7 @@ type CliCmdOptions struct {
 	numberOfValidators       int64
 	existingValidators       int64
 	installDependencies      bool
-	enableMonitoring bool
+	enableMonitoring         bool
 }
 
 func CliCmd(p ui.Prompter, actions actions.SedgeActions, depsMgr dependencies.DependenciesManager, monitoringMgr MonitoringManager) *cobra.Command {
@@ -399,8 +399,8 @@ func postGenerate(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsM
 		}
 		if o.enableMonitoring {
 			if err := InitMonitoring(true, true, monitoringMgr, nil); err != nil {
-                return err
-            }
+				return err
+			}
 		}
 		if o.withValidator {
 			log.Info(configs.HappyStakingRun)
@@ -836,8 +836,8 @@ func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
 }
 
 func confirmEnableMonitoring(p ui.Prompter, o *CliCmdOptions) (err error) {
-    o.enableMonitoring, err = p.Confirm("Do you want to enable the monitoring stack?", false)
-    return
+	o.enableMonitoring, err = p.Confirm("Do you want to enable the monitoring stack?", false)
+	return
 }
 
 func inputCustomNetworkConfig(p ui.Prompter, o *CliCmdOptions) (err error) {

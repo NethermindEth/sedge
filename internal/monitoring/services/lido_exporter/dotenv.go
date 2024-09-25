@@ -16,13 +16,13 @@ limitations under the License.
 package lido_exporter
 
 var dotEnv map[string]string = map[string]string{
-    "LIDO_EXPORTER_IMAGE": "nethermindeth/lido-exporter:v1.0.0",
-    "LIDO_EXPORTER_PORT":  "8080",
-    "LIDO_EXPORTER_NODE_OPERATOR_ID": "",
-    "LIDO_EXPORTER_REWARD_ADDRESS":  "",
-    "LIDO_EXPORTER_NETWORK":         "",
-    "LIDO_EXPORTER_RPC_ENDPOINTS":   "",
-    "LIDO_EXPORTER_WS_ENDPOINTS":    "",
-    "LIDO_EXPORTER_SCRAPE_TIME":     "",
-    "LIDO_EXPORTER_LOG_LEVEL":       "",
+	"LIDO_EXPORTER_IMAGE":            "nethermindeth/lido-exporter:v1.0.0",
+	"LIDO_EXPORTER_PORT":             "8080",
+	"LIDO_EXPORTER_NODE_OPERATOR_ID": "",
+	"LIDO_EXPORTER_REWARD_ADDRESS":   "",
+	"LIDO_EXPORTER_NETWORK":          "",
+	"LIDO_EXPORTER_RPC_ENDPOINTS":    "",
+	"LIDO_EXPORTER_WS_ENDPOINTS":     "",
+	"LIDO_EXPORTER_SCRAPE_TIME":      "",
+	"LIDO_EXPORTER_LOG_LEVEL":        "",
 }

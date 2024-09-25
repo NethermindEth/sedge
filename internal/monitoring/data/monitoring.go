@@ -72,31 +72,31 @@ func (m *MonitoringStack) unlock() error {
 // Setup sets up the monitoring stack with the given environment variables and
 // docker-compose_base.tmpl file.
 func (m *MonitoringStack) Setup(env map[string]string, monitoringFs fs.FS) (err error) {
-    err = m.lock()
-    if err != nil {
-        return err
-    }
-    defer func() {
-        unlockErr := m.unlock()
-        if err == nil {
-            err = unlockErr
-        }
-    }()
+	err = m.lock()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		unlockErr := m.unlock()
+		if err == nil {
+			err = unlockErr
+		}
+	}()
 
-    // Create .env file
-    envFile, err := m.fs.Create(filepath.Join(m.path, ".env"))
-    if err != nil {
-        return err
-    }
-    for k, v := range env {
-        _, err = envFile.WriteString(fmt.Sprintf("%s=%s\n", k, v))
-        if err != nil {
-            return fmt.Errorf("failed to write to .env file: %w", err)
-        }
-    }
-    defer envFile.Close()
+	// Create .env file
+	envFile, err := m.fs.Create(filepath.Join(m.path, ".env"))
+	if err != nil {
+		return err
+	}
+	for k, v := range env {
+		_, err = envFile.WriteString(fmt.Sprintf("%s=%s\n", k, v))
+		if err != nil {
+			return fmt.Errorf("failed to write to .env file: %w", err)
+		}
+	}
+	defer envFile.Close()
 
-    // Read the main Docker Compose template
+	// Read the main Docker Compose template
 	rawBaseTmp, err := monitoringFs.Open("services/docker-compose_base.tmpl")
 	if err != nil {
 		return fmt.Errorf("error opening docker-compose template: %w", err)
@@ -120,7 +120,7 @@ func (m *MonitoringStack) Setup(env map[string]string, monitoringFs fs.FS) (err 
 
 	// Execute the base template without any additional data
 	if err := baseTmp.Execute(&buf, nil); err != nil {
-	return fmt.Errorf("error executing docker-compose template: %w", err)
+		return fmt.Errorf("error executing docker-compose template: %w", err)
 	}
 
 	// Write the executed template content to the final Docker Compose file
@@ -135,7 +135,7 @@ func (m *MonitoringStack) Setup(env map[string]string, monitoringFs fs.FS) (err 
 		return fmt.Errorf("error writing docker-compose.yml file: %w", err)
 	}
 
-    return nil
+	return nil
 }
 
 // CreateDir creates a new directory in the monitoring stack at the given path.
@@ -267,4 +267,3 @@ func (m *MonitoringStack) Cleanup(force bool) (err error) {
 	}
 	return m.fs.RemoveAll(m.path)
 }
-

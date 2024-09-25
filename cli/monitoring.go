@@ -29,17 +29,16 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/common"
 	"github.com/NethermindEth/sedge/internal/monitoring"
+	lidoExporter "github.com/NethermindEth/sedge/internal/monitoring/services/lido_exporter"
+	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/NethermindEth/sedge/internal/ui"
 	"github.com/NethermindEth/sedge/internal/utils"
-	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
-	lidoExporter "github.com/NethermindEth/sedge/internal/monitoring/services/lido_exporter"
 )
 
-var (
-	lido bool
-)
+var lido bool
+
 const (
-	initMonitoring = "init"
+	initMonitoring  = "init"
 	cleanMonitoring = "clean"
 )
 
@@ -78,11 +77,11 @@ func CleanSubCmd(mgr MonitoringManager) *cobra.Command {
 }
 
 func LidoSubCmd(mgr MonitoringManager, additionalServices []monitoring.ServiceAPI) *cobra.Command {
-	lido:= &lidoExporter.LidoExporterParams{} 
-	cmd:= &cobra.Command{
+	lido := &lidoExporter.LidoExporterParams{}
+	cmd := &cobra.Command{
 		Use:   "lido",
 		Short: "Configure Lido CSM Node monitoring",
-		Args: cobra.NoArgs,
+		Args:  cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if lido.NodeOperatorID == "" && lido.RewardAddress == "" {
 				return errors.New("Node Operator ID or Reward Address is required")
@@ -97,30 +96,29 @@ func LidoSubCmd(mgr MonitoringManager, additionalServices []monitoring.ServiceAP
 			return InitMonitoring(true, true, mgr, additionalServices)
 		},
 	}
-	cmd.Flags().StringVar(&lido.NodeOperatorID,"node-operator-id", "", "Node Operator ID")
-	cmd.Flags().StringVar(&lido.RewardAddress,"reward-address", "", "Reward address of Node Operator. It is used to calculate Node Operator ID if not set")
-	cmd.Flags().StringVar(&lido.Network,"network", "holesky", "Network name")
-	cmd.Flags().StringSliceVar(&lido.RPCEndpoints,"rpc-endpoints", nil, "List of Ethereum HTTP RPC endpoints")
-	cmd.Flags().StringSliceVar(&lido.WSEndpoints,"ws-endpoints", nil, "List of Ethereum WebSocket RPC endpoints")
-	cmd.Flags().Uint16Var(&lido.Port,"port", 8080, "Port where the metrics will be exported.")
-	cmd.Flags().DurationVar(&lido.ScrapeTime,"scrape-time", 30*time.Second, "Time interval for scraping metrics. Values should be in the format of 10s, 1m, 1h, etc.")
+	cmd.Flags().StringVar(&lido.NodeOperatorID, "node-operator-id", "", "Node Operator ID")
+	cmd.Flags().StringVar(&lido.RewardAddress, "reward-address", "", "Reward address of Node Operator. It is used to calculate Node Operator ID if not set")
+	cmd.Flags().StringVar(&lido.Network, "network", "holesky", "Network name")
+	cmd.Flags().StringSliceVar(&lido.RPCEndpoints, "rpc-endpoints", nil, "List of Ethereum HTTP RPC endpoints")
+	cmd.Flags().StringSliceVar(&lido.WSEndpoints, "ws-endpoints", nil, "List of Ethereum WebSocket RPC endpoints")
+	cmd.Flags().Uint16Var(&lido.Port, "port", 8080, "Port where the metrics will be exported.")
+	cmd.Flags().DurationVar(&lido.ScrapeTime, "scrape-time", 30*time.Second, "Time interval for scraping metrics. Values should be in the format of 10s, 1m, 1h, etc.")
 	cmd.Flags().StringVar(&logLevel, "log-level", "info", "Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace")
 
 	return cmd
 }
 
 func DefaultSubCmd(mgr MonitoringManager, additionalServices []monitoring.ServiceAPI) *cobra.Command {
-	cmd:= &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "default",
 		Short: "Default monitoring configuration",
-		Args: cobra.NoArgs,
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return InitMonitoring(true, true, mgr, nil)
 		},
 	}
 	return cmd
 }
-
 
 // Init initializes the Monitoring Stack. If install is true, it will install the Monitoring Stack if it is not installed.
 // If run is true, it will run the Monitoring Stack if it is not running.
@@ -146,12 +144,12 @@ func InitMonitoring(install, run bool, monitoringMgr MonitoringManager, addition
 	}
 
 	// Add additional services to the monitoring manager
-    for _, service := range additionalServices {
-        if err := monitoringMgr.AddService(service); err != nil {
-            return fmt.Errorf("failed to add service %s: %w", service.Name(), err)
-        }
-    }
-	
+	for _, service := range additionalServices {
+		if err := monitoringMgr.AddService(service); err != nil {
+			return fmt.Errorf("failed to add service %s: %w", service.Name(), err)
+		}
+	}
+
 	// Check if the monitoring stack is running.
 	status, err := monitoringMgr.Status()
 	if err != nil {
@@ -194,29 +192,29 @@ func CleanMonitoring(monitoringMgr MonitoringManager) error {
 
 func InputLidoExporterParams(p ui.Prompter) (*lidoExporter.LidoExporterParams, error) {
 	lido := sedgeOpts.CreateSedgeOptions(sedgeOpts.LidoNode)
-    params := &lidoExporter.LidoExporterParams{}
-    var err error
+	params := &lidoExporter.LidoExporterParams{}
+	var err error
 
-	// Node Operator ID 
-    params.NodeOperatorID, err = p.Input("Enter Node Operator ID (leave empty if using Reward Address)", "", false, nil)
-    if err != nil {
-        return params, err
-    }
+	// Node Operator ID
+	params.NodeOperatorID, err = p.Input("Enter Node Operator ID (leave empty if using Reward Address)", "", false, nil)
+	if err != nil {
+		return params, err
+	}
 
 	// Reward Address
-    if params.NodeOperatorID == "" {
-        params.RewardAddress, err = p.EthAddress("Enter Reward Address of Node Operator", "", true)
-        if err != nil {
-            return params, err
-        }
-    }
+	if params.NodeOperatorID == "" {
+		params.RewardAddress, err = p.EthAddress("Enter Reward Address of Node Operator", "", true)
+		if err != nil {
+			return params, err
+		}
+	}
 
 	// Network
 	options := lido.SupportedNetworks()
-    index, err := p.Select("Select network", "holesky", options)
-    if err != nil {
-        return params, err
-    }
+	index, err := p.Select("Select network", "holesky", options)
+	if err != nil {
+		return params, err
+	}
 	params.Network = options[index]
 
 	// RPC URLs
@@ -233,39 +231,39 @@ func InputLidoExporterParams(p ui.Prompter) (*lidoExporter.LidoExporterParams, e
 	// WSs URLs
 	defaultWSURLs, err := configs.GetPublicWSs(params.Network)
 	wsURLs, err := p.InputList("Insert Ethereum WebSocket RPC endpoints if you don't want to use the default values listed below", defaultWSURLs, nil)
-    if err != nil {
-        return params, err
-    }
+	if err != nil {
+		return params, err
+	}
 	params.WSEndpoints = wsURLs
-	
+
 	// Port
-    portStr, err := p.Input("Enter port for exporting metrics", "8080", false, nil)
-    if err != nil {
-        return params, err
-    }
-    port64, err := strconv.ParseUint(portStr, 10, 16)
-    if err != nil {
-        return params, fmt.Errorf("invalid port number: %v", err)
-    }
-    params.Port = uint16(port64)
+	portStr, err := p.Input("Enter port for exporting metrics", "8080", false, nil)
+	if err != nil {
+		return params, err
+	}
+	port64, err := strconv.ParseUint(portStr, 10, 16)
+	if err != nil {
+		return params, fmt.Errorf("invalid port number: %v", err)
+	}
+	params.Port = uint16(port64)
 
 	// Scrape time
-    scrapeTimeStr, err := p.Input("Enter scrape time interval (e.g., 30s, 1m, 1h)", "30s", false, nil)
-    if err != nil {
-        return params, err
-    }
-    params.ScrapeTime, err = time.ParseDuration(scrapeTimeStr)
-    if err != nil {
-        return params, fmt.Errorf("invalid scrape time: %v", err)
-    }
+	scrapeTimeStr, err := p.Input("Enter scrape time interval (e.g., 30s, 1m, 1h)", "30s", false, nil)
+	if err != nil {
+		return params, err
+	}
+	params.ScrapeTime, err = time.ParseDuration(scrapeTimeStr)
+	if err != nil {
+		return params, fmt.Errorf("invalid scrape time: %v", err)
+	}
 
-	//Log level
+	// Log level
 	logOptions := []string{"panic", "fatal", "error", "warn", "warning", "info", "debug", "trace"}
-    index, err = p.Select("Select log level", "info", logOptions)
-    if err != nil {
-        return params, err
-    }
+	index, err = p.Select("Select log level", "info", logOptions)
+	if err != nil {
+		return params, err
+	}
 	params.LogLevel = logOptions[index]
 
-    return params, nil
+	return params, nil
 }

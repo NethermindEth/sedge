@@ -165,9 +165,10 @@ func checkGrafanaHealth(t *testing.T) {
 }
 
 // checkMonitoringStackContainersNotRunning checks that the monitoring stack containers are not running
-func checkMonitoringStackContainersNotRunning(t *testing.T) {
+func checkMonitoringStackContainersNotRunning(t *testing.T, containerNames ...string) {
 	t.Logf("Checking monitoring stack containers are not running")
-	checkContainerNotExisting(t, "sedge_grafana", "sedge_prometheus", "sedge_node_exporter")
+	containerNames = append(containerNames, "sedge_grafana", "sedge_prometheus", "sedge_node_exporter")
+	checkContainerNotExisting(t, containerNames...)
 }
 
 // checkContainerNotExisting checks that the given containers are not existing
