@@ -113,7 +113,7 @@ func TestSetContainerIP(t *testing.T) {
 }
 
 func TestContainerName(t *testing.T) {
-	want := monitoring.NodeExporterContainerName
+	want := monitoring.LidoExporterContainerName
 
 	// Create a new Lido Exporter service
 	lidoExporter := NewLidoExporter(LidoExporterParams{})
@@ -136,4 +136,11 @@ func TestEndpoint(t *testing.T) {
 
 	endpoint := lidoExporter.Endpoint()
 	assert.Equal(t, want, endpoint)
+}
+
+func TestName(t *testing.T) {
+	want := monitoring.LidoExporterServiceName
+
+	lidoExporter := NewLidoExporter(LidoExporterParams{})
+	assert.Equal(t, want, lidoExporter.Name())
 }

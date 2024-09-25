@@ -15,24 +15,18 @@ limitations under the License.
 */
 package cli
 
-// TODO: Add prompt for monitoring in cli, add lido flag here to run lido-exporter,
-// implement Add target in serviceAPI as adding that service as target to prometheus (node & lido exporters) ,use image we created for lido-exporter
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/common"
 	"github.com/NethermindEth/sedge/internal/monitoring"
 	lidoExporter "github.com/NethermindEth/sedge/internal/monitoring/services/lido_exporter"
-	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/NethermindEth/sedge/internal/ui"
-	"github.com/NethermindEth/sedge/internal/utils"
 )
 
 var lido bool
@@ -188,82 +182,4 @@ func CleanMonitoring(monitoringMgr MonitoringManager) error {
 		}
 	}
 	return nil
-}
-
-func InputLidoExporterParams(p ui.Prompter) (*lidoExporter.LidoExporterParams, error) {
-	lido := sedgeOpts.CreateSedgeOptions(sedgeOpts.LidoNode)
-	params := &lidoExporter.LidoExporterParams{}
-	var err error
-
-	// Node Operator ID
-	params.NodeOperatorID, err = p.Input("Enter Node Operator ID (leave empty if using Reward Address)", "", false, nil)
-	if err != nil {
-		return params, err
-	}
-
-	// Reward Address
-	if params.NodeOperatorID == "" {
-		params.RewardAddress, err = p.EthAddress("Enter Reward Address of Node Operator", "", true)
-		if err != nil {
-			return params, err
-		}
-	}
-
-	// Network
-	options := lido.SupportedNetworks()
-	index, err := p.Select("Select network", "holesky", options)
-	if err != nil {
-		return params, err
-	}
-	params.Network = options[index]
-
-	// RPC URLs
-	defaultRPCURLs, err := configs.GetPublicRPCs(params.Network)
-	rpcURLs, err := p.InputList("Insert Ethereum HTTP RPC endpoints if you don't want to use the default values listed below", defaultRPCURLs, func(list []string) error {
-		badUri, ok := utils.UriValidator(list)
-		if !ok {
-			return fmt.Errorf(configs.InvalidUrlFlagError, "rpc", badUri)
-		}
-		return nil
-	})
-	params.RPCEndpoints = rpcURLs
-
-	// WSs URLs
-	defaultWSURLs, err := configs.GetPublicWSs(params.Network)
-	wsURLs, err := p.InputList("Insert Ethereum WebSocket RPC endpoints if you don't want to use the default values listed below", defaultWSURLs, nil)
-	if err != nil {
-		return params, err
-	}
-	params.WSEndpoints = wsURLs
-
-	// Port
-	portStr, err := p.Input("Enter port for exporting metrics", "8080", false, nil)
-	if err != nil {
-		return params, err
-	}
-	port64, err := strconv.ParseUint(portStr, 10, 16)
-	if err != nil {
-		return params, fmt.Errorf("invalid port number: %v", err)
-	}
-	params.Port = uint16(port64)
-
-	// Scrape time
-	scrapeTimeStr, err := p.Input("Enter scrape time interval (e.g., 30s, 1m, 1h)", "30s", false, nil)
-	if err != nil {
-		return params, err
-	}
-	params.ScrapeTime, err = time.ParseDuration(scrapeTimeStr)
-	if err != nil {
-		return params, fmt.Errorf("invalid scrape time: %v", err)
-	}
-
-	// Log level
-	logOptions := []string{"panic", "fatal", "error", "warn", "warning", "info", "debug", "trace"}
-	index, err = p.Select("Select log level", "info", logOptions)
-	if err != nil {
-		return params, err
-	}
-	params.LogLevel = logOptions[index]
-
-	return params, nil
 }
