@@ -47,3 +47,8 @@ func (t MonitoringTarget) String() string {
 func (t MonitoringTarget) Endpoint() string {
 	return t.Host + ":" + strconv.Itoa(int(t.Port))
 }
+
+// ServiceTemplateData: Struct Data object to be applied to docker-compose script
+type ServiceTemplateData struct {
+	LidoExporter bool
+}

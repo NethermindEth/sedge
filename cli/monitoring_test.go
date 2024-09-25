@@ -38,8 +38,8 @@ func TestMonitoringCmd(t *testing.T) {
 		isErr  bool
 	}{
 		{
-			name:  "valid monitoring init",
-			flags: []string{"init"},
+			name:  "valid monitoring init: default",
+			flags: []string{"init", "default"},
 			mocker: func(t *testing.T, ctrl *gomock.Controller) *sedge_mocks.MockMonitoringManager {
 				mockManager := sedge_mocks.NewMockMonitoringManager(ctrl)
 				gomock.InOrder(
@@ -67,8 +67,25 @@ func TestMonitoringCmd(t *testing.T) {
 			isErr: false,
 		},
 		{
-			name:  "invalid action",
-			flags: []string{"invalid"},
+			name:  "valid monitoring init: lido",
+			flags: []string{"init", "lido", "--node-operator-id", "1"},
+			mocker: func(t *testing.T, ctrl *gomock.Controller) *sedge_mocks.MockMonitoringManager {
+				mockManager := sedge_mocks.NewMockMonitoringManager(ctrl)
+				gomock.InOrder(
+					mockManager.EXPECT().InstallationStatus().Return(common.NotInstalled, nil).AnyTimes(),
+					mockManager.EXPECT().InstallStack().Return(nil).AnyTimes(),
+					mockManager.EXPECT().AddService(gomock.Any()).Return(nil).AnyTimes(),
+					mockManager.EXPECT().Status().Return(common.Created, nil).AnyTimes(),
+					mockManager.EXPECT().Run().Return(nil).AnyTimes(),
+					mockManager.EXPECT().Init().Return(nil).AnyTimes(),
+				)
+				return mockManager
+			},
+			isErr: false,
+		},
+		{
+			name:  "invalid monitoring init: lido, no nodeID or reward address",
+			flags: []string{"init", "lido"},
 			mocker: func(t *testing.T, ctrl *gomock.Controller) *sedge_mocks.MockMonitoringManager {
 				return sedge_mocks.NewMockMonitoringManager(ctrl)
 			},
@@ -285,7 +302,7 @@ func TestInitMonitoring(t *testing.T) {
 			// Get monitoring manager mock
 			monitoringMgr := tt.mocker(t, ctrl)
 
-			err := InitMonitoring(true, true, monitoringMgr)
+			err := InitMonitoring(true, true, monitoringMgr, nil)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {

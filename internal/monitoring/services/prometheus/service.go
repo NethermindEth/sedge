@@ -303,3 +303,7 @@ func (p *PrometheusService) reloadConfig() error {
 
 	return err
 }
+
+func (p *PrometheusService) Name() string {
+	return monitoring.PrometheusServiceName
+}

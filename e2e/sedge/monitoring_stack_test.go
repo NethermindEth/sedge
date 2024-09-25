@@ -62,7 +62,7 @@ func TestE2E_MonitoringStack_Init(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init","default")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -90,7 +90,7 @@ func TestE2E_MonitoringStack_NotReinstalled(t *testing.T) {
 		t,
 		// Arrange
 		func(t *testing.T, sedgePath string) error {
-			err := base.RunCommand(t, sedgePath, "sedge", "monitoring", "init")
+			err := base.RunCommand(t, sedgePath, "sedge", "monitoring", "init","default")
 			if err != nil {
 				return err
 			}
@@ -141,7 +141,7 @@ func TestE2E_MonitoringStack_Clean(t *testing.T) {
 		t,
 		// Arrange
 		func(t *testing.T, sedgePath string) error {
-			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "init")
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "init","default")
 		},
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {

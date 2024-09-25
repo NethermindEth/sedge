@@ -16,16 +16,17 @@ limitations under the License.
 package data
 
 import (
+	"bytes"
 	"errors"
-	"io/fs"
 	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
+	"text/template"
 	"time"
 
-	"github.com/NethermindEth/sedge/internal/monitoring/data/testdata"
 	mocks "github.com/NethermindEth/sedge/internal/monitoring/locker/mocks"
+	"github.com/NethermindEth/sedge/internal/monitoring/services/templates"
 	"github.com/NethermindEth/sedge/internal/monitoring/utils"
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/afero"
@@ -63,142 +64,141 @@ func TestInit(t *testing.T) {
 }
 
 func TestSetup(t *testing.T) {
-	t.Parallel()
+    t.Parallel()
 
-	okLocker := func(t *testing.T) *mocks.MockLocker {
-		// Create a mock locker
-		ctrl := gomock.NewController(t)
-		locker := mocks.NewMockLocker(ctrl)
+    okLocker := func(t *testing.T) *mocks.MockLocker {
+        ctrl := gomock.NewController(t)
+        locker := mocks.NewMockLocker(ctrl)
+        gomock.InOrder(
+            locker.EXPECT().Lock().Return(nil),
+            locker.EXPECT().Locked().Return(true),
+            locker.EXPECT().Unlock().Return(nil),
+        )
+        return locker
+    }
 
-		// Expect the lock to be acquired
-		gomock.InOrder(
-			locker.EXPECT().Lock().Return(nil),
-			locker.EXPECT().Locked().Return(true),
-			locker.EXPECT().Unlock().Return(nil),
-		)
-		return locker
-	}
+    mockTemplate := `{{/* docker-compose_base.tmpl */}}
+{{ define "docker-compose" }}
+services:
+  service1:
+    container_name: service1
+    image: ${IMAGE}
+    ports:
+      - ${PORT}:9090
+    networks:
+      - sedge
+networks:
+  sedge:
+    name: sedge-network
+    external: true
+{{ end }}
+`
 
-	tests := []struct {
-		name    string
-		env     map[string]string
-		testFs  fs.FS
-		mocker  func(*testing.T) *mocks.MockLocker
-		wantErr bool
-	}{
-		{
-			name: "success",
-			env: map[string]string{
-				"NODE_NAME": "node1",
-			},
-			testFs:  testdata.TestData,
-			mocker:  okLocker,
-			wantErr: false,
-		},
-		{
-			name: "missing docker-compose.yml",
-			env: map[string]string{
-				"ERROR": "error",
-			},
-			testFs:  testdata.Empty,
-			mocker:  okLocker,
-			wantErr: true,
-		},
-		{
-			name:    "empty .env",
-			env:     map[string]string{},
-			testFs:  testdata.TestData,
-			mocker:  okLocker,
-			wantErr: false,
-		},
-		{
-			name: "unlock error",
-			env: map[string]string{
-				"ERROR": "error",
-			},
-			testFs: testdata.TestData,
-			mocker: func(t *testing.T) *mocks.MockLocker {
-				// Create a mock locker
-				ctrl := gomock.NewController(t)
-				locker := mocks.NewMockLocker(ctrl)
+    tests := []struct {
+        name         string
+        env          map[string]string
+        mocker       func(*testing.T) *mocks.MockLocker
+        wantErr      bool
+    }{
+        {
+            name: "success",
+            env: map[string]string{
+                "IMAGE":       "myimage:latest",
+                "PORT":        "8080",
+            },
+            mocker:  okLocker,
+            wantErr: false,
+        },
+        {
+            name:    "empty .env",
+            env:     map[string]string{},
+            mocker:  okLocker,
+            wantErr: false,
+        },
+        {
+            name: "unlock error",
+            env: map[string]string{
+                "ERROR": "error",
+            },
+            mocker: func(t *testing.T) *mocks.MockLocker {
+                ctrl := gomock.NewController(t)
+                locker := mocks.NewMockLocker(ctrl)
+                gomock.InOrder(
+                    locker.EXPECT().Lock().Return(nil),
+                    locker.EXPECT().Locked().Return(false),
+                )
+                return locker
+            },
+            wantErr: true,
+        },
+        {
+            name: "lock error",
+            env: map[string]string{
+                "ERROR": "error",
+            },
+            mocker: func(t *testing.T) *mocks.MockLocker {
+                ctrl := gomock.NewController(t)
+                locker := mocks.NewMockLocker(ctrl)
+                locker.EXPECT().Lock().Return(errors.New("lock error"))
+                return locker
+            },
+            wantErr: true,
+        },
+    }
 
-				// Expect the lock to be acquired
-				gomock.InOrder(
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(false),
-				)
-				return locker
-			},
-			wantErr: true,
-		},
-		{
-			name: "lock error",
-			env: map[string]string{
-				"ERROR": "error",
-			},
-			testFs: testdata.TestData,
-			mocker: func(t *testing.T) *mocks.MockLocker {
-				// Create a mock locker
-				ctrl := gomock.NewController(t)
-				locker := mocks.NewMockLocker(ctrl)
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            afs := afero.NewMemMapFs()
+            mockFs := &afero.MemMapFs{}
+            afero.WriteFile(mockFs, "services/docker-compose_base.tmpl", []byte(mockTemplate), 0644)
 
-				// Expect the lock to be acquired
-				locker.EXPECT().Lock().Return(errors.New("lock error"))
-				return locker
-			},
-			wantErr: true,
-		},
-	}
+            stack := &MonitoringStack{
+                path: "/",
+                l:    tt.mocker(t),
+                fs:   afs,
+            }
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Create an in-memory filesystem
-			afs := afero.NewMemMapFs()
+            err := stack.Setup(tt.env, afero.NewIOFS(mockFs))
+            if tt.wantErr {
+                assert.Error(t, err)
+                return
+            }
+            assert.NoError(t, err)
 
-			// Create a new MonitoringStack with the in-memory filesystem
-			stack := &MonitoringStack{
-				path: "/",
-				l:    tt.mocker(t),
-				fs:   afs,
-			}
+            // Check .env file
+            exists, err := afero.Exists(afs, "/.env")
+            assert.NoError(t, err)
+            assert.True(t, exists)
 
-			err := stack.Setup(tt.env, tt.testFs)
-			if tt.wantErr {
-				assert.Error(t, err)
-				return
-			} else {
-				assert.NoError(t, err)
-			}
+            env, err := afero.ReadFile(afs, "/.env")
+            require.NoError(t, err)
+            gotEnv := make(map[string]string)
+            for _, line := range strings.Split(string(env), "\n") {
+                parts := strings.Split(line, "=")
+                if len(parts) == 2 {
+                    gotEnv[parts[0]] = parts[1]
+                }
+            }
+            assert.EqualValues(t, tt.env, gotEnv)
 
-			// Check that the files were created
-			exists, err := afero.Exists(afs, "/.env")
-			assert.NoError(t, err)
-			assert.True(t, exists)
+            // Check docker-compose.yml
+            exists, err = afero.Exists(afs, "/docker-compose.yml")
+            assert.NoError(t, err)
+            assert.True(t, exists)
 
-			// Parse .env file and compare with the expected values
-			env, error := afero.ReadFile(afs, "/.env")
-			require.NoError(t, error)
-			gotEnv := make(map[string]string)
-			for _, line := range strings.Split(string(env), "\n") {
-				parts := strings.Split(line, "=")
-				if len(parts) == 2 {
-					gotEnv[parts[0]] = parts[1]
-				}
-			}
-			assert.EqualValues(t, tt.env, gotEnv)
+            gotCmp, err := afero.ReadFile(afs, "/docker-compose.yml")
+            require.NoError(t, err)
 
-			exists, err = afero.Exists(afs, "/docker-compose.yml")
-			assert.NoError(t, err)
-			assert.True(t, exists)
+            // Parse the template with the test data
+            tmpl, err := template.New("test").Parse(mockTemplate)
+            require.NoError(t, err)
+            var expectedBuf bytes.Buffer
+            err = tmpl.ExecuteTemplate(&expectedBuf, "docker-compose", nil)
+            require.NoError(t, err)
 
-			// Compare docker-compose.yml with the expected file
-			gotCmp, err := afero.ReadFile(afs, "/docker-compose.yml")
-			require.NoError(t, err)
-			wantCmp, err := fs.ReadFile(tt.testFs, "script/docker-compose.yml")
-			require.NoError(t, err)
-			assert.Equal(t, string(wantCmp), string(gotCmp))
-		})
-	}
+            assert.Equal(t, expectedBuf.String(), string(gotCmp))
+        })
+    }
 }
 
 func TestCreateDir(t *testing.T) {
@@ -816,114 +816,112 @@ func TestPath(t *testing.T) {
 }
 
 func TestCleanup(t *testing.T) {
-	t.Parallel()
+    t.Parallel()
 
-	tests := []struct {
-		name       string
-		mocker     func(*testing.T) (*mocks.MockLocker, afero.Fs)
-		force      bool
-		notInstall bool
-		wantErr    bool
-	}{
-		{
-			name: "ok, force false",
-			mocker: func(t *testing.T) (*mocks.MockLocker, afero.Fs) {
-				// Create a mock locker
-				ctrl := gomock.NewController(t)
-				locker := mocks.NewMockLocker(ctrl)
+    tests := []struct {
+        name       string
+        mocker     func(*testing.T) (*mocks.MockLocker, afero.Fs)
+        force      bool
+        notInstall bool
+        wantErr    bool
+    }{
+        {
+            name: "ok, force false",
+            mocker: func(t *testing.T) (*mocks.MockLocker, afero.Fs) {
+                ctrl := gomock.NewController(t)
+                locker := mocks.NewMockLocker(ctrl)
+                gomock.InOrder(
+                    locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("monitoring", ".lock")}).Return(locker),
+                    locker.EXPECT().Lock().Return(nil),
+                    locker.EXPECT().Locked().Return(true),
+                    locker.EXPECT().Unlock().Return(nil),
+                )
+                locker.EXPECT().Lock().Return(nil)
+                return locker, afero.NewMemMapFs()
+            },
+            force: false,
+        },
+        {
+            name: "ok, force true",
+            mocker: func(t *testing.T) (*mocks.MockLocker, afero.Fs) {
+                ctrl := gomock.NewController(t)
+                locker := mocks.NewMockLocker(ctrl)
+                gomock.InOrder(
+                    locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("monitoring", ".lock")}).Return(locker),
+                    locker.EXPECT().Lock().Return(nil),
+                    locker.EXPECT().Locked().Return(true),
+                    locker.EXPECT().Unlock().Return(nil),
+                )
+                return locker, afero.NewMemMapFs()
+            },
+            force: true,
+        },
+        {
+            name: "not installed",
+            mocker: func(t *testing.T) (*mocks.MockLocker, afero.Fs) {
+                ctrl := gomock.NewController(t)
+                locker := mocks.NewMockLocker(ctrl)
+                locker.EXPECT().Lock().Return(nil)
+                return locker, afero.NewMemMapFs()
+            },
+            notInstall: true,
+        },
+        {
+            name: "lock error",
+            mocker: func(t *testing.T) (*mocks.MockLocker, afero.Fs) {
+                ctrl := gomock.NewController(t)
+                locker := mocks.NewMockLocker(ctrl)
+                gomock.InOrder(
+                    locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("monitoring", ".lock")}).Return(locker),
+                    locker.EXPECT().Lock().Return(nil),
+                    locker.EXPECT().Locked().Return(true),
+                    locker.EXPECT().Unlock().Return(nil),
+                )
+                locker.EXPECT().Lock().Return(errors.New("lock error"))
+                return locker, afero.NewMemMapFs()
+            },
+            wantErr: true,
+        },
+    }
 
-				// Expect the lock to be acquired
-				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("monitoring", ".lock")}).Return(locker),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
-				)
-				locker.EXPECT().Lock().Return(nil)
-				return locker, afero.NewMemMapFs()
-			},
-			force: false,
-		},
-		{
-			name: "ok, force true",
-			mocker: func(t *testing.T) (*mocks.MockLocker, afero.Fs) {
-				// Create a mock locker
-				ctrl := gomock.NewController(t)
-				locker := mocks.NewMockLocker(ctrl)
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            locker, fs := tt.mocker(t)
+            stack := &MonitoringStack{
+                path: "/monitoring",
+                l:    locker,
+                fs:   fs,
+            }
 
-				// Expect the lock to be acquired
-				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("monitoring", ".lock")}).Return(locker),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
-				)
-				return locker, afero.NewMemMapFs()
-			},
-			force: true,
-		},
-		{
-			name: "not installed",
-			mocker: func(t *testing.T) (*mocks.MockLocker, afero.Fs) {
-				// Create a mock locker
-				ctrl := gomock.NewController(t)
-				locker := mocks.NewMockLocker(ctrl)
+            // Install the stack
+            var err error
+            if !tt.notInstall {
+                err = stack.Init()
+                require.NoError(t, err)
 
-				// Expect the lock to be acquired
-				locker.EXPECT().Lock().Return(nil)
-				return locker, afero.NewMemMapFs()
-			},
-			notInstall: true,
-		},
-		{
-			name: "lock error",
-			mocker: func(t *testing.T) (*mocks.MockLocker, afero.Fs) {
-				// Create a mock locker
-				ctrl := gomock.NewController(t)
-				locker := mocks.NewMockLocker(ctrl)
+                // Write the template file to the in-memory filesystem
+                afero.WriteFile(fs, "services/docker-compose_base.tmpl", []byte(`
+services:
+  {{.ServiceName}}:
+    image: {{.Image}}
+    ports:
+      - "{{.Port}}:{{.Port}}"
+`), 0644)
 
-				// Expect the lock to be acquired
-				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("monitoring", ".lock")}).Return(locker),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
-				)
-				locker.EXPECT().Lock().Return(errors.New("lock error"))
-				return locker, afero.NewMemMapFs()
-			},
-			wantErr: true,
-		},
-	}
+                err = stack.Setup(map[string]string{"ServiceName": "myservice", "Image": "myimage:latest", "Port": "8080"}, templates.Services)
+                require.NoError(t, err)
+            }
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			locker, fs := tt.mocker(t)
-			stack := &MonitoringStack{
-				path: "/monitoring",
-				l:    locker,
-				fs:   fs,
-			}
-
-			// Install the stack
-			var err error
-			if !tt.notInstall {
-				err = stack.Init()
-				require.NoError(t, err)
-				err = stack.Setup(map[string]string{"NODE_NAME": "test"}, testdata.TestData)
-				require.NoError(t, err)
-			}
-
-			err = stack.Cleanup(tt.force)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				// Check that monitoring stack has been removed
-				exists, err := afero.DirExists(fs, "/monitoring")
-				assert.NoError(t, err)
-				assert.False(t, exists)
-			}
-		})
-	}
+            err = stack.Cleanup(tt.force)
+            if tt.wantErr {
+                assert.Error(t, err)
+            } else {
+                assert.NoError(t, err)
+                // Check that monitoring stack has been removed
+                exists, err := afero.DirExists(fs, "/monitoring")
+                assert.NoError(t, err)
+                assert.False(t, exists)
+            }
+        })
+    }
 }
