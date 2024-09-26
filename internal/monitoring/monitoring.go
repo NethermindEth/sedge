@@ -19,8 +19,9 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"io"
+	"io/fs"
 	"net"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -362,7 +363,7 @@ func (m *MonitoringManager) AddService(service ServiceAPI) error {
 	}
 
 	// Update the docker-compose.yml file
-	if err := m.updateDockerComposeFile(service); err != nil {
+	if err := m.updateDockerComposeFile(service, templates.Services); err != nil {
 		return fmt.Errorf("failed to update docker-compose.yml: %w", err)
 	}
 
@@ -370,7 +371,6 @@ func (m *MonitoringManager) AddService(service ServiceAPI) error {
 	if err := m.composeManager.Create(commands.DockerComposeCreateOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
 		return fmt.Errorf("failed to create service container: %w", err)
 	}
-
 	if err := m.composeManager.Up(commands.DockerComposeUpOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
 		return fmt.Errorf("failed to start service container: %w", err)
 	}
@@ -394,7 +394,7 @@ func (m *MonitoringManager) AddService(service ServiceAPI) error {
 	if err != nil {
 		return fmt.Errorf("invalid port in service endpoint %s: %w", portStr, err)
 	}
-	// Add target to the new service
+	// Set service as target
 	monitoringTarget := types.MonitoringTarget{
 		Host: service.ContainerName(),
 		Port: uint16(port64),
@@ -444,24 +444,39 @@ func (m *MonitoringManager) updateEnvFile(newEnv map[string]string) error {
 }
 
 // Helper method to update the docker-compose.yml file
-func (m *MonitoringManager) updateDockerComposeFile(service ServiceAPI) error {
+func (m *MonitoringManager) updateDockerComposeFile(service ServiceAPI, monitoringFs fs.FS) error {
 	// Read the main Docker Compose template
-	rawBaseTmp, err := templates.Services.ReadFile(filepath.Join("services", "docker-compose_base.tmpl"))
+	rawBaseTmp, err := monitoringFs.Open("services/docker-compose_base.tmpl")
+	if err != nil {
+		return fmt.Errorf("error opening docker-compose template: %w", err)
+	}
+	defer rawBaseTmp.Close()
+
+	// Read the content of the base template file
+	rawBaseTmpContent, err := io.ReadAll(rawBaseTmp)
+	if err != nil {
+		return fmt.Errorf("error reading docker-compose template: %w", err)
+	}
+
+	baseTmp, err := template.New("docker-compose").Parse(string(rawBaseTmpContent))
 	if err != nil {
 		return err
 	}
 
-	baseTmp, err := template.New("docker-compose").Parse(string(rawBaseTmp))
+	// Fetch the service template file
+	serviceTmp, err := monitoringFs.Open("services/" + service.Name() + ".tmpl")
 	if err != nil {
-		return err
+		return fmt.Errorf("error opening service %s template: %w", service.Name(), err)
+	}
+	defer serviceTmp.Close()
+
+	serviceTmpContent, err := io.ReadAll(serviceTmp)
+	if err != nil {
+		return fmt.Errorf("error reading service %s template: %w", service.Name(), err)
 	}
 
-	serviceTmp, err := templates.Services.ReadFile(filepath.Join("services", service.Name()+".tmpl"))
-	if err != nil {
-		return fmt.Errorf("error reading lido_exporter template: %w", err)
-	}
-
-	baseTmp, err = baseTmp.Parse(string(serviceTmp))
+	// Merge both templates
+	baseTmp, err = baseTmp.Parse(string(serviceTmpContent))
 	if err != nil {
 		return fmt.Errorf("error parsing service %s template: %w", service.Name(), err)
 	}
@@ -477,6 +492,7 @@ func (m *MonitoringManager) updateDockerComposeFile(service ServiceAPI) error {
 	if err := baseTmp.Execute(&buf, data); err != nil {
 		return err
 	}
+
 	// Write the merged content to the final Docker Compose file
-	return os.WriteFile(filepath.Join(m.stack.Path(), "docker-compose.yml"), buf.Bytes(), 0o644)
+	return m.stack.WriteFile("docker-compose.yml", buf.Bytes())
 }

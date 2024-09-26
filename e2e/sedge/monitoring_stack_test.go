@@ -210,7 +210,7 @@ func TestE2E_MonitoringStack_InitLido(t *testing.T) {
 			assert.NoError(t, runErr)
 			checkMonitoringStackDir(t)
 			checkMonitoringStackContainers(t, "sedge_lido_exporter")
-			checkPrometheusTargetsUp(t, "sedge_lido_exporter:8080")
+			checkPrometheusTargetsUp(t, "sedge_lido_exporter:8080", "sedge_node_exporter:9100")
 			checkGrafanaHealth(t)
 		},
 	)
@@ -228,7 +228,7 @@ func TestE2E_MonitoringStack_CleanLido(t *testing.T) {
 		t,
 		// Arrange
 		func(t *testing.T, sedgePath string) error {
-			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "init", "default")
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "10")
 		},
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {

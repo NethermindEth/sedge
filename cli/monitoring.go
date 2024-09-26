@@ -56,7 +56,7 @@ func InitSubCmd(mgr MonitoringManager) *cobra.Command {
 func CleanSubCmd(mgr MonitoringManager) *cobra.Command {
 	return &cobra.Command{
 		Use:   "clean",
-		Short: "Clean the monitoring stack",
+		Short: "Clean and uninstall the monitoring stack",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return CleanMonitoring(mgr)
 		},
@@ -68,6 +68,7 @@ func LidoSubCmd(mgr MonitoringManager, additionalServices []monitoring.ServiceAP
 	cmd := &cobra.Command{
 		Use:   "lido",
 		Short: "Configure Lido CSM Node monitoring",
+		Long:  "Configure Lido CSM Node monitoring using Prometheus, Grafana, Node Exporter, and Lido Exporter",
 		Args:  cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if lido.NodeOperatorID == "" && lido.RewardAddress == "" {
@@ -99,6 +100,7 @@ func DefaultSubCmd(mgr MonitoringManager, additionalServices []monitoring.Servic
 	cmd := &cobra.Command{
 		Use:   "default",
 		Short: "Default monitoring configuration",
+		Long:  "Default monitoring configuration using Prometheus, Grafana, and Node Exporter",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return InitMonitoring(true, true, mgr, nil)
@@ -130,13 +132,6 @@ func InitMonitoring(install, run bool, monitoringMgr MonitoringManager, addition
 		}
 	}
 
-	// Add additional services to the monitoring manager
-	for _, service := range additionalServices {
-		if err := monitoringMgr.AddService(service); err != nil {
-			return fmt.Errorf("failed to add service %s: %w", service.Name(), err)
-		}
-	}
-
 	// Check if the monitoring stack is running.
 	status, err := monitoringMgr.Status()
 	if err != nil {
@@ -155,6 +150,13 @@ func InitMonitoring(install, run bool, monitoringMgr MonitoringManager, addition
 	// Initialize monitoring stack if it is running.
 	if err := monitoringMgr.Init(); err != nil {
 		return err
+	}
+
+	// Add additional services to the monitoring manager
+	for _, service := range additionalServices {
+		if err := monitoringMgr.AddService(service); err != nil {
+			return fmt.Errorf("failed to add service %s: %w", service.Name(), err)
+		}
 	}
 
 	return nil

@@ -1670,6 +1670,251 @@ func TestServiceEndpoints(t *testing.T) {
 	assert.Equal(t, want, endpoints)
 }
 
+func TestAddService(t *testing.T) {
+	tests := []struct {
+		name          string
+		mocker        func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) (ServiceAPI, ComposeManager, DockerServiceManager)
+		expectedError error
+	}{
+		{
+			name: "Add Lido exporter service (valid case)",
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) (ServiceAPI, ComposeManager, DockerServiceManager) {
+				// service expectations
+				service := mocks.NewMockServiceAPI(ctrl)
+				service.EXPECT().ContainerName().Return("sedge_lido_exporter").AnyTimes()
+				service.EXPECT().DotEnv().Return(map[string]string{"LIDO_EXPORTER_PORT": "8080"}).AnyTimes()
+				service.EXPECT().Init(gomock.Any()).Return(nil).AnyTimes()
+				service.EXPECT().Setup(gomock.Any()).Return(nil).AnyTimes()
+				service.EXPECT().Name().Return("lido_exporter").AnyTimes()
+				service.EXPECT().Endpoint().Return("http://sedge_lido_exporter:8080").AnyTimes()
+				service.EXPECT().SetContainerIP(gomock.Any()).AnyTimes()
+				service.EXPECT().AddTarget(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+
+				// dockerServiceManager
+				dockerServiceManager := mocks.NewMockDockerServiceManager(ctrl)
+				dockerServiceManager.EXPECT().ContainerIP(GrafanaContainerName).Return("168.0.2.1", nil).AnyTimes()
+				dockerServiceManager.EXPECT().ContainerIP(PrometheusContainerName).Return("168.0.2.2", nil).AnyTimes()
+				dockerServiceManager.EXPECT().ContainerIP(NodeExporterContainerName).Return("168.0.2.3", nil).AnyTimes()
+				dockerServiceManager.EXPECT().ContainerIP("sedge_lido_exporter").Return("168.0.2.4", nil).AnyTimes()
+				dockerServiceManager.EXPECT().ContainerNetworks(PrometheusContainerName).Return([]string{"sedge_default", SedgeNetworkName}, nil)
+
+				// composeManager
+				composeManager := mocks.NewMockComposeManager(ctrl)
+				composeManager.EXPECT().Create(commands.DockerComposeCreateOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
+				composeManager.EXPECT().Up(commands.DockerComposeUpOptions{Path: filepath.Join(stack.Path(), "docker-compose.yml")}).Return(nil)
+
+				return service, composeManager, dockerServiceManager
+			},
+			expectedError: nil,
+		},
+		{
+			name: "Add already existing service",
+			mocker: func(t *testing.T, ctrl *gomock.Controller, stack *data.MonitoringStack) (ServiceAPI, ComposeManager, DockerServiceManager) {
+				service := mocks.NewMockServiceAPI(ctrl)
+				service.EXPECT().ContainerName().Return("sedge_prometheus").AnyTimes()
+				composeManager := mocks.NewMockComposeManager(ctrl)
+
+				return service, composeManager, mocks.NewMockDockerServiceManager(ctrl)
+			},
+			expectedError: errors.New("service sedge_prometheus already exists"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Setup mocks
+			ctrl := gomock.NewController(t)
+
+			userDataHome := os.Getenv("XDG_DATA_HOME")
+			if userDataHome == "" {
+				userHome, err := os.UserHomeDir()
+				require.NoError(t, err)
+				userDataHome = filepath.Join(userHome, ".local", "share")
+			}
+			// Create a mock locker
+			locker := mock_locker.NewMockLocker(ctrl)
+			// Expect the lock to be acquired
+			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(userDataHome, ".sedge", "monitoring", ".lock")}).Return(locker)
+			locker.EXPECT().Lock().Return(nil).AnyTimes()
+			locker.EXPECT().Locked().Return(true).AnyTimes()
+			locker.EXPECT().Unlock().Return(nil).AnyTimes()
+
+			// Expect the services to be triggered
+			grafanaMock := mocks.NewMockServiceAPI(ctrl)
+			promMock := mocks.NewMockServiceAPI(ctrl)
+			nodeExporterMock := mocks.NewMockServiceAPI(ctrl)
+			grafanaMock.EXPECT().ContainerName().Return(GrafanaContainerName).AnyTimes()
+			grafanaMock.EXPECT().SetContainerIP(gomock.Any()).AnyTimes()
+			grafanaMock.EXPECT().AddTarget(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+			promMock.EXPECT().ContainerName().Return(PrometheusContainerName).AnyTimes()
+			promMock.EXPECT().SetContainerIP(gomock.Any()).AnyTimes()
+			promMock.EXPECT().AddTarget(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+			nodeExporterMock.EXPECT().ContainerName().Return(NodeExporterContainerName).AnyTimes()
+			nodeExporterMock.EXPECT().SetContainerIP(gomock.Any()).AnyTimes()
+			nodeExporterMock.EXPECT().AddTarget(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+
+			// Create a filesystem
+			fs := afero.NewMemMapFs()
+			_, err := fs.Create(filepath.Join(userDataHome, ".sedge", "monitoring", "docker-compose.yml"))
+			require.NoError(t, err)
+			// Create the dotenv file
+			dotenvFile, err := fs.Create(filepath.Join(userDataHome, ".sedge", "monitoring", ".env"))
+			require.NoError(t, err)
+			dotenv := map[string]string{
+				"NODE_PORT": "9000",
+			}
+			// Write the dotenv file
+			for key, value := range dotenv {
+				_, err := dotenvFile.WriteString(key + "=" + value + "\n")
+				require.NoError(t, err)
+			}
+
+			// Create a monitoring manager
+			manager := NewMonitoringManager(
+				[]ServiceAPI{grafanaMock, promMock, nodeExporterMock},
+				mocks.NewMockComposeManager(ctrl),
+				mocks.NewMockDockerServiceManager(ctrl),
+				fs,
+				locker,
+			)
+
+			service, composeManager, dockerServiceManager := tt.mocker(t, ctrl, manager.stack)
+			manager.composeManager = composeManager
+			manager.dockerServiceManager = dockerServiceManager
+			err = manager.AddService(service)
+
+			if tt.expectedError != nil {
+				assert.Error(t, err)
+				assert.Equal(t, tt.expectedError, err)
+				assert.Contains(t, manager.services, service)
+			} else {
+				assert.NoError(t, err)
+				assert.Contains(t, manager.services, service)
+			}
+		})
+	}
+}
+
+func TestUpdateDockerComposeFile(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
+	baseTemplate := `{{/* docker-compose_base.tmpl */}}
+{{ define "docker-compose" }}
+services:
+  base_service:
+    image: base:latest
+{{ template "additional_services" . }}
+networks:
+  sedge:
+    name: sedge-network
+    external: true
+{{ end }}
+`
+
+	lidoExporterTemplate := `{{/* lido_exporter.tmpl */}}
+{{ define "additional_services" }}
+  {{ if .LidoExporter }}
+  lido_exporter:
+    image: lido_exporter:latest
+    networks:
+      - sedge
+  {{ end }}
+{{ end }}
+`
+
+	tests := []struct {
+		name            string
+		serviceName     string
+		baseTemplate    string
+		serviceTemplate string
+		expectedCompose string
+		wantErr         bool
+	}{
+		{
+			name:            "add lido exporter service",
+			serviceName:     "lido_exporter",
+			baseTemplate:    baseTemplate,
+			serviceTemplate: lidoExporterTemplate,
+			expectedCompose: `services:
+  base_service:
+    image: base:latest
+  lido_exporter:
+    image: lido_exporter:latest
+    networks:
+      - sedge
+networks:
+  sedge:
+    name: sedge-network
+    external: true
+`,
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fs := afero.NewMemMapFs()
+			ctrl := gomock.NewController(t)
+			mockLocker := mock_locker.NewMockLocker(ctrl)
+			mockService := mocks.NewMockServiceAPI(ctrl)
+
+			// Mock the locker behavior
+			mockLocker.EXPECT().New(gomock.Any()).Return(mockLocker).AnyTimes()
+			mockLocker.EXPECT().Lock().Return(nil).AnyTimes()
+			mockLocker.EXPECT().Locked().Return(true).AnyTimes()
+			mockLocker.EXPECT().Unlock().Return(nil).AnyTimes()
+
+			// Mock the service behavior
+			mockService.EXPECT().Name().Return(tt.serviceName).AnyTimes()
+
+			// Create a monitoring manager
+			manager := NewMonitoringManager(
+				[]ServiceAPI{},
+				mocks.NewMockComposeManager(ctrl),
+				mocks.NewMockDockerServiceManager(ctrl),
+				fs,
+				mockLocker,
+			)
+
+			// Create a mock monitoring filesystem
+			mockMonitoringFs := afero.NewMemMapFs()
+			err := afero.WriteFile(mockMonitoringFs, "services/docker-compose_base.tmpl", []byte(tt.baseTemplate), 0o644)
+			require.NoError(t, err)
+			err = afero.WriteFile(mockMonitoringFs, "services/"+tt.serviceName+".tmpl", []byte(tt.serviceTemplate), 0o644)
+			require.NoError(t, err)
+
+			// Call the function being tested
+			err = manager.updateDockerComposeFile(mockService, afero.NewIOFS(mockMonitoringFs))
+
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				content, err := manager.stack.ReadFile("docker-compose.yml")
+				assert.NoError(t, err)
+				// Normalize whitespace and remove empty lines
+				normalizeWhitespace := func(s string) string {
+					lines := strings.Split(s, "\n")
+					var nonEmptyLines []string
+					for _, line := range lines {
+						trimmed := strings.TrimSpace(line)
+						if trimmed != "" {
+							nonEmptyLines = append(nonEmptyLines, trimmed)
+						}
+					}
+					return strings.Join(nonEmptyLines, " ")
+				}
+
+				expectedNormalized := normalizeWhitespace(tt.expectedCompose)
+				actualNormalized := normalizeWhitespace(string(content))
+
+				assert.Equal(t, expectedNormalized, actualNormalized)
+			}
+		})
+	}
+}
+
 func TestUpdateEnvFile(t *testing.T) {
 	// Silence logger
 	log.SetOutput(io.Discard)
