@@ -390,14 +390,14 @@ func (m *MonitoringManager) AddService(service ServiceAPI) error {
 	}
 
 	// Convert port to uint16
-	port, err := strconv.Atoi(portStr)
+	port64, err := strconv.ParseUint(portStr, 10, 16)
 	if err != nil {
 		return fmt.Errorf("invalid port in service endpoint %s: %w", portStr, err)
 	}
 	// Add target to the new service
 	monitoringTarget := types.MonitoringTarget{
 		Host: service.ContainerName(),
-		Port: uint16(port),
+		Port: uint16(port64),
 		Path: "/metrics",
 	}
 
