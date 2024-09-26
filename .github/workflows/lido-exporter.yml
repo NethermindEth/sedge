@@ -61,20 +61,13 @@ jobs:
       TAG: ${{ github.event.inputs.tag }}
 
     steps:
-      - name: Extract version
-        id: extract_version
-        shell: bash
-        run: |
-          VERSION=${TAG#lido-exporter-}
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ env.VERSION }}
+          tag: ${{ env.TAG }}
           draft: true
           prerelease: false
           generateReleaseNotes: true
