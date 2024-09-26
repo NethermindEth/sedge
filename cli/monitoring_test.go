@@ -74,10 +74,10 @@ func TestMonitoringCmd(t *testing.T) {
 				gomock.InOrder(
 					mockManager.EXPECT().InstallationStatus().Return(common.NotInstalled, nil).AnyTimes(),
 					mockManager.EXPECT().InstallStack().Return(nil).AnyTimes(),
-					mockManager.EXPECT().AddService(gomock.Any()).Return(nil).AnyTimes(),
 					mockManager.EXPECT().Status().Return(common.Created, nil).AnyTimes(),
 					mockManager.EXPECT().Run().Return(nil).AnyTimes(),
 					mockManager.EXPECT().Init().Return(nil).AnyTimes(),
+					mockManager.EXPECT().AddService(gomock.Any()).Return(nil).AnyTimes(),
 				)
 				return mockManager
 			},
