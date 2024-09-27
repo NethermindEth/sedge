@@ -139,7 +139,7 @@ This command does not generate a validator configuration, as Optimism and Base u
 			return preValidationGenerateCmd(network, logging, &flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			services := []string{execution, consensus, optimism}
+			services := []string{execution, consensus, optimism, opExecution}
 			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, services)
 		},
 	}

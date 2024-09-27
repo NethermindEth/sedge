@@ -38,6 +38,7 @@ const (
 	consensus       = "consensus"
 	validator       = "validator"
 	optimism        = "optimism"
+	opExecution     = "opexecution"
 	validatorImport = "validator-import"
 	mevBoost        = "mev-boost"
 	configConsensus = "config_consensus"
@@ -108,10 +109,11 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 // mapClients convert genData clients to clients.Clients
 func mapClients(gd *GenData) map[string]*clients.Client {
 	cls := map[string]*clients.Client{
-		execution: gd.ExecutionClient,
-		consensus: gd.ConsensusClient,
-		validator: gd.ValidatorClient,
-		optimism:  gd.OptimismClient,
+		execution:   gd.ExecutionClient,
+		consensus:   gd.ConsensusClient,
+		validator:   gd.ValidatorClient,
+		optimism:    gd.OptimismClient,
+		opExecution: gd.ExecutionOPClient,
 	}
 
 	return cls
@@ -437,8 +439,14 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		elOpImage = imageOrEmpty(gd.ExecutionOPClient, gd.LatestVersion)
 	}
 	opImageVersion := ""
+	opGethSequencerHttp := ""
 	if gd.OptimismClient != nil {
 		opImageVersion = imageOrEmpty(cls[optimism], gd.LatestVersion)
+		if gd.IsBase {
+			opGethSequencerHttp = "https://" + gd.Network + "-sequencer.base.org"
+		} else {
+			opGethSequencerHttp = "https://" + gd.Network + "-sequencer.optimism.io"
+		}
 	}
 
 	data := EnvData{
@@ -467,6 +475,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		OPImageVersion:            opImageVersion,
 		ElOpImage:                 elOpImage,
 		ElOPAuthPort:              gd.Ports["AuthPortELOP"],
+		OpGethSequencerHttp:       opGethSequencerHttp,
 	}
 
 	// Save to writer

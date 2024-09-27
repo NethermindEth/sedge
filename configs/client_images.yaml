@@ -41,6 +41,10 @@ optimism:
   opnode:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node
     version: v1.9.1
+opexecution:
   opgeth:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth
     version: v1.101408.0
+  opneth:
+    name: nethermind/nethermind
+    version: 1.28.0
