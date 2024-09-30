@@ -1,3 +1,6 @@
+{{/* docker-compose_base.tmpl */}}
+{{ define "docker-compose" }}
+
 services:
   grafana:
     container_name: sedge_grafana
@@ -47,9 +50,14 @@ services:
     networks:
       - sedge
 
-networks:
-  sedge:
-    name: sedge-network
+{{ if .LidoExporter }}
+  {{ template "lido_exporter" . }}
+{{ end }}
 
 volumes:
   grafana-storage:
+
+networks:
+  sedge:
+    name: sedge-network
+{{ end }}

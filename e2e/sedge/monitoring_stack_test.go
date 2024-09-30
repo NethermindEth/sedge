@@ -62,7 +62,7 @@ func TestE2E_MonitoringStack_Init(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "default")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -90,7 +90,7 @@ func TestE2E_MonitoringStack_NotReinstalled(t *testing.T) {
 		t,
 		// Arrange
 		func(t *testing.T, sedgePath string) error {
-			err := base.RunCommand(t, sedgePath, "sedge", "monitoring", "init")
+			err := base.RunCommand(t, sedgePath, "sedge", "monitoring", "init", "default")
 			if err != nil {
 				return err
 			}
@@ -141,7 +141,7 @@ func TestE2E_MonitoringStack_Clean(t *testing.T) {
 		t,
 		// Arrange
 		func(t *testing.T, sedgePath string) error {
-			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "init")
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "init", "default")
 		},
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
@@ -185,6 +185,64 @@ func TestE2E_MonitoringStack_CleanNonExistent(t *testing.T) {
 
 			// Check that monitoring stack containers don't exist
 			checkMonitoringStackContainersNotRunning(t)
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
+
+func TestE2E_MonitoringStack_InitLido(t *testing.T) {
+	// Test context
+	var (
+		runErr error
+	)
+	// Build test case
+	e2eTest := newE2ESedgeTestCase(
+		t,
+		// Arrange
+		nil,
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "1")
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.NoError(t, runErr)
+			checkMonitoringStackDir(t)
+			checkMonitoringStackContainers(t, "sedge_lido_exporter")
+			checkPrometheusTargetsUp(t, "sedge_lido_exporter:8080", "sedge_node_exporter:9100")
+			checkGrafanaHealth(t)
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
+
+func TestE2E_MonitoringStack_CleanLido(t *testing.T) {
+	// Test context
+	var (
+		runErr error
+	)
+	// Build test case
+	e2eTest := newE2ESedgeTestCase(
+		t,
+		// Arrange
+		func(t *testing.T, sedgePath string) error {
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "10")
+		},
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "clean")
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.NoError(t, runErr)
+
+			// Check that monitoring stack directory is removed
+			assert.NoDirExists(t, dataDirPath)
+
+			// Check that monitoring stack containers are removed
+			checkMonitoringStackContainersNotRunning(t, "sedge_lido_exporter")
 		},
 	)
 	// Run test case

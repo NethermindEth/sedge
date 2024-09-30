@@ -4,6 +4,7 @@ package cli
 
 import (
 	"github.com/NethermindEth/sedge/internal/common"
+	"github.com/NethermindEth/sedge/internal/monitoring"
 	"github.com/NethermindEth/sedge/internal/monitoring/services/types"
 )
 
@@ -39,4 +40,7 @@ type MonitoringManager interface {
 
 	// ServiceEndpoints returns the endpoints of the monitoring services.
 	ServiceEndpoints() map[string]string
+
+	// AddService adds a new service to the monitoring stack.
+	AddService(service monitoring.ServiceAPI) error
 }

@@ -18,37 +18,100 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/NethermindEth/sedge/internal/common"
 	"github.com/NethermindEth/sedge/internal/monitoring"
+	lidoExporter "github.com/NethermindEth/sedge/internal/monitoring/services/lido_exporter"
+	"github.com/NethermindEth/sedge/internal/ui"
 )
 
 func MonitoringCmd(mgr MonitoringManager) *cobra.Command {
-	cmd := cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "monitoring [init|clean]",
 		Short: "Manage the monitoring stack",
 		Long:  "Manage the monitoring stack. Use 'init' to install and run, or 'clean' to stop and uninstall.",
-		Args:  cobra.ExactArgs(1),
+	}
+	cmd.AddCommand(InitSubCmd(mgr))
+	cmd.AddCommand(CleanSubCmd(mgr))
+
+	return cmd
+}
+
+func InitSubCmd(mgr MonitoringManager) *cobra.Command {
+	var additionalServices []monitoring.ServiceAPI
+	cmd := &cobra.Command{
+		Use:   "init",
+		Short: "Initialize the monitoring stack",
+	}
+	cmd.AddCommand(DefaultSubCmd(mgr, additionalServices))
+	cmd.AddCommand(LidoSubCmd(mgr, additionalServices))
+
+	return cmd
+}
+
+func CleanSubCmd(mgr MonitoringManager) *cobra.Command {
+	return &cobra.Command{
+		Use:   "clean",
+		Short: "Clean and uninstall the monitoring stack",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			switch args[0] {
-			case "init":
-				return InitMonitoring(true, true, mgr)
-			case "clean":
-				return CleanMonitoring(mgr)
-			default:
-				return fmt.Errorf("invalid argument: %s. Use 'init' or 'clean'", args[0])
-			}
+			return CleanMonitoring(mgr)
 		},
 	}
-	return &cmd
+}
+
+func LidoSubCmd(mgr MonitoringManager, additionalServices []monitoring.ServiceAPI) *cobra.Command {
+	lido := &lidoExporter.LidoExporterParams{}
+	cmd := &cobra.Command{
+		Use:   "lido",
+		Short: "Configure Lido CSM Node monitoring",
+		Long:  "Configure Lido CSM Node monitoring using Prometheus, Grafana, Node Exporter, and Lido Exporter",
+		Args:  cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if lido.NodeOperatorID == "" && lido.RewardAddress == "" {
+				return errors.New("Node Operator ID or Reward Address is required")
+			}
+			if err := ui.EthAddressValidator(rewardAddress, false); err != nil && len(args) != 0 {
+				return err
+			}
+			additionalServices = append(additionalServices, lidoExporter.NewLidoExporter(*lido))
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return InitMonitoring(true, true, mgr, additionalServices)
+		},
+	}
+	cmd.Flags().StringVar(&lido.NodeOperatorID, "node-operator-id", "", "Node Operator ID")
+	cmd.Flags().StringVar(&lido.RewardAddress, "reward-address", "", "Reward address of Node Operator. It is used to calculate Node Operator ID if not set")
+	cmd.Flags().StringVar(&lido.Network, "network", "holesky", "Network name")
+	cmd.Flags().StringSliceVar(&lido.RPCEndpoints, "rpc-endpoints", nil, "List of Ethereum HTTP RPC endpoints")
+	cmd.Flags().StringSliceVar(&lido.WSEndpoints, "ws-endpoints", nil, "List of Ethereum WebSocket RPC endpoints")
+	cmd.Flags().Uint16Var(&lido.Port, "port", 8080, "Port where the metrics will be exported.")
+	cmd.Flags().DurationVar(&lido.ScrapeTime, "scrape-time", 30*time.Second, "Time interval for scraping metrics. Values should be in the format of 10s, 1m, 1h, etc.")
+	cmd.Flags().StringVar(&logLevel, "log-level", "info", "Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace")
+
+	return cmd
+}
+
+func DefaultSubCmd(mgr MonitoringManager, additionalServices []monitoring.ServiceAPI) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "default",
+		Short: "Default monitoring configuration",
+		Long:  "Default monitoring configuration using Prometheus, Grafana, and Node Exporter",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return InitMonitoring(true, true, mgr, nil)
+		},
+	}
+	return cmd
 }
 
 // Init initializes the Monitoring Stack. If install is true, it will install the Monitoring Stack if it is not installed.
 // If run is true, it will run the Monitoring Stack if it is not running.
-func InitMonitoring(install, run bool, monitoringMgr MonitoringManager) error {
+func InitMonitoring(install, run bool, monitoringMgr MonitoringManager, additionalServices []monitoring.ServiceAPI) error {
 	// Check if the monitoring stack is installed.
 	installStatus, err := monitoringMgr.InstallationStatus()
 	if err != nil {
@@ -68,6 +131,7 @@ func InitMonitoring(install, run bool, monitoringMgr MonitoringManager) error {
 			return err
 		}
 	}
+
 	// Check if the monitoring stack is running.
 	status, err := monitoringMgr.Status()
 	if err != nil {
@@ -86,6 +150,13 @@ func InitMonitoring(install, run bool, monitoringMgr MonitoringManager) error {
 	// Initialize monitoring stack if it is running.
 	if err := monitoringMgr.Init(); err != nil {
 		return err
+	}
+
+	// Add additional services to the monitoring manager
+	for _, service := range additionalServices {
+		if err := monitoringMgr.AddService(service); err != nil {
+			return fmt.Errorf("failed to add service %s: %w", service.Name(), err)
+		}
 	}
 
 	return nil

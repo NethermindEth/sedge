@@ -365,3 +365,10 @@ func TestEndpoint(t *testing.T) {
 	endpoint := grafana.Endpoint()
 	assert.Equal(t, want, endpoint)
 }
+
+func TestName(t *testing.T) {
+	want := monitoring.GrafanaServiceName
+
+	grafana := NewGrafana()
+	assert.Equal(t, want, grafana.Name())
+}
