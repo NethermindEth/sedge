@@ -13,18 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package monitoring
+package lido_exporter
 
-const (
-	PrometheusServiceName     = "prometheus"
-	PrometheusContainerName   = "sedge_prometheus"
-	GrafanaServiceName        = "grafana"
-	GrafanaContainerName      = "sedge_grafana"
-	NodeExporterServiceName   = "node_exporter"
-	NodeExporterContainerName = "sedge_node_exporter"
-	LidoExporterServiceName   = "lido_exporter"
-	LidoExporterContainerName = "sedge_lido_exporter"
-	monitoringPath            = "monitoring"
-	InstanceIDLabel           = "instance_id"
-	SedgeNetworkName          = "sedge-network"
-)
+var dotEnv map[string]string = map[string]string{
+	"LIDO_EXPORTER_IMAGE":            "nethermindeth/lido-exporter:v1.0.0",
+	"LIDO_EXPORTER_PORT":             "8080",
+	"LIDO_EXPORTER_NODE_OPERATOR_ID": "",
+	"LIDO_EXPORTER_REWARD_ADDRESS":   "",
+	"LIDO_EXPORTER_NETWORK":          "",
+	"LIDO_EXPORTER_RPC_ENDPOINTS":    "",
+	"LIDO_EXPORTER_WS_ENDPOINTS":     "",
+	"LIDO_EXPORTER_SCRAPE_TIME":      "",
+	"LIDO_EXPORTER_LOG_LEVEL":        "",
+}

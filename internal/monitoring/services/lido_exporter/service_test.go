@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package node_exporter
+package lido_exporter
 
 import (
 	"net"
@@ -58,13 +58,13 @@ func TestInit(t *testing.T) {
 			name: "ok",
 			options: types.ServiceOptions{
 				Dotenv: map[string]string{
-					"NODE_EXPORTER_PORT": "6666",
+					"LIDO_EXPORTER_PORT": "6666",
 				},
 				Stack: stack,
 			},
 		},
 		{
-			name: "missing node exporter port",
+			name: "missing lido exporter port",
 			options: types.ServiceOptions{
 				Dotenv: map[string]string{},
 				Stack:  stack,
@@ -75,13 +75,13 @@ func TestInit(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			nodeExporter := NewNodeExporter()
-			err := nodeExporter.Init(tt.options)
+			lidoExporter := NewLidoExporter(LidoExporterParams{})
+			err := lidoExporter.Init(tt.options)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.options.Dotenv["NODE_EXPORTER_PORT"], strconv.Itoa(int(nodeExporter.port)))
+				assert.Equal(t, tt.options.Dotenv["LIDO_EXPORTER_PORT"], strconv.Itoa(int(lidoExporter.params.Port)))
 			}
 		})
 	}
@@ -104,43 +104,43 @@ func TestSetContainerIP(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create a new Node Exporter service
-			nodeExporter := NewNodeExporter()
-			nodeExporter.SetContainerIP(tt.ip)
-			assert.Equal(t, tt.ip, nodeExporter.containerIP)
+			// Create a new Lido Exporter service
+			lidoExporter := NewLidoExporter(LidoExporterParams{})
+			lidoExporter.SetContainerIP(tt.ip)
+			assert.Equal(t, tt.ip, lidoExporter.containerIP)
 		})
 	}
 }
 
 func TestContainerName(t *testing.T) {
-	want := monitoring.NodeExporterContainerName
+	want := monitoring.LidoExporterContainerName
 
-	// Create a new Node Exporter service
-	nodeExporter := NewNodeExporter()
-	assert.Equal(t, want, nodeExporter.ContainerName())
+	// Create a new Lido Exporter service
+	lidoExporter := NewLidoExporter(LidoExporterParams{})
+	assert.Equal(t, want, lidoExporter.ContainerName())
 }
 
 func TestEndpoint(t *testing.T) {
 	dotenv := map[string]string{
-		"NODE_EXPORTER_PORT": "6666",
+		"LIDO_EXPORTER_PORT": "6666",
 	}
 	want := "http://168.77.88.99:6666"
 
 	// Create a new Node exporter service
-	nodeExporter := NewNodeExporter()
-	err := nodeExporter.Init(types.ServiceOptions{
+	lidoExporter := NewLidoExporter(LidoExporterParams{})
+	err := lidoExporter.Init(types.ServiceOptions{
 		Dotenv: dotenv,
 	})
 	require.NoError(t, err)
-	nodeExporter.SetContainerIP(net.ParseIP("168.77.88.99"))
+	lidoExporter.SetContainerIP(net.ParseIP("168.77.88.99"))
 
-	endpoint := nodeExporter.Endpoint()
+	endpoint := lidoExporter.Endpoint()
 	assert.Equal(t, want, endpoint)
 }
 
 func TestName(t *testing.T) {
-	want := monitoring.NodeExporterServiceName
+	want := monitoring.LidoExporterServiceName
 
-	nodeExporter := NewNodeExporter()
-	assert.Equal(t, want, nodeExporter.Name())
+	lidoExporter := NewLidoExporter(LidoExporterParams{})
+	assert.Equal(t, want, lidoExporter.Name())
 }

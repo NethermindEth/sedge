@@ -13,18 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package monitoring
+package lido_exporter
 
-const (
-	PrometheusServiceName     = "prometheus"
-	PrometheusContainerName   = "sedge_prometheus"
-	GrafanaServiceName        = "grafana"
-	GrafanaContainerName      = "sedge_grafana"
-	NodeExporterServiceName   = "node_exporter"
-	NodeExporterContainerName = "sedge_node_exporter"
-	LidoExporterServiceName   = "lido_exporter"
-	LidoExporterContainerName = "sedge_lido_exporter"
-	monitoringPath            = "monitoring"
-	InstanceIDLabel           = "instance_id"
-	SedgeNetworkName          = "sedge-network"
-)
+import "errors"
+
+var ErrInvalidOptions = errors.New("invalid options for lido exporter setup")
