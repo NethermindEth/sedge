@@ -26,5 +26,5 @@ const (
 	LidoExporterContainerName = "sedge_lido_exporter"
 	monitoringPath            = "monitoring"
 	InstanceIDLabel           = "instance_id"
-	SedgeNetworkName          = "sedge-monitoring-network"
+	SedgeNetworkName          = "sedge-network"
 )
