@@ -93,6 +93,8 @@ func (c *Client) SetOpExecutionImage(image string) {
 		c.Image = valueOrDefault(image, configs.ClientImages.OpExecution.OpGeth.String())
 	case "opneth":
 		c.Image = valueOrDefault(image, configs.ClientImages.OpExecution.OpNeth.String())
+	case "opreth":
+		c.Image = valueOrDefault(image, configs.ClientImages.OpExecution.OpReth.String())
 	}
 }
 

@@ -42,6 +42,7 @@ var ClientImages struct {
 	OpExecution struct {
 		OpGeth Image `yaml:"opgeth"`
 		OpNeth Image `yaml:"opneth"`
+		OpReth Image `yaml:"opreth"`
 	}
 }
 

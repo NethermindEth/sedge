@@ -47,6 +47,7 @@ type EnvData struct {
 	OPImageVersion            string
 	ElOPAuthPort              uint16
 	OpGethSequencerHttp       string
+	RethNetwork               string
 }
 
 // GenData : Struct Data object for script's generation

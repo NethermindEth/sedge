@@ -48,3 +48,6 @@ opexecution:
   opneth:
     name: nethermind/nethermind
     version: 1.28.0
+  opreth:
+    name: ghcr.io/paradigmxyz/op-reth
+    version: v1.0.7

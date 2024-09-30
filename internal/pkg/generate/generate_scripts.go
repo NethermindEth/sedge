@@ -440,6 +440,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	}
 	opImageVersion := ""
 	opGethSequencerHttp := ""
+	rethNetwork := ""
 	if gd.OptimismClient != nil {
 		opImageVersion = imageOrEmpty(cls[optimism], gd.LatestVersion)
 		if gd.IsBase {
@@ -447,6 +448,21 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		} else {
 			opGethSequencerHttp = "https://" + gd.Network + "-sequencer.optimism.io"
 		}
+		if gd.Network == configs.NetworkMainnet {
+			if gd.IsBase {
+				rethNetwork = "base"
+			} else {
+				rethNetwork = "optimism"
+			}
+		}
+		if gd.Network == configs.NetworkSepolia {
+			if gd.IsBase {
+				rethNetwork = "base-sepolia"
+			} else {
+				rethNetwork = "optimism-sepolia"
+			}
+		}
+
 	}
 
 	data := EnvData{
@@ -476,6 +492,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ElOpImage:                 elOpImage,
 		ElOPAuthPort:              gd.Ports["AuthPortELOP"],
 		OpGethSequencerHttp:       opGethSequencerHttp,
+		RethNetwork:               rethNetwork,
 	}
 
 	// Save to writer
