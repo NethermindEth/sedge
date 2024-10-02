@@ -3,6 +3,7 @@ description: Sedge's Quickstart
 keywords:
   - sedge
   - installation
+  - optimism
   - validator
   - mainnet
   - sepolia

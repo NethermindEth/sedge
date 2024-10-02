@@ -127,6 +127,15 @@ While Sedge assists in installing the validator, it is not designed to register 
 
 Users acknowledge that no warranty is being made of a successful installation. Sedge is a tool and it ultimately depends on you to use it correctly and follow all the best practice guidance, as found in this README and documentation.
 
+## Lido integration
+
+Sedge is integrated with [Lido CSM](https://operatorportal.lido.fi/modules/community-staking-module), with 
+permissionless entry, allowing any node operator — and especially community stakers, from solo stakers, to groups of 
+friends, to amateur operators — to operate validators by providing an ETH-based bond (security collateral).
+
+Sedge supports the Lido CSM, allowing users to generate validator keys and set up their full nodes with ease. You can 
+read more about it in [our documentation](https://docs.sedge.nethermind.io/docs/quickstart/staking-with-lido)! 
+
 ## Supported networks and clients
 
 ### Mainnet
@@ -175,12 +184,12 @@ Users acknowledge that no warranty is being made of a successful installation. S
 
 ### CL clients with Mev-Boost
 
-| Client     | Mev-Boost | Networks                 |
-| ---------- | --------- |--------------------------|
-| Lighthouse | yes       | Mainnet, Sepolia |
-| Lodestar   | yes       | Mainnet, Sepolia |
-| Prysm      | yes       | Mainnet, Sepolia |
-| Teku       | yes       | Mainnet, Sepolia |
+| Client     | Mev-Boost | Networks                  |
+| ---------- | --------- |---------------------------|
+| Lighthouse | yes       | Mainnet, Sepolia, Holesky |
+| Lodestar   | yes       | Mainnet, Sepolia, Holesky |
+| Prysm      | yes       | Mainnet, Sepolia, Holesky |
+| Teku       | yes       | Mainnet, Sepolia, Holesky |
 
 ## Supported Linux flavours for dependency installation
 
@@ -247,6 +256,7 @@ The following roadmap covers the main features and ideas we want to implement bu
 ### Version 1.X (Current)
 
 - [x] Support Erigon on Gnosis
+- [x] Support for Lido CSM
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
 - [ ] More tests!!!
 - [ ] Support for Nimbus client
