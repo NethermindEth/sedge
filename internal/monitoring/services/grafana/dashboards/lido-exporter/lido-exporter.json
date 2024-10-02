@@ -317,7 +317,7 @@
       "id": 5,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -438,12 +438,30 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_onchain_penalties_total{node_operator_id=\"${NODE_ID}\"}",
+          "expr": "csm_onchain_penalties_total{node_operator_id=\"${NODE_ID}\", penalty_type=\"el_rewards_stealing\"}",
           "refId": "A",
-          "legendFormat": "Penalties"
+          "legendFormat": "EL Rewards Stealing"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "csm_onchain_penalties_total{node_operator_id=\"${NODE_ID}\", penalty_type=\"initial_slashing\"}",
+          "refId": "B",
+          "legendFormat": "Initial Slashing"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "csm_onchain_penalties_total{node_operator_id=\"${NODE_ID}\", penalty_type=\"withdrawal\"}",
+          "refId": "C",
+          "legendFormat": "Withdrawal"
         }
       ],
-      "title": "Penalties",
+      "title": "Penalties by Type",
       "type": "timeseries"
     },
     {
