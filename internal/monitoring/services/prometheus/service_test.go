@@ -167,11 +167,13 @@ func TestSetup(t *testing.T) {
 			locker.EXPECT().Locked().Return(true),
 			locker.EXPECT().Unlock().Return(nil),
 		)
-		gomock.InOrder(
-			locker.EXPECT().Lock().Return(nil),
-			locker.EXPECT().Locked().Return(true),
-			locker.EXPECT().Unlock().Return(nil),
-		)
+		for i := 0; i < 5; i++ {
+			gomock.InOrder(
+				locker.EXPECT().Lock().Return(nil),
+				locker.EXPECT().Locked().Return(true),
+				locker.EXPECT().Unlock().Return(nil),
+			)
+		}
 		return locker
 	}
 	onlyNewLocker := func(t *testing.T) *mocks.MockLocker {
@@ -302,6 +304,25 @@ func TestSetup(t *testing.T) {
 				for i := 0; i < len(tt.targets); i++ {
 					assert.Equal(t, tt.targets[i], prom.ScrapeConfigs[i].JobName)
 					assert.Equal(t, tt.targets[i], prom.ScrapeConfigs[i].StaticConfigs[0].Targets[0])
+				}
+				// Check the rules
+				foldersToCheck := []string{
+					filepath.Join(basePath, "monitoring", "prometheus", "rules"),
+					filepath.Join(basePath, "monitoring", "prometheus", "alertmanager"),
+				}
+				filesToCheck := []string{
+					filepath.Join(basePath, "monitoring", "prometheus", "rules", "lido-exporter.yml"),
+					filepath.Join(basePath, "monitoring", "prometheus", "alertmanager", "alertmanager.yml"),
+				}
+				for _, folder := range foldersToCheck {
+					ok, err = afero.DirExists(afs, folder)
+					assert.True(t, ok)
+					assert.NoError(t, err)
+				}
+				for _, file := range filesToCheck {
+					ok, err = afero.Exists(afs, file)
+					assert.True(t, ok)
+					assert.NoError(t, err)
 				}
 			}
 		})
