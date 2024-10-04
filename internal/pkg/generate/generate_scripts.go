@@ -439,14 +439,14 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		elOpImage = imageOrEmpty(gd.ExecutionOPClient, gd.LatestVersion)
 	}
 	opImageVersion := ""
-	opGethSequencerHttp := ""
+	opSequencerHttp := ""
 	rethNetwork := ""
 	if gd.OptimismClient != nil {
 		opImageVersion = imageOrEmpty(cls[optimism], gd.LatestVersion)
 		if gd.IsBase {
-			opGethSequencerHttp = "https://" + gd.Network + "-sequencer.base.org"
+			opSequencerHttp = "https://" + gd.Network + "-sequencer.base.org"
 		} else {
-			opGethSequencerHttp = "https://" + gd.Network + "-sequencer.optimism.io"
+			opSequencerHttp = "https://" + gd.Network + "-sequencer.optimism.io"
 		}
 		if gd.Network == configs.NetworkMainnet {
 			if gd.IsBase {
@@ -491,7 +491,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		OPImageVersion:            opImageVersion,
 		ElOpImage:                 elOpImage,
 		ElOPAuthPort:              gd.Ports["AuthPortELOP"],
-		OpGethSequencerHttp:       opGethSequencerHttp,
+		OpSequencerHttp:           opSequencerHttp,
 		RethNetwork:               rethNetwork,
 	}
 

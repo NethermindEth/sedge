@@ -36,7 +36,7 @@
       - --JsonRpc.EnginePort={{.ElOPAuthPort}}
       - --Network.DiscoveryPort={{.ElOPDiscoveryPort}}
       - --HealthChecks.Enabled=true
-      - --Optimism.SequencerUrl=${OP_NETHERMIND_SEQUENCER_HTTP}
+      - --Optimism.SequencerUrl=${OP_SEQUENCER_HTTP}
       - --Metrics.Enabled=true
       - --Metrics.ExposePort={{.ElOPMetricsPort}}{{range $flag := .ElOPExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}

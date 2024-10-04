@@ -46,7 +46,7 @@ type EnvData struct {
 	JWTOPSecretPath           string
 	OPImageVersion            string
 	ElOPAuthPort              uint16
-	OpGethSequencerHttp       string
+	OpSequencerHttp           string
 	RethNetwork               string
 }
 

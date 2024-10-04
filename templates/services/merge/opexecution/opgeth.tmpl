@@ -31,7 +31,7 @@
       - --authrpc.port={{.ElOPAuthPort}}
       - --authrpc.jwtsecret=/tmp/jwt/jwtsecret
       - --verbosity=3
-      - --rollup.sequencerhttp=${OP_GETH_SEQUENCER_HTTP}
+      - --rollup.sequencerhttp=${OP_SEQUENCER_HTTP}
       - --op-network={{.NetworkPrefix}}-${NETWORK}
       - --datadir=/op_geth/data
       - --discovery.port={{.ElOPDiscoveryPort}}
