@@ -256,6 +256,7 @@ The following roadmap covers the main features and ideas we want to implement bu
 
 - [x] Support Erigon on Gnosis
 - [x] Support for Lido CSM
+- [x] Support for Optimism and Base.
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
 - [ ] More tests!!!
 - [ ] Support for Nimbus client
