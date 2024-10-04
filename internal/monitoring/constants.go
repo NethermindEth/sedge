@@ -22,6 +22,9 @@ const (
 	GrafanaContainerName      = "sedge_grafana"
 	NodeExporterServiceName   = "node_exporter"
 	NodeExporterContainerName = "sedge_node_exporter"
+	LidoExporterServiceName   = "lido_exporter"
+	LidoExporterContainerName = "sedge_lido_exporter"
 	monitoringPath            = "monitoring"
 	InstanceIDLabel           = "instance_id"
+	SedgeNetworkName          = "sedge-network"
 )

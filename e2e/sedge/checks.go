@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package e2e
 
 import (
@@ -9,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	base "github.com/NethermindEth/sedge/e2e"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/cenkalti/backoff"
 	"github.com/docker/docker/client"
@@ -48,9 +64,10 @@ func checkMonitoringStackNotInstalled(t *testing.T) {
 }
 
 // checkMonitoringStackContainers checks that the monitoring stack containers are running
-func checkMonitoringStackContainers(t *testing.T) {
+func checkMonitoringStackContainers(t *testing.T, containerNames ...string) {
 	t.Logf("Checking monitoring stack containers")
-	checkContainerRunning(t, "sedge_grafana", "sedge_prometheus", "sedge_node_exporter")
+	containerNames = append(containerNames, "sedge_grafana", "sedge_prometheus", "sedge_node_exporter")
+	checkContainerRunning(t, containerNames...)
 }
 
 // checkContainerRunning checks that the given containers are running
@@ -90,13 +107,13 @@ func checkPrometheusTargetsUp(t *testing.T, targets ...string) {
 		logPrefix := fmt.Sprintf("checkPrometheusTargetsUp (%d)", tries)
 		promTargets, err = prometheusTargets(t)
 		if err != nil {
-			return logAndPipeError(t, logPrefix, err)
+			return base.LogAndPipeError(t, logPrefix, err)
 		}
 		if promTargets.Status != "success" {
-			return logAndPipeError(t, logPrefix, fmt.Errorf("expected status success, got %s", promTargets.Status))
+			return base.LogAndPipeError(t, logPrefix, fmt.Errorf("expected status success, got %s", promTargets.Status))
 		}
 		if len(promTargets.Data.ActiveTargets) != len(targets) {
-			return logAndPipeError(t, logPrefix, fmt.Errorf("expected %d targets, got %d", len(targets), len(promTargets.Data.ActiveTargets)))
+			return base.LogAndPipeError(t, logPrefix, fmt.Errorf("expected %d targets, got %d", len(targets), len(promTargets.Data.ActiveTargets)))
 		}
 		for i, target := range promTargets.Data.ActiveTargets {
 			var labels []string
@@ -104,14 +121,14 @@ func checkPrometheusTargetsUp(t *testing.T, targets ...string) {
 				labels = append(labels, label)
 			}
 			if !slices.Contains(labels, "instance") {
-				return logAndPipeError(t, logPrefix, fmt.Errorf("target %d does not have instance label", i))
+				return base.LogAndPipeError(t, logPrefix, fmt.Errorf("target %d does not have instance label", i))
 			}
 			instanceLabel := target.Labels["instance"]
 			if !slices.Contains(targets, instanceLabel) {
-				return logAndPipeError(t, logPrefix, fmt.Errorf("target %d instance label is not expected", i))
+				return base.LogAndPipeError(t, logPrefix, fmt.Errorf("target %d instance label is not expected", i))
 			}
 			if target.Health == "unknown" {
-				return logAndPipeError(t, logPrefix, fmt.Errorf("target %d health is unknown", i))
+				return base.LogAndPipeError(t, logPrefix, fmt.Errorf("target %d health is unknown", i))
 			}
 		}
 		return nil
@@ -134,14 +151,14 @@ func checkGrafanaHealth(t *testing.T) {
 			BasicAuth: url.UserPassword("admin", "admin"),
 		})
 		if err != nil {
-			return logAndPipeError(t, logPrefix, err)
+			return base.LogAndPipeError(t, logPrefix, err)
 		}
 		healthResponse, err := gClient.Health()
 		if err != nil {
-			return logAndPipeError(t, logPrefix, err)
+			return base.LogAndPipeError(t, logPrefix, err)
 		}
 		if healthResponse.Database != "ok" {
-			return logAndPipeError(t, logPrefix, fmt.Errorf("expected database ok, got %s", healthResponse.Database))
+			return base.LogAndPipeError(t, logPrefix, fmt.Errorf("expected database ok, got %s", healthResponse.Database))
 		}
 		return nil
 	}, b)
@@ -149,9 +166,10 @@ func checkGrafanaHealth(t *testing.T) {
 }
 
 // checkMonitoringStackContainersNotRunning checks that the monitoring stack containers are not running
-func checkMonitoringStackContainersNotRunning(t *testing.T) {
+func checkMonitoringStackContainersNotRunning(t *testing.T, containerNames ...string) {
 	t.Logf("Checking monitoring stack containers are not running")
-	checkContainerNotExisting(t, "sedge_grafana", "sedge_prometheus", "sedge_node_exporter")
+	containerNames = append(containerNames, "sedge_grafana", "sedge_prometheus", "sedge_node_exporter")
+	checkContainerNotExisting(t, containerNames...)
 }
 
 // checkContainerNotExisting checks that the given containers are not existing

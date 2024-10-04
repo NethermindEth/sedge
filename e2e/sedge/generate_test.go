@@ -1,3 +1,18 @@
+/*
+Copyright 2022 Nethermind
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package e2e
 
 import (
@@ -9,6 +24,8 @@ import (
 	"github.com/NethermindEth/sedge/internal/lido/contracts/mevboostrelaylist"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
+
+	base "github.com/NethermindEth/sedge/e2e"
 )
 
 func TestE2E_Generate_FullNode_GoerliNotSupported(t *testing.T) {
@@ -17,13 +34,13 @@ func TestE2E_Generate_FullNode_GoerliNotSupported(t *testing.T) {
 		runErr error
 	)
 	// Build test case
-	e2eTest := newE2ETestCase(
+	e2eTest := newE2ESedgeTestCase(
 		t,
 		// Arrange
 		nil,
 		// Act
 		func(t *testing.T, binaryPath, dataDirPath string) {
-			runErr = runSedge(t, binaryPath, "generate", "full-node", "--network", "goerli")
+			runErr = base.RunSedge(t, binaryPath, "generate", "full-node", "--network", "goerli")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -40,13 +57,13 @@ func TestE2E_Generate_FullNode_Lido_GnosisNotSupported(t *testing.T) {
 		runErr error
 	)
 	// Build test case
-	e2eTest := newE2ETestCase(
+	e2eTest := newE2ESedgeTestCase(
 		t,
 		// Arrange
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = runSedge(t, binaryPath, "generate", "--lido", "full-node", "--network", "gnosis")
+			runErr = base.RunSedge(t, binaryPath, "generate", "--lido", "full-node", "--network", "gnosis")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -63,13 +80,13 @@ func TestE2E_Generate_FullNode_Lido_SepoliaNotSupported(t *testing.T) {
 		runErr error
 	)
 	// Build test case
-	e2eTest := newE2ETestCase(
+	e2eTest := newE2ESedgeTestCase(
 		t,
 		// Arrange
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = runSedge(t, binaryPath, "generate", "--lido", "full-node", "--network", "sepolia")
+			runErr = base.RunSedge(t, binaryPath, "generate", "--lido", "full-node", "--network", "sepolia")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -87,13 +104,13 @@ func TestE2E_Generate_FullNode_Lido_Sepolia_NoMEV(t *testing.T) {
 		runErr error
 	)
 	// Build test case
-	e2eTest := newE2ETestCase(
+	e2eTest := newE2ESedgeTestCase(
 		t,
 		// Arrange
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = runSedge(t, binaryPath, "generate", "--lido", "full-node", "--network", "sepolia", "--no-mev-boost")
+			runErr = base.RunSedge(t, binaryPath, "generate", "--lido", "full-node", "--network", "sepolia", "--no-mev-boost")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -127,13 +144,13 @@ func TestE2E_Generate_FullNode_Lido_Mainnet(t *testing.T) {
 		runErr error
 	)
 	// Build test case
-	e2eTest := newE2ETestCase(
+	e2eTest := newE2ESedgeTestCase(
 		t,
 		// Arrange
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = runSedge(t, binaryPath, "generate", "--lido", "full-node", "--network", "mainnet")
+			runErr = base.RunSedge(t, binaryPath, "generate", "--lido", "full-node", "--network", "mainnet")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {

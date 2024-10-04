@@ -1116,3 +1116,10 @@ func TestEndpoint(t *testing.T) {
 	endpoint := prometheus.Endpoint()
 	assert.Equal(t, want, endpoint)
 }
+
+func TestName(t *testing.T) {
+	want := monitoring.PrometheusServiceName
+
+	prometheus := NewPrometheus()
+	assert.Equal(t, want, prometheus.Name())
+}
