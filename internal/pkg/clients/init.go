@@ -39,6 +39,7 @@ var AllClients map[string][]string = map[string][]string{
 	},
 	"opexecution": {
 		"opgeth",
-		"opneth",
+		"opnethermind",
+		"opreth",
 	},
 }
