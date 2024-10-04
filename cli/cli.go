@@ -23,13 +23,12 @@ import (
 	"strings"
 	"time"
 
-	eth2 "github.com/protolambda/zrnt/eth2/configs"
-
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/NethermindEth/sedge/internal/ui"
+	eth2 "github.com/protolambda/zrnt/eth2/configs"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	"github.com/NethermindEth/sedge/configs"
@@ -87,9 +86,10 @@ type CliCmdOptions struct {
 	numberOfValidators       int64
 	existingValidators       int64
 	installDependencies      bool
+	enableMonitoring         bool
 }
 
-func CliCmd(p ui.Prompter, actions actions.SedgeActions, depsMgr dependencies.DependenciesManager) *cobra.Command {
+func CliCmd(p ui.Prompter, actions actions.SedgeActions, depsMgr dependencies.DependenciesManager, monitoringMgr MonitoringManager) *cobra.Command {
 	o := new(CliCmdOptions)
 	cmd := &cobra.Command{
 		Use:   "cli",
@@ -119,13 +119,13 @@ using docker compose command behind the scenes.
 			}
 			switch o.nodeType {
 			case NodeTypeFullNode:
-				return setupFullNode(p, o, actions, depsMgr)
+				return setupFullNode(p, o, actions, depsMgr, monitoringMgr)
 			case NodeTypeExecution:
-				return setupExecutionNode(p, o, actions, depsMgr)
+				return setupExecutionNode(p, o, actions, depsMgr, monitoringMgr)
 			case NodeTypeConsensus:
-				return setupConsensusNode(p, o, actions, depsMgr)
+				return setupConsensusNode(p, o, actions, depsMgr, monitoringMgr)
 			case NodeTypeValidator:
-				return setupValidatorNode(p, o, actions, depsMgr)
+				return setupValidatorNode(p, o, actions, depsMgr, monitoringMgr)
 			}
 			return nil
 		},
@@ -133,7 +133,7 @@ using docker compose command behind the scenes.
 	return cmd
 }
 
-func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager) (err error) {
+func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager, monitoringMgr MonitoringManager) (err error) {
 	o.genData.Services = []string{"execution", "consensus"}
 	if err := confirmWithValidator(p, o); err != nil {
 		return err
@@ -196,6 +196,9 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, deps
 	if err := setupJWT(p, o, false); err != nil {
 		return err
 	}
+	if err := confirmEnableMonitoring(p, o); err != nil {
+		return err
+	}
 	// Call generate action
 	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
@@ -204,10 +207,10 @@ func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, deps
 	if err != nil {
 		return err
 	}
-	return postGenerate(p, o, a, depsManager)
+	return postGenerate(p, o, a, depsManager, monitoringMgr)
 }
 
-func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager) (err error) {
+func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager, monitoringMgr MonitoringManager) (err error) {
 	o.genData.Services = []string{"execution"}
 	if err := selectExecutionClient(p, o); err != nil {
 		return err
@@ -226,6 +229,9 @@ func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 	if err := setupJWT(p, o, true); err != nil {
 		return err
 	}
+	if err := confirmEnableMonitoring(p, o); err != nil {
+		return err
+	}
 	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
 		GenerationPath: o.generationPath,
@@ -233,10 +239,10 @@ func setupExecutionNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 	if err != nil {
 		return err
 	}
-	return postGenerate(p, o, a, depsManager)
+	return postGenerate(p, o, a, depsManager, monitoringMgr)
 }
 
-func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager) (err error) {
+func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager, monitoringMgr MonitoringManager) (err error) {
 	o.genData.Services = []string{"consensus"}
 	if err := selectConsensusClient(p, o); err != nil {
 		return err
@@ -271,6 +277,9 @@ func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 	if err := setupJWT(p, o, true); err != nil {
 		return err
 	}
+	if err := confirmEnableMonitoring(p, o); err != nil {
+		return err
+	}
 	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
 		GenerationPath: o.generationPath,
@@ -278,10 +287,10 @@ func setupConsensusNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 	if err != nil {
 		return err
 	}
-	return postGenerate(p, o, a, depsManager)
+	return postGenerate(p, o, a, depsManager, monitoringMgr)
 }
 
-func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager) (err error) {
+func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager, monitoringMgr MonitoringManager) (err error) {
 	o.genData.Services = []string{"validator"}
 	if err := selectValidatorClient(p, o); err != nil {
 		return err
@@ -309,6 +318,9 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 		}
 		o.genData.MevBoostOnValidator = o.withMevBoost
 	}
+	if err := confirmEnableMonitoring(p, o); err != nil {
+		return err
+	}
 	o.genData, err = a.Generate(actions.GenerateOptions{
 		GenerationData: o.genData,
 		GenerationPath: o.generationPath,
@@ -316,7 +328,7 @@ func setupValidatorNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions,
 	if err != nil {
 		return err
 	}
-	return postGenerate(p, o, a, depsManager)
+	return postGenerate(p, o, a, depsManager, monitoringMgr)
 }
 
 func setupJWT(p ui.Prompter, o *CliCmdOptions, skip bool) error {
@@ -348,7 +360,7 @@ func setupJWT(p ui.Prompter, o *CliCmdOptions, skip bool) error {
 	return nil
 }
 
-func postGenerate(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsMgr dependencies.DependenciesManager) error {
+func postGenerate(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsMgr dependencies.DependenciesManager, monitoringMgr MonitoringManager) error {
 	if o.withValidator || o.nodeType == NodeTypeValidator {
 		if err := generateKeystore(p, o, a, depsMgr); err != nil {
 			return err
@@ -387,6 +399,11 @@ func postGenerate(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsM
 			Services:       services,
 		}); err != nil {
 			return err
+		}
+		if o.enableMonitoring {
+			if err := InitMonitoring(true, true, monitoringMgr, nil); err != nil {
+				return err
+			}
 		}
 		if o.withValidator {
 			log.Info(configs.HappyStakingRun)
@@ -818,6 +835,11 @@ func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
 		return
 	}
 	o.withMevBoost, err = p.Confirm("Enable MEV Boost?", true)
+	return
+}
+
+func confirmEnableMonitoring(p ui.Prompter, o *CliCmdOptions) (err error) {
+	o.enableMonitoring, err = p.Confirm("Do you want to enable the monitoring stack?", false)
 	return
 }
 

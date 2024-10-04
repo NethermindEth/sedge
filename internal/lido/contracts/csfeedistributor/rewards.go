@@ -27,6 +27,8 @@ import (
 	"github.com/NethermindEth/sedge/internal/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Tree : struct that reperesents Merkle Tree data
@@ -85,16 +87,24 @@ func cumulativeFeeShares(treeCID string, nodeID *big.Int) (*big.Int, error) {
 		return nil, fmt.Errorf("error getting tree data: %v", err)
 	}
 
-	index, err := binarySearchNodeID(nodeID, treeData)
-	if err != nil {
-		return nil, fmt.Errorf("failed to find node ID: %v", err)
+	// Compare nodeOperatorID in tree with nodeId to get shares
+	for _, item := range treeData.Values {
+		if len(item.Value) == 2 {
+			nodeOperatorId, err1 := convertTreeValuesToBigInt(item.Value[0])
+			shares, err2 := convertTreeValuesToBigInt(item.Value[1])
+			if err1 != nil || err2 != nil {
+				log.Debugf("Error converting values: %v, %v", err1, err2)
+				continue
+			}
+			if nodeOperatorId.Cmp(nodeID) == 0 {
+				log.Debugf("shares: %v", shares)
+				return shares, nil
+			}
+		} else {
+			log.Debugf("Unexpected value format, expected 2 elements")
+		}
 	}
-
-	shares, err := convertTreeValuesToBigInt(treeData.Values[index].Value[1])
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert shares: %v", err)
-	}
-	return shares, nil
+	return nil, fmt.Errorf("invalid nodeId")
 }
 
 func treeCID(network string) (string, error) {
@@ -141,29 +151,8 @@ func convertTreeValuesToBigInt(value interface{}) (*big.Int, error) {
 	return bigIntValue, nil
 }
 
-func binarySearchNodeID(nodeID *big.Int, treeData Tree) (int, error) {
-	// Compare nodeOperatorID in tree with nodeId to get shares
-	low, high := 0, len(treeData.Values)-1
-	for low <= high {
-		mid := (low + high) / 2
-		nodeOperatorId, err := convertTreeValuesToBigInt(treeData.Values[mid].Value[0])
-		if err != nil {
-			return 0, fmt.Errorf("failed to convert nodeOperatorId: %v", err)
-		}
-		cmp := nodeOperatorId.Cmp(nodeID)
-		if cmp == 0 {
-			return mid, nil
-		} else if cmp < 0 {
-			low = mid + 1
-		} else {
-			high = mid - 1
-		}
-	}
-	return 0, fmt.Errorf("invalid node ID")
-}
-
 func csFeeDistributorContract(network string) (*Csfeedistributor, *ethclient.Client, error) {
-	client, err := contracts.ConnectClient(network)
+	client, err := contracts.ConnectClient(network, false)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to connect to client: %w", err)
 	}

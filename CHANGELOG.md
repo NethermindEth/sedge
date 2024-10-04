@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - New command `lido-status` to display data of Lido Node Operator.
+- Monitoring stack setup with Grafana, Prometheus, and Node Exporter.
+- Added support for `op-geth` and `op-reth` clients on Optimism and Base networks.
+
+### Changed
+- Update Go version from 1.21 to 1.22.
+- Changed the `--op-execution-image` flag to `--op-execution` on the `generate op-full-node` command.
 
 ### Fixed
 -  Teku and Lighthouse import keys container error on Windows.

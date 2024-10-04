@@ -82,15 +82,22 @@ func GetPublicRPCs(network string) ([]string, error) {
 	if !exists {
 		return nil, fmt.Errorf("invalid network")
 	}
-	// Create a copy of the slice to avoid modifying the original
-	shuffledRPCs := make([]string, len(rpcs.PublicRPCs))
-	copy(shuffledRPCs, rpcs.PublicRPCs)
 
-	// Shuffle the slice to randomize the order
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(shuffledRPCs), func(i, j int) {
-		shuffledRPCs[i], shuffledRPCs[j] = shuffledRPCs[j], shuffledRPCs[i]
+	return shuffleRPCs(rpcs.PublicRPCs), nil
+}
+
+func GetPublicWSs(network string) ([]string, error) {
+	ws, exists := networkRPCs[network]
+	if !exists {
+		return nil, fmt.Errorf("invalid network")
+	}
+	return shuffleRPCs(ws.PublicWSs), nil
+}
+
+func shuffleRPCs(rpcs []string) []string {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	r.Shuffle(len(rpcs), func(i, j int) {
+		rpcs[i], rpcs[j] = rpcs[j], rpcs[i]
 	})
-
-	return shuffledRPCs, nil
+	return rpcs
 }
