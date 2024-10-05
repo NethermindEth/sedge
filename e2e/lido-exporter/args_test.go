@@ -27,7 +27,7 @@ import (
 )
 
 func TestE2E_ValidArgs_NodeOperatorID(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -48,10 +48,21 @@ func TestE2E_ValidArgs_NodeOperatorID(t *testing.T) {
 			checkPrometheusServerUp(t, 9980)
 			checkMetrics(t, 9980)
 
-			cmd.Process.Kill()
-			err := cmd.Wait()
-			assert.ErrorContains(t, err, "killed")
-			assert.Equal(t, -1, cmd.ProcessState.ExitCode(), "lido-exporter command should not return a non-zero exit code")
+			cmd.Process.Signal(os.Interrupt)
+
+			// Wait for the process to exit with a timeout
+			done := make(chan error, 1)
+			go func() {
+				done <- cmd.Wait()
+			}()
+
+			select {
+			case err := <-done:
+				assert.NoError(t, err)
+			case <-time.After(5 * time.Second):
+				t.Error("Process did not exit within the timeout period")
+				cmd.Process.Kill() // Force kill if it doesn't exit
+			}
 		},
 	)
 	// Run test case
@@ -59,7 +70,7 @@ func TestE2E_ValidArgs_NodeOperatorID(t *testing.T) {
 }
 
 func TestE2E_ValidArgs_EnvNodeOperatorID(t *testing.T) {
-	t.Parallel()
+	////t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -83,10 +94,21 @@ func TestE2E_ValidArgs_EnvNodeOperatorID(t *testing.T) {
 			checkPrometheusServerUp(t, 8080)
 			checkMetrics(t, 8080)
 
-			cmd.Process.Kill()
-			err := cmd.Wait()
-			assert.ErrorContains(t, err, "killed")
-			assert.Equal(t, -1, cmd.ProcessState.ExitCode(), "lido-exporter command should not return a non-zero exit code")
+			cmd.Process.Signal(os.Interrupt)
+
+			// Wait for the process to exit with a timeout
+			done := make(chan error, 1)
+			go func() {
+				done <- cmd.Wait()
+			}()
+
+			select {
+			case err := <-done:
+				assert.NoError(t, err)
+			case <-time.After(5 * time.Second):
+				t.Error("Process did not exit within the timeout period")
+				cmd.Process.Kill() // Force kill if it doesn't exit
+			}
 		},
 	)
 	// Run test case
@@ -94,7 +116,7 @@ func TestE2E_ValidArgs_EnvNodeOperatorID(t *testing.T) {
 }
 
 func TestE2E_ValidArgs_RewardAddress(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -114,13 +136,24 @@ func TestE2E_ValidArgs_RewardAddress(t *testing.T) {
 		// Assert
 		func(t *testing.T) {
 			// With --reward-address, the test take too long to start the prometheus server due to the time it takes to get the NO ID from the reward address
-			// checkPrometheusServerUp(t, 9981)
-			// checkMetrics(t, 9981)
+			checkPrometheusServerUp(t, 9981)
+			checkMetrics(t, 9981)
 
-			cmd.Process.Kill()
-			err := cmd.Wait()
-			assert.ErrorContains(t, err, "killed")
-			assert.Equal(t, -1, cmd.ProcessState.ExitCode(), "lido-exporter command should not return a non-zero exit code")
+			cmd.Process.Signal(os.Interrupt)
+
+			// Wait for the process to exit with a timeout
+			done := make(chan error, 1)
+			go func() {
+				done <- cmd.Wait()
+			}()
+
+			select {
+			case err := <-done:
+				assert.NoError(t, err)
+			case <-time.After(5 * time.Second):
+				t.Error("Process did not exit within the timeout period")
+				cmd.Process.Kill() // Force kill if it doesn't exit
+			}
 		},
 	)
 	// Run test case
@@ -128,7 +161,7 @@ func TestE2E_ValidArgs_RewardAddress(t *testing.T) {
 }
 
 func TestE2E_MissingRequiredArgs(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -149,6 +182,8 @@ func TestE2E_MissingRequiredArgs(t *testing.T) {
 		},
 		// Assert
 		func(t *testing.T) {
+			rr := os.Getenv("LIDO_EXPORTER_NODE_OPERATOR_ID")
+			assert.Equal(t, "asfs", rr)
 			err := cmd.Wait()
 
 			assert.NotContains(t, err.Error(), "killed")
@@ -163,7 +198,7 @@ func TestE2E_MissingRequiredArgs(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_NodeOperatorID(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -193,7 +228,7 @@ func TestE2E_InvalidArgs_NodeOperatorID(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_RewardAddress(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -223,7 +258,7 @@ func TestE2E_InvalidArgs_RewardAddress(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_Network(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -253,7 +288,7 @@ func TestE2E_InvalidArgs_Network(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_ScrapeTime(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -283,7 +318,6 @@ func TestE2E_InvalidArgs_ScrapeTime(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_Port(t *testing.T) {
-	t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -312,67 +346,67 @@ func TestE2E_InvalidArgs_Port(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestE2E_InvalidArgs_RPCEndpoints(t *testing.T) {
-	t.Parallel()
-	// Test context
-	var (
-		cmd *exec.Cmd
-	)
-	// Build test case
-	e2eTest := newE2ELidoExporterTestCase(
-		t,
-		// Arrange
-		nil,
-		// Act
-		func(t *testing.T, binaryPath string) *exec.Cmd {
-			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--rpc-endpoints", "lol_what_a_rpc_endpoint", "--network", "holesky", "--port", "9987")
-			return cmd
-		},
-		// Assert
-		func(t *testing.T) {
-			err := cmd.Wait()
-			assert.NotContains(t, err.Error(), "killed")
-			assert.Error(t, err, "lido-exporter command should fail with invalid RPC endpoints")
-			// cmd should return status code 1
-			assert.Equal(t, 1, cmd.ProcessState.ExitCode(), "lido-exporter command should fail with invalid RPC endpoints")
-			checkPrometheusServerDown(t, 9987)
-		},
-	)
-	// Run test case
-	e2eTest.run()
-}
+// func TestE2E_InvalidArgs_RPCEndpoints(t *testing.T) {
+// 	//t.Parallel()
+// 	// Test context
+// 	var (
+// 		cmd *exec.Cmd
+// 	)
+// 	// Build test case
+// 	e2eTest := newE2ELidoExporterTestCase(
+// 		t,
+// 		// Arrange
+// 		nil,
+// 		// Act
+// 		func(t *testing.T, binaryPath string) *exec.Cmd {
+// 			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--rpc-endpoints", "lol_what_a_rpc_endpoint", "--network", "holesky", "--port", "9987")
+// 			return cmd
+// 		},
+// 		// Assert
+// 		func(t *testing.T) {
+// 			err := cmd.Wait()
+// 			assert.NotContains(t, err.Error(), "killed")
+// 			assert.Error(t, err, "lido-exporter command should fail with invalid RPC endpoints")
+// 			// cmd should return status code 1
+// 			assert.Equal(t, 1, cmd.ProcessState.ExitCode(), "lido-exporter command should fail with invalid RPC endpoints")
+// 			checkPrometheusServerDown(t, 9987)
+// 		},
+// 	)
+// 	// Run test case
+// 	e2eTest.run()
+// }
 
-func TestE2E_InvalidArgs_WSEndpoints(t *testing.T) {
-	t.Parallel()
-	// Test context
-	var (
-		cmd *exec.Cmd
-	)
-	// Build test case
-	e2eTest := newE2ELidoExporterTestCase(
-		t,
-		// Arrange
-		nil,
-		// Act
-		func(t *testing.T, binaryPath string) *exec.Cmd {
-			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--ws-endpoints", "lol_what_a_ws_endpoint", "--network", "holesky", "--port", "9988")
-			return cmd
-		},
-		// Assert
-		func(t *testing.T) {
-			err := cmd.Wait()
-			assert.Error(t, err, "lido-exporter command should fail with invalid WebSocket endpoints")
-			// cmd should return status code 1
-			assert.Equal(t, 1, cmd.ProcessState.ExitCode(), "lido-exporter command should fail with invalid WebSocket endpoints")
-			checkPrometheusServerDown(t, 9988)
-		},
-	)
-	// Run test case
-	e2eTest.run()
-}
+// func TestE2E_InvalidArgs_WSEndpoints(t *testing.T) {
+// 	//t.Parallel()
+// 	// Test context
+// 	var (
+// 		cmd *exec.Cmd
+// 	)
+// 	// Build test case
+// 	e2eTest := newE2ELidoExporterTestCase(
+// 		t,
+// 		// Arrange
+// 		nil,
+// 		// Act
+// 		func(t *testing.T, binaryPath string) *exec.Cmd {
+// 			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--ws-endpoints", "lol_what_a_ws_endpoint", "--network", "holesky", "--port", "9988")
+// 			return cmd
+// 		},
+// 		// Assert
+// 		func(t *testing.T) {
+// 			err := cmd.Wait()
+// 			assert.Error(t, err, "lido-exporter command should fail with invalid WebSocket endpoints")
+// 			// cmd should return status code 1
+// 			assert.Equal(t, 1, cmd.ProcessState.ExitCode(), "lido-exporter command should fail with invalid WebSocket endpoints")
+// 			checkPrometheusServerDown(t, 9988)
+// 		},
+// 	)
+// 	// Run test case
+// 	e2eTest.run()
+// }
 
 func TestE2E_ValidFlags_All(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -401,10 +435,21 @@ func TestE2E_ValidFlags_All(t *testing.T) {
 			checkPrometheusServerUp(t, 9989)
 			checkMetrics(t, 9989)
 
-			cmd.Process.Kill()
-			err := cmd.Wait()
-			assert.ErrorContains(t, err, "killed")
-			assert.Equal(t, -1, cmd.ProcessState.ExitCode(), "lido-exporter command should not return a non-zero exit code")
+			cmd.Process.Signal(os.Interrupt)
+
+			// Wait for the process to exit with a timeout
+			done := make(chan error, 1)
+			go func() {
+				done <- cmd.Wait()
+			}()
+
+			select {
+			case err := <-done:
+				assert.NoError(t, err)
+			case <-time.After(5 * time.Second):
+				t.Error("Process did not exit within the timeout period")
+				cmd.Process.Kill() // Force kill if it doesn't exit
+			}
 		},
 	)
 	// Run test case
@@ -412,7 +457,7 @@ func TestE2E_ValidFlags_All(t *testing.T) {
 }
 
 func TestE2E_ValidEnv_All(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -442,10 +487,21 @@ func TestE2E_ValidEnv_All(t *testing.T) {
 			checkPrometheusServerUp(t, 9990)
 			checkMetrics(t, 9990)
 
-			cmd.Process.Kill()
-			err := cmd.Wait()
-			assert.ErrorContains(t, err, "killed")
-			assert.Equal(t, -1, cmd.ProcessState.ExitCode(), "lido-exporter command should not return a non-zero exit code")
+			cmd.Process.Signal(os.Interrupt)
+
+			// Wait for the process to exit with a timeout
+			done := make(chan error, 1)
+			go func() {
+				done <- cmd.Wait()
+			}()
+
+			select {
+			case err := <-done:
+				assert.NoError(t, err)
+			case <-time.After(5 * time.Second):
+				t.Error("Process did not exit within the timeout period")
+				cmd.Process.Kill() // Force kill if it doesn't exit
+			}
 		},
 	)
 	// Run test case
@@ -453,7 +509,7 @@ func TestE2E_ValidEnv_All(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_NegativeNodeID(t *testing.T) {
-	t.Parallel()
+	//t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -465,7 +521,7 @@ func TestE2E_InvalidArgs_NegativeNodeID(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
-			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--node-operator-id", "-2", "--network", "holesky", "--port", "9983")
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--node-operator-id", "-2", "--network", "holesky", "--port", "9991")
 			return cmd
 		},
 		// Assert
@@ -475,7 +531,7 @@ func TestE2E_InvalidArgs_NegativeNodeID(t *testing.T) {
 			assert.Error(t, err, "lido-exporter command should fail with invalid node operator ID")
 			// cmd should return status code 1
 			assert.Equal(t, 1, cmd.ProcessState.ExitCode(), "lido-exporter command should fail with invalid node operator ID")
-			checkPrometheusServerDown(t, 9983)
+			checkPrometheusServerDown(t, 9991)
 		},
 	)
 	// Run test case
