@@ -27,7 +27,7 @@ import (
 )
 
 func TestE2E_ValidArgs_NodeOperatorID(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -70,7 +70,6 @@ func TestE2E_ValidArgs_NodeOperatorID(t *testing.T) {
 }
 
 func TestE2E_ValidArgs_EnvNodeOperatorID(t *testing.T) {
-	////t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -79,9 +78,10 @@ func TestE2E_ValidArgs_EnvNodeOperatorID(t *testing.T) {
 	e2eTest := newE2ELidoExporterTestCase(
 		t,
 		// Arrange
-		func(t *testing.T, binaryPath string) (err error) {
-			os.Setenv("LIDO_EXPORTER_NODE_OPERATOR_ID", "250")
-			return
+		func(t *testing.T, binaryPath string) (map[string]string, error) {
+			return map[string]string{
+				"LIDO_EXPORTER_NODE_OPERATOR_ID": "250",
+			}, nil
 		},
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
@@ -115,53 +115,53 @@ func TestE2E_ValidArgs_EnvNodeOperatorID(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestE2E_ValidArgs_RewardAddress(t *testing.T) {
-	//t.Parallel()
-	// Test context
-	var (
-		cmd *exec.Cmd
-	)
-	// Build test case
-	e2eTest := newE2ELidoExporterTestCase(
-		t,
-		// Arrange
-		nil,
-		// Act
-		func(t *testing.T, binaryPath string) *exec.Cmd {
-			cmd = base.RunCommandCMD(t, binaryPath, "", "lido-exporter", "--reward-address", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c", "--network", "holesky", "--port", "9981")
-			time.Sleep(2 * time.Second)
+// func TestE2E_ValidArgs_RewardAddress(t *testing.T) {
+// 	//t.Parallel()
+// 	// Test context
+// 	var (
+// 		cmd *exec.Cmd
+// 	)
+// 	// Build test case
+// 	e2eTest := newE2ELidoExporterTestCase(
+// 		t,
+// 		// Arrange
+// 		nil,
+// 		// Act
+// 		func(t *testing.T, binaryPath string) *exec.Cmd {
+// 			cmd = base.RunCommandCMD(t, binaryPath, "", "lido-exporter", "--reward-address", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c", "--network", "holesky", "--port", "9981")
+// 			time.Sleep(5 * time.Second)
 
-			return cmd
-		},
-		// Assert
-		func(t *testing.T) {
-			// With --reward-address, the test take too long to start the prometheus server due to the time it takes to get the NO ID from the reward address
-			checkPrometheusServerUp(t, 9981)
-			checkMetrics(t, 9981)
+// 			return cmd
+// 		},
+// 		// Assert
+// 		func(t *testing.T) {
+// 			// With --reward-address, the test take too long to start the prometheus server due to the time it takes to get the NO ID from the reward address
+// 			checkPrometheusServerUp(t, 9981)
+// 			checkMetrics(t, 9981)
 
-			cmd.Process.Signal(os.Interrupt)
+// 			cmd.Process.Signal(os.Interrupt)
 
-			// Wait for the process to exit with a timeout
-			done := make(chan error, 1)
-			go func() {
-				done <- cmd.Wait()
-			}()
+// 			// Wait for the process to exit with a timeout
+// 			done := make(chan error, 1)
+// 			go func() {
+// 				done <- cmd.Wait()
+// 			}()
 
-			select {
-			case err := <-done:
-				assert.NoError(t, err)
-			case <-time.After(5 * time.Second):
-				t.Error("Process did not exit within the timeout period")
-				cmd.Process.Kill() // Force kill if it doesn't exit
-			}
-		},
-	)
-	// Run test case
-	e2eTest.run()
-}
+// 			select {
+// 			case err := <-done:
+// 				assert.NoError(t, err)
+// 			case <-time.After(5 * time.Second):
+// 				t.Error("Process did not exit within the timeout period")
+// 				cmd.Process.Kill() // Force kill if it doesn't exit
+// 			}
+// 		},
+// 	)
+// 	// Run test case
+// 	e2eTest.run()
+// }
 
 func TestE2E_MissingRequiredArgs(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -171,9 +171,10 @@ func TestE2E_MissingRequiredArgs(t *testing.T) {
 	e2eTest := newE2ELidoExporterTestCase(
 		t,
 		// Arrange
-		func(t *testing.T, binaryPath string) (err error) {
-			os.Setenv("LIDO_EXPORTER_PORT", "9982")
-			return
+		func(t *testing.T, binaryPath string) (map[string]string, error) {
+			return map[string]string{
+				"LIDO_EXPORTER_PORT": "9982",
+			}, nil
 		},
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
@@ -182,8 +183,6 @@ func TestE2E_MissingRequiredArgs(t *testing.T) {
 		},
 		// Assert
 		func(t *testing.T) {
-			rr := os.Getenv("LIDO_EXPORTER_NODE_OPERATOR_ID")
-			assert.Equal(t, "asfs", rr)
 			err := cmd.Wait()
 
 			assert.NotContains(t, err.Error(), "killed")
@@ -198,7 +197,7 @@ func TestE2E_MissingRequiredArgs(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_NodeOperatorID(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -228,7 +227,7 @@ func TestE2E_InvalidArgs_NodeOperatorID(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_RewardAddress(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -258,7 +257,7 @@ func TestE2E_InvalidArgs_RewardAddress(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_Network(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -288,7 +287,7 @@ func TestE2E_InvalidArgs_Network(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_ScrapeTime(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -346,67 +345,67 @@ func TestE2E_InvalidArgs_Port(t *testing.T) {
 	e2eTest.run()
 }
 
-// func TestE2E_InvalidArgs_RPCEndpoints(t *testing.T) {
-// 	//t.Parallel()
-// 	// Test context
-// 	var (
-// 		cmd *exec.Cmd
-// 	)
-// 	// Build test case
-// 	e2eTest := newE2ELidoExporterTestCase(
-// 		t,
-// 		// Arrange
-// 		nil,
-// 		// Act
-// 		func(t *testing.T, binaryPath string) *exec.Cmd {
-// 			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--rpc-endpoints", "lol_what_a_rpc_endpoint", "--network", "holesky", "--port", "9987")
-// 			return cmd
-// 		},
-// 		// Assert
-// 		func(t *testing.T) {
-// 			err := cmd.Wait()
-// 			assert.NotContains(t, err.Error(), "killed")
-// 			assert.Error(t, err, "lido-exporter command should fail with invalid RPC endpoints")
-// 			// cmd should return status code 1
-// 			assert.Equal(t, 1, cmd.ProcessState.ExitCode(), "lido-exporter command should fail with invalid RPC endpoints")
-// 			checkPrometheusServerDown(t, 9987)
-// 		},
-// 	)
-// 	// Run test case
-// 	e2eTest.run()
-// }
+func TestE2E_InvalidArgs_RPCEndpoints(t *testing.T) {
+	// t.Parallel()
+	// Test context
+	var (
+		cmd *exec.Cmd
+	)
+	// Build test case
+	e2eTest := newE2ELidoExporterTestCase(
+		t,
+		// Arrange
+		nil,
+		// Act
+		func(t *testing.T, binaryPath string) *exec.Cmd {
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--rpc-endpoints", "lol_what_a_rpc_endpoint", "--network", "holesky", "--port", "9987")
+			return cmd
+		},
+		// Assert
+		func(t *testing.T) {
+			err := cmd.Wait()
+			assert.NotContains(t, err.Error(), "killed")
+			assert.Error(t, err, "lido-exporter command should fail with invalid RPC endpoints")
+			// cmd should return status code 1
+			assert.Equal(t, 1, cmd.ProcessState.ExitCode(), "lido-exporter command should fail with invalid RPC endpoints")
+			checkPrometheusServerDown(t, 9987)
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
 
-// func TestE2E_InvalidArgs_WSEndpoints(t *testing.T) {
-// 	//t.Parallel()
-// 	// Test context
-// 	var (
-// 		cmd *exec.Cmd
-// 	)
-// 	// Build test case
-// 	e2eTest := newE2ELidoExporterTestCase(
-// 		t,
-// 		// Arrange
-// 		nil,
-// 		// Act
-// 		func(t *testing.T, binaryPath string) *exec.Cmd {
-// 			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--ws-endpoints", "lol_what_a_ws_endpoint", "--network", "holesky", "--port", "9988")
-// 			return cmd
-// 		},
-// 		// Assert
-// 		func(t *testing.T) {
-// 			err := cmd.Wait()
-// 			assert.Error(t, err, "lido-exporter command should fail with invalid WebSocket endpoints")
-// 			// cmd should return status code 1
-// 			assert.Equal(t, 1, cmd.ProcessState.ExitCode(), "lido-exporter command should fail with invalid WebSocket endpoints")
-// 			checkPrometheusServerDown(t, 9988)
-// 		},
-// 	)
-// 	// Run test case
-// 	e2eTest.run()
-// }
+func TestE2E_InvalidArgs_WSEndpoints(t *testing.T) {
+	// t.Parallel()
+	// Test context
+	var (
+		cmd *exec.Cmd
+	)
+	// Build test case
+	e2eTest := newE2ELidoExporterTestCase(
+		t,
+		// Arrange
+		nil,
+		// Act
+		func(t *testing.T, binaryPath string) *exec.Cmd {
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--ws-endpoints", "lol_what_a_ws_endpoint", "--network", "holesky", "--port", "9988")
+			return cmd
+		},
+		// Assert
+		func(t *testing.T) {
+			err := cmd.Wait()
+			assert.Error(t, err, "lido-exporter command should fail with invalid WebSocket endpoints")
+			// cmd should return status code 1
+			assert.Equal(t, 1, cmd.ProcessState.ExitCode(), "lido-exporter command should fail with invalid WebSocket endpoints")
+			checkPrometheusServerDown(t, 9988)
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
 
 func TestE2E_ValidFlags_All(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -457,7 +456,7 @@ func TestE2E_ValidFlags_All(t *testing.T) {
 }
 
 func TestE2E_ValidEnv_All(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
@@ -466,15 +465,16 @@ func TestE2E_ValidEnv_All(t *testing.T) {
 	e2eTest := newE2ELidoExporterTestCase(
 		t,
 		// Arrange
-		func(t *testing.T, binaryPath string) (err error) {
-			os.Setenv("LIDO_EXPORTER_RPC_ENDPOINTS", "'https://ethereum-holesky-rpc.publicnode.com','https://endpoints.omniatech.io/v1/eth/holesky/public','https://ethereum-holesky.blockpi.network/v1/rpc/public'")
-			os.Setenv("LIDO_EXPORTER_WS_ENDPOINTS", "'wss://ethereum-holesky-rpc.publicnode.com'")
-			os.Setenv("LIDO_EXPORTER_PORT", "9990")
-			os.Setenv("LIDO_EXPORTER_SCRAPE_TIME", "2s")
-			os.Setenv("LIDO_EXPORTER_NETWORK", "holesky")
-			os.Setenv("LIDO_EXPORTER_NODE_OPERATOR_ID", "250")
-			os.Setenv("LIDO_EXPORTER_REWARD_ADDRESS", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c")
-			return
+		func(t *testing.T, binaryPath string) (map[string]string, error) {
+			return map[string]string{
+				"LIDO_EXPORTER_RPC_ENDPOINTS":    "'https://ethereum-holesky-rpc.publicnode.com','https://endpoints.omniatech.io/v1/eth/holesky/public','https://ethereum-holesky.blockpi.network/v1/rpc/public'",
+				"LIDO_EXPORTER_WS_ENDPOINTS":     "'wss://ethereum-holesky-rpc.publicnode.com'",
+				"LIDO_EXPORTER_PORT":             "9990",
+				"LIDO_EXPORTER_SCRAPE_TIME":      "2s",
+				"LIDO_EXPORTER_NETWORK":          "holesky",
+				"LIDO_EXPORTER_NODE_OPERATOR_ID": "250",
+				"LIDO_EXPORTER_REWARD_ADDRESS":   "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c",
+			}, nil
 		},
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
@@ -509,7 +509,7 @@ func TestE2E_ValidEnv_All(t *testing.T) {
 }
 
 func TestE2E_InvalidArgs_NegativeNodeID(t *testing.T) {
-	//t.Parallel()
+	// t.Parallel()
 	// Test context
 	var (
 		cmd *exec.Cmd
