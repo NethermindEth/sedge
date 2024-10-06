@@ -10,13 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - New command `lido-status` to display data of Lido Node Operator.
 - Monitoring stack setup with Grafana, Prometheus, and Node Exporter.
+- Security policy.
 - Support for Nimbus as Consensus and Validator client. 
 
 ### Changed
 - Update Go version from 1.21 to 1.22.
+- Update documentation versions and dependencies.
 
 ### Fixed
 -  Teku and Lighthouse import keys container error on Windows.
+-  Security issues on dependencies.
+-  Typos on documentation.
 
 ## [v1.5.0] - 2024-09-06
 

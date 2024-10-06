@@ -15,8 +15,8 @@ limitations under the License.
 */
 package monitoring
 
-//go:generate mockgen -package=sedge_mocks -destination=../../mocks/monitoringService.go github.com/NethermindEth/sedge/internal/monitoring ServiceAPI
+//go:generate mockgen -package=mocks -destination=./mocks/monitoringService.go github.com/NethermindEth/sedge/internal/monitoring ServiceAPI
 
-//go:generate mockgen -package=sedge_mocks -destination=../../mocks/composeManager.go github.com/NethermindEth/sedge/internal/monitoring ComposeManager
+//go:generate mockgen -package=mocks -destination=./mocks/composeManager.go github.com/NethermindEth/sedge/internal/monitoring ComposeManager
 
-//go:generate mockgen -package=sedge_mocks -destination=../../mocks/dockerManager.go github.com/NethermindEth/sedge/internal/monitoring DockerServiceManager
+//go:generate mockgen -package=mocks -destination=./mocks/dockerManager.go github.com/NethermindEth/sedge/internal/monitoring DockerServiceManager

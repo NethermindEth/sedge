@@ -273,6 +273,10 @@ Please check our [Contributing Guidelines](https://docs.sedge.nethermind.io/docs
 
 If you know of any good tricks for validator setup that other people could also use well, please consider adding it to Sedge. Your efforts will be greatly appreciated by the community.
 
+## 🛡️ Security 
+
+If you believe you have found a security vulnerability in our code, please report it to us as described in our [security policy](SECURITY.md).
+
 ## ⚠️ License
 
 Sedge is a Nethermind free and open-source software licensed under the [Apache 2.0 License](https://github.com/NethermindEth/sedge/blob/main/LICENSE).

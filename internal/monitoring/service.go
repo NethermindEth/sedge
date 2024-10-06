@@ -50,4 +50,7 @@ type ServiceAPI interface {
 
 	// Endpoint returns the endpoint of the service.
 	Endpoint() string
+
+	// Name returns the name of the service.
+	Name() string
 }

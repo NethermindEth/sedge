@@ -76,7 +76,7 @@ func main() {
 		prometheus.NewPrometheus(),
 		node_exporter.NewNodeExporter(),
 	}
-	monitoringManager := monitoring.NewMonitoringManager(
+	monitoringMgr := monitoring.NewMonitoringManager(
 		monitoringServices,
 		composeManager,
 		dockerServiceManager,
@@ -93,7 +93,7 @@ func main() {
 
 	sedgeCmd := cli.RootCmd()
 	sedgeCmd.AddCommand(
-		cli.CliCmd(prompt, sedgeActions, depsMgr),
+		cli.CliCmd(prompt, sedgeActions, depsMgr, monitoringMgr),
 		cli.KeysCmd(cmdRunner, prompt),
 		cli.DownCmd(cmdRunner, sedgeActions, depsMgr),
 		cli.ClientsCmd(),
@@ -108,7 +108,7 @@ func main() {
 		cli.DependenciesCommand(depsMgr),
 		cli.ShowCmd(cmdRunner, sedgeActions, depsMgr),
 		cli.LidoStatusCmd(),
-		cli.MonitoringCmd(monitoringManager),
+		cli.MonitoringCmd(monitoringMgr),
 	)
 	sedgeCmd.SilenceErrors = true
 	sedgeCmd.SilenceUsage = true
