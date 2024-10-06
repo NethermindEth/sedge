@@ -122,30 +122,11 @@ services:
           fi
         done
       "
-  validator-import:
-    container_name: validator-import-client
-    build:
-      context: github.com/NethermindEth/lighthouse-init-validator
-      args:
-        LH_VERSION: ${VL_IMAGE_VERSION}
-        NETWORK: ${NETWORK}
-    networks:
-    - sedge
-    volumes:
-    - ${KEYSTORE_DIR}:/keystore
-    - ${VL_DATA_DIR}:/data
-    logging:
-      driver: json-file
-      options:
-        max-size: 10m
-        max-file: "10"
   validator:
     container_name: validator-client
     image: ${VL_IMAGE_VERSION}
     restart: unless-stopped
     depends_on:
-      validator-import:
-        condition: service_completed_successfully
       validator-blocker:
         condition: service_completed_successfully
       consensus:
