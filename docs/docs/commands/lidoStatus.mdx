@@ -1,0 +1,35 @@
+---
+sidebar_position: 15
+id: lido-status
+---
+
+# Lido Status
+
+Running `sedge lido-status` will display detailed data for a single Lido Node Operator based on the provided rewards address. 
+Including information on the node operator's status, queue details, bond and reward information, and any relevant alerts.
+
+## Help
+
+```
+$ sedge lido-status -h
+This command retrieves and displays the status and detailed information of Lido Node Operators. 
+
+This information includes:
+- Node Operator ID.
+- Keys and queue information: available for deposit (in the queue), stuck, refunded, exited, deposited.
+- Bond and rewards information: total amount, amounts lower and higher than required, non-claimed rewards.
+
+Valid args: reward address of Node Operator (rewards recipient)
+
+Usage:
+  sedge lido-status [flags] [args]
+
+Flags:
+  -n, --network string   Target network. e.g. holesky, mainnet etc. (default "holesky")
+      --l                Show detailed descriptions for each value
+  -i, --nodeID int       Your Node Operator ID (optional) (default -1)
+  -h, --help             help for lido-status
+
+Global Flags:
+      --log-level string   Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
+```

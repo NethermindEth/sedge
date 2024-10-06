@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- New command `lido-status` to display data of Lido Node Operator.
+- Monitoring stack setup with Grafana, Prometheus, and Node Exporter.
+
+### Changed
+- Update Go version from 1.21 to 1.22.
+
+### Fixed
+-  Teku and Lighthouse import keys container error on Windows.
+
+## [v1.5.0] - 2024-09-06
+
+### Added
+- Add support for Optimism and Base, using Nethermind Client on Mainnet and Sepolia.
+
+### Changed
+- Update client images to latest versions.
+
+#### Fixed
+- Remove Peer upper limit of peers on CL
+
+##  [v1.4.0] - 2024-07-10
+
 ### Fixed
 - Remove arguments for Lighthouse `--eth1` flag.
 
@@ -20,13 +43,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update client images to Dencun-ready versions. 
+- Update client images to Dencun-ready versions.
 - Renamed `--eth1-withdrawal-address` flag from `sedge keys` to `--eth-withdrawal-address`.
 - Update client images to latest versions.
 
 ### Removed
 
-- Removed support for Goerli. 
+- Removed support for Goerli.
+
+
+## [v1.3.2] - 2024-03-08
+
+### Changed
+
+- Update client images to Dencun-ready versions.
 
 ## [v1.3.1] - 2024-02-14
 
