@@ -17,10 +17,11 @@ package e2e
 
 import (
 	"fmt"
-	"github.com/NethermindEth/sedge/internal/utils"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/NethermindEth/sedge/internal/utils"
 
 	"github.com/NethermindEth/sedge/internal/lido/contracts"
 	"github.com/NethermindEth/sedge/internal/lido/contracts/mevboostrelaylist"
