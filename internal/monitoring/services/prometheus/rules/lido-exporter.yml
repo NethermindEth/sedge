@@ -36,5 +36,5 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Exit request detected"
-          description: "An exit request has been detected for node operator {{ $labels.node_operator_id }}. Prompt action is required to exit the requested validators."
+          summary: "Exit requests detected"
+          description: "One or more exit requests have been detected for node operator {{ $labels.node_operator_id }}. Prompt action is required to exit the requested validators."
