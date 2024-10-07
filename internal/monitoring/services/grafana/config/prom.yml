@@ -11,7 +11,7 @@ datasources:
       httpMethod: POST
       manageAlerts: true
       prometheusType: Prometheus
-      prometheusVersion: 2.37.0
+      prometheusVersion: 2.54.1
       incrementalQuerying: true
       incrementalQueryOverlapWindow: 10m
       cacheLevel: 'High'

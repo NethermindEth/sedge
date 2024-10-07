@@ -197,3 +197,7 @@ func (g *GrafanaService) ContainerName() string {
 func (g *GrafanaService) Endpoint() string {
 	return fmt.Sprintf("http://%s:%d", g.containerIP, g.port)
 }
+
+func (g *GrafanaService) Name() string {
+	return monitoring.GrafanaServiceName
+}
