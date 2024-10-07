@@ -13,17 +13,24 @@ jobs:
 
     steps:
       - name: Checkout Sedge repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Authenticate App
+        id: gh-app
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Run update check script
         run: chmod +x ./scripts/check-image-updates.sh && ./scripts/check-image-updates.sh
         env:
-          PAT: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
+          PAT: ${{ steps.gh-app.outputs.token }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
+          token: ${{ steps.gh-app.outputs.token }}
           commit-message: Update image versions to latest version.
           title: "[Update] Update image versions"
           reviewers: AntiD2ta, adriantpaez, stdevMac, cbermudez97 
