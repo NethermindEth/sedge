@@ -4,6 +4,7 @@ import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import styled from '@emotion/styled';
 import { ArrowUpRight as LinkIcon, BookOpen, HelpCircle, Info } from 'react-feather';
+import SearchBar from '@theme/SearchBar';
 import {QuickLinks} from "../components/QuickLinks";
 import {SupportedNetworks} from "../components/SupportedNetworks";
 import {Header} from "../components/Header";
