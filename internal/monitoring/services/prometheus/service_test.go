@@ -586,10 +586,15 @@ func TestAddTarget(t *testing.T) {
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
 				)
+				for i := 0; i < 5; i++ {
+					gomock.InOrder(
+						locker.EXPECT().Lock().Return(nil),
+						locker.EXPECT().Locked().Return(true),
+						locker.EXPECT().Unlock().Return(nil),
+					)
+				}
+
 				locker.EXPECT().Lock().Return(fmt.Errorf("error"))
 				return locker
 			},
@@ -622,10 +627,14 @@ func TestAddTarget(t *testing.T) {
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(true),
 					locker.EXPECT().Unlock().Return(nil),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
 				)
+				for i := 0; i < 5; i++ {
+					gomock.InOrder(
+						locker.EXPECT().Lock().Return(nil),
+						locker.EXPECT().Locked().Return(true),
+						locker.EXPECT().Unlock().Return(nil),
+					)
+				}
 				gomock.InOrder(
 					locker.EXPECT().Lock().Return(nil),
 					locker.EXPECT().Locked().Return(false),
