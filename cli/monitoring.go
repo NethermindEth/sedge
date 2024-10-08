@@ -89,7 +89,7 @@ func LidoSubCmd(mgr MonitoringManager, additionalServices []monitoring.ServiceAP
 	cmd.Flags().StringVar(&lido.Network, "network", "holesky", "Network name")
 	cmd.Flags().StringSliceVar(&lido.RPCEndpoints, "rpc-endpoints", nil, "List of Ethereum HTTP RPC endpoints")
 	cmd.Flags().StringSliceVar(&lido.WSEndpoints, "ws-endpoints", nil, "List of Ethereum WebSocket RPC endpoints")
-	cmd.Flags().Uint16Var(&lido.Port, "port", 8080, "Port where the metrics will be exported.")
+	cmd.Flags().Uint16Var(&lido.Port, "port", 8088, "Port where the metrics will be exported.")
 	cmd.Flags().DurationVar(&lido.ScrapeTime, "scrape-time", 30*time.Second, "Time interval for scraping metrics. Values should be in the format of 10s, 1m, 1h, etc.")
 	cmd.Flags().StringVar(&logLevel, "log-level", "info", "Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace")
 

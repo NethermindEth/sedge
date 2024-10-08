@@ -4,7 +4,7 @@
     image: ${LIDO_EXPORTER_IMAGE}
     restart: unless-stopped
     ports:
-      - ${LIDO_EXPORTER_PORT}:8080
+      - ${LIDO_EXPORTER_PORT}:8088
     environment:
       - LIDO_EXPORTER_NODE_OPERATOR_ID=${LIDO_EXPORTER_NODE_OPERATOR_ID}
       - LIDO_EXPORTER_REWARD_ADDRESS=${LIDO_EXPORTER_REWARD_ADDRESS}
