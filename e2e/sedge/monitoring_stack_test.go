@@ -16,14 +16,22 @@ limitations under the License.
 package e2e
 
 import (
+	"runtime"
 	"testing"
 
 	base "github.com/NethermindEth/sedge/e2e"
 	"github.com/stretchr/testify/assert"
 )
 
+func skipIfNotAMD64(t *testing.T) {
+	if runtime.GOARCH != "amd64" {
+		t.Skip("Skipping test on non-AMD64 architecture")
+	}
+}
+
 // TestMonitoringStack_Init tests that the monitoring stack is not initialized if the user does not run the init-monitoring command
 func TestE2E_MonitoringStack_NotInitialized(t *testing.T) {
+	skipIfNotAMD64(t)
 	// Test context
 	var (
 		runErr error
@@ -51,6 +59,7 @@ func TestE2E_MonitoringStack_NotInitialized(t *testing.T) {
 
 // TestMonitoringStack_Init tests the monitoring stack initialization
 func TestE2E_MonitoringStack_Init(t *testing.T) {
+	skipIfNotAMD64(t)
 	// Test context
 	var (
 		runErr error
@@ -78,6 +87,7 @@ func TestE2E_MonitoringStack_Init(t *testing.T) {
 }
 
 func TestE2E_MonitoringStack_NotReinstalled(t *testing.T) {
+	skipIfNotAMD64(t)
 	// Test context
 	var (
 		grafanaContainerID      string
@@ -132,6 +142,7 @@ func TestE2E_MonitoringStack_NotReinstalled(t *testing.T) {
 }
 
 func TestE2E_MonitoringStack_Clean(t *testing.T) {
+	skipIfNotAMD64(t)
 	// Test context
 	var (
 		runErr error
@@ -163,6 +174,7 @@ func TestE2E_MonitoringStack_Clean(t *testing.T) {
 }
 
 func TestE2E_MonitoringStack_CleanNonExistent(t *testing.T) {
+	skipIfNotAMD64(t)
 	// Test context
 	var (
 		runErr error
@@ -192,6 +204,7 @@ func TestE2E_MonitoringStack_CleanNonExistent(t *testing.T) {
 }
 
 func TestE2E_MonitoringStack_InitLido(t *testing.T) {
+	skipIfNotAMD64(t)
 	// Test context
 	var (
 		runErr error
@@ -219,6 +232,7 @@ func TestE2E_MonitoringStack_InitLido(t *testing.T) {
 }
 
 func TestE2E_MonitoringStack_CleanLido(t *testing.T) {
+	skipIfNotAMD64(t)
 	// Test context
 	var (
 		runErr error
