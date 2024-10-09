@@ -223,7 +223,7 @@ func TestE2E_MonitoringStack_InitLido(t *testing.T) {
 			assert.NoError(t, runErr)
 			checkMonitoringStackDir(t)
 			checkMonitoringStackContainers(t, "sedge_lido_exporter")
-			checkPrometheusTargetsUp(t, "sedge_lido_exporter:8088", "sedge_node_exporter:9100")
+			checkPrometheusTargetsUp(t, "sedge_lido_exporter:8080", "sedge_node_exporter:9100")
 			checkGrafanaHealth(t)
 		},
 	)
