@@ -66,7 +66,7 @@ func TestNodeOperatorInfo(t *testing.T) {
 			"Valid NodeID, Holesky", "holesky", big.NewInt(13), "0xC870Fd7316956C1582A2c8Fd2c42552cCEC70C88", false,
 		},
 		{
-			"Valid Address, Holesky", "holesky", big.NewInt(4), "0xed1Fc097b5B9B007d40502e08aa0cddF477AaeaA", false,
+			"Valid Address, Holesky", "holesky", big.NewInt(4), "0xbA99F374C20A3475De737B466ee68Ad9C38c26AF", false,
 		},
 		{
 			"Invalid Address, Holesky", "holesky", big.NewInt(4), "0xC870Fd7316956C1582A2c8Fd2c46752cCEC70C99", true,
