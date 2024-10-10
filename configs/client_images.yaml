@@ -11,6 +11,9 @@ execution:
   erigon:
     name: thorax/erigon
     version: v2.60.6
+  reth:
+    name: ghcr.io/paradigmxyz/reth
+    version: v0.2.0-beta.6
 consensus:
   lighthouse:
     name: sigp/lighthouse

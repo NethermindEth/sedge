@@ -146,6 +146,7 @@ read more about it in [our documentation](https://docs.sedge.nethermind.io/docs/
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
+| Reth       |            |            |
 
 ### Sepolia
 
@@ -155,6 +156,7 @@ read more about it in [our documentation](https://docs.sedge.nethermind.io/docs/
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
+| Reth       |            |            |
 
 ### Holesky
 
@@ -164,6 +166,7 @@ read more about it in [our documentation](https://docs.sedge.nethermind.io/docs/
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Teku       | Teku       |
 | Besu       | Prysm      | Prysm      |
+| Reth       |            |            |
 
 ### Gnosis
 

@@ -93,7 +93,7 @@ func TestClients(t *testing.T) {
 			map[string][]string{
 				"consensus": {"lighthouse", "prysm", "teku", "lodestar"},
 				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
-				"execution": {"nethermind", "geth", "besu", "erigon"},
+				"execution": {"nethermind", "geth", "besu", "erigon", "reth"},
 			},
 			[]string{"consensus"},
 			"mainnet",
@@ -112,7 +112,7 @@ func TestClients(t *testing.T) {
 		{
 			map[string][]string{
 				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
-				"execution": {"nethermind", "geth", "besu", "erigon"},
+				"execution": {"nethermind", "geth", "besu", "erigon", "reth"},
 			},
 			[]string{"execution", "validator"},
 			"mainnet",
@@ -122,7 +122,7 @@ func TestClients(t *testing.T) {
 			map[string][]string{
 				"validator": {"lighthouse", "prysm", "teku", "lodestar"},
 				"consensus": {"lighthouse", "prysm", "teku", "lodestar"},
-				"execution": {"nethermind", "geth", "besu", "erigon"},
+				"execution": {"nethermind", "geth", "besu", "erigon", "reth"},
 			},
 			[]string{"consensus", "other"},
 			"mainnet",

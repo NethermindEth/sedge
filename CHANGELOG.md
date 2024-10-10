@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- Add support for Reth client
 - New command `lido-status` to display data of Lido Node Operator.
 - Monitoring stack setup with Grafana, Prometheus, and Node Exporter.
 - Security policy.
