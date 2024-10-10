@@ -66,7 +66,7 @@ func checkMonitoringStackNotInstalled(t *testing.T) {
 // checkMonitoringStackContainers checks that the monitoring stack containers are running
 func checkMonitoringStackContainers(t *testing.T, containerNames ...string) {
 	t.Logf("Checking monitoring stack containers")
-	containerNames = append(containerNames, "sedge_grafana", "sedge_prometheus", "sedge_node_exporter")
+	containerNames = append(containerNames, "sedge_grafana", "sedge_prometheus", "sedge_node_exporter", "sedge_alertmanager")
 	checkContainerRunning(t, containerNames...)
 }
 
@@ -168,7 +168,7 @@ func checkGrafanaHealth(t *testing.T) {
 // checkMonitoringStackContainersNotRunning checks that the monitoring stack containers are not running
 func checkMonitoringStackContainersNotRunning(t *testing.T, containerNames ...string) {
 	t.Logf("Checking monitoring stack containers are not running")
-	containerNames = append(containerNames, "sedge_grafana", "sedge_prometheus", "sedge_node_exporter")
+	containerNames = append(containerNames, "sedge_grafana", "sedge_prometheus", "sedge_node_exporter", "sedge_alertmanager")
 	checkContainerNotExisting(t, containerNames...)
 }
 
@@ -190,4 +190,20 @@ func checkContainerNotExisting(t *testing.T, containerNames ...string) {
 		_, err := dockerServiceManager.ContainerStatus(containerName)
 		assert.Error(t, err)
 	}
+}
+
+// checkMonitoringStackDir checks that the monitoring stack directory exists and contains the docker-compose file
+func checkPrometheusDir(t *testing.T) {
+	t.Logf("Checking prometheus directory")
+	// Check monitoring folder exists
+	dataDir, err := dataDirPath()
+	if err != nil {
+		t.Fatal(err)
+	}
+	prometheusDir := filepath.Join(dataDir, "monitoring", "prometheus")
+	assert.DirExists(t, prometheusDir)
+
+	assert.DirExists(t, filepath.Join(prometheusDir, "rules"))
+	// Check monitoring docker-compose file exists
+	assert.FileExists(t, filepath.Join(prometheusDir, "alertmanager", "alertmanager.yml"))
 }

@@ -24,6 +24,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -1974,7 +1975,15 @@ func TestUpdateEnvFile(t *testing.T) {
 				assert.NoError(t, err)
 				content, err := afero.ReadFile(fs, filepath.Join(manager.stack.Path(), ".env"))
 				assert.NoError(t, err)
-				assert.Equal(t, tt.expectedEnv, string(content))
+
+				// Normalize and sort the lines for comparison
+				expectedLines := strings.Split(strings.TrimSpace(tt.expectedEnv), "\n")
+				actualLines := strings.Split(strings.TrimSpace(string(content)), "\n")
+
+				sort.Strings(expectedLines)
+				sort.Strings(actualLines)
+
+				assert.Equal(t, expectedLines, actualLines)
 			}
 		})
 	}

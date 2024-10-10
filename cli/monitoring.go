@@ -18,6 +18,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -26,7 +27,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/common"
 	"github.com/NethermindEth/sedge/internal/monitoring"
 	lidoExporter "github.com/NethermindEth/sedge/internal/monitoring/services/lido_exporter"
-	"github.com/NethermindEth/sedge/internal/ui"
+	"github.com/NethermindEth/sedge/internal/utils"
 )
 
 func MonitoringCmd(mgr MonitoringManager) *cobra.Command {
@@ -74,8 +75,20 @@ func LidoSubCmd(mgr MonitoringManager, additionalServices []monitoring.ServiceAP
 			if lido.NodeOperatorID == "" && lido.RewardAddress == "" {
 				return errors.New("Node Operator ID or Reward Address is required")
 			}
-			if err := ui.EthAddressValidator(rewardAddress, false); err != nil && len(args) != 0 {
-				return err
+			if lido.NodeOperatorID != "" {
+				var nodeOperatorIDBigInt *big.Int
+				var ok bool
+				nodeOperatorIDBigInt, ok = new(big.Int).SetString(lido.NodeOperatorID, 10)
+				if !ok {
+					return errors.New("Failed to convert Node Operator ID to big.Int")
+				}
+				if nodeOperatorIDBigInt.Sign() < 0 { // Check if the value is negative
+					return errors.New("Node Operator ID cannot be negative")
+				}
+			} else {
+				if !utils.IsAddress(rewardAddress) {
+					return errors.New("Invalid reward address")
+				}
 			}
 			additionalServices = append(additionalServices, lidoExporter.NewLidoExporter(*lido))
 			return nil
