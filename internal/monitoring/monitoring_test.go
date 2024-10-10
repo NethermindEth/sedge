@@ -1998,7 +1998,7 @@ func TestValidateNewService(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			name: "exisitng service",
+			name: "existing service",
 			service: func(t *testing.T, ctrl *gomock.Controller) ServiceAPI {
 				promMock := mocks.NewMockServiceAPI(ctrl)
 
