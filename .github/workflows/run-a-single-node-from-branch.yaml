@@ -17,6 +17,8 @@ on:
           - holesky
           - volta
           - energyweb
+          - joc-mainnet
+          - joc-testnet
       cl_client:
         description: "Select Consensus Layer Client to run node against"
         default: ""

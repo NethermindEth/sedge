@@ -1,0 +1,10 @@
+{{/* docker-compose_base.tmpl */}}
+{{ define "env" }}
+# --- Global configuration ---
+NETWORK=joc-testnet{{if .WithMevBoostClient}}
+RELAY_URLS={{.RelayURLs}}{{end}}{{if .FeeRecipient}}
+FEE_RECIPIENT={{.FeeRecipient}}{{end}}
+{{template "execution" .}}
+{{template "consensus" .}}
+{{template "validator" .}}
+{{ end }}
