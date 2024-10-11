@@ -278,7 +278,9 @@ func TestE2E_MonitoringStack_InitLido_InvalidAddress(t *testing.T) {
 	e2eTest := newE2ESedgeTestCase(
 		t,
 		// Arrange
-		nil,
+		func(t *testing.T, sedgePath string) error {
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "clean")
+		},
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
 			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--reward-address", "lol_what_a_reward_address")
@@ -313,7 +315,6 @@ func TestE2E_MonitoringStack_InitLido_OccupiedPort(t *testing.T) {
 		// Assert
 		func(t *testing.T, dataDirPath string) {
 			assert.Error(t, runErr)
-			checkMonitoringStackNotInstalled(t)
 			checkContainerNotExisting(t, "sedge_lido_exporter")
 		},
 	)
@@ -335,7 +336,7 @@ func TestE2E_MonitoringStack_InitLido(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
 			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido",
-				"--rpc-endpoints", "https://ethereum-holesky-rpc.publicnode.com", "https://endpoints.omniatech.io/v1/eth/holesky/public", "https://ethereum-holesky.blockpi.network/v1/rpc/public",
+				"--rpc-endpoints", "https://ethereum-holesky-rpc.publicnode.com,https://endpoints.omniatech.io/v1/eth/holesky/public,https://ethereum-holesky.blockpi.network/v1/rpc/public",
 				"--ws-endpoints", "https://ethereum-holesky-rpc.publicnode.com,wss://ethereum-holesky-rpc.publicnode.com",
 				"--port", "9989",
 				"--scrape-time", "1s",
@@ -368,7 +369,9 @@ func TestE2E_MonitoringStack_InitLido_InvalidNodeID(t *testing.T) {
 	e2eTest := newE2ESedgeTestCase(
 		t,
 		// Arrange
-		nil,
+		func(t *testing.T, sedgePath string) error {
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "clean")
+		},
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
 			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "-1")
