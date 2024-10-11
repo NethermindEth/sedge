@@ -315,7 +315,7 @@ func TestE2E_MonitoringStack_InitLido_OccupiedPort(t *testing.T) {
 		// Assert
 		func(t *testing.T, dataDirPath string) {
 			assert.Error(t, runErr)
-			checkMonitoringStackContainersNotRunning(t, "sedge_lido_exporter")
+			checkContainerNotRunning(t, "sedge_lido_exporter")
 		},
 	)
 	// Run test case

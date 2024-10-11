@@ -207,3 +207,24 @@ func checkPrometheusDir(t *testing.T) {
 	// Check monitoring docker-compose file exists
 	assert.FileExists(t, filepath.Join(prometheusDir, "alertmanager", "alertmanager.yml"))
 }
+
+// checkContainerRunning checks that the given containers are running
+func checkContainerNotRunning(t *testing.T, containerNames ...string) {
+	cli, err := client.NewClientWithOpts(
+		client.FromEnv,
+		client.WithAPIVersionNegotiation(),
+	)
+	if err != nil {
+		t.Fatalf("Failed to create Docker client: %v", err)
+	}
+	defer cli.Close()
+
+	dockerServiceManager := services.NewDockerServiceManager(cli)
+
+	for _, containerName := range containerNames {
+		t.Logf("Checking %s container is not running", containerName)
+		isRunning, err := dockerServiceManager.IsRunning(containerName)
+		require.NoError(t, err)
+		assert.False(t, isRunning, "%s container should not be running", containerName)
+	}
+}
