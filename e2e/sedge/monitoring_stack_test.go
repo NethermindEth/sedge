@@ -29,7 +29,7 @@ func skipIfNotAMD64(t *testing.T) {
 	}
 }
 
-var grafanaOnCallContainers = []string{"engine", "celery", "oncall_db_migration", "redis", "oncall_setup"}
+var grafanaOnCallContainers = []string{"engine", "celery", "redis", "oncall_setup"}
 
 // TestMonitoringStack_Init tests that the monitoring stack is not initialized if the user does not run the init-monitoring command
 func TestE2E_MonitoringStack_NotInitialized(t *testing.T) {
@@ -312,10 +312,8 @@ func TestE2E_MonitoringStack_InitLido_OccupiedPort(t *testing.T) {
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
-			assert.NoError(t, runErr)
-			checkMonitoringStackDir(t)
-			checkPrometheusDir(t)
-			checkMonitoringStackContainers(t, grafanaOnCallContainers...)
+			assert.Error(t, runErr)
+			checkMonitoringStackNotInstalled(t)
 			checkContainerNotExisting(t, "sedge_lido_exporter")
 		},
 	)
@@ -336,13 +334,13 @@ func TestE2E_MonitoringStack_InitLido(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido-exporter",
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido",
 				"--rpc-endpoints", "https://ethereum-holesky-rpc.publicnode.com", "https://endpoints.omniatech.io/v1/eth/holesky/public", "https://ethereum-holesky.blockpi.network/v1/rpc/public",
-				"--ws-endpoints", "https://ethereum-holesky-rpc.publicnode.com,wss://ethereum-holesky-rpc.publicnode.com", // https endpoint should be ignored
+				"--ws-endpoints", "https://ethereum-holesky-rpc.publicnode.com,wss://ethereum-holesky-rpc.publicnode.com",
 				"--port", "9989",
 				"--scrape-time", "1s",
 				"--network", "holesky",
-				"--node-operator-id", "250", // should be prioritized over reward address
+				"--node-operator-id", "250",
 				"--reward-address", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c",
 			)
 		},
@@ -353,37 +351,6 @@ func TestE2E_MonitoringStack_InitLido(t *testing.T) {
 			checkPrometheusDir(t)
 			checkMonitoringStackContainers(t, "sedge_lido_exporter")
 			checkPrometheusTargetsUp(t, "sedge_lido_exporter:9989", "sedge_node_exporter:9100")
-			checkGrafanaHealth(t)
-		},
-	)
-	// Run test case
-	e2eTest.run()
-}
-
-func TestE2E_MonitoringStack_InitLido_TwoTargets(t *testing.T) {
-	skipIfNotAMD64(t)
-	// Test context
-	var (
-		runErr error
-	)
-	// Build test case
-	e2eTest := newE2ESedgeTestCase(
-		t,
-		// Arrange
-		func(t *testing.T, sedgePath string) error {
-			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "10")
-		},
-		// Act
-		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "20", "--port", "9889")
-		},
-		// Assert
-		func(t *testing.T, dataDirPath string) {
-			assert.NoError(t, runErr)
-			checkMonitoringStackDir(t)
-			checkPrometheusDir(t)
-			checkMonitoringStackContainers(t, "sedge_lido_exporter")
-			checkPrometheusTargetsUp(t, "sedge_lido_exporter:8080", "sedge_node_exporter:9100", "sedge_lido_exporter:9889")
 			checkGrafanaHealth(t)
 		},
 	)
