@@ -315,7 +315,7 @@ func TestE2E_MonitoringStack_InitLido_OccupiedPort(t *testing.T) {
 		// Assert
 		func(t *testing.T, dataDirPath string) {
 			assert.Error(t, runErr)
-			checkContainerNotExisting(t, "sedge_lido_exporter")
+			checkMonitoringStackContainersNotRunning(t, "sedge_lido_exporter")
 		},
 	)
 	// Run test case
@@ -336,13 +336,11 @@ func TestE2E_MonitoringStack_InitLido(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
 			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido",
-				"--rpc-endpoints", "https://ethereum-holesky-rpc.publicnode.com,https://endpoints.omniatech.io/v1/eth/holesky/public,https://ethereum-holesky.blockpi.network/v1/rpc/public",
 				"--ws-endpoints", "https://ethereum-holesky-rpc.publicnode.com,wss://ethereum-holesky-rpc.publicnode.com",
 				"--port", "9989",
-				"--scrape-time", "1s",
+				"--scrape-time", "30s",
 				"--network", "holesky",
 				"--node-operator-id", "250",
-				"--reward-address", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c",
 			)
 		},
 		// Assert
