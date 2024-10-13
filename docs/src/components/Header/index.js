@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 import ThemedImage from "@theme/ThemedImage";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import SearchBar from "@theme/SearchBar";
+import BashCommand from "../BashScript";
 
 export function Header() {
     const HeaderWrapper = styled.div`
@@ -63,6 +64,7 @@ export function Header() {
                     alt="Sedge Logo"
                 />
                 <Title>Easy node setup and deployment tool</Title>
+                <BashCommand/>
                 <SearchWrapper>
                     <SearchBar />
                 </SearchWrapper>

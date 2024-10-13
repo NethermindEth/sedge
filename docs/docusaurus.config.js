@@ -65,19 +65,23 @@ const config = {
               items: [
                 {
                   label: 'Ethereum',
-                  to: '/networks/mainnet',
+                  to: '/docs/networks/mainnet',
                 },
                 {
-                  label: 'Sepolia (Testnet)',
-                  to: '/networks/sepolia',
+                  label: 'Holesky',
+                  to: '/docs/networks/holesky',
+                },
+                {
+                  label: 'Sepolia',
+                  to: '/docs/networks/sepolia',
                 },
                 {
                   label: 'Gnosis',
-                  to: '/networks/gnosis',
+                  to: '/docs/networks/gnosis',
                 },
                 {
-                  label: 'Chiado (Testnet)',
-                  to: '/networks/chiado',
+                  label: 'Chiado',
+                  to: '/docs/networks/chiado',
                 },
                 {
                   label: 'Optimism',
@@ -86,6 +90,10 @@ const config = {
                 {
                   label: 'Base',
                   to: '/docs/quickstart/running-optimism-node#base-support',
+                },
+                {
+                  label: 'Lido CSM',
+                  to: '/docs/quickstart/staking-with-lido',
                 },
               ]
             },
@@ -125,6 +133,14 @@ const config = {
                 {
                   label: 'Optimism',
                   to: '/docs/networks/optimism',
+                },
+                {
+                  label: 'Base',
+                  to: '/docs/quickstart/running-optimism-node#base-support',
+                },
+                {
+                  label: 'Lido CSM',
+                  to: '/docs/quickstart/staking-with-lido',
                 },
               ],
             },
