@@ -8,6 +8,7 @@ import SearchBar from '@theme/SearchBar';
 import {QuickLinks} from "../components/QuickLinks";
 import {SupportedNetworks} from "../components/SupportedNetworks";
 import {Header} from "../components/Header";
+import BashCommand from "../components/BashScript";
 
 
 const Container = styled.div`
