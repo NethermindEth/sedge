@@ -47,10 +47,10 @@ import (
 func newAction(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
 	t.Helper()
 	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
-	serviceManager := services.NewServiceManager(dockerClient)
+	dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 	return actions.NewSedgeActions(actions.SedgeActionsOptions{
-		DockerClient:   dockerClient,
-		ServiceManager: serviceManager,
+		DockerClient:         dockerClient,
+		DockerServiceManager: dockerServiceManager,
 	})
 }
 

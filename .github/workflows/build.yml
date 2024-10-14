@@ -13,11 +13,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            go: '1.21'
+            go: '1.22'
           - os: macos-latest
-            go: '1.21'
+            go: '1.22'
           - os: windows-latest
-            go: '1.21'
+            go: '1.22'
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -45,7 +45,10 @@ jobs:
       - name: Install mockgen
         run: make install-mockgen
 
-      - name: Generate mocks
+      - name: Install abigen
+        run: make install-abigen
+
+      - name: Generate mocks and contracts
         run: make generate
 
       - name: Check go mod status

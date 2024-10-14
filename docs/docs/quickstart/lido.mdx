@@ -94,7 +94,7 @@ running and ready for validator activation.
 
 :::info
 
-The official [instructions guide] (https://dvt-homestaker.stakesaurus.com/bonded-validators-setup/lido-csm/upload-remove-view-validator-keys#upload-keys) provides detailed instructions on how to upload the deposit data and register your Node Operatort.
+The official [instructions guide] (https://dvt-homestaker.stakesaurus.com/bonded-validators-setup/lido-csm/upload-remove-view-validator-keys#upload-keys) provides detailed instructions on how to upload the deposit data and register your Node Operator.
 
 :::
 
@@ -103,8 +103,40 @@ meantime.
 
 ## Managing Your Node Operator
 
-Once your validator keys are deposited and your node is running, you can manage your Node Operator using the Lido
-CSM Widget. This interface allows you to:
+Once your validator keys are deposited and your node is running, you can manage your Node Operator using Sedge commands and the Lido
+CSM Widget.
+
+### Checking Node Operator Status
+
+To view detailed data about your Node Operator, use the `sedge lido-status` [command](../commands/lidoStatus.mdx). This command displays information specific to the Node Operator based on the provided rewards address.
+
+```bash
+sedge lido-status <your_reward_address>
+```
+
+:::info
+
+`rewardAddress` is the ultimate recipient of the rewards. It can perform the following actions regarding the CSM Node Operator:
+
+- Claim rewards
+- Propose a new `rewardAddress`
+- Reset `managerAddress` to make it equal to the current `rewardAddress`
+
+The [Lido Documentation] (https://docs.lido.fi/staking-modules/csm/guides/addresses#reward-address) provides detailed information about the `rewardAddress`.
+
+:::
+
+#### Description
+
+This command helps you monitor your Node Operator's performance by displaying:
+
+- Node Operator ID
+- Queue information (e.g., available for deposit, stuck, refunded, exited, deposited)
+- Bond and rewards details
+
+### Additional Management Tasks
+
+Using the Lido CSM Widget, it allows you to:
 
 - Claim bond and rewards
 - Add extra bond amount

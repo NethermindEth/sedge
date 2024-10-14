@@ -288,6 +288,13 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		flags.relayURLs, _ = opts.RelayURLs(network)
 	}
 
+	// Overwrite feeRecipient and relayURLs for Lido Node
+	if lidoNode {
+		opts := sedgeOpts.CreateSedgeOptions(sedgeOpts.LidoNode)
+		flags.feeRecipient = opts.FeeRecipient(network)
+		flags.relayURLs, _ = opts.RelayURLs(network)
+	}
+
 	// Warning if no fee recipient is set
 	if flags.feeRecipient == "" {
 		log.Warn(configs.EmptyFeeRecipientError)

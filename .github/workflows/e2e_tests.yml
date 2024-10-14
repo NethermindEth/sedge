@@ -13,9 +13,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            go: '1.21'
+            go: '1.22'
           - os: windows-latest
-            go: '1.21'
+            go: '1.22'
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -29,6 +29,11 @@ jobs:
 
       - name: Install deps
         run: make install-deps
-      
-      - name: Run e2e tests
+
+      - name: Run e2e tests Windows
+        if: runner.os == 'Windows'
+        run: make e2e-test-windows
+    
+      - name: Run e2e tests other
+        if: runner.os != 'Windows'
         run: make e2e-test

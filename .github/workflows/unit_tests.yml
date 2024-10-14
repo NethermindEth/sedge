@@ -13,9 +13,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            go: '1.21'
+            go: '1.22'
           - os: windows-latest
-            go: '1.21'
+            go: '1.22'
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -36,7 +36,7 @@ jobs:
 
       - name: Run tests other
         if: matrix.os != 'ubuntu-latest'
-        run: make generate && go test ./...
+        run: make generate && make test-no-e2e
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

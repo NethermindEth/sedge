@@ -168,9 +168,9 @@ func getMockActions(
 
 	return actions.NewSedgeActions(
 		actions.SedgeActionsOptions{
-			DockerClient:   dockerClient,
-			ServiceManager: nil,
-			CommandRunner:  nil,
+			DockerClient:         dockerClient,
+			DockerServiceManager: nil,
+			CommandRunner:        nil,
 		},
 	)
 }

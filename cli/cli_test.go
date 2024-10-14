@@ -117,6 +117,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address", "", true).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
+					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
 						GenerationData: genData,
@@ -182,6 +183,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
+					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
 						GenerationData: genData,
@@ -226,6 +228,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
+					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
 						GenerationData: genData,
@@ -259,6 +262,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(2, nil),
+					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
 						GenerationData: genData,
@@ -303,6 +307,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(2, nil),
+					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
 						GenerationData: genData,
@@ -358,6 +363,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e8b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
+					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
 						GenerationData: genData,
@@ -402,6 +408,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e8b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(false, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
+					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
 						GenerationData: genData,
@@ -444,6 +451,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address", "", true).Return("0x2d07a31ebadce0a13e8a91022a5e5732eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Enable MEV Boost?", true).Return(true, nil),
+					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
 						GenerationData: genData,
@@ -509,6 +517,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e8b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
+					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
 						GenerationData: genData,
@@ -567,6 +576,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("http://checkpoint.sync", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
+					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
 						GenerationData: genData,
@@ -645,6 +655,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("http://checkpoint.sync", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
+					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
 						GenerationPath: generationPath,
 						GenerationData: genData,
@@ -681,11 +692,12 @@ func TestCli(t *testing.T) {
 			sedgeActions := sedge_mocks.NewMockSedgeActions(ctrl)
 			prompter := sedge_mocks.NewMockPrompter(ctrl)
 			depsMgr := sedge_mocks.NewMockDependenciesManager(ctrl)
+			monitoringMgr := sedge_mocks.NewMockMonitoringManager(ctrl)
 			defer ctrl.Finish()
 
 			tt.setup(t, sedgeActions, prompter, depsMgr)
 
-			c := CliCmd(prompter, sedgeActions, depsMgr)
+			c := CliCmd(prompter, sedgeActions, depsMgr, monitoringMgr)
 			c.Execute()
 		})
 	}

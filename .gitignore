@@ -17,3 +17,11 @@ build/sedge
 courtney/
 
 mocks/
+
+internal/lido/contracts/csaccounting/CSAccounting.go
+
+internal/lido/contracts/csfeedistributor/CSFeeDistributor.go
+
+internal/lido/contracts/csmodule/CSModule.go
+
+internal/lido/contracts/mevboostrelaylist/MEVBoostRelayAllowedList.go

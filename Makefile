@@ -9,10 +9,28 @@ LDFLAGS=-X github.com/NethermindEth/sedge/internal/utils.Version="${SEDGE_VERSIO
 compile: ## compile:
 	@mkdir -p build
 	@go build -ldflags "${LDFLAGS}" -o build/sedge cmd/sedge/main.go
+	@go build -ldflags "${LDFLAGS}" -o build/lido-exporter cmd/lido-exporter/main.go
 
 compile-linux: ## compile:
 	@mkdir -p build
 	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/sedge cmd/sedge/main.go
+	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/lido-exporter cmd/lido-exporter/main.go
+	
+compile-sedge:
+	@mkdir -p build
+	@go build -ldflags "${LDFLAGS}" -o build/sedge cmd/sedge/main.go
+
+compile-lido-exporter:
+	@mkdir -p build
+	@go build -ldflags "${LDFLAGS}" -o build/lido-exporter cmd/lido-exporter/main.go
+
+compile-sedge-linux:
+	@mkdir -p build
+	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/sedge cmd/sedge/main.go
+
+compile-lido-exporter-linux:
+	@mkdir -p build
+	@env GOOS=linux go build -ldflags="${LDFLAGS[*]}" -o build/lido-exporter cmd/lido-exporter/main.go
 
 install: compile ## compile the binary and copy it to PATH
 	@sudo cp build/sedge /usr/local/bin
@@ -24,18 +42,30 @@ run-cli: compile ## run cli
 	@./build/sedge cli --config ./config.yaml
 
 generate: ## generate go files
+	@abigen --abi ./internal/lido/contracts/csmodule/CSModule.abi --bin ./internal/lido/contracts/csmodule/CSModule.bin --pkg csmodule --out ./internal/lido/contracts/csmodule/CSModule.go
+	@abigen --abi ./internal/lido/contracts/csfeedistributor/CSFeeDistributor.abi --bin ./internal/lido/contracts/csfeedistributor/CSFeeDistributor.bin --pkg csfeedistributor --out ./internal/lido/contracts/csfeedistributor/CSFeeDistributor.go
+	@abigen --abi ./internal/lido/contracts/csaccounting/CSAccounting.abi --bin ./internal/lido/contracts/csaccounting/CSAccounting.bin --pkg csaccounting --out ./internal/lido/contracts/csaccounting/CSAccounting.go
+	@abigen --abi ./internal/lido/contracts/mevboostrelaylist/MEVBoostRelayAllowedList.abi --bin ./internal/lido/contracts/mevboostrelaylist/MEVBoostRelayAllowedList.bin --pkg mevboostrelaylist --out ./internal/lido/contracts/mevboostrelaylist/MEVBoostRelayAllowedList.go
+	@abigen --abi ./internal/lido/contracts/vebo/VEBO.abi --bin ./internal/lido/contracts/vebo/VEBO.bin --pkg vebo --out ./internal/lido/contracts/vebo/VEBO.go
 	@go generate ./...
 
 test: generate ## run tests
 	@mkdir -p coverage
-	@go test -coverprofile=coverage/coverage.out -covermode=count ./...
+	@go test -coverprofile=coverage/coverage.out -covermode=count -timeout 25m ./...
 
 e2e-test: generate ## Run e2e tests
-	@go test -timeout 20m -count=1 ./e2e/...
+	@go test -timeout 25m -count=1 ./e2e/sedge/...
+
+e2e-test-windows: generate ## Run e2e tests on Windows
+	@go test -timeout 25m -count=1 -skip TestE2E_MonitoringStack ./e2e/sedge/...
+
+test-no-e2e: generate ## run tests excluding e2e
+	@mkdir -p coverage
+	@go test -coverprofile=coverage/coverage.out -covermode=count ./... -skip TestE2E
 
 codecov-test: generate ## unit tests with coverage using the courtney tool
 	@mkdir -p coverage
-	@courtney/courtney -v -o coverage/coverage.out ./...
+	@go test -coverprofile=coverage/coverage.out -covermode=count -timeout 25m ./... -skip TestE2E
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 install-gofumpt: ## install gofumpt
@@ -44,12 +74,10 @@ install-gofumpt: ## install gofumpt
 install-mockgen: ## install mockgen
 	go install github.com/golang/mock/mockgen@v1.6.0 
 
-install-courtney: ## Install courtney for code coverage
-	@git clone https://github.com/dave/courtney
-	@(cd courtney && go get  ./... && go build courtney.go)
-	@go get ./...
+install-abigen: ## install abigen
+	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
 
-install-deps: | install-gofumpt install-courtney install-mockgen ## Install some project dependencies
+install-deps: | install-gofumpt install-mockgen install-abigen ## Install some project dependencies
 
 coverage: ## show tests coverage
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html

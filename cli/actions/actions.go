@@ -18,7 +18,6 @@ package actions
 import (
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
-	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/docker/docker/client"
 )
 
@@ -37,22 +36,22 @@ type SedgeActions interface {
 }
 
 type sedgeActions struct {
-	dockerClient   client.APIClient
-	serviceManager services.ServiceManager
-	commandRunner  commands.CommandRunner
+	dockerClient         client.APIClient
+	dockerServiceManager DockerServiceManager
+	commandRunner        commands.CommandRunner
 }
 
 type SedgeActionsOptions struct {
-	DockerClient   client.APIClient
-	ServiceManager services.ServiceManager
-	CommandRunner  commands.CommandRunner
+	DockerClient         client.APIClient
+	DockerServiceManager DockerServiceManager
+	CommandRunner        commands.CommandRunner
 }
 
 func NewSedgeActions(options SedgeActionsOptions) SedgeActions {
 	return &sedgeActions{
-		dockerClient:   options.DockerClient,
-		serviceManager: options.ServiceManager,
-		commandRunner:  options.CommandRunner,
+		dockerClient:         options.DockerClient,
+		dockerServiceManager: options.DockerServiceManager,
+		commandRunner:        options.CommandRunner,
 	}
 }
 
