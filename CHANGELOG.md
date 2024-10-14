@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Add Grandine Consensus client support.
 - New command `lido-status` to display data of Lido Node Operator.
 - New command `monitoring` to run monitoring stack setup with Grafana, Prometheus, Node Exporter and Lido Exporter.
 - Security policy.

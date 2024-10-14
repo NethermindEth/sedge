@@ -146,6 +146,7 @@ read more about it in [our documentation](https://docs.sedge.nethermind.io/docs/
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
+|            | Grandine   |            |
 
 ### Sepolia
 
