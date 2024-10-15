@@ -87,7 +87,7 @@ func LidoSubCmd(mgr MonitoringManager, additionalServices []monitoring.ServiceAP
 				if !ok {
 					return errors.New("Failed to convert Node Operator ID to big.Int")
 				}
-				if nodeOperatorIDBigInt.Sign() < 0 { // Check if the value is negative
+				if nodeOperatorIDBigInt.Sign() < 0 {
 					return errors.New("Node Operator ID cannot be negative")
 				}
 			} else {
