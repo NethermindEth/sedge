@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update Go version from 1.21 to 1.22.
 - Update documentation versions and dependencies.
 - Update Lido Mainnet Vetted Relays List.
+- Remove the need of users cloning the repository to run `make generate` and `make compile`, rolling back to only `make compile`
 
 ### Fixed
 -  Teku and Lighthouse import keys container error on Windows.
