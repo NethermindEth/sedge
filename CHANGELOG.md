@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  Teku and Lighthouse import keys container error on Windows.
 -  Security issues on dependencies.
 -  Typos on documentation.
+-  Fix `sync-mode` command on besu.
 
 ## [v1.5.0] - 2024-09-06
 
