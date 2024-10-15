@@ -26,7 +26,7 @@ consensus:
     version: v5.1.0
   nimbus:
     name: statusim/nimbus-eth2
-    version: multiarch-v24.8.0
+    version: multiarch-v24.9.0
 validator:
   lighthouse:
     name: sigp/lighthouse
@@ -42,7 +42,7 @@ validator:
     version: v5.1.0
   nimbus:
     name: statusim/nimbus-validator-client
-    version: multiarch-v24.8.0
+    version: multiarch-v24.9.0
 optimism:
   optimism:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node
