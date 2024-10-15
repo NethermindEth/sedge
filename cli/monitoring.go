@@ -47,6 +47,11 @@ func InitSubCmd(mgr MonitoringManager) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialize the monitoring stack",
+		Long: `This command initializes the monitoring stack (Grafana, Prometheus, etc.) for Lido CSM or general node monitoring.
+
+The monitoring stack includes:
+- Grafana dashboards for real-time monitoring of Lido CSM node metrics.
+- Prometheus for collecting and displaying key metrics about your node operations.`,
 	}
 	cmd.AddCommand(DefaultSubCmd(mgr, additionalServices))
 	cmd.AddCommand(LidoSubCmd(mgr, additionalServices))
@@ -69,7 +74,7 @@ func LidoSubCmd(mgr MonitoringManager, additionalServices []monitoring.ServiceAP
 	cmd := &cobra.Command{
 		Use:   "lido",
 		Short: "Configure Lido CSM Node monitoring",
-		Long:  "Configure Lido CSM Node monitoring using Prometheus, Grafana, Node Exporter, and Lido Exporter",
+		Long:  "Configure Lido CSM node monitoring (Prometheus, Grafana, Node Exporter,Lido Exporter)",
 		Args:  cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if lido.NodeOperatorID == "" && lido.RewardAddress == "" {
@@ -113,7 +118,7 @@ func DefaultSubCmd(mgr MonitoringManager, additionalServices []monitoring.Servic
 	cmd := &cobra.Command{
 		Use:   "default",
 		Short: "Default monitoring configuration",
-		Long:  "Default monitoring configuration using Prometheus, Grafana, and Node Exporter",
+		Long:  "Default monitoring configuration (Prometheus, Grafana, Node Exporter)",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return InitMonitoring(true, true, mgr, nil)
