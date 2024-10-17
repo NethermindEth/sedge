@@ -19,9 +19,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"syscall"
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/images/validator-import/lighthouse"
@@ -35,6 +37,7 @@ import (
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/otiai10/copy"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 var ErrInterrupted = errors.New("interrupt")
@@ -110,6 +113,12 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 			return err
 		}
 		ctID = prysmCtID
+	case "nimbus":
+		nimbusCtID, err := setupNimbusValidatorImport(s.dockerClient, s.dockerServiceManager, options)
+		if err != nil {
+			return err
+		}
+		ctID = nimbusCtID
 	case "lodestar":
 		lodestarCtID, err := setupLodestarValidatorImport(s.dockerClient, s.dockerServiceManager, options)
 		if err != nil {
@@ -132,7 +141,12 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
 	log.Info("Importing validator keys")
-	runErr := runAndWaitImportKeys(s.dockerClient, s.dockerServiceManager, ctID)
+	var runErr error
+	if options.ValidatorClient == "nimbus" {
+		runErr = runAndWaitImportKeysNimbus(s.dockerClient, s.dockerServiceManager, ctID)
+	} else {
+		runErr = runAndWaitImportKeys(s.dockerClient, s.dockerServiceManager, ctID)
+	}
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
 		log.Info("The validator container is being restarted")
@@ -197,6 +211,69 @@ func setupPrysmValidatorImportContainer(dockerClient client.APIClient, dockerSer
 		&container.HostConfig{
 			Mounts:      mounts,
 			VolumesFrom: []string{validatorCtName},
+		},
+		&network.NetworkingConfig{},
+		&v1.Platform{},
+		validatorImportCtName,
+	)
+	if err != nil {
+		return "", err
+	}
+	return ct.ID, nil
+}
+
+func setupNimbusValidatorImport(dockerClient client.APIClient, dockerServiceManager DockerServiceManager, options ImportValidatorKeysOptions) (string, error) {
+	var (
+		// In the case of Nimbus, it's the consensus client the one that import the keys.
+		consensusCtName       = services.ContainerNameWithTag(services.DefaultSedgeConsensusClient, options.ContainerTag)
+		validatorCtName       = services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
+		validatorImportCtName = services.ContainerNameWithTag(services.ServiceCtValidatorImport, options.ContainerTag)
+	)
+	validatorImage, err := dockerServiceManager.Image(consensusCtName)
+	if err != nil {
+		return "", err
+	}
+	// Mounts
+	mounts := []mount.Mount{
+		{
+			Type:   mount.TypeBind,
+			Source: options.From,
+			Target: "/keystore",
+		},
+	}
+	// CMD
+	cmd := []string{
+		"deposits",
+		"import",
+		"--data-dir=/data",
+		"--method=single-salt",
+		"/keystore",
+	}
+	// Custom options
+	if options.CustomConfig.NetworkConfigPath != "" {
+		mounts = append(mounts, mount.Mount{
+			Type:   mount.TypeBind,
+			Source: options.CustomConfig.NetworkConfigPath,
+			Target: "/network_config/config.yml",
+		})
+		cmd = append(cmd, "--config-file=/network_config/config.yml")
+	} else {
+		cmd = append(cmd, "--network="+options.Network)
+	}
+	log.Debugf("Creating %s container", validatorImportCtName)
+	ct, err := dockerClient.ContainerCreate(context.Background(),
+		&container.Config{
+			Image:        validatorImage,
+			Cmd:          cmd,
+			AttachStdin:  true,
+			AttachStderr: true,
+			AttachStdout: true,
+			OpenStdin:    true,
+			Tty:          true,
+		},
+		&container.HostConfig{
+			Mounts:      mounts,
+			VolumesFrom: []string{consensusCtName, validatorCtName},
 		},
 		&network.NetworkingConfig{},
 		&v1.Platform{},
@@ -436,4 +513,90 @@ func runAndWaitImportKeys(dockerClient client.APIClient, dockerServiceManager Do
 			return exitErr
 		}
 	}
+}
+
+// runAndWaitImportKeysNimbus starts the container in interactive mode and waits for it to finish.
+func runAndWaitImportKeysNimbus(dockerClient client.APIClient, dockerServiceManager DockerServiceManager, ctID string) error {
+	log.Debugf("Starting interactive container with id: %s", ctID)
+
+	// Attach to the container's input/output for direct interaction
+	resp, err := dockerClient.ContainerAttach(context.Background(), ctID, container.AttachOptions{
+		Stream: true,
+		Stdin:  true,
+		Stdout: true,
+		Stderr: true,
+		Logs:   false, // Don't attach previous logs
+	})
+	if err != nil {
+		return err
+	}
+	defer resp.Close()
+
+	// Put the terminal in raw mode for proper TTY handling
+	oldState, err := terminal.MakeRaw(int(syscall.Stdin))
+	if err != nil {
+		return err
+	}
+	defer func() {
+		// Restore the terminal state immediately when the container finishes
+		terminal.Restore(int(syscall.Stdin), oldState)
+		// Clear the line again before printing the final success logs
+		fmt.Print("\033[2K\r") // Clear the current line in the terminal
+	}()
+
+	// Start the container
+	if err := dockerClient.ContainerStart(context.Background(), ctID, container.StartOptions{}); err != nil {
+		return err
+	}
+
+	// Use goroutines to pipe stdin, stdout, and stderr directly to the user's terminal
+	go func() {
+		// Pipe container stdout and stderr to the terminal
+		_, err := io.Copy(os.Stdout, resp.Reader)
+		if err != nil {
+			log.Errorf("Error piping container output: %v", err)
+		}
+	}()
+	go func() {
+		// Pipe terminal input to the container stdin
+		_, err := io.Copy(resp.Conn, os.Stdin)
+		if err != nil {
+			log.Errorf("Error piping user input: %v", err)
+		}
+	}()
+
+	// Wait for the container to finish execution
+	ctExit, errChan := dockerServiceManager.Wait(ctID, container.WaitConditionNextExit)
+
+	// Handle OS interrupts (e.g., Ctrl+C) to gracefully stop the container
+	osSignals := make(chan os.Signal, 1)
+	signal.Notify(osSignals, os.Interrupt, syscall.SIGTERM)
+
+	select {
+	case exitResult := <-ctExit:
+		if err = deleteContainer(dockerClient, ctID); err != nil {
+			return err
+		}
+		// Wait for the container to exit normally
+		if exitResult.StatusCode != 0 {
+			log.Errorf("Container exited with non-zero status: %d", exitResult.StatusCode)
+			return newValidatorImportCtBadExitCodeError(ctID, exitResult.StatusCode, "Container logs...")
+		}
+
+	case <-osSignals:
+		// If the user interrupts (e.g., Ctrl+C), stop the container
+		log.Infof("Received interrupt signal, stopping container %s", ctID)
+		if err := stopContainer(dockerClient, ctID); err != nil {
+			log.Errorf("Error stopping container: %v", err)
+		}
+		if err = deleteContainer(dockerClient, ctID); err != nil {
+			return err
+		}
+		return ErrInterrupted
+
+	case err := <-errChan:
+		return err
+	}
+
+	return nil
 }
