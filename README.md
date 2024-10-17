@@ -141,11 +141,12 @@ read more about it in [our documentation](https://docs.sedge.nethermind.io/docs/
 ### Mainnet
 
 | Execution  | Consensus  | Validator  |
-| ---------- | ---------- | ---------- |
+| ---------- |------------|------------|
 | Geth       | Lighthouse | Lighthouse |
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
+|            | Nimbus     | Nimbus     |
 
 ### Sepolia
 
@@ -155,6 +156,7 @@ read more about it in [our documentation](https://docs.sedge.nethermind.io/docs/
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
+|            | Nimbus     | Nimbus     |
 
 ### Holesky
 
@@ -164,6 +166,7 @@ read more about it in [our documentation](https://docs.sedge.nethermind.io/docs/
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Teku       | Teku       |
 | Besu       | Prysm      | Prysm      |
+|            | Nimbus     | Nimbus     |
 
 ### Gnosis
 
@@ -172,23 +175,26 @@ read more about it in [our documentation](https://docs.sedge.nethermind.io/docs/
 | Nethermind  | Lighthouse | Lighthouse |
 | Erigon      | Lodestar   | Lodestar   |
 |             | Teku       | Teku       |
+|            | Nimbus     | Nimbus     |
 
 ### Chiado (Gnosis testnet)
 
 | Execution     | Consensus  | Validator  |
-| ------------- | ---------- | ---------- |
+|---------------| ---------- | ---------- |
 | Nethermind    | Lighthouse | Lighthouse |
 | Erigon (soon) | Lodestar   | Lodestar   |
 |               | Teku       | Teku       |
+|               | Nimbus     | Nimbus     |
 
 ### CL clients with Mev-Boost
 
-| Client     | Mev-Boost | Networks                  |
-| ---------- | --------- |---------------------------|
-| Lighthouse | yes       | Mainnet, Sepolia, Holesky |
-| Lodestar   | yes       | Mainnet, Sepolia, Holesky |
-| Prysm      | yes       | Mainnet, Sepolia, Holesky |
-| Teku       | yes       | Mainnet, Sepolia, Holesky |
+| Client     | Mev-Boost  | Networks                  |
+|------------|------------|---------------------------|
+| Lighthouse | yes        | Mainnet, Sepolia, Holesky |
+| Lodestar   | yes        | Mainnet, Sepolia, Holesky |
+| Prysm      | yes        | Mainnet, Sepolia, Holesky |
+| Teku       | yes        | Mainnet, Sepolia, Holesky |
+| Nimbus     | yes        | Mainnet, Sepolia, Holesky |
 
 ## Supported Linux flavours for dependency installation
 
@@ -256,9 +262,9 @@ The following roadmap covers the main features and ideas we want to implement bu
 
 - [x] Support Erigon on Gnosis
 - [x] Support for Lido CSM
+- [x] Support for Nimbus client as Consensus and Validator
 - [ ] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
 - [ ] More tests!!!
-- [ ] Support for Nimbus client
 
 
 ## 💪 Want to contribute?
