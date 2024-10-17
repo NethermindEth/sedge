@@ -106,6 +106,20 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		SupportsMEVBoost:   true,
 		CheckpointSyncURL:  "https://goerli.checkpoint-sync.ethpandaops.io",
 	},
+	NetworkLineaMainnet: {
+		Name:               NetworkLineaMainnet,
+		NetworkService:     "merge",
+		GenesisForkVersion: "0x00001020",
+		SupportsMEVBoost:   true,
+		CheckpointSyncURL:  "https://goerli.checkpoint-sync.ethpandaops.io",
+	},
+	NetworkLineaSepolia: {
+		Name:               NetworkLineaSepolia,
+		NetworkService:     "merge",
+		GenesisForkVersion: "0x00001020",
+		SupportsMEVBoost:   true,
+		CheckpointSyncURL:  "https://goerli.checkpoint-sync.ethpandaops.io",
+	},
 	NetworkCustom: {
 		Name:               NetworkCustom,
 		NetworkService:     "merge",
