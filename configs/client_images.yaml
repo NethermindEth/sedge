@@ -23,7 +23,7 @@ consensus:
     version: 24.10.1
   prysm:
     name: gcr.io/prysmaticlabs/prysm/beacon-chain
-    version: v5.1.0
+    version: v5.1.2
 validator:
   lighthouse:
     name: sigp/lighthouse
@@ -36,7 +36,7 @@ validator:
     version: 24.10.1
   prysm:
     name: gcr.io/prysmaticlabs/prysm/validator
-    version: v5.1.0
+    version: v5.1.2
 optimism:
   optimism:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node
