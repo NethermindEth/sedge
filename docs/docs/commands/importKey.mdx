@@ -114,6 +114,14 @@ The resulted folder structure is:
     └── validator-data/
 ```
 
+:::note
+
+If you have to import your keys to nimbus, you will need to manually type the password when loading the keys, since the nimbus client does not support non interactive password loading.
+
+Importing keys on Nimbus is done using the consensus client container instead of the validator client container.
+
+:::
+
 Notice the new folder `keystore` inside the `sedge-data` folder, this is where
 the validator keys are copied to. Also notice the new folder `validator-data`,
 this is where the validator client stores its data.
