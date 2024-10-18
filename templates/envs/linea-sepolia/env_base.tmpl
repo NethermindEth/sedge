@@ -1,7 +1,7 @@
 {{/* docker-compose_base.tmpl */}}
 {{ define "env" }}
 # --- Global configuration ---
-NETWORK=linea-mainnet{{if .WithMevBoostClient}}
+NETWORK=linea-sepolia{{if .WithMevBoostClient}}
 RELAY_URLS={{.RelayURLs}}{{end}}{{if .FeeRecipient}}
 FEE_RECIPIENT={{.FeeRecipient}}{{end}}
 {{template "execution" .}}
