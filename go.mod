@@ -29,6 +29,7 @@ require (
 	github.com/prometheus/common v0.48.0
 	github.com/protolambda/go-keystorev4 v0.0.0-20211007151826-f20444f6d564
 	github.com/protolambda/zrnt v0.32.2
+	github.com/protolambda/zrnt v0.32.2
 	github.com/protolambda/ztyp v0.2.2
 	github.com/santhosh-tekuri/jsonschema/v5 v5.2.0
 	github.com/shopspring/decimal v1.4.0
@@ -89,6 +90,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
