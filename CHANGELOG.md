@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New command `monitoring` to run monitoring stack setup with Grafana, Prometheus, Node Exporter and Lido Exporter.
 - Security policy.
 - Support for Nimbus as Consensus and Validator client. 
+- Documentation for Lido Exporter and Monitoring Stack.
 
 ### Changed
 - Update Go version from 1.21 to 1.22.
