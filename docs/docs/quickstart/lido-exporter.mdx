@@ -80,59 +80,59 @@ The Lido Exporter can be run in two main ways:
 
 ### 1. **Running with Docker**
 
-You can easily run the Lido Exporter using Docker. Here’s how:
+You can easily run the Lido Exporter using Docker. There is a published Docker image available, which eliminates the need to build the image yourself.
 
-- **Step 1**: Build the Docker image:
-    
+- **Step 1**: Pull the Docker image:
+
     ```bash
-    docker build -t lido-exporter .
+    docker pull nethermindeth/lido-exporter:latest
     ```
-    
+
 - **Step 2**: Run the Docker container with the necessary environment variables:
-    
+
     ```bash
     docker run -d -p 8080:8080 \
       -e LIDO_EXPORTER_NODE_OPERATOR_ID=<your_node_operator_id> \
       -e LIDO_EXPORTER_NETWORK=<network_name> \
-      lido-exporter
+      nethermindeth/lido-exporter:latest
     ```
-    
+
     - The container listens on port `8080` by default, but you can change this using the `LIDO_EXPORTER_PORT` environment variable.
     - The metrics will be available at `http://localhost:8080/metrics`.
-    
+
     An example with more optional flags is given below:
-    
+
     ```bash
     docker run -d -p 9090:9090 \
-    -e LIDO_EXPORTER_NODE_OPERATOR_ID=12345 \
-    -e LIDO_EXPORTER_NETWORK=mainnet \
-    -e LIDO_EXPORTER_RPC_ENDPOINTS=https://mainnet.infura.io/v3/YOUR_INFURA_KEY \
-    -e LIDO_EXPORTER_WS_ENDPOINTS=wss://mainnet.infura.io/ws/v3/YOUR_INFURA_KEY \
-    -e LIDO_EXPORTER_PORT=9090 \
-    -e LIDO_EXPORTER_SCRAPE_TIME=15s \
-    -e LIDO_EXPORTER_LOG_LEVEL=debug \
-    lido-exporter
+      -e LIDO_EXPORTER_NODE_OPERATOR_ID=12345 \
+      -e LIDO_EXPORTER_NETWORK=mainnet \
+      -e LIDO_EXPORTER_RPC_ENDPOINTS=https://mainnet.infura.io/v3/YOUR_INFURA_KEY \
+      -e LIDO_EXPORTER_WS_ENDPOINTS=wss://mainnet.infura.io/ws/v3/YOUR_INFURA_KEY \
+      -e LIDO_EXPORTER_PORT=9090 \
+      -e LIDO_EXPORTER_SCRAPE_TIME=15s \
+      -e LIDO_EXPORTER_LOG_LEVEL=debug \
+      nethermindeth/lido-exporter:latest
     ```
-    
 
 ### 2. **Running as a CLI Application**
 
 You can also run the exporter as a standalone CLI tool:
 
 - **Step 1**: Build the application:
-    
+
     ```bash
-    go build -o lido-exporter cmd/lido-exporter/main.go
+    cd cmd/lido-exporter
+    go build -o lido-exporter main.go
     ```
-    
+
 - **Step 2**: Run the application with the appropriate flags:
-    
+
     ```bash
     ./lido-exporter --node-operator-id <your_node_operator_id> --network <network_name>
     ```
-    
+
     An example with more optional flags is given below:
-    
+
     ```bash
     ./lido-exporter --node-operator-id 12345 \
                     --network mainnet \
@@ -141,9 +141,7 @@ You can also run the exporter as a standalone CLI tool:
                     --port 9090 \
                     --scrape-time 15s \
                     --log-level debug
-    
     ```
-    
 
 ### Configuration Precedence
 
