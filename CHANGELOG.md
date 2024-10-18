@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.6.0] - 2024-10-18
+
+### Added
+- New command `lido-status` to display data of Lido Node Operator.
+- New command `monitoring` to run monitoring stack setup with Grafana, Prometheus, Node Exporter and Lido Exporter.
+- Security policy.
+- Support for Nimbus as Consensus and Validator client. 
+- Documentation for Lido Exporter and Monitoring Stack.
+
+### Changed
+- Update Go version from 1.21 to 1.22.
+- Update documentation versions and dependencies.
+- Update Lido Mainnet Vetted Relays List.
+- Remove the need of users cloning the repository to run `make generate` and `make compile`, rolling back to only `make compile`
+- Update client images.
+
+### Fixed
+-  Teku and Lighthouse import keys container error on Windows.
+-  Security issues on dependencies.
+-  Typos on documentation.
+-  Fix `sync-mode` command on besu.
+
 ## [v1.5.0] - 2024-09-06
 
 ### Added

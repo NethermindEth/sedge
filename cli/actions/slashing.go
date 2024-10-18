@@ -26,7 +26,6 @@ import (
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/services"
 	"github.com/NethermindEth/sedge/internal/utils"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
@@ -48,20 +47,21 @@ type SlashingImportOptions struct {
 
 func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptions) error {
 	validatorContainerName := services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
+	consensusContainerName := services.ContainerNameWithTag(services.DefaultSedgeConsensusClient, options.ContainerTag)
 	slashingContainerName := services.ContainerNameWithTag(services.ServiceCtSlashingData, options.ContainerTag)
 	// Check validator container exists
-	_, err := s.serviceManager.ContainerId(validatorContainerName)
+	_, err := s.dockerServiceManager.ContainerID(validatorContainerName)
 	if err != nil {
 		return err
 	}
-	previouslyRunning, err := s.serviceManager.IsRunning(validatorContainerName)
+	previouslyRunning, err := s.dockerServiceManager.IsRunning(validatorContainerName)
 	if err != nil {
 		return err
 	}
 	// Stop validator
 	if previouslyRunning {
 		log.Info("Stopping validator client...")
-		if err := s.serviceManager.Stop(validatorContainerName); err != nil {
+		if err := s.dockerServiceManager.Stop(validatorContainerName); err != nil {
 			return err
 		}
 		log.Info("Validator client stopped.")
@@ -106,18 +106,25 @@ func (s *sedgeActions) ImportSlashingInterchangeData(options SlashingImportOptio
 			"--data-path=/data",
 			"--from=/data/slashing_protection.json",
 		}
+	case "nimbus":
+		cmd = []string{
+			"slashingdb",
+			"import",
+			"/data/slashing_protection.json",
+			"--validators-dir=/data",
+		}
 	default:
 		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
 	log.Infof("Importing slashing data to client %s from %s", options.ValidatorClient, options.From)
-	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd, validatorContainerName, slashingContainerName); err != nil {
+	if err := runSlashingContainer(s.dockerClient, s.dockerServiceManager, cmd, validatorContainerName, consensusContainerName, slashingContainerName, options.ValidatorClient == "nimbus"); err != nil {
 		return err
 	}
 
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
 		log.Info("The validator container is being restarted")
-		if err := s.serviceManager.Start(validatorContainerName); err != nil {
+		if err := s.dockerServiceManager.Start(validatorContainerName); err != nil {
 			return err
 		}
 		log.Info("Validator started.")
@@ -137,20 +144,21 @@ type SlashingExportOptions struct {
 
 func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptions) error {
 	validatorContainerName := services.ContainerNameWithTag(services.DefaultSedgeValidatorClient, options.ContainerTag)
+	consensusContainerName := services.ContainerNameWithTag(services.DefaultSedgeConsensusClient, options.ContainerTag)
 	slashingContainerName := services.ContainerNameWithTag(services.ServiceCtSlashingData, options.ContainerTag)
 	// Check validator container exists
-	_, err := s.serviceManager.ContainerId(validatorContainerName)
+	_, err := s.dockerServiceManager.ContainerID(validatorContainerName)
 	if err != nil {
 		return err
 	}
-	previouslyRunning, err := s.serviceManager.IsRunning(validatorContainerName)
+	previouslyRunning, err := s.dockerServiceManager.IsRunning(validatorContainerName)
 	if err != nil {
 		return err
 	}
 	// Stop validator client
 	if previouslyRunning {
 		log.Info("Stopping validator client")
-		if err := s.serviceManager.Stop(validatorContainerName); err != nil {
+		if err := s.dockerServiceManager.Stop(validatorContainerName); err != nil {
 			return err
 		}
 		log.Info("Validator client stopped.")
@@ -188,11 +196,18 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 			"--data-path=/data",
 			"--to=/data/slashing_protection.json",
 		}
+	case "nimbus":
+		cmd = []string{
+			"slashingdb",
+			"export",
+			"/data/slashing_protection.json",
+			"--validators-dir=/data",
+		}
 	default:
 		return fmt.Errorf("%w: %s", ErrUnsupportedValidatorClient, options.ValidatorClient)
 	}
 	log.Infof("Exporting slashing data from client %s", options.ValidatorClient)
-	if err := runSlashingContainer(s.dockerClient, s.serviceManager, cmd, validatorContainerName, slashingContainerName); err != nil {
+	if err := runSlashingContainer(s.dockerClient, s.dockerServiceManager, cmd, validatorContainerName, consensusContainerName, slashingContainerName, options.ValidatorClient == "nimbus"); err != nil {
 		return err
 	}
 	copyFrom := filepath.Join(options.GenerationPath, configs.ValidatorDir, "slashing_protection.json")
@@ -204,7 +219,7 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 	// Run validator again
 	if (previouslyRunning && !options.StopValidator) || options.StartValidator {
 		log.Info("The validator container is being restarted...")
-		if err := s.serviceManager.Start(validatorContainerName); err != nil {
+		if err := s.dockerServiceManager.Start(validatorContainerName); err != nil {
 			return err
 		}
 		log.Info("Validator started.")
@@ -212,17 +227,26 @@ func (s *sedgeActions) ExportSlashingInterchangeData(options SlashingExportOptio
 	return nil
 }
 
-func runSlashingContainer(dockerClient client.APIClient, serviceManager services.ServiceManager, cmd []string,
-	validatorContainerName string, slashingContainerName string,
+func runSlashingContainer(dockerClient client.APIClient, dockerServiceManager DockerServiceManager, cmd []string,
+	validatorContainerName string, consensusContainerName string, slashingContainerName string, isNimbus bool,
 ) error {
-	validatorImage, err := serviceManager.Image(validatorContainerName)
-	if err != nil {
-		return err
+	slashingImage := ""
+	var err error
+	if isNimbus {
+		slashingImage, err = dockerServiceManager.Image(consensusContainerName)
+		if err != nil {
+			return err
+		}
+	} else {
+		slashingImage, err = dockerServiceManager.Image(validatorContainerName)
+		if err != nil {
+			return err
+		}
 	}
 	log.Debugf("Creating %s container", services.ServiceCtSlashingData)
 	ct, err := dockerClient.ContainerCreate(context.Background(),
 		&container.Config{
-			Image: validatorImage,
+			Image: slashingImage,
 			Cmd:   cmd,
 		},
 		&container.HostConfig{
@@ -239,9 +263,9 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 		return err
 	}
 	log.Debugf("Slashing protection container id: %s", ct.ID)
-	ctExit, errChan := serviceManager.Wait(slashingContainerName, container.WaitConditionNextExit)
+	ctExit, errChan := dockerServiceManager.Wait(slashingContainerName, container.WaitConditionNextExit)
 	log.Info("The slashing protection container is starting...")
-	if err := dockerClient.ContainerStart(context.Background(), ct.ID, types.ContainerStartOptions{}); err != nil {
+	if err := dockerClient.ContainerStart(context.Background(), ct.ID, container.StartOptions{}); err != nil {
 		return err
 	}
 	osSignals := make(chan os.Signal, 1)
@@ -249,7 +273,7 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 	for {
 		select {
 		case exitResult := <-ctExit:
-			logs, err := serviceManager.ContainerLogs(ct.ID, "Slashing protection")
+			logs, err := dockerServiceManager.ContainerLogs(ct.ID, "Slashing protection")
 			if err != nil {
 				return err
 			}
@@ -275,10 +299,10 @@ func runSlashingContainer(dockerClient client.APIClient, serviceManager services
 	}
 }
 
-func deleteContainer(dockerClient client.APIClient, container string) error {
-	log.Debugf("Removing container %s", container)
-	if err := dockerClient.ContainerRemove(context.Background(), container, types.ContainerRemoveOptions{}); err != nil && !client.IsErrNotFound(err) {
-		return fmt.Errorf("error removing container %s: %w", container, err)
+func deleteContainer(dockerClient client.APIClient, containerVar string) error {
+	log.Debugf("Removing container %s", containerVar)
+	if err := dockerClient.ContainerRemove(context.Background(), containerVar, container.RemoveOptions{}); err != nil && !client.IsErrNotFound(err) {
+		return fmt.Errorf("error removing container %s: %w", containerVar, err)
 	}
 	return nil
 }

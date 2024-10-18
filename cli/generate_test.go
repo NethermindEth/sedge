@@ -1363,6 +1363,20 @@ func TestGenerateCmd(t *testing.T) {
 			nil,
 		},
 		{
+			"Lido Full-node - Holesky without MEV",
+			subCmd{
+				name: "full-node",
+			},
+			GenCmdFlags{
+				noMev: true,
+			},
+			globalFlags{
+				network:  NetworkHolesky,
+				lidoNode: true,
+			},
+			nil,
+		},
+		{
 			"Lido Full-node - Sepolia",
 			subCmd{
 				name: "full-node",

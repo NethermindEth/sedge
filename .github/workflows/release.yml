@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.21.0"
+          go-version: "1.22.0"
 
       - run: chmod +x ./scripts/build-go-darwin-binaries.sh && ./scripts/build-go-darwin-binaries.sh
 
@@ -52,7 +52,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.21.0"
+          go-version: "1.22.0"
 
       - run: scripts\build-go-windows-binaries.ps1
 
@@ -74,7 +74,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.21.0"
+          go-version: "1.22.0"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -120,10 +120,17 @@ jobs:
           chmod +x /home/runner/work/sedge/sedge/homebrew-sedge/scripts/update-homebrew.sh
           bash /home/runner/work/sedge/sedge/homebrew-sedge/scripts/update-homebrew.sh
 
+      - name: Authenticate App
+        id: gh-app
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
+          token: ${{ steps.gh-app.outputs.token }}
           commit-message: Update Homebrew to latest release
           title: "[Release] Update Homebrew"
           reviewers: AntiD2ta, cbermudez97, stdevMac, adriantpaez
@@ -189,7 +196,7 @@ jobs:
           path: sedge
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.21.0"
+          go-version: "1.22.0"
       - name: Run publish PPA script
         env:
           GOPATH: /home/runner/go

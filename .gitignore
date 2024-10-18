@@ -17,3 +17,5 @@ build/sedge
 courtney/
 
 mocks/
+
+build/lido-exporter

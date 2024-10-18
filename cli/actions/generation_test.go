@@ -47,10 +47,10 @@ import (
 func newAction(t *testing.T, ctrl *gomock.Controller) actions.SedgeActions {
 	t.Helper()
 	dockerClient := sedge_mocks.NewMockAPIClient(ctrl)
-	serviceManager := services.NewServiceManager(dockerClient)
+	dockerServiceManager := services.NewDockerServiceManager(dockerClient)
 	return actions.NewSedgeActions(actions.SedgeActionsOptions{
-		DockerClient:   dockerClient,
-		ServiceManager: serviceManager,
+		DockerClient:         dockerClient,
+		DockerServiceManager: dockerServiceManager,
 	})
 }
 
@@ -346,7 +346,11 @@ func TestGenerateDockerCompose(t *testing.T) {
 				}
 				// Check that Checkpoint Sync URL is set
 				if tc.genData.CheckpointSyncUrl != "" {
-					assert.True(t, contains(t, cmpData.Services.Consensus.Command, tc.genData.CheckpointSyncUrl), "Checkpoint Sync URL not found in consensus service command: %s", cmpData.Services.Consensus.Command)
+					if tc.genData.ConsensusClient != nil && tc.genData.ConsensusClient.Name == "nimbus" {
+						assert.True(t, contains(t, cmpData.Services.ConsensusSync.Command, tc.genData.CheckpointSyncUrl), "Checkpoint Sync URL not found in consensus service command: %s", cmpData.Services.ConsensusSync.Command)
+					} else {
+						assert.True(t, contains(t, cmpData.Services.Consensus.Command, tc.genData.CheckpointSyncUrl), "Checkpoint Sync URL not found in consensus service command: %s", cmpData.Services.Consensus.Command)
+					}
 				}
 
 				// Check ccImage has the right format
