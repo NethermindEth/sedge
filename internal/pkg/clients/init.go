@@ -39,7 +39,4 @@ var AllClients map[string][]string = map[string][]string{
 	"optimism": {
 		"optimism",
 	},
-	"optimism": {
-		"optimism",
-	},
 }
