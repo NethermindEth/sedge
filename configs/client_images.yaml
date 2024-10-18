@@ -4,7 +4,7 @@ execution:
     version: v1.14.11
   besu:
     name: hyperledger/besu
-    version: 24.9.1
+    version: 24.10.0
   nethermind:
     name: nethermind/nethermind
     version: 1.29.1
@@ -20,7 +20,7 @@ consensus:
     version: v1.22.0
   teku:
     name: consensys/teku
-    version: 24.10.1
+    version: 24.10.2
   prysm:
     name: gcr.io/prysmaticlabs/prysm/beacon-chain
     version: v5.1.2
@@ -36,7 +36,7 @@ validator:
     version: v1.22.0
   teku:
     name: consensys/teku
-    version: 24.10.1
+    version: 24.10.2
   prysm:
     name: gcr.io/prysmaticlabs/prysm/validator
     version: v5.1.2
