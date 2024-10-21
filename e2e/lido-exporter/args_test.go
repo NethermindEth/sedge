@@ -537,3 +537,149 @@ func TestE2E_InvalidArgs_NegativeNodeID(t *testing.T) {
 	// Run test case
 	e2eTest.run()
 }
+
+func TestE2E_ValidArgs_NodeOperatorID_Mainnet(t *testing.T) {
+	// t.Parallel()
+	// Test context
+	var (
+		cmd *exec.Cmd
+	)
+	// Build test case
+	e2eTest := newE2ELidoExporterTestCase(
+		t,
+		// Arrange
+		nil,
+		// Act
+		func(t *testing.T, binaryPath string) *exec.Cmd {
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--node-operator-id", "1", "--network", "mainnet", "--port", "9980")
+			time.Sleep(2 * time.Second)
+			return cmd
+		},
+		// Assert
+		func(t *testing.T) {
+			checkPrometheusServerUp(t, 9980)
+			checkMetrics(t, 9980)
+
+			cmd.Process.Signal(os.Interrupt)
+
+			// Wait for the process to exit with a timeout
+			done := make(chan error, 1)
+			go func() {
+				done <- cmd.Wait()
+			}()
+
+			select {
+			case err := <-done:
+				assert.NoError(t, err)
+			case <-time.After(5 * time.Second):
+				t.Error("Process did not exit within the timeout period")
+				cmd.Process.Kill() // Force kill if it doesn't exit
+			}
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
+
+func TestE2E_ValidEnv_All_Mainnet(t *testing.T) {
+	// t.Parallel()
+	// Test context
+	var (
+		cmd *exec.Cmd
+	)
+	// Build test case
+	e2eTest := newE2ELidoExporterTestCase(
+		t,
+		// Arrange
+		func(t *testing.T, binaryPath string) (map[string]string, error) {
+			return map[string]string{
+				"LIDO_EXPORTER_RPC_ENDPOINTS":    "'https://eth.llamarpc.com','https://eth-pokt.nodies.app','https://rpc.mevblocker.io'",
+				"LIDO_EXPORTER_WS_ENDPOINTS":     "'wss://ethereum-rpc.publicnode.com'",
+				"LIDO_EXPORTER_PORT":             "9990",
+				"LIDO_EXPORTER_SCRAPE_TIME":      "2s",
+				"LIDO_EXPORTER_NETWORK":          "mainnet",
+				"LIDO_EXPORTER_NODE_OPERATOR_ID": "1",
+			}, nil
+		},
+		// Act
+		func(t *testing.T, binaryPath string) *exec.Cmd {
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter")
+			time.Sleep(2 * time.Second)
+			return cmd
+		},
+		// Assert
+		func(t *testing.T) {
+			checkPrometheusServerUp(t, 9990)
+			checkMetrics(t, 9990)
+
+			cmd.Process.Signal(os.Interrupt)
+
+			// Wait for the process to exit with a timeout
+			done := make(chan error, 1)
+			go func() {
+				done <- cmd.Wait()
+			}()
+
+			select {
+			case err := <-done:
+				assert.NoError(t, err)
+			case <-time.After(5 * time.Second):
+				t.Error("Process did not exit within the timeout period")
+				cmd.Process.Kill() // Force kill if it doesn't exit
+			}
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
+
+func TestE2E_ValidFlags_All_Mainnet(t *testing.T) {
+	// t.Parallel()
+	// Test context
+	var (
+		cmd *exec.Cmd
+	)
+	// Build test case
+	e2eTest := newE2ELidoExporterTestCase(
+		t,
+		// Arrange
+		nil,
+		// Act
+		func(t *testing.T, binaryPath string) *exec.Cmd {
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter",
+				"--rpc-endpoints", "https://eth.llamarpc.com", "https://eth-pokt.nodies.app", "https://rpc.mevblocker.io",
+				"--ws-endpoints", "wss://ethereum-rpc.publicnode.com", // https endpoint should be ignored
+				"--port", "9989",
+				"--scrape-time", "1s",
+				"--network", "mainnet",
+				"--node-operator-id", "1", // should be prioritized over reward address
+				"--reward-address", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c",
+			)
+			time.Sleep(2 * time.Second)
+			return cmd
+		},
+		// Assert
+		func(t *testing.T) {
+			checkPrometheusServerUp(t, 9989)
+			checkMetrics(t, 9989)
+
+			cmd.Process.Signal(os.Interrupt)
+
+			// Wait for the process to exit with a timeout
+			done := make(chan error, 1)
+			go func() {
+				done <- cmd.Wait()
+			}()
+
+			select {
+			case err := <-done:
+				assert.NoError(t, err)
+			case <-time.After(5 * time.Second):
+				t.Error("Process did not exit within the timeout period")
+				cmd.Process.Kill() // Force kill if it doesn't exit
+			}
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}

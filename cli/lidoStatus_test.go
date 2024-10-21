@@ -100,16 +100,67 @@ func TestLidoStatusCmd(t *testing.T) {
 		{
 			name: "Valid node ID, Holesky",
 			flags: flags{
-				networkName: "holesky",
-				nodeIDInt:   1,
+				rewardAddress: "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c", // rewardAddress should be ignored
+				networkName:   "holesky",
+				nodeIDInt:     1,
 			},
-			isErr: true,
+			isErr: false,
 		},
 		{
 			name: "Invalid: negative node ID, Holesky",
 			flags: flags{
 				networkName: "holesky",
 				nodeIDInt:   -2,
+			},
+			isErr: true,
+		},
+		{
+			name: "Invalid: missing address, Mainnet",
+			flags: flags{
+				networkName: "mainnet",
+			},
+			isErr: true,
+		},
+		{
+			name: "Invalid: incorrect address, Mainnet",
+			flags: flags{
+				rewardAddress: "0xC870Fd10dd",
+				networkName:   "mainnet",
+			},
+			isErr: true,
+		},
+		{
+			name: "Invalid: address missing 0x prefix, Mainnet",
+			flags: flags{
+				rewardAddress: "bA99F374C20A3475De737B466ee68Ad9C38c26AF",
+				networkName:   "mainnet",
+			},
+			isErr: true,
+		},
+		// {
+		// 	name: "Valid node ID, Mainnet",
+		// 	flags: flags{
+		// 		rewardAddress: "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c", // rewardAddress should be ignored
+		// 		networkName: "mainnet",
+		// 		nodeIDInt:   1,
+		// 	},
+		// 	isErr: false,
+		// },
+		// {
+		// 	name: "Valid node ID with long description, Mainnet",
+		// 	flags: flags{
+		// 		rewardAddress: "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c", // rewardAddress should be ignored
+		// 		networkName: "mainnet",
+		// 		nodeIDInt:   1,
+		// 		longDescriptions: true,
+		// 	},
+		// 	isErr: false,
+		// },
+		{
+			name: "Invalid: negative node ID, Mainnet",
+			flags: flags{
+				networkName: "mainnet",
+				nodeIDInt:   -14,
 			},
 			isErr: true,
 		},
