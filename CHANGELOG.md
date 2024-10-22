@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added support for `op-geth` and `op-reth` clients on Optimism and Base networks.
+
+### Changed
+- Changed the `--op-execution-image` flag to `--op-execution` on the `generate op-full-node` command.
+
 ## [v1.6.0] - 2024-10-18
 
 ### Added

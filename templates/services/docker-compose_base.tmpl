@@ -24,6 +24,7 @@ services:
 {{template "validator" .}}
 
 {{ if .WithOptimismClient}}
+{{template "opexecution" .}}
 {{template "optimism" .}}{{end}}
 
 networks:

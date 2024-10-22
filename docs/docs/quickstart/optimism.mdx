@@ -40,6 +40,18 @@ To generate the configuration for your Optimism node, use the following command:
 sedge generate op-full-node --network mainnet
 ```
 
+:::tip
+
+**Supported Execution Clients**:
+- op-nethermind
+- op-geth
+- op-reth
+
+You can set the execution client using the `--op-execution` flag. If you don't specify an execution client, Sedge will chose one randomly.
+
+Alternatively, you can set the docker image for the execution client using the `--op-execution '<CLIENT>:<DOCKER_IMAGE>'` syntax.
+:::
+
 This command will create a new directory with all the necessary configuration files for running an Optimism node on the mainnet. If you want to run a node on the testnet (Sepolia), use `--network sepolia` instead.
 
 At this time, we are using Nethermind as the execution Optimism node, in the future we will add support for `op-geth`.
