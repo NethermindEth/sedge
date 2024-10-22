@@ -120,10 +120,17 @@ jobs:
           chmod +x /home/runner/work/sedge/sedge/homebrew-sedge/scripts/update-homebrew.sh
           bash /home/runner/work/sedge/sedge/homebrew-sedge/scripts/update-homebrew.sh
 
+      - name: Authenticate App
+        id: gh-app
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
+          token: ${{ steps.gh-app.outputs.token }}
           commit-message: Update Homebrew to latest release
           title: "[Release] Update Homebrew"
           reviewers: AntiD2ta, cbermudez97, stdevMac, adriantpaez
