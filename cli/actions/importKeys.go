@@ -221,7 +221,11 @@ func (s *sedgeActions) ImportValidatorKeys(options ImportValidatorKeysOptions) e
 	log.Info("Importing validator keys")
 	var runErr error
 	if options.ValidatorClient == "nimbus" {
-		runErr = runAndWaitImportKeysNimbus(s.dockerClient, s.dockerServiceManager, ctID)
+		if !options.Distributed {
+			runErr = runAndWaitImportKeysNimbus(s.dockerClient, s.dockerServiceManager, ctID)
+		} else {
+			runErr = runAndWaitImportKeys(s.dockerClient, s.dockerServiceManager, ctID)
+		}
 	} else {
 		runErr = runAndWaitImportKeys(s.dockerClient, s.dockerServiceManager, ctID)
 	}
@@ -338,17 +342,47 @@ func setupNimbusValidatorImport(dockerClient client.APIClient, dockerServiceMana
 	} else {
 		cmd = append(cmd, "--network="+options.Network)
 	}
+	containerConfig := &container.Config{
+		Image:        validatorImage,
+		Cmd:          cmd,
+		AttachStdin:  true,
+		AttachStderr: true,
+		AttachStdout: true,
+		OpenStdin:    true,
+		Tty:          true,
+	}
+	if options.Distributed {
+		containerConfig = &container.Config{
+			Image: validatorImage,
+			Entrypoint: []string{
+				"sh", "-c", `
+				#!/usr/bin/env bash
+				set -e
+				tmpkeys="/keystore/validator_keys/tmpkeys"
+				mkdir -p ${tmpkeys}
+				for f in /keystore/validator_keys/keystore-*.json; do
+					echo "Importing key ${f}"
+					pwdfile="/keystore/$(basename "$f" .json).txt"
+					password=$(cat ${pwdfile})
+					echo "Using password file ${pwdfile}"
+					echo "Using password ${password}"
+					cp "${f}" "${tmpkeys}"
+					# Import keystore with password.
+						echo "$password" | \
+						/home/user/nimbus_beacon_node deposits import \
+						--data-dir=/data \
+						${tmpkeys}
+					filename="$(basename ${f})"
+  					rm "${tmpkeys}/${filename}"
+				done
+			`,
+			},
+		}
+	}
+
 	log.Debugf("Creating %s container", validatorImportCtName)
 	ct, err := dockerClient.ContainerCreate(context.Background(),
-		&container.Config{
-			Image:        validatorImage,
-			Cmd:          cmd,
-			AttachStdin:  true,
-			AttachStderr: true,
-			AttachStdout: true,
-			OpenStdin:    true,
-			Tty:          true,
-		},
+		containerConfig,
 		&container.HostConfig{
 			Mounts:      mounts,
 			VolumesFrom: []string{consensusCtName, validatorCtName},

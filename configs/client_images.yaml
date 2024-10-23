@@ -46,7 +46,7 @@ validator:
 distributed:
   charon:
     name: ghcr.io/obolnetwork/charon
-    version: v1.0.1
+    version: v1.1.1
 optimism:
   optimism:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node
