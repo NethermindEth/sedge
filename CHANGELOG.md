@@ -7,14 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [v1.6.0] - 2024-10-18
-
+## [v1.6.0] - 2024-10-23
 ### Added
 - New command `lido-status` to display data of Lido Node Operator.
 - New command `monitoring` to run monitoring stack setup with Grafana, Prometheus, Node Exporter and Lido Exporter.
 - Security policy.
 - Support for Nimbus as Consensus and Validator client. 
 - Documentation for Lido Exporter and Monitoring Stack.
+- New cli flag `--distributed` for running cluster with Charon distributed validator
 
 ### Changed
 - Update Go version from 1.21 to 1.22.

@@ -136,6 +136,11 @@ friends, to amateur operators — to operate validators by providing an ETH-base
 Sedge supports the Lido CSM, allowing users to generate validator keys and set up their full nodes with ease. You can 
 read more about it in [our documentation](https://docs.sedge.nethermind.io/docs/quickstart/staking-with-lido)! 
 
+## Charon DV integration
+Charon is used by stakers to distribute the responsibility of running Ethereum Validators across a number of different instances and client implementations. Setting up and running a full ethereum node with charon, needs some learning curve and compatibility knowledge, in order for the setup to be fully compliant with the charon configuration requirements for different BN-VC combinations. We want to provide a better and guided user experience for setting up a DV with Charon.
+
+Integrating Charon with Sedge would make it easy for stakers to setup and run a DV with Charon without having to go through each individual client setup docs and their compatibility with DVT.
+
 ## Supported networks and clients
 
 ### Mainnet
