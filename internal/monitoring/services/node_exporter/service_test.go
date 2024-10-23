@@ -137,3 +137,10 @@ func TestEndpoint(t *testing.T) {
 	endpoint := nodeExporter.Endpoint()
 	assert.Equal(t, want, endpoint)
 }
+
+func TestName(t *testing.T) {
+	want := monitoring.NodeExporterServiceName
+
+	nodeExporter := NewNodeExporter()
+	assert.Equal(t, want, nodeExporter.Name())
+}

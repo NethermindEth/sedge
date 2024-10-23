@@ -89,10 +89,18 @@ the importation.`,
 				},
 				Distributed: distributed,
 			}
-			err := sedgeActions.SetupContainers(actions.SetupContainersOptions{
-				GenerationPath: generationPath,
-				Services:       []string{validator},
-			})
+			var err error
+			if validatorClient == "nimbus" {
+				err = sedgeActions.SetupContainers(actions.SetupContainersOptions{
+					GenerationPath: generationPath,
+					Services:       []string{validator, consensus},
+				})
+			} else {
+				err = sedgeActions.SetupContainers(actions.SetupContainersOptions{
+					GenerationPath: generationPath,
+					Services:       []string{validator},
+				})
+			}
 			if err != nil {
 				return err
 			}

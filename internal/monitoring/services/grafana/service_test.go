@@ -141,7 +141,7 @@ func TestSetup(t *testing.T) {
 			locker.EXPECT().Locked().Return(true),
 			locker.EXPECT().Unlock().Return(nil),
 		)
-		for i := 0; i < 9; i++ {
+		for i := 0; i < 8; i++ {
 			gomock.InOrder(
 				locker.EXPECT().Lock().Return(nil),
 				locker.EXPECT().Locked().Return(true),
@@ -285,12 +285,11 @@ func TestSetup(t *testing.T) {
 				// Check the provisioned dashboards
 				foldersToCheck := []string{
 					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards"),
-					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "common-metrics"),
+					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "lido-exporter"),
 					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "node-exporter"),
 				}
 				filesToCheck := []string{
-					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "common-metrics", "common-metrics.json"),
-					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "common-metrics", "common-metrics-global.json"),
+					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "lido-exporter", "lido-exporter.json"),
 					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "node-exporter", "node-exporter.json"),
 				}
 				for _, folder := range foldersToCheck {
@@ -364,4 +363,11 @@ func TestEndpoint(t *testing.T) {
 
 	endpoint := grafana.Endpoint()
 	assert.Equal(t, want, endpoint)
+}
+
+func TestName(t *testing.T) {
+	want := monitoring.GrafanaServiceName
+
+	grafana := NewGrafana()
+	assert.Equal(t, want, grafana.Name())
 }

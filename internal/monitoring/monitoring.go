@@ -17,8 +17,10 @@ package monitoring
 
 import (
 	"bytes"
-	"embed"
 	"fmt"
+	"html/template"
+	"io"
+	"io/fs"
 	"net"
 	"path/filepath"
 	"strconv"
@@ -27,6 +29,7 @@ import (
 	"github.com/NethermindEth/sedge/internal/common"
 	"github.com/NethermindEth/sedge/internal/monitoring/data"
 	"github.com/NethermindEth/sedge/internal/monitoring/locker"
+	"github.com/NethermindEth/sedge/internal/monitoring/services/templates"
 	"github.com/NethermindEth/sedge/internal/monitoring/services/types"
 	"github.com/NethermindEth/sedge/internal/monitoring/utils"
 	"github.com/NethermindEth/sedge/internal/pkg/commands"
@@ -34,9 +37,6 @@ import (
 	"github.com/spf13/afero"
 	funk "github.com/thoas/go-funk"
 )
-
-//go:embed script
-var script embed.FS
 
 // MonitoringManager manages the monitoring services. It provides methods for initializing the monitoring stack,
 // adding and removing targets, running and stopping the monitoring stack, and checking the status of the monitoring stack.
@@ -113,6 +113,7 @@ func (m *MonitoringManager) InstallStack() error {
 	// Merge all dotEnv
 	dotEnv := make(map[string]string)
 	defaultPorts := make(map[string]uint16)
+
 	for _, service := range m.services {
 		for k, v := range service.DotEnv() {
 			dotEnv[k] = v
@@ -147,7 +148,7 @@ func (m *MonitoringManager) InstallStack() error {
 		}
 	}
 
-	if err = m.stack.Setup(dotEnv, script); err != nil {
+	if err = m.stack.Setup(dotEnv, templates.Services); err != nil {
 		return fmt.Errorf("%w: %w", ErrInstallingMonitoringMngr, err)
 	}
 
@@ -247,10 +248,9 @@ func (m *MonitoringManager) Stop() error {
 
 // Status checks the status of the containers in the monitoring stack and returns the status.
 func (m *MonitoringManager) Status() (status common.Status, err error) {
-	containers := []string{
-		GrafanaContainerName,
-		PrometheusContainerName,
-		NodeExporterContainerName,
+	var containers []string
+	for _, service := range m.services {
+		containers = append(containers, service.ContainerName())
 	}
 
 	for _, container := range containers {
@@ -281,7 +281,7 @@ func (m *MonitoringManager) InstallationStatus() (common.Status, error) {
 	return common.NotInstalled, nil
 }
 
-// Cleanup removes the monitoring stack. If force is true, it bypasses locks and removes the stack without running 'docker compose down'.
+// Cleanup removes the monitoring stack.
 func (m *MonitoringManager) Cleanup() error {
 	log.Info("Shutting down monitoring stack...")
 	if err := m.composeManager.Down(commands.DockerComposeDownOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
@@ -327,4 +327,196 @@ func (m *MonitoringManager) saveServiceIP() error {
 		service.SetContainerIP(parsedIP)
 	}
 	return nil
+}
+
+// AddService adds a new service to the monitoring stack dynamically.
+func (m *MonitoringManager) AddService(service ServiceAPI) error {
+	err := m.validateNewService(service)
+	if err != nil {
+		return fmt.Errorf("error validating service %s: %w", service.Name(), err)
+	}
+
+	// Add the new service to the list
+	m.services = append(m.services, service)
+
+	// Get the new service's environment variables
+	dotEnv := service.DotEnv()
+
+	err = m.setupNewService(service, dotEnv)
+	if err != nil {
+		return fmt.Errorf("failed to update .env file: %w", err)
+	}
+
+	// Update the .env file in the stack
+	if err := m.updateEnvFile(dotEnv); err != nil {
+		return fmt.Errorf("failed to update .env file: %w", err)
+	}
+
+	// Update the docker-compose.yml file
+	if err := m.updateDockerComposeFile(service, templates.Services); err != nil {
+		return fmt.Errorf("failed to update docker-compose.yml: %w", err)
+	}
+
+	// Create and start the new service's container
+	if err := m.composeManager.Create(commands.DockerComposeCreateOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
+		return fmt.Errorf("failed to create service container: %w", err)
+	}
+	if err := m.composeManager.Up(commands.DockerComposeUpOptions{Path: filepath.Join(m.stack.Path(), "docker-compose.yml")}); err != nil {
+		return fmt.Errorf("failed to start service container: %w", err)
+	}
+
+	// Save the new service's IP
+	if err := m.saveServiceIP(); err != nil {
+		return fmt.Errorf("failed to save service IP: %w", err)
+	}
+
+	monitoringTarget, labels, err := m.makeTarget(service)
+	if err != nil {
+		return fmt.Errorf("error making target of service %s: %w", service.Name(), err)
+	}
+	// Add this new service as a target to the monitoring manager
+	if err := m.AddTarget(monitoringTarget, labels, SedgeNetworkName); err != nil {
+		return fmt.Errorf("failed to add target for service %s: %w", service.Name(), err)
+	}
+
+	return nil
+}
+
+func (m *MonitoringManager) validateNewService(service ServiceAPI) error {
+	// Check if the service already exists
+	for _, existingService := range m.services {
+		if existingService.ContainerName() == service.ContainerName() {
+			return fmt.Errorf("service %s already exists", service.ContainerName())
+		}
+	}
+	return nil
+}
+
+func (m *MonitoringManager) setupNewService(service ServiceAPI, dotEnv map[string]string) error {
+	// Initialize the new service
+	if err := service.Init(types.ServiceOptions{
+		Stack:  m.stack,
+		Dotenv: dotEnv,
+	}); err != nil {
+		return fmt.Errorf("failed to initialize service %s: %w", service.Name(), err)
+	}
+
+	// Setup the new service
+	if err := service.Setup(dotEnv); err != nil {
+		return fmt.Errorf("failed to setup service %s: %w", service.Name(), err)
+	}
+	return nil
+}
+
+func (m *MonitoringManager) makeTarget(service ServiceAPI) (types.MonitoringTarget, map[string]string, error) {
+	var monitoringTarget types.MonitoringTarget
+	// Split the service's Endpoint into host and port
+	endpoint := service.Endpoint()
+	endpoint = strings.TrimPrefix(endpoint, "http://")
+	endpoint = strings.TrimPrefix(endpoint, "https://")
+	_, portStr, err := net.SplitHostPort(endpoint)
+	if err != nil {
+		return monitoringTarget, nil, fmt.Errorf("invalid service endpoint %s: %w", endpoint, err)
+	}
+
+	// Convert port to uint16
+	port64, err := strconv.ParseUint(portStr, 10, 16)
+	if err != nil {
+		return monitoringTarget, nil, fmt.Errorf("invalid port in service endpoint %s: %w", portStr, err)
+	}
+	// Set service as target
+	monitoringTarget = types.MonitoringTarget{
+		Host: service.ContainerName(),
+		Port: uint16(port64),
+		Path: "/metrics",
+	}
+
+	labels := map[string]string{
+		InstanceIDLabel: service.ContainerName(),
+	}
+	return monitoringTarget, labels, nil
+}
+
+// Helper method to update the .env file
+func (m *MonitoringManager) updateEnvFile(newEnv map[string]string) error {
+	currentEnv, err := m.stack.ReadFile(".env")
+	if err != nil {
+		return err
+	}
+
+	// Parse current env
+	env := make(map[string]string)
+	for _, line := range bytes.Split(currentEnv, []byte("\n")) {
+		parts := bytes.SplitN(line, []byte("="), 2)
+		if len(parts) == 2 {
+			env[string(parts[0])] = string(parts[1])
+		}
+	}
+
+	// Merge new env
+	for k, v := range newEnv {
+		env[k] = v
+	}
+
+	// Write updated env
+	var buf bytes.Buffer
+	for k, v := range env {
+		buf.WriteString(fmt.Sprintf("%s=%s\n", k, v))
+	}
+
+	return m.stack.WriteFile(".env", buf.Bytes())
+}
+
+// Helper method to update the docker-compose.yml file
+func (m *MonitoringManager) updateDockerComposeFile(service ServiceAPI, monitoringFs fs.FS) error {
+	// Read the main Docker Compose template
+	rawBaseTmp, err := monitoringFs.Open("services/docker-compose_base.tmpl")
+	if err != nil {
+		return fmt.Errorf("error opening docker-compose template: %w", err)
+	}
+	defer rawBaseTmp.Close()
+
+	// Read the content of the base template file
+	rawBaseTmpContent, err := io.ReadAll(rawBaseTmp)
+	if err != nil {
+		return fmt.Errorf("error reading docker-compose template: %w", err)
+	}
+
+	baseTmp, err := template.New("docker-compose").Parse(string(rawBaseTmpContent))
+	if err != nil {
+		return err
+	}
+
+	// Fetch the service template file
+	serviceTmp, err := monitoringFs.Open("services/" + service.Name() + ".tmpl")
+	if err != nil {
+		return fmt.Errorf("error opening service %s template: %w", service.Name(), err)
+	}
+	defer serviceTmp.Close()
+
+	serviceTmpContent, err := io.ReadAll(serviceTmp)
+	if err != nil {
+		return fmt.Errorf("error reading service %s template: %w", service.Name(), err)
+	}
+
+	// Merge both templates
+	baseTmp, err = baseTmp.Parse(string(serviceTmpContent))
+	if err != nil {
+		return fmt.Errorf("error parsing service %s template: %w", service.Name(), err)
+	}
+
+	// Create a buffer to hold the merged content
+	var buf bytes.Buffer
+
+	data := types.ServiceTemplateData{
+		LidoExporter: service.Name() == LidoExporterServiceName,
+	}
+
+	// Execute the main template with the service template as data
+	if err := baseTmp.Execute(&buf, data); err != nil {
+		return err
+	}
+
+	// Write the merged content to the final Docker Compose file
+	return m.stack.WriteFile("docker-compose.yml", buf.Bytes())
 }
