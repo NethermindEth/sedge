@@ -69,7 +69,7 @@ func TestLidoStatusCmd(t *testing.T) {
 		{
 			name: "valid lido-status flags, Holesky",
 			flags: flags{
-				rewardAddress: "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c",
+				rewardAddress: "0xe6b5A31d8bb53D2C769864aC137fe25F4989f1fd",
 				networkName:   "holesky",
 			},
 			isErr: false,
@@ -100,7 +100,7 @@ func TestLidoStatusCmd(t *testing.T) {
 		{
 			name: "Valid node ID, Holesky",
 			flags: flags{
-				rewardAddress: "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c", // rewardAddress should be ignored
+				rewardAddress: "0xe6b5A31d8bb53D2C769864aC137fe25F4989f1fd", // rewardAddress should be ignored
 				networkName:   "holesky",
 				nodeIDInt:     1,
 			},
@@ -140,7 +140,7 @@ func TestLidoStatusCmd(t *testing.T) {
 		// {
 		// 	name: "Valid node ID, Mainnet",
 		// 	flags: flags{
-		// 		rewardAddress: "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c", // rewardAddress should be ignored
+		// 		rewardAddress: "0xe6b5A31d8bb53D2C769864aC137fe25F4989f1fd", // rewardAddress should be ignored
 		// 		networkName: "mainnet",
 		// 		nodeIDInt:   1,
 		// 	},
@@ -149,7 +149,7 @@ func TestLidoStatusCmd(t *testing.T) {
 		// {
 		// 	name: "Valid node ID with long description, Mainnet",
 		// 	flags: flags{
-		// 		rewardAddress: "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c", // rewardAddress should be ignored
+		// 		rewardAddress: "0xe6b5A31d8bb53D2C769864aC137fe25F4989f1fd", // rewardAddress should be ignored
 		// 		networkName: "mainnet",
 		// 		nodeIDInt:   1,
 		// 		longDescriptions: true,

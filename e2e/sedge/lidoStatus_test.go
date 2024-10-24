@@ -35,7 +35,7 @@ func TestE2E_LidoStatus_ValidFlags(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "lido-status", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c", "--l", "--network", "holesky")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "lido-status", "0xe6b5A31d8bb53D2C769864aC137fe25F4989f1fd", "--l", "--network", "holesky")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
