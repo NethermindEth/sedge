@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.7.0] - 2024-10-24
+
 ##Added
 - Support Mainnet for Lido CSM setup.
 
