@@ -128,7 +128,7 @@ func TestE2E_ValidArgs_EnvNodeOperatorID(t *testing.T) {
 // 		nil,
 // 		// Act
 // 		func(t *testing.T, binaryPath string) *exec.Cmd {
-// 			cmd = base.RunCommandCMD(t, binaryPath, "", "lido-exporter", "--reward-address", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c", "--network", "holesky", "--port", "9981")
+// 			cmd = base.RunCommandCMD(t, binaryPath, "", "lido-exporter", "--reward-address", "0xe6b5A31d8bb53D2C769864aC137fe25F4989f1fd", "--network", "holesky", "--port", "9981")
 // 			time.Sleep(5 * time.Second)
 
 // 			return cmd
