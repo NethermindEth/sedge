@@ -130,7 +130,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ steps.gh-app.outputs.token }}
+          token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
           commit-message: Update Homebrew to latest release
           title: "[Release] Update Homebrew"
           reviewers: AntiD2ta, cbermudez97, stdevMac, adriantpaez
