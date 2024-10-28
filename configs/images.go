@@ -46,6 +46,13 @@ var ClientImages struct {
 		OpNeth Image `yaml:"opnethermind"`
 		OpReth Image `yaml:"opreth"`
 	}
+	Taiko struct {
+		TaikoClient Image `yaml:"taikoclient"`
+	}
+	TExecution struct {
+		TaikoGeth       Image `yaml:"taikogeth"`
+		TaikoNethermind Image `yaml:"taikonethermind"`
+	}
 }
 
 //go:embed client_images.yaml

@@ -1,18 +1,18 @@
-{{/* opreth.tmpl */}}
-{{ define "opexecution" }}
+{{/* taikonethermind.tmpl */}}
+{{ define "texecution" }}
   execution-l2:
     tty: true
     environment:
       - TERM=xterm-256color
       - COLORTERM=truecolor
     stop_grace_period: 30s
-    container_name: sedge-execution-op-l2-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    container_name: sedge-execution-taiko-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
     image: ${EC_L2_IMAGE_VERSION}
     networks:
       - sedge
     volumes:
-      - ${EC_L2_DATA_DIR}:/reth/data
+      - ${EC_L2_DATA_DIR}:/nethermind/data
       - ${EC_L2_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
     ports:
       - "{{.ElL2DiscoveryPort}}:{{.ElL2DiscoveryPort}}/tcp"
@@ -24,22 +24,19 @@
       - {{.ElL2ApiPort}}
       - {{.ElL2AuthPort}}
     command:
-      - node
-      - -vvv
-      - --datadir=/reth/data
-      - --log.stdout.format=${RETH_OP_LOG_LEVEL}
-      - --http
-      - --http.corsdomain="*"
-      - --http.addr=0.0.0.0
-      - --http.port={{.ElL2ApiPort}}
-      - --http.api=debug,eth,net,txpool
-      - --authrpc.addr=0.0.0.0
-      - --authrpc.port={{.ElL2AuthPort}}
-      - --authrpc.jwtsecret=/tmp/jwt/jwtsecret
-      - --metrics=0.0.0.0:{{.ElL2MetricsPort}}
-      - --chain=${RETH_NETWORK}
-      - --rollup.sequencer-http=${OP_SEQUENCER_HTTP}
-      - --rollup.disable-tx-pool-gossip{{range $flag := .ElL2ExtraFlags}}
+      - --config=${L2_NETWORK}
+      - --datadir=/nethermind/data
+      - --log=${NETHERMIND_L2_LOG_LEVEL}
+      - --JsonRpc.Enabled=true
+      - --JsonRpc.Host=0.0.0.0
+      - --JsonRpc.Port={{.ElL2ApiPort}}
+      - --JsonRpc.JwtSecretFile=/tmp/jwt/jwtsecret
+      - --JsonRpc.EngineHost=0.0.0.0
+      - --JsonRpc.EnginePort={{.ElL2AuthPort}}
+      - --Network.DiscoveryPort={{.ElL2DiscoveryPort}}
+      - --HealthChecks.Enabled=true
+      - --Metrics.Enabled=true
+      - --Metrics.ExposePort={{.ElL2MetricsPort}}{{range $flag := .ElL2ExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}

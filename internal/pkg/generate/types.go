@@ -24,7 +24,8 @@ type EnvData struct {
 	Services                  []string
 	Mev                       bool
 	ElImage                   string
-	ElOpImage                 string
+	ElL2Image                 string
+	TaikoImageVersion         string
 	ElDataDir                 string
 	CcImage                   string
 	CcDataDir                 string
@@ -42,10 +43,12 @@ type EnvData struct {
 	Graffiti                  string
 	RelayURLs                 string
 	CheckpointSyncUrl         string
-	ExecutionOPApiURL         string
-	JWTOPSecretPath           string
+	ExecutionL2ApiURL         string
+	JWTL2SecretPath           string
 	OPImageVersion            string
-	ElOPAuthPort              uint16
+	ElL2APort                 uint16
+	ElL2AuthPort              uint16
+	ExecutionWSApiURL         string
 	OpSequencerHttp           string
 	RethNetwork               string
 }
@@ -56,8 +59,9 @@ type GenData struct {
 	ExecutionClient         *clients.Client
 	ConsensusClient         *clients.Client
 	ValidatorClient         *clients.Client
-	ExecutionOPClient       *clients.Client
 	OptimismClient          *clients.Client
+	TaikoClient             *clients.Client
+	L2ExecutionClient       *clients.Client
 	Network                 string
 	CheckpointSyncUrl       string
 	FeeRecipient            string
@@ -66,8 +70,9 @@ type GenData struct {
 	ElExtraFlags            []string
 	ClExtraFlags            []string
 	VlExtraFlags            []string
-	ElOpExtraFlags          []string
+	ElL2ExtraFlags          []string
 	OpExtraFlags            []string
+	TaikoExtraFlags         []string
 	IsBase                  bool
 	MapAllPorts             bool
 	Mev                     bool
@@ -92,7 +97,7 @@ type GenData struct {
 	ConsensusApiUrl         string
 	ContainerTag            string
 	LatestVersion           bool
-	JWTSecretOP             string
+	JWTSecretL2             string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -112,10 +117,10 @@ type DockerComposeData struct {
 	ElApiPort               uint16
 	ElAuthPort              uint16
 	ElWsPort                uint16
-	ElOPDiscoveryPort       uint16
-	ElOPMetricsPort         uint16
-	ElOPApiPort             uint16
-	ElOPAuthPort            uint16
+	ElL2DiscoveryPort       uint16
+	ElL2MetricsPort         uint16
+	ElL2ApiPort             uint16
+	ElL2AuthPort            uint16
 	ClDiscoveryPort         uint16
 	ClMetricsPort           uint16
 	ClApiPort               uint16
@@ -123,8 +128,9 @@ type DockerComposeData struct {
 	VlMetricsPort           uint16
 	FallbackELUrls          []string
 	ElExtraFlags            []string
-	ElOPExtraFlags          []string
+	ElL2ExtraFlags          []string
 	OPExtraFlags            []string
+	TaikoExtraFlags         []string
 	NetworkPrefix           string
 	ClExtraFlags            []string
 	VlExtraFlags            []string
@@ -173,6 +179,16 @@ func (d DockerComposeData) WithValidatorClient() bool {
 func (d DockerComposeData) WithOptimismClient() bool {
 	for _, service := range d.Services {
 		if service == optimism {
+			return true
+		}
+	}
+	return false
+}
+
+// WithTaikoClient returns true if the taiko client is set
+func (d DockerComposeData) WithTaikoClient() bool {
+	for _, service := range d.Services {
+		if service == taiko {
 			return true
 		}
 	}
