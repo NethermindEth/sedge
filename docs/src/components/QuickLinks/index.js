@@ -109,7 +109,7 @@ const smartContractLinks = [
     {
         title: 'Optimism Network',
         description: 'Deploy on Optimism Mainnet and its test networks',
-        to: '/docs/quickstart/optimism',
+        to: '/docs/quickstart/running-optimism-node',
     },
     {
         title: 'Exposing API',

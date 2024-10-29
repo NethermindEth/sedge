@@ -132,7 +132,7 @@ const config = {
                 },
                 {
                   label: 'Optimism',
-                  to: '/docs/networks/optimism',
+                  to: '/docs/quickstart/running-optimism-node',
                 },
                 {
                   label: 'Base',
