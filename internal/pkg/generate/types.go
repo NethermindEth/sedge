@@ -46,7 +46,7 @@ type EnvData struct {
 	ExecutionL2ApiURL         string
 	JWTL2SecretPath           string
 	OPImageVersion            string
-	ElL2APort                 uint16
+	ElL2ApiPort               uint16
 	ElL2AuthPort              uint16
 	ExecutionWSApiURL         string
 	OpSequencerHttp           string

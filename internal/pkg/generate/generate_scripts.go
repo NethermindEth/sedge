@@ -522,7 +522,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ExecutionL2ApiURL:         executionOPApiUrl,
 		JWTL2SecretPath:           gd.JWTSecretL2,
 		OPImageVersion:            opImageVersion,
-		ElL2APort:                 gd.Ports["ApiPortELL2"],
+		ElL2ApiPort:               gd.Ports["ApiPortELL2"],
 		ElL2AuthPort:              gd.Ports["AuthPortELL2"],
 		ExecutionWSApiURL:         executionWSApiURL,
 		OpSequencerHttp:           opSequencerHttp,
