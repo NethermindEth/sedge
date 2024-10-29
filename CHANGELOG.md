@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Update "sedge-data" default directory from "[WORK_DIR]/sedge-data" to "[HOME_DIR]/.local/share/.sedge/sedge-data".
+
 ## [v1.7.0] - 2024-10-24
 
 ### Added

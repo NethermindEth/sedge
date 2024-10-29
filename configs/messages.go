@@ -17,8 +17,11 @@ package configs
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
+
+	"github.com/spf13/afero"
+	"github.com/NethermindEth/sedge/internal/locker"
+	"github.com/NethermindEth/sedge/internal/monitoring/data"
 )
 
 // All the strings that are needed for debugging and info logging, and constant strings.
@@ -120,10 +123,17 @@ Happy Staking!
 var DefaultAbsSedgeDataPath string
 
 func init() {
-	cwd, err := os.Getwd()
-	if err != nil {
-		// notest
+	// Set filesystem
+	// fs := afero.NewMemMapFs() // Uncomment this line if you want to use the in-memory filesystem
+	// fs := afero.NewBasePathFs(afero.NewOsFs(), "/tmp") // Uncomment this line if you want to use the real filesystem with a base path
+	fs := afero.NewOsFs() // Uncomment this line if you want to use the real filesystem
+
+	// Set locker
+	locker := locker.NewFLock()
+	dataDir, err := data.NewDataDirDefault(fs, locker)
+	if err != nil{
 		fmt.Println(err)
 	}
-	DefaultAbsSedgeDataPath = filepath.Join(cwd, DefaultSedgeDataFolderName)
+
+	DefaultAbsSedgeDataPath = filepath.Join(dataDir.Path(), DefaultSedgeDataFolderName)
 }
