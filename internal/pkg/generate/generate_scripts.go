@@ -360,13 +360,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	return nil
 }
 
-func (d DockerComposeData) DistributedValidatorEndpoint() string {
-	if d.Distributed {
-		return configs.OnPremiseDistributedValidatorURL
-	}
-	return ""
-}
-
 // EnvFile generates a .env file with the provided GenData
 func EnvFile(gd *GenData, at io.Writer) error {
 	rawBaseTmp, err := templates.Envs.ReadFile(strings.Join([]string{"envs", gd.Network, "env_base.tmpl"}, "/"))

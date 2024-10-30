@@ -102,10 +102,9 @@ type GenData struct {
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
-	Services    []string
-	Network     string
-	Distributed bool
-	// DistributedValidatorEndpoint string
+	Services                []string
+	Network                 string
+	Distributed             bool
 	XeeVersion              bool
 	Mev                     bool
 	MevBoostOnValidator     bool
