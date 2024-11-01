@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Changed the `--op-execution-image` flag to `--op-execution` on the `generate op-full-node` command.
 
+## [v1.7.0] - 2024-10-24
+
+### Added
+- Support Mainnet for Lido CSM setup.
+
 ## [v1.6.0] - 2024-10-18
 
 ### Added

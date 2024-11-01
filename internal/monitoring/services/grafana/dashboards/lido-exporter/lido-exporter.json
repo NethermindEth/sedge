@@ -113,7 +113,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_keys_stuck_validators_count{node_operator_id=\"${NODE_ID}\"}",
+          "expr": "csm_keys_stuck_validators_count{node_operator_id=\"${NODE_ID}\",network=\"${NETWORK}\"}",
           "refId": "A",
           "legendFormat": "Stuck Validators"
         },
@@ -122,7 +122,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_keys_refunded_validators_count{node_operator_id=\"${NODE_ID}\"}",
+          "expr": "csm_keys_refunded_validators_count{node_operator_id=\"${NODE_ID}\",network=\"${NETWORK}\"}",
           "refId": "B",
           "legendFormat": "Refunded Validators"
         },
@@ -131,7 +131,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_keys_exited_validators_count{node_operator_id=\"${NODE_ID}\"}",
+          "expr": "csm_keys_exited_validators_count{node_operator_id=\"${NODE_ID}\",network=\"${NETWORK}\"}",
           "refId": "C",
           "legendFormat": "Exited Validators"
         },
@@ -140,7 +140,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_keys_deposited_validators_count{node_operator_id=\"${NODE_ID}\"}",
+          "expr": "csm_keys_deposited_validators_count{node_operator_id=\"${NODE_ID}\",network=\"${NETWORK}\"}",
           "refId": "D",
           "legendFormat": "Deposited Validators"
         },
@@ -149,7 +149,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_keys_depositable_validators_count{node_operator_id=\"${NODE_ID}\"}",
+          "expr": "csm_keys_depositable_validators_count{node_operator_id=\"${NODE_ID}\",network=\"${NETWORK}\"}",
           "refId": "E",
           "legendFormat": "Depositable Validators"
         }
@@ -236,7 +236,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_bond_current{node_operator_id=\"${NODE_ID}\"} / 1e18",
+          "expr": "csm_bond_current{node_operator_id=\"${NODE_ID}\",network=\"${NETWORK}\"} / 1e18",
           "refId": "A",
           "legendFormat": "Current Bond"
         },
@@ -245,7 +245,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_bond_required{node_operator_id=\"${NODE_ID}\"} / 1e18",
+          "expr": "csm_bond_required{node_operator_id=\"${NODE_ID}\",network=\"${NETWORK}\"} / 1e18",
           "refId": "B",
           "legendFormat": "Required Bond"
         },
@@ -254,7 +254,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_bond_excess{node_operator_id=\"${NODE_ID}\"} / 1e18",
+          "expr": "csm_bond_excess{node_operator_id=\"${NODE_ID}\",network=\"${NETWORK}\"} / 1e18",
           "refId": "C",
           "legendFormat": "Excess Bond"
         },
@@ -263,7 +263,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_bond_missed{node_operator_id=\"${NODE_ID}\"} / 1e18",
+          "expr": "csm_bond_missed{node_operator_id=\"${NODE_ID}\",network=\"${NETWORK}\"} / 1e18",
           "refId": "D",
           "legendFormat": "Missed Bond"
         }
@@ -336,7 +336,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_non_claimed_rewards{node_operator_id=\"${NODE_ID}\"} / 1e18",
+          "expr": "csm_non_claimed_rewards{node_operator_id=\"${NODE_ID}\",network=\"${NETWORK}\"} / 1e18",
           "refId": "A"
         }
       ],
@@ -438,7 +438,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_onchain_penalties_total{node_operator_id=\"${NODE_ID}\", penalty_type=\"el_rewards_stealing\"}",
+          "expr": "csm_onchain_penalties_total{node_operator_id=\"${NODE_ID}\", penalty_type=\"el_rewards_stealing\",network=\"${NETWORK}\"}",
           "refId": "A",
           "legendFormat": "EL Rewards Stealing"
         },
@@ -447,7 +447,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_onchain_penalties_total{node_operator_id=\"${NODE_ID}\", penalty_type=\"initial_slashing\"}",
+          "expr": "csm_onchain_penalties_total{node_operator_id=\"${NODE_ID}\", penalty_type=\"initial_slashing\",network=\"${NETWORK}\"}",
           "refId": "B",
           "legendFormat": "Initial Slashing"
         },
@@ -456,7 +456,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_onchain_penalties_total{node_operator_id=\"${NODE_ID}\", penalty_type=\"withdrawal\"}",
+          "expr": "csm_onchain_penalties_total{node_operator_id=\"${NODE_ID}\", penalty_type=\"withdrawal\",network=\"${NETWORK}\"}",
           "refId": "C",
           "legendFormat": "Withdrawal"
         }
@@ -546,7 +546,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "csm_onchain_exit_requests_total{node_operator_id=\"${NODE_ID}\"}",
+          "expr": "csm_onchain_exit_requests_total{node_operator_id=\"${NODE_ID}\",network=\"${NETWORK}\"}",
           "refId": "A",
           "legendFormat": "Exit Requests"
         }
@@ -599,6 +599,33 @@
         "options": [],
         "query": {
           "query": "label_values(csm_node_operator_id, node_operator_id)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "default",
+          "value": "default"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(csm_node_operator_id, network)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Network",
+        "multi": false,
+        "name": "NETWORK",
+        "options": [],
+        "query": {
+          "query": "label_values(csm_node_operator_id, network)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
