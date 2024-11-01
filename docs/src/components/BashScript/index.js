@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 
-const BashCommand = () => {
+const BashCommand = ({ command }) => {
     const [copied, setCopied] = useState(false);
-    const command = "curl -sL brew install nethermindeth/sedge/sedge";
 
     const copyToClipboard = async () => {
         try {
@@ -16,23 +15,23 @@ const BashCommand = () => {
     };
 
     return (
-        <div className="rounded-md bg-gray-900 text-white font-mono text-sm">
-            <div className="flex items-center p-4">
-                <div className="flex-grow overflow-x-auto mr-4">
-                    <pre className="flex items-center">
-                        <code className="overflow-x-auto">{command}</code>
+        <div className="bash-command-container">
+            <div className="bash-command-content">
+                <div className="bash-command-code">
+                    <pre>
+                        <code>{command}</code>
                     </pre>
                 </div>
-                <div className="flex-shrink-0">
+                <div>
                     <button
                         onClick={copyToClipboard}
-                        className="p-2 rounded hover:bg-gray-700 transition-colors"
+                        className="bash-command-button"
                         aria-label="Copy to clipboard"
                     >
                         {copied ? (
-                            <Check className="h-5 w-5 text-green-400"/>
+                            <Check className="bash-command-icon" style={{ color: 'green' }} />
                         ) : (
-                            <Copy className="h-5 w-5 text-gray-400"/>
+                            <Copy className="bash-command-icon" style={{ color: 'gray' }} />
                         )}
                     </button>
                 </div>
