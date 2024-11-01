@@ -26,7 +26,7 @@ consensus:
     version: v5.1.2
   nimbus:
     name: statusim/nimbus-eth2
-    version: multiarch-v24.9.0
+    version: multiarch-v24.10.0
 validator:
   lighthouse:
     name: sigp/lighthouse
@@ -42,18 +42,18 @@ validator:
     version: v5.1.2
   nimbus:
     name: statusim/nimbus-validator-client
-    version: multiarch-v24.9.0
+    version: multiarch-v24.10.0
 optimism:
   opnode:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node
-    version: v1.9.3
+    version: v1.9.4
 opexecution:
   opgeth:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth
-    version: v1.101408.0
+    version: v1.101411.0
   opnethermind:
     name: nethermind/nethermind
-    version: 1.28.0
+    version: 1.29.1
   opreth:
     name: ghcr.io/paradigmxyz/op-reth
-    version: v1.0.7
+    version: v1.1.0
