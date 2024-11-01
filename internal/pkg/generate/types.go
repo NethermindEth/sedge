@@ -46,6 +46,8 @@ type EnvData struct {
 	JWTOPSecretPath           string
 	OPImageVersion            string
 	ElOPAuthPort              uint16
+	OpSequencerHttp           string
+	RethNetwork               string
 }
 
 // GenData : Struct Data object for script's generation

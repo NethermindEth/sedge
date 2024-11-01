@@ -47,8 +47,8 @@ var (
 )
 
 const (
-	execution, consensus, validator, mevBoost, optimism = "execution", "consensus", "validator", "mev-boost", "optimism"
-	jwtPathName                                         = "jwtsecret"
+	execution, consensus, validator, mevBoost, optimism, opExecution = "execution", "consensus", "validator", "mev-boost", "optimism", "opexecution"
+	jwtPathName                                                      = "jwtsecret"
 )
 
 type CustomFlags struct {
@@ -459,7 +459,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 		if flags.optimismName != "" {
-			opClient.Name = "optimism"
+			opClient.Name = "opnode"
 			if len(optimismParts) > 1 {
 				opClient.Image = strings.Join(optimismParts[1:], ":")
 			}
@@ -470,15 +470,18 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		}
 
 		optimismExecutionParts := strings.Split(flags.optimismExecutionName, ":")
-		executionOpClient = allClients[execution]["nethermind"]
+		executionOpClient, err = clients.RandomChoice(allClients[opExecution])
+		if err != nil {
+			return nil, err
+		}
 		if flags.optimismExecutionName != "" {
-			executionOpClient.Name = optimismExecutionParts[0]
+			executionOpClient.Name = strings.ReplaceAll(optimismExecutionParts[0], "-", "")
 			if len(optimismExecutionParts) > 1 {
 				executionOpClient.Image = strings.Join(optimismExecutionParts[1:], ":")
 			}
 		}
 		executionOpClient.SetImageOrDefault(strings.Join(optimismExecutionParts[1:], ":"))
-		if err = clients.ValidateClient(executionOpClient, optimism); err != nil {
+		if err = clients.ValidateClient(executionOpClient, opExecution); err != nil {
 			return nil, err
 		}
 
