@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.7.1] - 2024-11-1
+
 ### Added
 - Updates on support for `op-geth` and `op-reth` clients on Optimism and Base networks.
 
