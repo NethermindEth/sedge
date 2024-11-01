@@ -10,7 +10,7 @@ execution:
     version: 1.29.1
   erigon:
     name: thorax/erigon
-    version: v2.60.8
+    version: v2.60.9
 consensus:
   lighthouse:
     name: sigp/lighthouse
@@ -20,7 +20,7 @@ consensus:
     version: v1.22.0
   teku:
     name: consensys/teku
-    version: 24.10.2
+    version: 24.10.3
   prysm:
     name: gcr.io/prysmaticlabs/prysm/beacon-chain
     version: v5.1.2
@@ -36,7 +36,7 @@ validator:
     version: v1.22.0
   teku:
     name: consensys/teku
-    version: 24.10.2
+    version: 24.10.3
   prysm:
     name: gcr.io/prysmaticlabs/prysm/validator
     version: v5.1.2
