@@ -37,6 +37,11 @@ var AllClients map[string][]string = map[string][]string{
 		"nimbus",
 	},
 	"optimism": {
-		"optimism",
+		"opnode",
+	},
+	"opexecution": {
+		"opgeth",
+		"opnethermind",
+		"opreth",
 	},
 }

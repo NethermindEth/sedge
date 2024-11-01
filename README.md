@@ -264,6 +264,7 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Support for Lido CSM
 - [x] Support for Nimbus client as Consensus and Validator
 - [x] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
+- [x] Support for Optimism and Base.
 - [ ] More tests!!!
 
 
