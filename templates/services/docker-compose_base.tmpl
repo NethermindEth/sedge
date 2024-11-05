@@ -25,6 +25,7 @@ services:
 {{template "validator-blocker" .}}{{end}}
 {{template "validator" .}}
 {{ if .WithOptimismClient}}
+{{template "opexecution" .}}
 {{template "optimism" .}}{{end}}
 networks:
   sedge:
