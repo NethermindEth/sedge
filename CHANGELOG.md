@@ -8,16 +8,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- New command `lido-status` to display data of Lido Node Operator.
-- Monitoring stack setup with Grafana, Prometheus, and Node Exporter.
 - Added support for `op-geth` and `op-reth` clients on Optimism and Base networks.
 
 ### Changed
-- Update Go version from 1.21 to 1.22.
 - Changed the `--op-execution-image` flag to `--op-execution` on the `generate op-full-node` command.
+
+## [v1.6.0] - 2024-10-18
+
+### Added
+- New command `lido-status` to display data of Lido Node Operator.
+- New command `monitoring` to run monitoring stack setup with Grafana, Prometheus, Node Exporter and Lido Exporter.
+- Security policy.
+- Support for Nimbus as Consensus and Validator client. 
+- Documentation for Lido Exporter and Monitoring Stack.
+
+### Changed
+- Update Go version from 1.21 to 1.22.
+- Update documentation versions and dependencies.
+- Update Lido Mainnet Vetted Relays List.
+- Remove the need of users cloning the repository to run `make generate` and `make compile`, rolling back to only `make compile`
+- Update client images.
 
 ### Fixed
 -  Teku and Lighthouse import keys container error on Windows.
+-  Security issues on dependencies.
+-  Typos on documentation.
+-  Fix `sync-mode` command on besu.
 
 ## [v1.5.0] - 2024-09-06
 
@@ -58,7 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update client images to Dencun-ready versions.
+- Update client images to Dencun-ready versions. 
 
 ## [v1.3.1] - 2024-02-14
 

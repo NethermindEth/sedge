@@ -36,6 +36,7 @@ var ClientImages struct {
 		Lodestar   Image `yaml:"lodestar"`
 		Teku       Image `yaml:"teku"`
 		Prysm      Image `yaml:"prysm"`
+		Nimbus     Image `yaml:"nimbus"`
 	}
 	Optimism struct {
 		OpNode Image `yaml:"opnode"`
@@ -44,6 +45,13 @@ var ClientImages struct {
 		OpGeth Image `yaml:"opgeth"`
 		OpNeth Image `yaml:"opnethermind"`
 		OpReth Image `yaml:"opreth"`
+	}
+	Taiko struct {
+		TaikoClient Image `yaml:"taikoclient"`
+	}
+	TExecution struct {
+		TaikoGeth       Image `yaml:"taikogeth"`
+		TaikoNethermind Image `yaml:"taikonethermind"`
 	}
 }
 

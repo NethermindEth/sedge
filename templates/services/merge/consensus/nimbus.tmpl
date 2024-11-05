@@ -3,7 +3,7 @@
   consensus-sync:
     user: "root:root"
     stop_grace_period: 30s
-    container_name: sedge-consensus-trusted-sync
+    container_name: sedge-consensus-trusted-sync{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     image: ${CC_IMAGE_VERSION}
     networks:
       - sedge
@@ -27,11 +27,11 @@
   consensus:
     user: "root:root"
     stop_grace_period: 30s
-    container_name: sedge-consensus-client
+    container_name: sedge-consensus-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
     image: ${CC_IMAGE_VERSION}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl .Mev}}
     depends_on:{{if .Mev}}
-      mevboost:
+      mev-boost:
         condition: service_started{{end}}{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
       consensus-sync:
         condition: service_completed_successfully{{end}}{{end}}

@@ -27,6 +27,10 @@ services:
 {{template "opexecution" .}}
 {{template "optimism" .}}{{end}}
 
+{{ if .WithTaikoClient}}
+{{template "texecution" .}}
+{{template "taiko" .}}{{end}}
+
 networks:
   sedge:
     name: sedge-network{{if .ContainerTag}}-{{.ContainerTag}}{{end}}

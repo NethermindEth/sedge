@@ -28,12 +28,14 @@ var AllClients map[string][]string = map[string][]string{
 		"prysm",
 		"teku",
 		"lodestar",
+		"nimbus",
 	},
 	"validator": {
 		"lighthouse",
 		"prysm",
 		"teku",
 		"lodestar",
+		"nimbus",
 	},
 	"optimism": {
 		"opnode",
@@ -42,5 +44,12 @@ var AllClients map[string][]string = map[string][]string{
 		"opgeth",
 		"opnethermind",
 		"opreth",
+	},
+	"taiko": {
+		"taikoclient",
+	},
+	"texecution": {
+		"taikogeth",
+		"taikonethermind",
 	},
 }

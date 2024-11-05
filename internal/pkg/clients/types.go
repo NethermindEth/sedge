@@ -38,6 +38,10 @@ func (c *Client) SetImageOrDefault(image string) {
 		c.setOptimismImage(image)
 	case "opexecution":
 		c.SetOpExecutionImage(image)
+	case "taiko":
+		c.SetTaikoImage(image)
+	case "texecution":
+		c.SetTaikoExecutionImage(image)
 	}
 }
 
@@ -79,6 +83,8 @@ func (c *Client) setValidatorImage(image string) {
 		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Teku.String())
 	case "lodestar":
 		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Lodestar.String())
+	case "nimbus":
+		c.Image = valueOrDefault(image, configs.ClientImages.Validator.Nimbus.String())
 	}
 }
 
@@ -100,6 +106,22 @@ func (c *Client) SetOpExecutionImage(image string) {
 	}
 }
 
+func (c *Client) SetTaikoImage(image string) {
+	switch c.Name {
+	case "taikoclient":
+		c.Image = valueOrDefault(image, configs.ClientImages.Taiko.TaikoClient.String())
+	}
+}
+
+func (c *Client) SetTaikoExecutionImage(image string) {
+	switch c.Name {
+	case "taikogeth":
+		c.Image = valueOrDefault(image, configs.ClientImages.TExecution.TaikoGeth.String())
+	case "taikonethermind":
+		c.Image = valueOrDefault(image, configs.ClientImages.TExecution.TaikoNethermind.String())
+	}
+}
+
 func valueOrDefault(value string, defaultValue string) string {
 	if value == "" {
 		return defaultValue
@@ -113,7 +135,8 @@ type Clients struct {
 	Consensus   *Client
 	Validator   *Client
 	Optimism    *Client
-	ExecutionOP *Client
+	Taiko       *Client
+	L2Execution *Client
 }
 
 type ClientMap map[string]*Client
