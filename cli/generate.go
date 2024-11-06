@@ -515,13 +515,13 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 		if flags.taikoName != "" {
-			opClient.Name = "taikoclient"
+			taikoClient.Name = "taikoclient"
 			if len(taikoParts) > 1 {
-				opClient.Image = strings.Join(taikoParts[1:], ":")
+				taikoClient.Image = strings.Join(taikoParts[1:], ":")
 			}
 		}
 		taikoClient.SetImageOrDefault(strings.Join(taikoParts[1:], ":"))
-		if err = clients.ValidateClient(opClient, taiko); err != nil {
+		if err = clients.ValidateClient(taikoClient, taiko); err != nil {
 			return nil, err
 		}
 
