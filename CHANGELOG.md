@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Fix Erigon image source
+- Fix installation script path 
+
 ## [v1.7.1] - 2024-11-1
 
 ### Added
