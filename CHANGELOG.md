@@ -14,7 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Updates on support for `op-geth` and `op-reth` clients on Optimism and Base networks.
-- New cli flag `--distributed` for running cluster with Charon distributed validator
 
 ### Changed
 - Updated Sedge's Docker commands internal functionality.
