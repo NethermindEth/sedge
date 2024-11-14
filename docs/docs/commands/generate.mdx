@@ -145,7 +145,7 @@ Usage:
 Flags:
   -c, --consensus string                  Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
       --op-image string                   Optimism consensus client image.
-      --op-execution-image string         Image name set for nethermind client to be used with optimism.
+      --op-execution string               Optimism Execution client to be used, op-nethermind, op-geth, or op-reth. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name.
   -e, --execution string                  Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
       --execution-api-url string          Set execution api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.
       --consensus-url string          Set consensus api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.
