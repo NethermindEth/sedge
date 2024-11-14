@@ -37,6 +37,10 @@ var ClientImages struct {
 		Teku       Image `yaml:"teku"`
 		Prysm      Image `yaml:"prysm"`
 		Nimbus     Image `yaml:"nimbus"`
+		Charon     Image `yaml:"charon"`
+	}
+	Distributed struct {
+		Charon Image `yaml:"charon"`
 	}
 	Optimism struct {
 		OpNode Image `yaml:"opnode"`
