@@ -18,6 +18,7 @@ package e2e
 import (
 	"runtime"
 	"testing"
+	"time"
 
 	base "github.com/NethermindEth/sedge/e2e"
 	"github.com/stretchr/testify/assert"
@@ -80,6 +81,7 @@ func TestE2E_MonitoringStack_Init(t *testing.T) {
 			assert.NoError(t, runErr)
 			checkMonitoringStackDir(t)
 			checkPrometheusDir(t)
+			time.Sleep(2 * time.Second)
 			checkMonitoringStackContainers(t, grafanaOnCallContainers...)
 			checkPrometheusTargetsUp(t, "sedge_node_exporter:9100")
 			checkGrafanaHealth(t)
@@ -227,6 +229,7 @@ func TestE2E_MonitoringStack_InitLido_ValidID(t *testing.T) {
 			assert.NoError(t, runErr)
 			checkMonitoringStackDir(t)
 			checkPrometheusDir(t)
+			time.Sleep(2 * time.Second)
 			checkMonitoringStackContainers(t, "sedge_lido_exporter")
 			checkPrometheusTargetsUp(t, "sedge_lido_exporter:8080", "sedge_node_exporter:9100")
 			checkGrafanaHealth(t)
@@ -350,6 +353,7 @@ func TestE2E_MonitoringStack_InitLido(t *testing.T) {
 			assert.NoError(t, runErr)
 			checkMonitoringStackDir(t)
 			checkPrometheusDir(t)
+			time.Sleep(2 * time.Second)
 			checkMonitoringStackContainers(t, "sedge_lido_exporter")
 			checkPrometheusTargetsUp(t, "sedge_lido_exporter:9989", "sedge_node_exporter:9100")
 			checkGrafanaHealth(t)
@@ -466,6 +470,7 @@ func TestE2E_MonitoringStack_InitLido_ValidID_Mainnet(t *testing.T) {
 			assert.NoError(t, runErr)
 			checkMonitoringStackDir(t)
 			checkPrometheusDir(t)
+			time.Sleep(2 * time.Second)
 			checkMonitoringStackContainers(t, "sedge_lido_exporter")
 			checkPrometheusTargetsUp(t, "sedge_lido_exporter:8080", "sedge_node_exporter:9100")
 			checkGrafanaHealth(t)
