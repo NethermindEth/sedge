@@ -19,3 +19,8 @@ courtney/
 mocks/
 
 build/lido-exporter
+.charon/
+node*/
+
+keystore*
+!cli/actions/testdata/charon/validator_keys/keystore*
