@@ -90,7 +90,7 @@ services:
 
   oncall_setup:
     container_name: oncall_setup
-    image: curlimages/curl:latest
+    image: curlimages/curl:8.10.0
     depends_on:
       grafana:
         condition: service_started

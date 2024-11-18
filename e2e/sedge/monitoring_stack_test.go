@@ -18,7 +18,6 @@ package e2e
 import (
 	"runtime"
 	"testing"
-	"time"
 
 	base "github.com/NethermindEth/sedge/e2e"
 	"github.com/stretchr/testify/assert"
