@@ -22,7 +22,7 @@ services:
   # Grafana OnCall Services
   engine:
     container_name: engine
-    image: grafana/oncall
+    image: grafana/oncall:v1.11.5
     restart: always
     ports:
       - "8090:8080"
@@ -40,7 +40,7 @@ services:
 
   celery:
     container_name: celery
-    image: grafana/oncall
+    image: grafana/oncall:v1.11.5
     restart: always
     command: sh -c "./celery_with_exporter.sh"
     environment: *oncall-environment
@@ -56,7 +56,7 @@ services:
 
   oncall_db_migration:
     container_name: oncall_db_migration
-    image: grafana/oncall
+    image: grafana/oncall:v1.11.5
     command: python manage.py migrate --noinput
     environment: *oncall-environment
     volumes:
