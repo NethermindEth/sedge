@@ -395,6 +395,11 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 
 	// execution client
 	if utils.Contains(services, execution) {
+		if network == NetworkMekong {
+			if flags.executionName == "nethermind" || flags.executionName == "" {
+				flags.executionName = "nethermind:docker.ethquokkaops.io/dh/ethpandaops/nethermind:pectra_devnet_4-c3827bc"
+			}
+		}
 		executionParts := strings.Split(flags.executionName, ":")
 		executionClient, err = clients.RandomChoice(allClients[execution])
 		if err != nil {
@@ -421,6 +426,31 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			if flags.consensusName == "nimbus" {
 				flags.consensusName = "nimbus:ghcr.io/gnosischain/gnosis-nimbus-eth2:v24.9"
 			}
+		}
+		if network == NetworkMekong {
+
+			if flags.consensusName == "" {
+				// Select random client
+				consensusClient, err = clients.RandomChoice(allClients[consensus])
+				if err != nil {
+					return nil, err
+				}
+				flags.consensusName = consensusClient.Name
+			}
+
+			switch flags.consensusName {
+			case "lighthouse":
+				flags.consensusName = "lighthouse:docker.ethquokkaops.io/dh/ethpandaops/lighthouse:electra-alpha7-da953b8"
+			case "lodestar":
+				flags.consensusName = "lodestar:docker.ethquokkaops.io/dh/ethpandaops/lodestar:devnet-4-1531b19"
+			case "nimbus":
+				flags.consensusName = "nimbus:docker.ethquokkaops.io/dh/ethpandaops/nimbus-eth2:4JM-25aae76"
+			case "prysm":
+				flags.consensusName = "prysm:docker.ethquokkaops.io/dh/ethpandaops/prysm-beacon-chain:develop-4aa5410"
+			case "teku":
+				flags.consensusName = "teku:docker.ethquokkaops.io/dh/consensys/teku:24.10.3"
+			}
+
 		}
 		consensusParts := strings.Split(flags.consensusName, ":")
 		consensusClient, err = clients.RandomChoice(allClients[consensus])

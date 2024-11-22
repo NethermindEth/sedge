@@ -1,0 +1,8 @@
+{{/* besu.tmpl */}}
+{{ define "execution" }}
+# --- Execution Layer - Execution Node - configuration ---
+EC_IMAGE_VERSION={{.ElImage}}
+EC_ENABLED_MODULES=ETH,NET,CLIQUE,DEBUG,MINER,NET,PERM,ADMIN,EEA,TXPOOL,PRIV,WEB3
+EC_DATA_DIR={{.ElDataDir}}
+EC_JWT_SECRET_PATH={{.JWTSecretPath}}
+{{ end }}

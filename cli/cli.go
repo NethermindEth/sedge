@@ -39,10 +39,11 @@ import (
 )
 
 const (
-	NetworkMainnet   = "mainnet"
+	NetworkMainnet = "mainnet"
 
 	NetworkSepolia   = "sepolia"
 	NetworkGnosis    = "gnosis"
+	NetworkMekong    = "mekong"
 	NetworkChiado    = "chiado"
 	NetworkHolesky   = "holesky"
 	NetworkCustom    = "custom"

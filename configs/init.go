@@ -78,6 +78,15 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		ChainID: 17000,
 		Weight:  2,
 	},
+	NetworkMekong: {
+		Name:              NetworkMekong,
+		NetworkService:    "merge",
+		SupportsMEVBoost:  false,
+		CheckpointSyncURL: "https://checkpoint-sync.mekong.ethpandaops.io",
+		RelayURLs:         []string{},
+		ChainID:           7078815900,
+		Weight:            3,
+	},
 	NetworkVolta: {
 		Name:               NetworkVolta,
 		NetworkService:     "merge",
