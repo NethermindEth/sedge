@@ -47,7 +47,7 @@ var (
 )
 
 const (
-	execution, consensus, validator, mevBoost, optimism, opExecution, taiko, tExecution = "execution", "consensus", "validator", "mev-boost", "optimism", "opexecution", "taiko", "texecution"
+	execution, consensus, validator,distributedValidator, mevBoost, optimism, opExecution, taiko, tExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution", "taiko", "texecution"
 	jwtPathName                                                                         = "jwtsecret"
 )
 
@@ -80,31 +80,34 @@ type GenCmdFlags struct {
 	L2Execution
 	OptimismFlags
 	TaikoFlags
-	executionName     string
-	consensusName     string
-	validatorName     string
-	checkpointSyncUrl string
-	feeRecipient      string
-	noMev             bool
-	mevImage          string
-	mevBoostOnVal     bool
-	noValidator       bool
-	jwtPath           string
-	graffiti          string
-	mapAllPorts       bool
-	fallbackEL        []string
-	elExtraFlags      []string
-	clExtraFlags      []string
-	vlExtraFlags      []string
-	relayURLs         []string
-	mevBoostUrl       string
-	executionApiUrl   string
-	executionAuthUrl  string
-	consensusApiUrl   string
-	waitEpoch         int
-	customEnodes      []string
-	customEnrs        []string
-	latestVersion     bool
+	executionName            string
+	consensusName            string
+	validatorName            string
+	distributed              bool
+	distributedValidatorName string
+	checkpointSyncUrl        string
+	feeRecipient             string
+	noMev                    bool
+	mevImage                 string
+	mevBoostOnVal            bool
+	noValidator              bool
+	jwtPath                  string
+	graffiti                 string
+	mapAllPorts              bool
+	fallbackEL               []string
+	elExtraFlags             []string
+	clExtraFlags             []string
+	vlExtraFlags             []string
+	dvExtraFlags             []string
+	relayURLs                []string
+	mevBoostUrl              string
+	executionApiUrl          string
+	executionAuthUrl         string
+	consensusApiUrl          string
+	waitEpoch                int
+	customEnodes             []string
+	customEnrs               []string
+	latestVersion            bool
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -324,6 +327,8 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ExecutionClient:         combinedClients.Execution,
 		ConsensusClient:         combinedClients.Consensus,
 		ValidatorClient:         combinedClients.Validator,
+		Distributed:                flags.distributed,
+		DistributedValidatorClient: combinedClients.DistributedValidator,
 		L2ExecutionClient:       combinedClients.L2Execution,
 		OptimismClient:          combinedClients.Optimism,
 		TaikoClient:             combinedClients.Taiko,
@@ -391,6 +396,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 
 func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
 	var executionClient, consensusClient, validatorClient, opClient, taikoClient, l2ExecutionClient *clients.Client
+	var distributedValidatorClient *clients.Client
 	var err error
 
 	// execution client
@@ -584,10 +590,30 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		l2ExecutionClient = nil
 	}
 
+	// distributed validator client
+	if utils.Contains(services, distributedValidator) {
+		distributedValidatorClient, _ = clients.RandomChoice(allClients[distributedValidator])
+		if flags.distributedValidatorName != "" {
+			distributedValidatorParts := strings.Split(flags.distributedValidatorName, ":")
+			distributedValidatorClient.Name = distributedValidatorParts[0]
+			if len(distributedValidatorParts) > 1 {
+				distributedValidatorClient.Image = strings.Join(distributedValidatorParts[1:], ":")
+			}
+			distributedValidatorClient.SetImageOrDefault(strings.Join(distributedValidatorParts[1:], ":"))
+		} else {
+			distributedValidatorClient.Name = "charon"
+			distributedValidatorClient.SetImageOrDefault("")
+		}
+		if err = clients.ValidateClient(distributedValidatorClient, distributedValidator); err != nil {
+			return nil, err
+		}
+	}
+
 	return &clients.Clients{
 		Execution:   executionClient,
 		Consensus:   consensusClient,
 		Validator:   validatorClient,
+		DistributedValidator: distributedValidatorClient,
 		Optimism:    opClient,
 		Taiko:       taikoClient,
 		L2Execution: l2ExecutionClient,

@@ -27,6 +27,8 @@
       - --http
       - --http.port={{.ElL2ApiPort}}
       - --http.addr=0.0.0.0
+      - --http.vhosts=*
+      - --http.corsdomain=*
       - --authrpc.addr=0.0.0.0
       - --authrpc.port={{.ElL2AuthPort}}
       - --authrpc.jwtsecret=/tmp/jwt/jwtsecret

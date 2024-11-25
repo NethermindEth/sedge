@@ -37,6 +37,9 @@ var AllClients map[string][]string = map[string][]string{
 		"lodestar",
 		"nimbus",
 	},
+	"distributedValidator": {
+		"charon",
+	},
 	"optimism": {
 		"opnode",
 	},

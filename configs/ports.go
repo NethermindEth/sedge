@@ -31,4 +31,7 @@ const (
 	DefaultAuthPortELL2        uint16 = 8552
 	DefaultDiscoveryPortELL2   uint16 = 30313
 	DefaultMetricsPortELL2     uint16 = 8018
+	DefaultDiscoveryPortDV     uint16 = 3610
+	DefaultMetricsPortDV       uint16 = 3620
+	DefaultApiPortDV           uint16 = 3600
 )

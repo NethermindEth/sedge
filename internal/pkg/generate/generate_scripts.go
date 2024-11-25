@@ -46,6 +46,8 @@ const (
 	mevBoost        = "mev-boost"
 	configConsensus = "config_consensus"
 	empty           = "empty"
+	distributedValidator = "distributedValidator"
+	charon               = "charon"
 )
 
 // validateClients validates each client in GenData
@@ -58,6 +60,9 @@ func validateClients(gd *GenData) error {
 		return err
 	}
 	if err := validateValidator(gd, &c); err != nil {
+		return err
+	}
+	if err := validateDistributedValidator(gd, &c); err != nil {
 		return err
 	}
 	return nil
@@ -74,6 +79,21 @@ func validateValidator(gd *GenData, c *clients.ClientInfo) error {
 	}
 	if !utils.Contains(validatorClients, gd.ValidatorClient.Name) {
 		return ErrValidatorClientNotValid
+	}
+	return nil
+}
+
+// validateDistributedValidator validates the validator client in GenData
+func validateDistributedValidator(gd *GenData, c *clients.ClientInfo) error {
+	if gd.DistributedValidatorClient == nil {
+		return nil
+	}
+	distributedValidatorClients, err := c.SupportedClients(distributedValidator)
+	if err != nil {
+		return ErrUnableToGetClientsInfo
+	}
+	if !utils.Contains(distributedValidatorClients, gd.DistributedValidatorClient.Name) {
+		return ErrDistributedValidatorClientNotValid
 	}
 	return nil
 }
@@ -129,6 +149,7 @@ func mapClients(gd *GenData) map[string]*clients.Client {
 		opExecution:    l2OpClient,
 		taiko:          gd.TaikoClient,
 		taikoExecution: l2TaikoClient,
+		distributedValidator: gd.DistributedValidatorClient,
 	}
 
 	return cls
@@ -161,6 +182,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		"AuthPortELL2":      configs.DefaultAuthPortELL2,
 		"DiscoveryPortELL2": configs.DefaultDiscoveryPortELL2,
 		"MetricsPortELL2":   configs.DefaultMetricsPortELL2,
+		"DVDiscovery":       configs.DefaultDiscoveryPortDV,
+		"DVMetrics":         configs.DefaultMetricsPortDV,
+		"DVApi":             configs.DefaultApiPortDV,
 	}
 	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -268,6 +292,12 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	}
 	gd.MevBoostService = slices.Contains(gd.Services, "mev-boost")
 
+	if gd.Distributed {
+		// Check for distributed validator
+		if cls[distributedValidator] != nil {
+			gd.DistributedValidatorClient.Endpoint = configs.OnPremiseDistributedValidatorURL
+		}
+	}
 	consensusApiUrl := gd.ConsensusApiUrl
 	if cls[consensus] != nil && consensusApiUrl == "" {
 		consensusApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLApi"])
@@ -282,6 +312,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	data := DockerComposeData{
 		Services:            gd.Services,
 		Network:             gd.Network,
+		Distributed:         gd.Distributed,
 		XeeVersion:          xeeVersion,
 		Mev:                 networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev)),
 		MevBoostOnValidator: gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator,
@@ -311,6 +342,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		NetworkPrefix:       networkPrefix,
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
+		DvExtraFlags:        gd.DvExtraFlags,
 		ECBootnodes:         strings.Join(gd.ECBootnodes, ","),
 		CCBootnodes:         strings.Join(gd.CCBootnodes, ","),
 		CCBootnodesList:     gd.CCBootnodes,
@@ -331,6 +363,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		GID:                     os.Getegid(),
 		ContainerTag:            gd.ContainerTag,
 		ConsensusApiURL:         consensusApiUrl,
+		DVDiscoveryPort:         gd.Ports["DVDiscovery"],
+		DVMetricsPort:           gd.Ports["DVMetrics"],
+		DVApiPort:               gd.Ports["DVApi"],
 	}
 
 	// Save to writer
@@ -495,6 +530,13 @@ func EnvFile(gd *GenData, at io.Writer) error {
 			executionWSApiURL = executionApiUrl
 		}
 	}
+	distributedValidatorApiUrl := ""
+	if gd.Distributed {
+		// Check for distributed validator
+		if cls[distributedValidator] != nil {
+			distributedValidatorApiUrl = fmt.Sprintf("%s:%v", cls[distributedValidator].Endpoint, gd.Ports["DVApi"])
+		}
+	}
 
 	data := EnvData{
 		Services:                  gd.Services,
@@ -527,6 +569,10 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ExecutionWSApiURL:         executionWSApiURL,
 		OpSequencerHttp:           opSequencerHttp,
 		RethNetwork:               rethNetwork,
+		Distributed:                gd.Distributed,
+		DistributedValidatorApiUrl: distributedValidatorApiUrl,
+		DvDataDir:                  "./" + configs.DistributedValidatorDir,
+		DvImage:                    imageOrEmpty(cls[distributedValidator], gd.LatestVersion),
 	}
 
 	// Save to writer

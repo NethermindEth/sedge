@@ -33,6 +33,9 @@ func TestNodeOpIDs(t *testing.T) {
 		{
 			"NodeOpIDs, Holesky", "holesky",
 		},
+		{
+			"NodeOpIDs, Mainnet", "mainnet",
+		},
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
@@ -71,6 +74,9 @@ func TestNodeOperatorInfo(t *testing.T) {
 		{
 			"Invalid Address, Holesky", "holesky", big.NewInt(4), "0xC870Fd7316956C1582A2c8Fd2c46752cCEC70C99", true,
 		},
+		{
+			"Invalid Address, Mainnet", "mainnet", big.NewInt(4), "0xC870Fd7316956C1582A2c8Fd2c46752", true,
+		},
 	}
 
 	for _, tc := range tcs {
@@ -107,6 +113,12 @@ func TestNodeID(t *testing.T) {
 		{
 			"Invalid NodeID, Holesky #2", "holesky", big.NewInt(20000), true,
 		},
+		{
+			"Invalid NodeID, Mainnet", "mainnet", big.NewInt(-2), true,
+		},
+		// {
+		// 	"Valid NodeID, Mainnet", "mainnet", big.NewInt(1), false,
+		// },
 	}
 
 	for _, tc := range tcs {

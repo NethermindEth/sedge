@@ -6,7 +6,8 @@ RELAY_URLS={{.RelayURLs}}{{end}}{{if .FeeRecipient}}
 FEE_RECIPIENT={{.FeeRecipient}}{{end}}
 {{template "execution" .}}
 {{template "consensus" .}}
-{{template "validator" .}}
+{{template "validator" .}}{{if .Distributed}}
+{{template "distributedValidator" .}}{{end}}
 {{template "taiko" .}}
 {{template "texecution" .}}
 {{ end }}
