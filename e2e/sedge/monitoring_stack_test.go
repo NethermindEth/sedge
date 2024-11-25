@@ -387,3 +387,90 @@ func TestE2E_MonitoringStack_InitLido_InvalidNodeID(t *testing.T) {
 	// Run test case
 	e2eTest.run()
 }
+
+func TestE2E_MonitoringStack_InitLido_InvalidNodeID_Mainnet(t *testing.T) {
+	skipIfNotAMD64(t)
+	// Test context
+	var (
+		runErr error
+	)
+	// Build test case
+	e2eTest := newE2ESedgeTestCase(
+		t,
+		// Arrange
+		func(t *testing.T, sedgePath string) error {
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "clean")
+		},
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "-20", "--network", "mainnet")
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.Error(t, runErr)
+
+			checkMonitoringStackNotInstalled(t)
+			checkMonitoringStackContainersNotRunning(t, grafanaOnCallContainers...)
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
+
+func TestE2E_MonitoringStack_InitLido_InvalidAddress_Mainnet(t *testing.T) {
+	skipIfNotAMD64(t)
+	// Test context
+	var (
+		runErr error
+	)
+	// Build test case
+	e2eTest := newE2ESedgeTestCase(
+		t,
+		// Arrange
+		func(t *testing.T, sedgePath string) error {
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "clean")
+		},
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--reward-address", "xrewardx", "--network", "mainnet")
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.Error(t, runErr)
+
+			checkMonitoringStackNotInstalled(t)
+			checkMonitoringStackContainersNotRunning(t, grafanaOnCallContainers...)
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
+
+func TestE2E_MonitoringStack_InitLido_ValidID_Mainnet(t *testing.T) {
+	skipIfNotAMD64(t)
+	// Test context
+	var (
+		runErr error
+	)
+	// Build test case
+	e2eTest := newE2ESedgeTestCase(
+		t,
+		// Arrange
+		nil,
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "1", "--network", "mainnet")
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.NoError(t, runErr)
+			checkMonitoringStackDir(t)
+			checkPrometheusDir(t)
+			checkMonitoringStackContainers(t, "sedge_lido_exporter")
+			checkPrometheusTargetsUp(t, "sedge_lido_exporter:8080", "sedge_node_exporter:9100")
+			checkGrafanaHealth(t)
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}

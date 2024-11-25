@@ -17,13 +17,15 @@
       - --data-dir=/data
       - --log-file=/data/logs/validator.log
       - --log-level=${VL_LOG_LEVEL}
-      - --beacon-node=${CC_API_URL}
+      - --beacon-node={{if .Distributed}}${DV_API_URL}{{else}}${CC_API_URL}{{end}}
       - --metrics=true
       - --metrics-address=0.0.0.0
       - --metrics-port={{.VlMetricsPort}}{{with .FeeRecipient}}
       - --suggested-fee-recipient=${FEE_RECIPIENT}{{end}}{{range $flag := .VlExtraFlags}}
       - --{{$flag}}{{end}}
-      - --graffiti=${GRAFFITI}{{if .LoggingDriver}}
+      - --graffiti=${GRAFFITI}{{if .MevBoostOnValidator}}
+      - --payload-builder=true{{end}}{{if .Distributed}}
+      - --distributed{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:

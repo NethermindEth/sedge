@@ -19,10 +19,11 @@ services:
       - -relays
       - ${RELAY_URLS}{{end}}
 {{template "consensus" .}}
+{{if .Distributed}}
+{{template "distributedValidator" .}}{{ end }}
 {{ if .WithValidatorClient}}
 {{template "validator-blocker" .}}{{end}}
 {{template "validator" .}}
-
 {{ if .WithOptimismClient}}
 {{template "opexecution" .}}
 {{template "optimism" .}}{{end}}
