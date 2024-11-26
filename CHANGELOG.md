@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- New cli flag --distributed for running cluster with Charon distributed validator
+
+## [v1.7.2] - 2024-11-12
+
+### Fixed
+- Fix Erigon image source
+- Fix installation script path 
+
 ## [v1.7.1] - 2024-11-1
 
 ### Added
@@ -22,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support Mainnet for Lido CSM setup.
 
 ## [v1.6.0] - 2024-10-18
+
 
 ### Added
 - New command `lido-status` to display data of Lido Node Operator.
