@@ -697,7 +697,7 @@ func joinIfNotEmpty(strs ...string) string {
 // imageOrEmpty returns the image of the client if it is not nil, otherwise returns an empty string
 func imageOrEmpty(cls *clients.Client, latest bool) string {
 	if cls != nil {
-		if latest {
+		if latest && !cls.Modified {
 			splits := strings.Split(cls.Image, ":")
 			splits[len(splits)-1] = "latest"
 			return strings.Join(splits, ":")
