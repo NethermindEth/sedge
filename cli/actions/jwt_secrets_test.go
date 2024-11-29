@@ -78,7 +78,11 @@ func TestCreateJwtSecrets(t *testing.T) {
 			if jwtPath == "" {
 				return
 			}
-			assert.FileExists(t, jwtPath)
+			if tc.options.JWTPath == "" {
+				assert.FileExists(t, filepath.Join(tempDir, "jwtsecret"))
+			} else {
+				assert.FileExists(t, jwtPath)
+			}
 		})
 	}
 }

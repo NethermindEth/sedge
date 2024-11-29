@@ -40,7 +40,7 @@ func (s *sedgeActions) CreateJWTSecrets(options CreateJWTSecretOptions) (string,
 	jwtPath := options.JWTPath
 	if jwtPath == "" && !configs.NetworksConfigs()[options.Network].NoJWT {
 		return handleJWTSecret(options.GenerationPath)
-	} else if filepath.IsAbs(jwtPath) { // Ensure jwtPath is absolute
+	} else if filepath.IsAbs(jwtPath) { // ensure the path is absolute if provided
 		if jwtPath, err = filepath.Abs(jwtPath); err != nil {
 			return jwtPath, err
 		}
@@ -71,5 +71,17 @@ func handleJWTSecret(generationPath string) (string, error) {
 	}
 
 	log.Info(configs.JWTSecretGenerated)
-	return jwtPath, nil
+
+	// Convert the absolute path to a relative path
+	relativeJWTPath, err := filepath.Rel(generationPath, jwtPath)
+	if err != nil {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	// Prepend "./" to ensure compatibility with relative paths
+	if !filepath.IsAbs(relativeJWTPath) && !filepath.HasPrefix(relativeJWTPath, ".") {
+		relativeJWTPath = "." + string(filepath.Separator) + relativeJWTPath
+	}
+
+	return relativeJWTPath, nil
 }
