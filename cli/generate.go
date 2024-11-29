@@ -47,8 +47,8 @@ var (
 )
 
 const (
-	execution, consensus, validator,distributedValidator, mevBoost, optimism, opExecution, taiko, tExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution", "taiko", "texecution"
-	jwtPathName                                                                         = "jwtsecret"
+	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution, taiko, tExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution", "taiko", "texecution"
+	jwtPathName                                                                                               = "jwtsecret"
 )
 
 type CustomFlags struct {
@@ -324,50 +324,50 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 
 	// Generate docker-compose scripts
 	gd := generate.GenData{
-		ExecutionClient:         combinedClients.Execution,
-		ConsensusClient:         combinedClients.Consensus,
-		ValidatorClient:         combinedClients.Validator,
+		ExecutionClient:            combinedClients.Execution,
+		ConsensusClient:            combinedClients.Consensus,
+		ValidatorClient:            combinedClients.Validator,
 		Distributed:                flags.distributed,
 		DistributedValidatorClient: combinedClients.DistributedValidator,
-		L2ExecutionClient:       combinedClients.L2Execution,
-		OptimismClient:          combinedClients.Optimism,
-		TaikoClient:             combinedClients.Taiko,
-		Network:                 network,
-		CheckpointSyncUrl:       flags.checkpointSyncUrl,
-		FeeRecipient:            flags.feeRecipient,
-		JWTSecretPath:           flags.jwtPath,
-		Graffiti:                flags.graffiti,
-		FallbackELUrls:          flags.fallbackEL,
-		ElExtraFlags:            flags.elExtraFlags,
-		ClExtraFlags:            flags.clExtraFlags,
-		VlExtraFlags:            flags.vlExtraFlags,
-		ElL2ExtraFlags:          flags.ell2ExtraFlags,
-		OpExtraFlags:            flags.opExtraFlags,
-		TaikoExtraFlags:         flags.taikoExtraFlags,
-		IsBase:                  flags.isBase,
-		MapAllPorts:             flags.mapAllPorts,
-		Mev:                     !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
-		MevImage:                flags.mevImage,
-		LoggingDriver:           configs.GetLoggingDriver(logging),
-		RelayURLs:               flags.relayURLs,
-		MevBoostService:         utils.Contains(services, mevBoost),
-		MevBoostEndpoint:        flags.mevBoostUrl,
-		Services:                services,
-		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
-		ExecutionApiUrl:         executionApiUrl,
-		ExecutionAuthUrl:        executionAuthUrl,
-		ConsensusApiUrl:         consensusApiUrl,
-		ECBootnodes:             flags.customEnodes,
-		CCBootnodes:             flags.customEnrs,
-		CustomChainSpecPath:     flags.CustomFlags.customChainSpec,
-		CustomNetworkConfigPath: flags.CustomFlags.customNetworkConfig,
-		CustomGenesisPath:       flags.CustomFlags.customGenesis,
-		CustomDeployBlock:       flags.customDeployBlock,
-		CustomDeployBlockPath:   flags.CustomFlags.customDeployBlock,
-		MevBoostOnValidator:     flags.mevBoostOnVal,
-		ContainerTag:            containerTag,
-		LatestVersion:           flags.latestVersion,
-		JWTSecretL2:             jwtSecretL2,
+		L2ExecutionClient:          combinedClients.L2Execution,
+		OptimismClient:             combinedClients.Optimism,
+		TaikoClient:                combinedClients.Taiko,
+		Network:                    network,
+		CheckpointSyncUrl:          flags.checkpointSyncUrl,
+		FeeRecipient:               flags.feeRecipient,
+		JWTSecretPath:              flags.jwtPath,
+		Graffiti:                   flags.graffiti,
+		FallbackELUrls:             flags.fallbackEL,
+		ElExtraFlags:               flags.elExtraFlags,
+		ClExtraFlags:               flags.clExtraFlags,
+		VlExtraFlags:               flags.vlExtraFlags,
+		ElL2ExtraFlags:             flags.ell2ExtraFlags,
+		OpExtraFlags:               flags.opExtraFlags,
+		TaikoExtraFlags:            flags.taikoExtraFlags,
+		IsBase:                     flags.isBase,
+		MapAllPorts:                flags.mapAllPorts,
+		Mev:                        !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
+		MevImage:                   flags.mevImage,
+		LoggingDriver:              configs.GetLoggingDriver(logging),
+		RelayURLs:                  flags.relayURLs,
+		MevBoostService:            utils.Contains(services, mevBoost),
+		MevBoostEndpoint:           flags.mevBoostUrl,
+		Services:                   services,
+		VLStartGracePeriod:         uint(vlStartGracePeriod.Seconds()),
+		ExecutionApiUrl:            executionApiUrl,
+		ExecutionAuthUrl:           executionAuthUrl,
+		ConsensusApiUrl:            consensusApiUrl,
+		ECBootnodes:                flags.customEnodes,
+		CCBootnodes:                flags.customEnrs,
+		CustomChainSpecPath:        flags.CustomFlags.customChainSpec,
+		CustomNetworkConfigPath:    flags.CustomFlags.customNetworkConfig,
+		CustomGenesisPath:          flags.CustomFlags.customGenesis,
+		CustomDeployBlock:          flags.customDeployBlock,
+		CustomDeployBlockPath:      flags.CustomFlags.customDeployBlock,
+		MevBoostOnValidator:        flags.mevBoostOnVal,
+		ContainerTag:               containerTag,
+		LatestVersion:              flags.latestVersion,
+		JWTSecretL2:                jwtSecretL2,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,
@@ -403,7 +403,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 	if utils.Contains(services, execution) {
 		if network == NetworkMekong {
 			if flags.executionName == "nethermind" || flags.executionName == "" {
-				flags.executionName = "nethermind:docker.ethquokkaops.io/dh/ethpandaops/nethermind:pectra_devnet_4-c3827bc"
+				flags.executionName = "nethermind:nethermindeth/nethermind:master"
 			}
 		}
 		executionParts := strings.Split(flags.executionName, ":")
@@ -446,15 +446,15 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 
 			switch flags.consensusName {
 			case "lighthouse":
-				flags.consensusName = "lighthouse:docker.ethquokkaops.io/dh/ethpandaops/lighthouse:electra-alpha7-da953b8"
+				flags.consensusName = "lighthouse:ethpandaops/lighthouse:pawan-electra-alpha7-0dd215c"
 			case "lodestar":
-				flags.consensusName = "lodestar:docker.ethquokkaops.io/dh/ethpandaops/lodestar:devnet-4-1531b19"
+				flags.consensusName = "lodestar:docker.ethquokkaops.io/dh/chainsafe/lodestar:v1.23.0"
 			case "nimbus":
-				flags.consensusName = "nimbus:docker.ethquokkaops.io/dh/ethpandaops/nimbus-eth2:4JM-25aae76"
+				flags.consensusName = "nimbus:docker.ethquokkaops.io/dh/ethpandaops/nimbus-eth2:mekong-support-03fe86f"
 			case "prysm":
-				flags.consensusName = "prysm:docker.ethquokkaops.io/dh/ethpandaops/prysm-beacon-chain:develop-4aa5410"
+				flags.consensusName = "prysm:docker.ethquokkaops.io/gcr/prysmaticlabs/prysm/beacon-chain:v5.1.2-mekong"
 			case "teku":
-				flags.consensusName = "teku:docker.ethquokkaops.io/dh/consensys/teku:24.10.3"
+				flags.consensusName = "teku:consensys/teku:24.10.3"
 			}
 
 		}
@@ -610,13 +610,13 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 	}
 
 	return &clients.Clients{
-		Execution:   executionClient,
-		Consensus:   consensusClient,
-		Validator:   validatorClient,
+		Execution:            executionClient,
+		Consensus:            consensusClient,
+		Validator:            validatorClient,
 		DistributedValidator: distributedValidatorClient,
-		Optimism:    opClient,
-		Taiko:       taikoClient,
-		L2Execution: l2ExecutionClient,
+		Optimism:             opClient,
+		Taiko:                taikoClient,
+		L2Execution:          l2ExecutionClient,
 	}, err
 }
 
