@@ -416,7 +416,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			if len(executionParts) > 1 {
 				log.Warn(configs.CustomExecutionImagesWarning)
 				executionClient.Image = strings.Join(executionParts[1:], ":")
-				flags.latestVersion = false
+				executionClient.Modified = true
 			}
 		}
 		executionClient.SetImageOrDefault(strings.Join(executionParts[1:], ":"))
@@ -468,7 +468,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			if len(consensusParts) > 1 {
 				log.Warn(configs.CustomConsensusImagesWarning)
 				consensusClient.Image = strings.Join(consensusParts[1:], ":")
-				flags.latestVersion = false
+				consensusClient.Modified = true
 			}
 		}
 		consensusClient.SetImageOrDefault(strings.Join(consensusParts[1:], ":"))
@@ -490,8 +490,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			if len(validatorParts) > 1 {
 				log.Warn(configs.CustomValidatorImagesWarning)
 				validatorClient.Image = strings.Join(validatorParts[1:], ":")
-				flags.latestVersion = false
-
+				validatorClient.Modified = true
 			}
 		}
 		validatorClient.SetImageOrDefault(strings.Join(validatorParts[1:], ":"))
@@ -512,6 +511,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			opClient.Name = "opnode"
 			if len(optimismParts) > 1 {
 				opClient.Image = strings.Join(optimismParts[1:], ":")
+				opClient.Modified = true
 			}
 		}
 		opClient.SetImageOrDefault(strings.Join(optimismParts[1:], ":"))
@@ -528,6 +528,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			l2ExecutionClient.Name = strings.ReplaceAll(optimismExecutionParts[0], "-", "")
 			if len(optimismExecutionParts) > 1 {
 				l2ExecutionClient.Image = strings.Join(optimismExecutionParts[1:], ":")
+				executionClient.Modified = true
 			}
 		}
 		l2ExecutionClient.SetImageOrDefault(strings.Join(optimismExecutionParts[1:], ":"))
@@ -598,6 +599,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			distributedValidatorClient.Name = distributedValidatorParts[0]
 			if len(distributedValidatorParts) > 1 {
 				distributedValidatorClient.Image = strings.Join(distributedValidatorParts[1:], ":")
+				distributedValidatorClient.Modified = true
 			}
 			distributedValidatorClient.SetImageOrDefault(strings.Join(distributedValidatorParts[1:], ":"))
 		} else {
