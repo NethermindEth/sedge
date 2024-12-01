@@ -578,7 +578,19 @@ func handleJWTSecret(generationPath, name string) (string, error) {
 	}
 
 	log.Info(configs.JWTSecretGenerated)
-	return jwtPath, nil
+
+	// Convert the absolute path to a relative path
+	relativeJWTPath, err := filepath.Rel(generationPath, jwtPath)
+	if err != nil {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
+	}
+
+	// Prepend "./" to ensure compatibility with relative paths
+	if !filepath.IsAbs(relativeJWTPath) && !filepath.HasPrefix(relativeJWTPath, ".") {
+		relativeJWTPath = "." + string(filepath.Separator) + relativeJWTPath
+	}
+
+	return relativeJWTPath, nil
 }
 
 // TODO: Add unit tests

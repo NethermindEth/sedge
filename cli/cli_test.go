@@ -68,6 +68,9 @@ func TestCli(t *testing.T) {
 			name: "full node with validator mainnet",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
+				jwtPathAbs, _ := filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+				jwtPath, _ := filepath.Rel(generationPath, jwtPathAbs)
+				relativeJWTPath := "." + string(filepath.Separator) + jwtPath
 				genData := generate.GenData{
 					Services: []string{"execution", "consensus", "validator", "mev-boost"},
 					ExecutionClient: &clients.Client{
@@ -95,7 +98,7 @@ func TestCli(t *testing.T) {
 					MevImage:           "flashbots/mev-boost:latest",
 					RelayURLs:          configs.NetworksConfigs()[NetworkMainnet].RelayURLs,
 					ContainerTag:       "tag",
-					JWTSecretPath:      filepath.Join(generationPath, "jwtsecret"),
+					JWTSecretPath:      relativeJWTPath,
 				}
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
 				gomock.InOrder(
@@ -151,6 +154,9 @@ func TestCli(t *testing.T) {
 			name: "full node without validator mainnet",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
+				jwtPathAbs, _ := filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+				jwtPath, _ := filepath.Rel(generationPath, jwtPathAbs)
+				relativeJWTPath := "." + string(filepath.Separator) + jwtPath
 				genData := generate.GenData{
 					Services: []string{"execution", "consensus"},
 					ExecutionClient: &clients.Client{
@@ -168,7 +174,7 @@ func TestCli(t *testing.T) {
 					FeeRecipient:      "0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5",
 					MapAllPorts:       true,
 					ContainerTag:      "tag",
-					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
+					JWTSecretPath:     relativeJWTPath,
 				}
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
@@ -196,6 +202,9 @@ func TestCli(t *testing.T) {
 			name: "full node without validator holesky",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
+				jwtPathAbs, _ := filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+				jwtPath, _ := filepath.Rel(generationPath, jwtPathAbs)
+				relativeJWTPath := "." + string(filepath.Separator) + jwtPath
 				genData := generate.GenData{
 					Services: []string{"execution", "consensus"},
 					ExecutionClient: &clients.Client{
@@ -213,7 +222,7 @@ func TestCli(t *testing.T) {
 					FeeRecipient:      "0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5",
 					MapAllPorts:       true,
 					ContainerTag:      "tag",
-					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
+					JWTSecretPath:     relativeJWTPath,
 				}
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
@@ -331,6 +340,9 @@ func TestCli(t *testing.T) {
 			name: "consensus node",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
+				jwtPathAbs, _ := filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+				jwtPath, _ := filepath.Rel(generationPath, jwtPathAbs)
+				relativeJWTPath := "." + string(filepath.Separator) + jwtPath
 				genData := generate.GenData{
 					Services: []string{"consensus"},
 					ConsensusClient: &clients.Client{
@@ -346,7 +358,7 @@ func TestCli(t *testing.T) {
 					ExecutionAuthUrl:  "http://execution:5051",
 					MevBoostEndpoint:  "http://mev-boost:3030",
 					ContainerTag:      "tag",
-					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
+					JWTSecretPath:     relativeJWTPath,
 				}
 
 				gomock.InOrder(
@@ -376,6 +388,9 @@ func TestCli(t *testing.T) {
 			name: "consensus node holesky",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
+				jwtPathAbs, _ := filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+				jwtPath, _ := filepath.Rel(generationPath, jwtPathAbs)
+				relativeJWTPath := "." + string(filepath.Separator) + jwtPath
 				genData := generate.GenData{
 					Services: []string{"consensus"},
 					ConsensusClient: &clients.Client{
@@ -391,7 +406,7 @@ func TestCli(t *testing.T) {
 					ExecutionAuthUrl:  "http://execution:5051",
 					MevBoostEndpoint:  "http://mev-boost:3030",
 					ContainerTag:      "tag",
-					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
+					JWTSecretPath:     relativeJWTPath,
 				}
 
 				gomock.InOrder(
@@ -485,6 +500,9 @@ func TestCli(t *testing.T) {
 			name: "consensus node",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
+				jwtPathAbs, _ := filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+				jwtPath, _ := filepath.Rel(generationPath, jwtPathAbs)
+				relativeJWTPath := "." + string(filepath.Separator) + jwtPath
 				genData := generate.GenData{
 					Services: []string{"consensus"},
 					ConsensusClient: &clients.Client{
@@ -500,7 +518,7 @@ func TestCli(t *testing.T) {
 					ExecutionAuthUrl:  "http://execution:5051",
 					MevBoostEndpoint:  "http://mev-boost:3030",
 					ContainerTag:      "tag",
-					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
+					JWTSecretPath:     relativeJWTPath,
 				}
 
 				gomock.InOrder(
@@ -530,6 +548,9 @@ func TestCli(t *testing.T) {
 			name: "full node with Lido, mainnet",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
+				jwtPathAbs, _ := filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+				jwtPath, _ := filepath.Rel(generationPath, jwtPathAbs)
+				relativeJWTPath := "." + string(filepath.Separator) + jwtPath
 				genData := generate.GenData{
 					Services: []string{"execution", "consensus", "validator", "mev-boost"},
 					ExecutionClient: &clients.Client{
@@ -557,7 +578,7 @@ func TestCli(t *testing.T) {
 					MevImage:           "flashbots/mev-boost:latest",
 					RelayURLs:          mainnetMevboostRelayListUris,
 					ContainerTag:       "tag",
-					JWTSecretPath:      filepath.Join(generationPath, "jwtsecret"),
+					JWTSecretPath:      relativeJWTPath,
 				}
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
 				gomock.InOrder(
@@ -609,6 +630,9 @@ func TestCli(t *testing.T) {
 			name: "full node with Lido, holesky",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
+				jwtPathAbs, _ := filepath.Abs(filepath.Join(generationPath, "jwtsecret"))
+				jwtPath, _ := filepath.Rel(generationPath, jwtPathAbs)
+				relativeJWTPath := "." + string(filepath.Separator) + jwtPath
 				genData := generate.GenData{
 					Services: []string{"execution", "consensus", "validator", "mev-boost"},
 					ExecutionClient: &clients.Client{
@@ -636,7 +660,7 @@ func TestCli(t *testing.T) {
 					MevImage:           "flashbots/mev-boost:latest",
 					RelayURLs:          holeskyMevboostRelayListUris,
 					ContainerTag:       "tag",
-					JWTSecretPath:      filepath.Join(generationPath, "jwtsecret"),
+					JWTSecretPath:      relativeJWTPath,
 				}
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
 				gomock.InOrder(
