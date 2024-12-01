@@ -418,6 +418,8 @@ func TestGenerateDockerCompose(t *testing.T) {
 				if tc.genData.LatestVersion {
 					if tc.genData.ConsensusClient.Modified {
 						assert.True(t, strings.HasSuffix(named.String(), tc.genData.ConsensusClient.Image))
+					} else if tc.genData.ConsensusClient.Name == "nimbus" {
+						assert.True(t, strings.HasSuffix(named.String(), ":multiarch-latest"))
 					} else {
 						assert.True(t, strings.HasSuffix(named.String(), ":latest"))
 					}
@@ -483,6 +485,8 @@ func TestGenerateDockerCompose(t *testing.T) {
 				if tc.genData.LatestVersion {
 					if tc.genData.ValidatorClient.Modified {
 						assert.True(t, strings.HasSuffix(named.String(), tc.genData.ValidatorClient.Image))
+					} else if tc.genData.ValidatorClient.Name == "nimbus" {
+						assert.True(t, strings.HasSuffix(named.String(), ":multiarch-latest"))
 					} else {
 						assert.True(t, strings.HasSuffix(named.String(), ":latest"))
 					}
