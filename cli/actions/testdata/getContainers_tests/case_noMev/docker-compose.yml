@@ -21,7 +21,6 @@ services:
     command:
       - --config=${NETWORK}
       - --datadir=/nethermind/data
-      - --log=${NETHERMIND_LOG_LEVEL}
       - --Sync.SnapSync=${EC_SNAP_SYNC_ENABLED}
       - --JsonRpc.Enabled=true
       - --JsonRpc.Host=0.0.0.0
