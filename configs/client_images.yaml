@@ -1,7 +1,7 @@
 execution:
   geth:
     name: ethereum/client-go
-    version: v1.14.11
+    version: v1.14.12
   besu:
     name: hyperledger/besu
     version: 24.10.0
@@ -14,10 +14,10 @@ execution:
 consensus:
   lighthouse:
     name: sigp/lighthouse
-    version: v5.3.0
+    version: v6.0.0
   lodestar:
     name: chainsafe/lodestar
-    version: v1.22.0
+    version: v1.23.1
   teku:
     name: consensys/teku
     version: 24.10.3
@@ -30,10 +30,10 @@ consensus:
 validator:
   lighthouse:
     name: sigp/lighthouse
-    version: v5.3.0
+    version: v6.0.0
   lodestar:
     name: chainsafe/lodestar
-    version: v1.22.0
+    version: v1.23.1
   teku:
     name: consensys/teku
     version: 24.10.3
@@ -46,7 +46,7 @@ validator:
 distributed:
   charon:
     name: ghcr.io/obolnetwork/charon
-    version: v1.1.2
+    version: v5.1.2
 optimism:
   opnode:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node
