@@ -485,7 +485,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			executionOpClient.Name = strings.ReplaceAll(optimismExecutionParts[0], "-", "")
 			if len(optimismExecutionParts) > 1 {
 				executionOpClient.Image = strings.Join(optimismExecutionParts[1:], ":")
-				executionClient.Modified = true
+				executionOpClient.Modified = true
 			}
 		}
 		executionOpClient.SetImageOrDefault(strings.Join(optimismExecutionParts[1:], ":"))
