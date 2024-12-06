@@ -1,0 +1,93 @@
+---
+sidebar_position: 12
+id: running-taiko-node
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Running a Taiko Node with Sedge
+
+## What is Taiko?
+
+[Taiko](https://taiko.xyz/) is an Ethereum-equivalent Optimistic Rollup on the Ethereum network. In the future it aims to add zkVerifier making it a hybrid, optimistic-zk construction. Taiko combines based sequencing and a contestation mechanism with multi-proofs.
+
+Sedge supports setting up and running Taiko nodes, making it easier for users to participate in the Taiko ecosystem. This guide will walk you through the process of setting up a Taiko node using Sedge.
+
+:::info
+
+Running an Taiko node requires significant computational resources and a stable internet connection. Make sure your system meets the [minimum requirements](https://docs.taiko.xyz/guides/node-operators/run-a-taiko-node-with-docker/#prerequisites) before proceeding.
+
+:::
+
+## Workflow breakdown
+
+Setting up an Taiko node with Sedge involves several steps:
+
+2. **Generate Node Configuration**: Use Sedge to generate the necessary configuration files for your Taiko node.
+3. **Run the Node**: Start your Taiko node using the generated configuration.
+4. **Monitor and Maintain**: Keep your node running smoothly and up to date.
+
+Let's dive into each step in detail.
+
+## Using Sedge for Taiko
+
+### Generating Node Configuration
+
+To generate the configuration for your Taiko node, use the following command:
+
+```bash
+sedge generate taiko-full-node --network mainnet
+```
+
+:::tip
+
+**Supported Execution Clients**:
+- op-nethermind
+- op-geth
+
+You can set the execution client using the `--l2-execution` flag. If you don't specify an execution client, Sedge will chose one randomly.
+
+Alternatively, you can set the docker image for the execution client using the `--l2-execution '<CLIENT>:<DOCKER_IMAGE>'` syntax.
+:::
+
+This command will create a new directory with all the necessary configuration files for running a Taiko node on the mainnet. If you want to run a node on the testnet (Hekla), use `--network holesky` instead.
+
+:::info
+
+When you use `sedge generate taiko-full-node`, Sedge will generate a `docker-compose.yml` script and a `.env` file with the necessary configuration for your Taiko node.
+
+That config will include the execution client, the consensus client, and the execution and consensus Taiko client.
+
+:::
+
+:::tip
+
+Setting `--execution-api-url` and `--consensus--url`flag, will only generate execution and consensus Taiko nodes, and the stack will point to that execution node.
+
+This is useful if you already have an endpoint for the execution node. It will save synchronization time.
+
+For example you can set: `sedge generate taiko-full-node --execution-api-url http://execution:port --consensus-url http://consensus:port -n holesky --l2-execution taiko-nethermind`
+
+:::
+
+### Running the Node
+Once the configuration is generated, you can start your Taiko node using:
+
+```
+sedge run
+```
+
+This command will start all the necessary components of your Taiko node, including the execution client and the taiko driver client (consensus).
+
+:::note
+
+The first time you run your node, it will need to sync with the network, which can take several hours or even days depending on your hardware and network connection.
+
+:::
+
+### Monitoring and Maintenance
+
+After your Taiko node is up and running, you should monitor its performance and ensure it stays in sync with the network. Regularly check for updates to the Taiko client and other components to keep your node secure and up to date.
+
+By following these steps, you can set up and run an Taiko node using Sedge, contributing to the growth and decentralization of the Taiko network.

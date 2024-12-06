@@ -12,7 +12,7 @@
     networks:
       - sedge
     volumes:
-      - ${EC_OP_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+      - ${EC_L2_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
     command:
       - op-node
       - --l1=${EC_API_URL}

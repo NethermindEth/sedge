@@ -47,8 +47,8 @@ var (
 )
 
 const (
-	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution"
-	jwtPathName                                                                            = "jwtsecret"
+	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution, taiko, tExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution", "taiko", "texecution"
+	jwtPathName                                                                                               = "jwtsecret"
 )
 
 type CustomFlags struct {
@@ -58,18 +58,28 @@ type CustomFlags struct {
 	customDeployBlock   string
 }
 
+type L2Execution struct {
+	l2ExecutionName string
+	ell2ExtraFlags  []string
+}
+
 type OptimismFlags struct {
-	optimismName          string
-	optimismExecutionName string
-	elOpExtraFlags        []string
-	opExtraFlags          []string
-	isBase                bool
+	optimismName string
+	opExtraFlags []string
+	isBase       bool
+}
+
+type TaikoFlags struct {
+	taikoName       string
+	taikoExtraFlags []string
 }
 
 // GenCmdFlags is a struct that holds the flags of the generate command
 type GenCmdFlags struct {
 	CustomFlags
+	L2Execution
 	OptimismFlags
+	TaikoFlags
 	executionName            string
 	consensusName            string
 	validatorName            string
@@ -127,6 +137,7 @@ You can generate:
 	cmd.AddCommand(ValidatorSubCmd(sedgeAction))
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
 	cmd.AddCommand(OpFullNodeSubCmd(sedgeAction))
+	cmd.AddCommand(TaikoFullNodeSubCmd(sedgeAction))
 
 	cmd.PersistentFlags().BoolVar(&lidoNode, "lido", false, "generate Lido CSM node")
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
@@ -275,10 +286,10 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 			return err
 		}
 	}
-	var jwtSecretOP string
+	var jwtSecretL2 string
 	// If optimism is included in the services, generate the jwt secret for it
-	if utils.Contains(services, optimism) {
-		jwtSecretOP, err = handleJWTSecret(generationPath, jwtPathName+"-op")
+	if utils.Contains(services, optimism) || utils.Contains(services, taiko) {
+		jwtSecretL2, err = handleJWTSecret(generationPath, jwtPathName+"-l2")
 		if err != nil {
 			return err
 		}
@@ -317,8 +328,10 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ValidatorClient:            combinedClients.Validator,
 		Distributed:                flags.distributed,
 		DistributedValidatorClient: combinedClients.DistributedValidator,
-		ExecutionOPClient:          combinedClients.ExecutionOP,
+		DvExtraFlags:               flags.dvExtraFlags,
+		L2ExecutionClient:          combinedClients.L2Execution,
 		OptimismClient:             combinedClients.Optimism,
+		TaikoClient:                combinedClients.Taiko,
 		Network:                    network,
 		CheckpointSyncUrl:          flags.checkpointSyncUrl,
 		FeeRecipient:               flags.feeRecipient,
@@ -328,9 +341,9 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ElExtraFlags:               flags.elExtraFlags,
 		ClExtraFlags:               flags.clExtraFlags,
 		VlExtraFlags:               flags.vlExtraFlags,
-		DvExtraFlags:               flags.dvExtraFlags,
-		ElOpExtraFlags:             flags.elOpExtraFlags,
+		ElL2ExtraFlags:             flags.ell2ExtraFlags,
 		OpExtraFlags:               flags.opExtraFlags,
+		TaikoExtraFlags:            flags.taikoExtraFlags,
 		IsBase:                     flags.isBase,
 		MapAllPorts:                flags.mapAllPorts,
 		Mev:                        !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
@@ -354,7 +367,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		MevBoostOnValidator:        flags.mevBoostOnVal,
 		ContainerTag:               containerTag,
 		LatestVersion:              flags.latestVersion,
-		JWTSecretOP:                jwtSecretOP,
+		JWTSecretL2:                jwtSecretL2,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,
@@ -382,7 +395,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 }
 
 func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
-	var executionClient, consensusClient, validatorClient, executionOpClient, opClient *clients.Client
+	var executionClient, consensusClient, validatorClient, opClient, taikoClient, l2ExecutionClient *clients.Client
 	var distributedValidatorClient *clients.Client
 	var err error
 
@@ -476,19 +489,19 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 
-		optimismExecutionParts := strings.Split(flags.optimismExecutionName, ":")
-		executionOpClient, err = clients.RandomChoice(allClients[opExecution])
+		optimismExecutionParts := strings.Split(flags.l2ExecutionName, ":")
+		l2ExecutionClient, err = clients.RandomChoice(allClients[opExecution])
 		if err != nil {
 			return nil, err
 		}
-		if flags.optimismExecutionName != "" {
-			executionOpClient.Name = strings.ReplaceAll(optimismExecutionParts[0], "-", "")
+		if flags.l2ExecutionName != "" {
+			l2ExecutionClient.Name = strings.ReplaceAll(optimismExecutionParts[0], "-", "")
 			if len(optimismExecutionParts) > 1 {
-				executionOpClient.Image = strings.Join(optimismExecutionParts[1:], ":")
+				l2ExecutionClient.Image = strings.Join(optimismExecutionParts[1:], ":")
 			}
 		}
-		executionOpClient.SetImageOrDefault(strings.Join(optimismExecutionParts[1:], ":"))
-		if err = clients.ValidateClient(executionOpClient, opExecution); err != nil {
+		l2ExecutionClient.SetImageOrDefault(strings.Join(optimismExecutionParts[1:], ":"))
+		if err = clients.ValidateClient(l2ExecutionClient, opExecution); err != nil {
 			return nil, err
 		}
 
@@ -499,7 +512,52 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		}
 	} else {
 		opClient = nil
-		executionOpClient = nil
+	}
+	// Taiko client
+	if utils.Contains(services, taiko) {
+		taikoParts := strings.Split(flags.taikoName, ":")
+		taikoClient, err = clients.RandomChoice(allClients[taiko])
+		if err != nil {
+			return nil, err
+		}
+		if flags.taikoName != "" {
+			taikoClient.Name = "taikoclient"
+			if len(taikoParts) > 1 {
+				taikoClient.Image = strings.Join(taikoParts[1:], ":")
+			}
+		}
+		taikoClient.SetImageOrDefault(strings.Join(taikoParts[1:], ":"))
+		if err = clients.ValidateClient(opClient, taiko); err != nil {
+			return nil, err
+		}
+
+		taikoExecutionParts := strings.Split(flags.l2ExecutionName, ":")
+		l2ExecutionClient, err = clients.RandomChoice(allClients[tExecution])
+		if err != nil {
+			return nil, err
+		}
+		if flags.l2ExecutionName != "" {
+			l2ExecutionClient.Name = strings.ReplaceAll(taikoExecutionParts[0], "-", "")
+			if len(taikoExecutionParts) > 1 {
+				l2ExecutionClient.Image = strings.Join(taikoExecutionParts[1:], ":")
+			}
+		}
+		l2ExecutionClient.SetImageOrDefault(strings.Join(taikoExecutionParts[1:], ":"))
+		if err = clients.ValidateClient(l2ExecutionClient, tExecution); err != nil {
+			return nil, err
+		}
+
+		// If set execution-api-url, set execution and beacon to nil
+		if flags.executionApiUrl != "" {
+			executionClient = nil
+			consensusClient = nil
+		}
+	} else {
+		taikoClient = nil
+	}
+
+	if !utils.Contains(services, optimism) && !utils.Contains(services, taiko) {
+		l2ExecutionClient = nil
 	}
 
 	// distributed validator client
@@ -526,8 +584,9 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		Consensus:            consensusClient,
 		Validator:            validatorClient,
 		DistributedValidator: distributedValidatorClient,
-		ExecutionOP:          executionOpClient,
 		Optimism:             opClient,
+		Taiko:                taikoClient,
+		L2Execution:          l2ExecutionClient,
 	}, err
 }
 
