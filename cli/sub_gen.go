@@ -173,6 +173,7 @@ This command does not generate a validator configuration, as Optimism and Base u
 	cmd.Flags().SortFlags = false
 	return cmd
 }
+
 func TaikoFullNodeSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 	cmd := &cobra.Command{

@@ -47,8 +47,8 @@ var (
 )
 
 const (
-	execution, consensus, validator,distributedValidator, mevBoost, optimism, opExecution, taiko, tExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution", "taiko", "texecution"
-	jwtPathName                                                                         = "jwtsecret"
+	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution, taiko, tExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution", "taiko", "texecution"
+	jwtPathName                                                                                               = "jwtsecret"
 )
 
 type CustomFlags struct {
@@ -323,50 +323,50 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 
 	// Generate docker-compose scripts
 	gd := generate.GenData{
-		ExecutionClient:         combinedClients.Execution,
-		ConsensusClient:         combinedClients.Consensus,
-		ValidatorClient:         combinedClients.Validator,
+		ExecutionClient:            combinedClients.Execution,
+		ConsensusClient:            combinedClients.Consensus,
+		ValidatorClient:            combinedClients.Validator,
 		Distributed:                flags.distributed,
 		DistributedValidatorClient: combinedClients.DistributedValidator,
-		L2ExecutionClient:       combinedClients.L2Execution,
-		OptimismClient:          combinedClients.Optimism,
-		TaikoClient:             combinedClients.Taiko,
-		Network:                 network,
-		CheckpointSyncUrl:       flags.checkpointSyncUrl,
-		FeeRecipient:            flags.feeRecipient,
-		JWTSecretPath:           flags.jwtPath,
-		Graffiti:                flags.graffiti,
-		FallbackELUrls:          flags.fallbackEL,
-		ElExtraFlags:            flags.elExtraFlags,
-		ClExtraFlags:            flags.clExtraFlags,
-		VlExtraFlags:            flags.vlExtraFlags,
-		ElL2ExtraFlags:          flags.ell2ExtraFlags,
-		OpExtraFlags:            flags.opExtraFlags,
-		TaikoExtraFlags:         flags.taikoExtraFlags,
-		IsBase:                  flags.isBase,
-		MapAllPorts:             flags.mapAllPorts,
-		Mev:                     !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
-		MevImage:                flags.mevImage,
-		LoggingDriver:           configs.GetLoggingDriver(logging),
-		RelayURLs:               flags.relayURLs,
-		MevBoostService:         utils.Contains(services, mevBoost),
-		MevBoostEndpoint:        flags.mevBoostUrl,
-		Services:                services,
-		VLStartGracePeriod:      uint(vlStartGracePeriod.Seconds()),
-		ExecutionApiUrl:         executionApiUrl,
-		ExecutionAuthUrl:        executionAuthUrl,
-		ConsensusApiUrl:         consensusApiUrl,
-		ECBootnodes:             flags.customEnodes,
-		CCBootnodes:             flags.customEnrs,
-		CustomChainSpecPath:     flags.CustomFlags.customChainSpec,
-		CustomNetworkConfigPath: flags.CustomFlags.customNetworkConfig,
-		CustomGenesisPath:       flags.CustomFlags.customGenesis,
-		CustomDeployBlock:       flags.customDeployBlock,
-		CustomDeployBlockPath:   flags.CustomFlags.customDeployBlock,
-		MevBoostOnValidator:     flags.mevBoostOnVal,
-		ContainerTag:            containerTag,
-		LatestVersion:           flags.latestVersion,
-		JWTSecretL2:             jwtSecretL2,
+		L2ExecutionClient:          combinedClients.L2Execution,
+		OptimismClient:             combinedClients.Optimism,
+		TaikoClient:                combinedClients.Taiko,
+		Network:                    network,
+		CheckpointSyncUrl:          flags.checkpointSyncUrl,
+		FeeRecipient:               flags.feeRecipient,
+		JWTSecretPath:              flags.jwtPath,
+		Graffiti:                   flags.graffiti,
+		FallbackELUrls:             flags.fallbackEL,
+		ElExtraFlags:               flags.elExtraFlags,
+		ClExtraFlags:               flags.clExtraFlags,
+		VlExtraFlags:               flags.vlExtraFlags,
+		ElL2ExtraFlags:             flags.ell2ExtraFlags,
+		OpExtraFlags:               flags.opExtraFlags,
+		TaikoExtraFlags:            flags.taikoExtraFlags,
+		IsBase:                     flags.isBase,
+		MapAllPorts:                flags.mapAllPorts,
+		Mev:                        !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
+		MevImage:                   flags.mevImage,
+		LoggingDriver:              configs.GetLoggingDriver(logging),
+		RelayURLs:                  flags.relayURLs,
+		MevBoostService:            utils.Contains(services, mevBoost),
+		MevBoostEndpoint:           flags.mevBoostUrl,
+		Services:                   services,
+		VLStartGracePeriod:         uint(vlStartGracePeriod.Seconds()),
+		ExecutionApiUrl:            executionApiUrl,
+		ExecutionAuthUrl:           executionAuthUrl,
+		ConsensusApiUrl:            consensusApiUrl,
+		ECBootnodes:                flags.customEnodes,
+		CCBootnodes:                flags.customEnrs,
+		CustomChainSpecPath:        flags.CustomFlags.customChainSpec,
+		CustomNetworkConfigPath:    flags.CustomFlags.customNetworkConfig,
+		CustomGenesisPath:          flags.CustomFlags.customGenesis,
+		CustomDeployBlock:          flags.customDeployBlock,
+		CustomDeployBlockPath:      flags.CustomFlags.customDeployBlock,
+		MevBoostOnValidator:        flags.mevBoostOnVal,
+		ContainerTag:               containerTag,
+		LatestVersion:              flags.latestVersion,
+		JWTSecretL2:                jwtSecretL2,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,
@@ -579,13 +579,13 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 	}
 
 	return &clients.Clients{
-		Execution:   executionClient,
-		Consensus:   consensusClient,
-		Validator:   validatorClient,
+		Execution:            executionClient,
+		Consensus:            consensusClient,
+		Validator:            validatorClient,
 		DistributedValidator: distributedValidatorClient,
-		Optimism:    opClient,
-		Taiko:       taikoClient,
-		L2Execution: l2ExecutionClient,
+		Optimism:             opClient,
+		Taiko:                taikoClient,
+		L2Execution:          l2ExecutionClient,
 	}, err
 }
 

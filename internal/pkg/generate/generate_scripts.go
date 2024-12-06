@@ -34,18 +34,18 @@ import (
 )
 
 const (
-	execution       = "execution"
-	consensus       = "consensus"
-	validator       = "validator"
-	optimism        = "optimism"
-	opExecution     = "opexecution"
-	taiko           = "taiko"
-	taikoExecution  = "texecution"
-	l2Execution     = "l2execution"
-	validatorImport = "validator-import"
-	mevBoost        = "mev-boost"
-	configConsensus = "config_consensus"
-	empty           = "empty"
+	execution            = "execution"
+	consensus            = "consensus"
+	validator            = "validator"
+	optimism             = "optimism"
+	opExecution          = "opexecution"
+	taiko                = "taiko"
+	taikoExecution       = "texecution"
+	l2Execution          = "l2execution"
+	validatorImport      = "validator-import"
+	mevBoost             = "mev-boost"
+	configConsensus      = "config_consensus"
+	empty                = "empty"
 	distributedValidator = "distributedValidator"
 	charon               = "charon"
 )
@@ -131,7 +131,6 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 
 // mapClients convert genData clients to clients.Clients
 func mapClients(gd *GenData) map[string]*clients.Client {
-
 	var l2OpClient, l2TaikoClient *clients.Client
 
 	if gd.OptimismClient != nil {
@@ -142,13 +141,13 @@ func mapClients(gd *GenData) map[string]*clients.Client {
 	}
 
 	cls := map[string]*clients.Client{
-		execution:      gd.ExecutionClient,
-		consensus:      gd.ConsensusClient,
-		validator:      gd.ValidatorClient,
-		optimism:       gd.OptimismClient,
-		opExecution:    l2OpClient,
-		taiko:          gd.TaikoClient,
-		taikoExecution: l2TaikoClient,
+		execution:            gd.ExecutionClient,
+		consensus:            gd.ConsensusClient,
+		validator:            gd.ValidatorClient,
+		optimism:             gd.OptimismClient,
+		opExecution:          l2OpClient,
+		taiko:                gd.TaikoClient,
+		taikoExecution:       l2TaikoClient,
 		distributedValidator: gd.DistributedValidatorClient,
 	}
 
@@ -539,36 +538,36 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	}
 
 	data := EnvData{
-		Services:                  gd.Services,
-		Mev:                       networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
-		ElImage:                   imageOrEmpty(cls[execution], gd.LatestVersion),
-		ElL2Image:                 elL2Image,
-		TaikoImageVersion:         taikoImage,
-		ElDataDir:                 "./" + configs.ExecutionDir,
-		CcImage:                   imageOrEmpty(cls[consensus], gd.LatestVersion),
-		CcDataDir:                 "./" + configs.ConsensusDir,
-		VlImage:                   imageOrEmpty(cls[validator], gd.LatestVersion),
-		VlDataDir:                 "./" + configs.ValidatorDir,
-		ExecutionApiURL:           executionApiUrl,
-		ExecutionAuthURL:          executionAuthUrl,
-		ConsensusApiURL:           consensusApiUrl,
-		ConsensusAdditionalApiURL: consensusAdditionalApiUrl,
-		FeeRecipient:              gd.FeeRecipient,
-		JWTSecretPath:             gd.JWTSecretPath,
-		ExecutionEngineName:       nameOrEmpty(cls[execution]),
-		ConsensusClientName:       nameOrEmpty(cls[consensus]),
-		KeystoreDir:               "./" + configs.KeystoreDir,
-		Graffiti:                  graffiti,
-		RelayURLs:                 strings.Join(gd.RelayURLs, ","),
-		CheckpointSyncUrl:         gd.CheckpointSyncUrl,
-		ExecutionL2ApiURL:         executionOPApiUrl,
-		JWTL2SecretPath:           gd.JWTSecretL2,
-		OPImageVersion:            opImageVersion,
-		ElL2ApiPort:               gd.Ports["ApiPortELL2"],
-		ElL2AuthPort:              gd.Ports["AuthPortELL2"],
-		ExecutionWSApiURL:         executionWSApiURL,
-		OpSequencerHttp:           opSequencerHttp,
-		RethNetwork:               rethNetwork,
+		Services:                   gd.Services,
+		Mev:                        networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
+		ElImage:                    imageOrEmpty(cls[execution], gd.LatestVersion),
+		ElL2Image:                  elL2Image,
+		TaikoImageVersion:          taikoImage,
+		ElDataDir:                  "./" + configs.ExecutionDir,
+		CcImage:                    imageOrEmpty(cls[consensus], gd.LatestVersion),
+		CcDataDir:                  "./" + configs.ConsensusDir,
+		VlImage:                    imageOrEmpty(cls[validator], gd.LatestVersion),
+		VlDataDir:                  "./" + configs.ValidatorDir,
+		ExecutionApiURL:            executionApiUrl,
+		ExecutionAuthURL:           executionAuthUrl,
+		ConsensusApiURL:            consensusApiUrl,
+		ConsensusAdditionalApiURL:  consensusAdditionalApiUrl,
+		FeeRecipient:               gd.FeeRecipient,
+		JWTSecretPath:              gd.JWTSecretPath,
+		ExecutionEngineName:        nameOrEmpty(cls[execution]),
+		ConsensusClientName:        nameOrEmpty(cls[consensus]),
+		KeystoreDir:                "./" + configs.KeystoreDir,
+		Graffiti:                   graffiti,
+		RelayURLs:                  strings.Join(gd.RelayURLs, ","),
+		CheckpointSyncUrl:          gd.CheckpointSyncUrl,
+		ExecutionL2ApiURL:          executionOPApiUrl,
+		JWTL2SecretPath:            gd.JWTSecretL2,
+		OPImageVersion:             opImageVersion,
+		ElL2ApiPort:                gd.Ports["ApiPortELL2"],
+		ElL2AuthPort:               gd.Ports["AuthPortELL2"],
+		ExecutionWSApiURL:          executionWSApiURL,
+		OpSequencerHttp:            opSequencerHttp,
+		RethNetwork:                rethNetwork,
 		Distributed:                gd.Distributed,
 		DistributedValidatorApiUrl: distributedValidatorApiUrl,
 		DvDataDir:                  "./" + configs.DistributedValidatorDir,
