@@ -2,7 +2,6 @@
 {{ define "execution" }}
 # --- Execution Layer - Execution Node - configuration ---
 EC_IMAGE_VERSION={{if .ElImage}}{{.ElImage}}{{else}}nethermind/nethermind:1.14.6{{end}}
-NETHERMIND_LOG_LEVEL=INFO
 EC_DATA_DIR={{.ElDataDir}}
 EC_JWT_SECRET_PATH={{.JWTSecretPath}}
 {{ end }}

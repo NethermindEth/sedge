@@ -17,7 +17,6 @@ services:
     command: 
       - --config=${NETHERMIND_CONFIG}
       - --datadir=/nethermind/data
-      - --log=${NETHERMIND_LOG_LEVEL}
       - --Metrics.Enabled=${NETHERMIND_METRICSCONFIG_ENABLED}
       - --Metrics.NodeName=${NETHERMIND_METRICSCONFIG_NODENAME}
       - --Metrics.PushGatewayUrl=${NETHERMIND_METRICSCONFIG_PUSHGATEWAYURL}
