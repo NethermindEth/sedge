@@ -328,6 +328,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ValidatorClient:            combinedClients.Validator,
 		Distributed:                flags.distributed,
 		DistributedValidatorClient: combinedClients.DistributedValidator,
+		DvExtraFlags:               flags.dvExtraFlags,
 		L2ExecutionClient:          combinedClients.L2Execution,
 		OptimismClient:             combinedClients.Optimism,
 		TaikoClient:                combinedClients.Taiko,
@@ -520,9 +521,9 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 		if flags.taikoName != "" {
-			opClient.Name = "taikoclient"
+			taikoClient.Name = "taikoclient"
 			if len(taikoParts) > 1 {
-				opClient.Image = strings.Join(taikoParts[1:], ":")
+				taikoClient.Image = strings.Join(taikoParts[1:], ":")
 			}
 		}
 		taikoClient.SetImageOrDefault(strings.Join(taikoParts[1:], ":"))

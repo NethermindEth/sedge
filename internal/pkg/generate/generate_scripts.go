@@ -41,7 +41,6 @@ const (
 	opExecution          = "opexecution"
 	taiko                = "taiko"
 	taikoExecution       = "texecution"
-	l2Execution          = "l2execution"
 	validatorImport      = "validator-import"
 	mevBoost             = "mev-boost"
 	configConsensus      = "config_consensus"
