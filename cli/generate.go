@@ -528,7 +528,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			l2ExecutionClient.Name = strings.ReplaceAll(optimismExecutionParts[0], "-", "")
 			if len(optimismExecutionParts) > 1 {
 				l2ExecutionClient.Image = strings.Join(optimismExecutionParts[1:], ":")
-				executionClient.Modified = true
+				l2ExecutionClient.Modified = true
 			}
 		}
 		l2ExecutionClient.SetImageOrDefault(strings.Join(optimismExecutionParts[1:], ":"))
@@ -555,6 +555,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			taikoClient.Name = "taikoclient"
 			if len(taikoParts) > 1 {
 				taikoClient.Image = strings.Join(taikoParts[1:], ":")
+				taikoClient.Modified = true
 			}
 		}
 		taikoClient.SetImageOrDefault(strings.Join(taikoParts[1:], ":"))
@@ -571,6 +572,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			l2ExecutionClient.Name = strings.ReplaceAll(taikoExecutionParts[0], "-", "")
 			if len(taikoExecutionParts) > 1 {
 				l2ExecutionClient.Image = strings.Join(taikoExecutionParts[1:], ":")
+				l2ExecutionClient.Modified = true
 			}
 		}
 		l2ExecutionClient.SetImageOrDefault(strings.Join(taikoExecutionParts[1:], ":"))
