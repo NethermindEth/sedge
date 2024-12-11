@@ -108,12 +108,16 @@ CSM Widget.
 
 ### Checking Node Operator Status
 
-To view detailed data about your Node Operator, use the `sedge lido-status` [command](../commands/lidoStatus.mdx). This command displays information specific to the Node Operator based on the provided rewards address.
+To view detailed data about your Node Operator, use the `sedge lido-status` [command](../commands/lidoStatus.mdx). This command displays information specific to the Node Operator based on the provided rewards address or node operator ID.
 
+**Using the rewards address**
 ```bash
 sedge lido-status <your_reward_address>
 ```
-
+**Using the node operator ID**
+```bash
+sedge lido-status --nodeID <your_node_operator_id>
+```
 :::info
 
 `rewardAddress` is the ultimate recipient of the rewards. It can perform the following actions regarding the CSM Node Operator:
