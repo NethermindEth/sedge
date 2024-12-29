@@ -21,13 +21,12 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
-	"github.com/NethermindEth/sedge/internal/crypto"
-
 	"github.com/NethermindEth/sedge/cli/actions"
+	"github.com/NethermindEth/sedge/cli/factory"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/crypto"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
@@ -108,6 +107,53 @@ type GenCmdFlags struct {
 	customEnodes             []string
 	customEnrs               []string
 	latestVersion            bool
+	network                  string
+}
+
+// Implement ClientFlags interface
+func (flags *GenCmdFlags) GetExecutionName() string {
+	return flags.executionName
+}
+
+func (flags *GenCmdFlags) GetConsensusName() string {
+	return flags.consensusName
+}
+
+func (flags *GenCmdFlags) GetValidatorName() string {
+	return flags.validatorName
+}
+
+func (flags *GenCmdFlags) GetOptimismName() string {
+	return flags.optimismName
+}
+
+func (flags *GenCmdFlags) GetTaikoName() string {
+	return flags.taikoName
+}
+
+func (flags *GenCmdFlags) GetL2ExecutionName() string {
+	return flags.l2ExecutionName
+}
+
+func (flags *GenCmdFlags) GetDistributedValidatorName() string {
+	return flags.distributedValidatorName
+}
+
+func (flags *GenCmdFlags) GetExecutionApiUrl() string {
+	return flags.executionApiUrl
+}
+
+func (flags *GenCmdFlags) GetNetwork() string {
+	return flags.network
+}
+
+func (flags *GenCmdFlags) IsNoValidator() bool {
+	return flags.noValidator
+}
+
+func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
+	nodeFactory := factory.NewNodeFactory()
+	return nodeFactory.InitializeClients(allClients, flags, services)
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -394,212 +440,6 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	return nil
 }
 
-func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
-	var executionClient, consensusClient, validatorClient, opClient, taikoClient, l2ExecutionClient *clients.Client
-	var distributedValidatorClient *clients.Client
-	var err error
-
-	// execution client
-	if utils.Contains(services, execution) {
-		executionParts := strings.Split(flags.executionName, ":")
-		executionClient, err = clients.RandomChoice(allClients[execution])
-		if err != nil {
-			return nil, err
-		}
-		if flags.executionName != "" {
-			executionClient.Name = executionParts[0]
-			if len(executionParts) > 1 {
-				log.Warn(configs.CustomExecutionImagesWarning)
-				executionClient.Image = strings.Join(executionParts[1:], ":")
-				flags.latestVersion = false
-			}
-		}
-		executionClient.SetImageOrDefault(strings.Join(executionParts[1:], ":"))
-		if err = clients.ValidateClient(executionClient, execution); err != nil {
-			return nil, err
-		}
-	} else {
-		executionClient = nil
-	}
-	// consensus client
-	if utils.Contains(services, consensus) {
-		if network == NetworkGnosis || network == NetworkChiado {
-			if flags.consensusName == "nimbus" {
-				flags.consensusName = "nimbus:ghcr.io/gnosischain/gnosis-nimbus-eth2:v24.9"
-			}
-		}
-		consensusParts := strings.Split(flags.consensusName, ":")
-		consensusClient, err = clients.RandomChoice(allClients[consensus])
-		if err != nil {
-			return nil, err
-		}
-		if flags.consensusName != "" {
-			consensusClient.Name = consensusParts[0]
-			if len(consensusParts) > 1 {
-				log.Warn(configs.CustomConsensusImagesWarning)
-				consensusClient.Image = strings.Join(consensusParts[1:], ":")
-				flags.latestVersion = false
-			}
-		}
-		consensusClient.SetImageOrDefault(strings.Join(consensusParts[1:], ":"))
-		if err = clients.ValidateClient(consensusClient, consensus); err != nil {
-			return nil, err
-		}
-	} else {
-		consensusClient = nil
-	}
-	// validator client
-	if utils.Contains(services, validator) && !flags.noValidator {
-		validatorParts := strings.Split(flags.validatorName, ":")
-		validatorClient, err = clients.RandomChoice(allClients[validator])
-		if err != nil {
-			return nil, err
-		}
-		if flags.validatorName != "" {
-			validatorClient.Name = validatorParts[0]
-			if len(validatorParts) > 1 {
-				log.Warn(configs.CustomValidatorImagesWarning)
-				validatorClient.Image = strings.Join(validatorParts[1:], ":")
-				flags.latestVersion = false
-
-			}
-		}
-		validatorClient.SetImageOrDefault(strings.Join(validatorParts[1:], ":"))
-		if err = clients.ValidateClient(validatorClient, validator); err != nil {
-			return nil, err
-		}
-	} else {
-		validatorClient = nil
-	}
-	// optimism client
-	if utils.Contains(services, optimism) {
-		optimismParts := strings.Split(flags.optimismName, ":")
-		opClient, err = clients.RandomChoice(allClients[optimism])
-		if err != nil {
-			return nil, err
-		}
-		if flags.optimismName != "" {
-			opClient.Name = "opnode"
-			if len(optimismParts) > 1 {
-				opClient.Image = strings.Join(optimismParts[1:], ":")
-			}
-		}
-		opClient.SetImageOrDefault(strings.Join(optimismParts[1:], ":"))
-		if err = clients.ValidateClient(opClient, optimism); err != nil {
-			return nil, err
-		}
-
-		optimismExecutionParts := strings.Split(flags.l2ExecutionName, ":")
-		l2ExecutionClient, err = clients.RandomChoice(allClients[opExecution])
-		if err != nil {
-			return nil, err
-		}
-		if flags.l2ExecutionName != "" {
-			l2ExecutionClient.Name = strings.ReplaceAll(optimismExecutionParts[0], "-", "")
-			if len(optimismExecutionParts) > 1 {
-				l2ExecutionClient.Image = strings.Join(optimismExecutionParts[1:], ":")
-			}
-		}
-		l2ExecutionClient.SetImageOrDefault(strings.Join(optimismExecutionParts[1:], ":"))
-		if err = clients.ValidateClient(l2ExecutionClient, opExecution); err != nil {
-			return nil, err
-		}
-
-		// If set execution-api-url, set execution and beacon to nil
-		if flags.executionApiUrl != "" {
-			executionClient = nil
-			consensusClient = nil
-		}
-	} else {
-		opClient = nil
-	}
-	// Taiko client
-	if utils.Contains(services, taiko) {
-		taikoParts := strings.Split(flags.taikoName, ":")
-		taikoClient, err = clients.RandomChoice(allClients[taiko])
-		if err != nil {
-			return nil, err
-		}
-		if flags.taikoName != "" {
-			taikoClient.Name = "taikoclient"
-			if len(taikoParts) > 1 {
-				taikoClient.Image = strings.Join(taikoParts[1:], ":")
-			}
-		}
-		taikoClient.SetImageOrDefault(strings.Join(taikoParts[1:], ":"))
-		if err = clients.ValidateClient(opClient, taiko); err != nil {
-			return nil, err
-		}
-
-		taikoExecutionParts := strings.Split(flags.l2ExecutionName, ":")
-		l2ExecutionClient, err = clients.RandomChoice(allClients[tExecution])
-		if err != nil {
-			return nil, err
-		}
-		if flags.l2ExecutionName != "" {
-			l2ExecutionClient.Name = strings.ReplaceAll(taikoExecutionParts[0], "-", "")
-			if len(taikoExecutionParts) > 1 {
-				l2ExecutionClient.Image = strings.Join(taikoExecutionParts[1:], ":")
-			}
-		}
-		l2ExecutionClient.SetImageOrDefault(strings.Join(taikoExecutionParts[1:], ":"))
-		if err = clients.ValidateClient(l2ExecutionClient, tExecution); err != nil {
-			return nil, err
-		}
-
-		// If set execution-api-url, set execution and beacon to nil
-		if flags.executionApiUrl != "" {
-			executionClient = nil
-			consensusClient = nil
-		}
-	} else {
-		taikoClient = nil
-	}
-
-	if !utils.Contains(services, optimism) && !utils.Contains(services, taiko) {
-		l2ExecutionClient = nil
-	}
-
-	// distributed validator client
-	if utils.Contains(services, distributedValidator) {
-		distributedValidatorClient, _ = clients.RandomChoice(allClients[distributedValidator])
-		if flags.distributedValidatorName != "" {
-			distributedValidatorParts := strings.Split(flags.distributedValidatorName, ":")
-			distributedValidatorClient.Name = distributedValidatorParts[0]
-			if len(distributedValidatorParts) > 1 {
-				distributedValidatorClient.Image = strings.Join(distributedValidatorParts[1:], ":")
-			}
-			distributedValidatorClient.SetImageOrDefault(strings.Join(distributedValidatorParts[1:], ":"))
-		} else {
-			distributedValidatorClient.Name = "charon"
-			distributedValidatorClient.SetImageOrDefault("")
-		}
-		if err = clients.ValidateClient(distributedValidatorClient, distributedValidator); err != nil {
-			return nil, err
-		}
-	}
-
-	return &clients.Clients{
-		Execution:            executionClient,
-		Consensus:            consensusClient,
-		Validator:            validatorClient,
-		DistributedValidator: distributedValidatorClient,
-		Optimism:             opClient,
-		Taiko:                taikoClient,
-		L2Execution:          l2ExecutionClient,
-	}, err
-}
-
-func onlyClients(services []string) []string {
-	newServices := make([]string, 0)
-	for _, service := range services {
-		if service != mevBoost {
-			newServices = append(newServices, service)
-		}
-	}
-	return newServices
-}
-
 func initGenPath(path string) error {
 	// Create directory if not exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -674,4 +514,14 @@ func nodeType() string {
 		nodeType = sedgeOpts.EthereumNode
 	}
 	return nodeType
+}
+
+func onlyClients(services []string) []string {
+	newServices := make([]string, 0)
+	for _, service := range services {
+		if service != mevBoost {
+			newServices = append(newServices, service)
+		}
+	}
+	return newServices
 }
