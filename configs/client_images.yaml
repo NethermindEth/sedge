@@ -64,7 +64,7 @@ opexecution:
 taiko:
   taikoclient:
     name: us-docker.pkg.dev/evmchain/images/taiko-client
-    version: taiko-client-v0.39.2
+    version: taiko-client-v0.40.0
 texecution:
   taikogeth:
     name: us-docker.pkg.dev/evmchain/images/taiko-geth
