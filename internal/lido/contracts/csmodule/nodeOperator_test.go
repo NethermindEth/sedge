@@ -105,22 +105,22 @@ func TestNodeID(t *testing.T) {
 		wantErr        bool
 	}{
 		{
-			"Valid NodeID, Holesky #1", "holesky", big.NewInt(13), false,
+			"Invalid NodeID, Mainnet", "mainnet", big.NewInt(-2), true,
 		},
 		{
-			"Valid NodeID, Holesky #2", "holesky", big.NewInt(4), false,
+			"Valid NodeID, Mainnet", "mainnet", big.NewInt(1), false,
+		},
+		{
+			"Valid NodeID, Mainnet #2", "mainnet", big.NewInt(12), false,
+		},
+		{
+			"Valid NodeID, Holesky", "holesky", big.NewInt(4), false,
 		},
 		{
 			"Invalid NodeID, Holesky #1", "holesky", big.NewInt(-4), true,
 		},
 		{
 			"Invalid NodeID, Holesky #2", "holesky", big.NewInt(20000), true,
-		},
-		{
-			"Invalid NodeID, Mainnet", "mainnet", big.NewInt(-2), true,
-		},
-		{
-			"Valid NodeID, Mainnet", "mainnet", big.NewInt(1), false,
 		},
 	}
 
