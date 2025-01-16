@@ -81,6 +81,7 @@ type GenData struct {
 	OpExtraFlags               []string
 	TaikoExtraFlags            []string
 	IsBase                     bool
+	IsWorldChain               bool
 	MapAllPorts                bool
 	Mev                        bool
 	RelayURLs                  []string

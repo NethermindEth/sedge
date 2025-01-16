@@ -308,6 +308,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 	if gd.IsBase {
 		networkPrefix = "base"
 	}
+	if gd.IsWorldChain {
+		networkPrefix = "worldchain"
+	}
 
 	data := DockerComposeData{
 		Services:            gd.Services,
@@ -495,12 +498,16 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		opImageVersion = imageOrEmpty(cls[optimism], gd.LatestVersion)
 		if gd.IsBase {
 			opSequencerHttp = "https://" + gd.Network + "-sequencer.base.org"
+		} else if gd.IsWorldChain {
+			opSequencerHttp = "https://worldchain-" + gd.Network + "-sequencer.g.alchemy.com"
 		} else {
 			opSequencerHttp = "https://" + gd.Network + "-sequencer.optimism.io"
 		}
 		if gd.Network == configs.NetworkMainnet {
 			if gd.IsBase {
 				rethNetwork = "base"
+			} else if gd.IsWorldChain {
+				rethNetwork = "optimism"
 			} else {
 				rethNetwork = "optimism"
 			}
@@ -508,6 +515,8 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		if gd.Network == configs.NetworkSepolia {
 			if gd.IsBase {
 				rethNetwork = "base-sepolia"
+			} else if gd.IsWorldChain {
+				rethNetwork = "worldchain-sepolia"
 			} else {
 				rethNetwork = "optimism-sepolia"
 			}

@@ -67,6 +67,7 @@ type OptimismFlags struct {
 	optimismName string
 	opExtraFlags []string
 	isBase       bool
+	isWorldChain          bool
 }
 
 type TaikoFlags struct {
@@ -345,6 +346,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		OpExtraFlags:               flags.opExtraFlags,
 		TaikoExtraFlags:            flags.taikoExtraFlags,
 		IsBase:                     flags.isBase,
+		IsWorldChain:               flags.isWorldChain,
 		MapAllPorts:                flags.mapAllPorts,
 		Mev:                        !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
 		MevImage:                   flags.mevImage,
