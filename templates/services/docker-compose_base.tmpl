@@ -32,6 +32,9 @@ services:
 {{template "texecution" .}}
 {{template "taiko" .}}{{end}}
 
+{{ if .WithStarknetClient}}
+{{template "starknet" .}}{{end}}
+
 networks:
   sedge:
     name: sedge-network{{if .ContainerTag}}-{{.ContainerTag}}{{end}}

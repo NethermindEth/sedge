@@ -9,6 +9,7 @@ type ClientFlags interface {
 	GetTaikoName() string
 	GetL2ExecutionName() string
 	GetDistributedValidatorName() string
+	GetStarknetName() string
 	GetExecutionApiUrl() string
 	GetNetwork() string
 	IsNoValidator() bool

@@ -46,6 +46,8 @@ func (c *Client) SetImageOrDefault(image string) {
 		c.SetTaikoImage(image)
 	case "texecution":
 		c.SetTaikoExecutionImage(image)
+	case "starknet":
+		c.SetStarknetImage(image)
 	}
 }
 
@@ -135,6 +137,25 @@ func (c *Client) SetTaikoExecutionImage(image string) {
 	}
 }
 
+func (c *Client) setStarknetImage(image string) {
+	switch c.Name {
+	case "juno":
+		c.Image = valueOrDefault(image, configs.ClientImages.Starknet.Juno.String())
+	case "pathfinder":
+		c.Image = valueOrDefault(image, configs.ClientImages.Starknet.Pathfinder.String())
+	case "madara":
+		c.Image = valueOrDefault(image, configs.ClientImages.Starknet.Madara.String())
+	default:
+		// If no specific client is chosen, default to juno
+		c.Name = "juno"
+		c.Image = valueOrDefault(image, configs.ClientImages.Starknet.Juno.String())
+	}
+}
+
+func (c *Client) SetStarknetImage(image string) {
+	c.setStarknetImage(image)
+}
+
 func valueOrDefault(value string, defaultValue string) string {
 	if value == "" {
 		return defaultValue
@@ -151,6 +172,7 @@ type Clients struct {
 	Taiko                *Client
 	L2Execution          *Client
 	DistributedValidator *Client
+	Starknet             *Client
 }
 
 type ClientMap map[string]*Client

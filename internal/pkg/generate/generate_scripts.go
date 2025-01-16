@@ -42,6 +42,7 @@ const (
 	taiko                = "taiko"
 	taikoExecution       = "texecution"
 	validatorImport      = "validator-import"
+	starknet             = "starknet"
 	mevBoost             = "mev-boost"
 	configConsensus      = "config_consensus"
 	empty                = "empty"
@@ -62,6 +63,9 @@ func validateClients(gd *GenData) error {
 		return err
 	}
 	if err := validateDistributedValidator(gd, &c); err != nil {
+		return err
+	}
+	if err := validateStarknet(gd, &c); err != nil {
 		return err
 	}
 	return nil
@@ -128,6 +132,21 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 	return nil
 }
 
+func validateStarknet(gd *GenData, c *clients.ClientInfo) error {
+	if gd.StarknetClient == nil {
+		return nil
+	}
+	starknetClients, err := c.SupportedClients(starknet)
+	if err != nil {
+		return ErrUnableToGetClientsInfo
+	}
+	if !utils.Contains(starknetClients, gd.StarknetClient.Name) {
+		return ErrStarknetClientNotValid
+	}
+	return nil
+
+}
+
 // mapClients convert genData clients to clients.Clients
 func mapClients(gd *GenData) map[string]*clients.Client {
 	var l2OpClient, l2TaikoClient *clients.Client
@@ -147,6 +166,7 @@ func mapClients(gd *GenData) map[string]*clients.Client {
 		opExecution:          l2OpClient,
 		taiko:                gd.TaikoClient,
 		taikoExecution:       l2TaikoClient,
+		starknet:             gd.StarknetClient,
 		distributedValidator: gd.DistributedValidatorClient,
 	}
 
@@ -337,6 +357,8 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ElExtraFlags:        gd.ElExtraFlags,
 		ElL2ExtraFlags:      gd.ElL2ExtraFlags,
 		OPExtraFlags:        gd.OpExtraFlags,
+		TaikoExtraFlags:     gd.TaikoExtraFlags,
+		StarknetExtraFlags:  gd.StarknetExtraFlags,
 		NetworkPrefix:       networkPrefix,
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
@@ -542,6 +564,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ElImage:                    imageOrEmpty(cls[execution], gd.LatestVersion),
 		ElL2Image:                  elL2Image,
 		TaikoImageVersion:          taikoImage,
+		StarknetImageVersion:       imageOrEmpty(cls[starknet], gd.LatestVersion),
 		ElDataDir:                  "./" + configs.ExecutionDir,
 		CcImage:                    imageOrEmpty(cls[consensus], gd.LatestVersion),
 		CcDataDir:                  "./" + configs.ConsensusDir,

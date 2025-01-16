@@ -72,3 +72,13 @@ texecution:
   taikonethermind:
     name: nethermindeth/nethermind
     version: master
+starknet:
+  juno:
+    name: nethermindeth/juno
+    version: v0.12.5
+  pathfinder:
+    name: eqlabs/pathfinder
+    version: v0.15.2
+  madara:
+    name: ghcr.io/madara-alliance/madara
+    version: latest

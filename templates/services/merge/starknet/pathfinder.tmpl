@@ -1,0 +1,26 @@
+{{/* pathfinder.tmpl */}}
+{{ define "starknet" }}
+  starknet_client:
+    image: ${STARKNET_IMAGE}
+    networks:
+      - sedge
+    container_name: sedge-starknet{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: unless-stopped
+    volumes:
+      - ./data/starknet:${PATHFINDER_DATA_DIR}
+    ports:
+      - "${STARKNET_PORT}:${STARKNET_PORT}"
+    environment:
+      - ETHEREUM_API_URL=${ETHEREUM_API_URL}
+      - ETHEREUM_WS_URL=${ETHEREUM_WS_URL}
+      - STARKNET_NETWORK=${STARKNET_NETWORK}
+      - PATHFINDER_DATA_DIR=${PATHFINDER_DATA_DIR}
+    {{if .StarknetExtraFlags}}command: {{range $flag := .StarknetExtraFlags}}
+      - {{$flag}}{{end}}{{end}}
+    {{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
+{{ end }}

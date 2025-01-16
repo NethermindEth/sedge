@@ -19,6 +19,7 @@ const (
 	opExecution          = "opexecution"
 	taiko                = "taiko"
 	tExecution           = "texecution"
+	starknet             = "starknet"
 	NetworkGnosis        = "gnosis"
 	NetworkChiado        = "chiado"
 )
@@ -384,6 +385,55 @@ func (d *DistributedValidatorNodeInitializer) UpdateResult(result *clients.Clien
 	result.DistributedValidator = client
 }
 
+// StarknetNodeInitializer handles starknet client initialization
+type StarknetNodeInitializer struct {
+	BaseNodeInitializer
+}
+
+func NewStarknetNodeInitializer() *StarknetNodeInitializer {
+	return &StarknetNodeInitializer{
+		BaseNodeInitializer: BaseNodeInitializer{
+			serviceType: starknet,
+			config: clientConfig{
+				clientType: starknet,
+				flagName:   "node",
+			},
+		},
+	}
+}
+
+func (s *StarknetNodeInitializer) Initialize(allClients clients.OrderedClients, flags ClientFlags) (*clients.Client, error) {
+	client, err := s.BaseNodeInitializer.Initialize(allClients, flags)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize starknet node: %w", err)
+	}
+
+	if client != nil {
+		// If no specific client is chosen, it will be randomly selected from available ones
+		if flags.GetStarknetName() != "" {
+			parts := strings.Split(flags.GetStarknetName(), ":")
+			client.Name = parts[0]
+			if len(parts) > 1 {
+				client.Image = strings.Join(parts[1:], ":")
+			}
+		}
+		client.SetImageOrDefault(strings.Join(strings.Split(flags.GetStarknetName(), ":")[1:], ":"))
+		if err = clients.ValidateClient(client, starknet); err != nil {
+			return nil, err
+		}
+	}
+
+	return client, nil
+}
+
+func (s *StarknetNodeInitializer) ShouldInitialize(services []string, flags ClientFlags) bool {
+	return utils.Contains(services, s.serviceType)
+}
+
+func (s *StarknetNodeInitializer) UpdateResult(result *clients.Clients, client *clients.Client) {
+	result.Starknet = client
+}
+
 // NodeFactory manages the creation of different node types
 type NodeFactory struct {
 	initializers []NodeInitializer
@@ -398,6 +448,7 @@ func NewNodeFactory() *NodeFactory {
 			NewOptimismNodeInitializer(),
 			NewTaikoNodeInitializer(),
 			NewDistributedValidatorNodeInitializer(),
+			NewStarknetNodeInitializer(),
 		},
 	}
 }

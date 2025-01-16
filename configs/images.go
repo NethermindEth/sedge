@@ -57,6 +57,11 @@ var ClientImages struct {
 		TaikoGeth       Image `yaml:"taikogeth"`
 		TaikoNethermind Image `yaml:"taikonethermind"`
 	}
+	Starknet struct {
+		Juno       Image `yaml:"juno"`
+		Pathfinder Image `yaml:"pathfinder"`
+		Madara     Image `yaml:"madara"`
+	}
 }
 
 //go:embed client_images.yaml

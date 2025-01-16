@@ -37,3 +37,6 @@ var ErrValidatorClientNotValid = errors.New("invalid validator client")
 
 // ErrDistributedValidatorClientNotValid is returned when the distributed validator client is not valid
 var ErrDistributedValidatorClientNotValid = errors.New("invalid distributed validator client")
+
+// ErrStarknetClientNotValid is returned when the starknet client is not valid
+var ErrStarknetClientNotValid = errors.New("invalid starknet client")

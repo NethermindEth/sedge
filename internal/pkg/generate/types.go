@@ -26,6 +26,7 @@ type EnvData struct {
 	ElImage                    string
 	ElL2Image                  string
 	TaikoImageVersion          string
+	StarknetImageVersion       string
 	ElDataDir                  string
 	CcImage                    string
 	CcDataDir                  string
@@ -67,6 +68,7 @@ type GenData struct {
 	TaikoClient                *clients.Client
 	L2ExecutionClient          *clients.Client
 	DistributedValidatorClient *clients.Client
+	StarknetClient             *clients.Client
 	Distributed                bool
 	Network                    string
 	CheckpointSyncUrl          string
@@ -80,6 +82,7 @@ type GenData struct {
 	DvExtraFlags               []string
 	OpExtraFlags               []string
 	TaikoExtraFlags            []string
+	StarknetExtraFlags         []string
 	IsBase                     bool
 	MapAllPorts                bool
 	Mev                        bool
@@ -139,6 +142,7 @@ type DockerComposeData struct {
 	ElL2ExtraFlags          []string
 	OPExtraFlags            []string
 	TaikoExtraFlags         []string
+	StarknetExtraFlags      []string
 	NetworkPrefix           string
 	ClExtraFlags            []string
 	VlExtraFlags            []string
@@ -201,6 +205,16 @@ func (d DockerComposeData) WithOptimismClient() bool {
 func (d DockerComposeData) WithTaikoClient() bool {
 	for _, service := range d.Services {
 		if service == taiko {
+			return true
+		}
+	}
+	return false
+}
+
+// WithStarknetClient returns true if the starknet client is set
+func (d DockerComposeData) WithStarknetClient() bool {
+	for _, service := range d.Services {
+		if service == starknet {
 			return true
 		}
 	}
@@ -332,6 +346,7 @@ type Services struct {
 	Validator            *Validator            `yaml:"validator,omitempty"`
 	ConfigConsensus      *ConfigConsensus      `yaml:"config_consensus,omitempty"`
 	DistributedValidator *DistributedValidator `yaml:"dv,omitempty"`
+	Starknet             *Execution            `yaml:"starknet_client,omitempty"`
 }
 type Sedge struct {
 	Name string `yaml:"name"`

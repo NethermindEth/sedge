@@ -1,0 +1,9 @@
+{{/* pathfinder.tmpl */}}
+{{ define "starknet" }}
+# --- Layer 2 - Starknet Node - configuration ---
+ETHEREUM_API_URL={{.ExecutionApiURL}}
+ETHEREUM_WS_URL={{.ExecutionWSApiURL}}
+STARKNET_NETWORK=mainnet
+STARKNET_PORT=9545
+PATHFINDER_DATA_DIR=/root/.starknet
+{{ end }}

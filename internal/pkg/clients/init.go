@@ -54,4 +54,9 @@ var AllClients map[string][]string = map[string][]string{
 		"taikogeth",
 		"taikonethermind",
 	},
+	"starknet": {
+		"juno",
+		"pathfinder",
+		"madara",
+	},
 }

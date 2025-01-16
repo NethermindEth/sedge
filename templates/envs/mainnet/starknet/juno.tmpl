@@ -1,0 +1,9 @@
+{{/* juno.tmpl */}}
+{{ define "starknet" }}
+# --- Layer 2 - Starknet Node - configuration ---
+ETHEREUM_API_URL={{.ExecutionApiURL}}
+STARKNET_IMAGE={{.StarknetImageVersion}}
+ETHEREUM_WS_URL={{.ExecutionWSApiURL}}
+STARKNET_NETWORK=mainnet
+STARKNET_PORT=9545
+{{ end }}

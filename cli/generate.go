@@ -46,8 +46,8 @@ var (
 )
 
 const (
-	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution, taiko, tExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution", "taiko", "texecution"
-	jwtPathName                                                                                               = "jwtsecret"
+	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution, taiko, tExecution, starknet = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution", "taiko", "texecution", "starknet"
+	jwtPathName                                                                                                         = "jwtsecret"
 )
 
 type CustomFlags struct {
@@ -73,12 +73,18 @@ type TaikoFlags struct {
 	taikoExtraFlags []string
 }
 
+type StarknetFlags struct {
+	NodeName       string
+	NodeExtraFlags []string
+}
+
 // GenCmdFlags is a struct that holds the flags of the generate command
 type GenCmdFlags struct {
 	CustomFlags
 	L2Execution
 	OptimismFlags
 	TaikoFlags
+	StarknetFlags
 	executionName            string
 	consensusName            string
 	validatorName            string
@@ -129,6 +135,10 @@ func (flags *GenCmdFlags) GetOptimismName() string {
 
 func (flags *GenCmdFlags) GetTaikoName() string {
 	return flags.taikoName
+}
+
+func (flags *GenCmdFlags) GetStarknetName() string {
+	return flags.StarknetFlags.NodeName
 }
 
 func (flags *GenCmdFlags) GetL2ExecutionName() string {
@@ -184,6 +194,7 @@ You can generate:
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
 	cmd.AddCommand(OpFullNodeSubCmd(sedgeAction))
 	cmd.AddCommand(TaikoFullNodeSubCmd(sedgeAction))
+	cmd.AddCommand(StarknetFullNodeSubCmd(sedgeAction))
 
 	cmd.PersistentFlags().BoolVar(&lidoNode, "lido", false, "generate Lido CSM node")
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
@@ -374,6 +385,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ValidatorClient:            combinedClients.Validator,
 		Distributed:                flags.distributed,
 		DistributedValidatorClient: combinedClients.DistributedValidator,
+		StarknetClient:             combinedClients.Starknet,
 		DvExtraFlags:               flags.dvExtraFlags,
 		L2ExecutionClient:          combinedClients.L2Execution,
 		OptimismClient:             combinedClients.Optimism,
@@ -414,6 +426,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ContainerTag:               containerTag,
 		LatestVersion:              flags.latestVersion,
 		JWTSecretL2:                jwtSecretL2,
+		StarknetExtraFlags:         flags.NodeExtraFlags,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,
