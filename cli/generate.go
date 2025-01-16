@@ -64,6 +64,7 @@ type OptimismFlags struct {
 	elOpExtraFlags        []string
 	opExtraFlags          []string
 	isBase                bool
+	isWorldChain          bool
 }
 
 // GenCmdFlags is a struct that holds the flags of the generate command
@@ -332,6 +333,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ElOpExtraFlags:             flags.elOpExtraFlags,
 		OpExtraFlags:               flags.opExtraFlags,
 		IsBase:                     flags.isBase,
+		IsWorldChain:               flags.isWorldChain,
 		MapAllPorts:                flags.mapAllPorts,
 		Mev:                        !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
 		MevImage:                   flags.mevImage,

@@ -76,6 +76,7 @@ type GenData struct {
 	ElOpExtraFlags             []string
 	OpExtraFlags               []string
 	IsBase                     bool
+	IsWorldChain               bool
 	MapAllPorts                bool
 	Mev                        bool
 	RelayURLs                  []string
