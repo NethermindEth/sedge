@@ -7,13 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [v1.7.3] - 2025-01-20
+## [v1.8.0] - 2025-01-20
 
 ### Added
 - New cli flag --distributed for running cluster with Charon distributed validator
 
 ### Changed
 - Update `lido-status` command documentation.
+
+### Fixed
+- Adjusted Grafana Oncall Docker Compose setup
 
 ## [v1.7.2] - 2024-11-12
 
