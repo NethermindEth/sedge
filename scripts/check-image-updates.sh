@@ -64,3 +64,14 @@ update-client "Prysm" "validator" ".validator.prysm" "$PRYSM_LATEST_VERSION"
 GRANDINE_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/grandinetech/grandine/releases | jq -r ".tag_name")
 update-client "Grandine" "consensus" ".consensus.grandine" "$GRANDINE_LATEST_VERSION"
 update-client "Grandine" "validator" ".validator.grandine" "$GRANDINE_LATEST_VERSION"
+## Charon
+CHARON_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/ObolNetwork/charon/releases/latest | jq -r ".tag_name")
+update-client "Charon" "distributed" ".distributed.charon" "$PRYSM_LATEST_VERSION"
+
+## Charon
+CHARON_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/ObolNetwork/charon/releases/latest | jq -r ".tag_name")
+update-client "Charon" "distributed" ".distributed.charon" "$PRYSM_LATEST_VERSION"
+# Grandine
+GRANDINE_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/grandinetech/grandine/releases | jq -r ".tag_name")
+update-client "Grandine" "consensus" ".consensus.grandine" "$GRANDINE_LATEST_VERSION"
+update-client "Grandine" "validator" ".validator.grandine" "$GRANDINE_LATEST_VERSION"

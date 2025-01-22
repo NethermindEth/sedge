@@ -10,6 +10,14 @@ Including information on the node operator's status, queue details, bond and rew
 
 ## Help
 
+:::note
+
+When using only the rewards address as input, the command will return the first node found to be associated with that address. 
+However, rewards addresses can be linked to multiple node operator (NO) entries in CSM (e.g., due to the "change rewards address" functionality). 
+If a rewards address is associated with multiple NOs, we recommend using the node operator ID flag (```-i```) to specify the appropriate node.
+
+:::
+
 ```
 $ sedge lido-status -h
 This command retrieves and displays the status and detailed information of Lido Node Operators. 

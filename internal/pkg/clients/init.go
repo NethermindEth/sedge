@@ -28,14 +28,24 @@ var AllClients map[string][]string = map[string][]string{
 		"teku",
 		"lodestar",
 		"grandine",
+		"nimbus",
 	},
 	"validator": {
 		"lighthouse",
 		"prysm",
 		"teku",
 		"lodestar",
+		"nimbus",
+	},
+	"distributedValidator": {
+		"charon",
 	},
 	"optimism": {
-		"optimism",
+		"opnode",
+	},
+	"opexecution": {
+		"opgeth",
+		"opnethermind",
+		"opreth",
 	},
 }
