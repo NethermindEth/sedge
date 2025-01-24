@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.8.0] - 2025-01-20
+
+### Added
+- New cli flag --distributed for running cluster with Charon distributed validator
+
+### Changed
+- Override `--latest` flag to not use the latest version of the image in the clients if image is specified
+- Update `lido-status` command documentation.
+
+### Fixed
+- Adjusted Grafana Oncall Docker Compose setup
+
 ## [v1.7.2] - 2024-11-12
 
 ### Fixed
@@ -27,7 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Support Mainnet for Lido CSM setup.
 
+### Fixed
+- Fix missing equals sign when setting builder on Lodestar.
+
 ## [v1.6.0] - 2024-10-18
+
 
 ### Added
 - New command `lido-status` to display data of Lido Node Operator.
