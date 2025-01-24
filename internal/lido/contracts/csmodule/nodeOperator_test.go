@@ -33,6 +33,9 @@ func TestNodeOpIDs(t *testing.T) {
 		{
 			"NodeOpIDs, Holesky", "holesky",
 		},
+		{
+			"NodeOpIDs, Mainnet", "mainnet",
+		},
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
@@ -66,10 +69,16 @@ func TestNodeOperatorInfo(t *testing.T) {
 			"Valid NodeID, Holesky", "holesky", big.NewInt(13), "0xC870Fd7316956C1582A2c8Fd2c42552cCEC70C88", false,
 		},
 		{
-			"Valid Address, Holesky", "holesky", big.NewInt(4), "0xed1Fc097b5B9B007d40502e08aa0cddF477AaeaA", false,
+			"Valid Address, Holesky", "holesky", big.NewInt(4), "0xbA99F374C20A3475De737B466ee68Ad9C38c26AF", false,
 		},
 		{
 			"Invalid Address, Holesky", "holesky", big.NewInt(4), "0xC870Fd7316956C1582A2c8Fd2c46752cCEC70C99", true,
+		},
+		{
+			"Invalid Address, Mainnet", "mainnet", big.NewInt(4), "0xC870Fd7316956C1582A2c8Fd2c46752", true,
+		},
+		{
+			"Valid Address, Mainnet", "mainnet", big.NewInt(1), "0x556fedf2213A31c7Ab9F8bc8Db5B2254261A5B0b", false,
 		},
 	}
 
@@ -96,10 +105,16 @@ func TestNodeID(t *testing.T) {
 		wantErr        bool
 	}{
 		{
-			"Valid NodeID, Holesky #1", "holesky", big.NewInt(13), false,
+			"Invalid NodeID, Mainnet", "mainnet", big.NewInt(-2), true,
 		},
 		{
-			"Valid NodeID, Holesky #2", "holesky", big.NewInt(4), false,
+			"Valid NodeID, Mainnet", "mainnet", big.NewInt(1), false,
+		},
+		{
+			"Valid NodeID, Mainnet #2", "mainnet", big.NewInt(12), false,
+		},
+		{
+			"Valid NodeID, Holesky", "holesky", big.NewInt(4), false,
 		},
 		{
 			"Invalid NodeID, Holesky #1", "holesky", big.NewInt(-4), true,
@@ -134,6 +149,9 @@ func FuzzTestNodeID(f *testing.F) {
 		{"holesky", big.NewInt(13)},
 		{"holesky", big.NewInt(-1)},
 		{"holesky", big.NewInt(40000)},
+		{"mainnet", big.NewInt(12)},
+		{"mainnet", big.NewInt(-5)},
+		{"mainnet", big.NewInt(500000)},
 	}
 
 	for _, tc := range testcases {
