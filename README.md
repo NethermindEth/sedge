@@ -151,6 +151,7 @@ Integrating Charon with Sedge would make it easy for stakers to setup and run a 
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
+|            | Grandine   |            |
 |            | Nimbus     | Nimbus     |
 
 ### Sepolia
