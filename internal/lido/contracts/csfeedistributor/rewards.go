@@ -31,7 +31,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Tree : struct that reperesents Merkle Tree data
+// Tree : struct that represents Merkle Tree data
 type Tree struct {
 	Format       string   `json:"format"`
 	LeafEncoding []string `json:"leafEncoding"`
