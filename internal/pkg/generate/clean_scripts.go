@@ -199,7 +199,7 @@ func CleanDockerCompose(dockerComposePath string) error {
 
 /*
 CleanEnvFile
-This functions is resposible for the process of cleaning a generated `.env`
+This functions is responsible for the process of cleaning a generated `.env`
 file. It removes the duplicated env var in the file keeping only the latest
 apparititon of it.
 params :-
