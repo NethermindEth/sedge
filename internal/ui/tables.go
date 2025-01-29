@@ -126,7 +126,7 @@ None
 func WriteSimpleTable(w io.Writer, data *SimpleTableData) {
 	// Initialize table
 	table := simpletable.New()
-	// Get maxium dimensions
+	// Get maximum dimensions
 	n := 0
 	for _, column := range data.Columns {
 		if n < len(column) {
