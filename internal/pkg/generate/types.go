@@ -75,7 +75,8 @@ type GenData struct {
 	DvExtraFlags               []string
 	ElOpExtraFlags             []string
 	OpExtraFlags               []string
-	IsBase                     bool
+	Chain                      string
+	Sequencer                  string
 	MapAllPorts                bool
 	Mev                        bool
 	RelayURLs                  []string

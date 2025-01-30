@@ -288,12 +288,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		consensusApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLApi"])
 	}
 
-	// Set network prefix
-	networkPrefix := "op"
-	if gd.IsBase {
-		networkPrefix = "base"
-	}
-
 	data := DockerComposeData{
 		Services:            gd.Services,
 		Network:             gd.Network,
@@ -324,7 +318,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ElExtraFlags:        gd.ElExtraFlags,
 		ElOPExtraFlags:      gd.ElOpExtraFlags,
 		OPExtraFlags:        gd.OpExtraFlags,
-		NetworkPrefix:       networkPrefix,
+		NetworkPrefix:       gd.Chain,
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
 		DvExtraFlags:        gd.DvExtraFlags,
@@ -474,27 +468,21 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		elOpImage = imageOrEmpty(gd.ExecutionOPClient, gd.LatestVersion)
 	}
 	opImageVersion := ""
-	opSequencerHttp := ""
 	rethNetwork := ""
 	if gd.OptimismClient != nil {
 		opImageVersion = imageOrEmpty(cls[optimism], gd.LatestVersion)
-		if gd.IsBase {
-			opSequencerHttp = "https://" + gd.Network + "-sequencer.base.org"
-		} else {
-			opSequencerHttp = "https://" + gd.Network + "-sequencer.optimism.io"
-		}
 		if gd.Network == configs.NetworkMainnet {
-			if gd.IsBase {
-				rethNetwork = "base"
-			} else {
+			if gd.Chain == "op" {
 				rethNetwork = "optimism"
+			} else {
+				rethNetwork = gd.Chain
 			}
 		}
 		if gd.Network == configs.NetworkSepolia {
-			if gd.IsBase {
-				rethNetwork = "base-sepolia"
-			} else {
+			if gd.Chain == "op" {
 				rethNetwork = "optimism-sepolia"
+			} else {
+				rethNetwork = gd.Chain + "-sepolia"
 			}
 		}
 
@@ -538,7 +526,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		OPImageVersion:             opImageVersion,
 		ElOpImage:                  elOpImage,
 		ElOPAuthPort:               gd.Ports["AuthPortELOP"],
-		OpSequencerHttp:            opSequencerHttp,
+		OpSequencerHttp:            gd.Sequencer,
 		RethNetwork:                rethNetwork,
 	}
 

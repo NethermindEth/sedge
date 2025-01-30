@@ -63,7 +63,7 @@ type OptimismFlags struct {
 	optimismExecutionName string
 	elOpExtraFlags        []string
 	opExtraFlags          []string
-	isBase                bool
+	chain                 string
 }
 
 // GenCmdFlags is a struct that holds the flags of the generate command
@@ -276,9 +276,15 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		}
 	}
 	var jwtSecretOP string
+	var sequencerURL string
 	// If optimism is included in the services, generate the jwt secret for it
 	if utils.Contains(services, optimism) {
 		jwtSecretOP, err = handleJWTSecret(generationPath, jwtPathName+"-op")
+		if err != nil {
+			return err
+		}
+
+		sequencerURL, err = configs.GetSequencerURL(network, flags.chain)
 		if err != nil {
 			return err
 		}
@@ -331,7 +337,8 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		DvExtraFlags:               flags.dvExtraFlags,
 		ElOpExtraFlags:             flags.elOpExtraFlags,
 		OpExtraFlags:               flags.opExtraFlags,
-		IsBase:                     flags.isBase,
+		Chain:                      flags.chain,
+		Sequencer:                  sequencerURL,
 		MapAllPorts:                flags.mapAllPorts,
 		Mev:                        !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
 		MevImage:                   flags.mevImage,
