@@ -80,8 +80,8 @@ type GenData struct {
 	DvExtraFlags               []string
 	OpExtraFlags               []string
 	TaikoExtraFlags            []string
-	IsBase                     bool
-	IsWorldChain               bool
+	Chain                      string
+	Sequencer                  string
 	MapAllPorts                bool
 	Mev                        bool
 	RelayURLs                  []string

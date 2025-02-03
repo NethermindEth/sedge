@@ -34,18 +34,18 @@ import (
 )
 
 const (
-	execution       = "execution"
-	consensus       = "consensus"
-	validator       = "validator"
-	optimism        = "optimism"
-	opExecution     = "opexecution"
-	taiko           = "taiko"
-	taikoExecution  = "texecution"
-	l2Execution     = "l2execution"
-	validatorImport = "validator-import"
-	mevBoost        = "mev-boost"
-	configConsensus = "config_consensus"
-	empty           = "empty"
+	execution            = "execution"
+	consensus            = "consensus"
+	validator            = "validator"
+	optimism             = "optimism"
+	opExecution          = "opexecution"
+	taiko                = "taiko"
+	taikoExecution       = "texecution"
+	l2Execution          = "l2execution"
+	validatorImport      = "validator-import"
+	mevBoost             = "mev-boost"
+	configConsensus      = "config_consensus"
+	empty                = "empty"
 	distributedValidator = "distributedValidator"
 	charon               = "charon"
 )
@@ -142,13 +142,13 @@ func mapClients(gd *GenData) map[string]*clients.Client {
 	}
 
 	cls := map[string]*clients.Client{
-		execution:      gd.ExecutionClient,
-		consensus:      gd.ConsensusClient,
-		validator:      gd.ValidatorClient,
-		optimism:       gd.OptimismClient,
-		opExecution:    l2OpClient,
-		taiko:          gd.TaikoClient,
-		taikoExecution: l2TaikoClient,
+		execution:            gd.ExecutionClient,
+		consensus:            gd.ConsensusClient,
+		validator:            gd.ValidatorClient,
+		optimism:             gd.OptimismClient,
+		opExecution:          l2OpClient,
+		taiko:                gd.TaikoClient,
+		taikoExecution:       l2TaikoClient,
 		distributedValidator: gd.DistributedValidatorClient,
 	}
 
@@ -303,15 +303,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		consensusApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLApi"])
 	}
 
-	// Set network prefix
-	networkPrefix := "op"
-	if gd.IsBase {
-		networkPrefix = "base"
-	}
-	if gd.IsWorldChain {
-		networkPrefix = "worldchain"
-	}
-
 	data := DockerComposeData{
 		Services:            gd.Services,
 		Network:             gd.Network,
@@ -342,7 +333,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ElExtraFlags:        gd.ElExtraFlags,
 		ElL2ExtraFlags:      gd.ElL2ExtraFlags,
 		OPExtraFlags:        gd.OpExtraFlags,
-		NetworkPrefix:       networkPrefix,
+		NetworkPrefix:       gd.Chain,
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
 		DvExtraFlags:        gd.DvExtraFlags,
@@ -492,33 +483,21 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		elL2Image = imageOrEmpty(gd.L2ExecutionClient, gd.LatestVersion)
 	}
 	opImageVersion := ""
-	opSequencerHttp := ""
 	rethNetwork := ""
 	if gd.OptimismClient != nil {
 		opImageVersion = imageOrEmpty(cls[optimism], gd.LatestVersion)
-		if gd.IsBase {
-			opSequencerHttp = "https://" + gd.Network + "-sequencer.base.org"
-		} else if gd.IsWorldChain {
-			opSequencerHttp = "https://worldchain-" + gd.Network + "-sequencer.g.alchemy.com"
-		} else {
-			opSequencerHttp = "https://" + gd.Network + "-sequencer.optimism.io"
-		}
 		if gd.Network == configs.NetworkMainnet {
-			if gd.IsBase {
-				rethNetwork = "base"
-			} else if gd.IsWorldChain {
+			if gd.Chain == "op" {
 				rethNetwork = "optimism"
 			} else {
-				rethNetwork = "optimism"
+				rethNetwork = gd.Chain
 			}
 		}
 		if gd.Network == configs.NetworkSepolia {
-			if gd.IsBase {
-				rethNetwork = "base-sepolia"
-			} else if gd.IsWorldChain {
-				rethNetwork = "worldchain-sepolia"
-			} else {
+			if gd.Chain == "op" {
 				rethNetwork = "optimism-sepolia"
+			} else {
+				rethNetwork = gd.Chain + "-sepolia"
 			}
 		}
 	}
@@ -548,40 +527,40 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	}
 
 	data := EnvData{
-		Services:                  gd.Services,
-		Mev:                       networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
-		ElImage:                   imageOrEmpty(cls[execution], gd.LatestVersion),
-		ElL2Image:                 elL2Image,
-		TaikoImageVersion:         taikoImage,
-		ElDataDir:                 "./" + configs.ExecutionDir,
-		CcImage:                   imageOrEmpty(cls[consensus], gd.LatestVersion),
-		CcDataDir:                 "./" + configs.ConsensusDir,
-		VlImage:                   imageOrEmpty(cls[validator], gd.LatestVersion),
-		VlDataDir:                 "./" + configs.ValidatorDir,
-		ExecutionApiURL:           executionApiUrl,
-		ExecutionAuthURL:          executionAuthUrl,
-		ConsensusApiURL:           consensusApiUrl,
-		ConsensusAdditionalApiURL: consensusAdditionalApiUrl,
-		FeeRecipient:              gd.FeeRecipient,
-		JWTSecretPath:             gd.JWTSecretPath,
-		ExecutionEngineName:       nameOrEmpty(cls[execution]),
-		ConsensusClientName:       nameOrEmpty(cls[consensus]),
-		KeystoreDir:               "./" + configs.KeystoreDir,
-		Graffiti:                  graffiti,
-		RelayURLs:                 strings.Join(gd.RelayURLs, ","),
-		CheckpointSyncUrl:         gd.CheckpointSyncUrl,
-		ExecutionL2ApiURL:         executionOPApiUrl,
-		JWTL2SecretPath:           gd.JWTSecretL2,
-		OPImageVersion:            opImageVersion,
-		ElL2ApiPort:               gd.Ports["ApiPortELL2"],
-		ElL2AuthPort:              gd.Ports["AuthPortELL2"],
-		ExecutionWSApiURL:         executionWSApiURL,
-		OpSequencerHttp:           opSequencerHttp,
-		RethNetwork:               rethNetwork,
+		Services:                   gd.Services,
+		Mev:                        networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
+		ElImage:                    imageOrEmpty(cls[execution], gd.LatestVersion),
+		ElL2Image:                  elL2Image,
+		TaikoImageVersion:          taikoImage,
+		ElDataDir:                  "./" + configs.ExecutionDir,
+		CcImage:                    imageOrEmpty(cls[consensus], gd.LatestVersion),
+		CcDataDir:                  "./" + configs.ConsensusDir,
+		VlImage:                    imageOrEmpty(cls[validator], gd.LatestVersion),
+		VlDataDir:                  "./" + configs.ValidatorDir,
+		ExecutionApiURL:            executionApiUrl,
+		ExecutionAuthURL:           executionAuthUrl,
+		ConsensusApiURL:            consensusApiUrl,
+		ConsensusAdditionalApiURL:  consensusAdditionalApiUrl,
+		FeeRecipient:               gd.FeeRecipient,
+		JWTSecretPath:              gd.JWTSecretPath,
+		ExecutionEngineName:        nameOrEmpty(cls[execution]),
+		ConsensusClientName:        nameOrEmpty(cls[consensus]),
+		KeystoreDir:                "./" + configs.KeystoreDir,
+		Graffiti:                   graffiti,
+		RelayURLs:                  strings.Join(gd.RelayURLs, ","),
+		CheckpointSyncUrl:          gd.CheckpointSyncUrl,
+		ExecutionL2ApiURL:          executionOPApiUrl,
+		JWTL2SecretPath:            gd.JWTSecretL2,
+		ElL2ApiPort:                gd.Ports["ApiPortELL2"],
+		ElL2AuthPort:               gd.Ports["AuthPortELL2"],
+		ExecutionWSApiURL:          executionWSApiURL,
 		Distributed:                gd.Distributed,
 		DistributedValidatorApiUrl: distributedValidatorApiUrl,
 		DvDataDir:                  "./" + configs.DistributedValidatorDir,
 		DvImage:                    imageOrEmpty(cls[distributedValidator], gd.LatestVersion),
+		OPImageVersion:             opImageVersion,
+		OpSequencerHttp:            gd.Sequencer,
+		RethNetwork:                rethNetwork,
 	}
 
 	// Save to writer

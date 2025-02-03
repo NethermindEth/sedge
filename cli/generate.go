@@ -66,15 +66,13 @@ type L2Execution struct {
 type OptimismFlags struct {
 	optimismName string
 	opExtraFlags []string
-	isBase       bool
-	isWorldChain          bool
+	chain                 string
 }
 
 type TaikoFlags struct {
 	taikoName       string
 	taikoExtraFlags []string
 }
-
 // GenCmdFlags is a struct that holds the flags of the generate command
 type GenCmdFlags struct {
 	CustomFlags
@@ -289,9 +287,15 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		}
 	}
 	var jwtSecretL2 string
+	var sequencerURL string
 	// If optimism is included in the services, generate the jwt secret for it
 	if utils.Contains(services, optimism) || utils.Contains(services, taiko) {
 		jwtSecretL2, err = handleJWTSecret(generationPath, jwtPathName+"-l2")
+		if err != nil {
+			return err
+		}
+
+		sequencerURL, err = configs.GetSequencerURL(network, flags.chain)
 		if err != nil {
 			return err
 		}
@@ -345,8 +349,8 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ElL2ExtraFlags:             flags.ell2ExtraFlags,
 		OpExtraFlags:               flags.opExtraFlags,
 		TaikoExtraFlags:            flags.taikoExtraFlags,
-		IsBase:                     flags.isBase,
-		IsWorldChain:               flags.isWorldChain,
+		Chain:                      flags.chain,
+		Sequencer:                  sequencerURL,
 		MapAllPorts:                flags.mapAllPorts,
 		Mev:                        !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
 		MevImage:                   flags.mevImage,

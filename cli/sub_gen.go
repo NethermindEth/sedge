@@ -38,13 +38,6 @@ func validateCustomNetwork(flags *CustomFlags, net string) error {
 	return nil
 }
 
-func validateNotMultipleChainsOP(flags *GenCmdFlags) error {
-	if flags.isBase && flags.isWorldChain {
-		return ErrSetMultipleNetworksOnOP
-	}
-	return nil
-}
-
 func FullNodeSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 
@@ -162,9 +155,6 @@ This command does not generate a validator configuration, as Optimism and Base u
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			if err := validateNotMultipleChainsOP(&flags); err != nil {
-				return err
-			}
 			return preValidationGenerateCmd(network, logging, &flags)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -184,8 +174,7 @@ This command does not generate a validator configuration, as Optimism and Base u
 	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Suggested fee recipient. Is a 20-byte Ethereum address which the execution layer might choose to set as the coinbase and the recipient of other fees or rewards. There is no guarantee that an execution node will use the suggested fee recipient to collect fees, it may use any address it chooses. It is assumed that an honest execution node will use the suggested fee recipient, but users should note this trust assumption")
 	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file")
 	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
-	cmd.Flags().BoolVar(&flags.isBase, "base", false, "If set, will generate the docker-compose file for Base L2 config, not compatible with --world")
-	cmd.Flags().BoolVar(&flags.isWorldChain, "world", false, "If set, will generate the docker-compose file for Worldchain L2 config, not compatible with --base")
+	cmd.Flags().StringVar(&flags.chain, "chain", "op", "You can set any name of the superchains supported by Optimism. Default is 'op' for Optimism. You can use `base` for Base, `world` for Worldchain, and subsequently.")
 	cmd.Flags().StringSliceVar(&flags.fallbackEL, "fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge generate full-node -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
 	cmd.Flags().StringArrayVar(&flags.elExtraFlags, "el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringArrayVar(&flags.ell2ExtraFlags, "el-op-extra-flag", []string{}, "Additional flag to configure the execution client for optimism service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")

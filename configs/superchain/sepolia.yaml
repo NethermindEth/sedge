@@ -1,0 +1,41 @@
+networks:
+  - name: pivotal
+    sequencer: https://sepolia.pivotalprotocol.com/
+  - name: creator-chain-testnet
+    sequencer: https://rpc.creatorchain.io
+  - name: worldchain
+    sequencer: https://worldchain-sepolia-sequencer.g.alchemy.com
+  - name: arena-z-testnet
+    sequencer: https://rpc.arena-z.t.raas.gelato.cloud
+  - name: race
+    sequencer: https://racetestnet.io
+  - name: cyber
+    sequencer: https://cyber.alt.technology/
+  - name: soneium-minato
+    sequencer: https://rpc.minato.soneium.org
+  - name: mode
+    sequencer: https://sepolia.mode.network
+  - name: funki
+    sequencer: https://funki-testnet.alt.technology
+  - name: op
+    sequencer: https://sepolia-sequencer.optimism.io
+  - name: base
+    sequencer: https://sepolia-sequencer.base.org
+  - name: zora
+    sequencer: https://sepolia.rpc.zora.energy
+  - name: ink
+    sequencer: https://rpc-gel-sepolia.inkonchain.com
+  - name: superchain
+    sequencer: ''
+  - name: ethernity
+    sequencer: https://testnet.ethernitychain.io
+  - name: lisk
+    sequencer: https://rpc.sepolia-api.lisk.com
+  - name: shape
+    sequencer: https://shape-sepolia-sequencer.g.alchemy.com
+  - name: metal
+    sequencer: https://testnet.rpc.metall2.com
+  - name: unichain
+    sequencer: https://sepolia-sequencer.unichain.org
+  - name: tbn
+    sequencer: https://sequencer.rpc.bnry.testnet.zeeve.net
