@@ -2,9 +2,6 @@ package configs
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-
 	"gopkg.in/yaml.v3"
 )
 
@@ -21,11 +18,11 @@ type SuperChainConfig struct {
 // network should be either "mainnet" or "sepolia"
 // chainName is the name of the chain (e.g., "base", "op", etc.)
 func GetSequencerURL(network, chainName string) (string, error) {
-	configPath := filepath.Join("configs", "superchain", fmt.Sprintf("%s.yaml", network))
-	data, err := os.ReadFile(configPath)
-	if err != nil {
-		return "", fmt.Errorf("failed to read config file: %w", err)
+	configContent := GetSuperchainConfig(network)
+	if configContent == "" {
+		return "", fmt.Errorf("no config found for network %s", network)
 	}
+	data := []byte(configContent)
 
 	var config SuperChainConfig
 	if err := yaml.Unmarshal(data, &config); err != nil {
