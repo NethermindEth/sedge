@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated documentation to include Grandine consensus client support
 - Added Grandine to supported clients tables
+- Override `--latest` flag to not use the latest version of the image in the clients if image is specified
 
 ## [v1.7.2] - 2024-11-12
 
