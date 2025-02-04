@@ -31,12 +31,12 @@
       - --jwt-secret=/root/.grandine/jwtsecret
       - --http-address=0.0.0.0
       - --http-port={{.ClApiPort}}{{if not .CustomConsensusConfigs}}
-      - --network={{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}
+      - --network={{if eq .Network "gnosis" "chiado"}}gnosis{{else}}{{if .SplittedNetwork}}${CL_NETWORK}{{else}}${NETWORK}{{end}}{{end}}{{end}}
       - --metrics
       - --metrics-port={{.ClMetricsPort}}
       - --metrics-address=0.0.0.0{{if or .ClCheckpointSyncUrl .CheckpointSyncUrl}}
       - --checkpoint-sync-url={{if .CheckpointSyncUrl}}{{ .CheckpointSyncUrl }}{{else}}${CHECKPOINT_SYNC_URL}{{end}}{{end}}{{range $flag := .ClExtraFlags}}
-      - --{{$flag}}{{end}}{{if .MevBoostEndpoint}}
+      - --{{$flag}}{{end}}{{if and .MevBoostEndpoint (ne .Network "gnosis") (ne .Network "chiado")}}
       - --builder={{.MevBoostEndpoint}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
