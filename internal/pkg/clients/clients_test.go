@@ -31,7 +31,7 @@ func TestSupportedClients(t *testing.T) {
 		isErr      bool
 	}{
 		{"execution", "gnosis", []string{"nethermind", "erigon"}, false},
-		{"consensus", "gnosis", utils.Filter(AllClients["consensus"], func(c string) bool { return c != "prysm" && c != "grandine" }), false},
+		{"consensus", "gnosis", utils.Filter(AllClients["consensus"], func(c string) bool { return c != "prysm" }), false},
 		{"execution", "mainnet", AllClients["execution"], false},
 		{"consensus", "mainnet", AllClients["consensus"], false},
 		{"validator", "mainnet", AllClients["validator"], false},
@@ -132,7 +132,7 @@ func TestClients(t *testing.T) {
 		{
 			map[string][]string{
 				"validator": {"lighthouse", "teku", "lodestar", "nimbus"},
-				"consensus": {"lighthouse", "teku", "lodestar", "nimbus"},
+				"consensus": {"lighthouse", "teku", "lodestar", "nimbus", "grandine"},
 				"execution": {"nethermind", "erigon"},
 			},
 			[]string{"consensus", "execution", "validator"},
@@ -142,7 +142,7 @@ func TestClients(t *testing.T) {
 		{
 			map[string][]string{
 				"validator":            {"lighthouse", "prysm", "teku", "lodestar", "nimbus"},
-				"consensus":            {"lighthouse", "prysm", "teku", "lodestar", "nimbus"},
+				"consensus":            {"lighthouse", "prysm", "teku", "lodestar", "nimbus", "grandine"},
 				"execution":            {"nethermind", "geth", "besu", "erigon"},
 				"distributedValidator": {"charon"},
 			},

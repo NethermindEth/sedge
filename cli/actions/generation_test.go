@@ -280,20 +280,23 @@ func TestGenerateDockerCompose(t *testing.T) {
 
 				// For distributedValidator
 				if utils.Contains(distributedValidatorClients, "charon") {
-					tests = append(tests,
-						genTestData{
-							name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s,distributedValidator: %s, network: %s,  all, with distributedValidator", executionCl, consensusCl, consensusCl, distributedValidatorClients, network),
-							genData: generate.GenData{
-								Distributed:                true,
-								DistributedValidatorClient: &clients.Client{Name: "charon", Type: "distributedValidator"},
-								ExecutionClient:            &clients.Client{Name: executionCl, Type: "execution"},
-								ConsensusClient:            &clients.Client{Name: consensusCl, Type: "consensus"},
-								ValidatorClient:            &clients.Client{Name: consensusCl, Type: "validator"},
-								Services:                   []string{"execution", "consensus", "validator", "distributedValidator"},
-								Network:                    network,
+					// Only add distributed validator test if consensus client is not grandine
+					if consensusCl != "grandine" {
+						tests = append(tests,
+							genTestData{
+								name: fmt.Sprintf("execution: %s, consensus: %s, validator: %s,distributedValidator: %s, network: %s,  all, with distributedValidator", executionCl, consensusCl, consensusCl, distributedValidatorClients, network),
+								genData: generate.GenData{
+									Distributed:                true,
+									DistributedValidatorClient: &clients.Client{Name: "charon", Type: "distributedValidator"},
+									ExecutionClient:            &clients.Client{Name: executionCl, Type: "execution"},
+									ConsensusClient:            &clients.Client{Name: consensusCl, Type: "consensus"},
+									ValidatorClient:            &clients.Client{Name: consensusCl, Type: "validator"},
+									Services:                   []string{"execution", "consensus", "validator", "distributedValidator"},
+									Network:                    network,
+								},
 							},
-						},
-					)
+						)
+					}
 				}
 
 			}
