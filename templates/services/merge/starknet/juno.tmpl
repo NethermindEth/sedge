@@ -1,23 +1,43 @@
 {{/* juno.tmpl */}}
 {{ define "starknet" }}
+  juno-init:
+    image: alpine:latest
+    networks:
+      - sedge
+    container_name: sedge-juno-init{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    volumes:
+      - ${EC_L2_DATA_DIR}:/db/juno
+    command: >
+      /bin/sh -c '
+      if [ ! -d "/db/juno/data" ]; then
+        cd /db/juno && \
+        wget -O juno_db.tar https://juno-snapshots.nethermind.io/files/${NETWORK}/latest && \
+        tar -xvf juno_db.tar -C /db/juno && \
+        rm juno_db.tar;
+      fi && touch /db/juno/.init-complete && exit 0'
+    restart: "no"
+
   starknet_client:
+    depends_on:
+      juno-init:
+        condition: service_completed_successfully
     image: ${STARKNET_IMAGE}
     networks:
       - sedge
     container_name: sedge-starknet{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
     volumes:
-      - ./data/starknet:/root/.starknet
+      - ${EC_L2_DATA_DIR}:/db/juno
     ports:
-      - "${STARKNET_PORT}:${STARKNET_PORT}"
-    environment:
-      - ETHEREUM_API_URL=${ETHEREUM_API_URL}
-      - ETHEREUM_WS_URL=${ETHEREUM_WS_URL}
-      - STARKNET_NETWORK=${STARKNET_NETWORK}
-    {{if .StarknetExtraFlags}}command:
-      {{range $flag := .StarknetExtraFlags}}
-      - {{$flag}}{{end}}{{end}}
-    {{if .LoggingDriver}}
+      - "{{.ElL2ApiPort}}:{{.ElL2ApiPort}}"
+    command:
+      - --http
+      - --http-port={{.ElL2ApiPort}}
+      - --http-host=0.0.0.0
+      - --db-path=/db/juno{{if .StarknetVerifyL1}}
+      - --eth-node=${L1_EC_ENGINE_WS_RPC_URL}{{else}}
+      - --disable-l1-verification=true{{end}}{{range $flag := .StarknetExtraFlags}}
+      - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
       options:

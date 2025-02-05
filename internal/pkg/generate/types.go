@@ -83,6 +83,7 @@ type GenData struct {
 	OpExtraFlags               []string
 	TaikoExtraFlags            []string
 	StarknetExtraFlags         []string
+	StarknetVerifyL1           bool
 	IsBase                     bool
 	MapAllPorts                bool
 	Mev                        bool
@@ -169,6 +170,7 @@ type DockerComposeData struct {
 	DVMetricsPort           uint16
 	DVApiPort               uint16
 	ConsensusApiURL         string
+	StarknetVerifyL1        bool
 }
 
 // WithConsensusClient returns true if the consensus client is set

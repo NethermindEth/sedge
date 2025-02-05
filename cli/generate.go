@@ -75,6 +75,7 @@ type TaikoFlags struct {
 
 type StarknetFlags struct {
 	NodeName       string
+	VerifyL1       bool
 	NodeExtraFlags []string
 }
 
@@ -427,6 +428,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		LatestVersion:              flags.latestVersion,
 		JWTSecretL2:                jwtSecretL2,
 		StarknetExtraFlags:         flags.NodeExtraFlags,
+		StarknetVerifyL1:           flags.VerifyL1,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,

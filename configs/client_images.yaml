@@ -74,7 +74,7 @@ texecution:
     version: master
 starknet:
   juno:
-    name: nethermindeth/juno
+    name: nethermind/juno
     version: v0.12.5
   pathfinder:
     name: eqlabs/pathfinder
