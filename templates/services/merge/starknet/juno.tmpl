@@ -7,14 +7,22 @@
     container_name: sedge-juno-init{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     volumes:
       - ${EC_L2_DATA_DIR}:/db/juno
-    command: >
+    command: |-
       /bin/sh -c '
-      if [ ! -d "/db/juno/data" ]; then
+      if [ ! -f "/db/juno/.download-complete" ]; then
         cd /db/juno && \
-        wget -O juno_db.tar https://juno-snapshots.nethermind.io/files/${NETWORK}/latest && \
-        tar -xvf juno_db.tar -C /db/juno && \
-        rm juno_db.tar;
-      fi && touch /db/juno/.init-complete && exit 0'
+        apk add --no-cache aria2 && \
+        aria2c -x 1 -s 1 --show-console-readout=true --allow-overwrite=true --auto-file-renaming=false \
+          --continue=false --file-allocation=none --max-connection-per-server=1 \
+          --retry-wait=30 --max-tries=0 --timeout=600 --connect-timeout=600 \
+          -o juno_db.tar https://juno-snapshots.nethermind.io/files/${NETWORK}/latest && \
+        if [ $? -eq 0 ]; then
+          tar -xvf juno_db.tar -C /db/juno && \
+          rm juno_db.tar && \
+          touch /db/juno/.download-complete;
+        fi
+      fi && \
+      touch /db/juno/.init-complete && exit 0'
     restart: "no"
 
   starknet_client:
