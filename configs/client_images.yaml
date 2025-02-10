@@ -9,8 +9,8 @@ execution:
     name: nethermind/nethermind
     version: 1.29.1
   erigon:
-    name: thorax/erigon
-    version: v2.60.9
+    name: erigontech/erigon
+    version: v2.60.10
 consensus:
   lighthouse:
     name: sigp/lighthouse
@@ -43,6 +43,10 @@ validator:
   nimbus:
     name: statusim/nimbus-validator-client
     version: multiarch-v24.10.0
+distributed:
+  charon:
+    name: ghcr.io/obolnetwork/charon
+    version: v1.1.2
 optimism:
   opnode:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node

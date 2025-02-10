@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- New cli flag --distributed for running cluster with Charon distributed validator
+
+### Changed
+- Override `--latest` flag to not use the latest version of the image in the clients if image is specified
+
+## [v1.7.2] - 2024-11-12
+
+### Fixed
+- Fix Erigon image source
+- Fix installation script path 
+
+## [v1.7.1] - 2024-11-1
+
+### Added
 - Updates on support for `op-geth` and `op-reth` clients on Optimism and Base networks.
 
 ### Changed
@@ -19,7 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Support Mainnet for Lido CSM setup.
 
+### Fixed
+- Fix missing equals sign when setting builder on Lodestar.
+
 ## [v1.6.0] - 2024-10-18
+
 
 ### Added
 - New command `lido-status` to display data of Lido Node Operator.
