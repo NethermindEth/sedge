@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Override `--latest` flag to not use the latest version of the image in the clients if image is specified
+- JWT secret path set as relative path when not provided.
 
 ## [v1.7.2] - 2024-11-12
 
