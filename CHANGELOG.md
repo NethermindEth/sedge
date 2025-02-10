@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New cli flag --distributed for running cluster with Charon distributed validator
 - Add Taiko network support with Nethermind and Geth clients
 
+### Changed
+- Override `--latest` flag to not use the latest version of the image in the clients if image is specified
+
 ## [v1.7.2] - 2024-11-12
 
 ### Fixed
