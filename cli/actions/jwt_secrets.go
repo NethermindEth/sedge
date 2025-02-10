@@ -40,10 +40,14 @@ func (s *sedgeActions) CreateJWTSecrets(options CreateJWTSecretOptions) (string,
 	jwtPath := options.JWTPath
 	if jwtPath == "" && !configs.NetworksConfigs()[options.Network].NoJWT {
 		return handleJWTSecret(options.GenerationPath)
-	} else if filepath.IsAbs(jwtPath) { // ensure the path is absolute if provided
-		if jwtPath, err = filepath.Abs(jwtPath); err != nil {
-			return jwtPath, err
-		}
+	}
+	// Handle relative paths by joining with generation path
+	if !filepath.IsAbs(jwtPath) {
+		jwtPath = filepath.Join(options.GenerationPath, jwtPath)
+	}
+	// Create parent directories if they don't exist
+	if err = os.MkdirAll(filepath.Dir(jwtPath), 0o755); err != nil {
+		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
 	return jwtPath, nil
 }
@@ -73,15 +77,9 @@ func handleJWTSecret(generationPath string) (string, error) {
 	log.Info(configs.JWTSecretGenerated)
 
 	// Convert the absolute path to a relative path
-	relativeJWTPath, err := filepath.Rel(generationPath, jwtPath)
+	relPath, err := filepath.Rel(generationPath, jwtPath)
 	if err != nil {
 		return "", fmt.Errorf(configs.GenerateJWTSecretError, err)
 	}
-
-	// Prepend "./" to ensure compatibility with relative paths
-	if !filepath.IsAbs(relativeJWTPath) && !filepath.HasPrefix(relativeJWTPath, ".") {
-		relativeJWTPath = "." + string(filepath.Separator) + relativeJWTPath
-	}
-
-	return relativeJWTPath, nil
+	return relPath, nil
 }
