@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - New cli flag --distributed for running cluster with Charon distributed validator
 
+### Changed
+- Override `--latest` flag to not use the latest version of the image in the clients if image is specified
+- JWT secret path set as relative path when not provided.
+
 ## [v1.7.2] - 2024-11-12
 
 ### Fixed
@@ -30,8 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Support Mainnet for Lido CSM setup.
 
-### Changed
-- JWT secret path set as relative path when not provided.
+### Fixed
+- Fix missing equals sign when setting builder on Lodestar.
 
 ## [v1.6.0] - 2024-10-18
 
