@@ -126,6 +126,8 @@ jobs:
         with:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          repositories: "homebrew-sedge,sedge"
+          skip-token-revoke: true
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
