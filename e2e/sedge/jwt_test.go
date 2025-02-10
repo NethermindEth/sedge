@@ -34,7 +34,7 @@ const (
 func TestE2E_Generate_JWTSecret_RelativePath(t *testing.T) {
 	// Test context
 	var (
-		runErr error
+		runErr  error
 		jwtPath = "custom/path/jwtsecret"
 	)
 
@@ -67,7 +67,7 @@ func TestE2E_Generate_JWTSecret_RelativePath(t *testing.T) {
 			fullJWTPath := filepath.Join(dataDirPath, jwtPath)
 			_, err := os.Stat(fullJWTPath)
 			assert.NoError(t, err, "JWT secret file should exist at relative path")
-			
+
 			// Verify the JWT secret content
 			content, err := os.ReadFile(fullJWTPath)
 			assert.NoError(t, err)
@@ -80,7 +80,7 @@ func TestE2E_Generate_JWTSecret_RelativePath(t *testing.T) {
 func TestE2E_Generate_JWTSecret_AbsolutePath(t *testing.T) {
 	// Test context
 	var (
-		runErr error
+		runErr     error
 		tempJWTDir string
 	)
 
@@ -107,7 +107,7 @@ func TestE2E_Generate_JWTSecret_AbsolutePath(t *testing.T) {
 			jwtPath := filepath.Join(tempJWTDir, "jwtsecret")
 			_, err := os.Stat(jwtPath)
 			assert.NoError(t, err, "JWT secret file should exist at absolute path")
-			
+
 			// Verify the JWT secret content
 			content, err := os.ReadFile(jwtPath)
 			assert.NoError(t, err)
@@ -139,7 +139,7 @@ func TestE2E_Generate_JWTSecret_DefaultPath(t *testing.T) {
 			defaultJWTPath := filepath.Join(dataDirPath, "jwtsecret")
 			_, err := os.Stat(defaultJWTPath)
 			assert.NoError(t, err, "JWT secret file should exist at default path")
-			
+
 			// Read the file to ensure it's not empty
 			content, err := os.ReadFile(defaultJWTPath)
 			assert.NoError(t, err)
