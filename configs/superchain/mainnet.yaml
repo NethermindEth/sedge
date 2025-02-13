@@ -57,3 +57,5 @@ networks:
     sequencer: https://sequencer.bnry.mainnet.zeeve.net
   - name: automata
     sequencer: https://automata-mainnet.alt.technology/
+  - name: unichain
+    sequencer: https://mainnet-sequencer.unichain.org
