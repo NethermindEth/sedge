@@ -41,7 +41,7 @@ const (
 	opExecution          = "opexecution"
 	taiko                = "taiko"
 	taikoExecution       = "texecution"
-	l2Execution          = "l2execution"
+
 	validatorImport      = "validator-import"
 	mevBoost             = "mev-boost"
 	configConsensus      = "config_consensus"
@@ -131,7 +131,6 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 
 // mapClients convert genData clients to clients.Clients
 func mapClients(gd *GenData) map[string]*clients.Client {
-
 	var l2OpClient, l2TaikoClient *clients.Client
 
 	if gd.OptimismClient != nil {

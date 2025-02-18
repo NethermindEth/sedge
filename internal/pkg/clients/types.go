@@ -145,12 +145,12 @@ func valueOrDefault(value string, defaultValue string) string {
 
 // Clients : Struct Represent a combination of execution, consensus, validator and distributed validator clients
 type Clients struct {
-	Execution   *Client
-	Consensus   *Client
-	Validator   *Client
-	Optimism    *Client
-	Taiko       *Client
-	L2Execution *Client
+	Execution            *Client
+	Consensus            *Client
+	Validator            *Client
+	Optimism             *Client
+	Taiko                *Client
+	L2Execution          *Client
 	DistributedValidator *Client
 }
 
