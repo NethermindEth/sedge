@@ -1,23 +1,23 @@
 execution:
   geth:
     name: ethereum/client-go
-    version: v1.15.2
+    version: v1.15.4
   besu:
     name: hyperledger/besu
-    version: 25.2.0
+    version: 25.2.1
   nethermind:
     name: nethermind/nethermind
-    version: 1.31.0
+    version: 1.31.3
   erigon:
     name: erigontech/erigon
-    version: v2.61.1
+    version: v2.61.2
 consensus:
   lighthouse:
     name: sigp/lighthouse
     version: v7.0.0-beta.0
   lodestar:
     name: chainsafe/lodestar
-    version: v1.27.0
+    version: v1.27.1
   teku:
     name: consensys/teku
     version: 25.2.0
@@ -26,14 +26,14 @@ consensus:
     version: v5.3.0
   nimbus:
     name: statusim/nimbus-eth2
-    version: multiarch-v25.2.0
+    version: multiarch-v25.3.0
 validator:
   lighthouse:
     name: sigp/lighthouse
     version: v7.0.0-beta.0
   lodestar:
     name: chainsafe/lodestar
-    version: v1.27.0
+    version: v1.27.1
   teku:
     name: consensys/teku
     version: 25.2.0
@@ -42,7 +42,7 @@ validator:
     version: v5.3.0
   nimbus:
     name: statusim/nimbus-validator-client
-    version: multiarch-v25.2.0
+    version: multiarch-v25.3.0
 distributed:
   charon:
     name: ghcr.io/obolnetwork/charon
