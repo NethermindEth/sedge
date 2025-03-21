@@ -29,7 +29,7 @@ const (
 	NetworkGnosis  = "gnosis"
 	NetworkChiado  = "chiado"
 	NetworkHolesky = "holesky"
-	NetworkHoodi    = "hoodi"
+	NetworkHoodi   = "hoodi"
 	NetworkCustom  = "custom"
 )
 

@@ -84,9 +84,9 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		GenesisForkVersion: "0x10000910",
 		SupportsMEVBoost:   false,
 		CheckpointSyncURL:  "https://checkpoint-sync.hoodi.ethpandaops.io",
-		RelayURLs: []string{},
-		ChainID: 560048,
-		Weight:  2,
+		RelayURLs:          []string{},
+		ChainID:            560048,
+		Weight:             2,
 	},
 	NetworkCustom: {
 		Name:               NetworkCustom,
