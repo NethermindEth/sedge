@@ -29,6 +29,7 @@ const (
 	NetworkGnosis  = "gnosis"
 	NetworkChiado  = "chiado"
 	NetworkHolesky = "holesky"
+	NetworkHoodi    = "hoodi"
 	NetworkCustom  = "custom"
 )
 
@@ -51,6 +52,7 @@ func NetworkSupported() []string {
 		NetworkGnosis,
 		NetworkChiado,
 		NetworkHolesky,
+		NetworkHoodi,
 		NetworkCustom,
 	}
 }
