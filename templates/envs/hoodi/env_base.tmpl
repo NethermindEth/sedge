@@ -1,8 +1,7 @@
 {{/* docker-compose_base.tmpl */}}
 {{ define "env" }}
 # --- Global configuration ---
-NETWORK=hoodi{{if .WithMevBoostClient}}
-RELAY_URLS={{.RelayURLs}}{{end}}{{if .FeeRecipient}}
+NETWORK=hoodi{{if .FeeRecipient}}
 FEE_RECIPIENT={{.FeeRecipient}}{{end}}
 {{template "execution" .}}
 {{template "consensus" .}}

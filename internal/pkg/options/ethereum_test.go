@@ -26,7 +26,7 @@ import (
 func TestEthereumOptions_SupportedNetworks(t *testing.T) {
 	options := CreateSedgeOptions(EthereumNode)
 	got := options.SupportedNetworks()
-	want := []string{"mainnet", "holesky", "hoodi", "sepolia", "gnosis", "chiado"}
+	want := []string{"mainnet", "hoodi", "holesky", "sepolia", "gnosis", "chiado"}
 	assert.Equal(t, want, got)
 }
 
