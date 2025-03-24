@@ -106,6 +106,7 @@ func nodeOpIDs(network string) ([]*big.Int, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error getting total number of Node Operators: %w", err)
 	}
+	limit.Mul(limit, big.NewInt(100))
 	offset := big.NewInt(0)
 
 	nodeOperatorIDs, err = contract.GetNodeOperatorIds(nil, offset, limit)

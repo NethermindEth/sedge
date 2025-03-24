@@ -41,7 +41,6 @@ var networkRPCs = map[string]RPC{
 		PublicRPCs: []string{
 			"https://ethereum-holesky-rpc.publicnode.com",
 			"https://endpoints.omniatech.io/v1/eth/holesky/public",
-			"https://ethereum-holesky.blockpi.network/v1/rpc/public",
 			"https://1rpc.io/holesky",
 			"https://holesky.drpc.org",
 		},
