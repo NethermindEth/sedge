@@ -1,7 +1,7 @@
 execution:
   geth:
     name: ethereum/client-go
-    version: latest
+    version: v1.15.6
   besu:
     name: hyperledger/besu
     version: 24.10.0
@@ -10,7 +10,7 @@ execution:
     version: 1.31.6
   erigon:
     name: erigontech/erigon
-    version: v2.60.10
+    version: v3.0.0
 consensus:
   lighthouse:
     name: sigp/lighthouse
