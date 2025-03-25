@@ -711,7 +711,7 @@ func TestCli(t *testing.T) {
 					MapAllPorts:        true,
 					Graffiti:           "test graffiti",
 					VLStartGracePeriod: 840,
-					Mev:                false,
+					Mev:                true,
 					ContainerTag:       "tag",
 					JWTSecretPath:      filepath.Join(generationPath, "jwtsecret"),
 				}
@@ -723,6 +723,9 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
 					prompter.EXPECT().Confirm("Do you want to set up a validator?", true).Return(true, nil),
+					prompter.EXPECT().Confirm("Enable MEV Boost?", true).Return(true, nil),
+					prompter.EXPECT().Input("Mev-Boost image", "flashbots/mev-boost:latest", false, nil).Return("flashbots/mev-boost:latest", nil),
+					prompter.EXPECT().InputList("Insert relay URLs if you don't want to use the default values listed below", configs.NetworksConfigs()[NetworkHoodi].RelayURLs, gomock.AssignableToTypeOf(func([]string) error { return nil })).Return(configs.NetworksConfigs()[NetworkHoodi].RelayURLs, nil),
 					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
 					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(1, nil),
 					prompter.EXPECT().Select("Select validator client", "", ETHClients["validator"]).Return(1, nil),
