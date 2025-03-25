@@ -8,27 +8,24 @@ import InstallCommand from "../InstallCommand";
 export function Header() {
     const HeaderWrapper = styled.div`
         width: 100%;
-        //background-image: url('/img/background-image.jpg');
         background-size: cover;
         background-position: center;
         position: relative;
+        padding: 0 1rem;
 
-        //&::before {
-        //    content: '';
-        //    position: absolute;
-        //    top: 0;
-        //    left: 0;
-        //    right: 0;
-        //    bottom: 0;
-        //    background: rgba(0, 0, 0, 0.7); // Darker overall overlay
-        //}
+        @media (max-width: 768px) {
+            padding: 0 0.75rem;
+        }
 
+        @media (max-width: 480px) {
+            padding: 0 0.5rem;
+        }
     `;
 
 
     const HeaderContent = styled.header`
         position: relative;
-        padding: 4rem 0;
+        padding: 4rem 1rem;
         text-align: center;
         display: flex;
         flex-direction: column;
@@ -36,13 +33,42 @@ export function Header() {
         max-width: var(--ifm-container-width);
         margin: 0 auto;
         color: var(--ifm-font-color-base);
+
+        @media (max-width: 1024px) {
+            padding: 3rem 1rem;
+        }
+
+        @media (max-width: 768px) {
+            padding: 2.5rem 0.75rem;
+        }
+
+        @media (max-width: 480px) {
+            padding: 2rem 0.5rem;
+        }
     `;
 
     const Title = styled.h1`
         font-weight: 600;
         font-size: 3rem;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
+        margin: 1.5rem 0;
+        text-align: center;
+        max-width: 800px;
+        line-height: 1.2;
+
+        @media (max-width: 1024px) {
+            font-size: 2.5rem;
+            margin: 1.25rem 0;
+        }
+
+        @media (max-width: 768px) {
+            font-size: 2rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 480px) {
+            font-size: 1.75rem;
+            margin: 0.875rem 0;
+        }
     `;
 
     const SearchWrapper = styled.div`
@@ -51,12 +77,48 @@ export function Header() {
         max-width: 600px;
         display: flex;
         justify-content: center;
+
+        @media (max-width: 768px) {
+            margin-top: 1.5rem;
+            max-width: 100%;
+            padding: 0 1rem;
+        }
+
+        @media (max-width: 480px) {
+            margin-top: 1.25rem;
+            padding: 0 0.5rem;
+        }
+
+        /* Style the search input to be more responsive */
+        :global(.navbar__search-input) {
+            width: 100%;
+            max-width: none;
+            font-size: 1rem;
+            padding: 0.75rem 1rem;
+
+            @media (max-width: 480px) {
+                font-size: 0.9375rem;
+                padding: 0.625rem 0.875rem;
+            }
+        }
     `;
 
     return (
         <HeaderWrapper>
             <HeaderContent>
                 <ThemedImage
+                    style={{
+                        width: 'auto',
+                        height: 'auto',
+                        maxWidth: '80%',
+                        maxHeight: '120px',
+                        '@media (max-width: 768px)': {
+                            maxHeight: '100px',
+                        },
+                        '@media (max-width: 480px)': {
+                            maxHeight: '80px',
+                        },
+                    }}
                     sources={{
                         dark: useBaseUrl('/img/Sedge_Horizontal_Light.svg'),
                         light: useBaseUrl('/img/Sedge_Horizontal_Dark.svg'),
