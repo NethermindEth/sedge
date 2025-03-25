@@ -685,11 +685,11 @@ func TestCli(t *testing.T) {
 			},
 		},
 		{
-			name: "full node with validator hoodi",
+			name: "full node with validator, hoodi",
 			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
 				generationPath := t.TempDir()
 				genData := generate.GenData{
-					Services: []string{"execution", "consensus", "validator"},
+					Services: []string{"execution", "consensus", "validator", "mev-boost"},
 					ExecutionClient: &clients.Client{
 						Name:  "nethermind",
 						Type:  "execution",
@@ -712,6 +712,8 @@ func TestCli(t *testing.T) {
 					Graffiti:           "test graffiti",
 					VLStartGracePeriod: 840,
 					Mev:                true,
+					MevImage:           "flashbots/mev-boost:latest",
+					RelayURLs:          configs.NetworksConfigs()[NetworkHoodi].RelayURLs,
 					ContainerTag:       "tag",
 					JWTSecretPath:      filepath.Join(generationPath, "jwtsecret"),
 				}
