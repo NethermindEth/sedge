@@ -14,6 +14,8 @@ const Container = styled.div`
     flex-direction: column;
     margin: 0 auto;
     min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden; // Prevent horizontal scrolling
 `;
 
 
@@ -55,14 +57,30 @@ const actions = [
 function Content() {
     const Row = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     grid-gap: 24px;
     justify-content: center;
     margin: 0 auto;
+    width: 100%;
     padding: 2rem;
     max-width: 1200px;
-    //background-color: var(--ifm-background-surface-color);
-  `;
+
+    @media (max-width: 1024px) {
+      padding: 1.5rem;
+      grid-gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      padding: 1.25rem;
+      grid-gap: 16px;
+      grid-template-columns: 1fr;
+      max-width: 600px;
+    }
+
+    @media (max-width: 480px) {
+      padding: 1rem;
+      grid-gap: 12px;
+    }`;
 
     const Card = styled.div`
     display: flex;
@@ -75,21 +93,67 @@ function Content() {
     transition: all 0.3s;
     background-color: var(--ifm-background-color);
     margin-bottom: 1rem;
+    height: 100%;
+    min-height: 240px;
 
-    &:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    @media (max-width: 1024px) {
+      padding: 1.25rem;
+      min-height: 220px;
+    }
+
+    @media (max-width: 768px) {
+      padding: 1.125rem;
+      min-height: 200px;
+    }
+
+    @media (max-width: 480px) {
+      padding: 1rem;
+      min-height: 180px;
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    &:active {
+      transform: translateY(1px);
     }
   `;
 
     const CardTitle = styled.h3`
     margin-bottom: 1rem;
     font-weight: 600;
+    font-size: 1.25rem;
+
+    @media (max-width: 768px) {
+      font-size: 1.125rem;
+      margin-bottom: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
   `;
 
     const CardText = styled.p`
     margin-bottom: 1rem;
     font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.5;
+
+    @media (max-width: 768px) {
+      font-size: 0.9375rem;
+      margin-bottom: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
   `;
 
     const IconWrapper = styled.div`
@@ -101,6 +165,18 @@ function Content() {
     border-radius: 50%;
     background-color: var(--ifm-color-emphasis-100);
     margin-bottom: 1rem;
+
+    @media (max-width: 768px) {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+      width: 36px;
+      height: 36px;
+      margin-bottom: 0.5rem;
+    }
   `;
 
     return (
