@@ -7,17 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.8.0] - 2025-01-20
+
 ### Added
 - New cli flag --distributed for running cluster with Charon distributed validator
 
 ### Changed
 - Override `--latest` flag to not use the latest version of the image in the clients if image is specified
+- Update `lido-status` command documentation.
+
+### Fixed
+- Adjusted Grafana Oncall Docker Compose setup
 
 ## [v1.7.2] - 2024-11-12
 
 ### Fixed
 - Fix Erigon image source
-- Fix installation script path 
+- Fix installation script path
 
 ## [v1.7.1] - 2024-11-1
 
@@ -43,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New command `lido-status` to display data of Lido Node Operator.
 - New command `monitoring` to run monitoring stack setup with Grafana, Prometheus, Node Exporter and Lido Exporter.
 - Security policy.
-- Support for Nimbus as Consensus and Validator client. 
+- Support for Nimbus as Consensus and Validator client.
 - Documentation for Lido Exporter and Monitoring Stack.
 
 ### Changed
@@ -98,7 +104,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update client images to Dencun-ready versions. 
+- Update client images to Dencun-ready versions.
 
 ## [v1.3.1] - 2024-02-14
 
