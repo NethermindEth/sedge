@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support `Hoodi` testnet for Ethereum node setup.
 
 ### Changed
-- - Update client images.
+- Update client images.
 
 ## [v1.8.0] - 2025-01-20
 
