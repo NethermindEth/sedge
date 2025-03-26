@@ -684,45 +684,45 @@ func TestE2E_ValidFlags_All_Mainnet(t *testing.T) {
 	e2eTest.run()
 }
 
-// func TestE2E_ValidArgs_NodeOperatorID_Hoodi(t *testing.T) {
-// 	// t.Parallel()
-// 	// Test context
-// 	var (
-// 		cmd *exec.Cmd
-// 	)
-// 	// Build test case
-// 	e2eTest := newE2ELidoExporterTestCase(
-// 		t,
-// 		// Arrange
-// 		nil,
-// 		// Act
-// 		func(t *testing.T, binaryPath string) *exec.Cmd {
-// 			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--node-operator-id", "1", "--network", "hoodi", "--port", "9980")
-// 			time.Sleep(2 * time.Second)
-// 			return cmd
-// 		},
-// 		// Assert
-// 		func(t *testing.T) {
-// 			checkPrometheusServerUp(t, 9980)
-// 			checkMetrics(t, 9980)
+func TestE2E_ValidArgs_NodeOperatorID_Hoodi(t *testing.T) {
+	// t.Parallel()
+	// Test context
+	var (
+		cmd *exec.Cmd
+	)
+	// Build test case
+	e2eTest := newE2ELidoExporterTestCase(
+		t,
+		// Arrange
+		nil,
+		// Act
+		func(t *testing.T, binaryPath string) *exec.Cmd {
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--node-operator-id", "1", "--network", "hoodi", "--port", "9980")
+			time.Sleep(2 * time.Second)
+			return cmd
+		},
+		// Assert
+		func(t *testing.T) {
+			checkPrometheusServerUp(t, 9980)
+			checkMetrics(t, 9980)
 
-// 			cmd.Process.Signal(os.Interrupt)
+			cmd.Process.Signal(os.Interrupt)
 
-// 			// Wait for the process to exit with a timeout
-// 			done := make(chan error, 1)
-// 			go func() {
-// 				done <- cmd.Wait()
-// 			}()
+			// Wait for the process to exit with a timeout
+			done := make(chan error, 1)
+			go func() {
+				done <- cmd.Wait()
+			}()
 
-// 			select {
-// 			case err := <-done:
-// 				assert.NoError(t, err)
-// 			case <-time.After(5 * time.Second):
-// 				t.Error("Process did not exit within the timeout period")
-// 				cmd.Process.Kill() // Force kill if it doesn't exit
-// 			}
-// 		},
-// 	)
-// 	// Run test case
-// 	e2eTest.run()
-// }
+			select {
+			case err := <-done:
+				assert.NoError(t, err)
+			case <-time.After(5 * time.Second):
+				t.Error("Process did not exit within the timeout period")
+				cmd.Process.Kill() // Force kill if it doesn't exit
+			}
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}

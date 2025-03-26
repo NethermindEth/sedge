@@ -232,25 +232,25 @@ func TestE2E_LidoStatus_RewardAddressNotFound_Mainnet(t *testing.T) {
 	e2eTest.run()
 }
 
-// func TestE2E_LidoStatus_ValidNodeID_Hoodi(t *testing.T) {
-// 	// Test context
-// 	var (
-// 		runErr error
-// 	)
-// 	// Build test case
-// 	e2eTest := newE2ESedgeTestCase(
-// 		t,
-// 		// Arrange
-// 		nil,
-// 		// Act
-// 		func(t *testing.T, binaryPath string, dataDirPath string) {
-// 			runErr = base.RunCommand(t, binaryPath, "sedge", "lido-status", "--nodeID", "1", "--l", "--network", "hoodi")
-// 		},
-// 		// Assert
-// 		func(t *testing.T, dataDirPath string) {
-// 			assert.NoError(t, runErr, "lido status command should succeed with the given arguments")
-// 		},
-// 	)
-// 	// Run test case
-// 	e2eTest.run()
-// }
+func TestE2E_LidoStatus_ValidNodeID_Hoodi(t *testing.T) {
+	// Test context
+	var (
+		runErr error
+	)
+	// Build test case
+	e2eTest := newE2ESedgeTestCase(
+		t,
+		// Arrange
+		nil,
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			runErr = base.RunCommand(t, binaryPath, "sedge", "lido-status", "--nodeID", "1", "--l", "--network", "hoodi")
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.NoError(t, runErr, "lido status command should succeed with the given arguments")
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}

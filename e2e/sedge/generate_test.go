@@ -287,45 +287,45 @@ func TestE2E_Generate_FullNode_Lighthouse_Hoodi(t *testing.T) {
 	e2eTest.run()
 }
 
-// func TestE2E_Generate_FullNode_Lido_Hoodi(t *testing.T) {
-// 	// Test context
-// 	var (
-// 		runErr error
-// 	)
-// 	// Build test case
-// 	e2eTest := newE2ESedgeTestCase(
-// 		t,
-// 		// Arrange
-// 		nil,
-// 		// Act
-// 		func(t *testing.T, binaryPath string, dataDirPath string) {
-// 			runErr = base.RunSedge(t, binaryPath, "generate", "--lido", "full-node", "--network", "hoodi")
-// 		},
-// 		// Assert
-// 		func(t *testing.T, dataDirPath string) {
-// 			assert.NoError(t, runErr, "generate command should succeed")
-// 			generateDataFilePath := filepath.Join(dataDirPath, ".env")
-// 			assert.FileExists(t, generateDataFilePath, ".env file should be created")
+func TestE2E_Generate_FullNode_Lido_Hoodi(t *testing.T) {
+	// Test context
+	var (
+		runErr error
+	)
+	// Build test case
+	e2eTest := newE2ESedgeTestCase(
+		t,
+		// Arrange
+		nil,
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			runErr = base.RunSedge(t, binaryPath, "generate", "--lido", "full-node", "--network", "hoodi")
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.NoError(t, runErr, "generate command should succeed")
+			generateDataFilePath := filepath.Join(dataDirPath, ".env")
+			assert.FileExists(t, generateDataFilePath, ".env file should be created")
 
-// 			// Read .env file
-// 			envMap, err := godotenv.Read(generateDataFilePath)
-// 			assert.NoError(t, err, "should be able to read .env file")
+			// Read .env file
+			envMap, err := godotenv.Read(generateDataFilePath)
+			assert.NoError(t, err, "should be able to read .env file")
 
-// 			// Read FEE_RECIPIENT value
-// 			feeRecipient, exists := envMap["FEE_RECIPIENT"]
-// 			assert.True(t, exists, "FEE_RECIPIENT should exist in .env file")
-// 			expectedFeeRecipient, ok := contracts.FeeRecipient("hoodi")
-// 			assert.True(t, ok, "FeeRecipient should be found")
-// 			assert.Equal(t, expectedFeeRecipient, feeRecipient, "FEE_RECIPIENT value should match expected value")
+			// Read FEE_RECIPIENT value
+			feeRecipient, exists := envMap["FEE_RECIPIENT"]
+			assert.True(t, exists, "FEE_RECIPIENT should exist in .env file")
+			expectedFeeRecipient, ok := contracts.FeeRecipient("hoodi")
+			assert.True(t, ok, "FeeRecipient should be found")
+			assert.Equal(t, expectedFeeRecipient, feeRecipient, "FEE_RECIPIENT value should match expected value")
 
-// 			// Read RELAY_URLS value
-// 			relayURLs, exists := envMap["RELAY_URLS"]
-// 			assert.True(t, exists, "RELAY_URLS should exist in .env file")
-// 			relayURLsList := strings.Split(relayURLs, ",")
-// 			expectedRelayURLs, _ := mevboostrelaylist.RelaysURI("hoodi")
-// 			assert.Equal(t, expectedRelayURLs, relayURLsList, "RELAY_URLS value should match expected value")
-// 		},
-// 	)
-// 	// Run test case
-// 	e2eTest.run()
-// }
+			// Read RELAY_URLS value
+			relayURLs, exists := envMap["RELAY_URLS"]
+			assert.True(t, exists, "RELAY_URLS should exist in .env file")
+			relayURLsList := strings.Split(relayURLs, ",")
+			expectedRelayURLs, _ := mevboostrelaylist.RelaysURI("hoodi")
+			assert.Equal(t, expectedRelayURLs, relayURLsList, "RELAY_URLS value should match expected value")
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}

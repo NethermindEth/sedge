@@ -164,6 +164,22 @@ func TestLidoStatusCmd(t *testing.T) {
 			},
 			isErr: true,
 		},
+		{
+			name: "Valid node ID, Hoodi",
+			flags: flags{
+				networkName: "hoodi",
+				nodeIDInt:   1,
+			},
+			isErr: false,
+		},
+		{
+			name: "Invalid: negative node ID, Hoodi",
+			flags: flags{
+				networkName: "hoodi",
+				nodeIDInt:   -13,
+			},
+			isErr: true,
+		},
 	}
 
 	for _, tc := range tcs {

@@ -28,12 +28,12 @@ mainnet:
     IsMandatory: false
     Description: "Manifold SecureRPC Relay"
   - Uri: "https://0x8c4ed5e24fe5c6ae21018437bde147693f68cda427cd1122cf20819c30eda7ed74f72dece09bb313f2a1855595ab677d@global.titanrelay.xyz"
-    Operator: "Gattaca" 
-    IsMandatory: false 
-    Description: "Titan Relay Global (non-filtering)" 
-  - Uri: "https://0x8c4ed5e24fe5c6ae21018437bde147693f68cda427cd1122cf20819c30eda7ed74f72dece09bb313f2a1855595ab677d@regional.titanrelay.xyz" 
-    Operator: "Gattaca" 
-    IsMandatory: false 
+    Operator: "Gattaca"
+    IsMandatory: false
+    Description: "Titan Relay Global (non-filtering)"
+  - Uri: "https://0x8c4ed5e24fe5c6ae21018437bde147693f68cda427cd1122cf20819c30eda7ed74f72dece09bb313f2a1855595ab677d@regional.titanrelay.xyz"
+    Operator: "Gattaca"
+    IsMandatory: false
     Description: "Titan Relay Regional (filtering)"
 
 
@@ -78,3 +78,13 @@ holesky:
     Operator: "Titan"
     IsMandatory: false
     Description: "Titan Preconf Holesky"
+
+hoodi:
+  - Uri: "https://0xaa58208899c6105603b74396734a6263cc7d947f444f396a90f7b7d3e65d102aec7e5e5291b27e08d02c50a050825c2f@hoodi.titanrelay.xyz"
+    Operator: "Titan"
+    IsMandatory: true
+    Description: "Titan Relay Hoodi - nonfiltering"
+  - Uri: "https://0x98f0ef62f00780cf8eb06701a7d22725b9437d4768bb19b363e882ae87129945ec206ec2dc16933f31d983f8225772b6@hoodi.aestus.live"
+    Operator: "Aestus"
+    IsMandatory: true
+    Description: "Aestus Relay Hoodi - nonfiltering"
