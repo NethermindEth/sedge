@@ -74,7 +74,7 @@ func TestSetImageOrDefault_Consensus(t *testing.T) {
 				Name: "lighthouse",
 				Type: "consensus",
 			},
-			expectedImage: *regexp.MustCompile(`^sigp/lighthouse:v\d+\.\d+\.\d+$`),
+			expectedImage: *regexp.MustCompile(`^sigp/lighthouse:v\d+\.\d+\.\d+-beta\.\d+$`),
 		},
 		{
 			client: Client{
@@ -116,7 +116,7 @@ func TestSetImageOrDefault_Validator(t *testing.T) {
 				Name: "lighthouse",
 				Type: "validator",
 			},
-			expectedImage: *regexp.MustCompile(`^sigp/lighthouse:v\d+\.\d+\.\d+$`),
+			expectedImage: *regexp.MustCompile(`^sigp/lighthouse:v\d+\.\d+\.\d+-beta\.\d+$`),
 		},
 		{
 			client: Client{
