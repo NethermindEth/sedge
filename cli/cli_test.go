@@ -791,7 +791,7 @@ func TestCli(t *testing.T) {
 					},
 					Network:            "hoodi",
 					CheckpointSyncUrl:  "http://checkpoint.sync",
-					FeeRecipient:       "0xE73a3602b99f1f913e72F8bdcBC235e206794Ac8",
+					FeeRecipient:       "0x9b108015fe433F173696Af3Aa0CF7CDb3E104258",
 					MapAllPorts:        true,
 					Graffiti:           "test graffiti",
 					VLStartGracePeriod: 840,

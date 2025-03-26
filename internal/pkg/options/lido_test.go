@@ -65,6 +65,10 @@ func TestLidoOptions_WithdrawalAddress(t *testing.T) {
 			expected,
 		},
 		{
+			"hoodi",
+			expected,
+		},
+		{
 			"unsupported",
 			func(network string) string {
 				return ""
@@ -104,6 +108,10 @@ func TestLidoOptions_FeeRecipient(t *testing.T) {
 			expected,
 		},
 		{
+			"hoodi",
+			expected,
+		},
+		{
 			"unsupported",
 			func(network string) string {
 				return ""
@@ -133,6 +141,7 @@ func TestLidoOptions_RelayURLs(t *testing.T) {
 		{"mainnet", expected},
 		{"sepolia", expected},
 		{"holesky", expected},
+		{"hoodi", expected},
 		{"unsupported", func(network string) []string {
 			return nil
 		}},
@@ -161,6 +170,7 @@ func TestLidoOptions_MEVBoostEnabled(t *testing.T) {
 		{"mainnet", true},
 		{"sepolia", false},
 		{"holesky", true},
+		{"hoodi", true},
 		{"unsupported", false},
 	}
 
@@ -216,6 +226,14 @@ func TestLidoOptionsValidateSettings(t *testing.T) {
 			name: "valid settings, holesky",
 			settings: OptionSettings{
 				Network:         "holesky",
+				MEVBoostEnabled: true,
+			},
+			expected: nil,
+		},
+		{
+			name: "valid settings, hoodi",
+			settings: OptionSettings{
+				Network:         "hoodi",
 				MEVBoostEnabled: true,
 			},
 			expected: nil,
