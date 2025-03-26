@@ -46,6 +46,7 @@ const (
 	NetworkMekong    = "mekong"
 	NetworkChiado    = "chiado"
 	NetworkHolesky   = "holesky"
+	NetworkHoodi   = "hoodi"
 	NetworkCustom    = "custom"
 	NetworkVolta     = "volta"
 	Networkenergyweb = "energyweb"

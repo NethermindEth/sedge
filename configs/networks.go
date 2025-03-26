@@ -37,6 +37,7 @@ const (
 	NetworkJocTestnet   = "joc-testnet"
 	NetworkLineaMainnet = "linea-mainnet"
 	NetworkLineaSepolia = "linea-sepolia"
+	NetworkHoodi   = "hoodi"
 	NetworkCustom       = "custom"
 )
 
@@ -61,6 +62,7 @@ func NetworkSupported() []string {
 		NetworkChiado,
 		NetworkHolesky,
 		NetworkMekong,
+		NetworkHoodi,
 		NetworkCustom,
 		NetworkVolta,
 		NetworkEnergyWeb,

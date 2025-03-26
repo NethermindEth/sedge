@@ -27,6 +27,7 @@ Sedge is a one-click node setup tool for PoS network/chain validators and nodes 
     - [**Disclaimer**](#disclaimer-1)
   - [Supported networks and clients](#supported-networks-and-clients)
     - [Mainnet](#mainnet)
+    - [Hoodi](#hoodi)
     - [Sepolia](#sepolia)
     - [Holesky](#holesky)
     - [Gnosis](#gnosis)
@@ -77,7 +78,7 @@ With `sedge cli` you can go through the entire workflow setup:
 3. Check dependencies
 4. Execute the `docker-compose.yml` script (only execution and consensus nodes will be executed by default)
 5. Validator client will be executed automatically after the consensus node is synced.
-  
+
 You can also generate the validator(s) keystore folder using `sedge keys`.
 
 The entire process is interactive. However, Sedge also has a very customizable, non-interactive setup without prompts.
@@ -99,7 +100,7 @@ As people who actively deployed validators way before The Merge, we know how har
 - There may be several valid combinations of clients to choose for your setup, so you need to go through each of the client's docs, evaluate it, get instructions for it and test it. You also need to feel comfortable executing commands in the cli, know docker, and understand basics of networking. On top of this, there are many different settings you must read up on and consider for your client node.
 - In the case of working with the Ethereum Mainnet, you are working with real money that can potentially be lost in the event of having downtime or being slashed. To avoid losing real value, you must be aware of and follow best practices on the validator setup, and correctly monitor your nodes.
 - Have you heard of MEV-Boost? You most likely want always to be running the latest version, but you also don’t have the time to understand the MEV-Boost architecture ins and outs or how to implement it into your environment successfully.
-  
+
 > Enter Sedge
 
 We want Sedge to take care of all of the above for you. With just a few clicks or steps, Sedge can create an entire Ethereum staking architecture that supports client diversity and Ethereum's latest features, while being completely free and open source. We want Sedge to save you from making costly mistakes in this complex setup; along with hours or days of research, reading and testing. We want you to be able to stake easily with or without blockchain knowledge by giving you the tools to help this amazing community (and earn some good money of course 😉).
@@ -129,12 +130,12 @@ Users acknowledge that no warranty is being made of a successful installation. S
 
 ## Lido integration
 
-Sedge is integrated with [Lido CSM](https://operatorportal.lido.fi/modules/community-staking-module), with 
-permissionless entry, allowing any node operator — and especially community stakers, from solo stakers, to groups of 
+Sedge is integrated with [Lido CSM](https://operatorportal.lido.fi/modules/community-staking-module), with
+permissionless entry, allowing any node operator — and especially community stakers, from solo stakers, to groups of
 friends, to amateur operators — to operate validators by providing an ETH-based bond (security collateral).
 
-Sedge supports the Lido CSM, allowing users to generate validator keys and set up their full nodes with ease. You can 
-read more about it in [our documentation](https://docs.sedge.nethermind.io/docs/quickstart/staking-with-lido)! 
+Sedge supports the Lido CSM, allowing users to generate validator keys and set up their full nodes with ease. You can
+read more about it in [our documentation](https://docs.sedge.nethermind.io/docs/quickstart/staking-with-lido)!
 
 ## Charon DV integration
 Charon is used by stakers to distribute the responsibility of running Ethereum Validators across a number of different instances and client implementations. Setting up and running a full ethereum node with charon, needs some learning curve and compatibility knowledge, in order for the setup to be fully compliant with the charon configuration requirements for different BN-VC combinations. We want to provide a better and guided user experience for setting up a DV with Charon.
@@ -151,6 +152,16 @@ Integrating Charon with Sedge would make it easy for stakers to setup and run a 
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
+|            | Nimbus     | Nimbus     |
+
+### Hoodi
+
+| Execution  | Consensus  | Validator  |
+| ---------- |------------|------------|
+| Geth       | Lighthouse | Lighthouse |
+| Nethermind | Lodestar   | Lodestar   |
+| Erigon     | Teku       | Teku       |
+| Besu       | Prysm      | Prysm      |
 |            | Nimbus     | Nimbus     |
 
 ### Sepolia
@@ -250,25 +261,27 @@ The following roadmap covers the main features and ideas we want to implement bu
 - [x] Support for Gnosis Merge
 - [x] Bug fixes
 
-### Version 0.6 
+### Version 0.6
 
 - [x] Besu and Erigon support
 - [x] Windows support
 - [x] Bug fixes
 
-### Version 1.0 
+### Version 1.0
 
 - [x] Full Ethereum PoS support with MEV-Boost
 - [x] Set up and run only one node (execution/consensus/validator)
 - [x] Keystore generation
 - [x] Slashing protection
-  
+
 ### Version 1.X (Current)
 
 - [x] Support Erigon on Gnosis
 - [x] Support for Lido CSM
 - [x] Support for Nimbus client as Consensus and Validator
 - [x] Include monitoring tool for alerting, tracking validator balance, and tracking sync progress and status of nodes
+- [x] Support for Optimism and Base
+- [x] Support for Hoodi
 - [x] Support for Optimism and Base.
 - [x] Support for Charon DV
 - [x] Support for Taiko
@@ -281,7 +294,7 @@ Please check our [Contributing Guidelines](https://docs.sedge.nethermind.io/docs
 
 If you know of any good tricks for validator setup that other people could also use well, please consider adding it to Sedge. Your efforts will be greatly appreciated by the community.
 
-## 🛡️ Security 
+## 🛡️ Security
 
 If you believe you have found a security vulnerability in our code, please report it to us as described in our [security policy](SECURITY.md).
 

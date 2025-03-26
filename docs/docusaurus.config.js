@@ -68,6 +68,10 @@ const config = {
                   to: '/docs/networks/mainnet',
                 },
                 {
+                  label: 'Hoodi',
+                  to: '/docs/networks/hoodi',
+                },
+                {
                   label: 'Holesky',
                   to: '/docs/networks/holesky',
                 },
@@ -113,6 +117,10 @@ const config = {
                 {
                   label: 'Mainnet',
                   to: '/docs/networks/mainnet',
+                },
+                {
+                  label: 'Hoodi',
+                  to: '/docs/networks/hoodi',
                 },
                 {
                   label: 'Sepolia',
