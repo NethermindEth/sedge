@@ -780,14 +780,14 @@ func TestCli(t *testing.T) {
 						Image: configs.ClientImages.Execution.Nethermind.String(),
 					},
 					ConsensusClient: &clients.Client{
-						Name:  "lighthouse",
+						Name:  "prysm",
 						Type:  "consensus",
-						Image: configs.ClientImages.Consensus.Lighthouse.String(),
+						Image: configs.ClientImages.Consensus.Prysm.String(),
 					},
 					ValidatorClient: &clients.Client{
-						Name:  "lighthouse",
+						Name:  "prysm",
 						Type:  "validator",
-						Image: configs.ClientImages.Validator.Lighthouse.String(),
+						Image: configs.ClientImages.Validator.Prysm.String(),
 					},
 					Network:            "hoodi",
 					CheckpointSyncUrl:  "http://checkpoint.sync",
@@ -836,7 +836,7 @@ func TestCli(t *testing.T) {
 						Services:       []string{"validator"},
 					}),
 					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
-						ValidatorClient: "lighthouse",
+						ValidatorClient: "prysm",
 						Network:         NetworkHoodi,
 						GenerationPath:  generationPath,
 						From:            filepath.Join(generationPath, "keystore"),
