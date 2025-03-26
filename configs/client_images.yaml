@@ -4,7 +4,7 @@ execution:
     version: v1.15.6
   besu:
     name: hyperledger/besu
-    version: 24.10.0
+    version: 25.3.0
   nethermind:
     name: nethermind/nethermind
     version: 1.31.6
