@@ -25,7 +25,7 @@ import (
 
 func TestLidoOptions_SupportedNetworks(t *testing.T) {
 	options := CreateSedgeOptions(LidoNode)
-	expected := []string{"mainnet", "holesky", "sepolia"}
+	expected := []string{"mainnet", "hoodi", "holesky", "sepolia"}
 	assert.Equal(t, expected, options.SupportedNetworks())
 }
 
