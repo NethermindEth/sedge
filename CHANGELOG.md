@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Support `Hoodi` testnet for Ethereum node setup.
+- Support `Hoodi` testnet for Lido CSM node setup.
 
 ### Changed
 - Update client images.
