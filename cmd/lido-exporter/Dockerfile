@@ -1,5 +1,5 @@
 # Use the official Golang image to build the application
-FROM golang:1.22 as builder
+FROM golang:1.23 as builder
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
@@ -23,7 +23,7 @@ RUN make generate
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o lido-exporter ./cmd/lido-exporter
 
 # Start a new stage from scratch
-FROM alpine:latest  
+FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates
 
