@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.9.0] - 2025-03-27
+
+### Added
+- Support `Hoodi` testnet for Ethereum node setup.
+- Support `Hoodi` testnet for Lido CSM node setup.
+
+### Changed
+- Update client images.
+
 ## [v1.8.0] - 2025-01-20
 
 ### Added
@@ -23,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fix Erigon image source
-- Fix installation script path 
+- Fix installation script path
 
 ## [v1.7.1] - 2024-11-1
 
@@ -49,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New command `lido-status` to display data of Lido Node Operator.
 - New command `monitoring` to run monitoring stack setup with Grafana, Prometheus, Node Exporter and Lido Exporter.
 - Security policy.
-- Support for Nimbus as Consensus and Validator client. 
+- Support for Nimbus as Consensus and Validator client.
 - Documentation for Lido Exporter and Monitoring Stack.
 
 ### Changed
@@ -104,7 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update client images to Dencun-ready versions. 
+- Update client images to Dencun-ready versions.
 
 ## [v1.3.1] - 2024-02-14
 

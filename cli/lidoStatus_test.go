@@ -164,6 +164,23 @@ func TestLidoStatusCmd(t *testing.T) {
 			},
 			isErr: true,
 		},
+		// {
+		// 	name: "Valid node ID, Hoodi",
+		// 	flags: flags{
+		// 		rewardAddress:    "0xe6b5A31d8bb53D2C769864aC137fe25F4989f1fd", // rewardAddress should be ignored
+		// 		networkName: "hoodi",
+		// 		nodeIDInt:   1,
+		// 	},
+		// 	isErr: false,
+		// },
+		{
+			name: "Invalid: negative node ID, Hoodi",
+			flags: flags{
+				networkName: "hoodi",
+				nodeIDInt:   -13,
+			},
+			isErr: true,
+		},
 	}
 
 	for _, tc := range tcs {

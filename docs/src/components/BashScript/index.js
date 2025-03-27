@@ -10,10 +10,10 @@ const BashCommand = ({ command }) => {
         const checkMobile = () => {
             setIsMobile(window.innerWidth <= 480);
         };
-        
+
         checkMobile();
         window.addEventListener('resize', checkMobile);
-        
+
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
@@ -76,22 +76,22 @@ const BashCommand = ({ command }) => {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         position: relative;
-        
+
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             height: 4px;
         }
-        
+
         ::-webkit-scrollbar-track {
             background: var(--ifm-color-emphasis-100);
             border-radius: 2px;
         }
-        
+
         ::-webkit-scrollbar-thumb {
             background: var(--ifm-color-emphasis-300);
             border-radius: 2px;
         }
-        
+
         pre {
             margin: 0;
             padding: 0;

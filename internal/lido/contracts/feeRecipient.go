@@ -36,12 +36,17 @@ var feeRecipient = map[string]feeRecipientConfig{
 	configs.NetworkHolesky: {
 		network:             configs.NetworkHolesky,
 		feeRecipientAddress: "0xE73a3602b99f1f913e72F8bdcBC235e206794Ac8",
-		weight:              2,
+		weight:              3,
 	},
 	configs.NetworkSepolia: {
 		network:             configs.NetworkSepolia,
 		feeRecipientAddress: "0x94B1B8e2680882f8652882e7F196169dE3d9a3B2",
-		weight:              3,
+		weight:              4,
+	},
+	configs.NetworkHoodi: {
+		network:             configs.NetworkHoodi,
+		feeRecipientAddress: "0x9b108015fe433F173696Af3Aa0CF7CDb3E104258",
+		weight:              2,
 	},
 }
 

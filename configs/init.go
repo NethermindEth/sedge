@@ -45,7 +45,7 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 			"https://0x845bd072b7cd566f02faeb0a4033ce9399e42839ced64e8b2adcfc859ed1e8e1a5a293336a49feac6d9a5edb779be53a@builder-relay-sepolia.flashbots.net",
 		},
 		ChainID: 11155111,
-		Weight:  3,
+		Weight:  4,
 	},
 	NetworkChiado: {
 		Name:               NetworkChiado,
@@ -53,7 +53,7 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		GenesisForkVersion: "0x0000006f",
 		CheckpointSyncURL:  "https://checkpoint.chiadochain.net",
 		ChainID:            10200,
-		Weight:             5,
+		Weight:             6,
 	},
 	NetworkGnosis: {
 		Name:               NetworkGnosis,
@@ -61,7 +61,7 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		GenesisForkVersion: "0x00000064",
 		CheckpointSyncURL:  "https://checkpoint.gnosischain.com",
 		ChainID:            100,
-		Weight:             4,
+		Weight:             5,
 	},
 	NetworkHolesky: {
 		Name:               NetworkHolesky,
@@ -76,13 +76,25 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 			"https://0xaa58208899c6105603b74396734a6263cc7d947f444f396a90f7b7d3e65d102aec7e5e5291b27e08d02c50a050825c2f@holesky.titanrelay.xyz",
 		},
 		ChainID: 17000,
+		Weight:  3,
+	},
+	NetworkHoodi: {
+		Name:               NetworkHoodi,
+		NetworkService:     "merge",
+		GenesisForkVersion: "0x10000910",
+		SupportsMEVBoost:   true,
+		CheckpointSyncURL:  "https://checkpoint-sync.hoodi.ethpandaops.io",
+		RelayURLs: []string{
+			"https://0xaa58208899c6105603b74396734a6263cc7d947f444f396a90f7b7d3e65d102aec7e5e5291b27e08d02c50a050825c2f@hoodi.titanrelay.xyz",
+		},
+		ChainID: 560048,
 		Weight:  2,
 	},
 	NetworkCustom: {
 		Name:               NetworkCustom,
 		NetworkService:     "merge",
 		GenesisForkVersion: "0x00000000", // TODO: only affects keystores generation, ensure the deposit method does not conflict over this.
-		Weight:             6,
+		Weight:             7,
 	},
 }
 

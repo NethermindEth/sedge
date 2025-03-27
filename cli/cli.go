@@ -44,6 +44,7 @@ const (
 	NetworkGnosis  = "gnosis"
 	NetworkChiado  = "chiado"
 	NetworkHolesky = "holesky"
+	NetworkHoodi   = "hoodi"
 	NetworkCustom  = "custom"
 
 	NodeTypeFullNode  = "full-node"
@@ -882,6 +883,9 @@ func inputConsensusBootNodes(p ui.Prompter, o *CliCmdOptions) (err error) {
 func inputMevImage(p ui.Prompter, o *CliCmdOptions) (err error) {
 	// Default value is set in the template
 	o.genData.MevImage, err = p.Input("Mev-Boost image", "flashbots/mev-boost:latest", false, nil)
+	if o.genData.Network == configs.NetworkHoodi {
+		o.genData.MevImage = "flashbots/mev-boost:1.9rc3"
+	}
 	return
 }
 

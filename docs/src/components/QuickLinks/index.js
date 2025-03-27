@@ -50,7 +50,7 @@ const ColumnWrapper = styled.div`
 const Column = styled.div`
   flex: 1;
   min-width: 0; // Prevents flex items from overflowing
-  
+
   @media (max-width: 768px) {
     width: 100%;
   }
@@ -124,7 +124,7 @@ const LinkCard = styled(Link)`
     svg {
       flex-shrink: 0;
       margin-left: 1rem;
-      
+
       @media (max-width: 480px) {
         width: 18px;
         height: 18px;

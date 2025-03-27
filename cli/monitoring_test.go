@@ -116,6 +116,23 @@ func TestMonitoringCmd(t *testing.T) {
 			},
 			isErr: true,
 		},
+		{
+			name:  "valid monitoring init: lido, Hoodi",
+			flags: []string{"init", "lido", "--node-operator-id", "4", "--network", "hoodi"},
+			mocker: func(t *testing.T, ctrl *gomock.Controller) *sedge_mocks.MockMonitoringManager {
+				mockManager := sedge_mocks.NewMockMonitoringManager(ctrl)
+				gomock.InOrder(
+					mockManager.EXPECT().InstallationStatus().Return(common.NotInstalled, nil).AnyTimes(),
+					mockManager.EXPECT().InstallStack().Return(nil).AnyTimes(),
+					mockManager.EXPECT().Status().Return(common.Created, nil).AnyTimes(),
+					mockManager.EXPECT().Run().Return(nil).AnyTimes(),
+					mockManager.EXPECT().Init().Return(nil).AnyTimes(),
+					mockManager.EXPECT().AddService(gomock.Any()).Return(nil).AnyTimes(),
+				)
+				return mockManager
+			},
+			isErr: false,
+		},
 	}
 
 	for _, tc := range tcs {
