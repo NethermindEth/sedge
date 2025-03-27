@@ -36,6 +36,9 @@ func TestNodeOpIDs(t *testing.T) {
 		{
 			"NodeOpIDs, Mainnet", "mainnet",
 		},
+		{
+			"NodeOpIDs, Hoodi", "hoodi",
+		},
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
@@ -48,7 +51,6 @@ func TestNodeOpIDs(t *testing.T) {
 			if err != nil {
 				t.Errorf("failed to call  nodeOpsCount: %v", err)
 			}
-
 			if len(nodeOperatorIDs) != int(nodeOperatorsCount.Int64()) {
 				t.Errorf("mismatch: nodeOperatorIDs size (%d) != nodeOperatorsCount (%d)", len(nodeOperatorIDs), nodeOperatorsCount.Int64())
 			}
@@ -79,6 +81,12 @@ func TestNodeOperatorInfo(t *testing.T) {
 		},
 		{
 			"Valid Address, Mainnet", "mainnet", big.NewInt(1), "0x556fedf2213A31c7Ab9F8bc8Db5B2254261A5B0b", false,
+		},
+		{
+			"Valid Address, Hoodi", "hoodi", big.NewInt(1), "0x937B9327225f1756f9bb807C0f2Db37bDA002F30", false,
+		},
+		{
+			"Invalid Address, Hoodi", "hoodi", big.NewInt(4), "0xC870Fd7316956C1582A2c8Fd2c467", true,
 		},
 	}
 
@@ -122,6 +130,15 @@ func TestNodeID(t *testing.T) {
 		{
 			"Invalid NodeID, Holesky #2", "holesky", big.NewInt(20000), true,
 		},
+		{
+			"Valid NodeID, Hoodi", "hoodi", big.NewInt(4), false,
+		},
+		{
+			"Invalid NodeID, Hoodi #1", "hoodi", big.NewInt(-4), true,
+		},
+		{
+			"Invalid NodeID, Hoodi #2", "hoodi", big.NewInt(200000), true,
+		},
 	}
 
 	for _, tc := range tcs {
@@ -152,6 +169,9 @@ func FuzzTestNodeID(f *testing.F) {
 		{"mainnet", big.NewInt(12)},
 		{"mainnet", big.NewInt(-5)},
 		{"mainnet", big.NewInt(500000)},
+		{"hoodi", big.NewInt(1)},
+		{"hoodi", big.NewInt(-1)},
+		{"hoodi", big.NewInt(40000)},
 	}
 
 	for _, tc := range testcases {
