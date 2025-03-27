@@ -310,6 +310,9 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		executionAuthUrl = flags.executionAuthUrl
 	}
 
+	if network == configs.NetworkHoodi {
+		flags.mevImage = "flashbots/mev-boost:1.9-rc3"
+	}
 	// Generate docker-compose scripts
 	gd := generate.GenData{
 		ExecutionClient:            combinedClients.Execution,
