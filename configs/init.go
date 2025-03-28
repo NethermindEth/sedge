@@ -78,15 +78,17 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		ChainID: 17000,
 		Weight:  3,
 	},
-	NetworkHoodi: { // TODO: add mev boost when available
+	NetworkHoodi: {
 		Name:               NetworkHoodi,
 		NetworkService:     "merge",
 		GenesisForkVersion: "0x10000910",
-		SupportsMEVBoost:   false,
+		SupportsMEVBoost:   true,
 		CheckpointSyncURL:  "https://checkpoint-sync.hoodi.ethpandaops.io",
-		RelayURLs:          []string{},
-		ChainID:            560048,
-		Weight:             2,
+		RelayURLs: []string{
+			"https://0xaa58208899c6105603b74396734a6263cc7d947f444f396a90f7b7d3e65d102aec7e5e5291b27e08d02c50a050825c2f@hoodi.titanrelay.xyz",
+		},
+		ChainID: 560048,
+		Weight:  2,
 	},
 	NetworkCustom: {
 		Name:               NetworkCustom,

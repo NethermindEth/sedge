@@ -48,4 +48,14 @@ var networkRPCs = map[string]RPC{
 			"wss://ethereum-holesky-rpc.publicnode.com",
 		},
 	},
+	NetworkHoodi: {
+		NetworkName: NetworkHoodi,
+		PublicRPCs: []string{
+			"https://0xrpc.io/hoodi",
+			"https://rpc.hoodi.ethpandaops.io",
+		},
+		PublicWSs: []string{
+			"wss://0xrpc.io/hoodi",
+		},
+	},
 }

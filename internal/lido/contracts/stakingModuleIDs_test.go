@@ -31,6 +31,7 @@ func TestStakingModuleID(t *testing.T) {
 		{configs.NetworkHolesky, big.NewInt(4), false},
 		{"unknown", nil, true},
 		{configs.NetworkMainnet, big.NewInt(2), false},
+		{configs.NetworkHoodi, big.NewInt(4), false},
 	}
 
 	for _, tc := range tcs {
