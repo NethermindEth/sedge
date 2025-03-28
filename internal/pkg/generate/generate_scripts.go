@@ -39,6 +39,9 @@ const (
 	validator            = "validator"
 	optimism             = "optimism"
 	opExecution          = "opexecution"
+	taiko                = "taiko"
+	taikoExecution       = "texecution"
+
 	validatorImport      = "validator-import"
 	mevBoost             = "mev-boost"
 	configConsensus      = "config_consensus"
@@ -128,12 +131,23 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 
 // mapClients convert genData clients to clients.Clients
 func mapClients(gd *GenData) map[string]*clients.Client {
+	var l2OpClient, l2TaikoClient *clients.Client
+
+	if gd.OptimismClient != nil {
+		l2OpClient = gd.L2ExecutionClient
+	}
+	if gd.TaikoClient != nil {
+		l2TaikoClient = gd.L2ExecutionClient
+	}
+
 	cls := map[string]*clients.Client{
 		execution:            gd.ExecutionClient,
 		consensus:            gd.ConsensusClient,
 		validator:            gd.ValidatorClient,
 		optimism:             gd.OptimismClient,
-		opExecution:          gd.ExecutionOPClient,
+		opExecution:          l2OpClient,
+		taiko:                gd.TaikoClient,
+		taikoExecution:       l2TaikoClient,
 		distributedValidator: gd.DistributedValidatorClient,
 	}
 
@@ -163,13 +177,13 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		"CLAdditionalApi":   configs.DefaultAdditionalApiPortCL,
 		"VLMetrics":         configs.DefaultMetricsPortVL,
 		"MevPort":           configs.DefaultMevPort,
+		"ApiPortELL2":       configs.DefaultApiPortELL2,
+		"AuthPortELL2":      configs.DefaultAuthPortELL2,
+		"DiscoveryPortELL2": configs.DefaultDiscoveryPortELL2,
+		"MetricsPortELL2":   configs.DefaultMetricsPortELL2,
 		"DVDiscovery":       configs.DefaultDiscoveryPortDV,
 		"DVMetrics":         configs.DefaultMetricsPortDV,
 		"DVApi":             configs.DefaultApiPortDV,
-		"ApiPortELOP":       configs.DefaultApiPortELOP,
-		"AuthPortELOP":      configs.DefaultAuthPortELOP,
-		"DiscoveryPortELOP": configs.DefaultDiscoveryPortELOP,
-		"MetricsPortELOP":   configs.DefaultMetricsPortELOP,
 	}
 	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -288,12 +302,6 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		consensusApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLApi"])
 	}
 
-	// Set network prefix
-	networkPrefix := "op"
-	if gd.IsBase {
-		networkPrefix = "base"
-	}
-
 	data := DockerComposeData{
 		Services:            gd.Services,
 		Network:             gd.Network,
@@ -316,15 +324,15 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		ClApiPort:           gd.Ports["CLApi"],
 		ClAdditionalApiPort: gd.Ports["CLAdditionalApi"],
 		VlMetricsPort:       gd.Ports["VLMetrics"],
-		ElOPApiPort:         gd.Ports["ApiPortELOP"],
-		ElOPAuthPort:        gd.Ports["AuthPortELOP"],
-		ElOPDiscoveryPort:   gd.Ports["DiscoveryPortELOP"],
-		ElOPMetricsPort:     gd.Ports["MetricsPortELOP"],
+		ElL2ApiPort:         gd.Ports["ApiPortELL2"],
+		ElL2AuthPort:        gd.Ports["AuthPortELL2"],
+		ElL2DiscoveryPort:   gd.Ports["DiscoveryPortELL2"],
+		ElL2MetricsPort:     gd.Ports["MetricsPortELL2"],
 		FallbackELUrls:      gd.FallbackELUrls,
 		ElExtraFlags:        gd.ElExtraFlags,
-		ElOPExtraFlags:      gd.ElOpExtraFlags,
+		ElL2ExtraFlags:      gd.ElL2ExtraFlags,
 		OPExtraFlags:        gd.OpExtraFlags,
-		NetworkPrefix:       networkPrefix,
+		NetworkPrefix:       gd.Chain,
 		ClExtraFlags:        gd.ClExtraFlags,
 		VlExtraFlags:        gd.VlExtraFlags,
 		DvExtraFlags:        gd.DvExtraFlags,
@@ -431,13 +439,13 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		}
 	}
 
-	if cls[optimism] != nil {
-		gd.ExecutionOPClient.Endpoint = configs.OnPremiseOpExecutionURL
+	if cls[optimism] != nil || cls[taiko] != nil {
+		gd.L2ExecutionClient.Endpoint = configs.OnPremiseOpExecutionURL
 	}
 
 	executionOPApiUrl := ""
-	if cls[optimism] != nil {
-		executionOPApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(gd.ExecutionOPClient), gd.Ports["ApiPortELOP"])
+	if cls[optimism] != nil || cls[taiko] != nil {
+		executionOPApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(gd.L2ExecutionClient), gd.Ports["ApiPortELL2"])
 	}
 	var mevSupported bool
 	if cls[validator] != nil {
@@ -469,37 +477,46 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	if gd.CheckpointSyncUrl == "" {
 		gd.CheckpointSyncUrl = configs.NetworksConfigs()[gd.Network].CheckpointSyncURL
 	}
-	elOpImage := ""
-	if gd.ExecutionOPClient != nil {
-		elOpImage = imageOrEmpty(gd.ExecutionOPClient, gd.LatestVersion)
+	elL2Image := ""
+	if gd.L2ExecutionClient != nil {
+		elL2Image = imageOrEmpty(gd.L2ExecutionClient, gd.LatestVersion)
 	}
 	opImageVersion := ""
-	opSequencerHttp := ""
 	rethNetwork := ""
 	if gd.OptimismClient != nil {
 		opImageVersion = imageOrEmpty(cls[optimism], gd.LatestVersion)
-		if gd.IsBase {
-			opSequencerHttp = "https://" + gd.Network + "-sequencer.base.org"
-		} else {
-			opSequencerHttp = "https://" + gd.Network + "-sequencer.optimism.io"
-		}
 		if gd.Network == configs.NetworkMainnet {
-			if gd.IsBase {
-				rethNetwork = "base"
-			} else {
+			if gd.Chain == "op" {
 				rethNetwork = "optimism"
+			} else {
+				rethNetwork = gd.Chain
 			}
 		}
 		if gd.Network == configs.NetworkSepolia {
-			if gd.IsBase {
-				rethNetwork = "base-sepolia"
-			} else {
+			if gd.Chain == "op" {
 				rethNetwork = "optimism-sepolia"
+			} else {
+				rethNetwork = gd.Chain + "-sepolia"
 			}
 		}
-
 	}
 
+	taikoImage := ""
+	if gd.TaikoClient != nil {
+		taikoImage = imageOrEmpty(cls[taiko], gd.LatestVersion)
+	}
+
+	executionWSApiURL := ""
+	if len(executionApiUrl) > 0 {
+		// If the execution API URL is set, then we need to change https: for ws: at the beginning
+		if strings.HasPrefix(executionApiUrl, "https:") {
+			executionWSApiURL = strings.Replace(executionApiUrl, "https:", "ws:", 1)
+		} else if strings.HasPrefix(executionApiUrl, "http:") {
+			executionWSApiURL = strings.Replace(executionApiUrl, "http:", "ws:", 1)
+		} else {
+			executionWSApiURL = executionApiUrl
+		}
+	}
 	distributedValidatorApiUrl := ""
 	if gd.Distributed {
 		// Check for distributed validator
@@ -512,6 +529,8 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		Services:                   gd.Services,
 		Mev:                        networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
 		ElImage:                    imageOrEmpty(cls[execution], gd.LatestVersion),
+		ElL2Image:                  elL2Image,
+		TaikoImageVersion:          taikoImage,
 		ElDataDir:                  "./" + configs.ExecutionDir,
 		CcImage:                    imageOrEmpty(cls[consensus], gd.LatestVersion),
 		CcDataDir:                  "./" + configs.ConsensusDir,
@@ -529,16 +548,17 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		Graffiti:                   graffiti,
 		RelayURLs:                  strings.Join(gd.RelayURLs, ","),
 		CheckpointSyncUrl:          gd.CheckpointSyncUrl,
+		ExecutionL2ApiURL:          executionOPApiUrl,
+		JWTL2SecretPath:            gd.JWTSecretL2,
+		ElL2ApiPort:                gd.Ports["ApiPortELL2"],
+		ElL2AuthPort:               gd.Ports["AuthPortELL2"],
+		ExecutionWSApiURL:          executionWSApiURL,
 		Distributed:                gd.Distributed,
 		DistributedValidatorApiUrl: distributedValidatorApiUrl,
 		DvDataDir:                  "./" + configs.DistributedValidatorDir,
 		DvImage:                    imageOrEmpty(cls[distributedValidator], gd.LatestVersion),
-		ExecutionOPApiURL:          executionOPApiUrl,
-		JWTOPSecretPath:            gd.JWTSecretOP,
 		OPImageVersion:             opImageVersion,
-		ElOpImage:                  elOpImage,
-		ElOPAuthPort:               gd.Ports["AuthPortELOP"],
-		OpSequencerHttp:            opSequencerHttp,
+		OpSequencerHttp:            gd.Sequencer,
 		RethNetwork:                rethNetwork,
 	}
 

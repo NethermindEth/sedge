@@ -27,11 +27,11 @@ const (
 	DefaultAdditionalApiPortCL uint16 = 4001
 	DefaultMetricsPortVL       uint16 = 5056
 	DefaultMevPort             uint16 = 18550
+	DefaultApiPortELL2         uint16 = 8547
+	DefaultAuthPortELL2        uint16 = 8552
+	DefaultDiscoveryPortELL2   uint16 = 30313
+	DefaultMetricsPortELL2     uint16 = 8018
 	DefaultDiscoveryPortDV     uint16 = 3610
 	DefaultMetricsPortDV       uint16 = 3620
 	DefaultApiPortDV           uint16 = 3600
-	DefaultApiPortELOP         uint16 = 8547
-	DefaultAuthPortELOP        uint16 = 8552
-	DefaultDiscoveryPortELOP   uint16 = 30313
-	DefaultMetricsPortELOP     uint16 = 8018
 )

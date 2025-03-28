@@ -1,0 +1,154 @@
+[
+  {
+    "network": "pivotal-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "creator-chain-testnet-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "worldchain-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "arena-z-testnet-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "race-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "cyber-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "soneium-minato-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "mode-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "funki-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "op-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "base-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "zora-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "ink-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "ethernity-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "lisk-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "shape-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "metal-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "unichain-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  },
+  {
+    "network": "tbn-sepolia",
+    "cl": "",
+    "cl_image": "",
+    "checkpoint-sync-url": "",
+    "timeout": 600,
+    "agent": "g6-standard-6"
+  }
+]

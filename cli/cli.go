@@ -40,12 +40,16 @@ import (
 
 const (
 	NetworkMainnet = "mainnet"
-	NetworkSepolia = "sepolia"
-	NetworkGnosis  = "gnosis"
-	NetworkChiado  = "chiado"
-	NetworkHolesky = "holesky"
+
+	NetworkSepolia   = "sepolia"
+	NetworkGnosis    = "gnosis"
+	NetworkMekong    = "mekong"
+	NetworkChiado    = "chiado"
+	NetworkHolesky   = "holesky"
 	NetworkHoodi   = "hoodi"
-	NetworkCustom  = "custom"
+	NetworkCustom    = "custom"
+	NetworkVolta     = "volta"
+	Networkenergyweb = "energyweb"
 
 	NodeTypeFullNode  = "full-node"
 	NodeTypeExecution = "execution"

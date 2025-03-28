@@ -21,13 +21,12 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
-	"github.com/NethermindEth/sedge/internal/crypto"
-
 	"github.com/NethermindEth/sedge/cli/actions"
+	"github.com/NethermindEth/sedge/cli/factory"
 	"github.com/NethermindEth/sedge/configs"
+	"github.com/NethermindEth/sedge/internal/crypto"
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
@@ -47,8 +46,8 @@ var (
 )
 
 const (
-	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution"
-	jwtPathName                                                                            = "jwtsecret"
+	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution, taiko, tExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution", "taiko", "texecution"
+	jwtPathName                                                                                               = "jwtsecret"
 )
 
 type CustomFlags struct {
@@ -58,18 +57,28 @@ type CustomFlags struct {
 	customDeployBlock   string
 }
 
+type L2Execution struct {
+	l2ExecutionName string
+	ell2ExtraFlags  []string
+}
+
 type OptimismFlags struct {
-	optimismName          string
-	optimismExecutionName string
-	elOpExtraFlags        []string
-	opExtraFlags          []string
-	isBase                bool
+	optimismName string
+	opExtraFlags []string
+	chain        string
+}
+
+type TaikoFlags struct {
+	taikoName       string
+	taikoExtraFlags []string
 }
 
 // GenCmdFlags is a struct that holds the flags of the generate command
 type GenCmdFlags struct {
 	CustomFlags
+	L2Execution
 	OptimismFlags
+	TaikoFlags
 	executionName            string
 	consensusName            string
 	validatorName            string
@@ -98,6 +107,53 @@ type GenCmdFlags struct {
 	customEnodes             []string
 	customEnrs               []string
 	latestVersion            bool
+	network                  string
+}
+
+// Implement ClientFlags interface
+func (flags *GenCmdFlags) GetExecutionName() string {
+	return flags.executionName
+}
+
+func (flags *GenCmdFlags) GetConsensusName() string {
+	return flags.consensusName
+}
+
+func (flags *GenCmdFlags) GetValidatorName() string {
+	return flags.validatorName
+}
+
+func (flags *GenCmdFlags) GetOptimismName() string {
+	return flags.optimismName
+}
+
+func (flags *GenCmdFlags) GetTaikoName() string {
+	return flags.taikoName
+}
+
+func (flags *GenCmdFlags) GetL2ExecutionName() string {
+	return flags.l2ExecutionName
+}
+
+func (flags *GenCmdFlags) GetDistributedValidatorName() string {
+	return flags.distributedValidatorName
+}
+
+func (flags *GenCmdFlags) GetExecutionApiUrl() string {
+	return flags.executionApiUrl
+}
+
+func (flags *GenCmdFlags) GetNetwork() string {
+	return flags.network
+}
+
+func (flags *GenCmdFlags) IsNoValidator() bool {
+	return flags.noValidator
+}
+
+func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
+	nodeFactory := factory.NewNodeFactory()
+	return nodeFactory.InitializeClients(allClients, flags, services)
 }
 
 func GenerateCmd(sedgeAction actions.SedgeActions) *cobra.Command {
@@ -117,6 +173,7 @@ You can generate:
 - Validator Node
 - Mev-Boost Instance
 - Lido CSM node
+- Poa Node
 `,
 		Args: cobra.NoArgs,
 	}
@@ -127,10 +184,11 @@ You can generate:
 	cmd.AddCommand(ValidatorSubCmd(sedgeAction))
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
 	cmd.AddCommand(OpFullNodeSubCmd(sedgeAction))
+	cmd.AddCommand(TaikoFullNodeSubCmd(sedgeAction))
 
 	cmd.PersistentFlags().BoolVar(&lidoNode, "lido", false, "generate Lido CSM node")
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
-	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet,sepolia, holesky, gnosis, chiado, etc.")
+	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet,sepolia, holesky, gnosis, chiado, volta, energyweb, joc-mainnet, joc-testnet, linea-mainnet, linea-sepolia etc.")
 	cmd.PersistentFlags().StringVar(&logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
 	cmd.PersistentFlags().StringVar(&containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.")
 	return cmd
@@ -275,10 +333,17 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 			return err
 		}
 	}
-	var jwtSecretOP string
-	// If optimism is included in the services, generate the jwt secret for it
+	var jwtSecretL2 string
+	var sequencerURL string
+	// If optimism or taiko is included in the services, generate the jwt secret for it
+	if utils.Contains(services, optimism) || utils.Contains(services, taiko) {
+		jwtSecretL2, err = handleJWTSecret(generationPath, jwtPathName+"-l2")
+		if err != nil {
+			return err
+		}
+	}
 	if utils.Contains(services, optimism) {
-		jwtSecretOP, err = handleJWTSecret(generationPath, jwtPathName+"-op")
+		sequencerURL, err = configs.GetSequencerURL(network, flags.chain)
 		if err != nil {
 			return err
 		}
@@ -321,8 +386,10 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ValidatorClient:            combinedClients.Validator,
 		Distributed:                flags.distributed,
 		DistributedValidatorClient: combinedClients.DistributedValidator,
-		ExecutionOPClient:          combinedClients.ExecutionOP,
+		DvExtraFlags:               flags.dvExtraFlags,
+		L2ExecutionClient:          combinedClients.L2Execution,
 		OptimismClient:             combinedClients.Optimism,
+		TaikoClient:                combinedClients.Taiko,
 		Network:                    network,
 		CheckpointSyncUrl:          flags.checkpointSyncUrl,
 		FeeRecipient:               flags.feeRecipient,
@@ -332,10 +399,11 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ElExtraFlags:               flags.elExtraFlags,
 		ClExtraFlags:               flags.clExtraFlags,
 		VlExtraFlags:               flags.vlExtraFlags,
-		DvExtraFlags:               flags.dvExtraFlags,
-		ElOpExtraFlags:             flags.elOpExtraFlags,
+		ElL2ExtraFlags:             flags.ell2ExtraFlags,
 		OpExtraFlags:               flags.opExtraFlags,
-		IsBase:                     flags.isBase,
+		TaikoExtraFlags:            flags.taikoExtraFlags,
+		Chain:                      flags.chain,
+		Sequencer:                  sequencerURL,
 		MapAllPorts:                flags.mapAllPorts,
 		Mev:                        !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
 		MevImage:                   flags.mevImage,
@@ -358,7 +426,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		MevBoostOnValidator:        flags.mevBoostOnVal,
 		ContainerTag:               containerTag,
 		LatestVersion:              flags.latestVersion,
-		JWTSecretOP:                jwtSecretOP,
+		JWTSecretL2:                jwtSecretL2,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,
@@ -383,158 +451,6 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	log.Info(configs.GenerationEnd)
 
 	return nil
-}
-
-func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
-	var executionClient, consensusClient, validatorClient, executionOpClient, opClient *clients.Client
-	var distributedValidatorClient *clients.Client
-	var err error
-
-	// execution client
-	if utils.Contains(services, execution) {
-		executionParts := strings.Split(flags.executionName, ":")
-		executionClient, err = clients.RandomChoice(allClients[execution])
-		if err != nil {
-			return nil, err
-		}
-		if flags.executionName != "" {
-			executionClient.Name = executionParts[0]
-			if len(executionParts) > 1 {
-				log.Warn(configs.CustomExecutionImagesWarning)
-				executionClient.Image = strings.Join(executionParts[1:], ":")
-				executionClient.Modified = true
-			}
-		}
-		executionClient.SetImageOrDefault(strings.Join(executionParts[1:], ":"))
-		if err = clients.ValidateClient(executionClient, execution); err != nil {
-			return nil, err
-		}
-	} else {
-		executionClient = nil
-	}
-	// consensus client
-	if utils.Contains(services, consensus) {
-		if network == NetworkGnosis || network == NetworkChiado {
-			if flags.consensusName == "nimbus" {
-				flags.consensusName = "nimbus:ghcr.io/gnosischain/gnosis-nimbus-eth2:v24.9"
-			}
-		}
-		consensusParts := strings.Split(flags.consensusName, ":")
-		consensusClient, err = clients.RandomChoice(allClients[consensus])
-		if err != nil {
-			return nil, err
-		}
-		if flags.consensusName != "" {
-			consensusClient.Name = consensusParts[0]
-			if len(consensusParts) > 1 {
-				log.Warn(configs.CustomConsensusImagesWarning)
-				consensusClient.Image = strings.Join(consensusParts[1:], ":")
-				consensusClient.Modified = true
-			}
-		}
-		consensusClient.SetImageOrDefault(strings.Join(consensusParts[1:], ":"))
-		if err = clients.ValidateClient(consensusClient, consensus); err != nil {
-			return nil, err
-		}
-	} else {
-		consensusClient = nil
-	}
-	// validator client
-	if utils.Contains(services, validator) && !flags.noValidator {
-		validatorParts := strings.Split(flags.validatorName, ":")
-		validatorClient, err = clients.RandomChoice(allClients[validator])
-		if err != nil {
-			return nil, err
-		}
-		if flags.validatorName != "" {
-			validatorClient.Name = validatorParts[0]
-			if len(validatorParts) > 1 {
-				log.Warn(configs.CustomValidatorImagesWarning)
-				validatorClient.Image = strings.Join(validatorParts[1:], ":")
-				validatorClient.Modified = true
-			}
-		}
-		validatorClient.SetImageOrDefault(strings.Join(validatorParts[1:], ":"))
-		if err = clients.ValidateClient(validatorClient, validator); err != nil {
-			return nil, err
-		}
-	} else {
-		validatorClient = nil
-	}
-	// optimism client
-	if utils.Contains(services, optimism) {
-		optimismParts := strings.Split(flags.optimismName, ":")
-		opClient, err = clients.RandomChoice(allClients[optimism])
-		if err != nil {
-			return nil, err
-		}
-		if flags.optimismName != "" {
-			opClient.Name = "opnode"
-			if len(optimismParts) > 1 {
-				opClient.Image = strings.Join(optimismParts[1:], ":")
-				opClient.Modified = true
-			}
-		}
-		opClient.SetImageOrDefault(strings.Join(optimismParts[1:], ":"))
-		if err = clients.ValidateClient(opClient, optimism); err != nil {
-			return nil, err
-		}
-
-		optimismExecutionParts := strings.Split(flags.optimismExecutionName, ":")
-		executionOpClient, err = clients.RandomChoice(allClients[opExecution])
-		if err != nil {
-			return nil, err
-		}
-		if flags.optimismExecutionName != "" {
-			executionOpClient.Name = strings.ReplaceAll(optimismExecutionParts[0], "-", "")
-			if len(optimismExecutionParts) > 1 {
-				executionOpClient.Image = strings.Join(optimismExecutionParts[1:], ":")
-				executionOpClient.Modified = true
-			}
-		}
-		executionOpClient.SetImageOrDefault(strings.Join(optimismExecutionParts[1:], ":"))
-		if err = clients.ValidateClient(executionOpClient, opExecution); err != nil {
-			return nil, err
-		}
-
-		// If set execution-api-url, set execution and beacon to nil
-		if flags.executionApiUrl != "" {
-			executionClient = nil
-			consensusClient = nil
-		}
-	} else {
-		opClient = nil
-		executionOpClient = nil
-	}
-
-	// distributed validator client
-	if utils.Contains(services, distributedValidator) {
-		distributedValidatorClient, _ = clients.RandomChoice(allClients[distributedValidator])
-		if flags.distributedValidatorName != "" {
-			distributedValidatorParts := strings.Split(flags.distributedValidatorName, ":")
-			distributedValidatorClient.Name = distributedValidatorParts[0]
-			if len(distributedValidatorParts) > 1 {
-				distributedValidatorClient.Image = strings.Join(distributedValidatorParts[1:], ":")
-				distributedValidatorClient.Modified = true
-			}
-			distributedValidatorClient.SetImageOrDefault(strings.Join(distributedValidatorParts[1:], ":"))
-		} else {
-			distributedValidatorClient.Name = "charon"
-			distributedValidatorClient.SetImageOrDefault("")
-		}
-		if err = clients.ValidateClient(distributedValidatorClient, distributedValidator); err != nil {
-			return nil, err
-		}
-	}
-
-	return &clients.Clients{
-		Execution:            executionClient,
-		Consensus:            consensusClient,
-		Validator:            validatorClient,
-		DistributedValidator: distributedValidatorClient,
-		ExecutionOP:          executionOpClient,
-		Optimism:             opClient,
-	}, err
 }
 
 func onlyClients(services []string) []string {

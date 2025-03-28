@@ -1,0 +1,61 @@
+{{/* taikogeth.tmpl */}}
+{{ define "texecution" }}
+  execution-l2:
+    tty: true
+    environment:
+      - TERM=xterm-256color
+      - COLORTERM=truecolor
+    stop_grace_period: 30s
+    container_name: sedge-execution-taiko-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: unless-stopped
+    image: ${EC_L2_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${EC_L2_DATA_DIR}:/taiko_geth/data
+      - ${EC_L2_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+      - "{{.ElL2DiscoveryPort}}:{{.ElL2DiscoveryPort}}/tcp"
+      - "{{.ElL2DiscoveryPort}}:{{.ElL2DiscoveryPort}}/udp"
+      - "{{.ElL2MetricsPort}}:{{.ElL2MetricsPort}}"{{if .MapAllPorts}}
+      - "{{.ElL2ApiPort}}:{{.ElL2ApiPort}}"
+      - "{{.ElL2AuthPort}}:{{.ElL2AuthPort}}"{{end}}
+    expose:
+      - {{.ElL2ApiPort}}
+      - {{.ElL2AuthPort}}
+    command:
+      - --taiko
+      - --networkid=${CHAIN_ID}
+      - --gcmode=archive
+      - --http
+      - --http.port={{.ElL2ApiPort}}
+      - --http.addr=0.0.0.0
+      - --http.vhosts=*
+      - --http.corsdomain=*
+      - --http.api=debug,eth,net,web3,txpool,taiko
+      - --ws
+      - --ws.port=8546
+      - --ws.addr=0.0.0.0
+      - --ws.origins=*
+      - --ws.api=debug,eth,net,web3,txpool,taiko
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.port={{.ElL2AuthPort}}
+      - --authrpc.jwtsecret=/tmp/jwt/jwtsecret
+      - --authrpc.vhosts=*
+      - --verbosity=3
+      - --datadir=/taiko_geth/data
+      - --gpo.defaultprice=10000000
+      - --discovery.port={{.ElL2DiscoveryPort}}
+      - --maxpeers=50
+      - --maxpendpeers=0
+      - --bootnodes=${TAIKO_BOOTNODES}
+      - --metrics=true
+      - --metrics.addr=0.0.0.0
+      - --metrics.port={{.ElL2MetricsPort}}{{range $flag := .ElL2ExtraFlags}}
+      - --{{$flag}}{{end}}{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
+{{ end }}

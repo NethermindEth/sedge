@@ -8,39 +8,38 @@
     stop_grace_period: 30s
     container_name: sedge-execution-op-l2-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
-    image: ${EC_OP_IMAGE_VERSION}
+    image: ${EC_L2_IMAGE_VERSION}
     networks:
       - sedge
     volumes:
-      - ${EC_OP_DATA_DIR}:/op_geth/data
-      - ${EC_OP_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+      - ${EC_L2_DATA_DIR}:/op_geth/data
+      - ${EC_L2_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
     ports:
-      - "{{.ElOPDiscoveryPort}}:{{.ElOPDiscoveryPort}}/tcp"
-      - "{{.ElOPDiscoveryPort}}:{{.ElOPDiscoveryPort}}/udp"
-      - "{{.ElOPMetricsPort}}:{{.ElOPMetricsPort}}"{{if .MapAllPorts}}
-      - "{{.ElOPApiPort}}:{{.ElOPApiPort}}"
-      - "{{.ElOPAuthPort}}:{{.ElOPAuthPort}}"{{end}}
+      - "{{.ElL2DiscoveryPort}}:{{.ElL2DiscoveryPort}}/tcp"
+      - "{{.ElL2DiscoveryPort}}:{{.ElL2DiscoveryPort}}/udp"
+      - "{{.ElL2MetricsPort}}:{{.ElL2MetricsPort}}"{{if .MapAllPorts}}
+      - "{{.ElL2ApiPort}}:{{.ElL2ApiPort}}"
+      - "{{.ElL2AuthPort}}:{{.ElL2AuthPort}}"{{end}}
     expose:
-      - {{.ElOPApiPort}}
-      - {{.ElOPAuthPort}}
+      - {{.ElL2ApiPort}}
+      - {{.ElL2AuthPort}}
     command:
       - --http
-      - --http.port={{.ElOPApiPort}}
+      - --http.port={{.ElL2ApiPort}}
       - --http.addr=0.0.0.0
       - --http.vhosts=*
       - --http.corsdomain=*
       - --authrpc.addr=0.0.0.0
-      - --authrpc.port={{.ElOPAuthPort}}
-      - --authrpc.vhosts=*
+      - --authrpc.port={{.ElL2AuthPort}}
       - --authrpc.jwtsecret=/tmp/jwt/jwtsecret
       - --verbosity=3
       - --rollup.sequencerhttp=${OP_SEQUENCER_HTTP}
       - --op-network={{.NetworkPrefix}}-${NETWORK}
       - --datadir=/op_geth/data
-      - --discovery.port={{.ElOPDiscoveryPort}}
+      - --discovery.port={{.ElL2DiscoveryPort}}
       - --metrics=true
       - --metrics.addr=0.0.0.0
-      - --metrics.port={{.ElOPMetricsPort}}{{range $flag := .ElOPExtraFlags}}
+      - --metrics.port={{.ElL2MetricsPort}}{{range $flag := .ElL2ExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}

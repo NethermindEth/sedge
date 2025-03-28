@@ -1,0 +1,61 @@
+networks:
+  - name: hashkeychain
+    sequencer: https://hashkeychain-mainnet.alt.technology
+  - name: lyra
+    sequencer: https://rpc.lyra.finance
+  - name: worldchain
+    sequencer: https://worldchain-mainnet-sequencer.g.alchemy.com
+  - name: mint
+    sequencer: https://rpc.mintchain.io
+  - name: race
+    sequencer: https://racemainnet.io
+  - name: cyber
+    sequencer: https://cyber.alt.technology/
+  - name: mode
+    sequencer: https://mainnet-sequencer.mode.network
+  - name: funki
+    sequencer: https://rpc-mainnet.funkichain.com
+  - name: bob
+    sequencer: https://rpc.gobob.xyz
+  - name: op
+    sequencer: https://mainnet-sequencer.optimism.io
+  - name: base
+    sequencer: https://mainnet-sequencer.base.org
+  - name: redstone
+    sequencer: https://rpc.redstonechain.com
+  - name: swan
+    sequencer: https://sequencer-mainnet.swanchain.org
+  - name: arena-z
+    sequencer: https://rpc.arena-z.gg
+  - name: zora
+    sequencer: https://rpc.zora.energy
+  - name: ink
+    sequencer: https://rpc-gel.inkonchain.com
+  - name: superchain
+    sequencer: ''
+  - name: swell
+    sequencer: https://swell-mainnet.alt.technology
+  - name: ethernity
+    sequencer: https://mainnet.ethernitychain.io
+  - name: lisk
+    sequencer: https://rpc.api.lisk.com
+  - name: xterio-eth
+    sequencer: https://xterio-eth.alt.technology/
+  - name: orderly
+    sequencer: https://rpc.orderly.network
+  - name: shape
+    sequencer: https://shape-mainnet-sequencer.g.alchemy.com
+  - name: metal
+    sequencer: https://rpc.metall2.com
+  - name: soneium
+    sequencer: https://rpc.soneium.org
+  - name: sseed
+    sequencer: https://mainnet.superseed.xyz
+  - name: polynomial
+    sequencer: https://rpc.polynomial.fi
+  - name: tbn
+    sequencer: https://sequencer.bnry.mainnet.zeeve.net
+  - name: automata
+    sequencer: https://automata-mainnet.alt.technology/
+  - name: unichain
+    sequencer: https://mainnet-sequencer.unichain.org

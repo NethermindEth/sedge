@@ -23,6 +23,7 @@ var AllClients map[string][]string = map[string][]string{
 		"besu",
 	},
 	"consensus": {
+		"nimbus",
 		"lighthouse",
 		"prysm",
 		"teku",
@@ -46,5 +47,12 @@ var AllClients map[string][]string = map[string][]string{
 		"opgeth",
 		"opnethermind",
 		"opreth",
+	},
+	"taiko": {
+		"taikoclient",
+	},
+	"texecution": {
+		"taikogeth",
+		"taikonethermind",
 	},
 }
