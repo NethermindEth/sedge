@@ -133,6 +133,7 @@ func NewConsensusNodeInitializer() *ConsensusNodeInitializer {
 }
 
 func (c *ConsensusNodeInitializer) Initialize(allClients clients.OrderedClients, flags ClientFlags) (*clients.Client, error) {
+	c.config.flagName = flags.GetConsensusName()
 	// Special handling for Gnosis and Chiado networks
 	if flags.GetNetwork() == NetworkGnosis || flags.GetNetwork() == NetworkChiado {
 		if flags.GetConsensusName() == "nimbus" {
