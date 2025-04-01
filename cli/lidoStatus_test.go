@@ -169,7 +169,7 @@ func TestLidoStatusCmd(t *testing.T) {
 			flags: flags{
 				rewardAddress: "0xe6b5A31d8bb53D2C769864aC137fe25F4989f1fd", // rewardAddress should be ignored
 				networkName:   "hoodi",
-				nodeIDInt:     1,
+				nodeIDInt:     5,
 			},
 			isErr: false,
 		},
