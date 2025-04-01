@@ -244,7 +244,7 @@ func TestE2E_LidoStatus_ValidNodeID_Hoodi(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "lido-status", "--nodeID", "1", "--l", "--network", "hoodi")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "lido-status", "--nodeID", "5", "--l", "--network", "hoodi")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
