@@ -262,13 +262,15 @@ func (o *OptimismNodeInitializer) Initialize(allClients clients.OrderedClients, 
 	// Handle L2 execution client name and image
 	if execClient != nil {
 		parts := strings.Split(flags.GetL2ExecutionName(), ":")
-		execClient.Name = strings.ReplaceAll(parts[0], "-", "")
 		if len(parts) > 1 {
-			execClient.Image = strings.Join(parts[1:], ":")
-		}
-		execClient.SetImageOrDefault(strings.Join(parts[1:], ":"))
-		if err = clients.ValidateClient(execClient, opExecution); err != nil {
-			return nil, err
+			execClient.Name = strings.ReplaceAll(parts[0], "-", "")
+			if len(parts) > 1 {
+				execClient.Image = strings.Join(parts[1:], ":")
+			}
+			execClient.SetImageOrDefault(strings.Join(parts[1:], ":"))
+			if err = clients.ValidateClient(execClient, opExecution); err != nil {
+				return nil, err
+			}
 		}
 	}
 
