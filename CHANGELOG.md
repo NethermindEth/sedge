@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 - Fix `keys` command for `hoodi` network.
+- Fix `lido-status` command links.
 
 ## [v1.9.0] - 2025-03-27
 
