@@ -76,6 +76,7 @@ func initializeClient(allClients clients.OrderedClients, config clientConfig) (*
 			log.Warn(config.warningMsg)
 		}
 		client.Image = strings.Join(parts[1:], ":")
+		client.Modified = true
 	}
 
 	client.SetImageOrDefault(strings.Join(parts[1:], ":"))
@@ -252,6 +253,7 @@ func (o *OptimismNodeInitializer) Initialize(allClients clients.OrderedClients, 
 		if strings.Contains(flags.GetOptimismName(), ":") {
 			parts := strings.Split(flags.GetOptimismName(), ":")
 			client.Image = strings.Join(parts[1:], ":")
+			client.Modified = true
 		}
 		client.SetImageOrDefault(strings.Join(strings.Split(flags.GetOptimismName(), ":")[1:], ":"))
 		if err = clients.ValidateClient(client, optimism); err != nil {
@@ -266,6 +268,7 @@ func (o *OptimismNodeInitializer) Initialize(allClients clients.OrderedClients, 
 			execClient.Name = strings.ReplaceAll(parts[0], "-", "")
 			if len(parts) > 1 {
 				execClient.Image = strings.Join(parts[1:], ":")
+				execClient.Modified = true
 			}
 			execClient.SetImageOrDefault(strings.Join(parts[1:], ":"))
 			if err = clients.ValidateClient(execClient, opExecution); err != nil {
@@ -329,6 +332,7 @@ func (t *TaikoNodeInitializer) Initialize(allClients clients.OrderedClients, fla
 		if strings.Contains(flags.GetTaikoName(), ":") {
 			parts := strings.Split(flags.GetTaikoName(), ":")
 			client.Image = strings.Join(parts[1:], ":")
+			client.Modified = true
 		}
 		client.SetImageOrDefault(strings.Join(strings.Split(flags.GetTaikoName(), ":")[1:], ":"))
 		if err = clients.ValidateClient(client, taiko); err != nil {
@@ -342,6 +346,7 @@ func (t *TaikoNodeInitializer) Initialize(allClients clients.OrderedClients, fla
 		execClient.Name = strings.ReplaceAll(parts[0], "-", "")
 		if len(parts) > 1 {
 			execClient.Image = strings.Join(parts[1:], ":")
+			execClient.Modified = true
 		}
 		execClient.SetImageOrDefault(strings.Join(parts[1:], ":"))
 		if err = clients.ValidateClient(execClient, tExecution); err != nil {
