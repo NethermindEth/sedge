@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 - Fix `keys` command for `hoodi` network.
-- Fix `lido-status` command links.
-- Fix `withdarawal_credentials` for lido node.
+- Update `lido-status` command links.
+- Fix `withdrawal_credentials` for lido node.
+- Fix importing keys for `nimbus` client.
 
 ## [v1.9.0] - 2025-03-27
 
