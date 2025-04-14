@@ -916,7 +916,7 @@ func TestCli(t *testing.T) {
 					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil),
 					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
 						GenerationPath: generationPath,
-						Services:       []string{"validator"},
+						Services:       []string{"validator", "consensus"},
 					}),
 					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 						ValidatorClient: "nimbus",
