@@ -541,10 +541,17 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, d
 	if err := checkCLIDependencies(p, o, a, depsMgr); err != nil {
 		return err
 	}
+
+	var services []string
+	if o.genData.ValidatorClient.Name == "nimbus" {
+		services = []string{validator, consensus}
+	} else {
+		services = []string{validator}
+	}
 	log.Info("Importing validator keys into the validator client...")
 	err := a.SetupContainers(actions.SetupContainersOptions{
 		GenerationPath: o.generationPath,
-		Services:       []string{validator, consensus},
+		Services:       services,
 	})
 	if err != nil {
 		return err
