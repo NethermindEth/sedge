@@ -502,7 +502,7 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, d
 			MaxIndex:          uint64(o.existingValidators) + uint64(o.numberOfValidators),
 			NetworkName:       o.genData.Network,
 			ForkVersion:       configs.NetworksConfigs()[o.genData.Network].GenesisForkVersion,
-			WithdrawalAddress: o.withdrawalAddress,
+			WithdrawalAddress: o.withdrawalAddress[2:],
 			// Constants
 			UseUniquePassphrase: true,
 			Insecure:            false,
