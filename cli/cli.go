@@ -495,13 +495,14 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, d
 		// TODO: Create an Action for keystore generation
 		log.Info("Generating keystores...")
 		data := keystores.ValidatorKeysGenData{
-			Mnemonic:    o.keystoreMnemonic,
-			Passphrase:  o.keystorePassphrase,
-			OutputPath:  o.keystorePath,
-			MinIndex:    uint64(o.existingValidators),
-			MaxIndex:    uint64(o.existingValidators) + uint64(o.numberOfValidators),
-			NetworkName: o.genData.Network,
-			ForkVersion: configs.NetworksConfigs()[o.genData.Network].GenesisForkVersion,
+			Mnemonic:          o.keystoreMnemonic,
+			Passphrase:        o.keystorePassphrase,
+			OutputPath:        o.keystorePath,
+			MinIndex:          uint64(o.existingValidators),
+			MaxIndex:          uint64(o.existingValidators) + uint64(o.numberOfValidators),
+			NetworkName:       o.genData.Network,
+			ForkVersion:       configs.NetworksConfigs()[o.genData.Network].GenesisForkVersion,
+			WithdrawalAddress: o.withdrawalAddress[2:],
 			// Constants
 			UseUniquePassphrase: true,
 			Insecure:            false,
@@ -540,10 +541,17 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, d
 	if err := checkCLIDependencies(p, o, a, depsMgr); err != nil {
 		return err
 	}
+
+	var services []string
+	if o.genData.ValidatorClient.Name == "nimbus" {
+		services = []string{validator, consensus}
+	} else {
+		services = []string{validator}
+	}
 	log.Info("Importing validator keys into the validator client...")
 	err := a.SetupContainers(actions.SetupContainersOptions{
 		GenerationPath: o.generationPath,
-		Services:       []string{validator},
+		Services:       services,
 	})
 	if err != nil {
 		return err
@@ -1000,7 +1008,7 @@ func inputWithdrawalAddress(p ui.Prompter, o *CliCmdOptions) (err error) {
 	opts := sedgeOpts.CreateSedgeOptions(o.nodeSetup)
 	withdrawalAddress := opts.WithdrawalAddress(o.genData.Network)
 	if opts.OverwriteSettings().WithdrawalAddress {
-		o.withdrawalAddress = withdrawalAddress
+		o.withdrawalAddress = withdrawalAddress[2:]
 		return
 	}
 	o.withdrawalAddress, err = p.Input("Withdrawal address", "", false, func(s string) error { return ui.EthAddressValidator(s, true) })
