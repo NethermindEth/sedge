@@ -12,8 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fix network validation bug with `keys` command for `hoodi` network.
 - Update `lido-status` command links (node operator reward address link, claiming your rewards link).
-- Fix `withdrawal_credentials` for lido node.
-- Fix importing keys for `nimbus` client.
+- Set correct `withdrawal_credentials` in `deposit_data.json` for lido node as required by the Lido CSM.
+- Fix importing keys for `nimbus` client (import keys into validator using consensus client).
 
 ## [v1.9.0] - 2025-03-27
 
