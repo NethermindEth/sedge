@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update `lido-status` command links.
 - Fix `withdrawal_credentials` for lido node.
 - Fix importing keys for `nimbus` client.
+- Update Client Images to be Pectra ready on Gnosis.
 
 ## [v1.9.0] - 2025-03-27
 
