@@ -9,34 +9,9 @@ func TestNetworkCheck(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "Valid network, mainnet",
-			network: "mainnet",
-			wantErr: false,
-		},
-		{
 			name:    "Invalid network, goerli",
 			network: "goerli",
 			wantErr: true,
-		},
-		{
-			name:    "Valid network, sepolia",
-			network: "sepolia",
-			wantErr: false,
-		},
-		{
-			name:    "Valid network, gnosis",
-			network: "gnosis",
-			wantErr: false,
-		},
-		{
-			name:    "Valid network, chiado",
-			network: "chiado",
-			wantErr: false,
-		},
-		{
-			name:    "Valid network, custom",
-			network: "custom",
-			wantErr: false,
 		},
 		{
 			name:    "Invalid network",
@@ -44,10 +19,22 @@ func TestNetworkCheck(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
+	for _, network := range NetworkSupported() {
+		tests = append(tests, struct {
+			name    string
+			network string
+			wantErr bool
+		}{
+			name:    network,
+			network: network,
+			wantErr: false,
+		})
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := NetworkCheck(tt.network); (err != nil) != tt.wantErr {
-				t.Errorf("NetworkCheck() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("NetworkCheck(%s) error = %v, wantErr %v", tt.network, err, tt.wantErr)
 			}
 		})
 	}

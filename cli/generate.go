@@ -313,6 +313,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	if network == configs.NetworkHoodi {
 		flags.mevImage = "flashbots/mev-boost:1.9rc3"
 	}
+
 	// Generate docker-compose scripts
 	gd := generate.GenData{
 		ExecutionClient:            combinedClients.Execution,
@@ -415,7 +416,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 	if utils.Contains(services, consensus) {
 		if network == NetworkGnosis || network == NetworkChiado {
 			if flags.consensusName == "nimbus" {
-				flags.consensusName = "nimbus:ghcr.io/gnosischain/gnosis-nimbus-eth2:v24.9"
+				flags.consensusName = "nimbus:ghcr.io/gnosischain/gnosis-nimbus-eth2:v25.4.1"
 			}
 		}
 		consensusParts := strings.Split(flags.consensusName, ":")

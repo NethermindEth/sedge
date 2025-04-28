@@ -83,7 +83,7 @@ func TestNodeOperatorInfo(t *testing.T) {
 			"Valid Address, Mainnet", "mainnet", big.NewInt(1), "0x556fedf2213A31c7Ab9F8bc8Db5B2254261A5B0b", false,
 		},
 		{
-			"Valid Address, Hoodi", "hoodi", big.NewInt(1), "0x937B9327225f1756f9bb807C0f2Db37bDA002F30", false,
+			"Valid Address, Hoodi", "hoodi", big.NewInt(1), "0xF61c0F048C62dC86823b143e32482dcF4E8c125A", false,
 		},
 		{
 			"Invalid Address, Hoodi", "hoodi", big.NewInt(4), "0xC870Fd7316956C1582A2c8Fd2c467", true,

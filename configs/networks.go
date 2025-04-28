@@ -37,7 +37,7 @@ var ErrInvalidNetwork = errors.New("invalid network")
 
 func NetworkCheck(value string) error {
 	switch value {
-	case NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky, NetworkCustom:
+	case NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky, NetworkHoodi, NetworkCustom:
 		return nil
 	default:
 		return fmt.Errorf("%w: %s", ErrInvalidNetwork, value)

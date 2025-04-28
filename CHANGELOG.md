@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.9.1] - 2025-04-16
+
+### Fixed
+- Fix network validation bug with `keys` command for `hoodi` network.
+- Update `lido-status` command links (node operator reward address link, claiming your rewards link).
+- Set correct `withdrawal_credentials` in `deposit_data.json` for Lido CSM validator setup as required by the Lido CSM (command fixed: `sedge cli`)
+- Fix issue when importing keys into validator client with Nimbus as validator client (command fixed: `sedge cli`)
+- Update Client Images to be Pectra ready on Gnosis.
+
 ## [v1.9.0] - 2025-03-27
 
 ### Added
