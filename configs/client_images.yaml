@@ -14,7 +14,7 @@ execution:
 consensus:
   lighthouse:
     name: sigp/lighthouse
-    version: v7.0.0
+    version: v7.0.1
   lodestar:
     name: chainsafe/lodestar
     version: v1.29.0
@@ -30,7 +30,7 @@ consensus:
 validator:
   lighthouse:
     name: sigp/lighthouse
-    version: v7.0.0
+    version: v7.0.1
   lodestar:
     name: chainsafe/lodestar
     version: v1.29.0
@@ -46,7 +46,7 @@ validator:
 distributed:
   charon:
     name: ghcr.io/obolnetwork/charon
-    version: v1.3.0
+    version: v6.0.0
 optimism:
   opnode:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node
