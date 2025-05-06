@@ -42,6 +42,12 @@ func TestBondSummary(t *testing.T) {
 		{
 			"BondSummary with invalid ID, Mainnet", "mainnet", big.NewInt(-10), true,
 		},
+		{
+			"BondSummary with invalid ID, Hoodi", "hoodi", big.NewInt(-20), true,
+		},
+		{
+			"BondSummary with valid ID, Hoodi", "hoodi", big.NewInt(5), false,
+		},
 	}
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {

@@ -61,7 +61,7 @@ func LidoStatusCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "lido-status [flags] [args]",
 		Short: "Display status and information of Lido Node Operator",
-		Long: `This command retrieves and displays the status and detailed information of Lido Node Operators. 
+		Long: `This command retrieves and displays the status and detailed information of Lido Node Operators.
 
 This information includes:
 - Node Operator ID.
@@ -95,7 +95,7 @@ Valid args: reward address of Node Operator (rewards recipient)`,
 			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&networkName, "network", "n", "holesky", "Target network. e.g. holesky, mainnet etc.")
+	cmd.Flags().StringVarP(&networkName, "network", "n", "holesky", "Target network. e.g. holesky, mainnet, hoodi etc.")
 	cmd.Flags().BoolVar(&longDescriptions, "l", false, "Show detailed descriptions for each value")
 	cmd.Flags().Int64VarP(&nodeIDInt, "nodeID", "i", -1, "Your Node Operator ID (optional)")
 	cmd.Flags().SortFlags = false
@@ -213,7 +213,7 @@ func buildLidoData(node *lidoData) map[string]struct {
 } {
 	var nodeOpDetailed, keysDetailed, queueDetailed, bondDetailed, rewardsDetailed string
 	var currentBond, requiredBond, excessBond, missedBond, rewards decimal.Decimal
-	rewardAddressLink := fmt.Sprintf(`https://etherscan.io/address/%s`, node.nodeInfo.RewardAddress)
+
 	var prefix string
 	if networkName == "mainnet" {
 		prefix = ""
@@ -221,16 +221,17 @@ func buildLidoData(node *lidoData) map[string]struct {
 		prefix = networkName + "."
 	}
 	claimRewardsLink := fmt.Sprintf(`https://%setherscan.io/address/%s#writeProxyContract#F10`, prefix, contracts.DeployedAddresses(contracts.CSModule)[networkName])
+	rewardAddressLink := fmt.Sprintf(`https://%setherscan.io/address/%s`, prefix, node.nodeInfo.RewardAddress)
 
 	detailedDescriptions := map[string]string{
 		nodeOpInfo: `
-## Description 
+## Description
 - Node Operator ID: Unique identifier for the node operator.
 - Reward Address: Address that is the ultimate recipient of the rewards
 - Manager Address: Address used to perform routine management operations regarding the CSM Node Operator.`,
 
 		keysInfo: `
-## Description 
+## Description
 - Stuck Keys Count: Number of keys stuck in the system. A validator is considered to be "stuck" if it has not been exited timely following an exit signal from the protocol.
 - Refunded Keys Count: Number of keys that were refunded.
 - Exited Keys Count: Number of keys that have exited.
@@ -238,11 +239,11 @@ func buildLidoData(node *lidoData) map[string]struct {
 - Depositable Keys Count: Number of keys eligible for deposits.`,
 
 		queueInfo: `
-## Description 
+## Description
 - Keys in the deposit queue: Number of the depositable keys that are in the deposit queue.`,
 
 		bondInfo: `
-## Description 
+## Description
 - Bond : a security collateral that Node Operators must submit before uploading validator keys into CSM. It covers possible losses caused by inappropriate actions on the Node Operator's side.
 - Current Bond: The current amount of bonded ETH.
 - Required Bond: The required amount of ETH to maintain.
@@ -250,7 +251,7 @@ func buildLidoData(node *lidoData) map[string]struct {
 - Missed Bond: The amount of bond that is missing.`,
 
 		rewardsInfo: `
-## Description 
+## Description
 - Non-claimed Rewards: The amount of rewards available for claiming.`,
 	}
 

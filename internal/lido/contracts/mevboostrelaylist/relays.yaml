@@ -88,3 +88,11 @@ hoodi:
     Operator: "Aestus"
     IsMandatory: true
     Description: "Aestus Relay Hoodi - nonfiltering"
+  - Uri: "https://0xb1559beef7b5ba3127485bbbb090362d9f497ba64e177ee2c8e7db74746306efad687f2cf8574e38d70067d40ef136dc@relay-hoodi.ultrasound.money"
+    Operator: "Ultra Sound"
+    IsMandatory: true
+    Description: "Ultra Sound Relay Hoodi - nonfiltering"
+  - Uri: "https://0xafa4c6985aa049fb79dd37010438cfebeb0f2bd42b115b89dd678dab0670c1de38da0c4e9138c9290a398ecd9a0b3110@boost-relay-hoodi.flashbots.net"
+    Operator: "Flashbots"
+    IsMandatory: true
+    Description: "Flashbots Relay Hoodi - filtering"
