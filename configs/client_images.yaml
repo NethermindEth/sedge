@@ -56,7 +56,7 @@ opexecution:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth
     version: v1.101503.3
   opnethermind:
-    name: nethermindeth/nethermind
+    name: nethermind/nethermind
     version: 1.31.9
   opreth:
     name: ghcr.io/paradigmxyz/op-reth
