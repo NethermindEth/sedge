@@ -39,7 +39,7 @@
     - --rpc-http-host=0.0.0.0
     - --rpc-http-port={{.ElApiPort}}
     - --rpc-http-api=${EC_ENABLED_MODULES}
-    - --rpc-http-cors-origins=*
+    - --rpc-http-cors-origins=*{{range $flag := .ElExtraFlags}}
     - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
