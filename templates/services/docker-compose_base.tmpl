@@ -32,6 +32,10 @@ services:
 {{template "texecution" .}}
 {{template "taiko" .}}{{end}}
 
+{{ if .WithSurgeClient}}
+{{template "sexecution" .}}
+{{template "surge" .}}{{end}}
+
 networks:
   sedge:
     name: sedge-network{{if .ContainerTag}}-{{.ContainerTag}}{{end}}

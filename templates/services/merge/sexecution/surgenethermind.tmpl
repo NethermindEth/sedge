@@ -1,0 +1,45 @@
+{{/* surgenethermind.tmpl */}}
+{{ define "sexecution" }}
+  execution-l2:
+    tty: true
+    environment:
+      - TERM=xterm-256color
+      - COLORTERM=truecolor
+    stop_grace_period: 30s
+    container_name: sedge-execution-surge-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: unless-stopped
+    image: ${EC_L2_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${EC_L2_DATA_DIR}:/nethermind/data
+      - ${EC_L2_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+      - "{{.ElL2DiscoveryPort}}:{{.ElL2DiscoveryPort}}/tcp"
+      - "{{.ElL2DiscoveryPort}}:{{.ElL2DiscoveryPort}}/udp"
+      - "{{.ElL2MetricsPort}}:{{.ElL2MetricsPort}}"{{if .MapAllPorts}}
+      - "{{.ElL2ApiPort}}:{{.ElL2ApiPort}}"
+      - "{{.ElL2AuthPort}}:{{.ElL2AuthPort}}"{{end}}
+    expose:
+      - {{.ElL2ApiPort}}
+      - {{.ElL2AuthPort}}
+    command:
+      - --config=${L2_NETWORK}
+      - --datadir=/nethermind/data
+      - --JsonRpc.Enabled=true
+      - --JsonRpc.Host=0.0.0.0
+      - --JsonRpc.Port={{.ElL2ApiPort}}
+      - --JsonRpc.JwtSecretFile=/tmp/jwt/jwtsecret
+      - --JsonRpc.EngineHost=0.0.0.0
+      - --JsonRpc.EnginePort={{.ElL2AuthPort}}
+      - --Network.DiscoveryPort={{.ElL2DiscoveryPort}}
+      - --HealthChecks.Enabled=true
+      - --Metrics.Enabled=true
+      - --Metrics.ExposePort={{.ElL2MetricsPort}}{{range $flag := .ElL2ExtraFlags}}
+      - --{{$flag}}{{end}}{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
+{{ end }}

@@ -7,6 +7,7 @@ type ClientFlags interface {
 	GetValidatorName() string
 	GetOptimismName() string
 	GetTaikoName() string
+	GetSurgeName() string
 	GetL2ExecutionName() string
 	GetDistributedValidatorName() string
 	GetExecutionApiUrl() string

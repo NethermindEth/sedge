@@ -1,0 +1,31 @@
+{{/* surgeclient.tmpl */}}
+{{ define "surge" }}
+  surge_client_driver:
+    tty: true
+    environment:
+      - TERM=xterm-256color
+      - COLORTERM=truecolor
+    stop_grace_period: 30s
+    container_name: sedge-consensus-surgedriver-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: unless-stopped
+    image: ${SURGE_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${EC_L2_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    command:
+      - driver
+      - --l1.ws=${L1_EC_ENGINE_WS_SURGE_RPC_URL}
+      - --l2.ws=${EC_ENGINE_WS_SURGE_RPC_URL}
+      - --l1.beacon={{.ConsensusApiURL}}
+      - --l2.auth=${EC_ENGINE_SURGE_RPC_URL}
+      - --taikoL1=${SURGE_L1_CONTRACT}
+      - --taikoL2=${SURGE_L2_CONTRACT}
+      - --jwtSecret=/tmp/jwt/jwtsecret{{range $flag := .TaikoExtraFlags}}
+      - --{{$flag}}{{end}}{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
+{{ end }}

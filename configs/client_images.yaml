@@ -72,3 +72,11 @@ texecution:
   taikonethermind:
     name: nethermind/nethermind
     version: 1.32.0
+surge:
+  surgeclient:
+    name: nethsurge/taiko-client
+    version: surge-testnet
+sexecution:
+  surgenethermind:
+    name: nethermindeth/nethermind
+    version: master-9d652e3

@@ -47,6 +47,10 @@ func (c *Client) SetImageOrDefault(image string) {
 		c.SetTaikoImage(image)
 	case "texecution":
 		c.SetTaikoExecutionImage(image)
+	case "surge":
+		c.SetSurgeImage(image)
+	case "sexecution":
+		c.SetSurgeExecutionImage(image)
 	}
 }
 
@@ -136,6 +140,19 @@ func (c *Client) SetTaikoExecutionImage(image string) {
 	}
 }
 
+func (c *Client) SetSurgeImage(image string) {
+	switch c.Name {
+	case "surgeclient":
+		c.Image = valueOrDefault(image, configs.ClientImages.Surge.SurgeClient.String())
+	}
+}
+
+func (c *Client) SetSurgeExecutionImage(image string) {
+	switch c.Name {
+	case "surgenethermind":
+		c.Image = valueOrDefault(image, configs.ClientImages.SExecution.SurgeNethermind.String())
+	}
+}
 func valueOrDefault(value string, defaultValue string) string {
 	if value == "" {
 		return defaultValue
@@ -150,6 +167,7 @@ type Clients struct {
 	Validator            *Client
 	Optimism             *Client
 	Taiko                *Client
+	Surge                *Client
 	L2Execution          *Client
 	DistributedValidator *Client
 }

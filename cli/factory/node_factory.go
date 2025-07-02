@@ -19,6 +19,8 @@ const (
 	opExecution          = "opexecution"
 	taiko                = "taiko"
 	tExecution           = "texecution"
+	surge                = "surge"
+	sExecution           = "sexecution"
 	NetworkGnosis        = "gnosis"
 	NetworkChiado        = "chiado"
 )
@@ -193,7 +195,7 @@ func (v *ValidatorNodeInitializer) UpdateResult(result *clients.Clients, client 
 	result.Validator = client
 }
 
-// L2BaseInitializer provides common functionality for L2 nodes (Optimism and Taiko)
+// L2BaseInitializer provides common functionality for L2 nodes (Optimism, Taiko and Surge)
 type L2BaseInitializer struct {
 	BaseNodeInitializer
 	l2ExecutionType string
@@ -366,6 +368,77 @@ func (t *TaikoNodeInitializer) UpdateResult(result *clients.Clients, client *cli
 	result.L2Execution = t.execClient
 }
 
+// SurgeNodeInitializer handles surge client initialization
+type SurgeNodeInitializer struct {
+	L2BaseInitializer
+	flags      ClientFlags
+	execClient *clients.Client
+}
+
+func NewSurgeNodeInitializer() *SurgeNodeInitializer {
+	return &SurgeNodeInitializer{
+		L2BaseInitializer: L2BaseInitializer{
+			BaseNodeInitializer: BaseNodeInitializer{
+				serviceType: surge,
+				config: clientConfig{
+					clientType: surge,
+					flagName:   "surge-name",
+					forceName:  "surgeclient",
+				},
+			},
+			l2ExecutionType: sExecution,
+		},
+	}
+}
+
+func (t *SurgeNodeInitializer) Initialize(allClients clients.OrderedClients, flags ClientFlags) (*clients.Client, error) {
+	t.flags = flags
+	client, execClient, err := t.initializeL2(allClients, flags)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize surge node: %w", err)
+	}
+	t.execClient = execClient
+
+	// Force surgeclient name for surge client
+	if client != nil {
+		client.Name = "surgeclient"
+		if strings.Contains(flags.GetSurgeName(), ":") {
+			parts := strings.Split(flags.GetSurgeName(), ":")
+			client.Image = strings.Join(parts[1:], ":")
+			client.Modified = true
+		}
+		client.SetImageOrDefault(strings.Join(strings.Split(flags.GetSurgeName(), ":")[1:], ":"))
+		if err = clients.ValidateClient(client, surge); err != nil {
+			return nil, err
+		}
+	}
+
+	// Handle L2 execution client name and image
+	if execClient != nil {
+		parts := strings.Split(flags.GetL2ExecutionName(), ":")
+		execClient.Name = strings.ReplaceAll(parts[0], "-", "")
+		if len(parts) > 1 {
+			execClient.Image = strings.Join(parts[1:], ":")
+			execClient.Modified = true
+		}
+		execClient.SetImageOrDefault(strings.Join(parts[1:], ":"))
+		if err = clients.ValidateClient(execClient, sExecution); err != nil {
+			return nil, err
+		}
+	}
+
+	return client, nil
+}
+
+func (t *SurgeNodeInitializer) ShouldInitialize(services []string, flags ClientFlags) bool {
+	return utils.Contains(services, t.serviceType)
+}
+
+func (t *SurgeNodeInitializer) UpdateResult(result *clients.Clients, client *clients.Client) {
+	result.Surge = client
+	result.L2Execution = t.execClient
+}
+
 // DistributedValidatorNodeInitializer handles distributed validator client initialization
 type DistributedValidatorNodeInitializer struct {
 	BaseNodeInitializer
@@ -405,6 +478,7 @@ func NewNodeFactory() *NodeFactory {
 			NewValidatorNodeInitializer(),
 			NewOptimismNodeInitializer(),
 			NewTaikoNodeInitializer(),
+			NewSurgeNodeInitializer(),
 			NewDistributedValidatorNodeInitializer(),
 		},
 	}

@@ -1,0 +1,11 @@
+{{/* surgeclient.tmpl */}}
+{{ define "surge" }}
+# --- Layer 2 - Surge Node - configuration ---
+L1_EC_ENGINE_WS_SURGE_RPC_URL={{.ExecutionWSApiURL}}
+EC_L2_JWT_SECRET_PATH={{.JWTL2SecretPath}}
+EC_ENGINE_WS_SURGE_RPC_URL=ws://execution-l2:{{.ElL2ApiPort}}
+EC_ENGINE_SURGE_RPC_URL=http://execution-l2:{{.ElL2AuthPort}}
+SURGE_L1_CONTRACT="0x4bBeF0eFDe3692b9B31BaCDA30f933D223f18A82"
+SURGE_L2_CONTRACT="0x7633750000000000000000000000000000010001"
+SURGE_IMAGE_VERSION={{.SurgeImageVersion}}
+{{ end }}
