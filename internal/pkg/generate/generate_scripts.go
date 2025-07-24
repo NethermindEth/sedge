@@ -354,7 +354,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		CustomNetwork:       gd.Network == configs.NetworkCustom, // Used custom templates
 		CustomConsensusConfigs: gd.CustomNetworkConfigPath != "" ||
 			gd.CustomGenesisPath != "" ||
-			gd.CustomDeployBlockPath != "", // Have custom configs paths
+			gd.CustomDeployBlockPath != "",                  // Have custom configs paths
 		CustomChainSpecPath:     gd.CustomChainSpecPath,     // Path to chainspec.json
 		CustomNetworkConfigPath: gd.CustomNetworkConfigPath, // Path to config.yaml
 		CustomGenesisPath:       gd.CustomGenesisPath,       // Path to genesis.ssz
@@ -733,6 +733,11 @@ func imageOrEmpty(cls *clients.Client, latest bool) string {
 			if cls.Name == "nimbus" {
 				splits := strings.Split(cls.Image, ":")
 				splits[len(splits)-1] = "multiarch-latest"
+				return strings.Join(splits, ":")
+
+			} else if cls.Name == "prysm" {
+				splits := strings.Split(cls.Image, ":")
+				splits[len(splits)-1] = "stable"
 				return strings.Join(splits, ":")
 
 			} else {
