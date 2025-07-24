@@ -55,4 +55,11 @@ var AllClients map[string][]string = map[string][]string{
 		"taikogeth",
 		"taikonethermind",
 	},
+	"surge": {
+		"surgeclient",
+	},
+	"sexecution": {
+		"surgegeth",
+		"surgenethermind",
+	},
 }

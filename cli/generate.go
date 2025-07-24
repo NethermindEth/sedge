@@ -46,8 +46,8 @@ var (
 )
 
 const (
-	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution, taiko, tExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution", "taiko", "texecution"
-	jwtPathName                                                                                               = "jwtsecret"
+	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution, taiko, tExecution, surge, sExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution", "taiko", "texecution", "surge", "sexecution"
+	jwtPathName                                                                                                                  = "jwtsecret"
 )
 
 type CustomFlags struct {
@@ -73,12 +73,18 @@ type TaikoFlags struct {
 	taikoExtraFlags []string
 }
 
+type SurgeFlags struct {
+	surgeName       string
+	surgeExtraFlags []string
+}
+
 // GenCmdFlags is a struct that holds the flags of the generate command
 type GenCmdFlags struct {
 	CustomFlags
 	L2Execution
 	OptimismFlags
 	TaikoFlags
+	SurgeFlags
 	executionName            string
 	consensusName            string
 	validatorName            string
@@ -129,6 +135,10 @@ func (flags *GenCmdFlags) GetOptimismName() string {
 
 func (flags *GenCmdFlags) GetTaikoName() string {
 	return flags.taikoName
+}
+
+func (flags *GenCmdFlags) GetSurgeName() string {
+	return flags.surgeName
 }
 
 func (flags *GenCmdFlags) GetL2ExecutionName() string {
@@ -185,6 +195,7 @@ You can generate:
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
 	cmd.AddCommand(OpFullNodeSubCmd(sedgeAction))
 	cmd.AddCommand(TaikoFullNodeSubCmd(sedgeAction))
+	cmd.AddCommand(SurgeFullNodeSubCmd(sedgeAction))
 
 	cmd.PersistentFlags().BoolVar(&lidoNode, "lido", false, "generate Lido CSM node")
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
@@ -335,8 +346,8 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	}
 	var jwtSecretL2 string
 	var sequencerURL string
-	// If optimism or taiko is included in the services, generate the jwt secret for it
-	if utils.Contains(services, optimism) || utils.Contains(services, taiko) {
+	// If optimism , taiko or surge is included in the services, generate the jwt secret for it
+	if utils.Contains(services, optimism) || utils.Contains(services, taiko) || utils.Contains(services, surge) {
 		jwtSecretL2, err = handleJWTSecret(generationPath, jwtPathName+"-l2")
 		if err != nil {
 			return err
@@ -390,6 +401,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		L2ExecutionClient:          combinedClients.L2Execution,
 		OptimismClient:             combinedClients.Optimism,
 		TaikoClient:                combinedClients.Taiko,
+		SurgeClient:                combinedClients.Surge,
 		Network:                    network,
 		CheckpointSyncUrl:          flags.checkpointSyncUrl,
 		FeeRecipient:               flags.feeRecipient,
@@ -402,6 +414,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ElL2ExtraFlags:             flags.ell2ExtraFlags,
 		OpExtraFlags:               flags.opExtraFlags,
 		TaikoExtraFlags:            flags.taikoExtraFlags,
+		SurgeExtraFlags:            flags.surgeExtraFlags,
 		Chain:                      flags.chain,
 		Sequencer:                  sequencerURL,
 		MapAllPorts:                flags.mapAllPorts,

@@ -57,6 +57,12 @@ var ClientImages struct {
 		TaikoGeth       Image `yaml:"taikogeth"`
 		TaikoNethermind Image `yaml:"taikonethermind"`
 	}
+	Surge struct {
+		SurgeClient Image `yaml:"surgeclient"`
+	}
+	SExecution struct {
+		SurgeNethermind Image `yaml:"surgenethermind"`
+	}
 }
 
 //go:embed client_images.yaml

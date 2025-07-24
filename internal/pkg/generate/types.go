@@ -26,6 +26,7 @@ type EnvData struct {
 	ElImage                    string
 	ElL2Image                  string
 	TaikoImageVersion          string
+	SurgeImageVersion          string
 	ElDataDir                  string
 	CcImage                    string
 	CcDataDir                  string
@@ -65,6 +66,7 @@ type GenData struct {
 	ValidatorClient            *clients.Client
 	OptimismClient             *clients.Client
 	TaikoClient                *clients.Client
+	SurgeClient                *clients.Client
 	L2ExecutionClient          *clients.Client
 	DistributedValidatorClient *clients.Client
 	Distributed                bool
@@ -80,6 +82,7 @@ type GenData struct {
 	DvExtraFlags               []string
 	OpExtraFlags               []string
 	TaikoExtraFlags            []string
+	SurgeExtraFlags            []string
 	Chain                      string
 	Sequencer                  string
 	MapAllPorts                bool
@@ -140,6 +143,7 @@ type DockerComposeData struct {
 	ElL2ExtraFlags          []string
 	OPExtraFlags            []string
 	TaikoExtraFlags         []string
+	SurgeExtraFlags         []string
 	NetworkPrefix           string
 	ClExtraFlags            []string
 	VlExtraFlags            []string
@@ -202,6 +206,16 @@ func (d DockerComposeData) WithOptimismClient() bool {
 func (d DockerComposeData) WithTaikoClient() bool {
 	for _, service := range d.Services {
 		if service == taiko {
+			return true
+		}
+	}
+	return false
+}
+
+// WithSurgeClient returns true if the surge client is set
+func (d DockerComposeData) WithSurgeClient() bool {
+	for _, service := range d.Services {
+		if service == surge {
 			return true
 		}
 	}

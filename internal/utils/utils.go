@@ -223,7 +223,7 @@ func UriValidator(input []string) (string, bool) {
 		if err != nil {
 			return uri, false
 		}
-		wrongScheme := u.Scheme != "http" && u.Scheme != "https"
+		wrongScheme := u.Scheme != "http" && u.Scheme != "https" && u.Scheme != "ws" && u.Scheme != "wss"
 
 		if wrongScheme || u.Host == "" {
 			return uri, false

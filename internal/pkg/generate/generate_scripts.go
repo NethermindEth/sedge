@@ -34,13 +34,15 @@ import (
 )
 
 const (
-	execution            = "execution"
-	consensus            = "consensus"
-	validator            = "validator"
-	optimism             = "optimism"
-	opExecution          = "opexecution"
-	taiko                = "taiko"
-	taikoExecution       = "texecution"
+	execution      = "execution"
+	consensus      = "consensus"
+	validator      = "validator"
+	optimism       = "optimism"
+	opExecution    = "opexecution"
+	taiko          = "taiko"
+	taikoExecution = "texecution"
+	surge          = "surge"
+	surgeExecution = "sexecution"
 
 	validatorImport      = "validator-import"
 	mevBoost             = "mev-boost"
@@ -131,13 +133,16 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 
 // mapClients convert genData clients to clients.Clients
 func mapClients(gd *GenData) map[string]*clients.Client {
-	var l2OpClient, l2TaikoClient *clients.Client
+	var l2OpClient, l2TaikoClient, l2SurgeClient *clients.Client
 
 	if gd.OptimismClient != nil {
 		l2OpClient = gd.L2ExecutionClient
 	}
 	if gd.TaikoClient != nil {
 		l2TaikoClient = gd.L2ExecutionClient
+	}
+	if gd.SurgeClient != nil {
+		l2SurgeClient = gd.L2ExecutionClient
 	}
 
 	cls := map[string]*clients.Client{
@@ -148,6 +153,8 @@ func mapClients(gd *GenData) map[string]*clients.Client {
 		opExecution:          l2OpClient,
 		taiko:                gd.TaikoClient,
 		taikoExecution:       l2TaikoClient,
+		surge:                gd.SurgeClient,
+		surgeExecution:       l2SurgeClient,
 		distributedValidator: gd.DistributedValidatorClient,
 	}
 
@@ -439,12 +446,12 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		}
 	}
 
-	if cls[optimism] != nil || cls[taiko] != nil {
+	if cls[optimism] != nil || cls[taiko] != nil || cls[surge] != nil {
 		gd.L2ExecutionClient.Endpoint = configs.OnPremiseOpExecutionURL
 	}
 
 	executionOPApiUrl := ""
-	if cls[optimism] != nil || cls[taiko] != nil {
+	if cls[optimism] != nil || cls[taiko] != nil || cls[surge] != nil {
 		executionOPApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(gd.L2ExecutionClient), gd.Ports["ApiPortELL2"])
 	}
 	var mevSupported bool
@@ -505,6 +512,10 @@ func EnvFile(gd *GenData, at io.Writer) error {
 	if gd.TaikoClient != nil {
 		taikoImage = imageOrEmpty(cls[taiko], gd.LatestVersion)
 	}
+	surgeImage := ""
+	if gd.SurgeClient != nil {
+		surgeImage = imageOrEmpty(cls[surge], gd.LatestVersion)
+	}
 
 	executionWSApiURL := ""
 	if len(executionApiUrl) > 0 {
@@ -531,6 +542,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ElImage:                    imageOrEmpty(cls[execution], gd.LatestVersion),
 		ElL2Image:                  elL2Image,
 		TaikoImageVersion:          taikoImage,
+		SurgeImageVersion:          surgeImage,
 		ElDataDir:                  "./" + configs.ExecutionDir,
 		CcImage:                    imageOrEmpty(cls[consensus], gd.LatestVersion),
 		CcDataDir:                  "./" + configs.ConsensusDir,
