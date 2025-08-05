@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/NethermindEth/sedge/internal/pkg/clients"
+	"github.com/NethermindEth/sedge/internal/pkg/commands"
 	"github.com/NethermindEth/sedge/internal/pkg/dependencies"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
 	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
@@ -608,12 +609,31 @@ func checkCLIDependencies(p ui.Prompter, o *CliCmdOptions, a actions.SedgeAction
 			log.Warnf("unsupported install dependencies %s", strings.Join(unsupported, " "))
 			return nil
 		}
-		// FIXME: There is an issue with the cli command and sudo permissions. Sedge deps install don't have this issue. This should be investigated and solved before uncommenting the commented code below.
-		// if err := confirmInstallDependencies(p, o); err != nil {
-		// 	return err
-		// }
-		o.installDependencies = false
-		if !o.installDependencies {
+		// Check if we should install dependencies automatically
+		if err := confirmInstallDependencies(p, o); err != nil {
+			return err
+		}
+		
+		if o.installDependencies {
+			// Create a command runner without sudo for dependency installation
+			// to avoid double sudo issues
+			noSudoRunner := commands.NewCMDRunner(commands.CMDRunnerOptions{
+				RunAsAdmin: false,
+			})
+			noSudoDepsMgr := dependencies.NewDependenciesManager(noSudoRunner)
+			
+			for _, s := range supported {
+				if err := noSudoDepsMgr.Install(s); err != nil {
+					log.Errorf("Failed to install %s: %v", s, err)
+					// Show instructions as fallback
+					if err := depsMgr.ShowInstructions(s); err != nil {
+						return err
+					}
+				} else {
+					log.Infof("Successfully installed %s", s)
+				}
+			}
+		} else {
 			for _, s := range supported {
 				if err := depsMgr.ShowInstructions(s); err != nil {
 					return err
@@ -621,11 +641,6 @@ func checkCLIDependencies(p ui.Prompter, o *CliCmdOptions, a actions.SedgeAction
 			}
 			return fmt.Errorf("%w: %s. To install dependencies if supported run: 'sedge deps install'", ErrMissingDependencies, strings.Join(pendingDependencies, ", "))
 		}
-		// for _, s := range supported {
-		// 	if err := depsMgr.Install(s); err != nil {
-		// 		return err
-		// 	}
-		// }
 	}
 	if err := depsMgr.DockerEngineIsOn(); err != nil {
 		return err
