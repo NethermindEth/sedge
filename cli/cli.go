@@ -492,7 +492,7 @@ func generateKeystore(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, d
 			}
 		}
 
-		// TODO: Create an Action for keystore generation
+		// Generate keystores using the keystore generation logic
 		log.Info("Generating keystores...")
 		data := keystores.ValidatorKeysGenData{
 			Mnemonic:          o.keystoreMnemonic,

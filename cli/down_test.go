@@ -71,7 +71,7 @@ func buildDownTestCase(t *testing.T, caseName string, isErr bool, path string) *
 		t.Fatalf("Can't build test case: %v", err)
 	}
 
-	// TODO: allow runner edition
+	// Use a simple command runner for testing
 	tc.runner = &test.SimpleCMDRunner{
 		SRunCMD: func(c commands.Command) (string, int, error) {
 			return "", 0, nil

@@ -93,7 +93,7 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 	NetworkCustom: {
 		Name:               NetworkCustom,
 		NetworkService:     "merge",
-		GenesisForkVersion: "0x00000000", // TODO: only affects keystores generation, ensure the deposit method does not conflict over this.
+		GenesisForkVersion: "0x00000000", // Default fork version for custom networks - only affects keystore generation
 		Weight:             7,
 	},
 }
