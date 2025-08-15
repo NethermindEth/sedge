@@ -319,7 +319,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	if len(errs) > 0 {
 		return errs[0]
 	}
-
+	flags.network = network
 	// Handle selection and validation of clients
 	combinedClients, err := valClients(clientsMap, flags, services)
 	if err != nil {
