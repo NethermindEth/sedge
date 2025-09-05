@@ -1,13 +1,13 @@
 function get-field() {
     # $1 - field name
-    cat configs/client_images.yaml | yq "$1"
+    yq e "$1" configs/client_images.yaml
 }
 
 function update-field() {
     # $1 - field name
     # $2 - new value
     echo "Updating $1 to $2 in configs/client_images.yaml"
-    yq eval -i "$1 = $2" configs/client_images.yaml
+    yq e -i "$1 = \"$2\"" configs/client_images.yaml
 }
 
 function update-client() {
@@ -17,9 +17,9 @@ function update-client() {
     # $4 latest version
 
     CURRENT_VERSION=$(get-field "$3.version")
-    if [[ $CURRENT_VERSION < $4 ]] ; then
+    if [[ "$(printf '%s\n' "$CURRENT_VERSION" "$4" | sort -V | head -n1)" != "$4" ]]; then
         echo "New version of $1 $2 client is available. Current version: $CURRENT_VERSION, new version: $4"
-        update-field "$3.version" "\"$4\""
+        update-field "$3.version" "$4"
         echo ""
     fi
 }
@@ -32,7 +32,7 @@ update-client "Geth" "execution" ".execution.geth" "$GETH_LATEST_VERSION"
 BESU_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/hyperledger/besu/releases/latest | jq -r ".tag_name")
 update-client "Besu" "execution" ".execution.besu" "$BESU_LATEST_VERSION"
 
-# Netehrmind
+# Nethermind
 NETHERMIND_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/NethermindEth/nethermind/releases/latest | jq -r ".tag_name")
 update-client "Nethermind" "execution" ".execution.nethermind" "$NETHERMIND_LATEST_VERSION"
 
@@ -55,11 +55,11 @@ TEKU_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.githu
 update-client "Teku" "consensus" ".consensus.teku" "$TEKU_LATEST_VERSION"
 update-client "Teku" "validator" ".validator.teku" "$TEKU_LATEST_VERSION"
 
-## Prysm
+# Prysm
 PRYSM_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/prysmaticlabs/prysm/releases/latest | jq -r ".tag_name")
 update-client "Prysm" "consensus" ".consensus.prysm" "$PRYSM_LATEST_VERSION"
 update-client "Prysm" "validator" ".validator.prysm" "$PRYSM_LATEST_VERSION"
 
-## Charon
+# Charon
 CHARON_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/ObolNetwork/charon/releases/latest | jq -r ".tag_name")
-update-client "Charon" "distributed" ".distributed.charon" "$PRYSM_LATEST_VERSION"
+update-client "Charon" "distributed" ".distributed.charon" "$CHARON_LATEST_VERSION"
