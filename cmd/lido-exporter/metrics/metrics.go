@@ -32,8 +32,6 @@ func InitMetrics(nodeOperatorID, network string) {
 	nodeOperatorRewardAddressGauge.WithLabelValues(nodeOperatorID, network)
 
 	// Keys metrics
-	keysStuckValidatorsCountGauge.WithLabelValues(nodeOperatorID, network)
-	keysRefundedValidatorsCountGauge.WithLabelValues(nodeOperatorID, network)
 	keysExitedValidatorsCountGauge.WithLabelValues(nodeOperatorID, network)
 	keysDepositedValidatorsCountGauge.WithLabelValues(nodeOperatorID, network)
 	keysDepositableValidatorsCountGauge.WithLabelValues(nodeOperatorID, network)
