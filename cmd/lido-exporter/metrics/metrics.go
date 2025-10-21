@@ -41,9 +41,9 @@ func InitMetrics(nodeOperatorID, network string) {
 	enqueuedKeysCountGauge.WithLabelValues(nodeOperatorID, network)
 
 	// Penalties metrics
-	penaltiesTotal.WithLabelValues(nodeOperatorID, "el_rewards_stealing", "")
-	penaltiesTotal.WithLabelValues(nodeOperatorID, "withdrawal", "")
-	penaltiesTotal.WithLabelValues(nodeOperatorID, "initial_slashing", "")
+	penaltiesTotal.WithLabelValues(nodeOperatorID, "strikes_penalty", "")
+	penaltiesTotal.WithLabelValues(nodeOperatorID, "validator_exit_delay_penalty", "")
+	penaltiesTotal.WithLabelValues(nodeOperatorID, "triggered_exit_fee", "")
 
 	// Exit requests metrics
 	exitRequestsTotal.WithLabelValues(nodeOperatorID, network, "")

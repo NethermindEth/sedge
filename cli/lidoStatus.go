@@ -215,15 +215,12 @@ func buildLidoData(node *lidoData) map[string]struct {
 	var currentBond, requiredBond, excessBond, missedBond, rewards decimal.Decimal
 
 	var prefix string
-	var contract string
 	if networkName == "mainnet" {
 		prefix = ""
-		contract = contracts.DeployedAddresses(contracts.CSAccounting)[networkName]
 	} else {
 		prefix = networkName + "."
-		contract = contracts.DeployedAddresses(contracts.CSModule)[networkName]
 	}
-	claimRewardsLink := fmt.Sprintf(`https://%setherscan.io/address/%s#writeProxyContract#F3`, prefix, contract)
+	claimRewardsLink := fmt.Sprintf(`https://%setherscan.io/address/%s#writeProxyContract#F3`, prefix, contracts.DeployedAddresses(contracts.CSAccounting)[networkName])
 	rewardAddressLink := fmt.Sprintf(`https://%setherscan.io/address/%s`, prefix, node.nodeInfo.RewardAddress)
 
 	detailedDescriptions := map[string]string{
