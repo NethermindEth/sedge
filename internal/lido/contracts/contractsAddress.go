@@ -61,6 +61,7 @@ var deployedAddresses = map[string]address{
 	},
 	CSExitPenalties: {
 		configs.NetworkMainnet: "0x06cd61045f958A209a0f8D746e103eCc625f4193",
+		configs.NetworkHoodi:   "0xD259b31083Be841E5C85b2D481Cfc17C14276800",
 	},
 }
 
