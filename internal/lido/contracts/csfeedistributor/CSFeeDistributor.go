@@ -29,10 +29,20 @@ var (
 	_ = abi.ConvertType
 )
 
+// ICSFeeDistributorDistributionData is an auto generated low-level Go binding around an user-defined struct.
+type ICSFeeDistributorDistributionData struct {
+	RefSlot     *big.Int
+	TreeRoot    [32]byte
+	TreeCid     string
+	LogCid      string
+	Distributed *big.Int
+	Rebate      *big.Int
+}
+
 // CsfeedistributorMetaData contains all meta data concerning the Csfeedistributor contract.
 var CsfeedistributorMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"stETH\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"accounting\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AccessControlBadConfirmation\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"neededRole\",\"type\":\"bytes32\"}],\"name\":\"AccessControlUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedToSendEther\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FeeSharesDecrease\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidProof\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidShares\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidTreeCID\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidTreeRoot\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotAccounting\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotAllowedToRecover\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotEnoughShares\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotOracle\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroAccountingAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroAdminAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroOracleAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroStEthAddress\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"totalClaimableShares\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"treeRoot\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"treeCid\",\"type\":\"string\"}],\"name\":\"DistributionDataUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"ERC1155Recovered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"ERC20Recovered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"}],\"name\":\"ERC721Recovered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"EtherRecovered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nodeOperatorId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"shares\",\"type\":\"uint256\"}],\"name\":\"FeeDistributed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"shares\",\"type\":\"uint256\"}],\"name\":\"StETHSharesRecovered\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"ACCOUNTING\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"ORACLE\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"RECOVERER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"STETH\",\"outputs\":[{\"internalType\":\"contractIStETH\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeOperatorId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"shares\",\"type\":\"uint256\"},{\"internalType\":\"bytes32[]\",\"name\":\"proof\",\"type\":\"bytes32[]\"}],\"name\":\"distributeFees\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"sharesToDistribute\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"distributedShares\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeOperatorId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"shares\",\"type\":\"uint256\"},{\"internalType\":\"bytes32[]\",\"name\":\"proof\",\"type\":\"bytes32[]\"}],\"name\":\"getFeesToDistribute\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"sharesToDistribute\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"getRoleMember\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleMemberCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeOperatorId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"shares\",\"type\":\"uint256\"}],\"name\":\"hashLeaf\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"admin\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pendingSharesToDistribute\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_treeRoot\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"_treeCid\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"distributed\",\"type\":\"uint256\"}],\"name\":\"processOracleReport\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"recoverERC1155\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"recoverERC20\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"recoverERC721\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"recoverEther\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"callerConfirmation\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalClaimableShares\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"treeCid\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"treeRoot\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
-	Bin: "0x608060405234801561000f575f80fd5b50600436106101a1575f3560e01c8063819d4cc6116100f3578063c4d66de811610093578063d547741f1161006e578063d547741f146103b7578063e00bfe50146103ca578063ea6301ab146103f1578063fe3c9b9b14610410575f80fd5b8063c4d66de814610389578063ca15c8731461039c578063d257cf2a146103af575f80fd5b806391d14854116100ce57806391d1485414610335578063a217fddf14610348578063acf1c9481461034f578063b66cf05814610376575f80fd5b8063819d4cc6146102fc5780638980f11f1461030f5780639010d07c14610322575f80fd5b806338013f021161015e5780635c654ad9116101395780635c654ad91461029c5780635e8e8f6f146102af5780636dc3f2bd146102c25780637e9f27ad146102e9575f80fd5b806338013f021461024c57806347d17d9d1461028b57806352d8bfc214610294575f80fd5b806301ffc9a7146101a557806314dc6c14146101cd57806321893f7b146101e3578063248a9ca3146101f65780632f2ff15d1461022457806336568abe14610239575b5f80fd5b6101b86101b336600461129e565b610425565b60405190151581526020015b60405180910390f35b6101d55f5481565b6040519081526020016101c4565b6101d56101f13660046112c5565b61044f565b6101d5610204366004611341565b5f9081525f805160206116cc833981519152602052604090206001015490565b610237610232366004611373565b6105e8565b005b610237610247366004611373565b61061e565b6102737f000000000000000000000000af57326c7d513085051b50912d51809ecc5d98ee81565b6040516001600160a01b0390911681526020016101c4565b6101d560035481565b610237610656565b6102376102aa36600461139d565b6106b2565b6101d56102bd3660046112c5565b61072d565b6102737f000000000000000000000000c093e53e8f4b55a223c18a2da6fa00e60dd5efe181565b6101d56102f73660046113c5565b6107a0565b61023761030a36600461139d565b6107f1565b61023761031d36600461139d565b610840565b6102736103303660046113c5565b6108e1565b6101b8610343366004611373565b610919565b6101d55f81565b6101d57fb3e25b5404b87e5a838579cb5d7481d61ad96ee284d38ec1e97c07ba64e7f6fc81565b6102376103843660046113e5565b61094f565b610237610397366004611460565b610b0f565b6101d56103aa366004611341565b610c4d565b6101d5610c8b565b6102376103c5366004611373565b610d26565b6102737f0000000000000000000000003f1c547b21f65e10480de3ad8e19faac46c9503481565b6101d56103ff366004611341565b60026020525f908152604090205481565b610418610d56565b6040516101c49190611479565b5f6001600160e01b03198216635a05180f60e01b1480610449575061044982610de2565b92915050565b5f336001600160a01b037f000000000000000000000000c093e53e8f4b55a223c18a2da6fa00e60dd5efe11614610499576040516318d9f40960e31b815260040160405180910390fd5b6104a58585858561072d565b9050805f036104b557505f6105e0565b8060035410156104d857604051633c57b48560e21b815260040160405180910390fd5b6003805482900390555f858152600260205260409081902080548301905551638fcb4e5b60e01b81526001600160a01b037f000000000000000000000000c093e53e8f4b55a223c18a2da6fa00e60dd5efe181166004830152602482018390527f0000000000000000000000003f1c547b21f65e10480de3ad8e19faac46c950341690638fcb4e5b906044016020604051808303815f875af1158015610580573d5f803e3d5ffd5b505050506040513d601f19601f820116820180604052508101906105a491906114c5565b50847f61930a6c1553eab59d5766da6e1bab8eba982aec848ae7683452f4a6423b6e4a826040516105d791815260200190565b60405180910390a25b949350505050565b5f8281525f805160206116cc833981519152602052604090206001015461060e81610e16565b6106188383610e23565b50505050565b6001600160a01b03811633146106475760405163334bd91960e11b815260040160405180910390fd5b6106518282610e78565b505050565b61065e610ec4565b73a74528edc289b1a597faf83fcff7eff871cc01d96352d8bfc26040518163ffffffff1660e01b81526004015f6040518083038186803b1580156106a0575f80fd5b505af4158015610618573d5f803e3d5ffd5b6106ba610ec4565b604051635c654ad960e01b81526001600160a01b03831660048201526024810182905273a74528edc289b1a597faf83fcff7eff871cc01d990635c654ad9906044015b5f6040518083038186803b158015610713575f80fd5b505af4158015610725573d5f803e3d5ffd5b505050505050565b5f8061074584845f546107408a8a6107a0565b610eef565b905080610765576040516309bde33960e01b815260040160405180910390fd5b5f868152600260205260409020548581111561079457604051636096ce8160e11b815260040160405180910390fd5b90940395945050505050565b60408051602081018490529081018290525f9060600160408051601f198184030181528282528051602091820120908301520160405160208183030381529060405280519060200120905092915050565b6107f9610ec4565b6040516340cea66360e11b81526001600160a01b03831660048201526024810182905273a74528edc289b1a597faf83fcff7eff871cc01d99063819d4cc6906044016106fd565b610848610ec4565b7f0000000000000000000000003f1c547b21f65e10480de3ad8e19faac46c950346001600160a01b0316826001600160a01b03160361089a576040516319efe5d760e21b815260040160405180910390fd5b604051638980f11f60e01b81526001600160a01b03831660048201526024810182905273a74528edc289b1a597faf83fcff7eff871cc01d990638980f11f906044016106fd565b5f8281527fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e823717059320006020819052604082206105e09084610f06565b5f9182525f805160206116cc833981519152602090815260408084206001600160a01b0393909316845291905290205460ff1690565b336001600160a01b037f000000000000000000000000af57326c7d513085051b50912d51809ecc5d98ee161461099857604051631bc2178f60e01b815260040160405180910390fd5b604051633d7ad0b760e21b81523060048201527f0000000000000000000000003f1c547b21f65e10480de3ad8e19faac46c950346001600160a01b03169063f5eb42dc90602401602060405180830381865afa1580156109fa573d5f803e3d5ffd5b505050506040513d601f19601f82011682018060405250810190610a1e91906114c5565b81600354610a2c91906114f0565b1115610a4b57604051636edcc52360e01b815260040160405180910390fd5b8015610618575f829003610a71576040516272916d60e51b815260040160405180910390fd5b83610a8f576040516357e86a3360e01b815260040160405180910390fd5b5f548403610ab0576040516357e86a3360e01b815260040160405180910390fd5b60038054820190555f8490556001610ac983858361159a565b507f26dec7cc117e9b3907dc1f90d2dc5f6e04dbb9f285f5898be2c82ec524dcd424600354858585604051610b019493929190611654565b60405180910390a150505050565b7ff0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a008054600160401b810460ff16159067ffffffffffffffff165f81158015610b545750825b90505f8267ffffffffffffffff166001148015610b705750303b155b905081158015610b7e575080155b15610b9c5760405163f92ee8a960e01b815260040160405180910390fd5b845467ffffffffffffffff191660011785558315610bc657845460ff60401b1916600160401b1785555b610bce610f11565b6001600160a01b038616610bf557604051633ef39b8160e01b815260040160405180910390fd5b610bff5f87610e23565b50831561072557845460ff60401b19168555604051600181527fc7f505b2f371ae2175ee4913f4499e1f2633a7b5936321eed1cdaeb6115181d29060200160405180910390a1505050505050565b5f8181527fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e82371705932000602081905260408220610c8490610f19565b9392505050565b600354604051633d7ad0b760e21b81523060048201525f91906001600160a01b037f0000000000000000000000003f1c547b21f65e10480de3ad8e19faac46c95034169063f5eb42dc90602401602060405180830381865afa158015610cf3573d5f803e3d5ffd5b505050506040513d601f19601f82011682018060405250810190610d1791906114c5565b610d219190611690565b905090565b5f8281525f805160206116cc8339815191526020526040902060010154610d4c81610e16565b6106188383610e78565b60018054610d6390611517565b80601f0160208091040260200160405190810160405280929190818152602001828054610d8f90611517565b8015610dda5780601f10610db157610100808354040283529160200191610dda565b820191905f5260205f20905b815481529060010190602001808311610dbd57829003601f168201915b505050505081565b5f6001600160e01b03198216637965db0b60e01b148061044957506301ffc9a760e01b6001600160e01b0319831614610449565b610e208133610f22565b50565b5f7fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e8237170593200081610e508585610f63565b905080156105e0575f858152602083905260409020610e6f9085611004565b50949350505050565b5f7fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e8237170593200081610ea58585611018565b905080156105e0575f858152602083905260409020610e6f9085611091565b610eed7fb3e25b5404b87e5a838579cb5d7481d61ad96ee284d38ec1e97c07ba64e7f6fc610e16565b565b5f82610efc8686856110a5565b1495945050505050565b5f610c8483836110dd565b610eed611103565b5f610449825490565b610f2c8282610919565b610f5f5760405163e2517d3f60e01b81526001600160a01b03821660048201526024810183905260440160405180910390fd5b5050565b5f5f805160206116cc833981519152610f7c8484610919565b610ffb575f848152602082815260408083206001600160a01b03871684529091529020805460ff19166001179055610fb13390565b6001600160a01b0316836001600160a01b0316857f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a46001915050610449565b5f915050610449565b5f610c84836001600160a01b03841661114c565b5f5f805160206116cc8339815191526110318484610919565b15610ffb575f848152602082815260408083206001600160a01b0387168085529252808320805460ff1916905551339287917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a46001915050610449565b5f610c84836001600160a01b038416611198565b5f81815b84811015610e6f576110d3828787848181106110c7576110c76116a3565b90506020020135611272565b91506001016110a9565b5f825f0182815481106110f2576110f26116a3565b905f5260205f200154905092915050565b7ff0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a0054600160401b900460ff16610eed57604051631afcd79f60e31b815260040160405180910390fd5b5f81815260018301602052604081205461119157508154600181810184555f848152602080822090930184905584548482528286019093526040902091909155610449565b505f610449565b5f8181526001830160205260408120548015610ffb575f6111ba600183611690565b85549091505f906111cd90600190611690565b905080821461122c575f865f0182815481106111eb576111eb6116a3565b905f5260205f200154905080875f01848154811061120b5761120b6116a3565b5f918252602080832090910192909255918252600188019052604090208390555b855486908061123d5761123d6116b7565b600190038181905f5260205f20015f90559055856001015f8681526020019081526020015f205f905560019350505050610449565b5f81831061128c575f828152602084905260409020610c84565b5f838152602083905260409020610c84565b5f602082840312156112ae575f80fd5b81356001600160e01b031981168114610c84575f80fd5b5f805f80606085870312156112d8575f80fd5b8435935060208501359250604085013567ffffffffffffffff808211156112fd575f80fd5b818701915087601f830112611310575f80fd5b81358181111561131e575f80fd5b8860208260051b8501011115611332575f80fd5b95989497505060200194505050565b5f60208284031215611351575f80fd5b5035919050565b80356001600160a01b038116811461136e575f80fd5b919050565b5f8060408385031215611384575f80fd5b8235915061139460208401611358565b90509250929050565b5f80604083850312156113ae575f80fd5b6113b783611358565b946020939093013593505050565b5f80604083850312156113d6575f80fd5b50508035926020909101359150565b5f805f80606085870312156113f8575f80fd5b84359350602085013567ffffffffffffffff80821115611416575f80fd5b818701915087601f830112611429575f80fd5b813581811115611437575f80fd5b886020828501011115611448575f80fd5b95986020929092019750949560400135945092505050565b5f60208284031215611470575f80fd5b610c8482611358565b5f602080835283518060208501525f5b818110156114a557858101830151858201604001528201611489565b505f604082860101526040601f19601f8301168501019250505092915050565b5f602082840312156114d5575f80fd5b5051919050565b634e487b7160e01b5f52601160045260245ffd5b80820180821115610449576104496114dc565b634e487b7160e01b5f52604160045260245ffd5b600181811c9082168061152b57607f821691505b60208210810361154957634e487b7160e01b5f52602260045260245ffd5b50919050565b601f82111561065157805f5260205f20601f840160051c810160208510156115745750805b601f840160051c820191505b81811015611593575f8155600101611580565b5050505050565b67ffffffffffffffff8311156115b2576115b2611503565b6115c6836115c08354611517565b8361154f565b5f601f8411600181146115f7575f85156115e05750838201355b5f19600387901b1c1916600186901b178355611593565b5f83815260208120601f198716915b828110156116265786850135825560209485019460019092019101611606565b5086821015611642575f1960f88860031b161c19848701351681555b505060018560011b0183555050505050565b84815283602082015260606040820152816060820152818360808301375f818301608090810191909152601f909201601f191601019392505050565b81810381811115610449576104496114dc565b634e487b7160e01b5f52603260045260245ffd5b634e487b7160e01b5f52603160045260245ffdfe02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b626800a164736f6c6343000818000a",
+	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"stETH\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"accounting\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AccessControlBadConfirmation\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"neededRole\",\"type\":\"bytes32\"}],\"name\":\"AccessControlUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedToSendEther\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FeeSharesDecrease\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidLogCID\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidProof\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidReportData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidShares\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidTreeCid\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidTreeRoot\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotAllowedToRecover\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotEnoughShares\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SenderIsNotAccounting\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SenderIsNotOracle\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroAccountingAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroAdminAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroOracleAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroRebateRecipientAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroStEthAddress\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"totalClaimableShares\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"treeRoot\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"treeCid\",\"type\":\"string\"}],\"name\":\"DistributionDataUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"logCid\",\"type\":\"string\"}],\"name\":\"DistributionLogUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"ERC1155Recovered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"ERC20Recovered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"}],\"name\":\"ERC721Recovered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"EtherRecovered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"shares\",\"type\":\"uint256\"}],\"name\":\"ModuleFeeDistributed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"nodeOperatorId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"shares\",\"type\":\"uint256\"}],\"name\":\"OperatorFeeDistributed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"}],\"name\":\"RebateRecipientSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"shares\",\"type\":\"uint256\"}],\"name\":\"RebateTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"shares\",\"type\":\"uint256\"}],\"name\":\"StETHSharesRecovered\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"ACCOUNTING\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"ORACLE\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"RECOVERER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"STETH\",\"outputs\":[{\"internalType\":\"contractIStETH\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeOperatorId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"cumulativeFeeShares\",\"type\":\"uint256\"},{\"internalType\":\"bytes32[]\",\"name\":\"proof\",\"type\":\"bytes32[]\"}],\"name\":\"distributeFees\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"sharesToDistribute\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeOperatorId\",\"type\":\"uint256\"}],\"name\":\"distributedShares\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"distributed\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"distributionDataHistoryCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_rebateRecipient\",\"type\":\"address\"}],\"name\":\"finalizeUpgradeV2\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeOperatorId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"cumulativeFeeShares\",\"type\":\"uint256\"},{\"internalType\":\"bytes32[]\",\"name\":\"proof\",\"type\":\"bytes32[]\"}],\"name\":\"getFeesToDistribute\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"sharesToDistribute\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"getHistoricalDistributionData\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"refSlot\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"treeRoot\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"treeCid\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"logCid\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"distributed\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"rebate\",\"type\":\"uint256\"}],\"internalType\":\"structICSFeeDistributor.DistributionData\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getInitializedVersion\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"\",\"type\":\"uint64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"getRoleMember\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleMemberCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeOperatorId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"shares\",\"type\":\"uint256\"}],\"name\":\"hashLeaf\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"admin\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_rebateRecipient\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"logCid\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pendingSharesToDistribute\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_treeRoot\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"_treeCid\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_logCid\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"distributed\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"rebate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"refSlot\",\"type\":\"uint256\"}],\"name\":\"processOracleReport\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"rebateRecipient\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"recoverERC1155\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"recoverERC20\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"recoverERC721\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"recoverEther\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"callerConfirmation\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_rebateRecipient\",\"type\":\"address\"}],\"name\":\"setRebateRecipient\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalClaimableShares\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"treeCid\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"treeRoot\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	Bin: "0x608060405234801561000f575f80fd5b50600436106101fd575f3560e01c80636f962e5c11610114578063b3c65015116100a9578063d5ba2dcf11610079578063d5ba2dcf14610498578063e00bfe50146104ab578063e877f068146104d2578063ea6301ab146104e5578063fe3c9b9b14610504575f80fd5b8063b3c6501514610449578063ca15c8731461046a578063d257cf2a1461047d578063d547741f14610485575f80fd5b80639010d07c116100e45780639010d07c146103f557806391d1485414610408578063a217fddf1461041b578063acf1c94814610422575f80fd5b80636f962e5c146103a75780637e9f27ad146103bc578063819d4cc6146103cf5780638980f11f146103e2575f80fd5b806338013f02116101955780634e5b3a62116101655780634e5b3a621461033257806352d8bfc2146103525780635c654ad91461035a5780635e8e8f6f1461036d5780636dc3f2bd14610380575f80fd5b806338013f02146102e65780633d18b6f31461030d57806347d17d9d14610316578063485cc9551461031f575f80fd5b80632f2ff15d116101d05780632f2ff15d146102805780632ffa14e1146102955780633333e109146102a857806336568abe146102d3575f80fd5b806301ffc9a71461020157806314dc6c141461022957806321893f7b1461023f578063248a9ca314610252575b5f80fd5b61021461020f366004611a81565b61050c565b60405190151581526020015b60405180910390f35b6102315f5481565b604051908152602001610220565b61023161024d366004611aa8565b610536565b610231610260366004611b24565b5f9081525f80516020612106833981519152602052604090206001015490565b61029361028e366004611b56565b6106df565b005b6102936102a3366004611bc5565b610715565b6007546102bb906001600160a01b031681565b6040516001600160a01b039091168152602001610220565b6102936102e1366004611b56565b610c65565b6102bb7f0000000000000000000000004d4074628678bd302921c20573eea1ed38ddf7fb81565b61023160065481565b61023160045481565b61029361032d366004611c4f565b610c9d565b610345610340366004611b24565b610db8565b6040516102209190611cba565b610293610f5a565b610293610368366004611d27565b610fb6565b61023161037b366004611aa8565b611031565b6102bb7f0000000000000000000000004d72bff1beac69925f8bd12526a39baab069e5da81565b6103af6110c4565b6040516102209190611d4f565b6102316103ca366004611d61565b611150565b6102936103dd366004611d27565b6111a1565b6102936103f0366004611d27565b6111f0565b6102bb610403366004611d61565b611291565b610214610416366004611b56565b6112c9565b6102315f81565b6102317fb3e25b5404b87e5a838579cb5d7481d61ad96ee284d38ec1e97c07ba64e7f6fc81565b6104516112ff565b60405167ffffffffffffffff9091168152602001610220565b610231610478366004611b24565b611337565b610231611375565b610293610493366004611b56565b61140d565b6102936104a6366004611d81565b61143d565b6102bb7f000000000000000000000000ae7ab96520de3a18e5e111b5eaab095312d7fe8481565b6102936104e0366004611d81565b61151d565b6102316104f3366004611b24565b60036020525f908152604090205481565b6103af611534565b5f6001600160e01b03198216635a05180f60e01b1480610530575061053082611541565b92915050565b5f336001600160a01b037f0000000000000000000000004d72bff1beac69925f8bd12526a39baab069e5da16146105805760405163a8d664b560e01b815260040160405180910390fd5b61058c85858585611031565b9050805f0361059c57505f6106d7565b8060045410156105bf57604051633c57b48560e21b815260040160405180910390fd5b6004805482900381555f868152600360205260409081902080548401905551638fcb4e5b60e01b81526001600160a01b037f000000000000000000000000ae7ab96520de3a18e5e111b5eaab095312d7fe841691638fcb4e5b9161065b917f0000000000000000000000004d72bff1beac69925f8bd12526a39baab069e5da918691016001600160a01b03929092168252602082015260400190565b6020604051808303815f875af1158015610677573d5f803e3d5ffd5b505050506040513d601f19601f8201168201806040525081019061069b9190611d9a565b50847f4b7ab1c192267e83350d06490a852b8dbbb25bfa00fd065b1862cf7accd2ab90826040516106ce91815260200190565b60405180910390a25b949350505050565b5f8281525f80516020612106833981519152602052604090206001015461070581611575565b61070f8383611582565b50505050565b336001600160a01b037f0000000000000000000000004d4074628678bd302921c20573eea1ed38ddf7fb161461075e576040516312d4786560e01b815260040160405180910390fd5b604051633d7ad0b760e21b81523060048201527f000000000000000000000000ae7ab96520de3a18e5e111b5eaab095312d7fe846001600160a01b03169063f5eb42dc90602401602060405180830381865afa1580156107c0573d5f803e3d5ffd5b505050506040513d601f19601f820116820180604052508101906107e49190611d9a565b82846004546107f39190611dc5565b6107fd9190611dc5565b111561081c57604051636edcc52360e01b815260040160405180910390fd5b8215801561082957505f82115b156108475760405163319c9a2160e21b815260040160405180910390fd5b8215610954575f86900361086e576040516312b7aebf60e01b815260040160405180910390fd5b600160405161087d9190611e10565b60405180910390208787604051610895929190611e82565b6040518091039020036108bb576040516312b7aebf60e01b815260040160405180910390fd5b876108d9576040516357e86a3360e01b815260040160405180910390fd5b5f5488036108fa576040516357e86a3360e01b815260040160405180910390fd5b60048054840190555f8890556001610913878983611ef0565b507f26dec7cc117e9b3907dc1f90d2dc5f6e04dbb9f285f5898be2c82ec524dcd42460045489898960405161094b9493929190611fd2565b60405180910390a15b6040518381527f010f65f5f56ba52d759f7b1dc49a3d277570cc2aa631e9c865b073a0ffc2af419060200160405180910390a18115610a5757600754604051638fcb4e5b60e01b81526001600160a01b039182166004820152602481018490527f000000000000000000000000ae7ab96520de3a18e5e111b5eaab095312d7fe8490911690638fcb4e5b906044016020604051808303815f875af11580156109fe573d5f803e3d5ffd5b505050506040513d601f19601f82011682018060405250810190610a229190611d9a565b506040518281527f7462935fb42d34d84233f737293310ca24e851021f9cb7f2549470cdf6de56bf9060200160405180910390a15b5f849003610a785760405163526ca52560e01b815260040160405180910390fd5b6002604051610a879190611e10565b60405180910390208585604051610a9f929190611e82565b604051809103902003610ac55760405163526ca52560e01b815260040160405180910390fd5b6002610ad2858783611ef0565b507f1f1a488b71a099a0d9cb71f60e14cf90bd1b5b188ca593111a40f533a3130b3b8585604051610b04929190611ffb565b60405180910390a16040518060c001604052808281526020015f54815260200160018054610b3190611dd8565b80601f0160208091040260200160405190810160405280929190818152602001828054610b5d90611dd8565b8015610ba85780601f10610b7f57610100808354040283529160200191610ba8565b820191905f5260205f20905b815481529060010190602001808311610b8b57829003601f168201915b5050505050815260200186868080601f0160208091040260200160405190810160405280939291908181526020018383808284375f920182905250938552505050602080830187905260409283018690526006548252600581529082902083518155908301516001820155908201516002820190610c26908261200e565b5060608201516003820190610c3b908261200e565b506080820151600482015560a0909101516005909101555050600680546001019055505050505050565b6001600160a01b0381163314610c8e5760405163334bd91960e11b815260040160405180910390fd5b610c9882826115d7565b505050565b7ff0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a00805460029190600160401b900460ff1680610ce75750805467ffffffffffffffff808416911610155b15610d055760405163f92ee8a960e01b815260040160405180910390fd5b805468ffffffffffffffffff191667ffffffffffffffff831617600160401b1781556001600160a01b038416610d4e57604051633ef39b8160e01b815260040160405180910390fd5b610d5783611623565b610d5f6116ab565b610d695f85611582565b50805460ff60401b1916815560405167ffffffffffffffff831681527fc7f505b2f371ae2175ee4913f4499e1f2633a7b5936321eed1cdaeb6115181d29060200160405180910390a150505050565b610df06040518060c001604052805f81526020015f801916815260200160608152602001606081526020015f81526020015f81525090565b60055f8381526020019081526020015f206040518060c00160405290815f820154815260200160018201548152602001600282018054610e2f90611dd8565b80601f0160208091040260200160405190810160405280929190818152602001828054610e5b90611dd8565b8015610ea65780601f10610e7d57610100808354040283529160200191610ea6565b820191905f5260205f20905b815481529060010190602001808311610e8957829003601f168201915b50505050508152602001600382018054610ebf90611dd8565b80601f0160208091040260200160405190810160405280929190818152602001828054610eeb90611dd8565b8015610f365780601f10610f0d57610100808354040283529160200191610f36565b820191905f5260205f20905b815481529060010190602001808311610f1957829003601f168201915b50505050508152602001600482015481526020016005820154815250509050919050565b610f626116b5565b73a74528edc289b1a597faf83fcff7eff871cc01d96352d8bfc26040518163ffffffff1660e01b81526004015f6040518083038186803b158015610fa4575f80fd5b505af415801561070f573d5f803e3d5ffd5b610fbe6116b5565b604051635c654ad960e01b81526001600160a01b03831660048201526024810182905273a74528edc289b1a597faf83fcff7eff871cc01d990635c654ad9906044015b5f6040518083038186803b158015611017575f80fd5b505af4158015611029573d5f803e3d5ffd5b505050505050565b5f818103611052576040516309bde33960e01b815260040160405180910390fd5b5f61106984845f546110648a8a611150565b6116de565b905080611089576040516309bde33960e01b815260040160405180910390fd5b5f86815260036020526040902054858111156110b857604051636096ce8160e11b815260040160405180910390fd5b90940395945050505050565b600280546110d190611dd8565b80601f01602080910402602001604051908101604052809291908181526020018280546110fd90611dd8565b80156111485780601f1061111f57610100808354040283529160200191611148565b820191905f5260205f20905b81548152906001019060200180831161112b57829003601f168201915b505050505081565b60408051602081018490529081018290525f9060600160408051601f198184030181528282528051602091820120908301520160405160208183030381529060405280519060200120905092915050565b6111a96116b5565b6040516340cea66360e11b81526001600160a01b03831660048201526024810182905273a74528edc289b1a597faf83fcff7eff871cc01d99063819d4cc690604401611001565b6111f86116b5565b7f000000000000000000000000ae7ab96520de3a18e5e111b5eaab095312d7fe846001600160a01b0316826001600160a01b03160361124a576040516319efe5d760e21b815260040160405180910390fd5b604051638980f11f60e01b81526001600160a01b03831660048201526024810182905273a74528edc289b1a597faf83fcff7eff871cc01d990638980f11f90604401611001565b5f8281527fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e823717059320006020819052604082206106d790846116f5565b5f9182525f80516020612106833981519152602090815260408084206001600160a01b0393909316845291905290205460ff1690565b5f6113327ff0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a005467ffffffffffffffff1690565b905090565b5f8181527fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e8237170593200060208190526040822061136e90611700565b9392505050565b60048054604051633d7ad0b760e21b815230928101929092525f917f000000000000000000000000ae7ab96520de3a18e5e111b5eaab095312d7fe846001600160a01b03169063f5eb42dc90602401602060405180830381865afa1580156113df573d5f803e3d5ffd5b505050506040513d601f19601f820116820180604052508101906114039190611d9a565b61133291906120ca565b5f8281525f80516020612106833981519152602052604090206001015461143381611575565b61070f83836115d7565b7ff0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a00805460029190600160401b900460ff16806114875750805467ffffffffffffffff808416911610155b156114a55760405163f92ee8a960e01b815260040160405180910390fd5b805468ffffffffffffffffff191667ffffffffffffffff831617600160401b1781556114d083611623565b805460ff60401b1916815560405167ffffffffffffffff831681527fc7f505b2f371ae2175ee4913f4499e1f2633a7b5936321eed1cdaeb6115181d29060200160405180910390a1505050565b5f61152781611575565b61153082611623565b5050565b600180546110d190611dd8565b5f6001600160e01b03198216637965db0b60e01b148061053057506301ffc9a760e01b6001600160e01b0319831614610530565b61157f8133611709565b50565b5f7fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e82371705932000816115af8585611746565b905080156106d7575f8581526020839052604090206115ce90856117e7565b50949350505050565b5f7fc1f6fe24621ce81ec5827caf0253cadb74709b061630e6b55e823717059320008161160485856117fb565b905080156106d7575f8581526020839052604090206115ce9085611874565b6001600160a01b03811661164a5760405163669766e160e01b815260040160405180910390fd5b6007805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0383169081179091556040519081527f9f8636d85f90aba9c7d2c9e076c6102a5459d2e063afb71d81328bbb3608a2349060200160405180910390a150565b6116b3611888565b565b6116b37fb3e25b5404b87e5a838579cb5d7481d61ad96ee284d38ec1e97c07ba64e7f6fc611575565b5f826116eb8686856118d1565b1495945050505050565b5f61136e8383611909565b5f610530825490565b61171382826112c9565b6115305760405163e2517d3f60e01b81526001600160a01b03821660048201526024810183905260440160405180910390fd5b5f5f8051602061210683398151915261175f84846112c9565b6117de575f848152602082815260408083206001600160a01b03871684529091529020805460ff191660011790556117943390565b6001600160a01b0316836001600160a01b0316857f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a46001915050610530565b5f915050610530565b5f61136e836001600160a01b03841661192f565b5f5f8051602061210683398151915261181484846112c9565b156117de575f848152602082815260408083206001600160a01b0387168085529252808320805460ff1916905551339287917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a46001915050610530565b5f61136e836001600160a01b03841661197b565b7ff0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a0054600160401b900460ff166116b357604051631afcd79f60e31b815260040160405180910390fd5b5f81815b848110156115ce576118ff828787848181106118f3576118f36120dd565b90506020020135611a55565b91506001016118d5565b5f825f01828154811061191e5761191e6120dd565b905f5260205f200154905092915050565b5f81815260018301602052604081205461197457508154600181810184555f848152602080822090930184905584548482528286019093526040902091909155610530565b505f610530565b5f81815260018301602052604081205480156117de575f61199d6001836120ca565b85549091505f906119b0906001906120ca565b9050808214611a0f575f865f0182815481106119ce576119ce6120dd565b905f5260205f200154905080875f0184815481106119ee576119ee6120dd565b5f918252602080832090910192909255918252600188019052604090208390555b8554869080611a2057611a206120f1565b600190038181905f5260205f20015f90559055856001015f8681526020019081526020015f205f905560019350505050610530565b5f818310611a6f575f82815260208490526040902061136e565b5f83815260208390526040902061136e565b5f60208284031215611a91575f80fd5b81356001600160e01b03198116811461136e575f80fd5b5f805f8060608587031215611abb575f80fd5b8435935060208501359250604085013567ffffffffffffffff80821115611ae0575f80fd5b818701915087601f830112611af3575f80fd5b813581811115611b01575f80fd5b8860208260051b8501011115611b15575f80fd5b95989497505060200194505050565b5f60208284031215611b34575f80fd5b5035919050565b80356001600160a01b0381168114611b51575f80fd5b919050565b5f8060408385031215611b67575f80fd5b82359150611b7760208401611b3b565b90509250929050565b5f8083601f840112611b90575f80fd5b50813567ffffffffffffffff811115611ba7575f80fd5b602083019150836020828501011115611bbe575f80fd5b9250929050565b5f805f805f805f8060c0898b031215611bdc575f80fd5b88359750602089013567ffffffffffffffff80821115611bfa575f80fd5b611c068c838d01611b80565b909950975060408b0135915080821115611c1e575f80fd5b50611c2b8b828c01611b80565b999c989b5096999698976060880135976080810135975060a0013595509350505050565b5f8060408385031215611c60575f80fd5b611c6983611b3b565b9150611b7760208401611b3b565b5f81518084525f5b81811015611c9b57602081850181015186830182015201611c7f565b505f602082860101526020601f19601f83011685010191505092915050565b6020815281516020820152602082015160408201525f604083015160c06060840152611ce960e0840182611c77565b90506060840151601f19848303016080850152611d068282611c77565b915050608084015160a084015260a084015160c08401528091505092915050565b5f8060408385031215611d38575f80fd5b611d4183611b3b565b946020939093013593505050565b602081525f61136e6020830184611c77565b5f8060408385031215611d72575f80fd5b50508035926020909101359150565b5f60208284031215611d91575f80fd5b61136e82611b3b565b5f60208284031215611daa575f80fd5b5051919050565b634e487b7160e01b5f52601160045260245ffd5b8082018082111561053057610530611db1565b600181811c90821680611dec57607f821691505b602082108103611e0a57634e487b7160e01b5f52602260045260245ffd5b50919050565b5f808354611e1d81611dd8565b60018281168015611e355760018114611e4a57611e76565b60ff1984168752821515830287019450611e76565b875f526020805f205f5b85811015611e6d5781548a820152908401908201611e54565b50505082870194505b50929695505050505050565b818382375f9101908152919050565b634e487b7160e01b5f52604160045260245ffd5b601f821115610c9857805f5260205f20601f840160051c81016020851015611eca5750805b601f840160051c820191505b81811015611ee9575f8155600101611ed6565b5050505050565b67ffffffffffffffff831115611f0857611f08611e91565b611f1c83611f168354611dd8565b83611ea5565b5f601f841160018114611f4d575f8515611f365750838201355b5f19600387901b1c1916600186901b178355611ee9565b5f83815260208120601f198716915b82811015611f7c5786850135825560209485019460019092019101611f5c565b5086821015611f98575f1960f88860031b161c19848701351681555b505060018560011b0183555050505050565b81835281816020850137505f828201602090810191909152601f909101601f19169091010190565b848152836020820152606060408201525f611ff1606083018486611faa565b9695505050505050565b602081525f6106d7602083018486611faa565b815167ffffffffffffffff81111561202857612028611e91565b61203c816120368454611dd8565b84611ea5565b602080601f83116001811461206f575f84156120585750858301515b5f19600386901b1c1916600185901b178555611029565b5f85815260208120601f198616915b8281101561209d5788860151825594840194600190910190840161207e565b50858210156120ba57878501515f19600388901b60f8161c191681555b5050505050600190811b01905550565b8181038181111561053057610530611db1565b634e487b7160e01b5f52603260045260245ffd5b634e487b7160e01b5f52603160045260245ffdfe02dd7bc7dec4dceedda775e58dd541e08a116c6c53815c0bd028192f7b626800a164736f6c6343000818000a",
 }
 
 // CsfeedistributorABI is the input ABI used to generate the binding from.
@@ -359,10 +369,10 @@ func (_Csfeedistributor *CsfeedistributorCallerSession) STETH() (common.Address,
 
 // DistributedShares is a free data retrieval call binding the contract method 0xea6301ab.
 //
-// Solidity: function distributedShares(uint256 ) view returns(uint256)
-func (_Csfeedistributor *CsfeedistributorCaller) DistributedShares(opts *bind.CallOpts, arg0 *big.Int) (*big.Int, error) {
+// Solidity: function distributedShares(uint256 nodeOperatorId) view returns(uint256 distributed)
+func (_Csfeedistributor *CsfeedistributorCaller) DistributedShares(opts *bind.CallOpts, nodeOperatorId *big.Int) (*big.Int, error) {
 	var out []interface{}
-	err := _Csfeedistributor.contract.Call(opts, &out, "distributedShares", arg0)
+	err := _Csfeedistributor.contract.Call(opts, &out, "distributedShares", nodeOperatorId)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -376,24 +386,55 @@ func (_Csfeedistributor *CsfeedistributorCaller) DistributedShares(opts *bind.Ca
 
 // DistributedShares is a free data retrieval call binding the contract method 0xea6301ab.
 //
-// Solidity: function distributedShares(uint256 ) view returns(uint256)
-func (_Csfeedistributor *CsfeedistributorSession) DistributedShares(arg0 *big.Int) (*big.Int, error) {
-	return _Csfeedistributor.Contract.DistributedShares(&_Csfeedistributor.CallOpts, arg0)
+// Solidity: function distributedShares(uint256 nodeOperatorId) view returns(uint256 distributed)
+func (_Csfeedistributor *CsfeedistributorSession) DistributedShares(nodeOperatorId *big.Int) (*big.Int, error) {
+	return _Csfeedistributor.Contract.DistributedShares(&_Csfeedistributor.CallOpts, nodeOperatorId)
 }
 
 // DistributedShares is a free data retrieval call binding the contract method 0xea6301ab.
 //
-// Solidity: function distributedShares(uint256 ) view returns(uint256)
-func (_Csfeedistributor *CsfeedistributorCallerSession) DistributedShares(arg0 *big.Int) (*big.Int, error) {
-	return _Csfeedistributor.Contract.DistributedShares(&_Csfeedistributor.CallOpts, arg0)
+// Solidity: function distributedShares(uint256 nodeOperatorId) view returns(uint256 distributed)
+func (_Csfeedistributor *CsfeedistributorCallerSession) DistributedShares(nodeOperatorId *big.Int) (*big.Int, error) {
+	return _Csfeedistributor.Contract.DistributedShares(&_Csfeedistributor.CallOpts, nodeOperatorId)
+}
+
+// DistributionDataHistoryCount is a free data retrieval call binding the contract method 0x3d18b6f3.
+//
+// Solidity: function distributionDataHistoryCount() view returns(uint256)
+func (_Csfeedistributor *CsfeedistributorCaller) DistributionDataHistoryCount(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _Csfeedistributor.contract.Call(opts, &out, "distributionDataHistoryCount")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// DistributionDataHistoryCount is a free data retrieval call binding the contract method 0x3d18b6f3.
+//
+// Solidity: function distributionDataHistoryCount() view returns(uint256)
+func (_Csfeedistributor *CsfeedistributorSession) DistributionDataHistoryCount() (*big.Int, error) {
+	return _Csfeedistributor.Contract.DistributionDataHistoryCount(&_Csfeedistributor.CallOpts)
+}
+
+// DistributionDataHistoryCount is a free data retrieval call binding the contract method 0x3d18b6f3.
+//
+// Solidity: function distributionDataHistoryCount() view returns(uint256)
+func (_Csfeedistributor *CsfeedistributorCallerSession) DistributionDataHistoryCount() (*big.Int, error) {
+	return _Csfeedistributor.Contract.DistributionDataHistoryCount(&_Csfeedistributor.CallOpts)
 }
 
 // GetFeesToDistribute is a free data retrieval call binding the contract method 0x5e8e8f6f.
 //
-// Solidity: function getFeesToDistribute(uint256 nodeOperatorId, uint256 shares, bytes32[] proof) view returns(uint256 sharesToDistribute)
-func (_Csfeedistributor *CsfeedistributorCaller) GetFeesToDistribute(opts *bind.CallOpts, nodeOperatorId *big.Int, shares *big.Int, proof [][32]byte) (*big.Int, error) {
+// Solidity: function getFeesToDistribute(uint256 nodeOperatorId, uint256 cumulativeFeeShares, bytes32[] proof) view returns(uint256 sharesToDistribute)
+func (_Csfeedistributor *CsfeedistributorCaller) GetFeesToDistribute(opts *bind.CallOpts, nodeOperatorId *big.Int, cumulativeFeeShares *big.Int, proof [][32]byte) (*big.Int, error) {
 	var out []interface{}
-	err := _Csfeedistributor.contract.Call(opts, &out, "getFeesToDistribute", nodeOperatorId, shares, proof)
+	err := _Csfeedistributor.contract.Call(opts, &out, "getFeesToDistribute", nodeOperatorId, cumulativeFeeShares, proof)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -407,16 +448,78 @@ func (_Csfeedistributor *CsfeedistributorCaller) GetFeesToDistribute(opts *bind.
 
 // GetFeesToDistribute is a free data retrieval call binding the contract method 0x5e8e8f6f.
 //
-// Solidity: function getFeesToDistribute(uint256 nodeOperatorId, uint256 shares, bytes32[] proof) view returns(uint256 sharesToDistribute)
-func (_Csfeedistributor *CsfeedistributorSession) GetFeesToDistribute(nodeOperatorId *big.Int, shares *big.Int, proof [][32]byte) (*big.Int, error) {
-	return _Csfeedistributor.Contract.GetFeesToDistribute(&_Csfeedistributor.CallOpts, nodeOperatorId, shares, proof)
+// Solidity: function getFeesToDistribute(uint256 nodeOperatorId, uint256 cumulativeFeeShares, bytes32[] proof) view returns(uint256 sharesToDistribute)
+func (_Csfeedistributor *CsfeedistributorSession) GetFeesToDistribute(nodeOperatorId *big.Int, cumulativeFeeShares *big.Int, proof [][32]byte) (*big.Int, error) {
+	return _Csfeedistributor.Contract.GetFeesToDistribute(&_Csfeedistributor.CallOpts, nodeOperatorId, cumulativeFeeShares, proof)
 }
 
 // GetFeesToDistribute is a free data retrieval call binding the contract method 0x5e8e8f6f.
 //
-// Solidity: function getFeesToDistribute(uint256 nodeOperatorId, uint256 shares, bytes32[] proof) view returns(uint256 sharesToDistribute)
-func (_Csfeedistributor *CsfeedistributorCallerSession) GetFeesToDistribute(nodeOperatorId *big.Int, shares *big.Int, proof [][32]byte) (*big.Int, error) {
-	return _Csfeedistributor.Contract.GetFeesToDistribute(&_Csfeedistributor.CallOpts, nodeOperatorId, shares, proof)
+// Solidity: function getFeesToDistribute(uint256 nodeOperatorId, uint256 cumulativeFeeShares, bytes32[] proof) view returns(uint256 sharesToDistribute)
+func (_Csfeedistributor *CsfeedistributorCallerSession) GetFeesToDistribute(nodeOperatorId *big.Int, cumulativeFeeShares *big.Int, proof [][32]byte) (*big.Int, error) {
+	return _Csfeedistributor.Contract.GetFeesToDistribute(&_Csfeedistributor.CallOpts, nodeOperatorId, cumulativeFeeShares, proof)
+}
+
+// GetHistoricalDistributionData is a free data retrieval call binding the contract method 0x4e5b3a62.
+//
+// Solidity: function getHistoricalDistributionData(uint256 index) view returns((uint256,bytes32,string,string,uint256,uint256))
+func (_Csfeedistributor *CsfeedistributorCaller) GetHistoricalDistributionData(opts *bind.CallOpts, index *big.Int) (ICSFeeDistributorDistributionData, error) {
+	var out []interface{}
+	err := _Csfeedistributor.contract.Call(opts, &out, "getHistoricalDistributionData", index)
+
+	if err != nil {
+		return *new(ICSFeeDistributorDistributionData), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(ICSFeeDistributorDistributionData)).(*ICSFeeDistributorDistributionData)
+
+	return out0, err
+
+}
+
+// GetHistoricalDistributionData is a free data retrieval call binding the contract method 0x4e5b3a62.
+//
+// Solidity: function getHistoricalDistributionData(uint256 index) view returns((uint256,bytes32,string,string,uint256,uint256))
+func (_Csfeedistributor *CsfeedistributorSession) GetHistoricalDistributionData(index *big.Int) (ICSFeeDistributorDistributionData, error) {
+	return _Csfeedistributor.Contract.GetHistoricalDistributionData(&_Csfeedistributor.CallOpts, index)
+}
+
+// GetHistoricalDistributionData is a free data retrieval call binding the contract method 0x4e5b3a62.
+//
+// Solidity: function getHistoricalDistributionData(uint256 index) view returns((uint256,bytes32,string,string,uint256,uint256))
+func (_Csfeedistributor *CsfeedistributorCallerSession) GetHistoricalDistributionData(index *big.Int) (ICSFeeDistributorDistributionData, error) {
+	return _Csfeedistributor.Contract.GetHistoricalDistributionData(&_Csfeedistributor.CallOpts, index)
+}
+
+// GetInitializedVersion is a free data retrieval call binding the contract method 0xb3c65015.
+//
+// Solidity: function getInitializedVersion() view returns(uint64)
+func (_Csfeedistributor *CsfeedistributorCaller) GetInitializedVersion(opts *bind.CallOpts) (uint64, error) {
+	var out []interface{}
+	err := _Csfeedistributor.contract.Call(opts, &out, "getInitializedVersion")
+
+	if err != nil {
+		return *new(uint64), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(uint64)).(*uint64)
+
+	return out0, err
+
+}
+
+// GetInitializedVersion is a free data retrieval call binding the contract method 0xb3c65015.
+//
+// Solidity: function getInitializedVersion() view returns(uint64)
+func (_Csfeedistributor *CsfeedistributorSession) GetInitializedVersion() (uint64, error) {
+	return _Csfeedistributor.Contract.GetInitializedVersion(&_Csfeedistributor.CallOpts)
+}
+
+// GetInitializedVersion is a free data retrieval call binding the contract method 0xb3c65015.
+//
+// Solidity: function getInitializedVersion() view returns(uint64)
+func (_Csfeedistributor *CsfeedistributorCallerSession) GetInitializedVersion() (uint64, error) {
+	return _Csfeedistributor.Contract.GetInitializedVersion(&_Csfeedistributor.CallOpts)
 }
 
 // GetRoleAdmin is a free data retrieval call binding the contract method 0x248a9ca3.
@@ -574,6 +677,37 @@ func (_Csfeedistributor *CsfeedistributorCallerSession) HashLeaf(nodeOperatorId 
 	return _Csfeedistributor.Contract.HashLeaf(&_Csfeedistributor.CallOpts, nodeOperatorId, shares)
 }
 
+// LogCid is a free data retrieval call binding the contract method 0x6f962e5c.
+//
+// Solidity: function logCid() view returns(string)
+func (_Csfeedistributor *CsfeedistributorCaller) LogCid(opts *bind.CallOpts) (string, error) {
+	var out []interface{}
+	err := _Csfeedistributor.contract.Call(opts, &out, "logCid")
+
+	if err != nil {
+		return *new(string), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(string)).(*string)
+
+	return out0, err
+
+}
+
+// LogCid is a free data retrieval call binding the contract method 0x6f962e5c.
+//
+// Solidity: function logCid() view returns(string)
+func (_Csfeedistributor *CsfeedistributorSession) LogCid() (string, error) {
+	return _Csfeedistributor.Contract.LogCid(&_Csfeedistributor.CallOpts)
+}
+
+// LogCid is a free data retrieval call binding the contract method 0x6f962e5c.
+//
+// Solidity: function logCid() view returns(string)
+func (_Csfeedistributor *CsfeedistributorCallerSession) LogCid() (string, error) {
+	return _Csfeedistributor.Contract.LogCid(&_Csfeedistributor.CallOpts)
+}
+
 // PendingSharesToDistribute is a free data retrieval call binding the contract method 0xd257cf2a.
 //
 // Solidity: function pendingSharesToDistribute() view returns(uint256)
@@ -603,6 +737,37 @@ func (_Csfeedistributor *CsfeedistributorSession) PendingSharesToDistribute() (*
 // Solidity: function pendingSharesToDistribute() view returns(uint256)
 func (_Csfeedistributor *CsfeedistributorCallerSession) PendingSharesToDistribute() (*big.Int, error) {
 	return _Csfeedistributor.Contract.PendingSharesToDistribute(&_Csfeedistributor.CallOpts)
+}
+
+// RebateRecipient is a free data retrieval call binding the contract method 0x3333e109.
+//
+// Solidity: function rebateRecipient() view returns(address)
+func (_Csfeedistributor *CsfeedistributorCaller) RebateRecipient(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _Csfeedistributor.contract.Call(opts, &out, "rebateRecipient")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// RebateRecipient is a free data retrieval call binding the contract method 0x3333e109.
+//
+// Solidity: function rebateRecipient() view returns(address)
+func (_Csfeedistributor *CsfeedistributorSession) RebateRecipient() (common.Address, error) {
+	return _Csfeedistributor.Contract.RebateRecipient(&_Csfeedistributor.CallOpts)
+}
+
+// RebateRecipient is a free data retrieval call binding the contract method 0x3333e109.
+//
+// Solidity: function rebateRecipient() view returns(address)
+func (_Csfeedistributor *CsfeedistributorCallerSession) RebateRecipient() (common.Address, error) {
+	return _Csfeedistributor.Contract.RebateRecipient(&_Csfeedistributor.CallOpts)
 }
 
 // SupportsInterface is a free data retrieval call binding the contract method 0x01ffc9a7.
@@ -731,23 +896,44 @@ func (_Csfeedistributor *CsfeedistributorCallerSession) TreeRoot() ([32]byte, er
 
 // DistributeFees is a paid mutator transaction binding the contract method 0x21893f7b.
 //
-// Solidity: function distributeFees(uint256 nodeOperatorId, uint256 shares, bytes32[] proof) returns(uint256 sharesToDistribute)
-func (_Csfeedistributor *CsfeedistributorTransactor) DistributeFees(opts *bind.TransactOpts, nodeOperatorId *big.Int, shares *big.Int, proof [][32]byte) (*types.Transaction, error) {
-	return _Csfeedistributor.contract.Transact(opts, "distributeFees", nodeOperatorId, shares, proof)
+// Solidity: function distributeFees(uint256 nodeOperatorId, uint256 cumulativeFeeShares, bytes32[] proof) returns(uint256 sharesToDistribute)
+func (_Csfeedistributor *CsfeedistributorTransactor) DistributeFees(opts *bind.TransactOpts, nodeOperatorId *big.Int, cumulativeFeeShares *big.Int, proof [][32]byte) (*types.Transaction, error) {
+	return _Csfeedistributor.contract.Transact(opts, "distributeFees", nodeOperatorId, cumulativeFeeShares, proof)
 }
 
 // DistributeFees is a paid mutator transaction binding the contract method 0x21893f7b.
 //
-// Solidity: function distributeFees(uint256 nodeOperatorId, uint256 shares, bytes32[] proof) returns(uint256 sharesToDistribute)
-func (_Csfeedistributor *CsfeedistributorSession) DistributeFees(nodeOperatorId *big.Int, shares *big.Int, proof [][32]byte) (*types.Transaction, error) {
-	return _Csfeedistributor.Contract.DistributeFees(&_Csfeedistributor.TransactOpts, nodeOperatorId, shares, proof)
+// Solidity: function distributeFees(uint256 nodeOperatorId, uint256 cumulativeFeeShares, bytes32[] proof) returns(uint256 sharesToDistribute)
+func (_Csfeedistributor *CsfeedistributorSession) DistributeFees(nodeOperatorId *big.Int, cumulativeFeeShares *big.Int, proof [][32]byte) (*types.Transaction, error) {
+	return _Csfeedistributor.Contract.DistributeFees(&_Csfeedistributor.TransactOpts, nodeOperatorId, cumulativeFeeShares, proof)
 }
 
 // DistributeFees is a paid mutator transaction binding the contract method 0x21893f7b.
 //
-// Solidity: function distributeFees(uint256 nodeOperatorId, uint256 shares, bytes32[] proof) returns(uint256 sharesToDistribute)
-func (_Csfeedistributor *CsfeedistributorTransactorSession) DistributeFees(nodeOperatorId *big.Int, shares *big.Int, proof [][32]byte) (*types.Transaction, error) {
-	return _Csfeedistributor.Contract.DistributeFees(&_Csfeedistributor.TransactOpts, nodeOperatorId, shares, proof)
+// Solidity: function distributeFees(uint256 nodeOperatorId, uint256 cumulativeFeeShares, bytes32[] proof) returns(uint256 sharesToDistribute)
+func (_Csfeedistributor *CsfeedistributorTransactorSession) DistributeFees(nodeOperatorId *big.Int, cumulativeFeeShares *big.Int, proof [][32]byte) (*types.Transaction, error) {
+	return _Csfeedistributor.Contract.DistributeFees(&_Csfeedistributor.TransactOpts, nodeOperatorId, cumulativeFeeShares, proof)
+}
+
+// FinalizeUpgradeV2 is a paid mutator transaction binding the contract method 0xd5ba2dcf.
+//
+// Solidity: function finalizeUpgradeV2(address _rebateRecipient) returns()
+func (_Csfeedistributor *CsfeedistributorTransactor) FinalizeUpgradeV2(opts *bind.TransactOpts, _rebateRecipient common.Address) (*types.Transaction, error) {
+	return _Csfeedistributor.contract.Transact(opts, "finalizeUpgradeV2", _rebateRecipient)
+}
+
+// FinalizeUpgradeV2 is a paid mutator transaction binding the contract method 0xd5ba2dcf.
+//
+// Solidity: function finalizeUpgradeV2(address _rebateRecipient) returns()
+func (_Csfeedistributor *CsfeedistributorSession) FinalizeUpgradeV2(_rebateRecipient common.Address) (*types.Transaction, error) {
+	return _Csfeedistributor.Contract.FinalizeUpgradeV2(&_Csfeedistributor.TransactOpts, _rebateRecipient)
+}
+
+// FinalizeUpgradeV2 is a paid mutator transaction binding the contract method 0xd5ba2dcf.
+//
+// Solidity: function finalizeUpgradeV2(address _rebateRecipient) returns()
+func (_Csfeedistributor *CsfeedistributorTransactorSession) FinalizeUpgradeV2(_rebateRecipient common.Address) (*types.Transaction, error) {
+	return _Csfeedistributor.Contract.FinalizeUpgradeV2(&_Csfeedistributor.TransactOpts, _rebateRecipient)
 }
 
 // GrantRole is a paid mutator transaction binding the contract method 0x2f2ff15d.
@@ -771,46 +957,46 @@ func (_Csfeedistributor *CsfeedistributorTransactorSession) GrantRole(role [32]b
 	return _Csfeedistributor.Contract.GrantRole(&_Csfeedistributor.TransactOpts, role, account)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xc4d66de8.
+// Initialize is a paid mutator transaction binding the contract method 0x485cc955.
 //
-// Solidity: function initialize(address admin) returns()
-func (_Csfeedistributor *CsfeedistributorTransactor) Initialize(opts *bind.TransactOpts, admin common.Address) (*types.Transaction, error) {
-	return _Csfeedistributor.contract.Transact(opts, "initialize", admin)
+// Solidity: function initialize(address admin, address _rebateRecipient) returns()
+func (_Csfeedistributor *CsfeedistributorTransactor) Initialize(opts *bind.TransactOpts, admin common.Address, _rebateRecipient common.Address) (*types.Transaction, error) {
+	return _Csfeedistributor.contract.Transact(opts, "initialize", admin, _rebateRecipient)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xc4d66de8.
+// Initialize is a paid mutator transaction binding the contract method 0x485cc955.
 //
-// Solidity: function initialize(address admin) returns()
-func (_Csfeedistributor *CsfeedistributorSession) Initialize(admin common.Address) (*types.Transaction, error) {
-	return _Csfeedistributor.Contract.Initialize(&_Csfeedistributor.TransactOpts, admin)
+// Solidity: function initialize(address admin, address _rebateRecipient) returns()
+func (_Csfeedistributor *CsfeedistributorSession) Initialize(admin common.Address, _rebateRecipient common.Address) (*types.Transaction, error) {
+	return _Csfeedistributor.Contract.Initialize(&_Csfeedistributor.TransactOpts, admin, _rebateRecipient)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xc4d66de8.
+// Initialize is a paid mutator transaction binding the contract method 0x485cc955.
 //
-// Solidity: function initialize(address admin) returns()
-func (_Csfeedistributor *CsfeedistributorTransactorSession) Initialize(admin common.Address) (*types.Transaction, error) {
-	return _Csfeedistributor.Contract.Initialize(&_Csfeedistributor.TransactOpts, admin)
+// Solidity: function initialize(address admin, address _rebateRecipient) returns()
+func (_Csfeedistributor *CsfeedistributorTransactorSession) Initialize(admin common.Address, _rebateRecipient common.Address) (*types.Transaction, error) {
+	return _Csfeedistributor.Contract.Initialize(&_Csfeedistributor.TransactOpts, admin, _rebateRecipient)
 }
 
-// ProcessOracleReport is a paid mutator transaction binding the contract method 0xb66cf058.
+// ProcessOracleReport is a paid mutator transaction binding the contract method 0x2ffa14e1.
 //
-// Solidity: function processOracleReport(bytes32 _treeRoot, string _treeCid, uint256 distributed) returns()
-func (_Csfeedistributor *CsfeedistributorTransactor) ProcessOracleReport(opts *bind.TransactOpts, _treeRoot [32]byte, _treeCid string, distributed *big.Int) (*types.Transaction, error) {
-	return _Csfeedistributor.contract.Transact(opts, "processOracleReport", _treeRoot, _treeCid, distributed)
+// Solidity: function processOracleReport(bytes32 _treeRoot, string _treeCid, string _logCid, uint256 distributed, uint256 rebate, uint256 refSlot) returns()
+func (_Csfeedistributor *CsfeedistributorTransactor) ProcessOracleReport(opts *bind.TransactOpts, _treeRoot [32]byte, _treeCid string, _logCid string, distributed *big.Int, rebate *big.Int, refSlot *big.Int) (*types.Transaction, error) {
+	return _Csfeedistributor.contract.Transact(opts, "processOracleReport", _treeRoot, _treeCid, _logCid, distributed, rebate, refSlot)
 }
 
-// ProcessOracleReport is a paid mutator transaction binding the contract method 0xb66cf058.
+// ProcessOracleReport is a paid mutator transaction binding the contract method 0x2ffa14e1.
 //
-// Solidity: function processOracleReport(bytes32 _treeRoot, string _treeCid, uint256 distributed) returns()
-func (_Csfeedistributor *CsfeedistributorSession) ProcessOracleReport(_treeRoot [32]byte, _treeCid string, distributed *big.Int) (*types.Transaction, error) {
-	return _Csfeedistributor.Contract.ProcessOracleReport(&_Csfeedistributor.TransactOpts, _treeRoot, _treeCid, distributed)
+// Solidity: function processOracleReport(bytes32 _treeRoot, string _treeCid, string _logCid, uint256 distributed, uint256 rebate, uint256 refSlot) returns()
+func (_Csfeedistributor *CsfeedistributorSession) ProcessOracleReport(_treeRoot [32]byte, _treeCid string, _logCid string, distributed *big.Int, rebate *big.Int, refSlot *big.Int) (*types.Transaction, error) {
+	return _Csfeedistributor.Contract.ProcessOracleReport(&_Csfeedistributor.TransactOpts, _treeRoot, _treeCid, _logCid, distributed, rebate, refSlot)
 }
 
-// ProcessOracleReport is a paid mutator transaction binding the contract method 0xb66cf058.
+// ProcessOracleReport is a paid mutator transaction binding the contract method 0x2ffa14e1.
 //
-// Solidity: function processOracleReport(bytes32 _treeRoot, string _treeCid, uint256 distributed) returns()
-func (_Csfeedistributor *CsfeedistributorTransactorSession) ProcessOracleReport(_treeRoot [32]byte, _treeCid string, distributed *big.Int) (*types.Transaction, error) {
-	return _Csfeedistributor.Contract.ProcessOracleReport(&_Csfeedistributor.TransactOpts, _treeRoot, _treeCid, distributed)
+// Solidity: function processOracleReport(bytes32 _treeRoot, string _treeCid, string _logCid, uint256 distributed, uint256 rebate, uint256 refSlot) returns()
+func (_Csfeedistributor *CsfeedistributorTransactorSession) ProcessOracleReport(_treeRoot [32]byte, _treeCid string, _logCid string, distributed *big.Int, rebate *big.Int, refSlot *big.Int) (*types.Transaction, error) {
+	return _Csfeedistributor.Contract.ProcessOracleReport(&_Csfeedistributor.TransactOpts, _treeRoot, _treeCid, _logCid, distributed, rebate, refSlot)
 }
 
 // RecoverERC1155 is a paid mutator transaction binding the contract method 0x5c654ad9.
@@ -937,6 +1123,27 @@ func (_Csfeedistributor *CsfeedistributorSession) RevokeRole(role [32]byte, acco
 // Solidity: function revokeRole(bytes32 role, address account) returns()
 func (_Csfeedistributor *CsfeedistributorTransactorSession) RevokeRole(role [32]byte, account common.Address) (*types.Transaction, error) {
 	return _Csfeedistributor.Contract.RevokeRole(&_Csfeedistributor.TransactOpts, role, account)
+}
+
+// SetRebateRecipient is a paid mutator transaction binding the contract method 0xe877f068.
+//
+// Solidity: function setRebateRecipient(address _rebateRecipient) returns()
+func (_Csfeedistributor *CsfeedistributorTransactor) SetRebateRecipient(opts *bind.TransactOpts, _rebateRecipient common.Address) (*types.Transaction, error) {
+	return _Csfeedistributor.contract.Transact(opts, "setRebateRecipient", _rebateRecipient)
+}
+
+// SetRebateRecipient is a paid mutator transaction binding the contract method 0xe877f068.
+//
+// Solidity: function setRebateRecipient(address _rebateRecipient) returns()
+func (_Csfeedistributor *CsfeedistributorSession) SetRebateRecipient(_rebateRecipient common.Address) (*types.Transaction, error) {
+	return _Csfeedistributor.Contract.SetRebateRecipient(&_Csfeedistributor.TransactOpts, _rebateRecipient)
+}
+
+// SetRebateRecipient is a paid mutator transaction binding the contract method 0xe877f068.
+//
+// Solidity: function setRebateRecipient(address _rebateRecipient) returns()
+func (_Csfeedistributor *CsfeedistributorTransactorSession) SetRebateRecipient(_rebateRecipient common.Address) (*types.Transaction, error) {
+	return _Csfeedistributor.Contract.SetRebateRecipient(&_Csfeedistributor.TransactOpts, _rebateRecipient)
 }
 
 // CsfeedistributorDistributionDataUpdatedIterator is returned from FilterDistributionDataUpdated and is used to iterate over the raw logs and unpacked data for DistributionDataUpdated events raised by the Csfeedistributor contract.
@@ -1069,6 +1276,140 @@ func (_Csfeedistributor *CsfeedistributorFilterer) WatchDistributionDataUpdated(
 func (_Csfeedistributor *CsfeedistributorFilterer) ParseDistributionDataUpdated(log types.Log) (*CsfeedistributorDistributionDataUpdated, error) {
 	event := new(CsfeedistributorDistributionDataUpdated)
 	if err := _Csfeedistributor.contract.UnpackLog(event, "DistributionDataUpdated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// CsfeedistributorDistributionLogUpdatedIterator is returned from FilterDistributionLogUpdated and is used to iterate over the raw logs and unpacked data for DistributionLogUpdated events raised by the Csfeedistributor contract.
+type CsfeedistributorDistributionLogUpdatedIterator struct {
+	Event *CsfeedistributorDistributionLogUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *CsfeedistributorDistributionLogUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(CsfeedistributorDistributionLogUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(CsfeedistributorDistributionLogUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *CsfeedistributorDistributionLogUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *CsfeedistributorDistributionLogUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// CsfeedistributorDistributionLogUpdated represents a DistributionLogUpdated event raised by the Csfeedistributor contract.
+type CsfeedistributorDistributionLogUpdated struct {
+	LogCid string
+	Raw    types.Log // Blockchain specific contextual infos
+}
+
+// FilterDistributionLogUpdated is a free log retrieval operation binding the contract event 0x1f1a488b71a099a0d9cb71f60e14cf90bd1b5b188ca593111a40f533a3130b3b.
+//
+// Solidity: event DistributionLogUpdated(string logCid)
+func (_Csfeedistributor *CsfeedistributorFilterer) FilterDistributionLogUpdated(opts *bind.FilterOpts) (*CsfeedistributorDistributionLogUpdatedIterator, error) {
+
+	logs, sub, err := _Csfeedistributor.contract.FilterLogs(opts, "DistributionLogUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return &CsfeedistributorDistributionLogUpdatedIterator{contract: _Csfeedistributor.contract, event: "DistributionLogUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchDistributionLogUpdated is a free log subscription operation binding the contract event 0x1f1a488b71a099a0d9cb71f60e14cf90bd1b5b188ca593111a40f533a3130b3b.
+//
+// Solidity: event DistributionLogUpdated(string logCid)
+func (_Csfeedistributor *CsfeedistributorFilterer) WatchDistributionLogUpdated(opts *bind.WatchOpts, sink chan<- *CsfeedistributorDistributionLogUpdated) (event.Subscription, error) {
+
+	logs, sub, err := _Csfeedistributor.contract.WatchLogs(opts, "DistributionLogUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(CsfeedistributorDistributionLogUpdated)
+				if err := _Csfeedistributor.contract.UnpackLog(event, "DistributionLogUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseDistributionLogUpdated is a log parse operation binding the contract event 0x1f1a488b71a099a0d9cb71f60e14cf90bd1b5b188ca593111a40f533a3130b3b.
+//
+// Solidity: event DistributionLogUpdated(string logCid)
+func (_Csfeedistributor *CsfeedistributorFilterer) ParseDistributionLogUpdated(log types.Log) (*CsfeedistributorDistributionLogUpdated, error) {
+	event := new(CsfeedistributorDistributionLogUpdated)
+	if err := _Csfeedistributor.contract.UnpackLog(event, "DistributionLogUpdated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -1687,151 +2028,6 @@ func (_Csfeedistributor *CsfeedistributorFilterer) ParseEtherRecovered(log types
 	return event, nil
 }
 
-// CsfeedistributorFeeDistributedIterator is returned from FilterFeeDistributed and is used to iterate over the raw logs and unpacked data for FeeDistributed events raised by the Csfeedistributor contract.
-type CsfeedistributorFeeDistributedIterator struct {
-	Event *CsfeedistributorFeeDistributed // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *CsfeedistributorFeeDistributedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(CsfeedistributorFeeDistributed)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(CsfeedistributorFeeDistributed)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *CsfeedistributorFeeDistributedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *CsfeedistributorFeeDistributedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// CsfeedistributorFeeDistributed represents a FeeDistributed event raised by the Csfeedistributor contract.
-type CsfeedistributorFeeDistributed struct {
-	NodeOperatorId *big.Int
-	Shares         *big.Int
-	Raw            types.Log // Blockchain specific contextual infos
-}
-
-// FilterFeeDistributed is a free log retrieval operation binding the contract event 0x61930a6c1553eab59d5766da6e1bab8eba982aec848ae7683452f4a6423b6e4a.
-//
-// Solidity: event FeeDistributed(uint256 indexed nodeOperatorId, uint256 shares)
-func (_Csfeedistributor *CsfeedistributorFilterer) FilterFeeDistributed(opts *bind.FilterOpts, nodeOperatorId []*big.Int) (*CsfeedistributorFeeDistributedIterator, error) {
-
-	var nodeOperatorIdRule []interface{}
-	for _, nodeOperatorIdItem := range nodeOperatorId {
-		nodeOperatorIdRule = append(nodeOperatorIdRule, nodeOperatorIdItem)
-	}
-
-	logs, sub, err := _Csfeedistributor.contract.FilterLogs(opts, "FeeDistributed", nodeOperatorIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return &CsfeedistributorFeeDistributedIterator{contract: _Csfeedistributor.contract, event: "FeeDistributed", logs: logs, sub: sub}, nil
-}
-
-// WatchFeeDistributed is a free log subscription operation binding the contract event 0x61930a6c1553eab59d5766da6e1bab8eba982aec848ae7683452f4a6423b6e4a.
-//
-// Solidity: event FeeDistributed(uint256 indexed nodeOperatorId, uint256 shares)
-func (_Csfeedistributor *CsfeedistributorFilterer) WatchFeeDistributed(opts *bind.WatchOpts, sink chan<- *CsfeedistributorFeeDistributed, nodeOperatorId []*big.Int) (event.Subscription, error) {
-
-	var nodeOperatorIdRule []interface{}
-	for _, nodeOperatorIdItem := range nodeOperatorId {
-		nodeOperatorIdRule = append(nodeOperatorIdRule, nodeOperatorIdItem)
-	}
-
-	logs, sub, err := _Csfeedistributor.contract.WatchLogs(opts, "FeeDistributed", nodeOperatorIdRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(CsfeedistributorFeeDistributed)
-				if err := _Csfeedistributor.contract.UnpackLog(event, "FeeDistributed", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseFeeDistributed is a log parse operation binding the contract event 0x61930a6c1553eab59d5766da6e1bab8eba982aec848ae7683452f4a6423b6e4a.
-//
-// Solidity: event FeeDistributed(uint256 indexed nodeOperatorId, uint256 shares)
-func (_Csfeedistributor *CsfeedistributorFilterer) ParseFeeDistributed(log types.Log) (*CsfeedistributorFeeDistributed, error) {
-	event := new(CsfeedistributorFeeDistributed)
-	if err := _Csfeedistributor.contract.UnpackLog(event, "FeeDistributed", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
 // CsfeedistributorInitializedIterator is returned from FilterInitialized and is used to iterate over the raw logs and unpacked data for Initialized events raised by the Csfeedistributor contract.
 type CsfeedistributorInitializedIterator struct {
 	Event *CsfeedistributorInitialized // Event containing the contract specifics and raw log
@@ -1960,6 +2156,553 @@ func (_Csfeedistributor *CsfeedistributorFilterer) WatchInitialized(opts *bind.W
 func (_Csfeedistributor *CsfeedistributorFilterer) ParseInitialized(log types.Log) (*CsfeedistributorInitialized, error) {
 	event := new(CsfeedistributorInitialized)
 	if err := _Csfeedistributor.contract.UnpackLog(event, "Initialized", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// CsfeedistributorModuleFeeDistributedIterator is returned from FilterModuleFeeDistributed and is used to iterate over the raw logs and unpacked data for ModuleFeeDistributed events raised by the Csfeedistributor contract.
+type CsfeedistributorModuleFeeDistributedIterator struct {
+	Event *CsfeedistributorModuleFeeDistributed // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *CsfeedistributorModuleFeeDistributedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(CsfeedistributorModuleFeeDistributed)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(CsfeedistributorModuleFeeDistributed)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *CsfeedistributorModuleFeeDistributedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *CsfeedistributorModuleFeeDistributedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// CsfeedistributorModuleFeeDistributed represents a ModuleFeeDistributed event raised by the Csfeedistributor contract.
+type CsfeedistributorModuleFeeDistributed struct {
+	Shares *big.Int
+	Raw    types.Log // Blockchain specific contextual infos
+}
+
+// FilterModuleFeeDistributed is a free log retrieval operation binding the contract event 0x010f65f5f56ba52d759f7b1dc49a3d277570cc2aa631e9c865b073a0ffc2af41.
+//
+// Solidity: event ModuleFeeDistributed(uint256 shares)
+func (_Csfeedistributor *CsfeedistributorFilterer) FilterModuleFeeDistributed(opts *bind.FilterOpts) (*CsfeedistributorModuleFeeDistributedIterator, error) {
+
+	logs, sub, err := _Csfeedistributor.contract.FilterLogs(opts, "ModuleFeeDistributed")
+	if err != nil {
+		return nil, err
+	}
+	return &CsfeedistributorModuleFeeDistributedIterator{contract: _Csfeedistributor.contract, event: "ModuleFeeDistributed", logs: logs, sub: sub}, nil
+}
+
+// WatchModuleFeeDistributed is a free log subscription operation binding the contract event 0x010f65f5f56ba52d759f7b1dc49a3d277570cc2aa631e9c865b073a0ffc2af41.
+//
+// Solidity: event ModuleFeeDistributed(uint256 shares)
+func (_Csfeedistributor *CsfeedistributorFilterer) WatchModuleFeeDistributed(opts *bind.WatchOpts, sink chan<- *CsfeedistributorModuleFeeDistributed) (event.Subscription, error) {
+
+	logs, sub, err := _Csfeedistributor.contract.WatchLogs(opts, "ModuleFeeDistributed")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(CsfeedistributorModuleFeeDistributed)
+				if err := _Csfeedistributor.contract.UnpackLog(event, "ModuleFeeDistributed", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseModuleFeeDistributed is a log parse operation binding the contract event 0x010f65f5f56ba52d759f7b1dc49a3d277570cc2aa631e9c865b073a0ffc2af41.
+//
+// Solidity: event ModuleFeeDistributed(uint256 shares)
+func (_Csfeedistributor *CsfeedistributorFilterer) ParseModuleFeeDistributed(log types.Log) (*CsfeedistributorModuleFeeDistributed, error) {
+	event := new(CsfeedistributorModuleFeeDistributed)
+	if err := _Csfeedistributor.contract.UnpackLog(event, "ModuleFeeDistributed", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// CsfeedistributorOperatorFeeDistributedIterator is returned from FilterOperatorFeeDistributed and is used to iterate over the raw logs and unpacked data for OperatorFeeDistributed events raised by the Csfeedistributor contract.
+type CsfeedistributorOperatorFeeDistributedIterator struct {
+	Event *CsfeedistributorOperatorFeeDistributed // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *CsfeedistributorOperatorFeeDistributedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(CsfeedistributorOperatorFeeDistributed)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(CsfeedistributorOperatorFeeDistributed)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *CsfeedistributorOperatorFeeDistributedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *CsfeedistributorOperatorFeeDistributedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// CsfeedistributorOperatorFeeDistributed represents a OperatorFeeDistributed event raised by the Csfeedistributor contract.
+type CsfeedistributorOperatorFeeDistributed struct {
+	NodeOperatorId *big.Int
+	Shares         *big.Int
+	Raw            types.Log // Blockchain specific contextual infos
+}
+
+// FilterOperatorFeeDistributed is a free log retrieval operation binding the contract event 0x4b7ab1c192267e83350d06490a852b8dbbb25bfa00fd065b1862cf7accd2ab90.
+//
+// Solidity: event OperatorFeeDistributed(uint256 indexed nodeOperatorId, uint256 shares)
+func (_Csfeedistributor *CsfeedistributorFilterer) FilterOperatorFeeDistributed(opts *bind.FilterOpts, nodeOperatorId []*big.Int) (*CsfeedistributorOperatorFeeDistributedIterator, error) {
+
+	var nodeOperatorIdRule []interface{}
+	for _, nodeOperatorIdItem := range nodeOperatorId {
+		nodeOperatorIdRule = append(nodeOperatorIdRule, nodeOperatorIdItem)
+	}
+
+	logs, sub, err := _Csfeedistributor.contract.FilterLogs(opts, "OperatorFeeDistributed", nodeOperatorIdRule)
+	if err != nil {
+		return nil, err
+	}
+	return &CsfeedistributorOperatorFeeDistributedIterator{contract: _Csfeedistributor.contract, event: "OperatorFeeDistributed", logs: logs, sub: sub}, nil
+}
+
+// WatchOperatorFeeDistributed is a free log subscription operation binding the contract event 0x4b7ab1c192267e83350d06490a852b8dbbb25bfa00fd065b1862cf7accd2ab90.
+//
+// Solidity: event OperatorFeeDistributed(uint256 indexed nodeOperatorId, uint256 shares)
+func (_Csfeedistributor *CsfeedistributorFilterer) WatchOperatorFeeDistributed(opts *bind.WatchOpts, sink chan<- *CsfeedistributorOperatorFeeDistributed, nodeOperatorId []*big.Int) (event.Subscription, error) {
+
+	var nodeOperatorIdRule []interface{}
+	for _, nodeOperatorIdItem := range nodeOperatorId {
+		nodeOperatorIdRule = append(nodeOperatorIdRule, nodeOperatorIdItem)
+	}
+
+	logs, sub, err := _Csfeedistributor.contract.WatchLogs(opts, "OperatorFeeDistributed", nodeOperatorIdRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(CsfeedistributorOperatorFeeDistributed)
+				if err := _Csfeedistributor.contract.UnpackLog(event, "OperatorFeeDistributed", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseOperatorFeeDistributed is a log parse operation binding the contract event 0x4b7ab1c192267e83350d06490a852b8dbbb25bfa00fd065b1862cf7accd2ab90.
+//
+// Solidity: event OperatorFeeDistributed(uint256 indexed nodeOperatorId, uint256 shares)
+func (_Csfeedistributor *CsfeedistributorFilterer) ParseOperatorFeeDistributed(log types.Log) (*CsfeedistributorOperatorFeeDistributed, error) {
+	event := new(CsfeedistributorOperatorFeeDistributed)
+	if err := _Csfeedistributor.contract.UnpackLog(event, "OperatorFeeDistributed", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// CsfeedistributorRebateRecipientSetIterator is returned from FilterRebateRecipientSet and is used to iterate over the raw logs and unpacked data for RebateRecipientSet events raised by the Csfeedistributor contract.
+type CsfeedistributorRebateRecipientSetIterator struct {
+	Event *CsfeedistributorRebateRecipientSet // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *CsfeedistributorRebateRecipientSetIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(CsfeedistributorRebateRecipientSet)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(CsfeedistributorRebateRecipientSet)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *CsfeedistributorRebateRecipientSetIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *CsfeedistributorRebateRecipientSetIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// CsfeedistributorRebateRecipientSet represents a RebateRecipientSet event raised by the Csfeedistributor contract.
+type CsfeedistributorRebateRecipientSet struct {
+	Recipient common.Address
+	Raw       types.Log // Blockchain specific contextual infos
+}
+
+// FilterRebateRecipientSet is a free log retrieval operation binding the contract event 0x9f8636d85f90aba9c7d2c9e076c6102a5459d2e063afb71d81328bbb3608a234.
+//
+// Solidity: event RebateRecipientSet(address recipient)
+func (_Csfeedistributor *CsfeedistributorFilterer) FilterRebateRecipientSet(opts *bind.FilterOpts) (*CsfeedistributorRebateRecipientSetIterator, error) {
+
+	logs, sub, err := _Csfeedistributor.contract.FilterLogs(opts, "RebateRecipientSet")
+	if err != nil {
+		return nil, err
+	}
+	return &CsfeedistributorRebateRecipientSetIterator{contract: _Csfeedistributor.contract, event: "RebateRecipientSet", logs: logs, sub: sub}, nil
+}
+
+// WatchRebateRecipientSet is a free log subscription operation binding the contract event 0x9f8636d85f90aba9c7d2c9e076c6102a5459d2e063afb71d81328bbb3608a234.
+//
+// Solidity: event RebateRecipientSet(address recipient)
+func (_Csfeedistributor *CsfeedistributorFilterer) WatchRebateRecipientSet(opts *bind.WatchOpts, sink chan<- *CsfeedistributorRebateRecipientSet) (event.Subscription, error) {
+
+	logs, sub, err := _Csfeedistributor.contract.WatchLogs(opts, "RebateRecipientSet")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(CsfeedistributorRebateRecipientSet)
+				if err := _Csfeedistributor.contract.UnpackLog(event, "RebateRecipientSet", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseRebateRecipientSet is a log parse operation binding the contract event 0x9f8636d85f90aba9c7d2c9e076c6102a5459d2e063afb71d81328bbb3608a234.
+//
+// Solidity: event RebateRecipientSet(address recipient)
+func (_Csfeedistributor *CsfeedistributorFilterer) ParseRebateRecipientSet(log types.Log) (*CsfeedistributorRebateRecipientSet, error) {
+	event := new(CsfeedistributorRebateRecipientSet)
+	if err := _Csfeedistributor.contract.UnpackLog(event, "RebateRecipientSet", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// CsfeedistributorRebateTransferredIterator is returned from FilterRebateTransferred and is used to iterate over the raw logs and unpacked data for RebateTransferred events raised by the Csfeedistributor contract.
+type CsfeedistributorRebateTransferredIterator struct {
+	Event *CsfeedistributorRebateTransferred // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *CsfeedistributorRebateTransferredIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(CsfeedistributorRebateTransferred)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(CsfeedistributorRebateTransferred)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *CsfeedistributorRebateTransferredIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *CsfeedistributorRebateTransferredIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// CsfeedistributorRebateTransferred represents a RebateTransferred event raised by the Csfeedistributor contract.
+type CsfeedistributorRebateTransferred struct {
+	Shares *big.Int
+	Raw    types.Log // Blockchain specific contextual infos
+}
+
+// FilterRebateTransferred is a free log retrieval operation binding the contract event 0x7462935fb42d34d84233f737293310ca24e851021f9cb7f2549470cdf6de56bf.
+//
+// Solidity: event RebateTransferred(uint256 shares)
+func (_Csfeedistributor *CsfeedistributorFilterer) FilterRebateTransferred(opts *bind.FilterOpts) (*CsfeedistributorRebateTransferredIterator, error) {
+
+	logs, sub, err := _Csfeedistributor.contract.FilterLogs(opts, "RebateTransferred")
+	if err != nil {
+		return nil, err
+	}
+	return &CsfeedistributorRebateTransferredIterator{contract: _Csfeedistributor.contract, event: "RebateTransferred", logs: logs, sub: sub}, nil
+}
+
+// WatchRebateTransferred is a free log subscription operation binding the contract event 0x7462935fb42d34d84233f737293310ca24e851021f9cb7f2549470cdf6de56bf.
+//
+// Solidity: event RebateTransferred(uint256 shares)
+func (_Csfeedistributor *CsfeedistributorFilterer) WatchRebateTransferred(opts *bind.WatchOpts, sink chan<- *CsfeedistributorRebateTransferred) (event.Subscription, error) {
+
+	logs, sub, err := _Csfeedistributor.contract.WatchLogs(opts, "RebateTransferred")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(CsfeedistributorRebateTransferred)
+				if err := _Csfeedistributor.contract.UnpackLog(event, "RebateTransferred", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseRebateTransferred is a log parse operation binding the contract event 0x7462935fb42d34d84233f737293310ca24e851021f9cb7f2549470cdf6de56bf.
+//
+// Solidity: event RebateTransferred(uint256 shares)
+func (_Csfeedistributor *CsfeedistributorFilterer) ParseRebateTransferred(log types.Log) (*CsfeedistributorRebateTransferred, error) {
+	event := new(CsfeedistributorRebateTransferred)
+	if err := _Csfeedistributor.contract.UnpackLog(event, "RebateTransferred", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

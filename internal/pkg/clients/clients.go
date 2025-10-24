@@ -47,7 +47,7 @@ Error if any
 func (c ClientInfo) SupportedClients(clientType string) (clientsNames []string, err error) {
 	files, err := templates.Envs.ReadDir(strings.Join([]string{"envs", c.Network, clientType}, "/"))
 	if err != nil {
-		return
+		return clientsNames, err
 	}
 
 	supported := make([]string, 0)
@@ -98,7 +98,7 @@ func (c ClientInfo) Clients(clientTypes []string) (clients OrderedClients, errs 
 		}
 	}
 
-	return
+	return clients, errs
 }
 
 /*

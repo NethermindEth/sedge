@@ -65,7 +65,7 @@ func TestRun(t *testing.T) {
 						Services:       []string{"execution", "consensus"},
 					}).Return(nil).Times(1),
 				)
-				return
+				return generationPath
 			},
 		},
 		{
@@ -83,7 +83,7 @@ func TestRun(t *testing.T) {
 					d.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
 					a.EXPECT().ValidateDockerComposeFile(filepath.Join(generationPath, "docker-compose.yml"), []string{"execution", "consensus"}).Return(errors.New("bad docker-compose")).Times(1),
 				)
-				return
+				return generationPath
 			},
 			err: "bad docker-compose",
 		},
@@ -107,7 +107,7 @@ func TestRun(t *testing.T) {
 				gomock.InOrder(
 					d.EXPECT().Check([]string{dependencies.Docker}).Return(nil, []string{dependencies.Docker}).Times(1),
 				)
-				return
+				return generationPath
 			},
 			err: "missing dependencies: docker",
 		},
@@ -130,7 +130,7 @@ func TestRun(t *testing.T) {
 						Services:       []string{"execution", "consensus"},
 					}).Return(errors.New("setup error")).Times(1),
 				)
-				return
+				return generationPath
 			},
 			err: "error setting up service containers: setup error",
 		},
@@ -157,7 +157,7 @@ func TestRun(t *testing.T) {
 						Services:       []string{"execution", "consensus"},
 					}).Return(errors.New("run error")).Times(1),
 				)
-				return
+				return generationPath
 			},
 			err: "error starting service containers: run error",
 		},
@@ -185,7 +185,7 @@ func TestRun(t *testing.T) {
 						Services:       []string{},
 					}).Return(nil).Times(1),
 				)
-				return
+				return generationPath
 			},
 		},
 	}

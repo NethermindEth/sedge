@@ -45,7 +45,7 @@ func getOSInfo() (distro distroInfo, err error) {
 
 	f, err := os.Open(file)
 	if err != nil {
-		return
+		return distro, err
 	}
 
 	// Just closing a file without checking any closing errors is a bad practice

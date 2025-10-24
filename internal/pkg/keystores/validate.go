@@ -62,7 +62,7 @@ func ValidateKeystoreDir(dir string) (errors []error) {
 	if err := validateValidatorKeysFolder(dir); err != nil {
 		errors = append(errors, err)
 	}
-	return
+	return errors
 }
 
 func validateKeystorePasswordFile(keystoreDirPath string) error {

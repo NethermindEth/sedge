@@ -220,7 +220,7 @@ func buildLidoData(node *lidoData) map[string]struct {
 	} else {
 		prefix = networkName + "."
 	}
-	claimRewardsLink := fmt.Sprintf(`https://%setherscan.io/address/%s#writeProxyContract#F10`, prefix, contracts.DeployedAddresses(contracts.CSModule)[networkName])
+	claimRewardsLink := fmt.Sprintf(`https://%setherscan.io/address/%s#writeProxyContract#F3`, prefix, contracts.DeployedAddresses(contracts.CSAccounting)[networkName])
 	rewardAddressLink := fmt.Sprintf(`https://%setherscan.io/address/%s`, prefix, node.nodeInfo.RewardAddress)
 
 	detailedDescriptions := map[string]string{

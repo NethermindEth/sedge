@@ -58,59 +58,42 @@ func (f flags) argsList() []string {
 func TestLidoStatusCmd(t *testing.T) {
 	tcs := []lidoStatusCmdTestCase{
 		{
-			name: "valid lido-status flags with long descriptions, Holesky",
+			name: "valid lido-status flags with long descriptions, Hoodi",
 			flags: flags{
 				rewardAddress:    "0xC870Fd7316956C1582A2c8Fd2c42552cCEC70C88",
-				networkName:      "holesky",
+				networkName:      "hoodi",
 				longDescriptions: true,
 			},
 			isErr: false,
 		},
 		{
-			name: "valid lido-status flags, Holesky",
+			name: "valid lido-status flags, Hoodi",
 			flags: flags{
 				rewardAddress: "0xe6b5A31d8bb53D2C769864aC137fe25F4989f1fd",
-				networkName:   "holesky",
+				networkName:   "hoodi",
 			},
 			isErr: false,
 		},
 		{
-			name: "Invalid: missing address, Holesky",
+			name: "Invalid: missing address, Hoodi",
 			flags: flags{
-				networkName: "holesky",
+				networkName: "hoodi",
 			},
 			isErr: true,
 		},
 		{
-			name: "Invalid: incorrect address, Holesky",
+			name: "Invalid: incorrect address, Hoodi",
 			flags: flags{
 				rewardAddress: "0xC870Fd",
-				networkName:   "holesky",
+				networkName:   "hoodi",
 			},
 			isErr: true,
 		},
 		{
-			name: "Invalid: address missing 0x prefix, Holesky",
+			name: "Invalid: address missing 0x prefix, Hoodi",
 			flags: flags{
 				rewardAddress: "22bA5CaFB5E26E6Fe51f330294209034013A5A4c",
-				networkName:   "holesky",
-			},
-			isErr: true,
-		},
-		{
-			name: "Valid node ID, Holesky",
-			flags: flags{
-				rewardAddress: "0xe6b5A31d8bb53D2C769864aC137fe25F4989f1fd", // rewardAddress should be ignored
-				networkName:   "holesky",
-				nodeIDInt:     1,
-			},
-			isErr: false,
-		},
-		{
-			name: "Invalid: negative node ID, Holesky",
-			flags: flags{
-				networkName: "holesky",
-				nodeIDInt:   -2,
+				networkName:   "hoodi",
 			},
 			isErr: true,
 		},

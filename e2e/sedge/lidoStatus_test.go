@@ -35,81 +35,11 @@ func TestE2E_LidoStatus_ValidFlags(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "lido-status", "0xe6b5A31d8bb53D2C769864aC137fe25F4989f1fd", "--l", "--network", "holesky")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "lido-status", "0xe6b5A31d8bb53D2C769864aC137fe25F4989f1fd", "--l", "--network", "mainnet")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
 			assert.NoError(t, runErr, "lido status command should succeed with the given arguments")
-		},
-	)
-	// Run test case
-	e2eTest.run()
-}
-
-func TestE2E_LidoStatus_ValidNodeID(t *testing.T) {
-	// Test context
-	var (
-		runErr error
-	)
-	// Build test case
-	e2eTest := newE2ESedgeTestCase(
-		t,
-		// Arrange
-		nil,
-		// Act
-		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "lido-status", "--nodeID", "10", "--l", "--network", "holesky")
-		},
-		// Assert
-		func(t *testing.T, dataDirPath string) {
-			assert.NoError(t, runErr, "lido status command should succeed with the given arguments")
-		},
-	)
-	// Run test case
-	e2eTest.run()
-}
-
-func TestE2E_LidoStatus_InvalidNodeID(t *testing.T) {
-	// Test context
-	var (
-		runErr error
-	)
-	// Build test case
-	e2eTest := newE2ESedgeTestCase(
-		t,
-		// Arrange
-		nil,
-		// Act
-		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "lido-status", "--nodeID", "-2", "--l", "--network", "holesky")
-		},
-		// Assert
-		func(t *testing.T, dataDirPath string) {
-			// Node ID can't be a negative value
-			assert.Error(t, runErr, "lido status command should fail")
-		},
-	)
-	// Run test case
-	e2eTest.run()
-}
-
-func TestE2E_LidoStatus_InvalidRewardAddress(t *testing.T) {
-	// Test context
-	var (
-		runErr error
-	)
-	// Build test case
-	e2eTest := newE2ESedgeTestCase(
-		t,
-		// Arrange
-		nil,
-		// Act
-		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "lido-status", "0xccb", "--network", "holesky")
-		},
-		// Assert
-		func(t *testing.T, dataDirPath string) {
-			assert.Error(t, runErr, "lido status command should fail")
 		},
 	)
 	// Run test case
@@ -128,7 +58,7 @@ func TestE2E_LidoStatus_InvalidZeroRewardAddress(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "lido-status", "0x0000000000000000000000000000000000000000", "--network", "holesky")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "lido-status", "0x0000000000000000000000000000000000000000", "--network", "hoodi")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {

@@ -46,7 +46,7 @@ func CreateFakeDep(t *testing.T, dependency string) (depPath string) {
 	if err != nil {
 		t.Fatalf("Can't fake dependency %s", dependency)
 	}
-	return
+	return depPath
 }
 
 // Remove the "depPath" from PATH.

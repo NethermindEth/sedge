@@ -55,7 +55,7 @@ func RandomChoice(clients ClientMap) (client *Client, err error) {
 
 	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(list))))
 	if err != nil {
-		return
+		return client, err
 	}
 	return list[n.Int64()], nil
 }
@@ -71,7 +71,7 @@ func RandomClientName(clients []string) (client string, err error) {
 
 	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(clients))))
 	if err != nil {
-		return
+		return client, err
 	}
 	return clients[n.Int64()], nil
 }

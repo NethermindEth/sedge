@@ -48,7 +48,7 @@ func AssignPorts(host string, defaults map[string]uint16) (ports map[string]uint
 		mask[v] = true
 	}
 
-	return
+	return ports, err
 }
 
 // Checks if port is occupied in a given host
