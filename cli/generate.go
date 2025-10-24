@@ -592,7 +592,7 @@ func loadJWTSecret(from string) (absFrom string, err error) {
 	// Ensure from is absolute
 	absFrom, err = filepath.Abs(from)
 	if err != nil {
-		return
+		return absFrom, err
 	}
 	// Check if file exists
 	if f, err := os.Stat(absFrom); os.IsNotExist(err) || !f.Mode().IsRegular() {
@@ -610,7 +610,7 @@ func loadJWTSecret(from string) (absFrom string, err error) {
 	if len(decodedJWT) != 32 {
 		return "", fmt.Errorf("jwt secret must be 32 bytes long")
 	}
-	return
+	return absFrom, err
 }
 
 func nodeType() string {

@@ -35,7 +35,7 @@ Error if any
 func SupportedNetworks() (networkNames []string, err error) {
 	files, err := templates.Envs.ReadDir("envs")
 	if err != nil {
-		return
+		return networkNames, err
 	}
 
 	for _, file := range files {

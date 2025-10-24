@@ -62,7 +62,7 @@ func runCmd(cmd string, getOutput bool) (out string, exitCode int, err error) {
 
 	// Start and wait for the command to finish
 	if err = exc.Start(); err != nil {
-		return
+		return out, exitCode, err
 	}
 	// Return this error at the end as we need to check if the output from stderr is to be returned
 	err = exc.Wait()
@@ -72,7 +72,7 @@ func runCmd(cmd string, getOutput bool) (out string, exitCode int, err error) {
 		out = combinedOut.String()
 	}
 
-	return
+	return out, exitCode, err
 }
 
 /*
@@ -92,7 +92,7 @@ Error if any
 func executeBashScript(script ScriptFile, runWithSudo bool) (out string, err error) {
 	var scriptBuffer, combinedOut bytes.Buffer
 	if err = script.Tmp.Execute(&scriptBuffer, script.Data); err != nil {
-		return
+		return out, err
 	}
 
 	var cmd *exec.Cmd
@@ -105,15 +105,15 @@ func executeBashScript(script ScriptFile, runWithSudo bool) (out string, err err
 	// Prepare pipes for stdin, stdout and stderr
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		return
+		return out, err
 	}
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return
+		return out, err
 	}
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		return
+		return out, err
 	}
 
 	wait := sync.WaitGroup{}
@@ -134,21 +134,21 @@ func executeBashScript(script ScriptFile, runWithSudo bool) (out string, err err
 	}
 
 	if err = cmd.Start(); err != nil {
-		return
+		return out, err
 	}
 
 	// Check for errors from goroutines
 	for _, errChan := range errChans {
 		err = <-errChan
 		if err != nil {
-			return
+			return out, err
 		}
 	}
 
 	wait.Wait()
 
 	if err = cmd.Wait(); err != nil {
-		return
+		return out, err
 	}
 
 	if script.GetOutput {
