@@ -8,7 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- Removed deprecateu flag `--host-whitelist`.
+- Removed deprecated flag `--host-whitelist`.
+- Update Lido CSM contracts ABI.
+- Update `claimRewards` link for `lido-status` command.
+- Remove stuck and refunded keys metrics from `lido-exporter`.
+- Update penalties events from `lido-exporter`.
+- Update client images.
+
 
 ## [v1.9.1] - 2025-04-16
 
