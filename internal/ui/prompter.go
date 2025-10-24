@@ -54,7 +54,7 @@ func (p *prompter) Select(message, defaultValue string, options []string) (resul
 		q.Default = defaultValue
 	}
 	err = survey.AskOne(q, &result)
-	return
+	return result, err
 }
 
 func (p *prompter) Confirm(question string, defaultValue bool) (answer bool, err error) {
@@ -62,7 +62,7 @@ func (p *prompter) Confirm(question string, defaultValue bool) (answer bool, err
 		Message: question,
 		Default: defaultValue,
 	}, &answer)
-	return
+	return answer, err
 }
 
 func (p *prompter) Input(prompt, defaultValue string, required bool, validator func(string) error) (result string, err error) {
@@ -82,7 +82,7 @@ func (p *prompter) Input(prompt, defaultValue string, required bool, validator f
 		q.Default = defaultValue
 	}
 	err = survey.AskOne(q, &result, options...)
-	return
+	return result, err
 }
 
 func (p *prompter) InputFilePath(prompt, defaultValue string, required bool, fileExtensions ...string) (result string, err error) {
@@ -102,7 +102,7 @@ func (p *prompter) InputFilePath(prompt, defaultValue string, required bool, fil
 		q.Default = defaultValue
 	}
 	err = survey.AskOne(q, &result, options...)
-	return
+	return result, err
 }
 
 func (p *prompter) InputDirPath(prompt, defaultValue string, required bool) (result string, err error) {
@@ -119,7 +119,7 @@ func (p *prompter) InputDirPath(prompt, defaultValue string, required bool) (res
 		Default: defaultValue,
 	}
 	err = survey.AskOne(q, &result, options...)
-	return
+	return result, err
 }
 
 func (p *prompter) InputURL(prompt, defaultValue string, required bool) (result string, err error) {
@@ -136,7 +136,7 @@ func (p *prompter) InputURL(prompt, defaultValue string, required bool) (result 
 		q.Default = defaultValue
 	}
 	err = survey.AskOne(q, &result, options...)
-	return
+	return result, err
 }
 
 func (p *prompter) InputSecret(prompt string) (result string, err error) {
@@ -147,7 +147,7 @@ func (p *prompter) InputSecret(prompt string) (result string, err error) {
 		Message: prompt,
 	}
 	err = survey.AskOne(q, &result, options...)
-	return
+	return result, err
 }
 
 func (p *prompter) InputInt64(prompt string, defaultValue int64) (result int64, err error) {
@@ -159,7 +159,7 @@ func (p *prompter) InputInt64(prompt string, defaultValue int64) (result int64, 
 		Default: fmt.Sprintf("%d", defaultValue),
 	}
 	err = survey.AskOne(q, &result, options...)
-	return
+	return result, err
 }
 
 func (p *prompter) EthAddress(prompt string, defaultValue string, required bool) (result string, err error) {
@@ -176,7 +176,7 @@ func (p *prompter) EthAddress(prompt string, defaultValue string, required bool)
 		Default: defaultValue,
 	}
 	err = survey.AskOne(q, &result, options...)
-	return
+	return result, err
 }
 
 func (p *prompter) InputList(prompt string, defaultValue []string, validator func([]string) error) (result []string, err error) {
@@ -218,5 +218,5 @@ func (p *prompter) InputList(prompt string, defaultValue []string, validator fun
 			result = append(result, item)
 		}
 	}
-	return
+	return result, err
 }

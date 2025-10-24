@@ -342,7 +342,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 		}
 	}
 
-	return
+	return tests
 }
 
 func TestGenerateComposeServices(t *testing.T) {
@@ -485,7 +485,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 		}
 	}
 
-	return
+	return tests
 }
 
 // TestValidateClients tests the validation of clients

@@ -64,7 +64,7 @@ func (d *dependenciesManager) Supported(dependencies []string) (supported []stri
 			supported = append(supported, dependency)
 		}
 	}
-	return
+	return supported, unsupported, err
 }
 
 // Check checks if the dependencies are installed on the host machine
@@ -78,7 +78,7 @@ func (d *dependenciesManager) Check(dependencies []string) (installed []string, 
 			installed = append(installed, dependency)
 		}
 	}
-	return
+	return installed, pending
 }
 
 // Install installs the dependency on the host machine

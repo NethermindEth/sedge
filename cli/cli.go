@@ -651,7 +651,7 @@ func selectNodeSetup(p ui.Prompter, o *CliCmdOptions) (err error) {
 		return err
 	}
 	o.nodeSetup = options[index]
-	return
+	return err
 }
 
 func selectNetwork(p ui.Prompter, o *CliCmdOptions) error {
@@ -815,22 +815,22 @@ func selectKeystorePassphraseSource(p ui.Prompter, o *CliCmdOptions) error {
 
 func confirmWithValidator(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.withValidator, err = p.Confirm("Do you want to set up a validator?", true)
-	return
+	return err
 }
 
 func confirmExposeAllPorts(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.MapAllPorts, err = p.Confirm("Do you want to expose all ports?", false)
-	return
+	return err
 }
 
 func confirmImportSlashingProtection(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.importSlashingProtection, err = p.Confirm("Do you want to import slashing protection data?", false)
-	return
+	return err
 }
 
 func confirmInstallDependencies(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.installDependencies, err = p.Confirm("Install dependencies?", false)
-	return
+	return err
 }
 
 func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
@@ -838,15 +838,15 @@ func confirmEnableMEVBoost(p ui.Prompter, o *CliCmdOptions) (err error) {
 	enableMev := opts.MEVBoostEnabled(o.genData.Network)
 	if opts.OverwriteSettings().MevBoost {
 		o.withMevBoost = enableMev
-		return
+		return err
 	}
 	o.withMevBoost, err = p.Confirm("Enable MEV Boost?", true)
-	return
+	return err
 }
 
 func confirmEnableMonitoring(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.enableMonitoring, err = p.Confirm("Do you want to enable the monitoring stack?", false)
-	return
+	return err
 }
 
 func inputCustomNetworkConfig(p ui.Prompter, o *CliCmdOptions) (err error) {
@@ -875,17 +875,17 @@ func inputCustomGenesis(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func inputCustomDeployBlock(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.CustomDeployBlock, err = p.Input("Custom deploy block", "0", false, ui.DigitsStringValidator)
-	return
+	return err
 }
 
 func inputExecutionBootNodes(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.ECBootnodes, err = p.InputList("Execution boot nodes", []string{}, utils.ENodesValidator)
-	return
+	return err
 }
 
 func inputConsensusBootNodes(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.CCBootnodes, err = p.InputList("Consensus boot nodes", []string{}, utils.ENRValidator)
-	return
+	return err
 }
 
 func inputMevImage(p ui.Prompter, o *CliCmdOptions) (err error) {
@@ -894,12 +894,12 @@ func inputMevImage(p ui.Prompter, o *CliCmdOptions) (err error) {
 	if o.genData.Network == configs.NetworkHoodi {
 		o.genData.MevImage = "flashbots/mev-boost:1.9rc3"
 	}
-	return
+	return err
 }
 
 func inputMevBoostEndpoint(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.MevBoostEndpoint, err = p.InputURL("Mev-Boost endpoint", "", false)
-	return
+	return err
 }
 
 func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
@@ -910,7 +910,7 @@ func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 	}
 	if relayURLs != nil && opts.OverwriteSettings().RelayURLs {
 		o.genData.RelayURLs = relayURLs
-		return
+		return err
 	}
 	relayURLs, err = p.InputList("Insert relay URLs if you don't want to use the default values listed below", relayURLs, func(list []string) error {
 		badUri, ok := utils.UriValidator(list)
@@ -920,17 +920,17 @@ func inputRelayURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 		return nil
 	})
 	o.genData.RelayURLs = relayURLs
-	return
+	return err
 }
 
 func inputGraffiti(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.Graffiti, err = p.Input("Graffiti to be used by the validator (press enter to skip it)", "", false, ui.GraffitiValidator)
-	return
+	return err
 }
 
 func inputCheckpointSyncURL(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.CheckpointSyncUrl, err = p.InputURL("Checkpoint sync URL", configs.NetworksConfigs()[o.genData.Network].CheckpointSyncURL, false)
-	return
+	return err
 }
 
 func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
@@ -938,10 +938,10 @@ func inputFeeRecipient(p ui.Prompter, o *CliCmdOptions) (err error) {
 	feeRecipient := opts.FeeRecipient(o.genData.Network)
 	if opts.OverwriteSettings().FeeRecipient {
 		o.genData.FeeRecipient = feeRecipient
-		return
+		return err
 	}
 	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address", "", true)
-	return
+	return err
 }
 
 func inputFeeRecipientNoValidator(p ui.Prompter, o *CliCmdOptions) (err error) {
@@ -949,10 +949,10 @@ func inputFeeRecipientNoValidator(p ui.Prompter, o *CliCmdOptions) (err error) {
 	feeRecipient := opts.FeeRecipient(o.genData.Network)
 	if opts.OverwriteSettings().FeeRecipient {
 		o.genData.FeeRecipient = feeRecipient
-		return
+		return err
 	}
 	o.genData.FeeRecipient, err = p.EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false)
-	return
+	return err
 }
 
 func inputValidatorGracePeriod(p ui.Prompter, o *CliCmdOptions) (err error) {
@@ -1001,7 +1001,7 @@ func inputKeystorePassphrasePath(p ui.Prompter, o *CliCmdOptions) (err error) {
 
 func inputKeystorePassphrase(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.keystorePassphrase, err = p.InputSecret("Enter keystore passphrase (min 8 characters):")
-	return
+	return err
 }
 
 func inputWithdrawalAddress(p ui.Prompter, o *CliCmdOptions) (err error) {
@@ -1009,20 +1009,20 @@ func inputWithdrawalAddress(p ui.Prompter, o *CliCmdOptions) (err error) {
 	withdrawalAddress := opts.WithdrawalAddress(o.genData.Network)
 	if opts.OverwriteSettings().WithdrawalAddress {
 		o.withdrawalAddress = withdrawalAddress[2:]
-		return
+		return err
 	}
 	o.withdrawalAddress, err = p.Input("Withdrawal address", "", false, func(s string) error { return ui.EthAddressValidator(s, true) })
-	return
+	return err
 }
 
 func inputNumberOfValidators(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.numberOfValidators, err = p.InputInt64("Number of validators", 1)
-	return
+	return err
 }
 
 func inputNumberOfExistingValidators(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.existingValidators, err = p.InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", 0)
-	return
+	return err
 }
 
 func inputKeystorePath(p ui.Prompter, o *CliCmdOptions) (err error) {
@@ -1043,22 +1043,22 @@ func inputImportSlashingProtectionFrom(p ui.Prompter, o *CliCmdOptions) (err err
 
 func inputExecutionAPIUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.ExecutionApiUrl, err = p.InputURL("Execution API URL", "", true)
-	return
+	return err
 }
 
 func inputExecutionAuthUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.ExecutionAuthUrl, err = p.InputURL("Execution Auth API URL", "", true)
-	return
+	return err
 }
 
 func inputConsensusAPIUrl(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.ConsensusApiUrl, err = p.InputURL("Consensus API URL", "", true)
-	return
+	return err
 }
 
 func inputContainerTag(p ui.Prompter, o *CliCmdOptions) (err error) {
 	o.genData.ContainerTag, err = p.Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil)
-	return
+	return err
 }
 
 func absPathInPlace(path *string) error {

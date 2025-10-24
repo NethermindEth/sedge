@@ -157,7 +157,7 @@ func AssignPorts(host string, defaults map[string]uint16) (ports map[string]uint
 		mask[v] = true
 	}
 
-	return
+	return ports, err
 }
 
 /*
@@ -213,7 +213,7 @@ func Filter[T any](list []T, filter func(T) bool) (ret []T) {
 			ret = append(ret, v)
 		}
 	}
-	return
+	return ret
 }
 
 // UriValidator validates a URI and returns true if it is valid.

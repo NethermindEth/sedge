@@ -30,6 +30,7 @@ const (
 	CSFeeDistributor         = "csfeedistributor"
 	MEVBoostRelayAllowedList = "mevboostrelayallowedlist"
 	Vebo                     = "vebo"
+	CSExitPenalties          = "csexitpenalties"
 )
 
 var deployedAddresses = map[string]address{
@@ -57,6 +58,10 @@ var deployedAddresses = map[string]address{
 		configs.NetworkHolesky: "0xffDDF7025410412deaa05E3E1cE68FE53208afcb",
 		configs.NetworkMainnet: "0x0De4Ea0184c2ad0BacA7183356Aea5B8d5Bf5c6e",
 		configs.NetworkHoodi:   "0x8664d394C2B3278F26A1B44B967aEf99707eeAB2",
+	},
+	CSExitPenalties: {
+		configs.NetworkMainnet: "0x06cd61045f958A209a0f8D746e103eCc625f4193",
+		configs.NetworkHoodi:   "0xD259b31083Be841E5C85b2D481Cfc17C14276800",
 	},
 }
 

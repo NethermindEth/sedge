@@ -113,7 +113,7 @@ func TestShow(t *testing.T) {
 					a.EXPECT().ValidateDockerComposeFile(filepath.Join(generationPath, "docker-compose.yml")).Return(nil).Times(1),
 					a.EXPECT().GetContainersData(options).Return(containersData, nil).Times(1),
 				)
-				return
+				return generationPath
 			},
 		},
 		{
@@ -130,7 +130,7 @@ func TestShow(t *testing.T) {
 					d.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
 					a.EXPECT().ValidateDockerComposeFile(filepath.Join(generationPath, "docker-compose.yml")).Return(errors.New("error")).Times(1),
 				)
-				return
+				return generationPath
 			},
 			err: "error",
 		},
@@ -148,7 +148,7 @@ func TestShow(t *testing.T) {
 					d.EXPECT().DockerComposeIsInstalled().Return(nil).Times(1),
 					a.EXPECT().ValidateDockerComposeFile(filepath.Join(generationPath, "docker-compose.yml")).Return(errors.New("error")).Times(1),
 				)
-				return
+				return generationPath
 			},
 			err: "error",
 		},
