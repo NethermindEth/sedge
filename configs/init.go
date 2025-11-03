@@ -21,7 +21,7 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		NetworkService:     "merge",
 		GenesisForkVersion: "0x00000000",
 		SupportsMEVBoost:   true,
-		CheckpointSyncURL:  "https://beaconstate.ethstaker.cc",
+		CheckpointSyncURL:  "https://mainnet-checkpoint-sync.attestant.io/",
 		RelayURLs: []string{
 			"https://0xa7ab7a996c8584251c8f925da3170bdfd6ebc75d50f5ddc4050a6fdc77f2a3b5fce2cc750d0865e05d7228af97d69561@agnostic-relay.net",
 			"https://0x9000009807ed12c1f08bf4e81c6da3ba8e3fc3d953898ce0102433094e5f22f21102ec057841fcb81978ed1ea0fa8246@builder-relay-mainnet.blocknative.com",
