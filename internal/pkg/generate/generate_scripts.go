@@ -737,7 +737,7 @@ func imageOrEmpty(cls *clients.Client, latest bool) string {
 
 			} else if cls.Name == "prysm" {
 				splits := strings.Split(cls.Image, ":")
-				splits[len(splits)-1] = "stable"
+				splits[len(splits)-1] = "v6.1.4"
 				return strings.Join(splits, ":")
 
 			} else {
