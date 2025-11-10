@@ -336,13 +336,12 @@ func TestE2E_MonitoringStack_InitLido(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
 			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido",
-				"--rpc-endpoints", "https://ethereum-hoodi.gateway.tatum.io,https://0xrpc.io/hoodi",
-				"--ws-endpoints", "wss://0xrpc.io/hoodi",
+				"--rpc-endpoints", "https://rpc.mevblocker.io",
+				"--ws-endpoints", "wss://eth.drpc.org",
 				"--port", "9989",
 				"--scrape-time", "30s",
-				"--network", "hoodi",
+				"--network", "mainnet",
 				"--node-operator-id", "25",
-				"--reward-address", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c",
 			)
 		},
 		// Assert
