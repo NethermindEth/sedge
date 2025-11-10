@@ -220,7 +220,7 @@ func TestE2E_MonitoringStack_InitLido_ValidID(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "1")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "1", "--network", "mainnet")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -247,7 +247,7 @@ func TestE2E_MonitoringStack_CleanLido(t *testing.T) {
 		t,
 		// Arrange
 		func(t *testing.T, sedgePath string) error {
-			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "10")
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "10", "--network", "mainnet")
 		},
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
@@ -374,7 +374,7 @@ func TestE2E_MonitoringStack_InitLido_InvalidNodeID(t *testing.T) {
 		},
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "-1")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "-1", "--network", "mainnet")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
