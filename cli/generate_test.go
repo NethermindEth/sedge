@@ -1333,7 +1333,7 @@ func TestGenerateCmd(t *testing.T) {
 				validatorName: "lighthouse",
 			},
 			globalFlags{
-				network: "mainnet",
+				network: "sepolia",
 			},
 			nil,
 		},
@@ -1354,7 +1354,7 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				install: false,
 				logging: "",
-				network: "mainnet",
+				network: "sepolia",
 			},
 			nil,
 		},
