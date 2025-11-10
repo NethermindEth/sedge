@@ -32,18 +32,6 @@ func TestKeysStatus(t *testing.T) {
 		invalidID bool
 	}{
 		{
-			"Valid NodeID, Holesky #1", "holesky", big.NewInt(13), false,
-		},
-		{
-			"Valid NodeID, Holesky #2", "holesky", big.NewInt(4), false,
-		},
-		{
-			"Invalid NodeID, Holesky #1", "holesky", big.NewInt(-4), true,
-		},
-		{
-			"Invalid NodeID, Holesky #2", "holesky", big.NewInt(20000), true,
-		},
-		{
 			"Invalid NodeID, Mainnet", "mainnet", big.NewInt(-15), true,
 		},
 		{

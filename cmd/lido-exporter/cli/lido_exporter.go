@@ -66,7 +66,7 @@ func RootCmd() *cobra.Command {
 	// Persistent flags
 	cmd.PersistentFlags().String("node-operator-id", "", "Node Operator ID")
 	cmd.PersistentFlags().String("reward-address", "", "Reward address of Node Operator. It is used to calculate Node Operator ID if not set")
-	cmd.PersistentFlags().String("network", "holesky", "Network name")
+	cmd.PersistentFlags().String("network", "hoodi", "Network name")
 	cmd.PersistentFlags().StringSlice("rpc-endpoints", nil, "List of Ethereum HTTP RPC endpoints")
 	cmd.PersistentFlags().StringSlice("ws-endpoints", nil, "List of Ethereum WebSocket RPC endpoints")
 	cmd.PersistentFlags().String("port", "8080", "Port where the metrics will be exported.")

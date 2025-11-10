@@ -104,7 +104,7 @@ func LidoSubCmd(mgr MonitoringManager, additionalServices []monitoring.ServiceAP
 	}
 	cmd.Flags().StringVar(&lido.NodeOperatorID, "node-operator-id", "", "Node Operator ID")
 	cmd.Flags().StringVar(&lido.RewardAddress, "reward-address", "", "Reward address of Node Operator. It is used to calculate Node Operator ID if not set")
-	cmd.Flags().StringVar(&lido.Network, "network", "holesky", "Network name")
+	cmd.Flags().StringVar(&lido.Network, "network", "hoodi", "Network name")
 	cmd.Flags().StringSliceVar(&lido.RPCEndpoints, "rpc-endpoints", nil, "List of Ethereum HTTP RPC endpoints")
 	cmd.Flags().StringSliceVar(&lido.WSEndpoints, "ws-endpoints", nil, "List of Ethereum WebSocket RPC endpoints")
 	cmd.Flags().Uint16Var(&lido.Port, "port", 8080, "Port where the metrics will be exported.")

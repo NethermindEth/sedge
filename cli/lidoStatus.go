@@ -95,7 +95,7 @@ Valid args: reward address of Node Operator (rewards recipient)`,
 			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&networkName, "network", "n", "holesky", "Target network. e.g. holesky, mainnet, hoodi etc.")
+	cmd.Flags().StringVarP(&networkName, "network", "n", "hoodi", "Target network. e.g. hoodi, mainnet etc.")
 	cmd.Flags().BoolVar(&longDescriptions, "l", false, "Show detailed descriptions for each value")
 	cmd.Flags().Int64VarP(&nodeIDInt, "nodeID", "i", -1, "Your Node Operator ID (optional)")
 	cmd.Flags().SortFlags = false
