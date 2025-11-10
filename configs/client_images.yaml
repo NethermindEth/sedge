@@ -7,7 +7,7 @@ execution:
     version: 25.11.0
   nethermind:
     name: nethermind/nethermind
-    version: 1.35.1
+    version: 1.35.2
   erigon:
     name: erigontech/erigon
     version: v3.2.2
@@ -50,25 +50,25 @@ distributed:
 optimism:
   opnode:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node
-    version: v1.14.1
+    version: v1.16.1
 opexecution:
   opgeth:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth
-    version: v1.101603.1
+    version: v1.101603.4
   opnethermind:
-    name: nethermindeth/nethermind
-    version: 1.35.1
+    name: nethermind/nethermind
+    version: 1.35.2
   opreth:
     name: ghcr.io/paradigmxyz/op-reth
-    version: v1.9.0
+    version: v1.9.1
 taiko:
   taikoclient:
     name: us-docker.pkg.dev/evmchain/images/taiko-client
-    version: taiko-alethia-client-v1.11.0
+    version: alethia-1.11.0
 texecution:
   taikogeth:
     name: us-docker.pkg.dev/evmchain/images/taiko-geth
-    version: v1.17.0
+    version: v1.18.0
   taikonethermind:
     name: nethermind/nethermind
-    version: 1.35.1
+    version: 1.35.2
