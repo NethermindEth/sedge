@@ -21,7 +21,7 @@ If you are interested in becoming a Lido node operator, make sure to read the [N
 
 :::info
 
-Lido CSM is **[currently live and permissionless on Mainnet and the Holesky testnet](https://operatorportal.lido.fi/modules/community-staking-module)**.
+Lido CSM is **[currently live and permissionless on Mainnet and the Hoodi testnet](https://operatorportal.lido.fi/modules/community-staking-module)**.
 
 :::
 
@@ -32,7 +32,7 @@ The Lido CSM staking process involves several steps:
 1. **Generate Validator Keys and Deposit Data**: Generate validator keys compatible with Lido CSM with withdrawal credentials set to Lido Withdrawal Vault.
 2. **Set Up Your Full Node**: Set up your full node with Lido CSM settings enabled (Fee recipient pointing to Lido Execution Layer Rewards Vault, and using designated MEV relays for Lido CSM) and the designed validator keys.
 3. **Upload Deposit Data**: Upload the deposit data to the Lido CSM Widget and provide the required bond amount in ETH, stETH, or wstETH.
-4. **Wait for Deposit Confirmation**: Wait for your CSM validator keys to be deposited through the protocol and ensure your node remains online in the meantime. 
+4. **Wait for Deposit Confirmation**: Wait for your CSM validator keys to be deposited through the protocol and ensure your node remains online in the meantime.
 
 Sedge simplifies the process of staking with Lido CSM by providing a seamless workflow for:
 
@@ -56,7 +56,7 @@ To get started with CSM using Sedge, you first need to generate your validator k
 with the `sedge keys` [command](../commands/keys.mdx). Use the `--lido` flag to generate keys compatible with Lido CSM:
 
 ```bash
-sedge keys --lido --network holesky
+sedge keys --lido --network hoodi
 ```
 
 ### Setting up your full node with Lido CSM settings enabled
@@ -64,12 +64,12 @@ sedge keys --lido --network holesky
 Once the keys are generated, you can set up your full node:
 
 ```bash
-sedge generate full-node --lido --network holesky
+sedge generate full-node --lido --network hoodi
 ```
 
 :::note
 
-This command will generate a setup with the Lido CSM enabled for the Holesky testnet.
+This command will generate a setup with the Lido CSM enabled for the Hoodi testnet.
 If supported, you can set other networks by changing the `--network` flag.
 
 :::
@@ -77,7 +77,7 @@ If supported, you can set other networks by changing the `--network` flag.
 This command will generate a new set of validator keys with the following parameters:
 
 - `withdrawal_address` set to the Lido Withdrawal Vault address
-- `chain` set to the appropriate network (e.g., `holesky`, `mainnet`)
+- `chain` set to the appropriate network (e.g., `hoodi`, `mainnet`)
 - `fee_recipient` set to the Lido Execution Layer Rewards Vault address
 - `mev_relay` set to the designated MEV relays for Lido CSM on the appropriate network
 
@@ -145,17 +145,17 @@ Sedge provides an integrated monitoring stack with pre-configured Grafana dashbo
 #### How to Launch the Grafana Service
 
 1. To initialize and start the monitoring stack, run the following command:
-    
+
     ```bash
     sedge monitoring init lido --node-operator-id <ID>
     ```
-    
+
     The following flags can also be included:
-    
-    - `--network`: `holesky` or `mainnet`, set to `holesky` by default.
+
+    - `--network`: `hoodi` or `mainnet`, set to `hoodi` by default.
     - `--reward-address`: Can replace the `--node-operator-id` flag with the rewards address to identify the node operator.
 
-2. This will install and configure the monitoring services for your Lido CSM node, including Grafana and Prometheus, as well as the Grafana OnCall and Prometheus alertmanager modules. 
+2. This will install and configure the monitoring services for your Lido CSM node, including Grafana and Prometheus, as well as the Grafana OnCall and Prometheus alertmanager modules.
 3. Once the monitoring stack is running, you can access the Grafana dashboards by navigating to `http://localhost:3000`.
 4. You will find dashboards specifically designed for Lido CSM with key panels:
     - **Keys and Bonds Information**: Displays data about validator keys (deposited, exit requests, etc.) and bond statuses (current bond, required bond, etc.).

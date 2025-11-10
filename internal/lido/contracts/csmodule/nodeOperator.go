@@ -30,7 +30,7 @@ NodeID :
 This function is responsible for:
 retrieving NodeOperatorID for Lido CSM node
 params :-
-network (string): The name of the network (e.g."holesky").
+network (string): The name of the network (e.g."hoodi").
 rewardAddress (string): The reward address of the node operator
 returns :-
 a. *big.Int
@@ -71,7 +71,7 @@ NodeOperatorInfo :
 This function is responsible for:
 retrieving NodeOperator info for Lido CSM node
 params :-
-network (string): The name of the network (e.g."holesky").
+network (string): The name of the network (e.g."hoodi").
 nodeID (*big.Int): Node Operator ID
 returns :-
 a. NodeOperator

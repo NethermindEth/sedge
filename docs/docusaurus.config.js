@@ -72,10 +72,6 @@ const config = {
                   to: '/docs/networks/hoodi',
                 },
                 {
-                  label: 'Holesky',
-                  to: '/docs/networks/holesky',
-                },
-                {
                   label: 'Sepolia',
                   to: '/docs/networks/sepolia',
                 },
@@ -125,10 +121,6 @@ const config = {
                 {
                   label: 'Sepolia',
                   to: '/docs/networks/sepolia',
-                },
-                {
-                  label: 'Holesky',
-                  to: '/docs/networks/holesky',
                 },
                 {
                   label: 'Gnosis',

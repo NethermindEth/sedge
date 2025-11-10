@@ -7,7 +7,6 @@ keywords:
   - validator
   - mainnet
   - sepolia
-  - holesky
   - chiado
   - gnosis
   - Ethereum

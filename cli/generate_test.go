@@ -1114,7 +1114,7 @@ func TestGenerateCmd(t *testing.T) {
 				consensusApiUrl: "http://localhost:4000",
 			},
 			globalFlags{
-				network: "holesky",
+				network: "mainnet",
 			},
 			nil,
 		},
@@ -1235,7 +1235,7 @@ func TestGenerateCmd(t *testing.T) {
 				graffiti:        "sedge-graffiti-sedge",
 			},
 			globalFlags{
-				network: "holesky",
+				network: "mainnet",
 			},
 			fmt.Errorf(configs.ErrGraffitiLength, "sedge-graffiti-sedge", 20),
 		},
@@ -1333,7 +1333,7 @@ func TestGenerateCmd(t *testing.T) {
 				validatorName: "lighthouse",
 			},
 			globalFlags{
-				network: "holesky",
+				network: "mainnet",
 			},
 			nil,
 		},
@@ -1354,7 +1354,7 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				install: false,
 				logging: "",
-				network: "holesky",
+				network: "mainnet",
 			},
 			nil,
 		},
@@ -1391,7 +1391,7 @@ func TestGenerateCmd(t *testing.T) {
 			nil,
 		},
 		{
-			"Lido Full-node - Holesky without MEV",
+			"Lido Full-node - Hoodi without MEV",
 			subCmd{
 				name: "full-node",
 			},
@@ -1399,13 +1399,13 @@ func TestGenerateCmd(t *testing.T) {
 				noMev: true,
 			},
 			globalFlags{
-				network:  NetworkHolesky,
+				network:  NetworkHoodi,
 				lidoNode: true,
 			},
 			nil,
 		},
 		{
-			"Lido Full-node - Holesky without MEV",
+			"Lido Full-node - Hoodi without MEV",
 			subCmd{
 				name: "full-node",
 			},
@@ -1413,7 +1413,7 @@ func TestGenerateCmd(t *testing.T) {
 				noMev: true,
 			},
 			globalFlags{
-				network:  NetworkHolesky,
+				network:  NetworkHoodi,
 				lidoNode: true,
 			},
 			nil,
@@ -1431,7 +1431,7 @@ func TestGenerateCmd(t *testing.T) {
 			fmt.Errorf(configs.InvalidNetworkForLidoMevBoost, mevboostrelaylist.LidoSupportedNetworksMevBoost()),
 		},
 		{
-			"Lido Full-node - Holesky no validator",
+			"Lido Full-node - Hoodi no validator",
 			subCmd{
 				name: "full-node",
 			},
@@ -1439,7 +1439,7 @@ func TestGenerateCmd(t *testing.T) {
 				noValidator: true,
 			},
 			globalFlags{
-				network:  NetworkHolesky,
+				network:  NetworkHoodi,
 				lidoNode: true,
 			},
 			nil,

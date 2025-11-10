@@ -37,7 +37,7 @@ BondSummary :
 This function is responsible for:
 retrieving bond info for Lido CSM node
 params :-
-network (string): The name of the network (e.g."holesky").
+network (string): The name of the network (e.g."hoodi").
 nodeID (*big.Int): Node Operator ID
 returns :-
 a. BondInfo

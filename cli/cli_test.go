@@ -40,7 +40,6 @@ func TestCli(t *testing.T) {
 	log.SetOutput(io.Discard)
 
 	mainnetMevboostRelayListUris, _ := mevboostrelaylist.RelaysURI("mainnet")
-	holeskyMevboostRelayListUris, _ := mevboostrelaylist.RelaysURI("holesky")
 	hoodiMevboostRelayListUris, _ := mevboostrelaylist.RelaysURI("hoodi")
 
 	ETHClients := map[string][]string{
@@ -101,7 +100,7 @@ func TestCli(t *testing.T) {
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -173,7 +172,7 @@ func TestCli(t *testing.T) {
 				}
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -181,51 +180,6 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
 					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(1, nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("http://checkpoint.sync", nil),
-					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
-					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
-					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
-					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
-					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
-						GenerationPath: generationPath,
-						GenerationData: genData,
-					})).Return(genData, nil),
-					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
-				)
-			},
-		},
-		{
-			name: "full node without validator holesky",
-			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
-				generationPath := t.TempDir()
-				genData := generate.GenData{
-					Services: []string{"execution", "consensus"},
-					ExecutionClient: &clients.Client{
-						Name:  "nethermind",
-						Type:  "execution",
-						Image: configs.ClientImages.Execution.Nethermind.String(),
-					},
-					ConsensusClient: &clients.Client{
-						Name:  "lodestar",
-						Type:  "consensus",
-						Image: configs.ClientImages.Consensus.Lodestar.String(),
-					},
-					Network:           "holesky",
-					CheckpointSyncUrl: "https://checkpoint-sync.holesky.ethpandaops.io/",
-					FeeRecipient:      "0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5",
-					MapAllPorts:       true,
-					ContainerTag:      "tag",
-					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
-				}
-				gomock.InOrder(
-					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(2, nil),
-					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
-					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
-					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
-					prompter.EXPECT().Confirm("Do you want to set up a validator?", true).Return(false, nil),
-					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
-					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(3, nil),
-					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("https://checkpoint-sync.holesky.ethpandaops.io/", nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e6b91022a7e5722eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
@@ -256,52 +210,7 @@ func TestCli(t *testing.T) {
 
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
-					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(1, nil),
-					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
-					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
-					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
-					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
-					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(2, nil),
-					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
-					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
-						GenerationPath: generationPath,
-						GenerationData: genData,
-					})).Return(genData, nil),
-					prompter.EXPECT().Confirm("Run services now?", false).Return(true, nil),
-					depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil),
-					depsMgr.EXPECT().DockerEngineIsOn().Return(nil),
-					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil),
-					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
-						GenerationPath: generationPath,
-						Services:       []string{"execution"},
-					}),
-					sedgeActions.EXPECT().RunContainers(actions.RunContainersOptions{
-						GenerationPath: generationPath,
-						Services:       []string{"execution"},
-					}),
-				)
-			},
-		},
-		{
-			name: "execution node holesky",
-			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
-				generationPath := t.TempDir()
-				genData := generate.GenData{
-					Services: []string{"execution"},
-					ExecutionClient: &clients.Client{
-						Name:  "nethermind",
-						Type:  "execution",
-						Image: configs.ClientImages.Execution.Nethermind.String(),
-					},
-					Network:      "holesky",
-					MapAllPorts:  true,
-					ContainerTag: "tag",
-				}
-
-				gomock.InOrder(
-					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(2, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(1, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -352,7 +261,7 @@ func TestCli(t *testing.T) {
 
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -363,51 +272,6 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().InputURL("Execution Auth API URL", "", true).Return("http://execution:5051", nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e8b91022a7e5732eb6bf5d5", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
-					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
-					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
-					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
-						GenerationPath: generationPath,
-						GenerationData: genData,
-					})).Return(genData, nil),
-					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
-				)
-			},
-		},
-		{
-			name: "consensus node holesky",
-			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
-				generationPath := t.TempDir()
-				genData := generate.GenData{
-					Services: []string{"consensus"},
-					ConsensusClient: &clients.Client{
-						Name:  "lodestar",
-						Type:  "consensus",
-						Image: configs.ClientImages.Consensus.Lodestar.String(),
-					},
-					Network:           NetworkHolesky,
-					CheckpointSyncUrl: "https://checkpoint-sync.holesky.ethpandaops.io/",
-					FeeRecipient:      "0x2d07a21ebadde0c13e8b91022a7e5732eb6bf5d5",
-					MapAllPorts:       false,
-					ExecutionApiUrl:   "http://execution:5051",
-					ExecutionAuthUrl:  "http://execution:5051",
-					MevBoostEndpoint:  "http://mev-boost:3030",
-					ContainerTag:      "tag",
-					JWTSecretPath:     filepath.Join(generationPath, "jwtsecret"),
-				}
-
-				gomock.InOrder(
-					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(2, nil),
-					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
-					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
-					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
-					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(3, nil),
-					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("https://checkpoint-sync.holesky.ethpandaops.io/", nil),
-					prompter.EXPECT().InputURL("Mev-Boost endpoint", "", false).Return("http://mev-boost:3030", nil),
-					prompter.EXPECT().InputURL("Execution API URL", "", true).Return("http://execution:5051", nil),
-					prompter.EXPECT().InputURL("Execution Auth API URL", "", true).Return("http://execution:5051", nil),
-					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("0x2d07a21ebadde0c13e8b91022a7e5732eb6bf5d5", nil),
-					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(false, nil),
 					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
 					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
 					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
@@ -442,7 +306,7 @@ func TestCli(t *testing.T) {
 
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(3, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -506,7 +370,7 @@ func TestCli(t *testing.T) {
 
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(2, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -563,7 +427,7 @@ func TestCli(t *testing.T) {
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(1, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkHolesky, NetworkSepolia}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkSepolia}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -597,85 +461,6 @@ func TestCli(t *testing.T) {
 					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 						ValidatorClient: "prysm",
 						Network:         NetworkMainnet,
-						GenerationPath:  generationPath,
-						From:            filepath.Join(generationPath, "keystore"),
-						ContainerTag:    "tag",
-					}).Return(nil),
-					prompter.EXPECT().Confirm("Do you want to import slashing protection data?", false).Return(false, nil),
-					prompter.EXPECT().Confirm("Run services now?", false).Return(false, nil),
-				)
-			},
-		},
-		{
-			name: "full node with Lido, holesky",
-			setup: func(t *testing.T, sedgeActions *sedge_mocks.MockSedgeActions, prompter *sedge_mocks.MockPrompter, depsMgr *sedge_mocks.MockDependenciesManager) {
-				generationPath := t.TempDir()
-				genData := generate.GenData{
-					Services: []string{"execution", "consensus", "validator", "mev-boost"},
-					ExecutionClient: &clients.Client{
-						Name:  "nethermind",
-						Type:  "execution",
-						Image: configs.ClientImages.Execution.Nethermind.String(),
-					},
-					ConsensusClient: &clients.Client{
-						Name:  "prysm",
-						Type:  "consensus",
-						Image: configs.ClientImages.Consensus.Prysm.String(),
-					},
-					ValidatorClient: &clients.Client{
-						Name:  "prysm",
-						Type:  "validator",
-						Image: configs.ClientImages.Validator.Prysm.String(),
-					},
-					Network:            "holesky",
-					CheckpointSyncUrl:  "http://checkpoint.sync",
-					FeeRecipient:       "0xE73a3602b99f1f913e72F8bdcBC235e206794Ac8",
-					MapAllPorts:        true,
-					Graffiti:           "test graffiti",
-					VLStartGracePeriod: 840,
-					Mev:                true,
-					MevImage:           "flashbots/mev-boost:latest",
-					RelayURLs:          holeskyMevboostRelayListUris,
-					ContainerTag:       "tag",
-					JWTSecretPath:      filepath.Join(generationPath, "jwtsecret"),
-				}
-				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
-				gomock.InOrder(
-					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(1, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkHolesky, NetworkSepolia}).Return(2, nil),
-					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
-					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
-					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
-					prompter.EXPECT().Confirm("Do you want to set up a validator?", true).Return(true, nil),
-					prompter.EXPECT().Input("Mev-Boost image", "flashbots/mev-boost:latest", false, nil).Return("flashbots/mev-boost:latest", nil),
-					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
-					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(1, nil),
-					prompter.EXPECT().Select("Select validator client", "", ETHClients["validator"]).Return(1, nil),
-					prompter.EXPECT().InputInt64("Validator grace period. This is the number of epochs the validator will wait for security reasons before starting", int64(1)).Return(int64(2), nil),
-					prompter.EXPECT().Input("Graffiti to be used by the validator (press enter to skip it)", "", false, gomock.AssignableToTypeOf(ui.GraffitiValidator)).Return("test graffiti", nil),
-					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("http://checkpoint.sync", nil),
-					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(true, nil),
-					prompter.EXPECT().Select("Select JWT source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
-					prompter.EXPECT().Confirm("Do you want to enable the monitoring stack?", false).Return(false, nil),
-					sedgeActions.EXPECT().Generate(gomock.Eq(actions.GenerateOptions{
-						GenerationPath: generationPath,
-						GenerationData: genData,
-					})).Return(genData, nil),
-					prompter.EXPECT().Select("Select keystore source", "", []string{SourceTypeCreate, SourceTypeExisting, SourceTypeSkip}).Return(0, nil),
-					prompter.EXPECT().Select("Select mnemonic source", "", []string{SourceTypeCreate, SourceTypeExisting}).Return(0, nil),
-					prompter.EXPECT().Select("Select passphrase source", "", []string{SourceTypeRandom, SourceTypeExisting, SourceTypeCreate}).Return(0, nil),
-					prompter.EXPECT().InputInt64("Number of validators", int64(1)).Return(int64(1), nil),
-					prompter.EXPECT().InputInt64("Existing validators. This number will be used as the initial index for the generated keystores.", int64(0)).Return(int64(0), nil),
-					depsMgr.EXPECT().Check([]string{dependencies.Docker}).Return([]string{dependencies.Docker}, nil),
-					depsMgr.EXPECT().DockerEngineIsOn().Return(nil),
-					depsMgr.EXPECT().DockerComposeIsInstalled().Return(nil),
-					sedgeActions.EXPECT().SetupContainers(actions.SetupContainersOptions{
-						GenerationPath: generationPath,
-						Services:       []string{"validator"},
-					}),
-					sedgeActions.EXPECT().ImportValidatorKeys(actions.ImportValidatorKeysOptions{
-						ValidatorClient: "prysm",
-						Network:         NetworkHolesky,
 						GenerationPath:  generationPath,
 						From:            filepath.Join(generationPath, "keystore"),
 						ContainerTag:    "tag",
@@ -721,7 +506,7 @@ func TestCli(t *testing.T) {
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(1, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(1, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -804,7 +589,7 @@ func TestCli(t *testing.T) {
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(1, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkHolesky, NetworkSepolia}).Return(1, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkSepolia}).Return(1, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),
@@ -883,7 +668,7 @@ func TestCli(t *testing.T) {
 				sedgeActions.EXPECT().GetCommandRunner().Return(&test.SimpleCMDRunner{})
 				gomock.InOrder(
 					prompter.EXPECT().Select("Select node setup", "", []string{sedgeOpts.EthereumNode, sedgeOpts.LidoNode}).Return(0, nil),
-					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkHolesky, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
+					prompter.EXPECT().Select("Select network", "", []string{NetworkMainnet, NetworkHoodi, NetworkSepolia, NetworkGnosis, NetworkChiado}).Return(0, nil),
 					prompter.EXPECT().Select("Select node type", "", []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}).Return(0, nil),
 					prompter.EXPECT().Input("Generation path", configs.DefaultAbsSedgeDataPath, false, nil).Return(generationPath, nil),
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("tag", nil),

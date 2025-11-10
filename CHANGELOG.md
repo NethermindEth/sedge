@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove stuck and refunded keys metrics from `lido-exporter`.
 - Update penalties events from `lido-exporter`.
 - Update client images.
-
+- Remove Holesky support.
 
 ## [v1.9.1] - 2025-04-16
 

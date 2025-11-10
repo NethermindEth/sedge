@@ -5,22 +5,22 @@ id: lido-status
 
 # Lido Status
 
-Running `sedge lido-status` will display detailed data for a single Lido Node Operator based on the provided rewards address. 
+Running `sedge lido-status` will display detailed data for a single Lido Node Operator based on the provided rewards address.
 Including information on the node operator's status, queue details, bond and reward information, and any relevant alerts.
 
 ## Help
 
 :::note
 
-When using only the rewards address as input, the command will return the first node found to be associated with that address. 
-However, rewards addresses can be linked to multiple node operator (NO) entries in CSM (e.g., due to the "change rewards address" functionality). 
+When using only the rewards address as input, the command will return the first node found to be associated with that address.
+However, rewards addresses can be linked to multiple node operator (NO) entries in CSM (e.g., due to the "change rewards address" functionality).
 If a rewards address is associated with multiple NOs, we recommend using the node operator ID flag (```-i```) to specify the appropriate node.
 
 :::
 
 ```
 $ sedge lido-status -h
-This command retrieves and displays the status and detailed information of Lido Node Operators. 
+This command retrieves and displays the status and detailed information of Lido Node Operators.
 
 This information includes:
 - Node Operator ID.
@@ -33,7 +33,7 @@ Usage:
   sedge lido-status [flags] [args]
 
 Flags:
-  -n, --network string   Target network. e.g. holesky, mainnet etc. (default "holesky")
+  -n, --network string   Target network. e.g. hoodi, mainnet etc. (default "hoodi")
       --l                Show detailed descriptions for each value
   -i, --nodeID int       Your Node Operator ID (optional) (default -1)
   -h, --help             help for lido-status

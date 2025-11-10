@@ -43,7 +43,6 @@ const (
 	NetworkSepolia = "sepolia"
 	NetworkGnosis  = "gnosis"
 	NetworkChiado  = "chiado"
-	NetworkHolesky = "holesky"
 	NetworkHoodi   = "hoodi"
 	NetworkCustom  = "custom"
 

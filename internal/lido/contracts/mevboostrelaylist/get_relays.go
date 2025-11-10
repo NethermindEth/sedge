@@ -39,7 +39,7 @@ Relays :
 This function is responsible for :-
 retrieving a list of relays from the MEV-Boost Allowed List contract for a given network.
 params :-
-network (string): The name of the network (e.g., "mainnet", "holesky").
+network (string): The name of the network (e.g., "mainnet", "hoodi").
 returns :-
 a. []Relay
 List of relays
@@ -77,7 +77,7 @@ RelaysURI :
 This function is responsible for :-
 retrieving a list of relays URI from the MEV-Boost Allowed List contract for a given network.
 params :-
-network (string): The name of the network (e.g., "mainnet", "holesky").
+network (string): The name of the network (e.g., "mainnet", "hoodi").
 returns :-
 a. []string
 List of relays URI
