@@ -1,74 +1,74 @@
 execution:
   geth:
     name: ethereum/client-go
-    version: v1.15.10
+    version: v1.16.7
   besu:
     name: hyperledger/besu
-    version: 25.4.1
+    version: 25.11.0
   nethermind:
     name: nethermind/nethermind
-    version: 1.31.9
+    version: 1.35.2
   erigon:
     name: erigontech/erigon
-    version: v3.0.2
+    version: v3.2.2
 consensus:
   lighthouse:
     name: sigp/lighthouse
-    version: v7.0.0
+    version: v8.0.0
   lodestar:
     name: chainsafe/lodestar
-    version: v1.29.0
+    version: v1.36.0
   teku:
     name: consensys/teku
-    version: 25.4.1
+    version: 25.11.0
   prysm:
     name: gcr.io/prysmaticlabs/prysm/beacon-chain
-    version: v6.0.0
+    version: v6.1.4
   nimbus:
     name: statusim/nimbus-eth2
-    version: multiarch-v25.4.1
+    version: v25.11.0
 validator:
   lighthouse:
     name: sigp/lighthouse
-    version: v7.0.0
+    version: v8.0.0
   lodestar:
     name: chainsafe/lodestar
-    version: v1.29.0
+    version: v1.36.0
   teku:
     name: consensys/teku
-    version: 25.4.1
+    version: 25.11.0
   prysm:
     name: gcr.io/prysmaticlabs/prysm/validator
-    version: v6.0.0
+    version: v6.1.4
   nimbus:
     name: statusim/nimbus-validator-client
-    version: multiarch-v25.4.1
+    version: v25.11.0
 distributed:
   charon:
     name: ghcr.io/obolnetwork/charon
-    version: v1.3.0
+    version: v1.7.1
 optimism:
   opnode:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node
-    version: v1.13.2
+    version: v1.16.1
 opexecution:
   opgeth:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth
-    version: v1.101503.3
+    version: v1.101603.4
   opnethermind:
-    name: nethermindeth/nethermind
-    version: 1.31.9
+    name: nethermind/nethermind
+    version: 1.35.2
   opreth:
     name: ghcr.io/paradigmxyz/op-reth
-    version: v1.3.12
+    version: v1.9.1
 taiko:
   taikoclient:
     name: us-docker.pkg.dev/evmchain/images/taiko-client
-    version: taiko-alethia-client-v1.5.0
+    version: alethia-1.11.0
 texecution:
   taikogeth:
     name: us-docker.pkg.dev/evmchain/images/taiko-geth
-    version: v1.12.0
+    version: v1.18.0
   taikonethermind:
     name: nethermind/nethermind
-    version: 1.31.9
+    version: 1.35.2

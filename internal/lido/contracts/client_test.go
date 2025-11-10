@@ -66,7 +66,7 @@ func TestConnectClientWithRPCs(t *testing.T) {
 		{
 			name:    "ConnectClientWithRPCs, Holesky",
 			network: "holesky",
-			RPCs:    []string{"https://endpoints.omniatech.io/v1/eth/holesky/public", "http://ethereum-holesky.blockpi.network/v1/rpc/public"},
+			RPCs:    []string{"https://holesky.gateway.tenderly.co", "https://eth-holesky-testnet.rpc.grove.city/v1/01fdb492"},
 			wantErr: false,
 		},
 		{
@@ -84,13 +84,13 @@ func TestConnectClientWithRPCs(t *testing.T) {
 		{
 			name:    "ConnectClientWithRPCs, invalid Network RPCs, no HTTPS",
 			network: "holesky",
-			RPCs:    []string{"wss://ethereum-holesky-rpc.publicnode.com"}, // Mainnet RPC
+			RPCs:    []string{"wss://holesky.drpc.org"}, // Mainnet RPC
 			wantErr: false,
 		},
 		{
 			name:    "ConnectClientWithRPCs, mix Network RPCs",
 			network: "holesky",
-			RPCs:    []string{"https://ethereum-holesky-rpc.publicnode.com", "wss://ethereum-rpc.publicnode.com"},
+			RPCs:    []string{"https://holesky.gateway.tenderly.co", "wss://ethereum-rpc.publicnode.com"},
 			wantErr: false,
 		},
 		{
