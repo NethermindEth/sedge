@@ -13,11 +13,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            go: '1.22'
+            go: '1.24'
           - os: macos-latest
-            go: '1.22'
+            go: '1.24'
           - os: windows-latest
-            go: '1.22'
+            go: '1.24'
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -41,7 +41,7 @@ jobs:
       - name: Check Format Unix
         if: matrix.os == 'ubuntu-latest'
         run: test -z "$(gofumpt -l . | tee >(cat 1>&2))"
-      
+
       - name: Install mockgen
         run: make install-mockgen
 
