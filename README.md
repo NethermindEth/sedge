@@ -28,6 +28,7 @@ Sedge is a one-click node setup tool for PoS network/chain validators and nodes 
   - [Supported networks and clients](#supported-networks-and-clients)
     - [Mainnet](#mainnet)
     - [Hoodi](#hoodi)
+    - [Hoodi](#hoodi)
     - [Sepolia](#sepolia)
     - [Gnosis](#gnosis)
     - [Chiado (Gnosis testnet)](#chiado-gnosis-testnet)

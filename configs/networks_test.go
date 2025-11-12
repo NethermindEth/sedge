@@ -62,6 +62,11 @@ func TestSupportMEVBoost(t *testing.T) {
 			want:    true,
 		},
 		{
+			name:    "Valid network, holesky",
+			network: "holesky",
+			want:    true,
+		},
+		{
 			name:    "Valid network, gnosis",
 			network: "gnosis",
 			want:    false,

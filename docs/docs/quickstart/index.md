@@ -4,6 +4,7 @@ keywords:
   - sedge
   - installation
   - optimism
+  - optimism
   - validator
   - mainnet
   - sepolia
