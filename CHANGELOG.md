@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update penalties events from `lido-exporter`.
 - Update client images.
 - Remove Holesky support.
+- Update Go version from 1.22 to 1.24.
 
 ## [v1.9.1] - 2025-04-16
 
