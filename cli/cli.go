@@ -597,7 +597,7 @@ func checkCLIDependencies(p ui.Prompter, o *CliCmdOptions, a actions.SedgeAction
 		supported, unsupported, err := depsMgr.Supported(pendingDependencies)
 		if err != nil {
 			if errors.Is(err, dependencies.ErrUnsupportedInstallForOS) {
-				log.Warnf(err.Error())
+				log.Warn(err.Error())
 				return nil
 			} else {
 				return err
