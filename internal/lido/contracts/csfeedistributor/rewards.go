@@ -31,7 +31,60 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Tree : struct that reperesents Merkle Tree data
+// Blockstamp represents block information in the new IPFS data structure
+type Blockstamp struct {
+	BlockHash      string `json:"block_hash"`
+	BlockNumber    int64  `json:"block_number"`
+	BlockTimestamp int64  `json:"block_timestamp"`
+	RefEpoch       int64  `json:"ref_epoch"`
+	RefSlot        int64  `json:"ref_slot"`
+	SlotNumber     int64  `json:"slot_number"`
+	StateRoot      string `json:"state_root"`
+}
+
+// Duty represents assigned vs included duties
+type Duty struct {
+	Assigned int `json:"assigned"`
+	Included int `json:"included"`
+}
+
+// PerformanceCoefficients represents the weighting for different duties
+type PerformanceCoefficients struct {
+	AttestationsWeight int `json:"attestations_weight"`
+	BlocksWeight       int `json:"blocks_weight"`
+	SyncWeight         int `json:"sync_weight"`
+}
+
+// Validator represents a single validator's data
+type Validator struct {
+	AttestationDuty    Duty     `json:"attestation_duty"`
+	DistributedRewards *big.Int `json:"distributed_rewards"`
+	Performance        float64  `json:"performance"`
+	ProposalDuty       Duty     `json:"proposal_duty"`
+	RewardsShare       float64  `json:"rewards_share"`
+	Slashed            bool     `json:"slashed"`
+	Strikes            int      `json:"strikes"`
+	SyncDuty           Duty     `json:"sync_duty"`
+	Threshold          float64  `json:"threshold"`
+}
+
+// Operator represents an operator's data with all validators
+type Operator struct {
+	DistributedRewards      *big.Int                `json:"distributed_rewards"`
+	PerformanceCoefficients PerformanceCoefficients `json:"performance_coefficients"`
+	Validators              map[string]Validator    `json:"validators"`
+}
+
+// Report : struct that represents a single report in the new IPFS data structure (legacy format)
+type Report struct {
+	NodeOperatorID      *big.Int               `json:"nodeOperatorId"`
+	CumulativeFeeShares *big.Int               `json:"cumulativeFeeShares"`
+	PerformanceMetrics  map[string]interface{} `json:"performanceMetrics,omitempty"`
+	Strikes             map[string]interface{} `json:"strikes,omitempty"`
+	Proof               []string               `json:"proof,omitempty"` // Merkle proof for verification
+}
+
+// Tree : struct that represents Merkle Tree data (legacy format)
 type Tree struct {
 	Format       string   `json:"format"`
 	LeafEncoding []string `json:"leafEncoding"`
@@ -42,12 +95,22 @@ type Tree struct {
 	} `json:"values"`
 }
 
+// NewTreeData : struct that represents the new IPFS data structure with operators and validators
+type NewTreeData struct {
+	Blockstamp         Blockstamp          `json:"blockstamp"`
+	Distributable      *big.Int            `json:"distributable"`
+	DistributedRewards *big.Int            `json:"distributed_rewards"`
+	Frame              []int64             `json:"frame"`
+	Operators          map[string]Operator `json:"operators"`
+	RebateToProtocol   *big.Int            `json:"rebate_to_protocol"`
+}
+
 /*
 Rewards :
 This function is responsible for:
 retrieving non-claimed rewards for Lido CSM node
 params :-
-network (string): The name of the network (e.g."holesky").
+network (string): The name of the network (e.g."hoodi").
 nodeID (*big.Int): Node Operator ID
 returns :-
 a. *big.Int
@@ -87,7 +150,17 @@ func cumulativeFeeShares(treeCID string, nodeID *big.Int) (*big.Int, error) {
 		return nil, fmt.Errorf("error getting tree data: %v", err)
 	}
 
-	// Compare nodeOperatorID in tree with nodeId to get shares
+	// Try new format first (list of reports)
+	if len(treeData.Values) == 0 {
+		// Try to parse as new format
+		newTreeData, err := parseNewTreeData(treeCID)
+		if err == nil {
+			return getSharesFromReports(newTreeData, nodeID)
+		}
+		log.Debugf("Failed to parse as new format, falling back to legacy format: %v", err)
+	}
+
+	// Legacy format: Compare nodeOperatorID in tree with nodeId to get shares
 	for _, item := range treeData.Values {
 		if len(item.Value) == 2 {
 			nodeOperatorId, err1 := convertTreeValuesToBigInt(item.Value[0])
@@ -142,6 +215,59 @@ func treeData(treeCID string) (Tree, error) {
 		return treeData, fmt.Errorf("failed to unmarshal JSON: %w", err)
 	}
 	return treeData, nil
+}
+
+// parseNewTreeData parses the new IPFS data structure with list of reports
+func parseNewTreeData(treeCID string) (*NewTreeData, error) {
+	var newTreeData NewTreeData
+	gatewayURL := fmt.Sprintf("https://ipfs.io/ipfs/%s", treeCID) // Public gateway URL
+	resp, err := utils.GetRequest(gatewayURL, time.Second)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to gatewayURL: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Read the data
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read data: %w", err)
+	}
+
+	// Try to parse as new format first
+	if err := json.Unmarshal(data, &newTreeData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal JSON as new format: %w", err)
+	}
+
+	// Validate that we have operators
+	if len(newTreeData.Operators) == 0 {
+		return nil, fmt.Errorf("no operators found in new format")
+	}
+
+	return &newTreeData, nil
+}
+
+// getSharesFromReports extracts cumulative fee shares from the new operator-based format
+func getSharesFromReports(newTreeData *NewTreeData, nodeID *big.Int) (*big.Int, error) {
+	nodeIDStr := nodeID.String()
+	operator, exists := newTreeData.Operators[nodeIDStr]
+	if !exists {
+		return nil, fmt.Errorf("nodeID %v not found in operators", nodeID)
+	}
+
+	log.Debugf("Found operator %v with distributed rewards: %v", nodeID, operator.DistributedRewards)
+	log.Debugf("Performance coefficients: attestations=%d, blocks=%d, sync=%d",
+		operator.PerformanceCoefficients.AttestationsWeight,
+		operator.PerformanceCoefficients.BlocksWeight,
+		operator.PerformanceCoefficients.SyncWeight)
+	log.Debugf("Number of validators: %d", len(operator.Validators))
+
+	// Log validator performance data
+	for validatorID, validator := range operator.Validators {
+		log.Debugf("Validator %s: performance=%.4f, strikes=%d, slashed=%v, rewards=%v",
+			validatorID, validator.Performance, validator.Strikes, validator.Slashed, validator.DistributedRewards)
+	}
+
+	return operator.DistributedRewards, nil
 }
 
 // Converts nodeOperatorId and shares from Tree.Values.Value interface

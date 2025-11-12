@@ -342,7 +342,7 @@ func generateTestCases(t *testing.T) (tests []genTestData) {
 		}
 	}
 
-	return
+	return tests
 }
 
 func TestGenerateComposeServices(t *testing.T) {
@@ -387,7 +387,7 @@ func TestGenerateComposeServices(t *testing.T) {
 				ValidatorClient:            &clients.Client{Name: "teku"},
 				DistributedValidatorClient: &clients.Client{Name: "charon"},
 				Distributed:                true,
-				Network:                    "holesky",
+				Network:                    "sepolia",
 				Services:                   []string{execution, consensus, validator, distributedValidator},
 				DvExtraFlags:               []string{"extra", "flag"},
 			},
@@ -485,7 +485,7 @@ func customFlagsTestCases(t *testing.T) (tests []genTestData) {
 		}
 	}
 
-	return
+	return tests
 }
 
 // TestValidateClients tests the validation of clients
@@ -640,7 +640,7 @@ func TestEnvFileAndFlags(t *testing.T) {
 				ValidatorClient:            &clients.Client{Name: "teku"},
 				DistributedValidatorClient: &clients.Client{Name: "charon"},
 				Distributed:                true,
-				Network:                    "holesky",
+				Network:                    "sepolia",
 				ConsensusApiUrl:            "http://localhost:8080",
 			},
 		},

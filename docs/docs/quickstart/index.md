@@ -4,10 +4,10 @@ keywords:
   - sedge
   - installation
   - optimism
+  - optimism
   - validator
   - mainnet
   - sepolia
-  - holesky
   - chiado
   - gnosis
   - Ethereum

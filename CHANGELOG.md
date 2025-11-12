@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.10.0] - 2025-11-12
+
+### Changed
+- Removed deprecated flag `--host-whitelist`.
+- Update Lido CSM contracts ABI.
+- Update `claimRewards` link for `lido-status` command.
+- Remove stuck and refunded keys metrics from `lido-exporter`.
+- Update penalties events from `lido-exporter`.
+- Update client images.
+- Remove Holesky support.
+- Update Go version from 1.22 to 1.24.
+
 ## [v1.9.1] - 2025-04-16
 
 ### Fixed

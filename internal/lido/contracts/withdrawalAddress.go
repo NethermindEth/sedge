@@ -31,10 +31,6 @@ var withdrawalAddress = map[string]withdrawalAddressConfig{
 		network:           configs.NetworkMainnet,
 		withdrawalAddress: "0xb9d7934878b5fb9610b3fe8a5e441e8fad7e293f",
 	},
-	configs.NetworkHolesky: {
-		network:           configs.NetworkHolesky,
-		withdrawalAddress: "0xF0179dEC45a37423EAD4FaD5fCb136197872EAd9",
-	},
 	configs.NetworkHoodi: {
 		network:           configs.NetworkHoodi,
 		withdrawalAddress: "0x4473dCDDbf77679A643BdB654dbd86D67F8d32f2",

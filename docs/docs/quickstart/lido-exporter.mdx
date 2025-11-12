@@ -67,7 +67,7 @@ The table below outlines the configuration options available for the Lido Export
 | --- | --- | --- | --- | --- |
 | **Node Operator ID** | The ID of the Lido Node Operator to monitor. This is required for metric collection unless the reward address is provided. | **Required** (if `reward-address` not provided) | `LIDO_EXPORTER_NODE_OPERATOR_ID` | `--node-operator-id` |
 | **Reward Address** | The reward address of the Node Operator. Used to calculate the Node Operator ID if not explicitly set. | **Optional** (required if `node-operator-id` is not provided) | `LIDO_EXPORTER_REWARD_ADDRESS` | `--reward-address` |
-| **Network** | Specifies the target network for monitoring (e.g., `holesky`, `mainnet`). | **Optional** (Default: `holesky`) | `LIDO_EXPORTER_NETWORK` | `--network` |
+| **Network** | Specifies the target network for monitoring (e.g., `hoodi`, `mainnet`). | **Optional** (Default: `hoodi`) | `LIDO_EXPORTER_NETWORK` | `--network` |
 | **RPC Endpoints** | A comma-separated list of Ethereum HTTP RPC endpoints for connecting to the Ethereum network. | **Optional** | `LIDO_EXPORTER_RPC_ENDPOINTS` | `--rpc-endpoints` |
 | **WebSocket Endpoints** | A comma-separated list of Ethereum WebSocket RPC endpoints for subscribing to events. | **Optional** | `LIDO_EXPORTER_WS_ENDPOINTS` | `--ws-endpoints` |
 | **Port** | The port on which Prometheus metrics are exposed. Default: `8080`. | **Optional** (Default: `8080`) | `LIDO_EXPORTER_PORT` | `--port` |
@@ -160,7 +160,7 @@ This allows operators or DevOps teams to leverage Lido Exporter’s metrics in d
 ### Integration Possibilities
 
 1. **Standalone Use in Non-Sedge Stacks**:
-    - If you’re managing Lido nodes outside of Sedge, you can deploy the Lido Exporter as a Docker container or CLI tool within your existing stack. Simply point the exporter to your Ethereum RPC/WebSocket endpoints and the desired Lido network (e.g., Holesky, Mainnet).
+    - If you’re managing Lido nodes outside of Sedge, you can deploy the Lido Exporter as a Docker container or CLI tool within your existing stack. Simply point the exporter to your Ethereum RPC/WebSocket endpoints and the desired Lido network (e.g., Hoodi, Mainnet).
     - The metrics will be exposed in Prometheus format, which can be consumed by external monitoring tools such as **Grafana**, **Prometheus**, or even **Kubernetes** Prometheus Operator.
 2. **Kubernetes Integration**:
     - The exporter can easily be deployed in a Kubernetes environment alongside Prometheus and Grafana. It can act as a source for Prometheus metrics and integrate seamlessly with Grafana dashboards for visualizing Lido node performance.

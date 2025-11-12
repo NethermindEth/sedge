@@ -31,9 +31,6 @@ func TestNodeOpIDs(t *testing.T) {
 		network string
 	}{
 		{
-			"NodeOpIDs, Holesky", "holesky",
-		},
-		{
 			"NodeOpIDs, Mainnet", "mainnet",
 		},
 		{
@@ -68,22 +65,13 @@ func TestNodeOperatorInfo(t *testing.T) {
 		wantErr         bool
 	}{
 		{
-			"Valid NodeID, Holesky", "holesky", big.NewInt(13), "0xC870Fd7316956C1582A2c8Fd2c42552cCEC70C88", false,
-		},
-		{
-			"Valid Address, Holesky", "holesky", big.NewInt(4), "0x940A98Ef0559C8A3CA9661A23291Ec76BAeA071A", false,
-		},
-		{
-			"Invalid Address, Holesky", "holesky", big.NewInt(4), "0xC870Fd7316956C1582A2c8Fd2c46752cCEC70C99", true,
-		},
-		{
 			"Invalid Address, Mainnet", "mainnet", big.NewInt(4), "0xC870Fd7316956C1582A2c8Fd2c46752", true,
 		},
 		{
 			"Valid Address, Mainnet", "mainnet", big.NewInt(1), "0x556fedf2213A31c7Ab9F8bc8Db5B2254261A5B0b", false,
 		},
 		{
-			"Valid Address, Hoodi", "hoodi", big.NewInt(1), "0xF61c0F048C62dC86823b143e32482dcF4E8c125A", false,
+			"Valid Address, Hoodi", "hoodi", big.NewInt(1), "0x937B9327225f1756f9bb807C0f2Db37bDA002F30", false,
 		},
 		{
 			"Invalid Address, Hoodi", "hoodi", big.NewInt(4), "0xC870Fd7316956C1582A2c8Fd2c467", true,
@@ -122,15 +110,6 @@ func TestNodeID(t *testing.T) {
 			"Valid NodeID, Mainnet #2", "mainnet", big.NewInt(12), false,
 		},
 		{
-			"Valid NodeID, Holesky", "holesky", big.NewInt(4), false,
-		},
-		{
-			"Invalid NodeID, Holesky #1", "holesky", big.NewInt(-4), true,
-		},
-		{
-			"Invalid NodeID, Holesky #2", "holesky", big.NewInt(20000), true,
-		},
-		{
 			"Valid NodeID, Hoodi", "hoodi", big.NewInt(4), false,
 		},
 		{
@@ -163,9 +142,6 @@ func FuzzTestNodeID(f *testing.F) {
 		network string
 		nodeID  *big.Int
 	}{
-		{"holesky", big.NewInt(13)},
-		{"holesky", big.NewInt(-1)},
-		{"holesky", big.NewInt(40000)},
 		{"mainnet", big.NewInt(12)},
 		{"mainnet", big.NewInt(-5)},
 		{"mainnet", big.NewInt(500000)},

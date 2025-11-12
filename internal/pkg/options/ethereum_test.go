@@ -26,7 +26,7 @@ import (
 func TestEthereumOptions_SupportedNetworks(t *testing.T) {
 	options := CreateSedgeOptions(EthereumNode)
 	got := options.SupportedNetworks()
-	want := []string{"mainnet", "hoodi", "holesky", "sepolia", "gnosis", "chiado"}
+	want := []string{"mainnet", "hoodi", "sepolia", "gnosis", "chiado"}
 	assert.Equal(t, want, got)
 }
 
@@ -90,7 +90,6 @@ func TestEthereumOptions_RelayURLs(t *testing.T) {
 		err      error
 	}{
 		{"mainnet", expected, nil},
-		{"holesky", expected, nil},
 		{"sepolia", expected, nil},
 		{"gnosis", expected, nil},
 		{"chiado", expected, nil},
@@ -124,7 +123,6 @@ func TestEthereumOptions_MEVBoostEnabled(t *testing.T) {
 		expected func(string) bool
 	}{
 		{"mainnet", enabled},
-		{"holesky", enabled},
 		{"sepolia", enabled},
 		{"gnosis", enabled},
 		{"chiado", enabled},
@@ -151,14 +149,6 @@ func TestEthereumOptions_ValidateSettings(t *testing.T) {
 			name: "valid settings, mainnet",
 			settings: OptionSettings{
 				Network:         "mainnet",
-				MEVBoostEnabled: true,
-			},
-			expected: nil,
-		},
-		{
-			name: "valid settings, holesky",
-			settings: OptionSettings{
-				Network:         "holesky",
 				MEVBoostEnabled: true,
 			},
 			expected: nil,

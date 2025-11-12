@@ -216,7 +216,6 @@ export const SupportedNetworks = () => {
             name: 'Testnets',
             networks: [
                 { name: 'Hoodi', link: '/docs/networks/hoodi' },
-                { name: 'Holesky', link: '/docs/networks/holesky' },
                 { name: 'Sepolia', link: '/docs/networks/sepolia' },
                 { name: 'Chiado', link: '/docs/networks/chiado' }
             ]

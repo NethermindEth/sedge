@@ -6,7 +6,7 @@ id: staking-with-obol-DV
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Set up an Obol DV Node with Sedge 
+# Set up an Obol DV Node with Sedge
 
 ## What are Distributed Validators?
 
@@ -27,7 +27,7 @@ The Obol DV Setup process involves a few steps:
 1. **Perform Obol DKG process**: Generate distributed node contents and validator keys compatible with Obol DVT using [DKG process](https://docs.obol.org/docs/next/start/quickstart_group).
 2. **Set Up Your Full Node**: Set up your full node with **sedge generate** command.
 3. **Import DKG Validator keys**: Import the keys generated in Step 1 using the **sedge import_key** command
-4. **Run the cluster**: Run the cluster using **sedge run** command. 
+4. **Run the cluster**: Run the cluster using **sedge run** command.
 
 Let's dive into each step in detail.
 
@@ -35,7 +35,7 @@ Let's dive into each step in detail.
 
 ### Perform DKG and Generate DKG components
 
-To get started with Obol DVT using Sedge, you first need to generate your validator keys and deposit data and DV node components with [Obol DV Launchpad](https://holesky.launchpad.obol.org/).
+To get started with Obol DVT using Sedge, you first need to generate your validator keys and deposit data and DV node components with [Obol DV Launchpad](https://sepolia.launchpad.obol.org/).
 You need to follow the steps listed below
 1. [Step 1: Get your ENR](https://docs.obol.org/docs/next/start/quickstart_group#step-1-get-your-enr)
 2. [Step 2: Create a cluster or accept an invitation to a cluster](https://docs.obol.org/docs/next/start/quickstart_group#step-2-create-a-cluster-or-accept-an-invitation-to-a-cluster)
@@ -61,12 +61,12 @@ $sedge % tree .charon
 Once the DKG process is complete and `.charon` folder and its contents are generated, you can set up your full node using **Sedge**:
 
 ```bash
-sedge generate full-node --validator=teku --consensus=prysm --execution=nethermind --network=holesky --distributed
+sedge generate full-node --validator=teku --consensus=prysm --execution=nethermind --network=sepolia --distributed
 ```
 
 :::note
 
-This command will generate a DV enabled cluster for the Holesky testnet.
+This command will generate a DV enabled cluster for the sepolia testnet.
 If supported, you can set other networks by changing the `--network` flag.
 If supported, you can set other execution, consensus and validator clients using the respective flags.
 :::
@@ -75,7 +75,7 @@ Once the full node setup process is complete a folder with name `sedge-data` wil
 
 ```bash
 $sedge % tree sedge-data
-tree sedge-data                                                                                             
+tree sedge-data
 sedge-data
 ├── docker-compose.yml
 └── jwtsecret
@@ -83,7 +83,7 @@ sedge-data
 Next, run the import keys step:
 
 ```bash
-sedge import-key --distributed --network holesky teku
+sedge import-key --distributed --network sepolia teku
 ```
 
 :::note
@@ -96,7 +96,7 @@ The validator client should be identical to the client used in the full-node gen
 Once the private keys import process is complete, the `sedge-data` folder contents will be updated.
 
 ```bash
-sedge % tree sedge-data                                      
+sedge % tree sedge-data
 sedge-data
 ├── docker-compose.yml
 ├── jwtsecret

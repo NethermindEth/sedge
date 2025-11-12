@@ -130,7 +130,7 @@ You can generate:
 
 	cmd.PersistentFlags().BoolVar(&lidoNode, "lido", false, "generate Lido CSM node")
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
-	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet,sepolia, holesky, gnosis, chiado, etc.")
+	cmd.PersistentFlags().StringVarP(&network, "network", "n", "mainnet", "Target network. e.g. mainnet,sepolia, hoodi, gnosis, chiado, etc.")
 	cmd.PersistentFlags().StringVar(&logging, "logging", "json", fmt.Sprintf("Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: %v", configs.ValidLoggingFlags()))
 	cmd.PersistentFlags().StringVar(&containerTag, "container-tag", "", "Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.")
 	return cmd
@@ -592,7 +592,7 @@ func loadJWTSecret(from string) (absFrom string, err error) {
 	// Ensure from is absolute
 	absFrom, err = filepath.Abs(from)
 	if err != nil {
-		return
+		return absFrom, err
 	}
 	// Check if file exists
 	if f, err := os.Stat(absFrom); os.IsNotExist(err) || !f.Mode().IsRegular() {
@@ -610,7 +610,7 @@ func loadJWTSecret(from string) (absFrom string, err error) {
 	if len(decodedJWT) != 32 {
 		return "", fmt.Errorf("jwt secret must be 32 bytes long")
 	}
-	return
+	return absFrom, err
 }
 
 func nodeType() string {

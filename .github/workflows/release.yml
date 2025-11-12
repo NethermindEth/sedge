@@ -1,5 +1,4 @@
 name: "Release Sedge"
-
 on:
   workflow_dispatch:
     inputs:
@@ -7,11 +6,9 @@ on:
         description: "The version number (e.g: v0.1.2) of the release you want to push"
         required: true
         default: "master"
-
 permissions:
   contents: write
   packages: write
-
 jobs:
   sedge-darwin:
     name: Build sedge darwin
@@ -21,25 +18,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22.0"
-
+          go-version: "1.24.0"
       - run: chmod +x ./scripts/build-go-darwin-binaries.sh && ./scripts/build-go-darwin-binaries.sh
-
       - uses: actions/upload-artifact@v4
         name: Uploading sedge darwin amd64 package
         with:
           name: sedge-${{env.VERSION}}-darwin-amd64
           path: build/sedge-${{env.VERSION}}-darwin-amd64
-
       - uses: actions/upload-artifact@v4
         name: Uploading sedge darwin arm64 package
         with:
           name: sedge-${{env.VERSION}}-darwin-arm64
           path: build/sedge-${{env.VERSION}}-darwin-arm64
-
   sedge-windows:
     name: Build sedge windows
     runs-on: windows-latest
@@ -49,19 +41,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22.0"
-
+          go-version: "1.24.0"
       - run: scripts\build-go-windows-binaries.ps1
-
       - uses: actions/upload-artifact@v4
         name: Uploading sedge windows amd64 package
         with:
           name: sedge-${{env.VERSION}}-windows-amd64.exe
           path: build\sedge-${{env.VERSION}}-windows-amd64.exe
-
   sedge-linux:
     name: Build sedge linux
     runs-on: ubuntu-latest
@@ -71,32 +59,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22.0"
-
+          go-version: "1.24.0"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
-
       - run: chmod +x ./scripts/build-go-linux-binaries.sh && ./scripts/build-go-linux-binaries.sh
-
       - uses: actions/upload-artifact@v4
         name: Uploading sedge linux amd64 package
         with:
           name: sedge-${{env.VERSION}}-linux-amd64
           path: build/sedge-${{env.VERSION}}-linux-amd64
-
       - uses: actions/upload-artifact@v4
         name: Uploading sedge linux arm64 package
         with:
           name: sedge-${{env.VERSION}}-linux-arm64
           path: build/sedge-${{env.VERSION}}-linux-arm64
-
   update-homebrew:
     name: Update Homebrew package
     runs-on: ubuntu-latest
@@ -108,18 +89,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: /tmp/binaries
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           repository: NethermindEth/homebrew-sedge
           path: homebrew-sedge
-
       - name: Update Homebrew file with new version and hash
         run: |
           chmod +x /home/runner/work/sedge/sedge/homebrew-sedge/scripts/update-homebrew.sh
           bash /home/runner/work/sedge/sedge/homebrew-sedge/scripts/update-homebrew.sh
-
       - name: Authenticate App
         id: gh-app
         uses: actions/create-github-app-token@v1
@@ -128,7 +106,6 @@ jobs:
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
           repositories: "homebrew-sedge,sedge"
           skip-token-revoke: true
-
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
@@ -140,7 +117,6 @@ jobs:
           path: homebrew-sedge
           add-paths: |
             Formula/sedge.rb
-
   publish-github:
     name: "Release and upload binaries to github"
     runs-on: ubuntu-latest
@@ -150,7 +126,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Download packages
         uses: actions/download-artifact@v4
         with:
@@ -159,7 +134,6 @@ jobs:
         run: |
           awk '/## \[Unreleased\]/ {flag=1;next} /## \[/ {flag=0} flag' CHANGELOG.md > /tmp/changelog
           echo -e "## [${{env.VERSION}}]\n$(cat /tmp/changelog)" > /tmp/changelog
-
       - name: Upload release to Github Releases
         uses: ncipollo/release-action@v1
         with:
@@ -168,7 +142,6 @@ jobs:
           draft: true
           tag: ${{ github.event.inputs.tag }}
           name: ${{ github.event.inputs.tag }}
-
   publish-ppa:
     name: "Publishing Sedge to PPA repository"
     runs-on: ubuntu-latest
@@ -197,8 +170,9 @@ jobs:
         with:
           path: sedge
       - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
-          go-version: "1.22.0"
+          go-version: "1.24.0"
       - name: Run publish PPA script
         env:
           GOPATH: /home/runner/go

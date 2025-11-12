@@ -5,7 +5,6 @@ on:
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
-
 jobs:
   unit_tests:
     name: Run e2e tests
@@ -13,27 +12,22 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            go: '1.22'
+            go: '1.24'
           - os: windows-latest
-            go: '1.22'
+            go: '1.24'
     runs-on: ${{ matrix.os }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
-
       - name: Install deps
         run: make install-deps
-
       - name: Run e2e tests Windows
         if: runner.os == 'Windows'
         run: make e2e-test-windows
-    
       - name: Run e2e tests other
         if: runner.os != 'Windows'
         run: make e2e-test

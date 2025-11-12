@@ -28,8 +28,8 @@ Sedge is a one-click node setup tool for PoS network/chain validators and nodes 
   - [Supported networks and clients](#supported-networks-and-clients)
     - [Mainnet](#mainnet)
     - [Hoodi](#hoodi)
+    - [Hoodi](#hoodi)
     - [Sepolia](#sepolia)
-    - [Holesky](#holesky)
     - [Gnosis](#gnosis)
     - [Chiado (Gnosis testnet)](#chiado-gnosis-testnet)
     - [CL clients with Mev-Boost](#cl-clients-with-mev-boost)
@@ -174,15 +174,6 @@ Integrating Charon with Sedge would make it easy for stakers to setup and run a 
 | Besu       | Teku       | Teku       |
 |            | Nimbus     | Nimbus     |
 
-### Holesky
-
-| Execution  | Consensus  | Validator  |
-| ---------- |------------|------------|
-| Geth       | Lighthouse | Lighthouse |
-| Nethermind | Lodestar   | Lodestar   |
-| Erigon     | Teku       | Teku       |
-| Besu       | Prysm      | Prysm      |
-|            | Nimbus     | Nimbus     |
 
 ### Gnosis
 
@@ -204,13 +195,13 @@ Integrating Charon with Sedge would make it easy for stakers to setup and run a 
 
 ### CL clients with Mev-Boost
 
-| Client     | Mev-Boost  | Networks                  |
-|------------|------------|---------------------------|
-| Lighthouse | yes        | Mainnet, Sepolia, Holesky |
-| Lodestar   | yes        | Mainnet, Sepolia, Holesky |
-| Prysm      | yes        | Mainnet, Sepolia, Holesky |
-| Teku       | yes        | Mainnet, Sepolia, Holesky |
-| Nimbus     | yes        | Mainnet, Sepolia, Holesky |
+| Client     | Mev-Boost  | Networks         |
+|------------|------------|------------------|
+| Lighthouse | yes        | Mainnet, Sepolia |
+| Lodestar   | yes        | Mainnet, Sepolia |
+| Prysm      | yes        | Mainnet, Sepolia |
+| Teku       | yes        | Mainnet, Sepolia |
+| Nimbus     | yes        | Mainnet, Sepolia |
 
 ## Supported Linux flavours for dependency installation
 

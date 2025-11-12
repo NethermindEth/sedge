@@ -417,7 +417,7 @@ func setupLodestarValidatorImport(dockerClient client.APIClient, dockerServiceMa
 	// CMD
 	var preset string
 	switch options.Network {
-	case "mainnet", "sepolia", "holesky":
+	case "mainnet", "sepolia", "hoodi":
 		preset = "mainnet"
 	case "gnosis", "chiado":
 		preset = "gnosis"

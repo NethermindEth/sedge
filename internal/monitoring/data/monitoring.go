@@ -189,7 +189,7 @@ func (m *MonitoringStack) ReadFile(path string) (data []byte, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrReadingFile, err)
 	}
-	return
+	return data, err
 }
 
 // WriteFile writes the given data to the file at the given path in the monitoring stack.

@@ -23,62 +23,22 @@ mainnet:
     Operator: "Ultra Sound"
     IsMandatory: true
     Description: "Ultra Sound Relay"
-  - Uri: "https://0x98650451ba02064f7b000f5768cf0cf4d4e492317d82871bdc87ef841a0743f69f0f1eea11168503240ac35d101c9135@mainnet-relay.securerpc.com/"
-    Operator: "Manifold Finance"
-    IsMandatory: false
-    Description: "Manifold SecureRPC Relay"
-  - Uri: "https://0x8c4ed5e24fe5c6ae21018437bde147693f68cda427cd1122cf20819c30eda7ed74f72dece09bb313f2a1855595ab677d@global.titanrelay.xyz"
-    Operator: "Gattaca"
-    IsMandatory: false
-    Description: "Titan Relay Global (non-filtering)"
   - Uri: "https://0x8c4ed5e24fe5c6ae21018437bde147693f68cda427cd1122cf20819c30eda7ed74f72dece09bb313f2a1855595ab677d@regional.titanrelay.xyz"
     Operator: "Gattaca"
     IsMandatory: false
     Description: "Titan Relay Regional (filtering)"
-
-
-holesky:
-  - Uri: "https://0xb1559beef7b5ba3127485bbbb090362d9f497ba64e177ee2c8e7db74746306efad687f2cf8574e38d70067d40ef136dc@relay-stag.ultrasound.money"
+  - Uri: "https://0x8c4ed5e24fe5c6ae21018437bde147693f68cda427cd1122cf20819c30eda7ed74f72dece09bb313f2a1855595ab677d@global.titanrelay.xyz"
+    Operator: "Gattaca"
+    IsMandatory: false
+    Description: "Titan Relay Global (non-filtering)"
+  - Uri: "https://0x98650451ba02064f7b000f5768cf0cf4d4e492317d82871bdc87ef841a0743f69f0f1eea11168503240ac35d101c9135@mainnet-relay.securerpc.com/"
+    Operator: "Manifold Finance"
+    IsMandatory: true
+    Description: "Manifold SecureRPC Relay"
+  - Uri: "https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay-filtered.ultrasound.money"
     Operator: "Ultra Sound"
     IsMandatory: true
-    Description: "Ultra Sound Relay Holesky - no filtering"
-  - Uri: "https://0xab78bf8c781c58078c3beb5710c57940874dd96aef2835e7742c866b4c7c0406754376c2c8285a36c630346aa5c5f833@holesky.aestus.live"
-    Operator: "Aestus"
-    IsMandatory: true
-    Description: "Aestus Relay Holesky - no filtering"
-  - Uri: "http://0x821f2a65afb70e7f2e820a925a9b4c80a159620582c1766b1b09729fec178b11ea22abb3a51f07b288be815a1a2ff516@testnet.relay-proxy.blxrbdn.com:18552/"
-    Operator: "bloxRoute"
-    IsMandatory: false
-    Description: "bloxRoute Validator Gateway - filtering"
-  - Uri: "https://0x821f2a65afb70e7f2e820a925a9b4c80a159620582c1766b1b09729fec178b11ea22abb3a51f07b288be815a1a2ff516@bloxroute.holesky.blxrbdn.com"
-    Operator: "bloxRoute"
-    IsMandatory: true
-    Description: "bloxRoute Relay - filtering"
-  - Uri: "https://0x833b55e20769a8a99549a28588564468423c77724a0ca96cffd58e65f69a39599d877f02dc77a0f6f9cda2a3a4765e56@relay-holesky.beaverbuild.org"
-    Operator: "Beaverbuild"
-    IsMandatory: false
-    Description: "Beaverbuild Relay Holesky"
-  - Uri: "https://0xafa4c6985aa049fb79dd37010438cfebeb0f2bd42b115b89dd678dab0670c1de38da0c4e9138c9290a398ecd9a0b3110@boost-relay-holesky.flashbots.net"
-    Operator: "Flashbots"
-    IsMandatory: true
-    Description: "Flashbots Boost Holesky - filtering"
-  - Uri: "https://0xaa58208899c6105603b74396734a6263cc7d947f444f396a90f7b7d3e65d102aec7e5e5291b27e08d02c50a050825c2f@holesky.titanrelay.xyz/"
-    Operator: "Titan"
-    IsMandatory: true
-    Description: "Titan Relay Holesky - nonfiltering"
-  - Uri: "https://0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5@relay-holesky.bolt.chainbound.io"
-    Operator: "Chainbound"
-    IsMandatory: false
-    Description: "Chainbound Preconf Holesky"
-  - Uri: "https://0x8d6ff9fdf3b8c05293f6c240f57034c6c5244d7ecb2b9a6e597de575b373610d6345f5060c150012d1cc42d38b8383ac@preconfs-holesky.aestus.live"
-    Operator: "Aestus"
-    IsMandatory: false
-    Description: "Aestus Preconf Holesky"
-  - Uri: "https://0xaa58208899c6105603b74396734a6263cc7d947f444f396a90f7b7d3e65d102aec7e5e5291b27e08d02c50a050825c2f@holesky-preconf.titanrelay.xyz"
-    Operator: "Titan"
-    IsMandatory: false
-    Description: "Titan Preconf Holesky"
-
+    Description: "Ultra Sound Relay - filtering"
 hoodi:
   - Uri: "https://0xaa58208899c6105603b74396734a6263cc7d947f444f396a90f7b7d3e65d102aec7e5e5291b27e08d02c50a050825c2f@hoodi.titanrelay.xyz"
     Operator: "Titan"
@@ -96,3 +56,15 @@ hoodi:
     Operator: "Flashbots"
     IsMandatory: true
     Description: "Flashbots Relay Hoodi - filtering"
+  - Uri: "https://0x9110847c15a7f5c80a9fdd5db989a614cc01104e53bd8c252b6f46a4842c7fdef6b9593336035b5094878deff386804c@hoodi-builder-proxy-alpha.interstate.so"
+    Operator: "Interstate"
+    IsMandatory: false
+    Description: "Interstate Proposer Commitments Relay Hoodi"
+  - Uri: "https://0xb20c3fe59db9c3655088839ef3d972878d182eb745afd8abb1dd2abf6c14f93cd5934ed4446a5fe1ba039e2bc0cf1011@hoodi-relay.ethgas.com"
+    Operator: "ETHGas"
+    IsMandatory: false
+    Description: "ETHGas Preconf  Relay Hoodi"
+  - Uri: "https://0xb1559beef7b5ba3127485bbbb090362d9f497ba64e177ee2c8e7db74746306efad687f2cf8574e38d70067d40ef136dc@relay-filtered-hoodi.ultrasound.money"
+    Operator: "Ultra Sound"
+    IsMandatory: true
+    Description: "Ultra Sound Relay Hoodi - filtering"
