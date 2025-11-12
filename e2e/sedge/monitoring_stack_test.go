@@ -220,7 +220,7 @@ func TestE2E_MonitoringStack_InitLido_ValidID(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "1")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "1", "--network", "mainnet")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -247,7 +247,7 @@ func TestE2E_MonitoringStack_CleanLido(t *testing.T) {
 		t,
 		// Arrange
 		func(t *testing.T, sedgePath string) error {
-			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "10")
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "10", "--network", "mainnet")
 		},
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
@@ -336,13 +336,12 @@ func TestE2E_MonitoringStack_InitLido(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
 			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido",
-				"--rpc-endpoints", "https://endpoints.omniatech.io/v1/eth/holesky/public,https://ethereum-holesky-rpc.publicnode.com",
-				"--ws-endpoints", "https://ethereum-holesky-rpc.publicnode.com,wss://ethereum-holesky-rpc.publicnode.com",
+				"--rpc-endpoints", "https://rpc.mevblocker.io",
+				"--ws-endpoints", "wss://eth.drpc.org",
 				"--port", "9989",
 				"--scrape-time", "30s",
-				"--network", "holesky",
-				"--node-operator-id", "250",
-				"--reward-address", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c",
+				"--network", "mainnet",
+				"--node-operator-id", "25",
 			)
 		},
 		// Assert
@@ -374,7 +373,7 @@ func TestE2E_MonitoringStack_InitLido_InvalidNodeID(t *testing.T) {
 		},
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "-1")
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "lido", "--node-operator-id", "-1", "--network", "mainnet")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {

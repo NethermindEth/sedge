@@ -28,8 +28,8 @@ func TestConnectClient(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "ConnectClient, Holesky",
-			network: "holesky",
+			name:    "ConnectClient, Hoodi",
+			network: "hoodi",
 			wantErr: false,
 		},
 		{
@@ -64,33 +64,33 @@ func TestConnectClientWithRPCs(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "ConnectClientWithRPCs, Holesky",
-			network: "holesky",
-			RPCs:    []string{"https://holesky.gateway.tenderly.co", "https://eth-holesky-testnet.rpc.grove.city/v1/01fdb492"},
+			name:    "ConnectClientWithRPCs, Hoodi",
+			network: "hoodi",
+			RPCs:    []string{"https://0xrpc.io/hoodi", "https://ethereum-hoodi.gateway.tatum.io"},
 			wantErr: false,
 		},
 		{
-			name:    "ConnectClientWithRPCs, Holesky, invalid RPC",
-			network: "holesky",
+			name:    "ConnectClientWithRPCs, Hoodi, invalid RPC",
+			network: "hoodi",
 			RPCs:    []string{"https://www.google.com"},
 			wantErr: true,
 		},
 		{
 			name:    "ConnectClientWithRPCs, invalid Network RPCs",
-			network: "holesky",
+			network: "hoodi",
 			RPCs:    []string{"https://eth.llamarpc.com"}, // Mainnet RPC
 			wantErr: true,
 		},
 		{
 			name:    "ConnectClientWithRPCs, invalid Network RPCs, no HTTPS",
-			network: "holesky",
-			RPCs:    []string{"wss://holesky.drpc.org"}, // Mainnet RPC
+			network: "hoodi",
+			RPCs:    []string{"wss://0xrpc.io/hoodi"},
 			wantErr: false,
 		},
 		{
 			name:    "ConnectClientWithRPCs, mix Network RPCs",
-			network: "holesky",
-			RPCs:    []string{"https://holesky.gateway.tenderly.co", "wss://ethereum-rpc.publicnode.com"},
+			network: "hoodi",
+			RPCs:    []string{"https://0xrpc.io/hoodi", "wss://ethereum-rpc.publicnode.com"},
 			wantErr: false,
 		},
 		{
@@ -120,8 +120,8 @@ func TestConnectClientWS(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "ConnectClient, Holesky",
-			network: "holesky",
+			name:    "ConnectClient, Hoodi",
+			network: "hoodi",
 			wantErr: false,
 		},
 		{
@@ -156,33 +156,33 @@ func TestConnectClientWSWithRPCs(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "ConnectClientWithRPCs, Holesky",
-			network: "holesky",
-			RPCs:    []string{"wss://ethereum-holesky-rpc.publicnode.com", "wss://holesky.drpc.org"},
+			name:    "ConnectClientWithRPCs, Hoodi",
+			network: "hoodi",
+			RPCs:    []string{"https://ethereum-hoodi.gateway.tatum.io", "wss://0xrpc.io/hoodi"},
 			wantErr: false,
 		},
 		{
-			name:    "ConnectClientWithRPCs, Holesky, invalid RPC",
-			network: "holesky",
+			name:    "ConnectClientWithRPCs, Hoodi, invalid RPC",
+			network: "hoodi",
 			RPCs:    []string{"https://www.google.com"},
 			wantErr: false,
 		},
 		{
 			name:    "ConnectClientWithRPCs, invalid Network RPCs",
-			network: "holesky",
+			network: "hoodi",
 			RPCs:    []string{"wss://ethereum-rpc.publicnode.com"}, // Mainnet RPC
 			wantErr: true,
 		},
 		{
 			name:    "ConnectClientWithRPCs, invalid Network RPCs, no WS",
-			network: "holesky",
-			RPCs:    []string{"https://ethereum-holesky-rpc.publicnode.com"}, // Mainnet RPC
+			network: "hoodi",
+			RPCs:    []string{"https://0xrpc.io/hoodi"},
 			wantErr: false,
 		},
 		{
 			name:    "ConnectClientWithRPCs, mix Network RPCs",
 			network: "mainnet",
-			RPCs:    []string{"https://ethereum-holesky-rpc.publicnode.com", "wss://ethereum-rpc.publicnode.com"},
+			RPCs:    []string{"https://0xrpc.io/hoodi", "wss://ethereum-rpc.publicnode.com"},
 			wantErr: false,
 		},
 		{

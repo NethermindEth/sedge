@@ -164,7 +164,7 @@ func TestE2E_Keys_Lido_Mainnet(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestE2E_Keys_Lido_Holesky(t *testing.T) {
+func TestE2E_Keys_Lido_Hoodi(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -189,7 +189,7 @@ func TestE2E_Keys_Lido_Holesky(t *testing.T) {
 			mnemonicPathFile := filepath.Join(filepath.Dir(binaryPath), "mnemonic.txt")
 			runErr = base.RunSedge(t, binaryPath, "keys",
 				"--lido",
-				"--network", "holesky",
+				"--network", "hoodi",
 				"--num-validators", "10",
 				"--mnemonic-path", mnemonicPathFile,
 				"--existing", "0",
@@ -210,13 +210,13 @@ func TestE2E_Keys_Lido_Holesky(t *testing.T) {
 			err = json.Unmarshal([]byte(jsonData), &keys)
 			assert.NoError(t, err, "error unmarshalling json")
 
-			wa, ok := contracts.WithdrawalAddress("holesky")
+			wa, ok := contracts.WithdrawalAddress("hoodi")
 			assert.True(t, ok, "WithdrawalAddress should be found")
 			pattern := `^010000000000000000000000[a-fA-F0-9]{40}$`
 			regex := regexp.MustCompile(pattern)
 			for _, key := range keys {
 				assert.Regexp(t, regex, key.WithdrawalCredentials, "withdrawal_credentials should match the pattern")
-				assert.Equal(t, key.NetworkName, "holesky", "network_name should be holesky")
+				assert.Equal(t, key.NetworkName, "hoodi", "network_name should be hoodi")
 				expectedWithdrawalCredentials := "010000000000000000000000" + (wa[2:])
 				expectedWithdrawalCredentials = strings.ToLower(expectedWithdrawalCredentials)
 				assert.Equal(t, expectedWithdrawalCredentials, key.WithdrawalCredentials, "WithdrawalAddress value should match expected value")
@@ -227,7 +227,7 @@ func TestE2E_Keys_Lido_Holesky(t *testing.T) {
 	e2eTest.run()
 }
 
-func TestE2E_Keys_Lido_EthWithdrawal_HoleskyInvalid(t *testing.T) {
+func TestE2E_Keys_Lido_EthWithdrawal_HoodiInvalid(t *testing.T) {
 	// Test context
 	var (
 		runErr error
@@ -253,7 +253,7 @@ func TestE2E_Keys_Lido_EthWithdrawal_HoleskyInvalid(t *testing.T) {
 			runErr = base.RunSedge(t, binaryPath, "keys",
 				"--lido",
 				"--eth-withdrawal-address", "0xb794f5ea0ba39494ce839613fffba74279579268",
-				"--network", "holesky",
+				"--network", "hoodi",
 				"--num-validators", "10",
 				"--mnemonic-path", mnemonicPathFile,
 				"--existing", "0",

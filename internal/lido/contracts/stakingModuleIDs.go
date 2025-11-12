@@ -23,7 +23,6 @@ import (
 )
 
 var stakingModuleIDs = map[string]*big.Int{
-	configs.NetworkHolesky: big.NewInt(4),
 	configs.NetworkMainnet: big.NewInt(2),
 	configs.NetworkHoodi:   big.NewInt(4),
 }

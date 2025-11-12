@@ -7,7 +7,7 @@
   "deposit_message_root": "7de8922c584ee15b6cbe971dba5fdb6a54910c012624a712bbdeb46e9453cc62",
   "deposit_data_root": "5506b2520a86668358d7ab60cbdcefa55e1e74d2e88209b13d5d62dda9e33208",
   "fork_version": "01017000",
-  "network_name": "holesky",
+  "network_name": "hoodi",
   "deposit_cli_version": "2.7.0"
  },
  {
@@ -18,7 +18,7 @@
   "deposit_message_root": "b0d8277db9b4072039a60d641bfca99a5b4e163d163d90f7ed0fc0429c75b7db",
   "deposit_data_root": "e73f77a8388bbb9d87eda265d6ae7868e1ea808f200b8cbca1a39fd17b9cb363",
   "fork_version": "01017000",
-  "network_name": "holesky",
+  "network_name": "hoodi",
   "deposit_cli_version": "2.7.0"
  },
  {
@@ -29,7 +29,7 @@
   "deposit_message_root": "9339492e6f4ad30b191aa5c4c495cd5fb3835357036dfad002fba96cef5b2743",
   "deposit_data_root": "68febc17db64a1d4c41ada21c257542a51bb9df63db5bfefb63557a39d5048fa",
   "fork_version": "01017000",
-  "network_name": "holesky",
+  "network_name": "hoodi",
   "deposit_cli_version": "2.7.0"
  },
  {
@@ -40,7 +40,7 @@
   "deposit_message_root": "ecfa84f6bf752a54438540e280a16b551b48c092108e73526a9289f89ece5aa6",
   "deposit_data_root": "beec5ed130b83b0ab3d07d994e3b9f6155703ccd1ee825d877260cfdf117266b",
   "fork_version": "01017000",
-  "network_name": "holesky",
+  "network_name": "hoodi",
   "deposit_cli_version": "2.7.0"
  },
  {
@@ -51,7 +51,7 @@
   "deposit_message_root": "eeae8e9cda1c60073cdb182894a934f644a9c9a3f1d14f6be579232214126af2",
   "deposit_data_root": "0a5868d133b29a19e130422532badba536fe5820a48b5a35702bef84f7cce742",
   "fork_version": "01017000",
-  "network_name": "holesky",
+  "network_name": "hoodi",
   "deposit_cli_version": "2.7.0"
  }
 ]

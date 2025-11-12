@@ -34,12 +34,6 @@ func TestBondSummary(t *testing.T) {
 			"BondSummary with valid ID, Mainnet", "mainnet", big.NewInt(2), false,
 		},
 		{
-			"BondSummary with valid ID, Holesky", "holesky", big.NewInt(14), false,
-		},
-		{
-			"BondSummary with invalid ID, Holesky", "holesky", big.NewInt(-6), true,
-		},
-		{
 			"BondSummary with invalid ID, Mainnet", "mainnet", big.NewInt(-10), true,
 		},
 		{

@@ -34,7 +34,7 @@ KeysStatus :
 This function is responsible for:
 retrieving keys status for Lido CSM node
 params :-
-network (string): The name of the network (e.g."holesky").
+network (string): The name of the network (e.g."hoodi").
 nodeID (*big.Int): Node Operator ID
 returns :-
 a. Keys

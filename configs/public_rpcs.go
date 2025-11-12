@@ -36,18 +36,6 @@ var networkRPCs = map[string]RPC{
 			"wss://ethereum-rpc.publicnode.com",
 		},
 	},
-	NetworkHolesky: {
-		NetworkName: NetworkHolesky,
-		PublicRPCs: []string{
-			"https://ethereum-holesky-rpc.publicnode.com",
-			"https://endpoints.omniatech.io/v1/eth/holesky/public",
-			"https://1rpc.io/holesky",
-			"https://holesky.drpc.org",
-		},
-		PublicWSs: []string{
-			"wss://ethereum-holesky-rpc.publicnode.com",
-		},
-	},
 	NetworkHoodi: {
 		NetworkName: NetworkHoodi,
 		PublicRPCs: []string{

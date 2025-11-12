@@ -28,7 +28,6 @@ func TestStakingModuleID(t *testing.T) {
 		want    *big.Int
 		wantErr bool
 	}{
-		{configs.NetworkHolesky, big.NewInt(4), false},
 		{"unknown", nil, true},
 		{configs.NetworkMainnet, big.NewInt(2), false},
 		{configs.NetworkHoodi, big.NewInt(4), false},

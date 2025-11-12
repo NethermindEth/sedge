@@ -27,7 +27,6 @@ import (
 
 type RelayData struct {
 	Mainnet []Relay `yaml:"mainnet"`
-	Holesky []Relay `yaml:"holesky"`
 	Hoodi   []Relay `yaml:"hoodi"`
 }
 
@@ -57,7 +56,6 @@ func loadRelays(filename string) (map[string][]Relay, error) {
 
 	return map[string][]Relay{
 		"mainnet": relayData.Mainnet,
-		"holesky": relayData.Holesky,
 		"hoodi":   relayData.Hoodi,
 	}, nil
 }
@@ -79,9 +77,6 @@ func TestRelays(t *testing.T) {
 	}{
 		{
 			"GetRelays Mainnet", "mainnet", expectedRelaysMap["mainnet"],
-		},
-		{
-			"GetRelays Holesky", "holesky", expectedRelaysMap["holesky"],
 		},
 		{
 			"GetRelays Hoodi", "hoodi", expectedRelaysMap["hoodi"],

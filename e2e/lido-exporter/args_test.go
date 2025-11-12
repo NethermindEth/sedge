@@ -39,7 +39,7 @@ func TestE2E_ValidArgs_NodeOperatorID(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
-			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--node-operator-id", "250", "--network", "holesky", "--port", "9980")
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--node-operator-id", "25", "--network", "hoodi", "--port", "9980")
 			time.Sleep(2 * time.Second)
 			return cmd
 		},
@@ -209,7 +209,7 @@ func TestE2E_InvalidArgs_NodeOperatorID(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
-			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--node-operator-id", "lol_what_a_node_operator_id", "--network", "holesky", "--port", "9983")
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--node-operator-id", "lol_what_a_node_operator_id", "--network", "hoodi", "--port", "9983")
 			return cmd
 		},
 		// Assert
@@ -239,7 +239,7 @@ func TestE2E_InvalidArgs_RewardAddress(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
-			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--reward-address", "lol_what_a_reward_address", "--network", "holesky", "--port", "9984")
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--reward-address", "lol_what_a_reward_address", "--network", "hoodi", "--port", "9984")
 			return cmd
 		},
 		// Assert
@@ -299,7 +299,7 @@ func TestE2E_InvalidArgs_ScrapeTime(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
-			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--scrape-time", "666", "--network", "holesky", "--port", "9986")
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--scrape-time", "666", "--network", "hoodi", "--port", "9986")
 			return cmd
 		},
 		// Assert
@@ -328,7 +328,7 @@ func TestE2E_InvalidArgs_Port(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
-			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--port", "lol_what_a_port", "--network", "holesky")
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--port", "lol_what_a_port", "--network", "hoodi")
 			return cmd
 		},
 		// Assert
@@ -358,7 +358,7 @@ func TestE2E_InvalidArgs_RPCEndpoints(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
-			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--rpc-endpoints", "lol_what_a_rpc_endpoint", "--network", "holesky", "--port", "9987")
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--rpc-endpoints", "lol_what_a_rpc_endpoint", "--network", "hoodi", "--port", "9987")
 			return cmd
 		},
 		// Assert
@@ -388,7 +388,7 @@ func TestE2E_InvalidArgs_WSEndpoints(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
-			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--ws-endpoints", "lol_what_a_ws_endpoint", "--network", "holesky", "--port", "9988")
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--ws-endpoints", "lol_what_a_ws_endpoint", "--network", "hoodi", "--port", "9988")
 			return cmd
 		},
 		// Assert
@@ -418,12 +418,12 @@ func TestE2E_ValidFlags_All(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
 			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter",
-				"--rpc-endpoints", "https://ethereum-holesky-rpc.publicnode.com", "https://endpoints.omniatech.io/v1/eth/holesky/public", "https://ethereum-holesky.blockpi.network/v1/rpc/public",
-				"--ws-endpoints", "https://ethereum-holesky-rpc.publicnode.com,wss://ethereum-holesky-rpc.publicnode.com", // https endpoint should be ignored
+				"--rpc-endpoints", "https://ethereum-hoodi.gateway.tatum.io", "https://0xrpc.io/hoodi",
+				"--ws-endpoints", "wss://0xrpc.io/hoodi", // https endpoint should be ignored
 				"--port", "9989",
 				"--scrape-time", "1s",
-				"--network", "holesky",
-				"--node-operator-id", "250", // should be prioritized over reward address
+				"--network", "hoodi",
+				"--node-operator-id", "25", // should be prioritized over reward address
 				"--reward-address", "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c",
 			)
 			time.Sleep(2 * time.Second)
@@ -467,12 +467,12 @@ func TestE2E_ValidEnv_All(t *testing.T) {
 		// Arrange
 		func(t *testing.T, binaryPath string) (map[string]string, error) {
 			return map[string]string{
-				"LIDO_EXPORTER_RPC_ENDPOINTS":    "'https://ethereum-holesky-rpc.publicnode.com','https://endpoints.omniatech.io/v1/eth/holesky/public','https://ethereum-holesky.blockpi.network/v1/rpc/public'",
-				"LIDO_EXPORTER_WS_ENDPOINTS":     "'wss://ethereum-holesky-rpc.publicnode.com'",
+				"LIDO_EXPORTER_RPC_ENDPOINTS":    "'https://ethereum-hoodi.gateway.tatum.io','https://0xrpc.io/hoodi'",
+				"LIDO_EXPORTER_WS_ENDPOINTS":     "'wss://0xrpc.io/hoodi'",
 				"LIDO_EXPORTER_PORT":             "9990",
 				"LIDO_EXPORTER_SCRAPE_TIME":      "2s",
-				"LIDO_EXPORTER_NETWORK":          "holesky",
-				"LIDO_EXPORTER_NODE_OPERATOR_ID": "250",
+				"LIDO_EXPORTER_NETWORK":          "hoodi",
+				"LIDO_EXPORTER_NODE_OPERATOR_ID": "25",
 				"LIDO_EXPORTER_REWARD_ADDRESS":   "0x22bA5CaFB5E26E6Fe51f330294209034013A5A4c",
 			}, nil
 		},
@@ -521,7 +521,7 @@ func TestE2E_InvalidArgs_NegativeNodeID(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
-			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--node-operator-id", "-2", "--network", "holesky", "--port", "9991")
+			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter", "--node-operator-id", "-2", "--network", "hoodi", "--port", "9991")
 			return cmd
 		},
 		// Assert

@@ -300,7 +300,7 @@ func TestImportKeys_DistributedMode(t *testing.T) {
 
 	err = s.ImportValidatorKeys(actions.ImportValidatorKeysOptions{
 		ValidatorClient: "lodestar",
-		Network:         "holesky",
+		Network:         "hoodi",
 		GenerationPath:  generationPath,
 		Distributed:     true,
 		From:            from,

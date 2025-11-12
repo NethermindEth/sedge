@@ -25,7 +25,7 @@ import (
 
 func TestLidoOptions_SupportedNetworks(t *testing.T) {
 	options := CreateSedgeOptions(LidoNode)
-	expected := []string{"mainnet", "hoodi", "holesky", "sepolia"}
+	expected := []string{"mainnet", "hoodi", "sepolia"}
 	assert.Equal(t, expected, options.SupportedNetworks())
 }
 
@@ -58,10 +58,6 @@ func TestLidoOptions_WithdrawalAddress(t *testing.T) {
 		},
 		{
 			"sepolia",
-			expected,
-		},
-		{
-			"holesky",
 			expected,
 		},
 		{
@@ -104,10 +100,6 @@ func TestLidoOptions_FeeRecipient(t *testing.T) {
 			expected,
 		},
 		{
-			"holesky",
-			expected,
-		},
-		{
 			"hoodi",
 			expected,
 		},
@@ -140,7 +132,6 @@ func TestLidoOptions_RelayURLs(t *testing.T) {
 	}{
 		{"mainnet", expected},
 		{"sepolia", expected},
-		{"holesky", expected},
 		{"hoodi", expected},
 		{"unsupported", func(network string) []string {
 			return nil
@@ -169,7 +160,6 @@ func TestLidoOptions_MEVBoostEnabled(t *testing.T) {
 	}{
 		{"mainnet", true},
 		{"sepolia", false},
-		{"holesky", true},
 		{"hoodi", true},
 		{"unsupported", false},
 	}
@@ -221,14 +211,6 @@ func TestLidoOptionsValidateSettings(t *testing.T) {
 				MEVBoostEnabled: false,
 			},
 			expected: ErrInvalidNetwork(lido.LidoSupportedNetworks(), "Lido"),
-		},
-		{
-			name: "valid settings, holesky",
-			settings: OptionSettings{
-				Network:         "holesky",
-				MEVBoostEnabled: true,
-			},
-			expected: nil,
 		},
 		{
 			name: "valid settings, hoodi",
