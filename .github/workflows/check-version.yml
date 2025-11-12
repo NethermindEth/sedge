@@ -33,6 +33,6 @@ jobs:
           token: ${{ steps.gh-app.outputs.token }}
           commit-message: Update image versions to latest version.
           title: "[Update] Update image versions"
-          reviewers: AntiD2ta, adriantpaez, stdevMac, cbermudez97 
+          reviewers: adriantpaez, stdevMac, cbermudez97
           branch: feature/update-container-images
           draft: false
