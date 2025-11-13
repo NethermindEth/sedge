@@ -23,6 +23,7 @@
       - --taikoAnchor=${TAIKO_ANCHOR_CONTRACT}
       - --jwtSecret=/tmp/jwt/jwtsecret
       - --p2p.sync
+      - --p2p.bootnodes=${TAIKO_BOOTNODES}
       - --p2p.checkPointSyncUrl=${TAIKO_CHECKPOINT_URL}{{range $flag := .TaikoExtraFlags}}
       - --{{$flag}}{{end}}{{if .LoggingDriver}}
     logging:

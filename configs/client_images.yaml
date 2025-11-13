@@ -64,7 +64,7 @@ opexecution:
 taiko:
   taikoclient:
     name: us-docker.pkg.dev/evmchain/images/taiko-client
-    version: taiko-alethia-client-v1.6.3
+    version: client-1.11.0-hotfix
 texecution:
   taikogeth:
     name: us-docker.pkg.dev/evmchain/images/taiko-geth
