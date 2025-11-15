@@ -23,7 +23,7 @@ consensus:
     version: 25.11.0
   prysm:
     name: gcr.io/prysmaticlabs/prysm/beacon-chain
-    version: v6.1.4
+    version: v7.0.0
   nimbus:
     name: statusim/nimbus-eth2
     version: v25.11.0
@@ -39,14 +39,14 @@ validator:
     version: 25.11.0
   prysm:
     name: gcr.io/prysmaticlabs/prysm/validator
-    version: v6.1.4
+    version: v7.0.0
   nimbus:
     name: statusim/nimbus-validator-client
     version: v25.11.0
 distributed:
   charon:
     name: ghcr.io/obolnetwork/charon
-    version: v1.7.1
+    version: v7.0.0
 optimism:
   opnode:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node
