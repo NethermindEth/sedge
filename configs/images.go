@@ -50,6 +50,9 @@ var ClientImages struct {
 		OpNeth Image `yaml:"opnethermind"`
 		OpReth Image `yaml:"opreth"`
 	}
+	Aztec struct {
+		Aztec Image `yaml:"aztec"`
+	}
 }
 
 //go:embed client_images.yaml

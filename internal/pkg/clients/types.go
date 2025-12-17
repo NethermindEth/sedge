@@ -43,6 +43,8 @@ func (c *Client) SetImageOrDefault(image string) {
 		c.setOptimismImage(image)
 	case "opexecution":
 		c.SetOpExecutionImage(image)
+	case "aztec":
+		c.setAztecImage(image)
 	}
 }
 
@@ -116,6 +118,12 @@ func (c *Client) SetOpExecutionImage(image string) {
 	}
 }
 
+func (c *Client) setAztecImage(image string) {
+	switch c.Name {
+	case "aztec":
+		c.Image = valueOrDefault(image, configs.ClientImages.Aztec.AztecSequencer.String())
+	}
+}
 func valueOrDefault(value string, defaultValue string) string {
 	if value == "" {
 		return defaultValue

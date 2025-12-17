@@ -47,4 +47,7 @@ var AllClients map[string][]string = map[string][]string{
 		"opnethermind",
 		"opreth",
 	},
+	"aztec": {
+		"aztec",
+	},
 }
