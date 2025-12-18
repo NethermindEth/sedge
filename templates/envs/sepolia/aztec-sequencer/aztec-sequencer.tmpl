@@ -1,0 +1,10 @@
+{{/* aztec.tmpl */}}
+{{ define "aztec-sequencer" }}
+# --- Aztec Sequencer configuration ---
+AZTEC_IMAGE_VERSION={{.AztecImage}}
+AZTEC_DATA_DIRECTORY={{.AztecDataDir}}
+AZTEC_KEYSTORE_PATH={{.AztecKeystorePath}}
+LOG_LEVEL=info
+AZTEC_ETHEREUM_HOSTS={{.ExecutionApiURL}}
+AZTEC_L1_CONSENSUS_HOST_URLS={{.ConsensusApiURL}}
+{{ end }}

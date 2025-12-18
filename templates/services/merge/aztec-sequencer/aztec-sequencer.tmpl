@@ -1,0 +1,44 @@
+{{/* aztec-sequencer.tmpl */}}
+{{ define "aztec-sequencer" }}
+  aztec-sequencer:
+    image: ${AZTEC_IMAGE_VERSION}
+    container_name: sedge-aztec-sequencer{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: unless-stopped
+    networks:
+      - sedge
+    volumes:
+      - ${AZTEC_DATA_DIRECTORY}:/var/lib/data
+      - ${AZTEC_KEYSTORE_PATH}:/var/lib/keystore
+    ports:
+      - {{.AztecPort}}:{{.AztecPort}}
+      - {{.AztecP2pPort}}:{{.AztecP2pPort}}
+      - {{.AztecP2pPort}}:{{.AztecP2pPort}}/udp
+    expose:
+      - {{.AztecPort}}
+      - {{.AztecP2pPort}}
+    environment:
+      KEY_STORE_DIRECTORY: /var/lib/keystore
+      DATA_DIRECTORY: /var/lib/data
+      LOG_LEVEL: ${LOG_LEVEL}
+      ETHEREUM_HOSTS: ${AZTEC_ETHEREUM_HOSTS}
+      L1_CONSENSUS_HOST_URLS: ${AZTEC_L1_CONSENSUS_HOST_URLS}
+      P2P_IP: {{.AztecP2pIp}}
+      P2P_PORT: {{.AztecP2pPort}}
+      AZTEC_PORT: {{.AztecPort}}
+      AZTEC_ADMIN_PORT: {{.AztecAdminPort}}
+    entrypoint: >-
+      node
+      --no-warnings
+      /usr/src/yarn-project/aztec/dest/bin/index.js
+      start
+      --node
+      --archiver
+      --sequencer
+      --network ${NETWORK}
+    {{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
+{{ end }}
