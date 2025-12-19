@@ -45,6 +45,7 @@ const (
 	empty                = "empty"
 	distributedValidator = "distributedValidator"
 	charon               = "charon"
+	aztecSequencer       = "aztec-sequencer"
 )
 
 // validateClients validates each client in GenData
@@ -170,6 +171,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		"AuthPortELOP":      configs.DefaultAuthPortELOP,
 		"DiscoveryPortELOP": configs.DefaultDiscoveryPortELOP,
 		"MetricsPortELOP":   configs.DefaultMetricsPortELOP,
+		"AztecPort":         configs.DefaultAztecPort,
+		"AztecP2pPort":      configs.DefaultAztecP2pPort,
+		"AztecAdminPort":    configs.DefaultAztecAdminPort,
 	}
 	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -351,6 +355,10 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		DVDiscoveryPort:         gd.Ports["DVDiscovery"],
 		DVMetricsPort:           gd.Ports["DVMetrics"],
 		DVApiPort:               gd.Ports["DVApi"],
+		AztecPort:               gd.Ports["AztecPort"],
+		AztecP2pPort:            gd.Ports["AztecP2pPort"],
+		AztecAdminPort:          gd.Ports["AztecAdminPort"],
+		AztecP2pIp:              gd.AztecP2pIp,
 	}
 
 	// Save to writer
@@ -540,6 +548,9 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ElOPAuthPort:               gd.Ports["AuthPortELOP"],
 		OpSequencerHttp:            opSequencerHttp,
 		RethNetwork:                rethNetwork,
+		AztecImage:                 imageOrEmpty(cls[aztecSequencer], gd.LatestVersion),
+		AztecSequencerKeystorePath: gd.AztecSequencerKeystorePath,
+		AztecDataDir:               "./" + configs.AztecDataDir,
 	}
 
 	// Save to writer

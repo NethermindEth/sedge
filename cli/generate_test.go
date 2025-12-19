@@ -1561,3 +1561,119 @@ func TestGeneratePathCases(t *testing.T) {
 
 	assert.Error(t, err, descr)
 }
+
+func TestLoadAztecSequencerKeystore(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
+	tcs := []struct {
+		name        string
+		testDataDir string // Subdirectory in testdata/cli_tests/aztec_keystore/
+		expectedErr string
+	}{
+		{
+			name:        "Valid keystore with single validator",
+			testDataDir: "valid_single",
+			expectedErr: "",
+		},
+		{
+			name:        "Valid keystore with multiple validators",
+			testDataDir: "valid_multiple",
+			expectedErr: "",
+		},
+		{
+			name:        "Valid keystore with optional fields",
+			testDataDir: "valid_with_optional",
+			expectedErr: "",
+		},
+		{
+			name:        "Wrong schema version",
+			testDataDir: "wrong_schema_version",
+			expectedErr: "unsupported keystore schema version: 2 (expected 1)",
+		},
+		{
+			name:        "Empty validators array",
+			testDataDir: "empty_validators",
+			expectedErr: "keystore must contain at least one validator",
+		},
+		{
+			name:        "Missing validators field",
+			testDataDir: "missing_validators",
+			expectedErr: "keystore must contain at least one validator",
+		},
+		{
+			name:        "Missing attester.eth field",
+			testDataDir: "missing_eth",
+			expectedErr: "validator[0] missing required 'attester.eth' field",
+		},
+		{
+			name:        "Missing attester.bls field",
+			testDataDir: "missing_bls",
+			expectedErr: "validator[0] missing required 'attester.bls' field",
+		},
+		{
+			name:        "Empty attester.eth field",
+			testDataDir: "empty_eth",
+			expectedErr: "validator[0] missing required 'attester.eth' field",
+		},
+		{
+			name:        "Empty attester.bls field",
+			testDataDir: "empty_bls",
+			expectedErr: "validator[0] missing required 'attester.bls' field",
+		},
+		{
+			name:        "Second validator missing attester.eth",
+			testDataDir: "second_validator_missing_eth",
+			expectedErr: "validator[1] missing required 'attester.eth' field",
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			// Prepare test data directory
+			tmpDir := t.TempDir()
+			testDataPath := filepath.Join("testdata", "cli_tests", "aztec_keystore", tc.testDataDir)
+			err := test.PrepareTestCaseDir(testDataPath, tmpDir)
+			if err != nil {
+				t.Fatalf("Can't build test case: %v", err)
+			}
+			keystorePath := filepath.Join(tmpDir, "keystore.json")
+
+			result, err := loadAztecSequencerKeystore(keystorePath)
+
+			if tc.expectedErr != "" {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tc.expectedErr)
+				assert.Empty(t, result)
+			} else {
+				assert.NoError(t, err)
+				assert.NotEmpty(t, result)
+				// Verify the returned path is absolute
+				assert.True(t, filepath.IsAbs(result))
+				// Verify it points to the same file
+				absPath, _ := filepath.Abs(keystorePath)
+				assert.Equal(t, absPath, result)
+			}
+		})
+	}
+
+	// Test cases that don't use testdata files
+	t.Run("File does not exist", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		nonexistentPath := filepath.Join(tmpDir, "nonexistent.json")
+		result, err := loadAztecSequencerKeystore(nonexistentPath)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "keystore file does not exist")
+		assert.Empty(t, result)
+	})
+
+	t.Run("Path is a directory, not a file", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		result, err := loadAztecSequencerKeystore(tmpDir)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "keystore path is not a regular file")
+		assert.Empty(t, result)
+	})
+}
