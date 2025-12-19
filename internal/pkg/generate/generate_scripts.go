@@ -136,6 +136,7 @@ func mapClients(gd *GenData) map[string]*clients.Client {
 		optimism:             gd.OptimismClient,
 		opExecution:          gd.ExecutionOPClient,
 		distributedValidator: gd.DistributedValidatorClient,
+		aztecSequencer:       gd.AztecSequencerClient,
 	}
 
 	return cls
