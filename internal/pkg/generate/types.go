@@ -81,6 +81,7 @@ type GenData struct {
 	DvExtraFlags               []string
 	ElOpExtraFlags             []string
 	OpExtraFlags               []string
+	AztecExtraFlags            []string
 	IsBase                     bool
 	MapAllPorts                bool
 	Mev                        bool
@@ -145,6 +146,7 @@ type DockerComposeData struct {
 	ClExtraFlags               []string
 	VlExtraFlags               []string
 	DvExtraFlags               []string
+	AztecExtraFlags            []string
 	ECBootnodes                string
 	CCBootnodes                string
 	CCBootnodesList            []string

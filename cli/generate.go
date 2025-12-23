@@ -72,6 +72,7 @@ type AztecSequencerFlags struct {
 	aztecSequencerName         string
 	aztecSequencerKeystorePath string
 	aztecP2pIp                 string
+	aztecExtraFlags            []string
 }
 
 // GenCmdFlags is a struct that holds the flags of the generate command
@@ -357,6 +358,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		DvExtraFlags:               flags.dvExtraFlags,
 		ElOpExtraFlags:             flags.elOpExtraFlags,
 		OpExtraFlags:               flags.opExtraFlags,
+		AztecExtraFlags:            flags.aztecExtraFlags,
 		IsBase:                     flags.isBase,
 		MapAllPorts:                flags.mapAllPorts,
 		Mev:                        !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,

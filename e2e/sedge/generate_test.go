@@ -507,6 +507,75 @@ func TestE2E_Generate_AztecSequencer_Mainnet(t *testing.T) {
 	e2eTest.run()
 }
 
+func TestE2E_Generate_AztecSequencer_ExtraFlag(t *testing.T) {
+	// Test context
+	var (
+		runErr error
+	)
+	// Build test case
+	e2eTest := newE2ESedgeTestCase(
+		t,
+		// Arrange
+		nil,
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			// Create data directory if it doesn't exist
+			err := os.MkdirAll(dataDirPath, 0755)
+			if err != nil {
+				t.Fatalf("Failed to create data directory: %v", err)
+			}
+
+			// Prepare valid keystore file
+			testDataPath := filepath.Join("cli", "testdata", "cli_tests", "aztec_keystore", "valid_single")
+			wd, err := os.Getwd()
+			if err != nil {
+				t.Fatalf("Failed to get working directory: %v", err)
+			}
+			repoPath := filepath.Dir(filepath.Dir(wd))
+			sourcePath := filepath.Join(repoPath, testDataPath)
+			destPath := filepath.Join(dataDirPath, "keystore.json")
+
+			// Copy keystore file
+			sourceFile, err := os.Open(filepath.Join(sourcePath, "keystore.json"))
+			if err != nil {
+				t.Fatalf("Failed to open source keystore: %v", err)
+			}
+			defer sourceFile.Close()
+
+			destFile, err := os.Create(destPath)
+			if err != nil {
+				t.Fatalf("Failed to create dest keystore: %v", err)
+			}
+			defer destFile.Close()
+
+			_, err = io.Copy(destFile, sourceFile)
+			if err != nil {
+				t.Fatalf("Failed to copy keystore: %v", err)
+			}
+
+			keystorePath := filepath.Join(dataDirPath, "keystore.json")
+			runErr = base.RunSedge(t, binaryPath, "generate", "aztec-sequencer",
+				"--network", "sepolia",
+				"--aztec-keystore-path", keystorePath,
+				"--aztec-p2p-ip", "192.168.1.100",
+				"--aztec-extra-flag", "p2p.maxPeers=200",
+			)
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.NoError(t, runErr, "generate command should succeed")
+
+			dockerComposeFilePath := filepath.Join(dataDirPath, "docker-compose.yml")
+			assert.FileExists(t, dockerComposeFilePath, "docker-compose.yml file should be created")
+			composeBytes, err := os.ReadFile(dockerComposeFilePath)
+			assert.NoError(t, err, "should be able to read docker-compose.yml")
+			assert.Contains(t, string(composeBytes), "--p2p.maxPeers=200", "docker-compose should include aztec extra flag")
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
+
 func TestE2E_Generate_AztecSequencer_MissingKeystorePath(t *testing.T) {
 	// Test context
 	var (

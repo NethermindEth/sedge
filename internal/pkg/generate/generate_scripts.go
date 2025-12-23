@@ -360,6 +360,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		AztecP2pPort:            gd.Ports["AztecP2pPort"],
 		AztecAdminPort:          gd.Ports["AztecAdminPort"],
 		AztecP2pIp:              gd.AztecP2pIp,
+		AztecExtraFlags:         gd.AztecExtraFlags,
 	}
 
 	// Save to writer

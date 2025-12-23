@@ -34,7 +34,8 @@
       --node
       --archiver
       --sequencer
-      --network ${AZTEC_NETWORK}
+      --network ${AZTEC_NETWORK}{{range $flag := .AztecExtraFlags}}
+      --{{$flag}}{{end}}
     {{if .LoggingDriver}}
     logging:
       driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
