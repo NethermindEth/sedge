@@ -345,7 +345,7 @@ func TestE2E_Generate_AztecSequencer_Sepolia(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
 			// Create data directory if it doesn't exist
-			err := os.MkdirAll(dataDirPath, 0755)
+			err := os.MkdirAll(dataDirPath, 0o755)
 			if err != nil {
 				t.Fatalf("Failed to create data directory: %v", err)
 			}
@@ -435,7 +435,7 @@ func TestE2E_Generate_AztecSequencer_Mainnet(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
 			// Create data directory if it doesn't exist
-			err := os.MkdirAll(dataDirPath, 0755)
+			err := os.MkdirAll(dataDirPath, 0o755)
 			if err != nil {
 				t.Fatalf("Failed to create data directory: %v", err)
 			}
@@ -546,7 +546,7 @@ func TestE2E_Generate_AztecSequencer_MissingP2pIp(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
 			// Create data directory if it doesn't exist
-			err := os.MkdirAll(dataDirPath, 0755)
+			err := os.MkdirAll(dataDirPath, 0o755)
 			if err != nil {
 				t.Fatalf("Failed to create data directory: %v", err)
 			}
