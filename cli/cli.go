@@ -18,6 +18,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -50,6 +51,7 @@ const (
 	NodeTypeExecution = "execution"
 	NodeTypeConsensus = "consensus"
 	NodeTypeValidator = "validator"
+	NodeTypeAztec     = "aztec-sequencer"
 
 	Randomize = "randomize"
 
@@ -98,6 +100,7 @@ func CliCmd(p ui.Prompter, actions actions.SedgeActions, depsMgr dependencies.De
 - Execution Node
 - Consensus Node
 - Validator Node
+- Aztec Sequencer (execution + consensus + aztec-sequencer)
 - Lido CSM Node
 
 Follow the prompts to select the options you want for your node. At the end of the process, you will
@@ -123,11 +126,62 @@ using docker compose command behind the scenes.
 				return setupConsensusNode(p, o, actions, depsMgr, monitoringMgr)
 			case NodeTypeValidator:
 				return setupValidatorNode(p, o, actions, depsMgr, monitoringMgr)
+			case NodeTypeAztec:
+				return setupAztecSequencerNode(p, o, actions, depsMgr, monitoringMgr)
 			}
 			return nil
 		},
 	}
 	return cmd
+}
+
+func setupAztecSequencerNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager, monitoringMgr MonitoringManager) (err error) {
+	o.genData.Services = []string{"execution", "consensus", aztecSequencer}
+
+	if o.genData.Network == NetworkCustom {
+		if err := runPromptActions(p, o,
+			inputCustomNetworkConfig,
+			inputCustomChainSpec,
+			inputCustomGenesis,
+			inputCustomDeployBlock,
+			inputExecutionBootNodes,
+			inputConsensusBootNodes,
+		); err != nil {
+			return err
+		}
+	}
+
+	if err := runPromptActions(p, o,
+		selectExecutionClient,
+		selectConsensusClient,
+		selectAztecSequencerClient,
+		inputAztecSequencerKeystorePath,
+		inputAztecSequencerP2pIP,
+		inputCheckpointSyncURL,
+		inputFeeRecipientNoValidator,
+	); err != nil {
+		return err
+	}
+
+	if err := confirmExposeAllPorts(p, o); err != nil {
+		return err
+	}
+	if err := setupJWT(p, o, false); err != nil {
+		return err
+	}
+	if err := confirmEnableMonitoring(p, o); err != nil {
+		return err
+	}
+
+	// Call generate action
+	o.genData, err = a.Generate(actions.GenerateOptions{
+		GenerationData: o.genData,
+		GenerationPath: o.generationPath,
+	})
+	if err != nil {
+		return err
+	}
+	return postGenerate(p, o, a, depsManager, monitoringMgr)
 }
 
 func setupFullNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager, monitoringMgr MonitoringManager) (err error) {
@@ -376,6 +430,8 @@ func postGenerate(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsM
 		services = []string{"consensus"}
 	case NodeTypeValidator:
 		services = []string{"validator"}
+	case NodeTypeAztec:
+		services = []string{"execution", "consensus", aztecSequencer}
 	}
 	run, err := p.Confirm("Run services now?", false)
 	if err != nil {
@@ -666,12 +722,69 @@ func selectNetwork(p ui.Prompter, o *CliCmdOptions) error {
 }
 
 func selectNodeType(p ui.Prompter, o *CliCmdOptions) error {
-	options := []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator}
+	options := []string{NodeTypeFullNode, NodeTypeExecution, NodeTypeConsensus, NodeTypeValidator, NodeTypeAztec}
 	index, err := p.Select("Select node type", "", options)
 	if err != nil {
 		return err
 	}
 	o.nodeType = options[index]
+	return nil
+}
+
+func selectAztecSequencerClient(p ui.Prompter, o *CliCmdOptions) (err error) {
+	c := clients.ClientInfo{Network: o.genData.Network}
+	supportedClients, err := c.SupportedClients(aztecSequencer)
+	if err != nil {
+		return err
+	}
+	options := append(supportedClients, Randomize)
+	index, err := p.Select("Select aztec sequencer client", "", options)
+	if err != nil {
+		return err
+	}
+	selectedAztecSequencerClient := options[index]
+	// In case random is selected, select a random client
+	if selectedAztecSequencerClient == Randomize {
+		randomName, err := clients.RandomClientName(supportedClients)
+		if err != nil {
+			return err
+		}
+		selectedAztecSequencerClient = randomName
+		log.Info("Random aztec sequencer client selected: ", selectedAztecSequencerClient)
+	}
+	o.genData.AztecSequencerClient = &clients.Client{
+		Name: selectedAztecSequencerClient,
+		Type: aztecSequencer,
+	}
+	o.genData.AztecSequencerClient.SetImageOrDefault("")
+	return nil
+}
+
+func inputAztecSequencerKeystorePath(p ui.Prompter, o *CliCmdOptions) (err error) {
+	path, err := p.InputFilePath("Aztec sequencer keystore.json path", "", true, ".json")
+	if err != nil {
+		return err
+	}
+	abs, err := loadAztecSequencerKeystore(path)
+	if err != nil {
+		return err
+	}
+	o.genData.AztecSequencerKeystorePath = abs
+	return nil
+}
+
+func inputAztecSequencerP2pIP(p ui.Prompter, o *CliCmdOptions) (err error) {
+	ip, err := p.Input("Aztec sequencer P2P IP address", "", true, func(s string) error {
+		parsed := net.ParseIP(s)
+		if parsed == nil {
+			return fmt.Errorf("invalid IP address: %s", s)
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	o.genData.AztecP2pIp = ip
 	return nil
 }
 

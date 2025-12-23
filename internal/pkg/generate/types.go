@@ -22,6 +22,8 @@ import (
 // EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
 type EnvData struct {
 	Services                   []string
+	Network                    string
+	AztecNetwork               string
 	Mev                        bool
 	ElImage                    string
 	ElOpImage                  string

@@ -519,6 +519,8 @@ func EnvFile(gd *GenData, at io.Writer) error {
 
 	data := EnvData{
 		Services:                   gd.Services,
+		Network:                    gd.Network,
+		AztecNetwork:               aztecNetworkForSedgeNetwork(gd.Network),
 		Mev:                        networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
 		ElImage:                    imageOrEmpty(cls[execution], gd.LatestVersion),
 		ElDataDir:                  "./" + configs.ExecutionDir,
@@ -724,4 +726,16 @@ func imageOrEmpty(cls *clients.Client, latest bool) string {
 		return cls.Image
 	}
 	return ""
+}
+
+func aztecNetworkForSedgeNetwork(network string) string {
+	switch network {
+	case configs.NetworkSepolia:
+		// Aztec uses "testnet" for Sepolia-backed deployments.
+		return "testnet"
+	case configs.NetworkMainnet:
+		return "mainnet"
+	default:
+		return network
+	}
 }

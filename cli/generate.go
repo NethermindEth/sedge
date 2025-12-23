@@ -344,6 +344,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		DistributedValidatorClient: combinedClients.DistributedValidator,
 		ExecutionOPClient:          combinedClients.ExecutionOP,
 		OptimismClient:             combinedClients.Optimism,
+		AztecSequencerClient:       combinedClients.AztecSequencer,
 		Network:                    network,
 		CheckpointSyncUrl:          flags.checkpointSyncUrl,
 		FeeRecipient:               flags.feeRecipient,
@@ -543,8 +544,11 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 				aztecSequencerClient.Image = strings.Join(aztecSequencerParts[1:], ":")
 				aztecSequencerClient.Modified = true
 			}
+			aztecSequencerClient.SetImageOrDefault(strings.Join(aztecSequencerParts[1:], ":"))
+		} else {
+			aztecSequencerClient.Name = "aztec-sequencer"
+			aztecSequencerClient.SetImageOrDefault("")
 		}
-		aztecSequencerClient.SetImageOrDefault(strings.Join(aztecSequencerParts[1:], ":"))
 		if err = clients.ValidateClient(aztecSequencerClient, aztecSequencer); err != nil {
 			return nil, err
 		}
@@ -585,6 +589,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		DistributedValidator: distributedValidatorClient,
 		ExecutionOP:          executionOpClient,
 		Optimism:             opClient,
+		AztecSequencer:       aztecSequencerClient,
 	}, err
 }
 
