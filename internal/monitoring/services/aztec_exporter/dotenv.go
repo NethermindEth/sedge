@@ -16,7 +16,7 @@ limitations under the License.
 package aztec_exporter
 
 var dotEnv map[string]string = map[string]string{
-	"AZTEC_EXPORTER_IMAGE":          "otel/opentelemetry-collector-contrib:v0.142.0",
+	"AZTEC_EXPORTER_IMAGE":          "otel/opentelemetry-collector-contrib:0.139.0",
 	"AZTEC_EXPORTER_PORT":           "9464",
 	"AZTEC_EXPORTER_OTLP_GRPC_PORT": "4317",
 	"AZTEC_EXPORTER_OTLP_HTTP_PORT": "4318",

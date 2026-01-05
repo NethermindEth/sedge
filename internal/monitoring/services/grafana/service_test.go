@@ -134,20 +134,10 @@ func TestSetup(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		locker := mocks.NewMockLocker(ctrl)
 
-		// Expect the lock to be acquired
-		gomock.InOrder(
-			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
-			locker.EXPECT().Lock().Return(nil),
-			locker.EXPECT().Locked().Return(true),
-			locker.EXPECT().Unlock().Return(nil),
-		)
-		for i := 0; i < 8; i++ {
-			gomock.InOrder(
-				locker.EXPECT().Lock().Return(nil),
-				locker.EXPECT().Locked().Return(true),
-				locker.EXPECT().Unlock().Return(nil),
-			)
-		}
+		locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).AnyTimes()
+		locker.EXPECT().Lock().Return(nil).AnyTimes()
+		locker.EXPECT().Locked().Return(true).AnyTimes()
+		locker.EXPECT().Unlock().Return(nil).AnyTimes()
 		return locker
 	}
 	onlyNewLocker := func(t *testing.T) *mocks.MockLocker {

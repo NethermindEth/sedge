@@ -38,6 +38,9 @@ func TestInit(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	locker := mocks.NewMockLocker(ctrl)
 	locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("monitoring", ".lock")}).Return(locker)
+	locker.EXPECT().Lock().Return(nil).AnyTimes()
+	locker.EXPECT().Locked().Return(true).AnyTimes()
+	locker.EXPECT().Unlock().Return(nil).AnyTimes()
 
 	dataDir, err := data.NewDataDir("/", afs, locker)
 	require.NoError(t, err)
@@ -98,6 +101,9 @@ func TestSetupWritesConfig(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	locker := mocks.NewMockLocker(ctrl)
 	locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join("monitoring", ".lock")}).Return(locker)
+	locker.EXPECT().Lock().Return(nil).AnyTimes()
+	locker.EXPECT().Locked().Return(true).AnyTimes()
+	locker.EXPECT().Unlock().Return(nil).AnyTimes()
 
 	dataDir, err := data.NewDataDir("/", afs, locker)
 	require.NoError(t, err)

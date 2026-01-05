@@ -181,6 +181,9 @@ func (a *AztecExporterService) ContainerName() string {
 }
 
 func (a *AztecExporterService) Endpoint() string {
+	if a.containerIP == nil {
+		return fmt.Sprintf("http://%s:%d", a.ContainerName(), a.params.PromPort)
+	}
 	return fmt.Sprintf("http://%s:%d", a.containerIP, a.params.PromPort)
 }
 

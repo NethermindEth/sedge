@@ -195,6 +195,9 @@ func (g *GrafanaService) ContainerName() string {
 }
 
 func (g *GrafanaService) Endpoint() string {
+	if g.containerIP == nil {
+		return fmt.Sprintf("http://%s:%d", g.ContainerName(), g.port)
+	}
 	return fmt.Sprintf("http://%s:%d", g.containerIP, g.port)
 }
 

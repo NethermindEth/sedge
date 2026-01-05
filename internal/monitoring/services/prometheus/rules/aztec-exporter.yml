@@ -9,14 +9,15 @@ groups:
         annotations:
           summary: "Aztec exporter (OTel collector) is down"
           description: "Prometheus cannot scrape the Aztec exporter (OpenTelemetry Collector)."
+      # Aztec Node Alerts
       - alert: L2BlockHeightNotIncreasing
         expr: increase(aztec_archiver_block_height{aztec_status=""}[15m]) == 0
         for: 5m
         labels:
-        severity: critical
+          severity: critical
         annotations:
-        summary: "Node not processing L2 blocks"
-        description: "No L2 blocks processed in the last 15 minutes. Node may be stuck or out of sync."
+          summary: "Node not processing L2 blocks"
+          description: "No L2 blocks processed in the last 15 minutes. Node may be stuck or out of sync."
       - alert: LowPeerCount
         expr: aztec_peer_manager_peer_count_peers < 5
         for: 10m
@@ -33,3 +34,30 @@ groups:
         annotations:
           summary: "Node not seeing new L1 blocks"
           description: "No L1 block updates in 15 minutes. Check node and L1 RPC connection."
+      # Aztec Sequencer Alerts
+      - alert: SequencerNotHealthy
+        expr: aztec_sequencer_current_state != 1
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Sequencer module not in healthy state"
+          description: "Sequencer state is {{ $value }} (expected 1). Check sequencer logs immediately."
+      - alert: HighBlockProposalFailureRate
+        expr: |
+          (increase(aztec_sequencer_slot_count[15m]) - increase(aztec_sequencer_slot_filled_count[15m]))
+          / increase(aztec_sequencer_slot_count[15m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High block proposal failure rate"
+          description: "{{ $value | humanizePercentage }} of block proposals are failing in the last 15 minutes."
+      - alert: BlobPublishingFailures
+        expr: increase(aztec_l1_publisher_blob_tx_failure[15m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Blob publishing failures detected"
+          description: "{{ $value }} blob transaction failures in the last 15 minutes. Check L1 gas prices and publisher balance."

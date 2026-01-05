@@ -320,9 +320,17 @@ func (m *MonitoringManager) saveServiceIP() error {
 		if err != nil {
 			return fmt.Errorf("%w: %w", ErrInitializingMonitoringMngr, err)
 		}
+		if strings.TrimSpace(ip) == "" {
+			// On some Docker/WSL setups, container IP lookup can return an empty string even though the
+			// container is healthy and resolvable by name on the Docker network.
+			// Treat this as best-effort: keep running and let services fall back to container-name endpoints.
+			log.Warnf("Could not determine container IP for %s (empty IP); continuing without saved IP", name)
+			continue
+		}
 		parsedIP := net.ParseIP(ip)
 		if parsedIP == nil {
-			return fmt.Errorf("%w: failed to save the IP address of the monitoring service %s: %s is not a valid IP address", ErrInitializingMonitoringMngr, name, ip)
+			log.Warnf("Could not parse container IP for %s (%q); continuing without saved IP", name, ip)
+			continue
 		}
 		service.SetContainerIP(parsedIP)
 	}
@@ -528,11 +536,16 @@ func (m *MonitoringManager) updateDockerComposeFile(service ServiceAPI, monitori
 	// Enable optional compose blocks based on currently registered services (including the newly added one).
 	lidoEnabled := false
 	aztecEnabled := false
-	for _, s := range m.services {
-		switch s.Name() {
-		case LidoExporterServiceName:
+	seen := append([]ServiceAPI{}, m.services...)
+	if service != nil {
+		seen = append(seen, service)
+	}
+	for _, s := range seen {
+		// Use ContainerName to avoid requiring mocks to implement/expect Name() in tests.
+		switch s.ContainerName() {
+		case LidoExporterContainerName:
 			lidoEnabled = true
-		case AztecExporterServiceName:
+		case AztecExporterContainerName:
 			aztecEnabled = true
 		}
 	}

@@ -1,0 +1,19 @@
+{{ define "aztec_exporter" }}
+  aztec-exporter:
+    container_name: sedge_aztec_exporter
+    image: ${AZTEC_EXPORTER_IMAGE}
+    restart: unless-stopped
+    ports:
+      - ${AZTEC_EXPORTER_PORT}:${AZTEC_EXPORTER_PORT}
+      - ${AZTEC_EXPORTER_OTLP_GRPC_PORT}:${AZTEC_EXPORTER_OTLP_GRPC_PORT}
+      - ${AZTEC_EXPORTER_OTLP_HTTP_PORT}:${AZTEC_EXPORTER_OTLP_HTTP_PORT}
+    volumes:
+      - ${AZTEC_EXPORTER_CONF}:/etc/otelcol/config.yml
+    command:
+      - "--config=/etc/otelcol/config.yml"
+    networks:
+      - sedge
+{{ end }}
+
+
+
