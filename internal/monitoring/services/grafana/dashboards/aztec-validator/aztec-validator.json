@@ -159,7 +159,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -234,7 +234,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -304,7 +304,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "sum(aztec_db_used_size_bytes{$selector}) + sum (aztec_world_state_db_used_size{$selector})",
@@ -402,7 +402,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "avg (rate(gossipsub_rpc_recv_bytes_total{$selector}[$__rate_interval]))",
@@ -431,7 +431,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "${data_source}"
       },
       "fieldConfig": {
         "defaults": {
@@ -582,7 +582,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -609,7 +609,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "max(aztec_archiver_block_height{ $selector, aztec_status=\"\"}) - max(aztec_archiver_block_height{ $selector ,aztec_status=\"proven\"})",
@@ -635,7 +635,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -753,7 +753,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "avg by (aztec_address_sender,service_name) (aztec_l1_publisher_balance_eth{$selector})",
@@ -821,7 +821,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "-sum(delta(aztec_l1_publisher_balance_eth{$selector}[24h]))",
@@ -894,7 +894,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -951,7 +951,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "${data_source}"
       },
       "description": "The status of proposals made by this validator",
       "fieldConfig": {
@@ -1017,7 +1017,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "avg by (aztec_status) (delta(aztec_sequencer_block_count{$selector}[24h]))",
@@ -1127,7 +1127,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "delta(aztec_sequencer_block_count{$selector,aztec_status=\"built\"}[$__rate_interval])",
@@ -1152,7 +1152,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "delta(aztec_sequencer_block_count{$selector,aztec_status=\"cancelled\"}[$__rate_interval])",
@@ -1251,7 +1251,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "rate(aztec_l1_publisher_blob_inclusion_blocks_sum{$selector}[$__rate_interval])/rate(aztec_l1_publisher_blob_inclusion_blocks_count{$selector}[$__rate_interval])",
@@ -1349,7 +1349,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "aztec_sequencer_current_block_size{$selector}",
@@ -1448,7 +1448,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "aztec_sequencer_block_build_mana_per_second{$selector}",
@@ -1536,7 +1536,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "sum(increase(aztec_sequencer_block_build_duration_milliseconds_bucket{$selector}[$__rate_interval])) by (le)",
@@ -1634,7 +1634,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "avg_over_time(aztec_sequencer_time_to_collect_attestations{$selector}[$__rate_interval])",
@@ -1705,7 +1705,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "avg (rate(aztec_archiver_tx_count{$selector}[$__rate_interval]))",
@@ -1800,7 +1800,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "max(aztec_world_state_unfinalised_height{$selector})",
@@ -1824,7 +1824,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "max(aztec_world_state_oldest_block{$selector})",
@@ -1924,7 +1924,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -2022,7 +2022,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -2137,7 +2137,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "${data_source}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2206,7 +2206,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "${data_source}"
               },
               "disableTextWrap": false,
               "editorMode": "builder",
@@ -2275,7 +2275,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "${data_source}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2352,7 +2352,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "${data_source}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2454,7 +2454,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "${data_source}"
               },
               "disableTextWrap": false,
               "editorMode": "builder",
@@ -2573,7 +2573,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.95, sum by(le) (rate(aztec_archiver_sync_duration_milliseconds_bucket{$selector}[$__rate_interval])))",
@@ -2600,7 +2600,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "${data_source}"
       },
       "fieldConfig": {
         "defaults": {
@@ -2695,7 +2695,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.5, sum(rate(aztec_world_state_request_time_microseconds_bucket{$selector,aztec_world_state_request=\"SYNC_BLOCK\"}[$__rate_interval])) by (le))",
@@ -2724,7 +2724,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "${data_source}"
       },
       "fieldConfig": {
         "defaults": {
@@ -2827,7 +2827,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "${data_source}"
       },
       "description": "",
       "fieldConfig": {
@@ -2938,7 +2938,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "${data_source}"
       },
       "fieldConfig": {
         "defaults": {
@@ -3042,7 +3042,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "${data_source}"
       },
       "fieldConfig": {
         "defaults": {
@@ -3141,7 +3141,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "${data_source}"
       },
       "fieldConfig": {
         "defaults": {
@@ -3233,7 +3233,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "sum (aztec_world_state_db_used_size{$selector})",
@@ -3333,7 +3333,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${data_source}"
           },
           "editorMode": "code",
           "expr": "rate(gossipsub_rpc_recv_bytes_total{$selector}[$__rate_interval])*8",
@@ -3379,18 +3379,18 @@
         "description": "",
         "hide": 2,
         "name": "selector",
-        "query": "${VAR_SELECTOR}",
+        "query": "service_instance_id!=\"\"",
         "skipUrlSync": true,
         "type": "constant",
         "current": {
-          "value": "${VAR_SELECTOR}",
-          "text": "${VAR_SELECTOR}",
+          "value": "service_instance_id!=\"\"",
+          "text": "service_instance_id!=\"\"",
           "selected": false
         },
         "options": [
           {
-            "value": "${VAR_SELECTOR}",
-            "text": "${VAR_SELECTOR}",
+            "value": "service_instance_id!=\"\"",
+            "text": "service_instance_id!=\"\"",
             "selected": false
           }
         ]
