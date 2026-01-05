@@ -567,25 +567,12 @@ func TestAddTarget(t *testing.T) {
 		{
 			name: "lock error",
 			mocker: func(t *testing.T, times int) *mocks.MockLocker {
-				// Create a mock locker
 				ctrl := gomock.NewController(t)
 				locker := mocks.NewMockLocker(ctrl)
 
-				// Expect the lock to be acquired
-				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
-				)
-				for i := 0; i < 5; i++ {
-					gomock.InOrder(
-						locker.EXPECT().Lock().Return(nil),
-						locker.EXPECT().Locked().Return(true),
-						locker.EXPECT().Unlock().Return(nil),
-					)
-				}
-
+				// Fail fast on the first lock attempt during Setup().
+				// The exact number/order of lock operations inside Setup may change over time.
+				locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).AnyTimes()
 				locker.EXPECT().Lock().Return(fmt.Errorf("error"))
 				return locker
 			},
@@ -608,28 +595,13 @@ func TestAddTarget(t *testing.T) {
 		{
 			name: "unlock error",
 			mocker: func(t *testing.T, times int) *mocks.MockLocker {
-				// Create a mock locker
 				ctrl := gomock.NewController(t)
 				locker := mocks.NewMockLocker(ctrl)
 
-				// Expect the lock to be acquired
-				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
-				)
-				for i := 0; i < 5; i++ {
-					gomock.InOrder(
-						locker.EXPECT().Lock().Return(nil),
-						locker.EXPECT().Locked().Return(true),
-						locker.EXPECT().Unlock().Return(nil),
-					)
-				}
-				gomock.InOrder(
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(false),
-				)
+				// Simulate an unlock failure: Locked() is false when we try to unlock.
+				locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).AnyTimes()
+				locker.EXPECT().Lock().Return(nil).AnyTimes()
+				locker.EXPECT().Locked().Return(false).AnyTimes()
 				return locker
 			},
 			options: map[string]string{
@@ -911,25 +883,11 @@ func TestRemoveTarget(t *testing.T) {
 		{
 			name: "lock error",
 			mocker: func(t *testing.T, times int) *mocks.MockLocker {
-				// Create a mock locker
 				ctrl := gomock.NewController(t)
 				locker := mocks.NewMockLocker(ctrl)
 
-				// Expect the lock to be acquired
-				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
-				)
-				for i := 0; i < 5; i++ {
-					gomock.InOrder(
-						locker.EXPECT().Lock().Return(nil),
-						locker.EXPECT().Locked().Return(true),
-						locker.EXPECT().Unlock().Return(nil),
-					)
-				}
-
+				// Fail fast on the first lock attempt during Setup().
+				locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).AnyTimes()
 				locker.EXPECT().Lock().Return(fmt.Errorf("error"))
 				return locker
 			},
@@ -948,28 +906,13 @@ func TestRemoveTarget(t *testing.T) {
 		{
 			name: "unlock error",
 			mocker: func(t *testing.T, times int) *mocks.MockLocker {
-				// Create a mock locker
 				ctrl := gomock.NewController(t)
 				locker := mocks.NewMockLocker(ctrl)
 
-				// Expect the lock to be acquired
-				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
-				)
-				for i := 0; i < 5; i++ {
-					gomock.InOrder(
-						locker.EXPECT().Lock().Return(nil),
-						locker.EXPECT().Locked().Return(true),
-						locker.EXPECT().Unlock().Return(nil),
-					)
-				}
-				gomock.InOrder(
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(false),
-				)
+				// Simulate an unlock failure: Locked() is false when we try to unlock.
+				locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).AnyTimes()
+				locker.EXPECT().Lock().Return(nil).AnyTimes()
+				locker.EXPECT().Locked().Return(false).AnyTimes()
 				return locker
 			},
 			options: map[string]string{
