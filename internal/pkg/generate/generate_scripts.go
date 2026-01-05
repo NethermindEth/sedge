@@ -525,6 +525,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		Network:                    gd.Network,
 		AztecNetwork:               aztecNetworkForSedgeNetwork(gd.Network),
 		AztecNodeType:              gd.AztecNodeType,
+		AztecOtelMetricsPort:       gd.AztecOtelMetricsPort,
 		Mev:                        networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
 		ElImage:                    imageOrEmpty(cls[execution], gd.LatestVersion),
 		ElDataDir:                  "./" + configs.ExecutionDir,

@@ -16,7 +16,9 @@ limitations under the License.
 package e2e
 
 import (
+	"net"
 	"runtime"
+	"strconv"
 	"testing"
 
 	base "github.com/NethermindEth/sedge/e2e"
@@ -468,6 +470,143 @@ func TestE2E_MonitoringStack_InitLido_ValidID_Mainnet(t *testing.T) {
 			checkMonitoringStackContainers(t, "sedge_lido_exporter")
 			checkPrometheusTargetsUp(t, "sedge_lido_exporter:8080", "sedge_node_exporter:9100")
 			checkGrafanaHealth(t)
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
+
+func TestE2E_MonitoringStack_InitAztec(t *testing.T) {
+	skipIfNotAMD64(t)
+	// Test context
+	var (
+		runErr error
+	)
+	// Build test case
+	e2eTest := newE2ESedgeTestCase(
+		t,
+		// Arrange
+		func(t *testing.T, sedgePath string) error {
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "clean")
+		},
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "aztec")
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.NoError(t, runErr)
+			checkMonitoringStackDir(t)
+			checkPrometheusDir(t)
+			checkMonitoringStackContainers(t, "sedge_aztec_exporter")
+			checkPrometheusTargetsUp(t, "sedge_aztec_exporter:9464", "sedge_node_exporter:9100")
+			checkGrafanaHealth(t)
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
+
+func TestE2E_MonitoringStack_InitAztec_CustomMetricsPort(t *testing.T) {
+	skipIfNotAMD64(t)
+	// Test context
+	var (
+		runErr error
+		port   int
+	)
+	// Build test case
+	e2eTest := newE2ESedgeTestCase(
+		t,
+		// Arrange
+		func(t *testing.T, sedgePath string) error {
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "clean")
+		},
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			// Pick a free port for the exporter metrics endpoint.
+			ln, err := net.Listen("tcp", "127.0.0.1:0")
+			if err != nil {
+				t.Fatalf("failed to reserve a free port: %v", err)
+			}
+			port = ln.Addr().(*net.TCPAddr).Port
+			_ = ln.Close()
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "aztec", "--metrics-port", strconv.Itoa(port))
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.NoError(t, runErr)
+			checkMonitoringStackDir(t)
+			checkPrometheusDir(t)
+			checkMonitoringStackContainers(t, "sedge_aztec_exporter")
+			checkPrometheusTargetsUp(t, "sedge_aztec_exporter:"+strconv.Itoa(port), "sedge_node_exporter:9100")
+			checkGrafanaHealth(t)
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
+
+func TestE2E_MonitoringStack_InitAztec_OccupiedPort(t *testing.T) {
+	skipIfNotAMD64(t)
+	// Test context
+	var (
+		runErr error
+	)
+	// Build test case
+	e2eTest := newE2ESedgeTestCase(
+		t,
+		// Arrange
+		func(t *testing.T, sedgePath string) error {
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "clean")
+		},
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			// Occupy a free port, then try to bind the exporter to it via docker compose; it should fail.
+			// Bind on all interfaces to reliably collide with Docker's 0.0.0.0 port binding.
+			ln, err := net.Listen("tcp", ":0")
+			if err != nil {
+				t.Fatalf("failed to reserve a port: %v", err)
+			}
+			defer ln.Close()
+			port := ln.Addr().(*net.TCPAddr).Port
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "init", "aztec", "--metrics-port", strconv.Itoa(port))
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.Error(t, runErr)
+			checkContainerNotRunning(t, "sedge_aztec_exporter")
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
+
+func TestE2E_MonitoringStack_CleanAztec(t *testing.T) {
+	skipIfNotAMD64(t)
+	// Test context
+	var (
+		runErr error
+	)
+	// Build test case
+	e2eTest := newE2ESedgeTestCase(
+		t,
+		// Arrange
+		func(t *testing.T, sedgePath string) error {
+			return base.RunCommand(t, sedgePath, "sedge", "monitoring", "init", "aztec")
+		},
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			runErr = base.RunCommand(t, binaryPath, "sedge", "monitoring", "clean")
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.NoError(t, runErr)
+
+			// Check that monitoring stack directory is removed
+			assert.NoDirExists(t, dataDirPath)
+
+			// Check that monitoring stack containers are removed
+			checkMonitoringStackContainersNotRunning(t, "sedge_aztec_exporter")
 		},
 	)
 	// Run test case

@@ -316,11 +316,25 @@ func (p *PrometheusService) reloadConfig() error {
 	b.MaxElapsedTime = time.Minute
 
 	err := backoff.Retry(func() (err error) {
-		resp, err := http.Post(fmt.Sprintf("http://%s:%d/-/reload", p.containerIP, p.port), "", nil)
-		if err != nil {
+		reloadURLs := []string{
+			fmt.Sprintf("http://localhost:%d/-/reload", p.port),
+		}
+		if p.containerIP != nil {
+			reloadURLs = append(reloadURLs, fmt.Sprintf("http://%s:%d/-/reload", p.containerIP, p.port))
+		}
+
+		var resp *http.Response
+		var lastErr error
+		for _, u := range reloadURLs {
+			resp, lastErr = http.Post(u, "", nil)
+			if lastErr == nil {
+				break
+			}
+		}
+		if lastErr != nil {
 			// TODO: Use fields to log the error
 			log.Debug("Retrying request...")
-			return err
+			return lastErr
 		}
 		defer resp.Body.Close()
 

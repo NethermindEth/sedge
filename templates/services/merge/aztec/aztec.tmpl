@@ -35,6 +35,7 @@
       P2P_PORT: {{.AztecP2pPort}}
       AZTEC_PORT: {{.AztecPort}}
       AZTEC_ADMIN_PORT: {{.AztecAdminPort}}
+      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT}
     entrypoint: >-
       node
       --no-warnings

@@ -487,29 +487,58 @@ func (m *MonitoringManager) updateDockerComposeFile(service ServiceAPI, monitori
 		return err
 	}
 
-	// Fetch the service template file
-	serviceTmp, err := monitoringFs.Open("services/" + service.Name() + ".tmpl")
+	// Parse all service templates so optional template calls (e.g. lido_exporter) never fail.
+	// Note: we still control whether they are rendered via ServiceTemplateData flags.
+	err = fs.WalkDir(monitoringFs, "services", func(path string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if d.IsDir() {
+			return nil
+		}
+		// Skip the base template (already parsed)
+		if path == "services/docker-compose_base.tmpl" {
+			return nil
+		}
+		// Only parse *.tmpl files
+		if !strings.HasSuffix(path, ".tmpl") {
+			return nil
+		}
+		f, err := monitoringFs.Open(path)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		b, err := io.ReadAll(f)
+		if err != nil {
+			return err
+		}
+		if _, err := baseTmp.Parse(string(b)); err != nil {
+			return fmt.Errorf("error parsing service template %s: %w", path, err)
+		}
+		return nil
+	})
 	if err != nil {
-		return fmt.Errorf("error opening service %s template: %w", service.Name(), err)
-	}
-	defer serviceTmp.Close()
-
-	serviceTmpContent, err := io.ReadAll(serviceTmp)
-	if err != nil {
-		return fmt.Errorf("error reading service %s template: %w", service.Name(), err)
-	}
-
-	// Merge both templates
-	baseTmp, err = baseTmp.Parse(string(serviceTmpContent))
-	if err != nil {
-		return fmt.Errorf("error parsing service %s template: %w", service.Name(), err)
+		return err
 	}
 
 	// Create a buffer to hold the merged content
 	var buf bytes.Buffer
 
+	// Enable optional compose blocks based on currently registered services (including the newly added one).
+	lidoEnabled := false
+	aztecEnabled := false
+	for _, s := range m.services {
+		switch s.Name() {
+		case LidoExporterServiceName:
+			lidoEnabled = true
+		case AztecExporterServiceName:
+			aztecEnabled = true
+		}
+	}
 	data := types.ServiceTemplateData{
-		LidoExporter: service.Name() == LidoExporterServiceName,
+		LidoExporter:  lidoEnabled,
+		AztecExporter: aztecEnabled,
 	}
 
 	// Execute the main template with the service template as data

@@ -25,6 +25,7 @@ type EnvData struct {
 	Network                    string
 	AztecNetwork               string
 	AztecNodeType              string
+	AztecOtelMetricsPort       uint16
 	Mev                        bool
 	ElImage                    string
 	ElOpImage                  string
@@ -111,6 +112,7 @@ type GenData struct {
 	AztecSequencerKeystorePath string
 	AztecP2pIp                 string
 	AztecNodeType              string
+	AztecOtelMetricsPort       uint16
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script

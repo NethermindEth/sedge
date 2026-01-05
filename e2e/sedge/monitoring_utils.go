@@ -21,6 +21,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -57,8 +58,55 @@ type PrometheusTargetsResponse struct {
 	Data   Data   `json:"data"`
 }
 
+func monitoringDotEnv(t *testing.T) map[string]string {
+	t.Helper()
+	dataDir, err := dataDirPath()
+	if err != nil {
+		t.Fatal(err)
+	}
+	envPath := filepath.Join(dataDir, "monitoring", ".env")
+	raw, err := os.ReadFile(envPath)
+	if err != nil {
+		// Not installed yet, or cleaned already.
+		return map[string]string{}
+	}
+	env := map[string]string{}
+	for _, line := range strings.Split(string(raw), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		env[parts[0]] = parts[1]
+	}
+	return env
+}
+
+func prometheusBaseURL(t *testing.T) string {
+	t.Helper()
+	env := monitoringDotEnv(t)
+	port := env["PROM_PORT"]
+	if port == "" {
+		port = "9090"
+	}
+	return fmt.Sprintf("http://localhost:%s", port)
+}
+
+func grafanaBaseURL(t *testing.T) string {
+	t.Helper()
+	env := monitoringDotEnv(t)
+	port := env["GRAFANA_PORT"]
+	if port == "" {
+		port = "3000"
+	}
+	return fmt.Sprintf("http://localhost:%s", port)
+}
+
 func prometheusTargets(t *testing.T) (*PrometheusTargetsResponse, error) {
-	response, err := utils.GetRequest("http://localhost:9090/api/v1/targets", time.Second)
+	response, err := utils.GetRequest(prometheusBaseURL(t)+"/api/v1/targets", time.Second)
 	if err != nil {
 		return nil, err
 	}

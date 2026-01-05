@@ -1,0 +1,11 @@
+groups:
+  - name: aztec-exporter
+    rules:
+      - alert: AztecExporterDown
+        expr: up{instance_id="sedge_aztec_exporter"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Aztec exporter (OTel collector) is down"
+          description: "Prometheus cannot scrape the Aztec exporter (OpenTelemetry Collector)."

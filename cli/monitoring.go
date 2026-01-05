@@ -26,6 +26,7 @@ import (
 
 	"github.com/NethermindEth/sedge/internal/common"
 	"github.com/NethermindEth/sedge/internal/monitoring"
+	aztecExporter "github.com/NethermindEth/sedge/internal/monitoring/services/aztec_exporter"
 	lidoExporter "github.com/NethermindEth/sedge/internal/monitoring/services/lido_exporter"
 	"github.com/NethermindEth/sedge/internal/utils"
 )
@@ -55,6 +56,32 @@ The monitoring stack includes:
 	}
 	cmd.AddCommand(DefaultSubCmd(mgr, additionalServices))
 	cmd.AddCommand(LidoSubCmd(mgr, additionalServices))
+	cmd.AddCommand(AztecSubCmd(mgr, additionalServices))
+
+	return cmd
+}
+
+func AztecSubCmd(mgr MonitoringManager, additionalServices []monitoring.ServiceAPI) *cobra.Command {
+	aztec := &aztecExporter.AztecExporterParams{}
+	cmd := &cobra.Command{
+		Use:   "aztec",
+		Short: "Configure Aztec monitoring (OTel Collector -> Prometheus -> Grafana)",
+		Long:  "Configure Aztec monitoring using an OpenTelemetry Collector (OTLP receiver) that exposes a Prometheus scrape endpoint, plus Grafana dashboards.",
+		Args:  cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			additionalServices = append(additionalServices, aztecExporter.NewAztecExporter(*aztec))
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return InitMonitoring(true, true, mgr, additionalServices)
+		},
+	}
+
+	cmd.Flags().Uint16Var(&aztec.PromPort, "metrics-port", 9464, "Port where Prometheus will scrape the Aztec metrics from the collector.")
+	cmd.Flags().Uint16Var(&aztec.OtlpGrpcPort, "otlp-grpc-port", 4317, "OTLP gRPC receiver port for Aztec nodes to send metrics to.")
+	cmd.Flags().Uint16Var(&aztec.OtlpHttpPort, "otlp-http-port", 4318, "OTLP HTTP receiver port for Aztec nodes to send metrics to.")
+	cmd.Flags().StringVar(&aztec.LogLevel, "log-level", "info", "Collector log level (e.g. error, warn, info, debug).")
+	cmd.Flags().StringVar(&aztec.MetricExpiry, "metric-expiry", "5m", "How long to keep stale metrics series before expiring them (e.g. 5m, 1h).")
 
 	return cmd
 }

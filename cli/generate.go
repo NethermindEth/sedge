@@ -76,6 +76,7 @@ type AztecFlags struct {
 	aztecSequencerKeystorePath string
 	aztecP2pIp                 string
 	aztecExtraFlags            []string
+	aztecOtelMetricsPort       uint16
 }
 
 // GenCmdFlags is a struct that holds the flags of the generate command
@@ -401,6 +402,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		AztecSequencerKeystorePath: aztecSequencerKeystorePath,
 		AztecP2pIp:                 flags.aztecP2pIp,
 		AztecNodeType:              aztecNodeType,
+		AztecOtelMetricsPort:       flags.aztecOtelMetricsPort,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,

@@ -285,10 +285,12 @@ func TestSetup(t *testing.T) {
 				// Check the provisioned dashboards
 				foldersToCheck := []string{
 					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards"),
+					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "aztec-validator"),
 					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "lido-exporter"),
 					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "node-exporter"),
 				}
 				filesToCheck := []string{
+					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "aztec-validator", "aztec-validator.json"),
 					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "lido-exporter", "lido-exporter.json"),
 					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "node-exporter", "node-exporter.json"),
 				}
