@@ -51,7 +51,7 @@ const (
 	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution"
 	jwtPathName                                                                            = "jwtsecret"
 	aztec                                                                                  = "aztec"
-	aztecNodeTypeFullNode                                                                  = "node"
+	aztecNodeTypeFullNode                                                                  = "full-node"
 	aztecNodeTypeSequencer                                                                 = "sequencer"
 )
 

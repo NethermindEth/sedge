@@ -382,13 +382,13 @@ func AztecSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 	cmd := &cobra.Command{
 		Use:   "aztec [flags]",
-		Short: "Generate an Aztec node config (full node or sequencer)",
+		Short: "Generate an Aztec node config (full-node or sequencer)",
 		Long: `Generate a docker-compose and an environment file for Aztec networks.
 
 This command sets up an Aztec node, which includes an execution client, a consensus client, and an Aztec node client.
 
 Choose the node mode with --type:
-- node: Run an Aztec full node (no sequencer)
+- full-node: Run an Aztec full node
 - sequencer: Run an Aztec sequencer (requires a keystore)
 
 If you don't provide images for your clients, they will be chosen randomly. You can specify custom images for the Aztec client and other nodes.
