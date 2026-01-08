@@ -168,6 +168,9 @@ func (flags *GenCmdFlags) argsList() []string {
 	if flags.aztecP2pIp != "" {
 		s = append(s, "--aztec-p2p-ip", flags.aztecP2pIp)
 	}
+	if flags.aztecType != "" {
+		s = append(s, "--type", flags.aztecType)
+	}
 	if flags.aztecSequencerName != "" {
 		s = append(s, "--aztec-sequencer-image", flags.aztecSequencerName)
 	}
@@ -1480,7 +1483,7 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "sepolia",
 			},
-			errors.New("aztec-keystore-path is required when generating aztec-sequencer configuration"),
+			errors.New("aztec-keystore-path is required when generating aztec sequencer configuration"),
 		},
 		{
 			"Aztec sequencer - missing P2P IP",
@@ -1495,7 +1498,7 @@ func TestGenerateCmd(t *testing.T) {
 			globalFlags{
 				network: "sepolia",
 			},
-			errors.New("aztec-p2p-ip is required when generating aztec-sequencer configuration"),
+			errors.New("aztec-p2p-ip is required when generating aztec sequencer configuration"),
 		},
 		{
 			"Aztec sequencer - basic",
@@ -1581,6 +1584,37 @@ func TestGenerateCmd(t *testing.T) {
 				network: "sepolia",
 			},
 			errors.New("invalid aztec sequencer keystore"),
+		},
+		{
+			"Aztec node - basic (type full-node, no keystore required)",
+			subCmd{
+				name: "aztec",
+			},
+			GenCmdFlags{
+				AztecSequencerFlags: AztecSequencerFlags{
+					aztecType: aztecNodeTypeFullNode,
+				},
+			},
+			globalFlags{
+				network: "sepolia",
+			},
+			nil,
+		},
+		{
+			"Aztec node - sequencer missing keystore path",
+			subCmd{
+				name: "aztec",
+			},
+			GenCmdFlags{
+				AztecSequencerFlags: AztecSequencerFlags{
+					aztecType:  aztecNodeTypeSequencer,
+					aztecP2pIp: "192.168.1.100",
+				},
+			},
+			globalFlags{
+				network: "sepolia",
+			},
+			errors.New("aztec-keystore-path is required when generating aztec sequencer configuration"),
 		},
 	}
 

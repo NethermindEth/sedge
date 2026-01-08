@@ -51,7 +51,7 @@ const (
 	NodeTypeExecution = "execution"
 	NodeTypeConsensus = "consensus"
 	NodeTypeValidator = "validator"
-	NodeTypeAztec     = "aztec-sequencer"
+	NodeTypeAztec     = "aztec"
 
 	Randomize = "randomize"
 
@@ -100,7 +100,7 @@ func CliCmd(p ui.Prompter, actions actions.SedgeActions, depsMgr dependencies.De
 - Execution Node
 - Consensus Node
 - Validator Node
-- Aztec Sequencer (execution + consensus + aztec-sequencer)
+- Aztec Node (execution + consensus + aztec)
 - Lido CSM Node
 
 Follow the prompts to select the options you want for your node. At the end of the process, you will
@@ -155,8 +155,19 @@ func setupAztecSequencerNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeAct
 		selectExecutionClient,
 		selectConsensusClient,
 		selectAztecSequencerClient,
-		inputAztecSequencerKeystorePath,
-		inputAztecSequencerP2pIP,
+		selectAztecNodeType,
+	); err != nil {
+		return err
+	}
+	if o.genData.AztecNodeType == aztecNodeTypeSequencer {
+		if err := runPromptActions(p, o,
+			inputAztecSequencerKeystorePath,
+			inputAztecSequencerP2pIP,
+		); err != nil {
+			return err
+		}
+	}
+	if err := runPromptActions(p, o,
 		inputCheckpointSyncURL,
 		inputFeeRecipientNoValidator,
 	); err != nil {
@@ -757,6 +768,16 @@ func selectAztecSequencerClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 		Type: aztecSequencer,
 	}
 	o.genData.AztecSequencerClient.SetImageOrDefault("")
+	return nil
+}
+
+func selectAztecNodeType(p ui.Prompter, o *CliCmdOptions) (err error) {
+	options := []string{aztecNodeTypeFullNode, aztecNodeTypeSequencer}
+	index, err := p.Select("Select aztec node type", "", options)
+	if err != nil {
+		return err
+	}
+	o.genData.AztecNodeType = options[index]
 	return nil
 }
 

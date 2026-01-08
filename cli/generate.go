@@ -51,6 +51,8 @@ const (
 	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution"
 	jwtPathName                                                                            = "jwtsecret"
 	aztecSequencer                                                                         = "aztec-sequencer"
+	aztecNodeTypeFullNode                                                                  = "node"
+	aztecNodeTypeSequencer                                                                 = "sequencer"
 )
 
 type CustomFlags struct {
@@ -69,6 +71,7 @@ type OptimismFlags struct {
 }
 
 type AztecSequencerFlags struct {
+	aztecType                  string
 	aztecSequencerName         string
 	aztecSequencerKeystorePath string
 	aztecP2pIp                 string
@@ -137,7 +140,7 @@ You can generate:
 	cmd.AddCommand(ValidatorSubCmd(sedgeAction))
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
 	cmd.AddCommand(OpFullNodeSubCmd(sedgeAction))
-	cmd.AddCommand(AztecSequencerSubCmd(sedgeAction))
+	cmd.AddCommand(AztecSubCmd(sedgeAction))
 
 	cmd.PersistentFlags().BoolVar(&lidoNode, "lido", false, "generate Lido CSM node")
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
@@ -295,18 +298,29 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		}
 	}
 
-	// Validate Aztec keystore path and P2P IP if aztec-sequencer is included in services
+	// Validate Aztec flags if aztec-sequencer service is included (this service can run in "node" or "sequencer" mode)
 	var aztecSequencerKeystorePath string
+	aztecNodeType := flags.aztecType
 	if utils.Contains(services, aztecSequencer) {
-		if flags.aztecSequencerKeystorePath == "" {
-			return fmt.Errorf("aztec-keystore-path is required when generating aztec-sequencer configuration. Use --aztec-keystore-path to specify the path to your keystore.json file")
+		if aztecNodeType == "" {
+			aztecNodeType = aztecNodeTypeFullNode
 		}
-		aztecSequencerKeystorePath, err = loadAztecSequencerKeystore(flags.aztecSequencerKeystorePath)
-		if err != nil {
-			return fmt.Errorf("invalid aztec sequencer keystore: %w", err)
-		}
-		if flags.aztecP2pIp == "" {
-			return fmt.Errorf("aztec-p2p-ip is required when generating aztec-sequencer configuration. Use --aztec-p2p-ip to specify the P2P IP address")
+		switch aztecNodeType {
+		case aztecNodeTypeFullNode:
+			// No keystore required for non-sequencer nodes.
+		case aztecNodeTypeSequencer:
+			if flags.aztecSequencerKeystorePath == "" {
+				return fmt.Errorf("aztec-keystore-path is required when generating aztec sequencer configuration. Use --aztec-keystore-path to specify the path to your keystore.json file")
+			}
+			aztecSequencerKeystorePath, err = loadAztecSequencerKeystore(flags.aztecSequencerKeystorePath)
+			if err != nil {
+				return fmt.Errorf("invalid aztec sequencer keystore: %w", err)
+			}
+			if flags.aztecP2pIp == "" {
+				return fmt.Errorf("aztec-p2p-ip is required when generating aztec sequencer configuration. Use --aztec-p2p-ip to specify the P2P IP address")
+			}
+		default:
+			return fmt.Errorf("invalid aztec node type %q (expected %q or %q)", aztecNodeType, aztecNodeTypeFullNode, aztecNodeTypeSequencer)
 		}
 	}
 
@@ -385,6 +399,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		JWTSecretOP:                jwtSecretOP,
 		AztecSequencerKeystorePath: aztecSequencerKeystorePath,
 		AztecP2pIp:                 flags.aztecP2pIp,
+		AztecNodeType:              aztecNodeType,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,

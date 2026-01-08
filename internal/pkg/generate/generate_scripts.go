@@ -361,6 +361,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		AztecAdminPort:          gd.Ports["AztecAdminPort"],
 		AztecP2pIp:              gd.AztecP2pIp,
 		AztecExtraFlags:         gd.AztecExtraFlags,
+		AztecNodeType:           gd.AztecNodeType,
 	}
 
 	// Save to writer
@@ -522,6 +523,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		Services:                   gd.Services,
 		Network:                    gd.Network,
 		AztecNetwork:               aztecNetworkForSedgeNetwork(gd.Network),
+		AztecNodeType:              gd.AztecNodeType,
 		Mev:                        networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
 		ElImage:                    imageOrEmpty(cls[execution], gd.LatestVersion),
 		ElDataDir:                  "./" + configs.ExecutionDir,

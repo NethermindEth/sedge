@@ -24,6 +24,7 @@ type EnvData struct {
 	Services                   []string
 	Network                    string
 	AztecNetwork               string
+	AztecNodeType              string
 	Mev                        bool
 	ElImage                    string
 	ElOpImage                  string
@@ -109,6 +110,7 @@ type GenData struct {
 	JWTSecretOP                string
 	AztecSequencerKeystorePath string
 	AztecP2pIp                 string
+	AztecNodeType              string
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -174,6 +176,7 @@ type DockerComposeData struct {
 	AztecAdminPort             uint16
 	AztecP2pIp                 string
 	AztecSequencerKeystorePath string
+	AztecNodeType              string
 }
 
 // WithConsensusClient returns true if the consensus client is set

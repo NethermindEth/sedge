@@ -654,7 +654,68 @@ func TestE2E_Generate_AztecSequencer_MissingP2pIp(t *testing.T) {
 		// Assert
 		func(t *testing.T, dataDirPath string) {
 			assert.Error(t, runErr, "generate command should fail without P2P IP")
-			assert.Contains(t, string(output), "aztec-p2p-ip is required when generating aztec-sequencer configuration", "error should mention missing P2P IP")
+			assert.Contains(t, string(output), "aztec-p2p-ip is required when generating aztec sequencer configuration", "error should mention missing P2P IP")
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
+
+func TestE2E_Generate_AztecFullNode_Sepolia(t *testing.T) {
+	// Test context
+	var (
+		runErr error
+	)
+	// Build test case
+	e2eTest := newE2ESedgeTestCase(
+		t,
+		// Arrange
+		nil,
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			runErr = base.RunSedge(t, binaryPath, "generate", "aztec", "--network", "sepolia", "--type", "node")
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.NoError(t, runErr, "generate command should succeed")
+			generateDataFilePath := filepath.Join(dataDirPath, ".env")
+			assert.FileExists(t, generateDataFilePath, ".env file should be created")
+
+			// Read .env file
+			envMap, err := godotenv.Read(generateDataFilePath)
+			assert.NoError(t, err, "should be able to read .env file")
+
+			// Read Network value
+			network, exists := envMap["NETWORK"]
+			assert.True(t, exists, "NETWORK should exist in .env file")
+			assert.Equal(t, "sepolia", network, "NETWORK value should be 'sepolia'")
+
+			// AZTEC_IMAGE_VERSION should exist
+			aztecImage, exists := envMap["AZTEC_IMAGE_VERSION"]
+			assert.True(t, exists, "AZTEC_IMAGE_VERSION should exist in .env file")
+			assert.Contains(t, aztecImage, "aztec", "AZTEC_IMAGE_VERSION should contain 'aztec'")
+
+			// Full node should not require keystore; env may include AZTEC_KEYSTORE_PATH but it should be empty.
+			aztecKeystorePath, exists := envMap["AZTEC_KEYSTORE_PATH"]
+			assert.True(t, exists, "AZTEC_KEYSTORE_PATH should exist in .env file")
+			assert.Empty(t, aztecKeystorePath, "AZTEC_KEYSTORE_PATH should be empty for full node")
+
+			// Check compose services and ensure it is NOT in sequencer mode
+			dockerComposeFilePath := filepath.Join(dataDirPath, "docker-compose.yml")
+			assert.FileExists(t, dockerComposeFilePath, "docker-compose.yml file should be created")
+			err = utils.ValidateCompose(dockerComposeFilePath)
+			assert.NoError(t, err, "docker-compose file should be valid")
+
+			composeServices, err := utils.LoadDockerComposeServices(dockerComposeFilePath)
+			assert.NoError(t, err, "should be able to load docker-compose services")
+			for _, service := range []string{"execution", "consensus", "aztec-sequencer"} {
+				assert.Contains(t, composeServices, service, fmt.Sprintf("docker-compose file should contain service %s", service))
+			}
+
+			composeBytes, err := os.ReadFile(dockerComposeFilePath)
+			assert.NoError(t, err, "should be able to read docker-compose.yml")
+			assert.NotContains(t, string(composeBytes), "--sequencer", "full node docker-compose should not include --sequencer")
+			assert.NotContains(t, string(composeBytes), "/var/lib/keystore", "full node docker-compose should not mount keystore")
 		},
 	)
 	// Run test case

@@ -8,7 +8,9 @@
       - sedge
     volumes:
       - ${AZTEC_DATA_DIRECTORY}:/var/lib/data
+{{- if eq .AztecNodeType "sequencer" }}
       - ${AZTEC_KEYSTORE_PATH}:/var/lib/keystore
+{{- end }}
     ports:
       - {{.AztecPort}}:{{.AztecPort}}
       - {{.AztecP2pPort}}:{{.AztecP2pPort}}
@@ -17,11 +19,13 @@
       - {{.AztecPort}}
       - {{.AztecP2pPort}}
     environment:
-      KEY_STORE_DIRECTORY: /var/lib/keystore
       DATA_DIRECTORY: /var/lib/data
       LOG_LEVEL: ${LOG_LEVEL}
       ETHEREUM_HOSTS: ${AZTEC_ETHEREUM_HOSTS}
       L1_CONSENSUS_HOST_URLS: ${AZTEC_L1_CONSENSUS_HOST_URLS}
+{{- if eq .AztecNodeType "sequencer" }}
+      KEY_STORE_DIRECTORY: /var/lib/keystore
+{{- end }}
       P2P_IP: {{.AztecP2pIp}}
       P2P_PORT: {{.AztecP2pPort}}
       AZTEC_PORT: {{.AztecPort}}
@@ -33,7 +37,9 @@
       start
       --node
       --archiver
+{{- if eq .AztecNodeType "sequencer" }}
       --sequencer
+{{- end }}
       --network ${AZTEC_NETWORK}{{range $flag := .AztecExtraFlags}}
       --{{$flag}}{{end}}
     {{if .LoggingDriver}}

@@ -17,6 +17,7 @@ package cli
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/NethermindEth/sedge/cli/actions"
 	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
@@ -377,26 +378,31 @@ func MevBoostSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	return cmd
 }
 
-func AztecSequencerSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
+func AztecSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 	var flags GenCmdFlags
 	cmd := &cobra.Command{
-		Use:   "aztec-sequencer [flags]",
-		Short: "Generate a Aztec Sequencer node config",
-		Long: `Generate a docker-compose and an environment file with a full node configuration for Aztec Sequencer networks.
+		Use:   "aztec [flags]",
+		Short: "Generate an Aztec node config (full node or sequencer)",
+		Long: `Generate a docker-compose and an environment file for Aztec networks.
 
-This command sets up an Aztec Sequencer node, which includes an execution client, a consensus client, and a Aztec Sequencer client.
+This command sets up an Aztec node, which includes an execution client, a consensus client, and an Aztec node client.
 
-If you don't provide images for your clients, they will be chosen randomly. You can specify custom images for the Aztec Sequencer and other nodes.
+Choose the node mode with --type:
+- node: Run an Aztec full node (no sequencer)
+- sequencer: Run an Aztec sequencer (requires a keystore)
+
+If you don't provide images for your clients, they will be chosen randomly. You can specify custom images for the Aztec client and other nodes.
 
 The command allows you to use external execution and consensus APIs instead of running your own nodes, by providing the respective URLs.
 
-Additionally, you can use the syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate aztec-sequencer --execution nethermind:custom.image'. If you want to use the default docker image, just use the client name.
-
-This command does not generate a validator configuration, as Aztec Sequencer use different validation mechanisms compared to standard Ethereum networks.`,
+Additionally, you can use the syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate aztec --execution nethermind:custom.image'. If you want to use the default docker image, just use the client name.`,
 		Args: cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
+			}
+			if flags.aztecType == "" {
+				flags.aztecType = aztecNodeTypeFullNode
 			}
 			return preValidationGenerateCmd(network, logging, &flags)
 		},
@@ -406,10 +412,11 @@ This command does not generate a validator configuration, as Aztec Sequencer use
 		},
 	}
 	// Bind flags
-	cmd.Flags().StringVar(&flags.aztecSequencerKeystorePath, "aztec-keystore-path", "", "Path to Aztec sequencer keystore.json file (required). The keystore must be generated using 'aztec validator-keys new' command. See https://docs.aztec.network/network/setup/sequencer_management for details.")
-	cmd.Flags().StringVar(&flags.aztecP2pIp, "aztec-p2p-ip", "", "P2P IP address for Aztec sequencer (required). This is the IP address that other nodes will use to connect to this sequencer.")
-	cmd.Flags().StringVar(&flags.aztecSequencerName, "aztec-sequencer-image", "", "Aztec Sequencer image.")
-	cmd.Flags().StringArrayVar(&flags.aztecExtraFlags, "aztec-extra-flag", []string{}, "Additional flag to configure the aztec sequencer service in the generated docker-compose script. Example: 'sedge generate aztec-sequencer --aztec-extra-flag \"p2p.maxPeers=200\" --aztec-extra-flag \"txPool.maxSize=10000\"'")
+	cmd.Flags().StringVar(&flags.aztecType, "type", aztecNodeTypeFullNode, fmt.Sprintf("Aztec node type. One of: %s,%s", aztecNodeTypeFullNode, aztecNodeTypeSequencer))
+	cmd.Flags().StringVar(&flags.aztecSequencerKeystorePath, "aztec-keystore-path", "", "Path to Aztec sequencer keystore.json file (required when --type sequencer). The keystore must be generated using 'aztec validator-keys new' command. See https://docs.aztec.network/network/setup/sequencer_management for details.")
+	cmd.Flags().StringVar(&flags.aztecP2pIp, "aztec-p2p-ip", "", "P2P IP address for Aztec sequencer. This is the IP address that other nodes will use to connect to this sequencer.")
+	cmd.Flags().StringVar(&flags.aztecSequencerName, "aztec-image", "", "Aztec image.")
+	cmd.Flags().StringArrayVar(&flags.aztecExtraFlags, "aztec-extra-flag", []string{}, "Additional flag to configure the Aztec node service in the generated docker-compose script. Example: 'sedge generate aztec --aztec-extra-flag \"p2p.maxPeers=200\" --aztec-extra-flag \"txPool.maxSize=10000\"'")
 	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.executionApiUrl, "execution-api-url", "", "", "Set execution api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.")
