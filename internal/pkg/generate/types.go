@@ -70,7 +70,7 @@ type GenData struct {
 	Distributed                bool
 	ExecutionOPClient          *clients.Client
 	OptimismClient             *clients.Client
-	AztecSequencerClient       *clients.Client
+	AztecClient                *clients.Client
 	Network                    string
 	CheckpointSyncUrl          string
 	FeeRecipient               string
@@ -209,10 +209,10 @@ func (d DockerComposeData) WithOptimismClient() bool {
 	return false
 }
 
-// WithAztecSequencer returns true if the aztec sequencer client is set
-func (d DockerComposeData) WithAztecSequencer() bool {
+// WithAztecClient returns true if the aztec client is set
+func (d DockerComposeData) WithAztecClient() bool {
 	for _, service := range d.Services {
-		if service == aztecSequencer {
+		if service == aztec {
 			return true
 		}
 	}

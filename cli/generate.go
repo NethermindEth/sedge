@@ -50,7 +50,7 @@ var (
 const (
 	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution"
 	jwtPathName                                                                            = "jwtsecret"
-	aztecSequencer                                                                         = "aztec-sequencer"
+	aztec                                                                                  = "aztec"
 	aztecNodeTypeFullNode                                                                  = "node"
 	aztecNodeTypeSequencer                                                                 = "sequencer"
 )
@@ -70,9 +70,9 @@ type OptimismFlags struct {
 	isBase                bool
 }
 
-type AztecSequencerFlags struct {
+type AztecFlags struct {
 	aztecType                  string
-	aztecSequencerName         string
+	aztecName                  string
 	aztecSequencerKeystorePath string
 	aztecP2pIp                 string
 	aztecExtraFlags            []string
@@ -82,7 +82,7 @@ type AztecSequencerFlags struct {
 type GenCmdFlags struct {
 	CustomFlags
 	OptimismFlags
-	AztecSequencerFlags
+	AztecFlags
 	executionName            string
 	consensusName            string
 	validatorName            string
@@ -298,10 +298,10 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		}
 	}
 
-	// Validate Aztec flags if aztec-sequencer service is included (this service can run in "node" or "sequencer" mode)
+	// Validate Aztec flags if aztec service is included (this service can run in "full-node" or "sequencer" mode)
 	var aztecSequencerKeystorePath string
 	aztecNodeType := flags.aztecType
-	if utils.Contains(services, aztecSequencer) {
+	if utils.Contains(services, aztec) {
 		if aztecNodeType == "" {
 			aztecNodeType = aztecNodeTypeFullNode
 		}
@@ -317,7 +317,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 				return fmt.Errorf("invalid aztec sequencer keystore: %w", err)
 			}
 			if flags.aztecP2pIp == "" {
-				return fmt.Errorf("aztec-p2p-ip is required when generating aztec sequencer configuration. Use --aztec-p2p-ip to specify the P2P IP address")
+				return fmt.Errorf("aztec-p2p-ip is required when generating aztec configuration. Use --aztec-p2p-ip to specify the P2P IP address")
 			}
 		default:
 			return fmt.Errorf("invalid aztec node type %q (expected %q or %q)", aztecNodeType, aztecNodeTypeFullNode, aztecNodeTypeSequencer)
@@ -359,7 +359,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		DistributedValidatorClient: combinedClients.DistributedValidator,
 		ExecutionOPClient:          combinedClients.ExecutionOP,
 		OptimismClient:             combinedClients.Optimism,
-		AztecSequencerClient:       combinedClients.AztecSequencer,
+		AztecClient:                combinedClients.Aztec,
 		Network:                    network,
 		CheckpointSyncUrl:          flags.checkpointSyncUrl,
 		FeeRecipient:               flags.feeRecipient,
@@ -427,7 +427,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 }
 
 func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
-	var executionClient, consensusClient, validatorClient, executionOpClient, opClient, aztecSequencerClient *clients.Client
+	var executionClient, consensusClient, validatorClient, executionOpClient, opClient, aztecClient *clients.Client
 	var distributedValidatorClient *clients.Client
 	var err error
 
@@ -548,25 +548,25 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		executionOpClient = nil
 	}
 
-	// aztec sequencer client
-	if utils.Contains(services, aztecSequencer) {
-		aztecSequencerParts := strings.Split(flags.aztecSequencerName, ":")
-		aztecSequencerClient, err = clients.RandomChoice(allClients[aztecSequencer])
+	// aztec client
+	if utils.Contains(services, aztec) {
+		aztecParts := strings.Split(flags.aztecName, ":")
+		aztecClient, err = clients.RandomChoice(allClients[aztec])
 		if err != nil {
 			return nil, err
 		}
-		if flags.aztecSequencerName != "" {
-			aztecSequencerClient.Name = "aztec-sequencer"
-			if len(aztecSequencerParts) > 1 {
-				aztecSequencerClient.Image = strings.Join(aztecSequencerParts[1:], ":")
-				aztecSequencerClient.Modified = true
+		if flags.aztecName != "" {
+			aztecClient.Name = "aztec"
+			if len(aztecParts) > 1 {
+				aztecClient.Image = strings.Join(aztecParts[1:], ":")
+				aztecClient.Modified = true
 			}
-			aztecSequencerClient.SetImageOrDefault(strings.Join(aztecSequencerParts[1:], ":"))
+			aztecClient.SetImageOrDefault(strings.Join(aztecParts[1:], ":"))
 		} else {
-			aztecSequencerClient.Name = "aztec-sequencer"
-			aztecSequencerClient.SetImageOrDefault("")
+			aztecClient.Name = "aztec"
+			aztecClient.SetImageOrDefault("")
 		}
-		if err = clients.ValidateClient(aztecSequencerClient, aztecSequencer); err != nil {
+		if err = clients.ValidateClient(aztecClient, aztec); err != nil {
 			return nil, err
 		}
 
@@ -576,7 +576,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			consensusClient = nil
 		}
 	} else {
-		aztecSequencerClient = nil
+		aztecClient = nil
 	}
 
 	// distributed validator client
@@ -606,7 +606,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		DistributedValidator: distributedValidatorClient,
 		ExecutionOP:          executionOpClient,
 		Optimism:             opClient,
-		AztecSequencer:       aztecSequencerClient,
+		Aztec:                aztecClient,
 	}, err
 }
 

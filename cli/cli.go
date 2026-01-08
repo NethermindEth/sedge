@@ -136,7 +136,7 @@ using docker compose command behind the scenes.
 }
 
 func setupAztecSequencerNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsManager dependencies.DependenciesManager, monitoringMgr MonitoringManager) (err error) {
-	o.genData.Services = []string{"execution", "consensus", aztecSequencer}
+	o.genData.Services = []string{"execution", "consensus", aztec}
 
 	if o.genData.Network == NetworkCustom {
 		if err := runPromptActions(p, o,
@@ -154,7 +154,7 @@ func setupAztecSequencerNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeAct
 	if err := runPromptActions(p, o,
 		selectExecutionClient,
 		selectConsensusClient,
-		selectAztecSequencerClient,
+		selectAztecClient,
 		selectAztecNodeType,
 	); err != nil {
 		return err
@@ -442,7 +442,7 @@ func postGenerate(p ui.Prompter, o *CliCmdOptions, a actions.SedgeActions, depsM
 	case NodeTypeValidator:
 		services = []string{"validator"}
 	case NodeTypeAztec:
-		services = []string{"execution", "consensus", aztecSequencer}
+		services = []string{"execution", "consensus", aztec}
 	}
 	run, err := p.Confirm("Run services now?", false)
 	if err != nil {
@@ -742,32 +742,32 @@ func selectNodeType(p ui.Prompter, o *CliCmdOptions) error {
 	return nil
 }
 
-func selectAztecSequencerClient(p ui.Prompter, o *CliCmdOptions) (err error) {
+func selectAztecClient(p ui.Prompter, o *CliCmdOptions) (err error) {
 	c := clients.ClientInfo{Network: o.genData.Network}
-	supportedClients, err := c.SupportedClients(aztecSequencer)
+	supportedClients, err := c.SupportedClients(aztec)
 	if err != nil {
 		return err
 	}
 	options := append(supportedClients, Randomize)
-	index, err := p.Select("Select aztec sequencer client", "", options)
+	index, err := p.Select("Select aztec client", "", options)
 	if err != nil {
 		return err
 	}
-	selectedAztecSequencerClient := options[index]
+	selectedAztecClient := options[index]
 	// In case random is selected, select a random client
-	if selectedAztecSequencerClient == Randomize {
+	if selectedAztecClient == Randomize {
 		randomName, err := clients.RandomClientName(supportedClients)
 		if err != nil {
 			return err
 		}
-		selectedAztecSequencerClient = randomName
-		log.Info("Random aztec sequencer client selected: ", selectedAztecSequencerClient)
+		selectedAztecClient = randomName
+		log.Info("Random aztec client selected: ", selectedAztecClient)
 	}
-	o.genData.AztecSequencerClient = &clients.Client{
-		Name: selectedAztecSequencerClient,
-		Type: aztecSequencer,
+	o.genData.AztecClient = &clients.Client{
+		Name: selectedAztecClient,
+		Type: aztec,
 	}
-	o.genData.AztecSequencerClient.SetImageOrDefault("")
+	o.genData.AztecClient.SetImageOrDefault("")
 	return nil
 }
 

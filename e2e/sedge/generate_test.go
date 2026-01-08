@@ -379,7 +379,7 @@ func TestE2E_Generate_AztecSequencer_Sepolia(t *testing.T) {
 			}
 
 			keystorePath := filepath.Join(dataDirPath, "keystore.json")
-			runErr = base.RunSedge(t, binaryPath, "generate", "aztec-sequencer", "--network", "sepolia", "--aztec-keystore-path", keystorePath, "--aztec-p2p-ip", "192.168.1.100")
+			runErr = base.RunSedge(t, binaryPath, "generate", "aztec", "--network", "sepolia", "--type", "sequencer", "--aztec-keystore-path", keystorePath, "--aztec-p2p-ip", "192.168.1.100")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -413,7 +413,7 @@ func TestE2E_Generate_AztecSequencer_Sepolia(t *testing.T) {
 			assert.NoError(t, err, "docker-compose file should be valid")
 			composeServices, err := utils.LoadDockerComposeServices(dockerComposeFilePath)
 			assert.NoError(t, err, "should be able to load docker-compose services")
-			for _, service := range []string{"execution", "consensus", "aztec-sequencer"} {
+			for _, service := range []string{"execution", "consensus", "aztec"} {
 				assert.Contains(t, composeServices, service, fmt.Sprintf("docker-compose file should contain service %s", service))
 			}
 		},
@@ -469,7 +469,7 @@ func TestE2E_Generate_AztecSequencer_Mainnet(t *testing.T) {
 			}
 
 			keystorePath := filepath.Join(dataDirPath, "keystore.json")
-			runErr = base.RunSedge(t, binaryPath, "generate", "aztec-sequencer", "--network", "mainnet", "--aztec-keystore-path", keystorePath, "--aztec-p2p-ip", "192.168.1.100")
+			runErr = base.RunSedge(t, binaryPath, "generate", "aztec", "--network", "mainnet", "--type", "sequencer", "--aztec-keystore-path", keystorePath, "--aztec-p2p-ip", "192.168.1.100")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -498,7 +498,7 @@ func TestE2E_Generate_AztecSequencer_Mainnet(t *testing.T) {
 			assert.NoError(t, err, "docker-compose file should be valid")
 			composeServices, err := utils.LoadDockerComposeServices(dockerComposeFilePath)
 			assert.NoError(t, err, "should be able to load docker-compose services")
-			for _, service := range []string{"execution", "consensus", "aztec-sequencer"} {
+			for _, service := range []string{"execution", "consensus", "aztec"} {
 				assert.Contains(t, composeServices, service, fmt.Sprintf("docker-compose file should contain service %s", service))
 			}
 		},
@@ -554,8 +554,9 @@ func TestE2E_Generate_AztecSequencer_ExtraFlag(t *testing.T) {
 			}
 
 			keystorePath := filepath.Join(dataDirPath, "keystore.json")
-			runErr = base.RunSedge(t, binaryPath, "generate", "aztec-sequencer",
+			runErr = base.RunSedge(t, binaryPath, "generate", "aztec",
 				"--network", "sepolia",
+				"--type", "sequencer",
 				"--aztec-keystore-path", keystorePath,
 				"--aztec-p2p-ip", "192.168.1.100",
 				"--aztec-extra-flag", "p2p.maxPeers=200",
@@ -589,7 +590,7 @@ func TestE2E_Generate_AztecSequencer_MissingKeystorePath(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			output, runErr = base.RunSedgeWithOutput(t, binaryPath, "generate", "aztec-sequencer", "--network", "sepolia", "--aztec-p2p-ip", "192.168.1.100")
+			output, runErr = base.RunSedgeWithOutput(t, binaryPath, "generate", "aztec", "--network", "sepolia", "--type", "sequencer", "--aztec-p2p-ip", "192.168.1.100")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
@@ -649,12 +650,12 @@ func TestE2E_Generate_AztecSequencer_MissingP2pIp(t *testing.T) {
 			}
 
 			keystorePath := filepath.Join(dataDirPath, "keystore.json")
-			output, runErr = base.RunSedgeWithOutput(t, binaryPath, "generate", "aztec-sequencer", "--network", "sepolia", "--aztec-keystore-path", keystorePath)
+			output, runErr = base.RunSedgeWithOutput(t, binaryPath, "generate", "aztec", "--network", "sepolia", "--type", "sequencer", "--aztec-keystore-path", keystorePath)
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
 			assert.Error(t, runErr, "generate command should fail without P2P IP")
-			assert.Contains(t, string(output), "aztec-p2p-ip is required when generating aztec sequencer configuration", "error should mention missing P2P IP")
+			assert.Contains(t, string(output), "aztec-p2p-ip is required when generating aztec configuration", "error should mention missing P2P IP")
 		},
 	)
 	// Run test case
@@ -708,7 +709,7 @@ func TestE2E_Generate_AztecFullNode_Sepolia(t *testing.T) {
 
 			composeServices, err := utils.LoadDockerComposeServices(dockerComposeFilePath)
 			assert.NoError(t, err, "should be able to load docker-compose services")
-			for _, service := range []string{"execution", "consensus", "aztec-sequencer"} {
+			for _, service := range []string{"execution", "consensus", "aztec"} {
 				assert.Contains(t, composeServices, service, fmt.Sprintf("docker-compose file should contain service %s", service))
 			}
 

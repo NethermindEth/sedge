@@ -43,8 +43,8 @@ func (c *Client) SetImageOrDefault(image string) {
 		c.setOptimismImage(image)
 	case "opexecution":
 		c.SetOpExecutionImage(image)
-	case "aztec-sequencer":
-		c.setAztecSequencerImage(image)
+	case "aztec":
+		c.setAztecImage(image)
 	}
 }
 
@@ -118,9 +118,9 @@ func (c *Client) SetOpExecutionImage(image string) {
 	}
 }
 
-func (c *Client) setAztecSequencerImage(image string) {
+func (c *Client) setAztecImage(image string) {
 	switch c.Name {
-	case "aztec-sequencer":
+	case "aztec":
 		c.Image = valueOrDefault(image, configs.ClientImages.Aztec.Aztec.String())
 	}
 }
@@ -140,7 +140,7 @@ type Clients struct {
 	Optimism             *Client
 	ExecutionOP          *Client
 	DistributedValidator *Client
-	AztecSequencer       *Client
+	Aztec                *Client
 }
 
 type ClientMap map[string]*Client

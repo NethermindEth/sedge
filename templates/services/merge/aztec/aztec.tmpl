@@ -1,8 +1,8 @@
-{{/* aztec-sequencer.tmpl */}}
-{{ define "aztec-sequencer" }}
-  aztec-sequencer:
+{{/* aztec.tmpl */}}
+{{ define "aztec" }}
+  aztec:
     image: ${AZTEC_IMAGE_VERSION}
-    container_name: sedge-aztec-sequencer{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    container_name: sedge-aztec{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
     networks:
       - sedge
@@ -49,3 +49,4 @@
         max-size: "10m"
         max-file: "10"{{end}}{{end}}
 {{ end }}
+

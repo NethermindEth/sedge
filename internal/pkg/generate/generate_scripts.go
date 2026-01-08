@@ -45,7 +45,7 @@ const (
 	empty                = "empty"
 	distributedValidator = "distributedValidator"
 	charon               = "charon"
-	aztecSequencer       = "aztec-sequencer"
+	aztec                = "aztec"
 )
 
 // validateClients validates each client in GenData
@@ -136,7 +136,7 @@ func mapClients(gd *GenData) map[string]*clients.Client {
 		optimism:             gd.OptimismClient,
 		opExecution:          gd.ExecutionOPClient,
 		distributedValidator: gd.DistributedValidatorClient,
-		aztecSequencer:       gd.AztecSequencerClient,
+		aztec:                gd.AztecClient,
 	}
 
 	return cls
@@ -554,7 +554,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ElOPAuthPort:               gd.Ports["AuthPortELOP"],
 		OpSequencerHttp:            opSequencerHttp,
 		RethNetwork:                rethNetwork,
-		AztecImage:                 imageOrEmpty(cls[aztecSequencer], gd.LatestVersion),
+		AztecImage:                 imageOrEmpty(cls[aztec], gd.LatestVersion),
 		AztecSequencerKeystorePath: gd.AztecSequencerKeystorePath,
 		AztecDataDir:               "./" + configs.AztecDataDir,
 	}

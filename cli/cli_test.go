@@ -726,7 +726,7 @@ func TestCli(t *testing.T) {
 				}
 
 				genData := generate.GenData{
-					Services:      []string{"execution", "consensus", "aztec-sequencer"},
+					Services:      []string{"execution", "consensus", "aztec"},
 					AztecNodeType: aztecNodeTypeSequencer,
 					ExecutionClient: &clients.Client{
 						Name:  "nethermind",
@@ -738,9 +738,9 @@ func TestCli(t *testing.T) {
 						Type:  "consensus",
 						Image: configs.ClientImages.Consensus.Lighthouse.String(),
 					},
-					AztecSequencerClient: &clients.Client{
-						Name:  "aztec-sequencer",
-						Type:  "aztec-sequencer",
+					AztecClient: &clients.Client{
+						Name:  "aztec",
+						Type:  "aztec",
 						Image: configs.ClientImages.Aztec.Aztec.String(),
 					},
 					Network:                    "sepolia",
@@ -760,7 +760,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("", nil),
 					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
 					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(0, nil),
-					prompter.EXPECT().Select("Select aztec sequencer client", "", []string{"aztec-sequencer", Randomize}).Return(0, nil),
+					prompter.EXPECT().Select("Select aztec client", "", []string{"aztec", Randomize}).Return(0, nil),
 					prompter.EXPECT().Select("Select aztec node type", "", []string{aztecNodeTypeFullNode, aztecNodeTypeSequencer}).Return(1, nil),
 					prompter.EXPECT().InputFilePath("Aztec sequencer keystore.json path", "", true, ".json").Return(keystorePath, nil),
 					prompter.EXPECT().Input("Aztec sequencer P2P IP address", "", true, gomock.AssignableToTypeOf(func(string) error { return nil })).Return("192.168.1.100", nil),
@@ -787,8 +787,8 @@ func TestCli(t *testing.T) {
 						if got.ConsensusClient == nil || got.ConsensusClient.Name != genData.ConsensusClient.Name {
 							t.Fatalf("unexpected ConsensusClient. got %+v want name %q", got.ConsensusClient, genData.ConsensusClient.Name)
 						}
-						if got.AztecSequencerClient == nil || got.AztecSequencerClient.Name != genData.AztecSequencerClient.Name {
-							t.Fatalf("unexpected AztecSequencerClient. got %+v want name %q", got.AztecSequencerClient, genData.AztecSequencerClient.Name)
+						if got.AztecClient == nil || got.AztecClient.Name != genData.AztecClient.Name {
+							t.Fatalf("unexpected AztecClient. got %+v want name %q", got.AztecClient, genData.AztecClient.Name)
 						}
 						if got.AztecNodeType != genData.AztecNodeType {
 							t.Fatalf("unexpected AztecNodeType. got %q want %q", got.AztecNodeType, genData.AztecNodeType)
@@ -811,7 +811,7 @@ func TestCli(t *testing.T) {
 				generationPath := t.TempDir()
 
 				genData := generate.GenData{
-					Services:      []string{"execution", "consensus", "aztec-sequencer"},
+					Services:      []string{"execution", "consensus", "aztec"},
 					AztecNodeType: aztecNodeTypeFullNode,
 					ExecutionClient: &clients.Client{
 						Name:  "nethermind",
@@ -823,9 +823,9 @@ func TestCli(t *testing.T) {
 						Type:  "consensus",
 						Image: configs.ClientImages.Consensus.Lighthouse.String(),
 					},
-					AztecSequencerClient: &clients.Client{
-						Name:  "aztec-sequencer",
-						Type:  "aztec-sequencer",
+					AztecClient: &clients.Client{
+						Name:  "aztec",
+						Type:  "aztec",
 						Image: configs.ClientImages.Aztec.Aztec.String(),
 					},
 					Network:           "sepolia",
@@ -843,7 +843,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Input("Container tag, sedge will add to each container and the network, a suffix with the tag", "", false, nil).Return("", nil),
 					prompter.EXPECT().Select("Select execution client", "", ETHClients["execution"]).Return(0, nil),
 					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(0, nil),
-					prompter.EXPECT().Select("Select aztec sequencer client", "", []string{"aztec-sequencer", Randomize}).Return(0, nil),
+					prompter.EXPECT().Select("Select aztec client", "", []string{"aztec", Randomize}).Return(0, nil),
 					prompter.EXPECT().Select("Select aztec node type", "", []string{aztecNodeTypeFullNode, aztecNodeTypeSequencer}).Return(0, nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("http://checkpoint.sync", nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("", nil),
@@ -868,8 +868,8 @@ func TestCli(t *testing.T) {
 						if got.ConsensusClient == nil || got.ConsensusClient.Name != genData.ConsensusClient.Name {
 							t.Fatalf("unexpected ConsensusClient. got %+v want name %q", got.ConsensusClient, genData.ConsensusClient.Name)
 						}
-						if got.AztecSequencerClient == nil || got.AztecSequencerClient.Name != genData.AztecSequencerClient.Name {
-							t.Fatalf("unexpected AztecSequencerClient. got %+v want name %q", got.AztecSequencerClient, genData.AztecSequencerClient.Name)
+						if got.AztecClient == nil || got.AztecClient.Name != genData.AztecClient.Name {
+							t.Fatalf("unexpected AztecClient. got %+v want name %q", got.AztecClient, genData.AztecClient.Name)
 						}
 						if got.AztecNodeType != genData.AztecNodeType {
 							t.Fatalf("unexpected AztecNodeType. got %q want %q", got.AztecNodeType, genData.AztecNodeType)
