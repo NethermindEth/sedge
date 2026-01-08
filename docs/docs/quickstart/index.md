@@ -23,4 +23,4 @@ A complete tour of using Sedge for setting up a validator or full Ethereum node 
 
 Other guides in this section show you how to set up a validator with only one step and how to set up a validator with mev-boost.
 
-You can also run an Aztec sequencer using Sedge; see [Running an Aztec Sequencer](quickstart/aztec-sequencer).
+You can also run an Aztec node (full node or sequencer) using Sedge; see [Running an Aztec Node](quickstart/aztec-sequencer).

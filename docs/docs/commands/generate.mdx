@@ -19,7 +19,7 @@ You can generate:
 - Full Node (execution + consensus + validator)
 - Full Node without Validator (execution + consensus)
 - Optimism Full Node
-- Aztec Sequencer (execution + consensus + aztec-sequencer)
+- Aztec Node (execution + consensus + aztec)
 - Execution Node
 - Consensus Node
 - Validator Node
@@ -30,7 +30,7 @@ Usage:
   sedge generate [command]
 
 Available Commands:
-  aztec-sequencer Generate a Aztec Sequencer node config
+  aztec        Generate an Aztec node config (full node or sequencer)
   consensus    Generate a consensus node config
   execution    Generate a execution node config
   full-node    Generate a full node config, with or without a validator
@@ -329,50 +329,44 @@ Global Flags:
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```
 
-#### Aztec-Sequencer
+#### Aztec
 
 ```
-$ sedge generate aztec-sequencer -h
-Generate a docker-compose and an environment file with a full node configuration for Aztec Sequencer networks.
+$ sedge generate aztec -h
+Generate a docker-compose and an environment file for Aztec networks.
 
-This command sets up an Aztec Sequencer node, which includes an execution client, a consensus client, and a Aztec Sequencer client.
+This command sets up an Aztec node, which includes an execution client, a consensus client, and an Aztec node client.
 
-Additionally, you can use the syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate aztec-sequencer --execution nethermind:custom.image'. If you want to use the default docker image, just use the client name.
-
-Required flags:
-- `--aztec-keystore-path`
-- `--aztec-p2p-ip`
+Choose the node mode with --type:
+- node: Run an Aztec full node (default)
+- sequencer: Run an Aztec sequencer (requires a keystore)
 
 Usage:
-  sedge generate aztec-sequencer [flags]
+  sedge generate aztec [flags]
 
-Flags:
-      --aztec-keystore-path string     Path to Aztec sequencer keystore.json file (required). The keystore must be generated using 'aztec validator-keys new' command. See https://docs.aztec.network/network/setup/sequencer_management for details.
-      --aztec-p2p-ip string            P2P IP address for Aztec sequencer (required). This is the IP address that other nodes will use to connect to this sequencer.
-      --aztec-sequencer-image string   Aztec Sequencer image.
-      --aztec-extra-flag stringArray   Additional flag to configure the aztec sequencer service in the generated docker-compose script.
-      --otel-metrics-port uint16       OTLP HTTP metrics port on the monitoring stack collector (default: 4318). The host is fixed to sedge_aztec_exporter and path to /v1/metrics.
-  -c, --consensus string               Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus.
-  -e, --execution string               Execution engine client, e.g. geth, nethermind, besu, erigon.
-      --execution-api-url string       Set execution api url. If set, will omit the creation of execution and beacon nodes, and only create Aztec sequencer nodes.
-      --consensus-url string           Set consensus api url. If set, will omit the creation of execution and beacon nodes, and only create Aztec sequencer nodes.
-      --jwt-secret-path string         Path to the JWT secret file
-      --map-all                        Map all clients ports to host. Use with care. Useful to allow remote access to the clients
-  -n, --network string                 Target network. e.g. mainnet, sepolia etc. (default "mainnet")
-  -p, --path string                    generation path for sedge data. Default is sedge-data (default "/path/to/sedge-data")
-  -h, --help                           help for aztec-sequencer
-
-Global Flags:
-      --container-tag string   Container tag to use. If defined, sedge will add to each container and the network, a suffix with the tag. e.g. sedge-validator-client -> sedge-validator-client-<tag>.
-      --lido                   generate Lido CSM node
-      --log-level string       Set Log Level, e.g panic, fatal, error, warn, warning, info, debug, trace (default "info")
-      --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
+Aztec Flags:
+      --type string                  Aztec node type. One of: full-node,sequencer (default "full-node")
+      --aztec-keystore-path string   Path to Aztec sequencer keystore.json file (required when --type sequencer).
+      --aztec-p2p-ip string          P2P IP address for Aztec sequencer (required when --type sequencer).
+      --aztec-image string           Aztec image.
+      --aztec-extra-flag stringArray Additional flag to configure the Aztec node service in the generated docker-compose script.
+      --otel-metrics-port uint16     OTLP HTTP metrics port on the monitoring stack collector (default: 4318). The host is fixed to sedge_aztec_exporter and path to /v1/metrics.
 ```
 
-Example (Sepolia):
+Example (Sepolia, full node):
 
 ```bash
-sedge generate aztec-sequencer \
+sedge generate aztec \
+  --network sepolia \
+  --execution nethermind \
+  --consensus lighthouse
+```
+
+Example (Sepolia, sequencer):
+
+```bash
+sedge generate aztec \
+  --type sequencer \
   --network sepolia \
   --execution nethermind \
   --consensus lighthouse \
@@ -387,7 +381,7 @@ The generated environment config sets `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` to `
 You can change the port using:
 
 ```bash
-sedge generate aztec-sequencer --otel-metrics-port 4318
+sedge generate aztec --otel-metrics-port 4318
 ```
 
 ::::

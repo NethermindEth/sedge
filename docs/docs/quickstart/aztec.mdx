@@ -3,17 +3,17 @@ sidebar_position: 12
 id: aztec-sequencer
 ---
 
-# Running an Aztec Sequencer with Sedge
+# Running an Aztec Node with Sedge (Full Node or Sequencer)
 
 ## What is Aztec?
 
 [Aztec](https://docs.aztec.network/) is a privacy-first L2 that uses a sequencer to order and publish L2 blocks to Ethereum (L1).
 
-Sedge can generate a Docker Compose setup for an **Aztec sequencer node**, including:
+Sedge can generate a Docker Compose setup for an **Aztec node**, including:
 
 - An **Ethereum execution client**
 - An **Ethereum consensus client**
-- The **Aztec sequencer** client
+- The **Aztec node** client (full node or sequencer)
 
 ## Prerequisites
 
@@ -24,7 +24,7 @@ Sedge currently provides Aztec sequencer templates for `--network mainnet` and `
 Before you generate the stack, you will need:
 
 - **Docker + Docker Compose plugin** (see [Dependencies](./dependencies))
-- An **Aztec sequencer keystore** (`keystore.json`)
+- *(Sequencer only)* An **Aztec sequencer keystore** (`keystore.json`)
 - A **P2P IP address** that other nodes can reach (typically your machine’s public IP)
 
 ## Workflow breakdown
@@ -34,7 +34,7 @@ Before you generate the stack, you will need:
 3. **Run the stack**
 4. *(Optional)* **Enable monitoring (Prometheus + Grafana)**
 
-## 1) Generate the Aztec sequencer keystore
+## 1) Generate the Aztec sequencer keystore (sequencer only)
 
 Aztec expects the keystore to be generated using the Aztec tooling:
 
@@ -48,10 +48,29 @@ For the latest Aztec instructions, see the Aztec docs on sequencer management: `
 
 ## 2) Generate the stack with Sedge
 
+Sedge uses a single generator command for Aztec. Select the mode with `--type`:
+
+- `--type node`: Aztec **full node** (default)
+- `--type sequencer`: Aztec **sequencer** (requires keystore + P2P IP)
+
+### Aztec full node (default)
+
+From your Sedge directory (or wherever you run Sedge), generate an Aztec full node stack:
+
+```bash
+sedge generate aztec \
+  --network sepolia \
+  --execution nethermind \
+  --consensus lighthouse
+```
+
+### Aztec sequencer
+
 From your Sedge directory (or wherever you run Sedge), generate an Aztec sequencer stack:
 
 ```bash
-sedge generate aztec-sequencer \
+sedge generate aztec \
+  --type sequencer \
   --network sepolia \
   --execution nethermind \
   --consensus lighthouse \
@@ -60,7 +79,7 @@ sedge generate aztec-sequencer \
 ```
 
 ::::note
-`--aztec-keystore-path` and `--aztec-p2p-ip` are **required** for `sedge generate aztec-sequencer`.
+`--aztec-keystore-path` is **required** when running with `--type sequencer`.
 ::::
 
 ::::tip
@@ -68,7 +87,7 @@ Setting `--execution-api-url` and `--consensus-url` will skip generating the exe
 
 This is useful if you already have synced execution/consensus nodes. It will save synchronization time.
 
-For example you can set: `sedge generate aztec-sequencer --execution-api-url http://execution:port --consensus-url http://consensus:port -n sepolia --aztec-keystore-path /path/to/keystore.json --aztec-p2p-ip <YOUR_PUBLIC_IP>`
+For example you can set: `sedge generate aztec --type sequencer --execution-api-url http://execution:port --consensus-url http://consensus:port -n sepolia --aztec-keystore-path /path/to/keystore.json --aztec-p2p-ip <YOUR_PUBLIC_IP>`
 ::::
 
 ### Useful optional flags
@@ -76,13 +95,13 @@ For example you can set: `sedge generate aztec-sequencer --execution-api-url htt
 - **Use a custom Aztec image**:
 
 ```bash
-sedge generate aztec-sequencer --aztec-sequencer-image <IMAGE>
+sedge generate aztec --aztec-image <IMAGE>
 ```
 
 - **Pass extra Aztec flags**:
 
 ```bash
-sedge generate aztec-sequencer --aztec-extra-flag "p2p.maxPeers=200"
+sedge generate aztec --aztec-extra-flag "p2p.maxPeers=200"
 ```
 
 ## 3) Run the stack
@@ -132,13 +151,14 @@ The generated Aztec sequencer config sends OTLP HTTP metrics to:
 
 By default, `<PORT>` is `4318`. If you change the port, update it in both places:
 
-- **Sequencer generation**: `sedge generate aztec-sequencer --otel-metrics-port <PORT>`
+- **Aztec generation**: `sedge generate aztec --otel-metrics-port <PORT>`
 - **Monitoring collector**: `sedge monitoring init aztec --otlp-http-port <PORT>`
 
 Example (port `14318`):
 
 ```bash
-sedge generate aztec-sequencer --otel-metrics-port 14318 \
+sedge generate aztec --otel-metrics-port 14318 \
+  --type sequencer \
   --aztec-keystore-path /path/to/keystore.json \
   --aztec-p2p-ip <YOUR_PUBLIC_IP>
 ```
