@@ -674,7 +674,7 @@ func TestE2E_Generate_AztecFullNode_Sepolia(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunSedge(t, binaryPath, "generate", "aztec", "--network", "sepolia", "--type", "node")
+			runErr = base.RunSedge(t, binaryPath, "generate", "aztec", "--network", "sepolia", "--type", "full-node")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
