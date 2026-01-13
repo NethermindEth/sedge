@@ -16,6 +16,7 @@ limitations under the License.
 package actions
 
 import (
+	"github.com/NethermindEth/sedge/internal/utils"
 	"os"
 	"path/filepath"
 
@@ -52,6 +53,19 @@ func (s *sedgeActions) Generate(options GenerateOptions) (generate.GenData, erro
 	options.GenerationData.CustomNetworkConfigPath = customConfigsPaths.NetworkConfigPath
 	options.GenerationData.CustomGenesisPath = customConfigsPaths.GenesisPath
 	options.GenerationData.CustomDeployBlockPath = customConfigsPaths.DeployBlockPath
+
+	// If Aztec sequencer mode is used, copy the keystore.json into the generation directory
+	if options.GenerationData.AztecNodeType == "sequencer" && options.GenerationData.AztecSequencerKeystorePath != "" {
+		relKeystorePath := "./.aztec/keystore/key1.json"
+		absKeystorePath := filepath.Join(options.GenerationPath, ".aztec", "keystore", "key1.json")
+		if err := os.MkdirAll(filepath.Dir(absKeystorePath), 0o755); err != nil {
+			return options.GenerationData, err
+		}
+		if err := utils.CopyFile(options.GenerationData.AztecSequencerKeystorePath, absKeystorePath); err != nil {
+			return options.GenerationData, err
+		}
+		options.GenerationData.AztecSequencerKeystorePath = relKeystorePath
+	}
 
 	log.Info(configs.GeneratingDockerComposeScript)
 	// open output file

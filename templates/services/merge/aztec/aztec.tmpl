@@ -9,10 +9,12 @@
     volumes:
       - ${AZTEC_DATA_DIRECTORY}:/var/lib/data
 {{- if eq .AztecNodeType "sequencer" }}
-      - ${AZTEC_KEYSTORE_PATH}:/var/lib/keystore
+      - ${AZTEC_KEYSTORE_PATH}:/root/.aztec/keystore/key1.json
 {{- end }}
     ports:
+{{- if .MapAllPorts }}
       - {{.AztecPort}}:{{.AztecPort}}
+{{- end }}
       - {{.AztecP2pPort}}:{{.AztecP2pPort}}
       - {{.AztecP2pPort}}:{{.AztecP2pPort}}/udp
     expose:
@@ -23,8 +25,11 @@
       LOG_LEVEL: ${LOG_LEVEL}
       ETHEREUM_HOSTS: ${AZTEC_ETHEREUM_HOSTS}
       L1_CONSENSUS_HOST_URLS: ${AZTEC_L1_CONSENSUS_HOST_URLS}
+      {{if eq .ExecutionEngineName "nethermind"}}
+      L1_FIXED_PRIORITY_FEE_PER_GAS: ${L1_FIXED_PRIORITY_FEE_PER_GAS}
+      {{end}}
 {{- if eq .AztecNodeType "sequencer" }}
-      KEY_STORE_DIRECTORY: /var/lib/keystore
+      KEY_STORE_DIRECTORY: /root/.aztec/keystore
 {{- end }}
       P2P_IP: {{.AztecP2pIp}}
       P2P_PORT: {{.AztecP2pPort}}

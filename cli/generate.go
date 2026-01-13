@@ -550,20 +550,16 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 
 	// aztec client
 	if utils.Contains(services, aztec) {
-		aztecParts := strings.Split(flags.aztecName, ":")
 		aztecClient, err = clients.RandomChoice(allClients[aztec])
 		if err != nil {
 			return nil, err
 		}
+		aztecClient.Name = "aztec"
 		if flags.aztecName != "" {
-			aztecClient.Name = "aztec"
-			if len(aztecParts) > 1 {
-				aztecClient.Image = strings.Join(aztecParts[1:], ":")
-				aztecClient.Modified = true
-			}
-			aztecClient.SetImageOrDefault(strings.Join(aztecParts[1:], ":"))
+			aztecClient.Image = flags.aztecName
+			aztecClient.Modified = true
+			aztecClient.SetImageOrDefault(flags.aztecName)
 		} else {
-			aztecClient.Name = "aztec"
 			aztecClient.SetImageOrDefault("")
 		}
 		if err = clients.ValidateClient(aztecClient, aztec); err != nil {

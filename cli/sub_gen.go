@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/NethermindEth/sedge/cli/actions"
+	"github.com/NethermindEth/sedge/configs"
 	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/spf13/cobra"
 )
@@ -401,6 +402,9 @@ Additionally, you can use the syntax '<CLIENT>:<DOCKER_IMAGE>' to override the d
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
+			if !cmd.Flags().Changed("aztec-image") {
+				flags.aztecName = ""
+			}
 			if flags.aztecType == "" {
 				flags.aztecType = aztecNodeTypeFullNode
 			}
@@ -415,7 +419,7 @@ Additionally, you can use the syntax '<CLIENT>:<DOCKER_IMAGE>' to override the d
 	cmd.Flags().StringVar(&flags.aztecType, "type", aztecNodeTypeFullNode, fmt.Sprintf("Aztec node type. One of: %s,%s", aztecNodeTypeFullNode, aztecNodeTypeSequencer))
 	cmd.Flags().StringVar(&flags.aztecSequencerKeystorePath, "aztec-keystore-path", "", "Path to Aztec sequencer keystore.json file (required when --type sequencer). The keystore must be generated using 'aztec validator-keys new' command. See https://docs.aztec.network/network/setup/sequencer_management for details.")
 	cmd.Flags().StringVar(&flags.aztecP2pIp, "aztec-p2p-ip", "", "P2P IP address for Aztec sequencer. This is the IP address that other nodes will use to connect to this sequencer.")
-	cmd.Flags().StringVar(&flags.aztecName, "aztec-image", "", "Aztec image.")
+	cmd.Flags().StringVar(&flags.aztecName, "aztec-image", configs.ClientImages.Aztec.Aztec.String(), "Aztec docker image.")
 	cmd.Flags().StringArrayVar(&flags.aztecExtraFlags, "aztec-extra-flag", []string{}, "Additional flag to configure the Aztec node service in the generated docker-compose script. Example: 'sedge generate aztec --aztec-extra-flag \"p2p.maxPeers=200\" --aztec-extra-flag \"txPool.maxSize=10000\"'")
 	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
@@ -428,8 +432,6 @@ Additionally, you can use the syntax '<CLIENT>:<DOCKER_IMAGE>' to override the d
 	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all clients ports to host. Use with care. Useful to allow remote access to the clients")
 	cmd.Flags().StringSliceVar(&flags.fallbackEL, "fallback-execution-urls", []string{}, "Fallback/backup execution endpoints for the consensus client. Not supported by Teku. Example: 'sedge generate full-node -r --fallback-execution=https://mainnet.infura.io/v3/YOUR-PROJECT-ID,https://eth-mainnet.alchemyapi.io/v2/YOUR-PROJECT-ID'")
 	cmd.Flags().StringArrayVar(&flags.elExtraFlags, "el-extra-flag", []string{}, "Additional flag to configure the execution client service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	cmd.Flags().StringArrayVar(&flags.elOpExtraFlags, "el-op-extra-flag", []string{}, "Additional flag to configure the execution client for optimism service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
-	cmd.Flags().StringArrayVar(&flags.opExtraFlags, "op-extra-flag", []string{}, "Additional flag to configure the optimism client service in the generated docker-compose script. Example: 'sedge generate full-node --el-extra-flag \"<flag1>=value1\" --el-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringArrayVar(&flags.clExtraFlags, "cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge generate full-node --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringSliceVar(&flags.customEnodes, "execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
 	cmd.Flags().StringSliceVar(&flags.customEnrs, "consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")

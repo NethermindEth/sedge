@@ -400,6 +400,10 @@ func TestE2E_Generate_AztecSequencer_Sepolia(t *testing.T) {
 			aztecKeystorePath, exists := envMap["AZTEC_KEYSTORE_PATH"]
 			assert.True(t, exists, "AZTEC_KEYSTORE_PATH should exist in .env file")
 			assert.NotEmpty(t, aztecKeystorePath, "AZTEC_KEYSTORE_PATH should not be empty")
+			assert.Equal(t, "./.aztec/keystore/key1.json", aztecKeystorePath, "AZTEC_KEYSTORE_PATH should point to the copied keystore inside the sedge data directory")
+
+			// Ensure the keystore was copied into the generation path
+			assert.FileExists(t, filepath.Join(dataDirPath, ".aztec", "keystore", "key1.json"), "keystore should be copied into sedge data directory")
 
 			// Read AZTEC_IMAGE_VERSION value
 			aztecImage, exists := envMap["AZTEC_IMAGE_VERSION"]
