@@ -311,7 +311,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		MevImage:            gd.MevImage,
 		CheckpointSyncUrl:   gd.CheckpointSyncUrl,
 		FeeRecipient:        gd.FeeRecipient,
-		ExecutionEngineName: gd.ExecutionClient.Name,
+		ExecutionEngineName: nameOrEmpty(cls[execution]),
 		ElDiscoveryPort:     gd.Ports["ELDiscovery"],
 		ElMetricsPort:       gd.Ports["ELMetrics"],
 		ElApiPort:           gd.Ports["ELApi"],
