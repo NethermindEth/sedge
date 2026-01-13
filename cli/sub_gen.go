@@ -402,9 +402,6 @@ Additionally, you can use the syntax '<CLIENT>:<DOCKER_IMAGE>' to override the d
 			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
 				return err
 			}
-			if !cmd.Flags().Changed("aztec-image") {
-				flags.aztecName = ""
-			}
 			if flags.aztecType == "" {
 				flags.aztecType = aztecNodeTypeFullNode
 			}

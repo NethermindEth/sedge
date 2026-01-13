@@ -555,7 +555,10 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 			return nil, err
 		}
 		aztecClient.Name = "aztec"
-		if flags.aztecName != "" {
+		defaultAztecImage := configs.ClientImages.Aztec.Aztec.String()
+		// If the flag wasn't explicitly set by the user, Cobra will populate it with the default.
+		// Treat "default value" as "not user-modified" so `--latest` can still apply.
+		if flags.aztecName != "" && flags.aztecName != defaultAztecImage {
 			aztecClient.Image = flags.aztecName
 			aztecClient.Modified = true
 			aztecClient.SetImageOrDefault(flags.aztecName)
