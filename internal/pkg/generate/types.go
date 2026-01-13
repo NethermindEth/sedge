@@ -126,7 +126,7 @@ type DockerComposeData struct {
 	MevBoostEndpoint           string
 	CheckpointSyncUrl          string
 	FeeRecipient               string
-	ExecutionEngineName        string //Needed for aztec
+	ExecutionEngineName        string // Needed for aztec
 	ElDiscoveryPort            uint16
 	ElMetricsPort              uint16
 	ElApiPort                  uint16

@@ -16,9 +16,10 @@ limitations under the License.
 package actions
 
 import (
-	"github.com/NethermindEth/sedge/internal/utils"
 	"os"
 	"path/filepath"
+
+	"github.com/NethermindEth/sedge/internal/utils"
 
 	"github.com/NethermindEth/sedge/configs"
 	"github.com/NethermindEth/sedge/internal/pkg/generate"
