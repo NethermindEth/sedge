@@ -3,7 +3,9 @@
 # --- Aztec Node configuration ---
 AZTEC_IMAGE_VERSION={{.AztecImage}}
 AZTEC_DATA_DIRECTORY={{.AztecDataDir}}
+{{- if eq .AztecNodeType "sequencer" }}
 AZTEC_KEYSTORE_PATH={{.AztecSequencerKeystorePath}}
+{{- end }}
 AZTEC_NETWORK={{.AztecNetwork}}
 LOG_LEVEL=info
 AZTEC_ETHEREUM_HOSTS={{.ExecutionApiURL}}
