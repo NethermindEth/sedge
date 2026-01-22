@@ -700,10 +700,9 @@ func TestE2E_Generate_AztecFullNode_Sepolia(t *testing.T) {
 			assert.True(t, exists, "AZTEC_IMAGE_VERSION should exist in .env file")
 			assert.Contains(t, aztecImage, "aztec", "AZTEC_IMAGE_VERSION should contain 'aztec'")
 
-			// Full node should not require keystore; env may include AZTEC_KEYSTORE_PATH but it should be empty.
-			aztecKeystorePath, exists := envMap["AZTEC_KEYSTORE_PATH"]
-			assert.True(t, exists, "AZTEC_KEYSTORE_PATH should exist in .env file")
-			assert.Empty(t, aztecKeystorePath, "AZTEC_KEYSTORE_PATH should be empty for full node")
+			// Full node should not have keystore path (only sequencers need it)
+			_, exists = envMap["AZTEC_KEYSTORE_PATH"]
+			assert.False(t, exists, "AZTEC_KEYSTORE_PATH should not exist in .env file for full node")
 
 			// Check compose services and ensure it is NOT in sequencer mode
 			dockerComposeFilePath := filepath.Join(dataDirPath, "docker-compose.yml")
