@@ -415,7 +415,7 @@ Additionally, you can use the syntax '<CLIENT>:<DOCKER_IMAGE>' to override the d
 	// Bind flags
 	cmd.Flags().StringVar(&flags.aztecType, "type", aztecNodeTypeFullNode, fmt.Sprintf("Aztec node type. One of: %s,%s", aztecNodeTypeFullNode, aztecNodeTypeSequencer))
 	cmd.Flags().StringVar(&flags.aztecSequencerKeystorePath, "aztec-keystore-path", "", "Path to Aztec sequencer keystore.json file (required when --type sequencer). The keystore must be generated using 'aztec validator-keys new' command. See https://docs.aztec.network/network/setup/sequencer_management for details.")
-	cmd.Flags().StringVar(&flags.aztecP2pIp, "aztec-p2p-ip", "", "P2P IP address for Aztec sequencer. This is the IP address that other nodes will use to connect to this sequencer.")
+	cmd.Flags().StringVar(&flags.aztecP2pIp, "aztec-p2p-ip", "", "P2P IP address for Aztec node (required for both full node and sequencer). This is the IP address that other nodes will use to connect to this node.")
 	cmd.Flags().StringVar(&flags.aztecName, "aztec-image", configs.ClientImages.Aztec.Aztec.String(), "Aztec docker image.")
 	cmd.Flags().StringArrayVar(&flags.aztecExtraFlags, "aztec-extra-flag", []string{}, "Additional flag to configure the Aztec node service in the generated docker-compose script. Example: 'sedge generate aztec --aztec-extra-flag \"p2p.maxPeers=200\" --aztec-extra-flag \"txPool.maxSize=10000\"'")
 	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")

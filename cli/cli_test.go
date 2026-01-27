@@ -762,8 +762,8 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(0, nil),
 					prompter.EXPECT().Select("Select aztec client", "", []string{"aztec", Randomize}).Return(0, nil),
 					prompter.EXPECT().Select("Select aztec node type", "", []string{aztecNodeTypeFullNode, aztecNodeTypeSequencer}).Return(1, nil),
+					prompter.EXPECT().Input("Aztec node P2P IP address", "", true, gomock.AssignableToTypeOf(func(string) error { return nil })).Return("192.168.1.100", nil),
 					prompter.EXPECT().InputFilePath("Aztec sequencer keystore.json path", "", true, ".json").Return(keystorePath, nil),
-					prompter.EXPECT().Input("Aztec sequencer P2P IP address", "", true, gomock.AssignableToTypeOf(func(string) error { return nil })).Return("192.168.1.100", nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("http://checkpoint.sync", nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(false, nil),
@@ -813,6 +813,7 @@ func TestCli(t *testing.T) {
 				genData := generate.GenData{
 					Services:      []string{"execution", "consensus", "aztec"},
 					AztecNodeType: aztecNodeTypeFullNode,
+					AztecP2pIp:    "192.168.1.100",
 					ExecutionClient: &clients.Client{
 						Name:  "nethermind",
 						Type:  "execution",
@@ -845,6 +846,7 @@ func TestCli(t *testing.T) {
 					prompter.EXPECT().Select("Select consensus client", "", ETHClients["consensus"]).Return(0, nil),
 					prompter.EXPECT().Select("Select aztec client", "", []string{"aztec", Randomize}).Return(0, nil),
 					prompter.EXPECT().Select("Select aztec node type", "", []string{aztecNodeTypeFullNode, aztecNodeTypeSequencer}).Return(0, nil),
+					prompter.EXPECT().Input("Aztec node P2P IP address", "", true, gomock.AssignableToTypeOf(func(string) error { return nil })).Return("192.168.1.100", nil),
 					prompter.EXPECT().InputURL("Checkpoint sync URL", configs.NetworksConfigs()[genData.Network].CheckpointSyncURL, false).Return("http://checkpoint.sync", nil),
 					prompter.EXPECT().EthAddress("Please enter the Fee Recipient address (press enter to skip it)", "", false).Return("", nil),
 					prompter.EXPECT().Confirm("Do you want to expose all ports?", false).Return(false, nil),
@@ -877,8 +879,8 @@ func TestCli(t *testing.T) {
 						if got.AztecSequencerKeystorePath != "" {
 							t.Fatalf("unexpected AztecSequencerKeystorePath. got %q want empty", got.AztecSequencerKeystorePath)
 						}
-						if got.AztecP2pIp != "" {
-							t.Fatalf("unexpected AztecP2pIp. got %q want empty", got.AztecP2pIp)
+						if got.AztecP2pIp != genData.AztecP2pIp {
+							t.Fatalf("unexpected AztecP2pIp. got %q want %q", got.AztecP2pIp, genData.AztecP2pIp)
 						}
 						return got, nil
 					}),

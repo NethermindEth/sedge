@@ -1599,13 +1599,29 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			GenCmdFlags{
 				AztecFlags: AztecFlags{
-					aztecType: aztecNodeTypeFullNode,
+					aztecType:  aztecNodeTypeFullNode,
+					aztecP2pIp: "192.168.1.100",
 				},
 			},
 			globalFlags{
 				network: "sepolia",
 			},
 			nil,
+		},
+		{
+			"Aztec node - full-node missing P2P IP",
+			subCmd{
+				name: "aztec",
+			},
+			GenCmdFlags{
+				AztecFlags: AztecFlags{
+					aztecType: aztecNodeTypeFullNode,
+				},
+			},
+			globalFlags{
+				network: "sepolia",
+			},
+			errors.New("aztec-p2p-ip is required when generating aztec configuration"),
 		},
 		{
 			"Aztec node - sequencer missing keystore path",

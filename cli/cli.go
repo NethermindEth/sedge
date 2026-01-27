@@ -159,10 +159,16 @@ func setupAztecSequencerNode(p ui.Prompter, o *CliCmdOptions, a actions.SedgeAct
 	); err != nil {
 		return err
 	}
+	// P2P IP is required for both full node and sequencer
+	if err := runPromptActions(p, o,
+		inputAztecP2pIP,
+	); err != nil {
+		return err
+	}
+	// Keystore is only required for sequencer
 	if o.genData.AztecNodeType == aztecNodeTypeSequencer {
 		if err := runPromptActions(p, o,
 			inputAztecSequencerKeystorePath,
-			inputAztecSequencerP2pIP,
 		); err != nil {
 			return err
 		}
@@ -794,8 +800,8 @@ func inputAztecSequencerKeystorePath(p ui.Prompter, o *CliCmdOptions) (err error
 	return nil
 }
 
-func inputAztecSequencerP2pIP(p ui.Prompter, o *CliCmdOptions) (err error) {
-	ip, err := p.Input("Aztec sequencer P2P IP address", "", true, func(s string) error {
+func inputAztecP2pIP(p ui.Prompter, o *CliCmdOptions) (err error) {
+	ip, err := p.Input("Aztec node P2P IP address", "", true, func(s string) error {
 		parsed := net.ParseIP(s)
 		if parsed == nil {
 			return fmt.Errorf("invalid IP address: %s", s)

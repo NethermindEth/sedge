@@ -305,6 +305,10 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		if aztecNodeType == "" {
 			aztecNodeType = aztecNodeTypeFullNode
 		}
+		// P2P IP is required for both full node and sequencer
+		if flags.aztecP2pIp == "" {
+			return fmt.Errorf("aztec-p2p-ip is required when generating aztec configuration. Use --aztec-p2p-ip to specify the P2P IP address")
+		}
 		switch aztecNodeType {
 		case aztecNodeTypeFullNode:
 			// No keystore required for non-sequencer nodes.
@@ -315,9 +319,6 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 			aztecSequencerKeystorePath, err = loadAztecSequencerKeystore(flags.aztecSequencerKeystorePath)
 			if err != nil {
 				return fmt.Errorf("invalid aztec sequencer keystore: %w", err)
-			}
-			if flags.aztecP2pIp == "" {
-				return fmt.Errorf("aztec-p2p-ip is required when generating aztec configuration. Use --aztec-p2p-ip to specify the P2P IP address")
 			}
 		default:
 			return fmt.Errorf("invalid aztec node type %q (expected %q or %q)", aztecNodeType, aztecNodeTypeFullNode, aztecNodeTypeSequencer)

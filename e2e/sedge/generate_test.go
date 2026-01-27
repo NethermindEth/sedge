@@ -666,6 +666,31 @@ func TestE2E_Generate_AztecSequencer_MissingP2pIp(t *testing.T) {
 	e2eTest.run()
 }
 
+func TestE2E_Generate_AztecFullNode_MissingP2pIp(t *testing.T) {
+	// Test context
+	var (
+		runErr error
+		output []byte
+	)
+	// Build test case
+	e2eTest := newE2ESedgeTestCase(
+		t,
+		// Arrange
+		nil,
+		// Act
+		func(t *testing.T, binaryPath string, dataDirPath string) {
+			output, runErr = base.RunSedgeWithOutput(t, binaryPath, "generate", "aztec", "--network", "sepolia", "--type", "full-node")
+		},
+		// Assert
+		func(t *testing.T, dataDirPath string) {
+			assert.Error(t, runErr, "generate command should fail without P2P IP")
+			assert.Contains(t, string(output), "aztec-p2p-ip is required when generating aztec configuration", "error should mention missing P2P IP")
+		},
+	)
+	// Run test case
+	e2eTest.run()
+}
+
 func TestE2E_Generate_AztecFullNode_Sepolia(t *testing.T) {
 	// Test context
 	var (
@@ -678,7 +703,7 @@ func TestE2E_Generate_AztecFullNode_Sepolia(t *testing.T) {
 		nil,
 		// Act
 		func(t *testing.T, binaryPath string, dataDirPath string) {
-			runErr = base.RunSedge(t, binaryPath, "generate", "aztec", "--network", "sepolia", "--type", "full-node")
+			runErr = base.RunSedge(t, binaryPath, "generate", "aztec", "--network", "sepolia", "--type", "full-node", "--aztec-p2p-ip", "192.168.1.100")
 		},
 		// Assert
 		func(t *testing.T, dataDirPath string) {
