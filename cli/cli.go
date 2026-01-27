@@ -749,26 +749,7 @@ func selectNodeType(p ui.Prompter, o *CliCmdOptions) error {
 }
 
 func selectAztecClient(p ui.Prompter, o *CliCmdOptions) (err error) {
-	c := clients.ClientInfo{Network: o.genData.Network}
-	supportedClients, err := c.SupportedClients(aztec)
-	if err != nil {
-		return err
-	}
-	options := append(supportedClients, Randomize)
-	index, err := p.Select("Select aztec client", "", options)
-	if err != nil {
-		return err
-	}
-	selectedAztecClient := options[index]
-	// In case random is selected, select a random client
-	if selectedAztecClient == Randomize {
-		randomName, err := clients.RandomClientName(supportedClients)
-		if err != nil {
-			return err
-		}
-		selectedAztecClient = randomName
-		log.Info("Random aztec client selected: ", selectedAztecClient)
-	}
+	selectedAztecClient := "aztec"
 	o.genData.AztecClient = &clients.Client{
 		Name: selectedAztecClient,
 		Type: aztec,
