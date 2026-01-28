@@ -265,7 +265,7 @@ func TestSetup(t *testing.T) {
 				// Check the Prometheus port
 				promEndpoint := fmt.Sprintf("http://%s:%s", monitoring.PrometheusContainerName, tt.options["PROM_PORT"])
 				assert.Equal(t, promEndpoint, prom.Datasources[0].URL)
-				
+
 				// Check the Alertmanager URL
 				alertmanagerEndpoint := "http://sedge_alertmanager:9093"
 				assert.Equal(t, alertmanagerEndpoint, prom.Datasources[1].URL)
