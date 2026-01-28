@@ -56,12 +56,12 @@ The monitoring stack includes:
 	}
 	cmd.AddCommand(DefaultSubCmd(mgr, additionalServices))
 	cmd.AddCommand(LidoSubCmd(mgr, additionalServices))
-	cmd.AddCommand(AztecSubCmd(mgr, additionalServices))
+	cmd.AddCommand(AztecMonitoringSubCmd(mgr, additionalServices))
 
 	return cmd
 }
 
-func AztecSubCmd(mgr MonitoringManager, additionalServices []monitoring.ServiceAPI) *cobra.Command {
+func AztecMonitoringSubCmd(mgr MonitoringManager, additionalServices []monitoring.ServiceAPI) *cobra.Command {
 	aztec := &aztecExporter.AztecExporterParams{}
 	cmd := &cobra.Command{
 		Use:   "aztec",

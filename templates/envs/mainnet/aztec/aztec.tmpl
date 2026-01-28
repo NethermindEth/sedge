@@ -14,5 +14,7 @@ AZTEC_L1_CONSENSUS_HOST_URLS={{.ConsensusApiURL}}
 {{if eq .ExecutionEngineName "nethermind"}}
 L1_FIXED_PRIORITY_FEE_PER_GAS=1
 {{end}}
+# Send OTLP metrics to the monitoring stack's Aztec exporter (OpenTelemetry Collector).
+OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://sedge_aztec_exporter:{{if .AztecOtelMetricsPort}}{{.AztecOtelMetricsPort}}{{else}}4318{{end}}/v1/metrics
 {{ end }}
 
