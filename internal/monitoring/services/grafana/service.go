@@ -118,9 +118,11 @@ func (g *GrafanaService) Setup(options map[string]string) error {
 
 	// Execute template
 	data := struct {
-		PromEndpoint string
+		PromEndpoint        string
+		AlertmanagerEndpoint string
 	}{
-		PromEndpoint: fmt.Sprintf("http://%s:%s", monitoring.PrometheusServiceName, options["PROM_PORT"]),
+		PromEndpoint:        fmt.Sprintf("http://%s:%s", monitoring.PrometheusContainerName, options["PROM_PORT"]),
+		AlertmanagerEndpoint: "http://sedge_alertmanager:9093",
 	}
 	err = tmp.Execute(configFile, data)
 	if err != nil {

@@ -12,7 +12,7 @@
       "name": "VAR_SELECTOR",
       "type": "constant",
       "label": "selector",
-      "value": "service_instance_id!=\"\"",
+      "value": "job=~\".*\"",
       "description": ""
     }
   ],
@@ -3379,18 +3379,18 @@
         "description": "",
         "hide": 2,
         "name": "selector",
-        "query": "service_instance_id!=\"\"",
+        "query": "job=~\".*\"",
         "skipUrlSync": true,
         "type": "constant",
         "current": {
-          "value": "service_instance_id!=\"\"",
-          "text": "service_instance_id!=\"\"",
+          "value": "job=~\".*\"",
+          "text": "job=~\".*\"",
           "selected": false
         },
         "options": [
           {
-            "value": "service_instance_id!=\"\"",
-            "text": "service_instance_id!=\"\"",
+            "value": "job=~\".*\"",
+            "text": "job=~\".*\"",
             "selected": false
           }
         ]

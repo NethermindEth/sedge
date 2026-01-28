@@ -24,7 +24,7 @@ datasources:
   - name: Alertmanager
     type: alertmanager
     access: proxy
-    url: http://alertmanager:9093
+    url: {{ .AlertmanagerEndpoint }}
     uid: sedge-alertmanager
     jsonData:
       implementation: "prometheus"

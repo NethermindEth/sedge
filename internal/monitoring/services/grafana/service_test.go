@@ -263,8 +263,12 @@ func TestSetup(t *testing.T) {
 				assert.NoError(t, err)
 
 				// Check the Prometheus port
-				promEndpoint := fmt.Sprintf("http://%s:%s", monitoring.PrometheusServiceName, tt.options["PROM_PORT"])
+				promEndpoint := fmt.Sprintf("http://%s:%s", monitoring.PrometheusContainerName, tt.options["PROM_PORT"])
 				assert.Equal(t, promEndpoint, prom.Datasources[0].URL)
+				
+				// Check the Alertmanager URL
+				alertmanagerEndpoint := "http://sedge_alertmanager:9093"
+				assert.Equal(t, alertmanagerEndpoint, prom.Datasources[1].URL)
 
 				// Check the Dashboards config file
 				dashboardsYmlPath := filepath.Join(basePath, "monitoring", "grafana", "provisioning", "dashboards", "dashboards.yml")
