@@ -28,4 +28,5 @@ const (
 	ValidatorDir                        = "validator-data"
 	KeystoreDir                         = "keystore"
 	DistributedValidatorDir             = ".charon"
+	AztecDataDir                        = "aztec-data"
 )

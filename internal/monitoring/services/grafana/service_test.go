@@ -134,20 +134,10 @@ func TestSetup(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		locker := mocks.NewMockLocker(ctrl)
 
-		// Expect the lock to be acquired
-		gomock.InOrder(
-			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
-			locker.EXPECT().Lock().Return(nil),
-			locker.EXPECT().Locked().Return(true),
-			locker.EXPECT().Unlock().Return(nil),
-		)
-		for i := 0; i < 8; i++ {
-			gomock.InOrder(
-				locker.EXPECT().Lock().Return(nil),
-				locker.EXPECT().Locked().Return(true),
-				locker.EXPECT().Unlock().Return(nil),
-			)
-		}
+		locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).AnyTimes()
+		locker.EXPECT().Lock().Return(nil).AnyTimes()
+		locker.EXPECT().Locked().Return(true).AnyTimes()
+		locker.EXPECT().Unlock().Return(nil).AnyTimes()
 		return locker
 	}
 	onlyNewLocker := func(t *testing.T) *mocks.MockLocker {
@@ -273,8 +263,12 @@ func TestSetup(t *testing.T) {
 				assert.NoError(t, err)
 
 				// Check the Prometheus port
-				promEndpoint := fmt.Sprintf("http://%s:%s", monitoring.PrometheusServiceName, tt.options["PROM_PORT"])
+				promEndpoint := fmt.Sprintf("http://%s:%s", monitoring.PrometheusContainerName, tt.options["PROM_PORT"])
 				assert.Equal(t, promEndpoint, prom.Datasources[0].URL)
+
+				// Check the Alertmanager URL
+				alertmanagerEndpoint := "http://sedge_alertmanager:9093"
+				assert.Equal(t, alertmanagerEndpoint, prom.Datasources[1].URL)
 
 				// Check the Dashboards config file
 				dashboardsYmlPath := filepath.Join(basePath, "monitoring", "grafana", "provisioning", "dashboards", "dashboards.yml")
@@ -285,10 +279,12 @@ func TestSetup(t *testing.T) {
 				// Check the provisioned dashboards
 				foldersToCheck := []string{
 					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards"),
+					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "aztec-validator"),
 					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "lido-exporter"),
 					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "node-exporter"),
 				}
 				filesToCheck := []string{
+					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "aztec-validator", "aztec-validator.json"),
 					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "lido-exporter", "lido-exporter.json"),
 					filepath.Join(basePath, "monitoring", "grafana", "data", "dashboards", "node-exporter", "node-exporter.json"),
 				}

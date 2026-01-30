@@ -228,7 +228,9 @@ func TestInit(t *testing.T) {
 			dotenv: map[string]string{
 				"NODE_PORT": "9000",
 			},
-			wantErr: true,
+			// Container IP lookup can fail/return junk on some Docker/WSL setups.
+			// We treat IP saving as best-effort and continue without it.
+			wantErr: false,
 		},
 	}
 
@@ -1868,6 +1870,14 @@ networks:
 
 			// Mock the service behavior
 			mockService.EXPECT().Name().Return(tt.serviceName).AnyTimes()
+			// updateDockerComposeFile now uses ContainerName to decide which optional blocks to enable
+			if tt.serviceName == "lido_exporter" {
+				mockService.EXPECT().ContainerName().Return(LidoExporterContainerName).AnyTimes()
+			} else if tt.serviceName == "aztec_exporter" {
+				mockService.EXPECT().ContainerName().Return(AztecExporterContainerName).AnyTimes()
+			} else {
+				mockService.EXPECT().ContainerName().Return("unknown").AnyTimes()
+			}
 
 			// Create a monitoring manager
 			manager := NewMonitoringManager(

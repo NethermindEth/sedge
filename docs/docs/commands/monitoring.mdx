@@ -41,6 +41,7 @@ Usage:
 Available Subcommands:
   default     Default monitoring configuration (Prometheus, Grafana, Node Exporter)
   lido        Configure Lido CSM node monitoring (Prometheus, Grafana, Node Exporter, Lido Exporter)
+  aztec       Configure Aztec monitoring (OTel Collector -> Prometheus -> Grafana)
 
 Flags:
   -h, --help   help for init
@@ -80,6 +81,28 @@ Flags:
   --port uint16               Port for exporting metrics (default 8080)
   --scrape-time duration      Scrape interval for metrics (default "30s")
   --log-level string          Set log level (default "info")
+
+Global Flags:
+  --log-level string   Set log level, e.g., panic, fatal, error, warn, warning, info, debug, trace (default "info")
+```
+
+### Aztec-Specific Monitoring
+
+`sedge monitoring init aztec` configures an **OpenTelemetry Collector** that receives **OTLP metrics** from Aztec nodes and exposes them as a **Prometheus-scrapable** endpoint. It also provisions Grafana dashboards for Aztec.
+
+```
+$ sedge monitoring init aztec -h
+Configure Aztec monitoring (OTel Collector -> Prometheus -> Grafana)
+
+Usage:
+  sedge monitoring init aztec [flags]
+
+Flags:
+  --metrics-port uint16        Port where Prometheus will scrape the Aztec metrics from the collector. (default 9464)
+  --otlp-grpc-port uint16      OTLP gRPC receiver port for Aztec nodes to send metrics to. (default 4317)
+  --otlp-http-port uint16      OTLP HTTP receiver port for Aztec nodes to send metrics to. (default 4318)
+  --log-level string           Collector log level (e.g. error, warn, info, debug). (default "info")
+  --metric-expiry string       How long to keep stale metrics series before expiring them (e.g. 5m, 1h). (default "5m")
 
 Global Flags:
   --log-level string   Set log level, e.g., panic, fatal, error, warn, warning, info, debug, trace (default "info")

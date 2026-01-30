@@ -77,6 +77,9 @@ func (n *NodeExporterService) ContainerName() string {
 }
 
 func (n *NodeExporterService) Endpoint() string {
+	if n.containerIP == nil {
+		return fmt.Sprintf("http://%s:%d", n.ContainerName(), n.port)
+	}
 	return fmt.Sprintf("http://%s:%d", n.containerIP, n.port)
 }
 

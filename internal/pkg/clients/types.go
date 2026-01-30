@@ -43,6 +43,8 @@ func (c *Client) SetImageOrDefault(image string) {
 		c.setOptimismImage(image)
 	case "opexecution":
 		c.SetOpExecutionImage(image)
+	case "aztec":
+		c.setAztecImage(image)
 	}
 }
 
@@ -116,6 +118,13 @@ func (c *Client) SetOpExecutionImage(image string) {
 	}
 }
 
+func (c *Client) setAztecImage(image string) {
+	switch c.Name {
+	case "aztec":
+		c.Image = valueOrDefault(image, configs.ClientImages.Aztec.Aztec.String())
+	}
+}
+
 func valueOrDefault(value string, defaultValue string) string {
 	if value == "" {
 		return defaultValue
@@ -123,7 +132,7 @@ func valueOrDefault(value string, defaultValue string) string {
 	return value
 }
 
-// Clients : Struct Represent a combination of execution, consensus, validator and distributed validator clients
+// Clients : Struct Represent a combination of execution, consensus, validator, optimism, distributed validator, and aztec clients
 type Clients struct {
 	Execution            *Client
 	Consensus            *Client
@@ -131,6 +140,7 @@ type Clients struct {
 	Optimism             *Client
 	ExecutionOP          *Client
 	DistributedValidator *Client
+	Aztec                *Client
 }
 
 type ClientMap map[string]*Client

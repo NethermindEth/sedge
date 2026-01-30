@@ -186,6 +186,10 @@ services:
   {{ template "lido_exporter" . }}
 {{ end }}
 
+{{ if .AztecExporter }}
+  {{ template "aztec_exporter" . }}
+{{ end }}
+
 volumes:
   grafana-storage:
   oncall_data:

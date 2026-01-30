@@ -119,6 +119,17 @@ func (p *PrometheusService) Init(opts types.ServiceOptions) error {
 // AddTarget adds a new target to the Prometheus config and reloads the Prometheus configuration.
 // Assumes endpoint is in the form http://<ip/domain>:<port>
 func (p *PrometheusService) AddTarget(target types.MonitoringTarget, labels map[string]string, jobName string) error {
+	// If we are adding a service that has its own alert rules, make sure the rule file exists in the stack.
+	// This is important for dynamic service adds (monitoring init aztec/lido) where Prometheus.Setup isn't rerun.
+	if labels != nil {
+		switch labels[monitoring.InstanceIDLabel] {
+		case monitoring.AztecExporterContainerName:
+			_ = p.ensureRuleFile("aztec-exporter.yml")
+		case monitoring.LidoExporterContainerName:
+			_ = p.ensureRuleFile("lido-exporter.yml")
+		}
+	}
+
 	path := filepath.Join("prometheus", "prometheus.yml")
 	// Read the existing config
 	rawConfig, err := p.stack.ReadFile(path)
@@ -175,6 +186,24 @@ func (p *PrometheusService) AddTarget(target types.MonitoringTarget, labels map[
 	}
 
 	return nil
+}
+
+func (p *PrometheusService) ensureRuleFile(filename string) error {
+	// Read from embedded FS
+	raw, err := rules.ReadFile(filepath.Join("rules", filename))
+	if err != nil {
+		return err
+	}
+	// Ensure destination dir exists
+	if err := p.stack.CreateDir(filepath.Join("prometheus", "rules")); err != nil {
+		return err
+	}
+	dst := filepath.Join("prometheus", "rules", filename)
+	// If already present, do nothing
+	if _, err := p.stack.ReadFile(dst); err == nil {
+		return nil
+	}
+	return p.stack.WriteFile(dst, raw)
 }
 
 // RemoveTarget removes a target from the Prometheus config and reloads the Prometheus configuration.
@@ -283,8 +312,9 @@ func (p *PrometheusService) Setup(options map[string]string) error {
 		return err
 	}
 
-	// Copy rules
-	if err = p.copyRules(filepath.Join("prometheus")); err != nil {
+	// Create rules directory.
+	// Exporter-specific rule files are installed on-demand when the exporter is added (see ensureRuleFile()).
+	if err = p.stack.CreateDir(filepath.Join("prometheus", "rules")); err != nil {
 		return err
 	}
 
@@ -306,6 +336,9 @@ func (p *PrometheusService) ContainerName() string {
 }
 
 func (p *PrometheusService) Endpoint() string {
+	if p.containerIP == nil {
+		return fmt.Sprintf("http://%s:%d", p.ContainerName(), p.port)
+	}
 	return fmt.Sprintf("http://%s:%d", p.containerIP, p.port)
 }
 
@@ -316,11 +349,25 @@ func (p *PrometheusService) reloadConfig() error {
 	b.MaxElapsedTime = time.Minute
 
 	err := backoff.Retry(func() (err error) {
-		resp, err := http.Post(fmt.Sprintf("http://%s:%d/-/reload", p.containerIP, p.port), "", nil)
-		if err != nil {
+		reloadURLs := []string{
+			fmt.Sprintf("http://localhost:%d/-/reload", p.port),
+		}
+		if p.containerIP != nil {
+			reloadURLs = append(reloadURLs, fmt.Sprintf("http://%s:%d/-/reload", p.containerIP, p.port))
+		}
+
+		var resp *http.Response
+		var lastErr error
+		for _, u := range reloadURLs {
+			resp, lastErr = http.Post(u, "", nil)
+			if lastErr == nil {
+				break
+			}
+		}
+		if lastErr != nil {
 			// TODO: Use fields to log the error
 			log.Debug("Retrying request...")
-			return err
+			return lastErr
 		}
 		defer resp.Body.Close()
 

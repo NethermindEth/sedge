@@ -1,0 +1,29 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:{{ .OtlpGrpcPort }}
+      http:
+        endpoint: 0.0.0.0:{{ .OtlpHttpPort }}
+
+processors:
+  batch: {}
+
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:{{ .PromPort }}
+    send_timestamps: true
+    metric_expiration: {{ .MetricExpiry }}
+
+service:
+  telemetry:
+    logs:
+      level: {{ .LogLevel }}
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus]
+
+
+

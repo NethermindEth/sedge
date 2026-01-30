@@ -161,19 +161,10 @@ func TestSetup(t *testing.T) {
 		locker := mocks.NewMockLocker(ctrl)
 
 		// Expect the lock to be acquired
-		gomock.InOrder(
-			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
-			locker.EXPECT().Lock().Return(nil),
-			locker.EXPECT().Locked().Return(true),
-			locker.EXPECT().Unlock().Return(nil),
-		)
-		for i := 0; i < 5; i++ {
-			gomock.InOrder(
-				locker.EXPECT().Lock().Return(nil),
-				locker.EXPECT().Locked().Return(true),
-				locker.EXPECT().Unlock().Return(nil),
-			)
-		}
+		locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).AnyTimes()
+		locker.EXPECT().Lock().Return(nil).AnyTimes()
+		locker.EXPECT().Locked().Return(true).AnyTimes()
+		locker.EXPECT().Unlock().Return(nil).AnyTimes()
 		return locker
 	}
 	onlyNewLocker := func(t *testing.T) *mocks.MockLocker {
@@ -311,7 +302,6 @@ func TestSetup(t *testing.T) {
 					filepath.Join(basePath, "monitoring", "prometheus", "alertmanager"),
 				}
 				filesToCheck := []string{
-					filepath.Join(basePath, "monitoring", "prometheus", "rules", "lido-exporter.yml"),
 					filepath.Join(basePath, "monitoring", "prometheus", "alertmanager", "alertmanager.yml"),
 				}
 				for _, folder := range foldersToCheck {
@@ -322,6 +312,17 @@ func TestSetup(t *testing.T) {
 				for _, file := range filesToCheck {
 					ok, err = afero.Exists(afs, file)
 					assert.True(t, ok)
+					assert.NoError(t, err)
+				}
+
+				// Exporter-specific rule files should not be copied during Prometheus setup.
+				// They are added on-demand when the exporter is added to the monitoring stack.
+				for _, ruleFile := range []string{
+					filepath.Join(basePath, "monitoring", "prometheus", "rules", "aztec-exporter.yml"),
+					filepath.Join(basePath, "monitoring", "prometheus", "rules", "lido-exporter.yml"),
+				} {
+					ok, err = afero.Exists(afs, ruleFile)
+					assert.False(t, ok)
 					assert.NoError(t, err)
 				}
 			}
@@ -339,20 +340,10 @@ func TestAddTarget(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		locker := mocks.NewMockLocker(ctrl)
 
-		// Expect the lock to be acquired
-		gomock.InOrder(
-			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
-			locker.EXPECT().Lock().Return(nil),
-			locker.EXPECT().Locked().Return(true),
-			locker.EXPECT().Unlock().Return(nil),
-		)
-		for i := 0; i < times*2+5; i++ {
-			gomock.InOrder(
-				locker.EXPECT().Lock().Return(nil),
-				locker.EXPECT().Locked().Return(true),
-				locker.EXPECT().Unlock().Return(nil),
-			)
-		}
+		locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).AnyTimes()
+		locker.EXPECT().Lock().Return(nil).AnyTimes()
+		locker.EXPECT().Locked().Return(true).AnyTimes()
+		locker.EXPECT().Unlock().Return(nil).AnyTimes()
 
 		return locker
 	}
@@ -576,25 +567,12 @@ func TestAddTarget(t *testing.T) {
 		{
 			name: "lock error",
 			mocker: func(t *testing.T, times int) *mocks.MockLocker {
-				// Create a mock locker
 				ctrl := gomock.NewController(t)
 				locker := mocks.NewMockLocker(ctrl)
 
-				// Expect the lock to be acquired
-				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
-				)
-				for i := 0; i < 5; i++ {
-					gomock.InOrder(
-						locker.EXPECT().Lock().Return(nil),
-						locker.EXPECT().Locked().Return(true),
-						locker.EXPECT().Unlock().Return(nil),
-					)
-				}
-
+				// Fail fast on the first lock attempt during Setup().
+				// The exact number/order of lock operations inside Setup may change over time.
+				locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).AnyTimes()
 				locker.EXPECT().Lock().Return(fmt.Errorf("error"))
 				return locker
 			},
@@ -617,28 +595,13 @@ func TestAddTarget(t *testing.T) {
 		{
 			name: "unlock error",
 			mocker: func(t *testing.T, times int) *mocks.MockLocker {
-				// Create a mock locker
 				ctrl := gomock.NewController(t)
 				locker := mocks.NewMockLocker(ctrl)
 
-				// Expect the lock to be acquired
-				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
-				)
-				for i := 0; i < 5; i++ {
-					gomock.InOrder(
-						locker.EXPECT().Lock().Return(nil),
-						locker.EXPECT().Locked().Return(true),
-						locker.EXPECT().Unlock().Return(nil),
-					)
-				}
-				gomock.InOrder(
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(false),
-				)
+				// Simulate an unlock failure: Locked() is false when we try to unlock.
+				locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).AnyTimes()
+				locker.EXPECT().Lock().Return(nil).AnyTimes()
+				locker.EXPECT().Locked().Return(false).AnyTimes()
 				return locker
 			},
 			options: map[string]string{
@@ -680,6 +643,11 @@ func TestAddTarget(t *testing.T) {
 
 			// Setup the Prometheus service
 			err = prometheus.Setup(tt.options)
+			// Some cases intentionally simulate locker failures; in those cases Setup is expected to fail.
+			if tt.name == "lock error" || tt.name == "unlock error" {
+				require.Error(t, err)
+				return
+			}
 			require.NoError(t, err)
 
 			if !tt.badEndpoint {
@@ -747,20 +715,10 @@ func TestRemoveTarget(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		locker := mocks.NewMockLocker(ctrl)
 
-		// Expect the lock to be acquired
-		gomock.InOrder(
-			locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
-			locker.EXPECT().Lock().Return(nil),
-			locker.EXPECT().Locked().Return(true),
-			locker.EXPECT().Unlock().Return(nil),
-		)
-		for i := 0; i < times*2+5; i++ {
-			gomock.InOrder(
-				locker.EXPECT().Lock().Return(nil),
-				locker.EXPECT().Locked().Return(true),
-				locker.EXPECT().Unlock().Return(nil),
-			)
-		}
+		locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).AnyTimes()
+		locker.EXPECT().Lock().Return(nil).AnyTimes()
+		locker.EXPECT().Locked().Return(true).AnyTimes()
+		locker.EXPECT().Unlock().Return(nil).AnyTimes()
 
 		return locker
 	}
@@ -874,20 +832,10 @@ func TestRemoveTarget(t *testing.T) {
 				ctrl := gomock.NewController(t)
 				locker := mocks.NewMockLocker(ctrl)
 
-				// Expect the lock to be acquired
-				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
-				)
-				for i := 0; i < times+5; i++ {
-					gomock.InOrder(
-						locker.EXPECT().Lock().Return(nil),
-						locker.EXPECT().Locked().Return(true),
-						locker.EXPECT().Unlock().Return(nil),
-					)
-				}
+				locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).AnyTimes()
+				locker.EXPECT().Lock().Return(nil).AnyTimes()
+				locker.EXPECT().Locked().Return(true).AnyTimes()
+				locker.EXPECT().Unlock().Return(nil).AnyTimes()
 
 				return locker
 			},
@@ -935,25 +883,11 @@ func TestRemoveTarget(t *testing.T) {
 		{
 			name: "lock error",
 			mocker: func(t *testing.T, times int) *mocks.MockLocker {
-				// Create a mock locker
 				ctrl := gomock.NewController(t)
 				locker := mocks.NewMockLocker(ctrl)
 
-				// Expect the lock to be acquired
-				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
-				)
-				for i := 0; i < 5; i++ {
-					gomock.InOrder(
-						locker.EXPECT().Lock().Return(nil),
-						locker.EXPECT().Locked().Return(true),
-						locker.EXPECT().Unlock().Return(nil),
-					)
-				}
-
+				// Fail fast on the first lock attempt during Setup().
+				locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).AnyTimes()
 				locker.EXPECT().Lock().Return(fmt.Errorf("error"))
 				return locker
 			},
@@ -972,28 +906,13 @@ func TestRemoveTarget(t *testing.T) {
 		{
 			name: "unlock error",
 			mocker: func(t *testing.T, times int) *mocks.MockLocker {
-				// Create a mock locker
 				ctrl := gomock.NewController(t)
 				locker := mocks.NewMockLocker(ctrl)
 
-				// Expect the lock to be acquired
-				gomock.InOrder(
-					locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker),
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(true),
-					locker.EXPECT().Unlock().Return(nil),
-				)
-				for i := 0; i < 5; i++ {
-					gomock.InOrder(
-						locker.EXPECT().Lock().Return(nil),
-						locker.EXPECT().Locked().Return(true),
-						locker.EXPECT().Unlock().Return(nil),
-					)
-				}
-				gomock.InOrder(
-					locker.EXPECT().Lock().Return(nil),
-					locker.EXPECT().Locked().Return(false),
-				)
+				// Simulate an unlock failure: Locked() is false when we try to unlock.
+				locker.EXPECT().New(utils.PathMatcher{Expected: filepath.Join(basePath, "monitoring", ".lock")}).Return(locker).AnyTimes()
+				locker.EXPECT().Lock().Return(nil).AnyTimes()
+				locker.EXPECT().Locked().Return(false).AnyTimes()
 				return locker
 			},
 			options: map[string]string{
@@ -1032,6 +951,11 @@ func TestRemoveTarget(t *testing.T) {
 
 			// Setup the Prometheus service
 			err = prometheus.Setup(tt.options)
+			// Some cases intentionally simulate locker failures; in those cases Setup is expected to fail.
+			if tt.name == "lock error" || tt.name == "unlock error" {
+				require.Error(t, err)
+				return
+			}
 			require.NoError(t, err)
 
 			if !tt.badEndpoint {

@@ -72,3 +72,7 @@ texecution:
   taikonethermind:
     name: nethermind/nethermind
     version: 1.35.2
+aztec:
+  aztec:
+    name: aztecprotocol/aztec
+    version: 2.1.9
