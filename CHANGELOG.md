@@ -7,11 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.11.0] - 2026-01-30
+
 ### Added
 - New command `sedge generate aztec` to generate an Aztec node setup.
 - Support for Aztec Sequencer on Sepolia and Mainnet networks.
 - Support for Aztec Full Node on Sepolia and Mainnet networks.
 - Added Aztec Exporter to the monitoring stack.
+
+### Changed
+- Update Lido links in documentation.
 
 ## [v1.10.0] - 2025-11-12
 
