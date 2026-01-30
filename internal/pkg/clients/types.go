@@ -132,7 +132,7 @@ func valueOrDefault(value string, defaultValue string) string {
 	return value
 }
 
-// Clients : Struct Represent a combination of execution, consensus, validator, optimism, distributed validator, and aztec sequencer clients
+// Clients : Struct Represent a combination of execution, consensus, validator, optimism, distributed validator, and aztec clients
 type Clients struct {
 	Execution            *Client
 	Consensus            *Client
