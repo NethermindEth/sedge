@@ -162,6 +162,18 @@ func (flags *GenCmdFlags) argsList() []string {
 	if flags.distributedValidatorName != "" {
 		s = append(s, "--distributedValidator", flags.distributedValidatorName)
 	}
+	if flags.aztecSequencerKeystorePath != "" {
+		s = append(s, "--aztec-keystore-path", flags.aztecSequencerKeystorePath)
+	}
+	if flags.aztecP2pIp != "" {
+		s = append(s, "--aztec-p2p-ip", flags.aztecP2pIp)
+	}
+	if flags.aztecType != "" {
+		s = append(s, "--type", flags.aztecType)
+	}
+	if flags.aztecName != "" {
+		s = append(s, "--aztec-image", flags.aztecName)
+	}
 	return s
 }
 
@@ -1458,6 +1470,175 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			fmt.Errorf(configs.InvalidNetworkForLido, contracts.LidoSupportedNetworks()),
 		},
+		{
+			"Aztec sequencer - missing keystore path",
+			subCmd{
+				name: "aztec",
+			},
+			GenCmdFlags{
+				AztecFlags: AztecFlags{
+					aztecType:  aztecNodeTypeSequencer,
+					aztecP2pIp: "192.168.1.100",
+				},
+			},
+			globalFlags{
+				network: "sepolia",
+			},
+			errors.New("aztec-keystore-path is required when generating aztec sequencer configuration"),
+		},
+		{
+			"Aztec sequencer - missing P2P IP",
+			subCmd{
+				name: "aztec",
+			},
+			GenCmdFlags{
+				AztecFlags: AztecFlags{
+					aztecType:                  aztecNodeTypeSequencer,
+					aztecSequencerKeystorePath: "/path/to/keystore.json",
+				},
+			},
+			globalFlags{
+				network: "sepolia",
+			},
+			errors.New("aztec-p2p-ip is required when generating aztec configuration"),
+		},
+		{
+			"Aztec sequencer - basic",
+			subCmd{
+				name: "aztec",
+			},
+			GenCmdFlags{
+				AztecFlags: AztecFlags{
+					aztecType:                  aztecNodeTypeSequencer,
+					aztecSequencerKeystorePath: "/path/to/keystore.json",
+					aztecP2pIp:                 "192.168.1.100",
+				},
+			},
+			globalFlags{
+				network: "sepolia",
+			},
+			nil,
+		},
+		{
+			"Aztec sequencer - with custom execution and consensus",
+			subCmd{
+				name: "aztec",
+			},
+			GenCmdFlags{
+				AztecFlags: AztecFlags{
+					aztecType:                  aztecNodeTypeSequencer,
+					aztecSequencerKeystorePath: "/path/to/keystore.json",
+					aztecP2pIp:                 "192.168.1.100",
+				},
+				executionName: "nethermind",
+				consensusName: "lighthouse",
+			},
+			globalFlags{
+				network: "sepolia",
+			},
+			nil,
+		},
+		{
+			"Aztec sequencer - with external execution API",
+			subCmd{
+				name: "aztec",
+			},
+			GenCmdFlags{
+				AztecFlags: AztecFlags{
+					aztecType:                  aztecNodeTypeSequencer,
+					aztecSequencerKeystorePath: "/path/to/keystore.json",
+					aztecP2pIp:                 "192.168.1.100",
+				},
+				executionApiUrl: "https://localhost:8545",
+				consensusApiUrl: "https://localhost:8000",
+			},
+			globalFlags{
+				network: "sepolia",
+			},
+			nil,
+		},
+		{
+			"Aztec sequencer - with custom aztec sequencer image",
+			subCmd{
+				name: "aztec",
+			},
+			GenCmdFlags{
+				AztecFlags: AztecFlags{
+					aztecType:                  aztecNodeTypeSequencer,
+					aztecSequencerKeystorePath: "/path/to/keystore.json",
+					aztecP2pIp:                 "192.168.1.100",
+					aztecName:                  "aztecprotocol/aztec:custom",
+				},
+			},
+			globalFlags{
+				network: "mainnet",
+			},
+			nil,
+		},
+		{
+			"Aztec sequencer - invalid keystore path",
+			subCmd{
+				name: "aztec",
+			},
+			GenCmdFlags{
+				AztecFlags: AztecFlags{
+					aztecType:                  aztecNodeTypeSequencer,
+					aztecSequencerKeystorePath: "/nonexistent/path/keystore.json",
+					aztecP2pIp:                 "192.168.1.100",
+				},
+			},
+			globalFlags{
+				network: "sepolia",
+			},
+			errors.New("invalid aztec sequencer keystore"),
+		},
+		{
+			"Aztec node - basic (type full-node, no keystore required)",
+			subCmd{
+				name: "aztec",
+			},
+			GenCmdFlags{
+				AztecFlags: AztecFlags{
+					aztecType:  aztecNodeTypeFullNode,
+					aztecP2pIp: "192.168.1.100",
+				},
+			},
+			globalFlags{
+				network: "sepolia",
+			},
+			nil,
+		},
+		{
+			"Aztec node - full-node missing P2P IP",
+			subCmd{
+				name: "aztec",
+			},
+			GenCmdFlags{
+				AztecFlags: AztecFlags{
+					aztecType: aztecNodeTypeFullNode,
+				},
+			},
+			globalFlags{
+				network: "sepolia",
+			},
+			errors.New("aztec-p2p-ip is required when generating aztec configuration"),
+		},
+		{
+			"Aztec node - sequencer missing keystore path",
+			subCmd{
+				name: "aztec",
+			},
+			GenCmdFlags{
+				AztecFlags: AztecFlags{
+					aztecType:  aztecNodeTypeSequencer,
+					aztecP2pIp: "192.168.1.100",
+				},
+			},
+			globalFlags{
+				network: "sepolia",
+			},
+			errors.New("aztec-keystore-path is required when generating aztec sequencer configuration"),
+		},
 	}
 
 	// TODO: Add test cases for Execution fallback urls
@@ -1466,12 +1647,27 @@ func TestGenerateCmd(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			descr := fmt.Sprintf("sedge generate %s %s %s", strings.Join(tc.subCommand.argsList(), " "), tc.args.toString(), strings.Join(tc.globalArgs.argsList(), " "))
+
+			// Set up valid keystore for Aztec sequencer tests that need it
+			testFlags := tc.args
+			if tc.subCommand.name == "aztec" && testFlags.aztecType == aztecNodeTypeSequencer && testFlags.aztecSequencerKeystorePath != "" && testFlags.aztecSequencerKeystorePath != "/nonexistent/path/keystore.json" {
+				// For tests that expect success or need valid keystore (like "missing P2P IP"),
+				// set up a valid keystore file
+				tmpDir := t.TempDir()
+				err := test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", "aztec_keystore", "valid_single"), tmpDir)
+				if err != nil {
+					t.Fatalf("Can't build test case: %v", err)
+				}
+				keystorePath := filepath.Join(tmpDir, "keystore.json")
+				testFlags.aztecSequencerKeystorePath = keystorePath
+			}
+
 			sedgeActions := actions.NewSedgeActions(actions.SedgeActionsOptions{})
 
 			rootCmd := RootCmd()
 			rootCmd.AddCommand(GenerateCmd(sedgeActions))
 			argsL := append([]string{"generate"}, tc.subCommand.argsList()...)
-			argsL = append(argsL, tc.args.argsList()...)
+			argsL = append(argsL, testFlags.argsList()...)
 			argsL = append(argsL, tc.globalArgs.argsList()...)
 			argsL = append(argsL, "-p", t.TempDir())
 			rootCmd.SetArgs(argsL)
@@ -1480,7 +1676,8 @@ func TestGenerateCmd(t *testing.T) {
 			err := rootCmd.Execute()
 
 			if tc.err != nil {
-				assert.EqualError(t, err, tc.err.Error(), descr)
+				assert.Error(t, err, descr)
+				assert.Contains(t, err.Error(), tc.err.Error(), descr)
 			} else {
 				assert.NoError(t, err, descr)
 			}
@@ -1560,4 +1757,141 @@ func TestGeneratePathCases(t *testing.T) {
 	err = rootCmd.Execute()
 
 	assert.Error(t, err, descr)
+
+	// Aztec sequencer with valid keystore
+	path = t.TempDir()
+	descr = fmt.Sprintf("Aztec sequencer with valid keystore, sedge generate aztec --type sequencer --aztec-keystore-path %s --aztec-p2p-ip 192.168.1.100", path)
+	err = test.PrepareTestCaseDir(filepath.Join("testdata", "cli_tests", "aztec_keystore", "valid_single"), path)
+	if err != nil {
+		t.Fatalf("Can't build test case: %v", err)
+	}
+	keystorePath := filepath.Join(path, "keystore.json")
+
+	sedgeActions = actions.NewSedgeActions(actions.SedgeActionsOptions{})
+
+	rootCmd = RootCmd()
+	rootCmd.AddCommand(GenerateCmd(sedgeActions))
+	argsL = []string{"generate", "aztec", "--path", path, "--type", "sequencer", "--aztec-keystore-path", keystorePath, "--aztec-p2p-ip", "192.168.1.100", "--network", "sepolia"}
+	rootCmd.SetArgs(argsL)
+	rootCmd.SetOutput(io.Discard)
+
+	err = rootCmd.Execute()
+
+	assert.NoError(t, err, descr)
+}
+
+func TestLoadAztecSequencerKeystore(t *testing.T) {
+	// Silence logger
+	log.SetOutput(io.Discard)
+
+	tcs := []struct {
+		name        string
+		testDataDir string // Subdirectory in testdata/cli_tests/aztec_keystore/
+		expectedErr string
+	}{
+		{
+			name:        "Valid keystore with single validator",
+			testDataDir: "valid_single",
+			expectedErr: "",
+		},
+		{
+			name:        "Valid keystore with multiple validators",
+			testDataDir: "valid_multiple",
+			expectedErr: "",
+		},
+		{
+			name:        "Valid keystore with optional fields",
+			testDataDir: "valid_with_optional",
+			expectedErr: "",
+		},
+		{
+			name:        "Wrong schema version",
+			testDataDir: "wrong_schema_version",
+			expectedErr: "unsupported keystore schema version: 2 (expected 1)",
+		},
+		{
+			name:        "Empty validators array",
+			testDataDir: "empty_validators",
+			expectedErr: "keystore must contain at least one validator",
+		},
+		{
+			name:        "Missing validators field",
+			testDataDir: "missing_validators",
+			expectedErr: "keystore must contain at least one validator",
+		},
+		{
+			name:        "Missing attester.eth field",
+			testDataDir: "missing_eth",
+			expectedErr: "validator[0] missing required 'attester.eth' field",
+		},
+		{
+			name:        "Missing attester.bls field",
+			testDataDir: "missing_bls",
+			expectedErr: "validator[0] missing required 'attester.bls' field",
+		},
+		{
+			name:        "Empty attester.eth field",
+			testDataDir: "empty_eth",
+			expectedErr: "validator[0] missing required 'attester.eth' field",
+		},
+		{
+			name:        "Empty attester.bls field",
+			testDataDir: "empty_bls",
+			expectedErr: "validator[0] missing required 'attester.bls' field",
+		},
+		{
+			name:        "Second validator missing attester.eth",
+			testDataDir: "second_validator_missing_eth",
+			expectedErr: "validator[1] missing required 'attester.eth' field",
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			// Prepare test data directory
+			tmpDir := t.TempDir()
+			testDataPath := filepath.Join("testdata", "cli_tests", "aztec_keystore", tc.testDataDir)
+			err := test.PrepareTestCaseDir(testDataPath, tmpDir)
+			if err != nil {
+				t.Fatalf("Can't build test case: %v", err)
+			}
+			keystorePath := filepath.Join(tmpDir, "keystore.json")
+
+			result, err := loadAztecSequencerKeystore(keystorePath)
+
+			if tc.expectedErr != "" {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tc.expectedErr)
+				assert.Empty(t, result)
+			} else {
+				assert.NoError(t, err)
+				assert.NotEmpty(t, result)
+				// Verify the returned path is absolute
+				assert.True(t, filepath.IsAbs(result))
+				// Verify it points to the same file
+				absPath, _ := filepath.Abs(keystorePath)
+				assert.Equal(t, absPath, result)
+			}
+		})
+	}
+
+	// Test cases that don't use testdata files
+	t.Run("File does not exist", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		nonexistentPath := filepath.Join(tmpDir, "nonexistent.json")
+		result, err := loadAztecSequencerKeystore(nonexistentPath)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "keystore file does not exist")
+		assert.Empty(t, result)
+	})
+
+	t.Run("Path is a directory, not a file", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		result, err := loadAztecSequencerKeystore(tmpDir)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "keystore path is not a regular file")
+		assert.Empty(t, result)
+	})
 }

@@ -147,7 +147,7 @@ func checkGrafanaHealth(t *testing.T) {
 		logPrefix := fmt.Sprintf("checkGrafanaHealth (%d)", tries+1)
 		tries++
 		// Check Grafana health
-		gClient, err := gapi.New("http://localhost:3000", gapi.Config{
+		gClient, err := gapi.New(grafanaBaseURL(t), gapi.Config{
 			BasicAuth: url.UserPassword("admin", "admin"),
 		})
 		if err != nil {

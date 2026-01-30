@@ -27,6 +27,8 @@ services:
 {{ if .WithOptimismClient}}
 {{template "opexecution" .}}
 {{template "optimism" .}}{{end}}
+{{ if .WithAztecClient}}
+{{template "aztec" .}}{{end}}
 networks:
   sedge:
     name: sedge-network{{if .ContainerTag}}-{{.ContainerTag}}{{end}}

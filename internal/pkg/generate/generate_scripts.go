@@ -45,6 +45,7 @@ const (
 	empty                = "empty"
 	distributedValidator = "distributedValidator"
 	charon               = "charon"
+	aztec                = "aztec"
 )
 
 // validateClients validates each client in GenData
@@ -135,6 +136,7 @@ func mapClients(gd *GenData) map[string]*clients.Client {
 		optimism:             gd.OptimismClient,
 		opExecution:          gd.ExecutionOPClient,
 		distributedValidator: gd.DistributedValidatorClient,
+		aztec:                gd.AztecClient,
 	}
 
 	return cls
@@ -170,6 +172,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		"AuthPortELOP":      configs.DefaultAuthPortELOP,
 		"DiscoveryPortELOP": configs.DefaultDiscoveryPortELOP,
 		"MetricsPortELOP":   configs.DefaultMetricsPortELOP,
+		"AztecPort":         configs.DefaultAztecPort,
+		"AztecP2pPort":      configs.DefaultAztecP2pPort,
+		"AztecAdminPort":    configs.DefaultAztecAdminPort,
 	}
 	ports, err := utils.AssignPorts("localhost", defaultsPorts)
 	if err != nil {
@@ -306,6 +311,7 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		MevImage:            gd.MevImage,
 		CheckpointSyncUrl:   gd.CheckpointSyncUrl,
 		FeeRecipient:        gd.FeeRecipient,
+		ExecutionEngineName: nameOrEmpty(cls[execution]),
 		ElDiscoveryPort:     gd.Ports["ELDiscovery"],
 		ElMetricsPort:       gd.Ports["ELMetrics"],
 		ElApiPort:           gd.Ports["ELApi"],
@@ -351,6 +357,12 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		DVDiscoveryPort:         gd.Ports["DVDiscovery"],
 		DVMetricsPort:           gd.Ports["DVMetrics"],
 		DVApiPort:               gd.Ports["DVApi"],
+		AztecPort:               gd.Ports["AztecPort"],
+		AztecP2pPort:            gd.Ports["AztecP2pPort"],
+		AztecAdminPort:          gd.Ports["AztecAdminPort"],
+		AztecP2pIp:              gd.AztecP2pIp,
+		AztecExtraFlags:         gd.AztecExtraFlags,
+		AztecNodeType:           gd.AztecNodeType,
 	}
 
 	// Save to writer
@@ -510,6 +522,10 @@ func EnvFile(gd *GenData, at io.Writer) error {
 
 	data := EnvData{
 		Services:                   gd.Services,
+		Network:                    gd.Network,
+		AztecNetwork:               aztecNetworkForSedgeNetwork(gd.Network),
+		AztecNodeType:              gd.AztecNodeType,
+		AztecOtelMetricsPort:       gd.AztecOtelMetricsPort,
 		Mev:                        networkConfig.SupportsMEVBoost && (gd.MevBoostService || (mevSupported && gd.Mev) || gd.MevBoostOnValidator),
 		ElImage:                    imageOrEmpty(cls[execution], gd.LatestVersion),
 		ElDataDir:                  "./" + configs.ExecutionDir,
@@ -540,6 +556,9 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ElOPAuthPort:               gd.Ports["AuthPortELOP"],
 		OpSequencerHttp:            opSequencerHttp,
 		RethNetwork:                rethNetwork,
+		AztecImage:                 imageOrEmpty(cls[aztec], gd.LatestVersion),
+		AztecSequencerKeystorePath: gd.AztecSequencerKeystorePath,
+		AztecDataDir:               "./" + configs.AztecDataDir,
 	}
 
 	// Save to writer
@@ -712,4 +731,16 @@ func imageOrEmpty(cls *clients.Client, latest bool) string {
 		return cls.Image
 	}
 	return ""
+}
+
+func aztecNetworkForSedgeNetwork(network string) string {
+	switch network {
+	case configs.NetworkSepolia:
+		// Aztec uses "testnet" for Sepolia-backed deployments.
+		return "testnet"
+	case configs.NetworkMainnet:
+		return "mainnet"
+	default:
+		return network
+	}
 }

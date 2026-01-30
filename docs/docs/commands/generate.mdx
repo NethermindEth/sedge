@@ -19,6 +19,7 @@ You can generate:
 - Full Node (execution + consensus + validator)
 - Full Node without Validator (execution + consensus)
 - Optimism Full Node
+- Aztec Node (execution + consensus + aztec)
 - Execution Node
 - Consensus Node
 - Validator Node
@@ -29,6 +30,7 @@ Usage:
   sedge generate [command]
 
 Available Commands:
+  aztec        Generate an Aztec node config (full node or sequencer)
   consensus    Generate a consensus node config
   execution    Generate a execution node config
   full-node    Generate a full node config, with or without a validator
@@ -326,3 +328,60 @@ Global Flags:
       --logging string         Docker logging driver used by all the services. Set 'none' to use the default docker logging driver. Possible values: [none json] (default "json")
   -p, --path string            generation path for sedge data. Default is sedge-data (default "/path/to/sedge/sedge-data")
 ```
+
+#### Aztec
+
+```
+$ sedge generate aztec -h
+Generate a docker-compose and an environment file for Aztec networks.
+
+This command sets up an Aztec node, which includes an execution client, a consensus client, and an Aztec node client.
+
+Choose the node mode with --type:
+- node: Run an Aztec full node (default)
+- sequencer: Run an Aztec sequencer (requires a keystore)
+
+Usage:
+  sedge generate aztec [flags]
+
+Aztec Flags:
+      --type string                  Aztec node type. One of: full-node,sequencer (default "full-node")
+      --aztec-keystore-path string   Path to Aztec sequencer keystore.json file (required when --type sequencer).
+      --aztec-p2p-ip string          P2P IP address for Aztec sequencer (required when --type sequencer).
+      --aztec-image string           Aztec image.
+      --aztec-extra-flag stringArray Additional flag to configure the Aztec node service in the generated docker-compose script.
+      --otel-metrics-port uint16     OTLP HTTP metrics port on the monitoring stack collector (default: 4318). The host is fixed to sedge_aztec_exporter and path to /v1/metrics.
+```
+
+Example (Sepolia, full node):
+
+```bash
+sedge generate aztec \
+  --network sepolia \
+  --execution nethermind \
+  --consensus lighthouse
+```
+
+Example (Sepolia, sequencer):
+
+```bash
+sedge generate aztec \
+  --type sequencer \
+  --network sepolia \
+  --execution nethermind \
+  --consensus lighthouse \
+  --aztec-keystore-path /path/to/keystore.json \
+  --aztec-p2p-ip <YOUR_PUBLIC_IP>
+```
+
+::::note Monitoring port
+
+The generated environment config sets `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` to `http://sedge_aztec_exporter:<PORT>/v1/metrics`.
+
+You can change the port using:
+
+```bash
+sedge generate aztec --otel-metrics-port 4318
+```
+
+::::

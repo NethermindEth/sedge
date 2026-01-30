@@ -28,6 +28,12 @@ func RunSedge(t *testing.T, binaryPath string, args ...string) error {
 	return RunCommand(t, binaryPath, "sedge", append([]string{"--path", dataDir}, args...)...)
 }
 
+func RunSedgeWithOutput(t *testing.T, binaryPath string, args ...string) ([]byte, error) {
+	dataDir := filepath.Join(filepath.Dir(binaryPath), "sedge-data")
+	out, _, err := runCommandOutput(t, binaryPath, "sedge", append([]string{"--path", dataDir}, args...)...)
+	return out, err
+}
+
 func RunCommand(t *testing.T, path string, binaryName string, args ...string) error {
 	_, _, err := runCommandOutput(t, path, binaryName, args...)
 	return err

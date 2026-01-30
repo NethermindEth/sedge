@@ -102,6 +102,9 @@ func (l *LidoExporterService) ContainerName() string {
 }
 
 func (l *LidoExporterService) Endpoint() string {
+	if l.containerIP == nil {
+		return fmt.Sprintf("http://%s:%d", l.ContainerName(), l.params.Port)
+	}
 	return fmt.Sprintf("http://%s:%d", l.containerIP, l.params.Port)
 }
 

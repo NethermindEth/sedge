@@ -24,3 +24,4 @@ node*/
 
 keystore*
 !cli/actions/testdata/charon/validator_keys/keystore*
+!cli/testdata/cli_tests/aztec_keystore/**/keystore.json

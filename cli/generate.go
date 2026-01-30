@@ -17,6 +17,7 @@ package cli
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -49,6 +50,9 @@ var (
 const (
 	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution"
 	jwtPathName                                                                            = "jwtsecret"
+	aztec                                                                                  = "aztec"
+	aztecNodeTypeFullNode                                                                  = "full-node"
+	aztecNodeTypeSequencer                                                                 = "sequencer"
 )
 
 type CustomFlags struct {
@@ -66,10 +70,20 @@ type OptimismFlags struct {
 	isBase                bool
 }
 
+type AztecFlags struct {
+	aztecType                  string
+	aztecName                  string
+	aztecSequencerKeystorePath string
+	aztecP2pIp                 string
+	aztecExtraFlags            []string
+	aztecOtelMetricsPort       uint16
+}
+
 // GenCmdFlags is a struct that holds the flags of the generate command
 type GenCmdFlags struct {
 	CustomFlags
 	OptimismFlags
+	AztecFlags
 	executionName            string
 	consensusName            string
 	validatorName            string
@@ -127,6 +141,7 @@ You can generate:
 	cmd.AddCommand(ValidatorSubCmd(sedgeAction))
 	cmd.AddCommand(MevBoostSubCmd(sedgeAction))
 	cmd.AddCommand(OpFullNodeSubCmd(sedgeAction))
+	cmd.AddCommand(AztecSubCmd(sedgeAction))
 
 	cmd.PersistentFlags().BoolVar(&lidoNode, "lido", false, "generate Lido CSM node")
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
@@ -284,6 +299,33 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		}
 	}
 
+	// Validate Aztec flags if aztec service is included (this service can run in "full-node" or "sequencer" mode)
+	var aztecSequencerKeystorePath string
+	aztecNodeType := flags.aztecType
+	if utils.Contains(services, aztec) {
+		if aztecNodeType == "" {
+			aztecNodeType = aztecNodeTypeFullNode
+		}
+		// P2P IP is required for both full node and sequencer
+		if flags.aztecP2pIp == "" {
+			return fmt.Errorf("aztec-p2p-ip is required when generating aztec configuration. Use --aztec-p2p-ip to specify the P2P IP address")
+		}
+		switch aztecNodeType {
+		case aztecNodeTypeFullNode:
+			// No keystore required for non-sequencer nodes.
+		case aztecNodeTypeSequencer:
+			if flags.aztecSequencerKeystorePath == "" {
+				return fmt.Errorf("aztec-keystore-path is required when generating aztec sequencer configuration. Use --aztec-keystore-path to specify the path to your keystore.json file")
+			}
+			aztecSequencerKeystorePath, err = loadAztecSequencerKeystore(flags.aztecSequencerKeystorePath)
+			if err != nil {
+				return fmt.Errorf("invalid aztec sequencer keystore: %w", err)
+			}
+		default:
+			return fmt.Errorf("invalid aztec node type %q (expected %q or %q)", aztecNodeType, aztecNodeTypeFullNode, aztecNodeTypeSequencer)
+		}
+	}
+
 	// Overwrite feeRecipient and relayURLs for Lido Node
 	if lidoNode {
 		opts := sedgeOpts.CreateSedgeOptions(sedgeOpts.LidoNode)
@@ -310,10 +352,6 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		executionAuthUrl = flags.executionAuthUrl
 	}
 
-	if network == configs.NetworkHoodi {
-		flags.mevImage = "flashbots/mev-boost:1.9rc3"
-	}
-
 	// Generate docker-compose scripts
 	gd := generate.GenData{
 		ExecutionClient:            combinedClients.Execution,
@@ -323,6 +361,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		DistributedValidatorClient: combinedClients.DistributedValidator,
 		ExecutionOPClient:          combinedClients.ExecutionOP,
 		OptimismClient:             combinedClients.Optimism,
+		AztecClient:                combinedClients.Aztec,
 		Network:                    network,
 		CheckpointSyncUrl:          flags.checkpointSyncUrl,
 		FeeRecipient:               flags.feeRecipient,
@@ -335,6 +374,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		DvExtraFlags:               flags.dvExtraFlags,
 		ElOpExtraFlags:             flags.elOpExtraFlags,
 		OpExtraFlags:               flags.opExtraFlags,
+		AztecExtraFlags:            flags.aztecExtraFlags,
 		IsBase:                     flags.isBase,
 		MapAllPorts:                flags.mapAllPorts,
 		Mev:                        !flags.noMev && utils.Contains(services, validator) && utils.Contains(services, consensus) && !flags.noValidator,
@@ -359,6 +399,10 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		ContainerTag:               containerTag,
 		LatestVersion:              flags.latestVersion,
 		JWTSecretOP:                jwtSecretOP,
+		AztecSequencerKeystorePath: aztecSequencerKeystorePath,
+		AztecP2pIp:                 flags.aztecP2pIp,
+		AztecNodeType:              aztecNodeType,
+		AztecOtelMetricsPort:       flags.aztecOtelMetricsPort,
 	}
 	_, err = sedgeAction.Generate(actions.GenerateOptions{
 		GenerationData: gd,
@@ -386,7 +430,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 }
 
 func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services []string) (*clients.Clients, error) {
-	var executionClient, consensusClient, validatorClient, executionOpClient, opClient *clients.Client
+	var executionClient, consensusClient, validatorClient, executionOpClient, opClient, aztecClient *clients.Client
 	var distributedValidatorClient *clients.Client
 	var err error
 
@@ -507,6 +551,36 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		executionOpClient = nil
 	}
 
+	// aztec client
+	if utils.Contains(services, aztec) {
+		aztecClient, err = clients.RandomChoice(allClients[aztec])
+		if err != nil {
+			return nil, err
+		}
+		aztecClient.Name = "aztec"
+		defaultAztecImage := configs.ClientImages.Aztec.Aztec.String()
+		// If the flag wasn't explicitly set by the user, Cobra will populate it with the default.
+		// Treat "default value" as "not user-modified" so `--latest` can still apply.
+		if flags.aztecName != "" && flags.aztecName != defaultAztecImage {
+			aztecClient.Image = flags.aztecName
+			aztecClient.Modified = true
+			aztecClient.SetImageOrDefault(flags.aztecName)
+		} else {
+			aztecClient.SetImageOrDefault("")
+		}
+		if err = clients.ValidateClient(aztecClient, aztec); err != nil {
+			return nil, err
+		}
+
+		// If set execution-api-url, set execution and beacon to nil
+		if flags.executionApiUrl != "" {
+			executionClient = nil
+			consensusClient = nil
+		}
+	} else {
+		aztecClient = nil
+	}
+
 	// distributed validator client
 	if utils.Contains(services, distributedValidator) {
 		distributedValidatorClient, _ = clients.RandomChoice(allClients[distributedValidator])
@@ -534,6 +608,7 @@ func valClients(allClients clients.OrderedClients, flags *GenCmdFlags, services 
 		DistributedValidator: distributedValidatorClient,
 		ExecutionOP:          executionOpClient,
 		Optimism:             opClient,
+		Aztec:                aztecClient,
 	}, err
 }
 
@@ -611,6 +686,73 @@ func loadJWTSecret(from string) (absFrom string, err error) {
 		return "", fmt.Errorf("jwt secret must be 32 bytes long")
 	}
 	return absFrom, err
+}
+
+// loadAztecKeystore validates and loads the Aztec keystore file path
+func loadAztecSequencerKeystore(from string) (absFrom string, err error) {
+	// Ensure from is absolute
+	absFrom, err = filepath.Abs(from)
+	if err != nil {
+		return "", fmt.Errorf("could not resolve keystore path: %w", err)
+	}
+
+	// Check if file exists and is a regular file
+	fileInfo, err := os.Stat(absFrom)
+	if os.IsNotExist(err) {
+		return "", fmt.Errorf("keystore file does not exist: %s", absFrom)
+	}
+	if err != nil {
+		return "", fmt.Errorf("could not access keystore file: %w", err)
+	}
+	if !fileInfo.Mode().IsRegular() {
+		return "", fmt.Errorf("keystore path is not a regular file: %s", absFrom)
+	}
+
+	// Read and validate JSON structure
+	keystoreData, err := os.ReadFile(absFrom)
+	if err != nil {
+		return "", fmt.Errorf("could not read keystore file: %w", err)
+	}
+
+	// Parse JSON to validate structure
+	var keystore struct {
+		SchemaVersion int `json:"schemaVersion"`
+		Validators    []struct {
+			Attester struct {
+				Eth string `json:"eth"`
+				Bls string `json:"bls"`
+			} `json:"attester"`
+			Publisher    interface{} `json:"publisher,omitempty"`
+			FeeRecipient string      `json:"feeRecipient,omitempty"`
+			Coinbase     string      `json:"coinbase,omitempty"`
+		} `json:"validators"`
+	}
+
+	if err := json.Unmarshal(keystoreData, &keystore); err != nil {
+		return "", fmt.Errorf("keystore file is not valid JSON: %w", err)
+	}
+
+	// Validate schema version
+	if keystore.SchemaVersion != 1 {
+		return "", fmt.Errorf("unsupported keystore schema version: %d (expected 1)", keystore.SchemaVersion)
+	}
+
+	// Validate validators array
+	if len(keystore.Validators) == 0 {
+		return "", fmt.Errorf("keystore must contain at least one validator")
+	}
+
+	// Validate each validator has required attester fields
+	for i, validator := range keystore.Validators {
+		if validator.Attester.Eth == "" {
+			return "", fmt.Errorf("validator[%d] missing required 'attester.eth' field", i)
+		}
+		if validator.Attester.Bls == "" {
+			return "", fmt.Errorf("validator[%d] missing required 'attester.bls' field", i)
+		}
+	}
+
+	return absFrom, nil
 }
 
 func nodeType() string {

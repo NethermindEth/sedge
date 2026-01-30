@@ -22,6 +22,10 @@ import (
 // EnvData : Struct Data object to be applied to the docker-compose script environment (.env) template
 type EnvData struct {
 	Services                   []string
+	Network                    string
+	AztecNetwork               string
+	AztecNodeType              string
+	AztecOtelMetricsPort       uint16
 	Mev                        bool
 	ElImage                    string
 	ElOpImage                  string
@@ -52,6 +56,9 @@ type EnvData struct {
 	ElOPAuthPort               uint16
 	OpSequencerHttp            string
 	RethNetwork                string
+	AztecImage                 string
+	AztecSequencerKeystorePath string
+	AztecDataDir               string
 }
 
 // GenData : Struct Data object for script's generation
@@ -64,6 +71,7 @@ type GenData struct {
 	Distributed                bool
 	ExecutionOPClient          *clients.Client
 	OptimismClient             *clients.Client
+	AztecClient                *clients.Client
 	Network                    string
 	CheckpointSyncUrl          string
 	FeeRecipient               string
@@ -75,6 +83,7 @@ type GenData struct {
 	DvExtraFlags               []string
 	ElOpExtraFlags             []string
 	OpExtraFlags               []string
+	AztecExtraFlags            []string
 	IsBase                     bool
 	MapAllPorts                bool
 	Mev                        bool
@@ -100,65 +109,77 @@ type GenData struct {
 	ContainerTag               string
 	LatestVersion              bool
 	JWTSecretOP                string
+	AztecSequencerKeystorePath string
+	AztecP2pIp                 string
+	AztecNodeType              string
+	AztecOtelMetricsPort       uint16
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
 type DockerComposeData struct {
-	Services                []string
-	Network                 string
-	Distributed             bool
-	XeeVersion              bool
-	Mev                     bool
-	MevBoostOnValidator     bool
-	MevPort                 uint16
-	MevImage                string
-	MevBoostEndpoint        string
-	CheckpointSyncUrl       string
-	FeeRecipient            string
-	ElDiscoveryPort         uint16
-	ElMetricsPort           uint16
-	ElApiPort               uint16
-	ElAuthPort              uint16
-	ElWsPort                uint16
-	ElOPDiscoveryPort       uint16
-	ElOPMetricsPort         uint16
-	ElOPApiPort             uint16
-	ElOPAuthPort            uint16
-	ClDiscoveryPort         uint16
-	ClMetricsPort           uint16
-	ClApiPort               uint16
-	ClAdditionalApiPort     uint16
-	VlMetricsPort           uint16
-	FallbackELUrls          []string
-	ElExtraFlags            []string
-	ElOPExtraFlags          []string
-	OPExtraFlags            []string
-	NetworkPrefix           string
-	ClExtraFlags            []string
-	VlExtraFlags            []string
-	DvExtraFlags            []string
-	ECBootnodes             string
-	CCBootnodes             string
-	CCBootnodesList         []string
-	MapAllPorts             bool
-	SplittedNetwork         bool
-	ClCheckpointSyncUrl     bool
-	LoggingDriver           string
-	CustomConsensusConfigs  bool
-	CustomNetwork           bool
-	CustomChainSpecPath     string
-	CustomNetworkConfigPath string
-	CustomGenesisPath       string
-	CustomDeployBlock       bool
-	CustomDeployBlockPath   string // Needed for lighthouse
-	VLStartGracePeriod      uint
-	UID                     int // Needed for teku
-	GID                     int // Needed for teku
-	ContainerTag            string
-	DVDiscoveryPort         uint16
-	DVMetricsPort           uint16
-	DVApiPort               uint16
-	ConsensusApiURL         string
+	Services                   []string
+	Network                    string
+	Distributed                bool
+	XeeVersion                 bool
+	Mev                        bool
+	MevBoostOnValidator        bool
+	MevPort                    uint16
+	MevImage                   string
+	MevBoostEndpoint           string
+	CheckpointSyncUrl          string
+	FeeRecipient               string
+	ExecutionEngineName        string // Needed for aztec
+	ElDiscoveryPort            uint16
+	ElMetricsPort              uint16
+	ElApiPort                  uint16
+	ElAuthPort                 uint16
+	ElWsPort                   uint16
+	ElOPDiscoveryPort          uint16
+	ElOPMetricsPort            uint16
+	ElOPApiPort                uint16
+	ElOPAuthPort               uint16
+	ClDiscoveryPort            uint16
+	ClMetricsPort              uint16
+	ClApiPort                  uint16
+	ClAdditionalApiPort        uint16
+	VlMetricsPort              uint16
+	FallbackELUrls             []string
+	ElExtraFlags               []string
+	ElOPExtraFlags             []string
+	OPExtraFlags               []string
+	NetworkPrefix              string
+	ClExtraFlags               []string
+	VlExtraFlags               []string
+	DvExtraFlags               []string
+	AztecExtraFlags            []string
+	ECBootnodes                string
+	CCBootnodes                string
+	CCBootnodesList            []string
+	MapAllPorts                bool
+	SplittedNetwork            bool
+	ClCheckpointSyncUrl        bool
+	LoggingDriver              string
+	CustomConsensusConfigs     bool
+	CustomNetwork              bool
+	CustomChainSpecPath        string
+	CustomNetworkConfigPath    string
+	CustomGenesisPath          string
+	CustomDeployBlock          bool
+	CustomDeployBlockPath      string // Needed for lighthouse
+	VLStartGracePeriod         uint
+	UID                        int // Needed for teku
+	GID                        int // Needed for teku
+	ContainerTag               string
+	DVDiscoveryPort            uint16
+	DVMetricsPort              uint16
+	DVApiPort                  uint16
+	ConsensusApiURL            string
+	AztecPort                  uint16
+	AztecP2pPort               uint16
+	AztecAdminPort             uint16
+	AztecP2pIp                 string
+	AztecSequencerKeystorePath string
+	AztecNodeType              string
 }
 
 // WithConsensusClient returns true if the consensus client is set
@@ -185,6 +206,16 @@ func (d DockerComposeData) WithValidatorClient() bool {
 func (d DockerComposeData) WithOptimismClient() bool {
 	for _, service := range d.Services {
 		if service == optimism {
+			return true
+		}
+	}
+	return false
+}
+
+// WithAztecClient returns true if the aztec client is set
+func (d DockerComposeData) WithAztecClient() bool {
+	for _, service := range d.Services {
+		if service == aztec {
 			return true
 		}
 	}

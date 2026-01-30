@@ -50,5 +50,6 @@ func (t MonitoringTarget) Endpoint() string {
 
 // ServiceTemplateData: Struct Data object to be applied to docker-compose script
 type ServiceTemplateData struct {
-	LidoExporter bool
+	LidoExporter  bool
+	AztecExporter bool
 }

@@ -1,0 +1,218 @@
+---
+sidebar_position: 12
+id: aztec-sequencer
+---
+
+# Running an Aztec Node with Sedge (Full Node or Sequencer)
+
+## What is Aztec?
+
+[Aztec](https://docs.aztec.network/) is a privacy-first L2 that uses a sequencer to order and publish L2 blocks to Ethereum (L1).
+
+Sedge can generate a Docker Compose setup for an **Aztec node**, including:
+
+- An **Ethereum execution client**
+- An **Ethereum consensus client**
+- The **Aztec node** client (full node or sequencer)
+
+## Prerequisites
+
+::::info Supported networks
+Sedge currently provides Aztec sequencer templates for `--network mainnet` and `--network sepolia`.
+::::
+
+Before you generate the stack, you will need:
+
+- **Docker + Docker Compose plugin** (see [Dependencies](./dependencies))
+- *(Sequencer only)* An **Aztec sequencer keystore** (`keystore.json`)
+- A **P2P IP address** that other nodes can reach (typically your machine’s public IP)
+
+## Workflow breakdown
+
+1. **Generate your Aztec sequencer keystore**
+2. **Generate the Sedge stack**
+3. **Run the stack**
+4. *(Optional)* **Enable monitoring (Prometheus + Grafana)**
+
+## 1) Generate the Aztec sequencer keystore (sequencer only)
+
+Aztec expects the keystore to be generated using the Aztec tooling:
+
+```bash
+aztec validator-keys new
+```
+
+This will produce a `keystore.json` file you will pass to Sedge.
+
+For the latest Aztec instructions, see the Aztec docs on sequencer management: `https://docs.aztec.network/network/setup/sequencer_management`.
+
+## 2) Generate the stack with Sedge
+
+Sedge uses a single generator command for Aztec. Select the mode with `--type`:
+
+- `--type node`: Aztec **full node** (default)
+- `--type sequencer`: Aztec **sequencer** (requires keystore + P2P IP)
+
+### Aztec full node (default)
+
+From your Sedge directory (or wherever you run Sedge), generate an Aztec full node stack:
+
+```bash
+sedge generate aztec \
+  --network sepolia \
+  --execution nethermind \
+  --consensus lighthouse
+```
+
+### Aztec sequencer
+
+From your Sedge directory (or wherever you run Sedge), generate an Aztec sequencer stack:
+
+```bash
+sedge generate aztec \
+  --type sequencer \
+  --network sepolia \
+  --execution nethermind \
+  --consensus lighthouse \
+  --aztec-keystore-path /path/to/keystore.json \
+  --aztec-p2p-ip <YOUR_PUBLIC_IP>
+```
+
+::::note
+`--aztec-keystore-path` is **required** when running with `--type sequencer`.
+::::
+
+::::tip
+Setting `--execution-api-url` and `--consensus-url` will skip generating the execution and consensus clients, and configure the Aztec sequencer to use your existing endpoints instead.
+
+This is useful if you already have synced execution/consensus nodes. It will save synchronization time.
+
+For example you can set: `sedge generate aztec --type sequencer --execution-api-url http://execution:port --consensus-url http://consensus:port -n sepolia --aztec-keystore-path /path/to/keystore.json --aztec-p2p-ip <YOUR_PUBLIC_IP>`
+::::
+
+### Useful optional flags
+
+- **Use a custom Aztec image**:
+
+```bash
+sedge generate aztec --aztec-image <IMAGE>
+```
+
+- **Pass extra Aztec flags**:
+
+```bash
+sedge generate aztec --aztec-extra-flag "p2p.maxPeers=200"
+```
+
+## 3) Run the stack
+
+Start the generated Docker Compose stack:
+
+```bash
+sedge run
+```
+
+If you generated into a custom directory, pass the same path to `sedge run`:
+
+```bash
+sedge run --path /path/to/sedge-data
+```
+
+## 4) Monitoring (Prometheus + Grafana)
+
+### **Monitoring through Grafana Dashboards**
+
+Sedge provides an integrated monitoring stack with pre-configured Grafana dashboards. These dashboards display detailed insights about your Aztec node/sequencer performance, including key metrics such as L1/L2 block height progress, peer count, and sequencer health state.
+
+#### How to Launch the Grafana Service
+
+1. To initialize and start the monitoring stack, run the following command:
+
+```bash
+sedge monitoring init aztec
+```
+
+The following flags can also be included:
+
+- `--metrics-port`: Port where Prometheus will scrape the Aztec metrics from the collector (default: `9464`).
+- `--otlp-grpc-port`: OTLP gRPC receiver port for Aztec nodes to send metrics to (default: `4317`).
+- `--otlp-http-port`: OTLP HTTP receiver port for Aztec nodes to send metrics to (default: `4318`).
+- `--log-level`: Collector log level (default: `info`).
+- `--metric-expiry`: How long to keep stale metric series before expiring them (default: `5m`).
+
+2. This will install and configure the monitoring services for your Aztec node, including Grafana and Prometheus, as well as the Grafana OnCall and Prometheus alertmanager modules.
+3. Once the monitoring stack is running, you can access the Grafana dashboards by navigating to `http://localhost:3000`.
+
+#### OTLP metrics port (must match)
+
+The generated Aztec sequencer config sends OTLP HTTP metrics to:
+
+`http://sedge_aztec_exporter:<PORT>/v1/metrics`
+
+By default, `<PORT>` is `4318`. If you change the port, update it in both places:
+
+- **Aztec generation**: `sedge generate aztec --otel-metrics-port <PORT>`
+- **Monitoring collector**: `sedge monitoring init aztec --otlp-http-port <PORT>`
+
+Example (port `14318`):
+
+```bash
+sedge generate aztec --otel-metrics-port 14318 \
+  --type sequencer \
+  --aztec-keystore-path /path/to/keystore.json \
+  --aztec-p2p-ip <YOUR_PUBLIC_IP>
+```
+
+```bash
+sedge monitoring init aztec --otlp-http-port 14318
+```
+
+### **Alerting for Aztec Exporter and Sequencer**
+
+To monitor critical events from your Aztec node operations (exporter down, sequencer unhealthy, etc.), **Grafana OnCall** is connected to **Prometheus Alertmanager**. Sedge's monitoring stack provides pre-configured alerts for common Aztec failure scenarios.
+
+#### I. Initialize the monitoring stack with Aztec-specific configurations:
+
+```bash
+sedge monitoring init aztec
+```
+
+#### II. Verify Prometheus targets and rules
+
+1. Open Prometheus at `http://localhost:9090`.
+2. Visit `/targets` to confirm the Aztec exporter is up.
+3. Visit `/rules` to confirm the Aztec alert group is loaded.
+
+#### III. View alerts in Grafana OnCall
+
+In your Grafana instance (`http://localhost:3000`):
+
+1. Go to **Alerts & IRM** and select **OnCall**.
+2. You should see Aztec alerts such as:
+    - **Aztec exporter down**
+    - **Node not processing L2 blocks**
+    - **Low peer count**
+    - **Node not seeing new L1 blocks**
+    - **Sequencer not healthy**
+    - **High block proposal failure rate**
+    - **Blob publishing failures**
+
+#### IV. Configure Contact Points in Grafana OnCall
+
+To start receiving alerts:
+
+1. Navigate to **OnCall** settings in Grafana.
+2. Ensure that your **contact points** (email, Slack, Telegram, etc.) are configured for notifications.
+3. Grafana will send notifications based on the pre-configured alert rules whenever critical events occur.
+
+## Troubleshooting
+
+- **No Aztec metrics in Grafana**:
+  - Confirm the monitoring stack is running (`sedge monitoring init aztec`)
+  - Confirm the ports match (see [OTLP metrics port (must match)](#otlp-metrics-port-must-match))
+  - Check Prometheus targets at `http://localhost:9090/targets`
+
+- **Sequencer not reachable by peers**:
+  - Ensure `--aztec-p2p-ip` is a reachable IP (not `127.0.0.1`)
+
+

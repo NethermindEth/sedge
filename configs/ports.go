@@ -34,4 +34,7 @@ const (
 	DefaultAuthPortELOP        uint16 = 8552
 	DefaultDiscoveryPortELOP   uint16 = 30313
 	DefaultMetricsPortELOP     uint16 = 8018
+	DefaultAztecPort           uint16 = 8080
+	DefaultAztecP2pPort        uint16 = 40400
+	DefaultAztecAdminPort      uint16 = 8880
 )

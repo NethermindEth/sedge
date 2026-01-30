@@ -1,0 +1,20 @@
+{{/* aztec.tmpl */}}
+{{ define "aztec" }}
+# --- Aztec Node configuration ---
+AZTEC_IMAGE_VERSION={{.AztecImage}}
+AZTEC_DATA_DIRECTORY={{.AztecDataDir}}
+{{- if eq .AztecNodeType "sequencer" }}
+AZTEC_KEYSTORE_PATH={{.AztecSequencerKeystorePath}}
+{{- end }}
+AZTEC_NETWORK={{.AztecNetwork}}
+LOG_LEVEL=info
+AZTEC_ETHEREUM_HOSTS={{.ExecutionApiURL}}
+AZTEC_L1_CONSENSUS_HOST_URLS={{.ConsensusApiURL}}
+# Required for Nethermind (Aztec full node / sequencer when L1 execution client is Nethermind)
+{{if eq .ExecutionEngineName "nethermind"}}
+L1_FIXED_PRIORITY_FEE_PER_GAS=1
+{{end}}
+# Send OTLP metrics to the monitoring stack's Aztec exporter (OpenTelemetry Collector).
+OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://sedge_aztec_exporter:{{if .AztecOtelMetricsPort}}{{.AztecOtelMetricsPort}}{{else}}4318{{end}}/v1/metrics
+{{ end }}
+
