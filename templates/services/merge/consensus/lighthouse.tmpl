@@ -37,7 +37,6 @@
       - --boot-nodes={{.CCBootnodes}}{{end}}
       - --execution-endpoints=${EC_AUTH_URL}
       - --execution-jwt=/tmp/jwt/jwtsecret
-      - --eth1
       - --debug-level=${CC_LOG_LEVEL}{{with .FeeRecipient}}
       - --suggested-fee-recipient=${FEE_RECIPIENT}{{end}}
       - --validator-monitor-auto
