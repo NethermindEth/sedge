@@ -347,7 +347,7 @@ Usage:
 Aztec Flags:
       --type string                  Aztec node type. One of: full-node,sequencer (default "full-node")
       --aztec-keystore-path string   Path to Aztec sequencer keystore.json file (required when --type sequencer).
-      --aztec-p2p-ip string          P2P IP address for Aztec sequencer (required when --type sequencer).
+      --aztec-p2p-ip string          P2P IP address for Aztec node (required for both full node and sequencer).
       --aztec-image string           Aztec image.
       --aztec-extra-flag stringArray Additional flag to configure the Aztec node service in the generated docker-compose script.
       --otel-metrics-port uint16     OTLP HTTP metrics port on the monitoring stack collector (default: 4318). The host is fixed to sedge_aztec_exporter and path to /v1/metrics.
@@ -359,7 +359,8 @@ Example (Sepolia, full node):
 sedge generate aztec \
   --network sepolia \
   --execution nethermind \
-  --consensus lighthouse
+  --consensus lighthouse \
+  --aztec-p2p-ip <YOUR_PUBLIC_IP>
 ```
 
 Example (Sepolia, sequencer):
