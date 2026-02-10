@@ -27,10 +27,9 @@ var networkRPCs = map[string]RPC{
 		PublicRPCs: []string{
 			"https://eth.llamarpc.com",
 			"https://eth-pokt.nodies.app",
-			"https://rpc.mevblocker.io",
 			"https://ethereum-rpc.publicnode.com",
-			"https://rpc.flashbots.net",
 			"https://eth.drpc.org",
+			"https://rpc.ankr.com/eth",
 		},
 		PublicWSs: []string{
 			"wss://ethereum-rpc.publicnode.com",
