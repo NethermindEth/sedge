@@ -25,7 +25,6 @@ var networkRPCs = map[string]RPC{
 	NetworkMainnet: {
 		NetworkName: NetworkMainnet,
 		PublicRPCs: []string{
-			"https://eth.llamarpc.com",
 			"https://eth-pokt.nodies.app",
 			"https://ethereum-rpc.publicnode.com",
 			"https://eth.drpc.org",
