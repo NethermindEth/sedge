@@ -37,7 +37,6 @@ jobs:
     runs-on: windows-latest
     env:
       VERSION: ${{ github.event.inputs.tag }}
-    needs: sedge-darwin
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -55,7 +54,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERSION: ${{ github.event.inputs.tag }}
-    needs: sedge-windows
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -83,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERSION: ${{ github.event.inputs.tag }}
-    needs: sedge-linux
+    needs: [sedge-darwin, sedge-windows, sedge-linux]
     steps:
       - name: Download packages
         uses: actions/download-artifact@v4
@@ -172,6 +170,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.24.0"
+          cache-dependency-path: sedge/go.sum
       - name: Run publish PPA script
         env:
           GOPATH: /home/runner/go
@@ -183,6 +182,8 @@ jobs:
         run: sleep 3600s
         shell: bash
       - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
       - run: pip install launchpadlib --upgrade
       - name: Run copy binaries PPA script
         env:

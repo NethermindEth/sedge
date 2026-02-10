@@ -51,7 +51,8 @@ var ClientImages struct {
 		OpReth Image `yaml:"opreth"`
 	}
 	Aztec struct {
-		Aztec Image `yaml:"aztec"`
+		Aztec        Image `yaml:"aztec"`
+		AztecTestnet Image `yaml:"aztectestnet"`
 	}
 }
 
