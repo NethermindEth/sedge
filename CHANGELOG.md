@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.11.1] - 2026-02-10
+
 ### Changed
 - Removed deprecated flag `--eth1`from Lighthouse templates.
 - Update Aztec image version for Sepolia testnet.
