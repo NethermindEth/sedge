@@ -556,7 +556,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		ElOPAuthPort:               gd.Ports["AuthPortELOP"],
 		OpSequencerHttp:            opSequencerHttp,
 		RethNetwork:                rethNetwork,
-		AztecImage:                 imageOrEmpty(cls[aztec], gd.LatestVersion),
+		AztecImage:                 aztecImageForNetwork(imageOrEmpty(cls[aztec], gd.LatestVersion), gd.Network),
 		AztecSequencerKeystorePath: gd.AztecSequencerKeystorePath,
 		AztecDataDir:               "./" + configs.AztecDataDir,
 	}
@@ -743,4 +743,22 @@ func aztecNetworkForSedgeNetwork(network string) string {
 	default:
 		return network
 	}
+}
+
+// aztecImageForNetwork overrides the Aztec image version for the Sepolia testnet,
+// which requires a different version than mainnet. If the user explicitly provided
+// a custom image (different from the default), it is preserved as-is.
+func aztecImageForNetwork(image string, network string) string {
+	if image == "" {
+		return ""
+	}
+	defaultImage := configs.ClientImages.Aztec.Aztec.String()
+	if image != defaultImage {
+		// User provided a custom image via --aztec-image; don't override.
+		return image
+	}
+	if network == configs.NetworkSepolia {
+		return configs.ClientImages.Aztec.AztecTestnet.String()
+	}
+	return image
 }

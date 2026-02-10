@@ -25,12 +25,12 @@ var networkRPCs = map[string]RPC{
 	NetworkMainnet: {
 		NetworkName: NetworkMainnet,
 		PublicRPCs: []string{
-			"https://eth.llamarpc.com",
 			"https://eth-pokt.nodies.app",
-			"https://rpc.mevblocker.io",
 			"https://ethereum-rpc.publicnode.com",
-			"https://rpc.flashbots.net",
 			"https://eth.drpc.org",
+			"https://ethereum-public.nodies.app",
+			"https://eth-mainnet.public.blastapi.io",
+			"https://gateway.tenderly.co/public/mainnet",
 		},
 		PublicWSs: []string{
 			"wss://ethereum-rpc.publicnode.com",
@@ -41,6 +41,8 @@ var networkRPCs = map[string]RPC{
 		PublicRPCs: []string{
 			"https://0xrpc.io/hoodi",
 			"https://rpc.hoodi.ethpandaops.io",
+			"https://ethereum-hoodi.gateway.tatum.io",
+			"https://rpc.sentio.xyz/hoodi",
 		},
 		PublicWSs: []string{
 			"wss://0xrpc.io/hoodi",

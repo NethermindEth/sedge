@@ -76,3 +76,6 @@ aztec:
   aztec:
     name: aztecprotocol/aztec
     version: 2.1.9
+  aztectestnet:
+    name: aztecprotocol/aztec
+    version: 3.0.1

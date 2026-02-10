@@ -51,7 +51,11 @@ For the latest Aztec instructions, see the Aztec docs on sequencer management: `
 Sedge uses a single generator command for Aztec. Select the mode with `--type`:
 
 - `--type node`: Aztec **full node** (default)
-- `--type sequencer`: Aztec **sequencer** (requires keystore + P2P IP)
+- `--type sequencer`: Aztec **sequencer** (requires keystore)
+
+::::caution
+`--aztec-p2p-ip` is **required** for both full node and sequencer modes. This is the IP address other nodes will use to connect to your node.
+::::
 
 ### Aztec full node (default)
 
@@ -61,7 +65,8 @@ From your Sedge directory (or wherever you run Sedge), generate an Aztec full no
 sedge generate aztec \
   --network sepolia \
   --execution nethermind \
-  --consensus lighthouse
+  --consensus lighthouse \
+  --aztec-p2p-ip <YOUR_PUBLIC_IP>
 ```
 
 ### Aztec sequencer
@@ -204,6 +209,14 @@ To start receiving alerts:
 1. Navigate to **OnCall** settings in Grafana.
 2. Ensure that your **contact points** (email, Slack, Telegram, etc.) are configured for notifications.
 3. Grafana will send notifications based on the pre-configured alert rules whenever critical events occur.
+
+## RPC provider requirements
+
+::::note
+If you are using an external RPC provider (via `--execution-api-url`) instead of running your own execution client, be aware that some free-tier providers (e.g. Alchemy Free, Infura Free) impose rate limits or restrict certain RPC methods such as `eth_getLogs`. The Aztec node makes heavy use of `eth_getLogs` to track L1 contract events, and hitting these limits can cause sync failures or misleading contract errors.
+
+For best results, use a provider plan that supports unlimited `eth_getLogs` queries, or run your own execution client (the default Sedge setup).
+::::
 
 ## Troubleshooting
 
