@@ -140,7 +140,7 @@ func (c *ConsensusNodeInitializer) Initialize(allClients clients.OrderedClients,
 	// Special handling for Gnosis and Chiado networks
 	if flags.GetNetwork() == NetworkGnosis || flags.GetNetwork() == NetworkChiado {
 		if flags.GetConsensusName() == "nimbus" {
-			c.config.flagName = "nimbus:ghcr.io/gnosischain/gnosis-nimbus-eth2:v24.9"
+			c.config.flagName = "nimbus:ghcr.io/gnosischain/gnosis-nimbus-eth2:v26.3"
 		}
 	}
 
