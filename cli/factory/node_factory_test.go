@@ -42,6 +42,24 @@ func TestNewArbitrumNodeInitializer(t *testing.T) {
 	}
 }
 
+func TestArbitrumNodeInitializer_Initialize_NoStripHyphen(t *testing.T) {
+	allClients := clients.OrderedClients{
+		"arbitrum":     {"nitro": &clients.Client{Name: "nitro", Type: "arbitrum", Supported: true}},
+		"arbexecution": {"nethermind-arbitrum": &clients.Client{Name: "nethermind-arbitrum", Type: "arbexecution", Supported: true}},
+	}
+	init := NewArbitrumNodeInitializer()
+	rollup, err := init.Initialize(allClients, &fakeArbFlags{})
+	if err != nil {
+		t.Fatalf("Initialize: %v", err)
+	}
+	if rollup == nil || rollup.Name != "nitro" {
+		t.Errorf("rollup: want Name=nitro, got %+v", rollup)
+	}
+	if init.execClient == nil || init.execClient.Name != "nethermind-arbitrum" {
+		t.Errorf("EL: want Name=nethermind-arbitrum, got %+v", init.execClient)
+	}
+}
+
 func TestArbitrumUpdateResult_ExternalL1(t *testing.T) {
 	// Without external-L1: Execution/Consensus stay intact.
 	exec := &clients.Client{Name: "geth"}

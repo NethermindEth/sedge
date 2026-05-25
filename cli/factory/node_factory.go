@@ -470,36 +470,9 @@ func (a *ArbitrumNodeInitializer) Initialize(allClients clients.OrderedClients, 
 		return nil, fmt.Errorf("failed to initialize arbitrum node: %w", err)
 	}
 	a.execClient = execClient
-
-	// Force nitro name for arbitrum client
-	if client != nil {
-		client.Name = "nitro"
-		if strings.Contains(flags.GetArbitrumName(), ":") {
-			parts := strings.Split(flags.GetArbitrumName(), ":")
-			client.Image = strings.Join(parts[1:], ":")
-			client.Modified = true
-		}
-		client.SetImageOrDefault(strings.Join(strings.Split(flags.GetArbitrumName(), ":")[1:], ":"))
-		if err = clients.ValidateClient(client, arbitrum); err != nil {
-			return nil, err
-		}
-	}
-
-	// Handle L2 execution client name and image
-	// Do NOT strip hyphens: AllClients["arbexecution"] is registered as "nethermind-arbitrum".
-	if execClient != nil {
-		parts := strings.Split(flags.GetL2ExecutionName(), ":")
-		if len(parts) > 1 {
-			execClient.Name = parts[0]
-			execClient.Image = strings.Join(parts[1:], ":")
-			execClient.Modified = true
-			execClient.SetImageOrDefault(strings.Join(parts[1:], ":"))
-			if err = clients.ValidateClient(execClient, arbExecution); err != nil {
-				return nil, err
-			}
-		}
-	}
-
+	// No post-processing needed: AllClients["arbexecution"] is "nethermind-arbitrum"
+	// verbatim, so initializeL2 handles name+image+validation for both clients without
+	// the hyphen-strip that Optimism's post-block applies.
 	return client, nil
 }
 
