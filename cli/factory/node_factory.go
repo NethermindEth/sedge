@@ -512,6 +512,10 @@ func (a *ArbitrumNodeInitializer) UpdateResult(result *clients.Clients, client *
 	if a.execClient != nil {
 		result.L2Execution = a.execClient
 	}
+	if client != nil && a.flags != nil && a.flags.GetExecutionApiUrl() != "" {
+		result.Execution = nil
+		result.Consensus = nil
+	}
 }
 
 // DistributedValidatorNodeInitializer handles distributed validator client initialization
