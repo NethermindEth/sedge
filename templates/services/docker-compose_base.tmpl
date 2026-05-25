@@ -36,6 +36,10 @@ services:
 {{template "sexecution" .}}
 {{template "surge" .}}{{end}}
 
+{{ if .WithArbitrumClient}}
+{{template "arbexecution" .}}
+{{template "arbitrum" .}}{{end}}
+
 networks:
   sedge:
     name: sedge-network{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
