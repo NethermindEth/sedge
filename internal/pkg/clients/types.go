@@ -187,6 +187,7 @@ type Clients struct {
 	Optimism             *Client
 	Taiko                *Client
 	Surge                *Client
+	Arbitrum             *Client
 	L2Execution          *Client
 	DistributedValidator *Client
 }

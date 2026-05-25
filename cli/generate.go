@@ -78,6 +78,11 @@ type SurgeFlags struct {
 	surgeExtraFlags []string
 }
 
+type ArbitrumFlags struct {
+	arbitrumName       string
+	arbitrumExtraFlags []string
+}
+
 // GenCmdFlags is a struct that holds the flags of the generate command
 type GenCmdFlags struct {
 	CustomFlags
@@ -85,6 +90,7 @@ type GenCmdFlags struct {
 	OptimismFlags
 	TaikoFlags
 	SurgeFlags
+	ArbitrumFlags
 	executionName            string
 	consensusName            string
 	validatorName            string
@@ -139,6 +145,10 @@ func (flags *GenCmdFlags) GetTaikoName() string {
 
 func (flags *GenCmdFlags) GetSurgeName() string {
 	return flags.surgeName
+}
+
+func (flags *GenCmdFlags) GetArbitrumName() string {
+	return flags.arbitrumName
 }
 
 func (flags *GenCmdFlags) GetL2ExecutionName() string {

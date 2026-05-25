@@ -21,6 +21,8 @@ const (
 	tExecution           = "texecution"
 	surge                = "surge"
 	sExecution           = "sexecution"
+	arbitrum             = "arbitrum"
+	arbExecution         = "arbexecution"
 	NetworkGnosis        = "gnosis"
 	NetworkChiado        = "chiado"
 )
@@ -439,6 +441,79 @@ func (t *SurgeNodeInitializer) UpdateResult(result *clients.Clients, client *cli
 	result.L2Execution = t.execClient
 }
 
+// ArbitrumNodeInitializer handles arbitrum client initialization
+type ArbitrumNodeInitializer struct {
+	L2BaseInitializer
+	flags      ClientFlags
+	execClient *clients.Client
+}
+
+func NewArbitrumNodeInitializer() *ArbitrumNodeInitializer {
+	return &ArbitrumNodeInitializer{
+		L2BaseInitializer: L2BaseInitializer{
+			BaseNodeInitializer: BaseNodeInitializer{
+				serviceType: arbitrum,
+				config: clientConfig{
+					clientType: arbitrum,
+					forceName:  "nitro",
+				},
+			},
+			l2ExecutionType: arbExecution,
+		},
+	}
+}
+
+func (a *ArbitrumNodeInitializer) Initialize(allClients clients.OrderedClients, flags ClientFlags) (*clients.Client, error) {
+	a.flags = flags
+	client, execClient, err := a.initializeL2(allClients, flags)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize arbitrum node: %w", err)
+	}
+	a.execClient = execClient
+
+	// Force nitro name for arbitrum client
+	if client != nil {
+		client.Name = "nitro"
+		if strings.Contains(flags.GetArbitrumName(), ":") {
+			parts := strings.Split(flags.GetArbitrumName(), ":")
+			client.Image = strings.Join(parts[1:], ":")
+			client.Modified = true
+		}
+		client.SetImageOrDefault(strings.Join(strings.Split(flags.GetArbitrumName(), ":")[1:], ":"))
+		if err = clients.ValidateClient(client, arbitrum); err != nil {
+			return nil, err
+		}
+	}
+
+	// Handle L2 execution client name and image
+	// Do NOT strip hyphens: AllClients["arbexecution"] is registered as "nethermind-arbitrum".
+	if execClient != nil {
+		parts := strings.Split(flags.GetL2ExecutionName(), ":")
+		if len(parts) > 1 {
+			execClient.Name = parts[0]
+			execClient.Image = strings.Join(parts[1:], ":")
+			execClient.Modified = true
+			execClient.SetImageOrDefault(strings.Join(parts[1:], ":"))
+			if err = clients.ValidateClient(execClient, arbExecution); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return client, nil
+}
+
+func (a *ArbitrumNodeInitializer) ShouldInitialize(services []string, flags ClientFlags) bool {
+	return utils.Contains(services, a.serviceType)
+}
+
+func (a *ArbitrumNodeInitializer) UpdateResult(result *clients.Clients, client *clients.Client) {
+	result.Arbitrum = client
+	if a.execClient != nil {
+		result.L2Execution = a.execClient
+	}
+}
+
 // DistributedValidatorNodeInitializer handles distributed validator client initialization
 type DistributedValidatorNodeInitializer struct {
 	BaseNodeInitializer
@@ -479,6 +554,7 @@ func NewNodeFactory() *NodeFactory {
 			NewOptimismNodeInitializer(),
 			NewTaikoNodeInitializer(),
 			NewSurgeNodeInitializer(),
+			NewArbitrumNodeInitializer(),
 			NewDistributedValidatorNodeInitializer(),
 		},
 	}
