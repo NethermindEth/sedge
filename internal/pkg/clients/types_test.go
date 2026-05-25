@@ -214,18 +214,16 @@ func TestSetImageOrDefault_CustomImage(t *testing.T) {
 
 func TestSetArbitrumImages(t *testing.T) {
 	t.Run("arbexecution default", func(t *testing.T) {
+		expectedImage := regexp.MustCompile(`^nethermind/nethermind-arbitrum:`)
 		c := &Client{Name: "nethermind-arbitrum", Type: "arbexecution"}
 		c.SetImageOrDefault("")
-		if c.Image == "" {
-			t.Fatalf("default image not set")
-		}
+		assert.True(t, expectedImage.MatchString(c.Image), "got %q", c.Image)
 	})
 	t.Run("arbitrum default", func(t *testing.T) {
+		expectedImage := regexp.MustCompile(`^offchainlabs/nitro-node:`)
 		c := &Client{Name: "nitro", Type: "arbitrum"}
 		c.SetImageOrDefault("")
-		if c.Image == "" {
-			t.Fatalf("default image not set")
-		}
+		assert.True(t, expectedImage.MatchString(c.Image), "got %q", c.Image)
 	})
 	t.Run("arbexecution override", func(t *testing.T) {
 		c := &Client{Name: "nethermind-arbitrum", Type: "arbexecution"}
