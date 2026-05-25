@@ -44,6 +44,11 @@ func TestNetworkCheck(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:    "Valid network, xdc-testnet",
+			network: "xdc-testnet",
+			wantErr: false,
+		},
+		{
 			name:    "Invalid network",
 			network: "invalid",
 			wantErr: true,
