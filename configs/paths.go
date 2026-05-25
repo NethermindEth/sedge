@@ -26,6 +26,7 @@ const (
 	ExecutionDir                        = "execution-data"
 	ConsensusDir                        = "consensus-data"
 	ValidatorDir                        = "validator-data"
+	ArbitrumDir                         = "arbitrum-data"
 	KeystoreDir                         = "keystore"
 	DistributedValidatorDir             = ".charon"
 )

@@ -133,6 +133,39 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 	return nil
 }
 
+type arbResolved struct {
+	chainID              uint64
+	chainspec            string
+	effectiveSnapshotURL string
+	initMode             string // "snapshot" | "empty"
+}
+
+// resolveArbitrum looks up the configured arbitrum chain and merges its defaults
+// with any user-provided overrides. Returns nil when arbitrum is not in play.
+func resolveArbitrum(gd *GenData) (*arbResolved, error) {
+	if gd.ArbChain == "" {
+		return nil, nil
+	}
+	cfg, err := configs.ArbitrumChain(gd.ArbChain)
+	if err != nil {
+		return nil, err
+	}
+	snap := gd.ArbSnapshotURL
+	if snap == "" {
+		snap = cfg.DefaultSnapshotURL
+	}
+	mode := "empty"
+	if snap != "" {
+		mode = "snapshot"
+	}
+	return &arbResolved{
+		chainID:              cfg.ChainID,
+		chainspec:            cfg.NethermindChainspec,
+		effectiveSnapshotURL: snap,
+		initMode:             mode,
+	}, nil
+}
+
 // mapClients convert genData clients to clients.Clients
 func mapClients(gd *GenData) map[string]*clients.Client {
 	var l2OpClient, l2TaikoClient, l2SurgeClient, l2ArbClient *clients.Client
@@ -316,19 +349,15 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		consensusApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLApi"])
 	}
 
+	arb, err := resolveArbitrum(gd)
+	if err != nil {
+		return err
+	}
 	var arbChainID uint64
 	arbInitMode := ""
-	if gd.ArbitrumClient != nil {
-		chainCfg, err := configs.ArbitrumChain(gd.ArbChain)
-		if err != nil {
-			return err
-		}
-		arbChainID = chainCfg.ChainID
-		if gd.ArbSnapshotURL != "" || chainCfg.DefaultSnapshotURL != "" {
-			arbInitMode = "snapshot"
-		} else {
-			arbInitMode = "empty"
-		}
+	if arb != nil && gd.ArbitrumClient != nil {
+		arbChainID = arb.chainID
+		arbInitMode = arb.initMode
 	}
 
 	data := DockerComposeData{
@@ -547,17 +576,15 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		arbImage = imageOrEmpty(cls[arbitrum], gd.LatestVersion)
 	}
 
+	arbCfg, err := resolveArbitrum(gd)
+	if err != nil {
+		return err
+	}
 	var arbChainspec string
 	arbSnapshotURL := gd.ArbSnapshotURL
-	if gd.ArbChain != "" {
-		chainCfg, err := configs.ArbitrumChain(gd.ArbChain)
-		if err != nil {
-			return err
-		}
-		arbChainspec = chainCfg.NethermindChainspec
-		if arbSnapshotURL == "" {
-			arbSnapshotURL = chainCfg.DefaultSnapshotURL
-		}
+	if arbCfg != nil {
+		arbChainspec = arbCfg.chainspec
+		arbSnapshotURL = arbCfg.effectiveSnapshotURL
 	}
 
 	executionWSApiURL := ""
@@ -616,7 +643,7 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		OpSequencerHttp:            gd.Sequencer,
 		RethNetwork:                rethNetwork,
 		ArbImageVersion:            arbImage,
-		ArbDataDir:                 "./" + "arbitrum-data",
+		ArbDataDir:                 "./" + configs.ArbitrumDir,
 		ArbChainspec:               arbChainspec,
 		ArbSnapshotURL:             arbSnapshotURL,
 		ParentChainRPCURL:          gd.ParentChainRPCURL,
