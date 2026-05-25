@@ -38,7 +38,7 @@
       - --Metrics.ExposePort={{.ElL2MetricsPort}}{{range $flag := .ElL2ExtraFlags}}
       - --{{$flag}}{{end}}
     healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost {{.ElL2AuthPort}} || exit 1"]
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/{{.ElL2AuthPort}}"]
       interval: 10s
       timeout: 5s
       retries: 10
