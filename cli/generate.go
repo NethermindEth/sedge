@@ -46,8 +46,8 @@ var (
 )
 
 const (
-	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution, taiko, tExecution, surge, sExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution", "taiko", "texecution", "surge", "sexecution"
-	jwtPathName                                                                                                                  = "jwtsecret"
+	execution, consensus, validator, distributedValidator, mevBoost, optimism, opExecution, taiko, tExecution, surge, sExecution, arbitrum, arbExecution = "execution", "consensus", "validator", "distributedValidator", "mev-boost", "optimism", "opexecution", "taiko", "texecution", "surge", "sexecution", "arbitrum", "arbexecution"
+	jwtPathName                                                                                                                                          = "jwtsecret"
 )
 
 type CustomFlags struct {
