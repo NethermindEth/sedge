@@ -51,6 +51,10 @@ func (c *Client) SetImageOrDefault(image string) {
 		c.SetSurgeImage(image)
 	case "sexecution":
 		c.SetSurgeExecutionImage(image)
+	case "arbexecution":
+		c.setArbExecutionImage(image)
+	case "arbitrum":
+		c.setArbitrumImage(image)
 	}
 }
 
@@ -153,6 +157,21 @@ func (c *Client) SetSurgeExecutionImage(image string) {
 		c.Image = valueOrDefault(image, configs.ClientImages.SExecution.SurgeNethermind.String())
 	}
 }
+
+func (c *Client) setArbExecutionImage(image string) {
+	switch c.Name {
+	case "nethermind-arbitrum":
+		c.Image = valueOrDefault(image, configs.ClientImages.ArbExecution.NethermindArbitrum.String())
+	}
+}
+
+func (c *Client) setArbitrumImage(image string) {
+	switch c.Name {
+	case "nitro":
+		c.Image = valueOrDefault(image, configs.ClientImages.Arbitrum.Nitro.String())
+	}
+}
+
 func valueOrDefault(value string, defaultValue string) string {
 	if value == "" {
 		return defaultValue

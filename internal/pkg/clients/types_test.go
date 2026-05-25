@@ -211,3 +211,34 @@ func TestSetImageOrDefault_CustomImage(t *testing.T) {
 		})
 	}
 }
+
+func TestSetArbitrumImages(t *testing.T) {
+	t.Run("arbexecution default", func(t *testing.T) {
+		c := &Client{Name: "nethermind-arbitrum", Type: "arbexecution"}
+		c.SetImageOrDefault("")
+		if c.Image == "" {
+			t.Fatalf("default image not set")
+		}
+	})
+	t.Run("arbitrum default", func(t *testing.T) {
+		c := &Client{Name: "nitro", Type: "arbitrum"}
+		c.SetImageOrDefault("")
+		if c.Image == "" {
+			t.Fatalf("default image not set")
+		}
+	})
+	t.Run("arbexecution override", func(t *testing.T) {
+		c := &Client{Name: "nethermind-arbitrum", Type: "arbexecution"}
+		c.SetImageOrDefault("my.registry/custom:tag")
+		if c.Image != "my.registry/custom:tag" {
+			t.Errorf("override not honored, got %q", c.Image)
+		}
+	})
+	t.Run("arbitrum override", func(t *testing.T) {
+		c := &Client{Name: "nitro", Type: "arbitrum"}
+		c.SetImageOrDefault("offchainlabs/nitro-node:custom")
+		if c.Image != "offchainlabs/nitro-node:custom" {
+			t.Errorf("override not honored, got %q", c.Image)
+		}
+	})
+}

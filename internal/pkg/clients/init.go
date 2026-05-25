@@ -62,4 +62,10 @@ var AllClients map[string][]string = map[string][]string{
 		"surgegeth",
 		"surgenethermind",
 	},
+	"arbitrum": {
+		"nitro",
+	},
+	"arbexecution": {
+		"nethermind-arbitrum",
+	},
 }
