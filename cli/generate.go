@@ -81,6 +81,10 @@ type SurgeFlags struct {
 type ArbitrumFlags struct {
 	arbitrumName       string
 	arbitrumExtraFlags []string
+	arbChain           string // "arbitrum-one" or "arbitrum-sepolia"; inferred from -n if empty
+	arbSnapshotURL     string
+	parentChainRPC     string
+	parentChainBeacon  string
 }
 
 // GenCmdFlags is a struct that holds the flags of the generate command
@@ -206,6 +210,7 @@ You can generate:
 	cmd.AddCommand(OpFullNodeSubCmd(sedgeAction))
 	cmd.AddCommand(TaikoFullNodeSubCmd(sedgeAction))
 	cmd.AddCommand(SurgeFullNodeSubCmd(sedgeAction))
+	cmd.AddCommand(ArbFullNodeSubCmd(sedgeAction))
 
 	cmd.PersistentFlags().BoolVar(&lidoNode, "lido", false, "generate Lido CSM node")
 	cmd.PersistentFlags().StringVarP(&generationPath, "path", "p", configs.DefaultAbsSedgeDataPath, "generation path for sedge data. Default is sedge-data")
@@ -357,7 +362,7 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 	var jwtSecretL2 string
 	var sequencerURL string
 	// If optimism , taiko or surge is included in the services, generate the jwt secret for it
-	if utils.Contains(services, optimism) || utils.Contains(services, taiko) || utils.Contains(services, surge) {
+	if utils.Contains(services, optimism) || utils.Contains(services, taiko) || utils.Contains(services, surge) || utils.Contains(services, arbitrum) {
 		jwtSecretL2, err = handleJWTSecret(generationPath, jwtPathName+"-l2")
 		if err != nil {
 			return err
@@ -412,6 +417,12 @@ func runGenCmd(out io.Writer, flags *GenCmdFlags, sedgeAction actions.SedgeActio
 		OptimismClient:             combinedClients.Optimism,
 		TaikoClient:                combinedClients.Taiko,
 		SurgeClient:                combinedClients.Surge,
+		ArbitrumClient:             combinedClients.Arbitrum,
+		ArbExtraFlags:              flags.arbitrumExtraFlags,
+		ArbChain:                   flags.arbChain,
+		ArbSnapshotURL:             flags.arbSnapshotURL,
+		ParentChainRPCURL:          flags.parentChainRPC,
+		ParentChainBeacon:          flags.parentChainBeacon,
 		Network:                    network,
 		CheckpointSyncUrl:          flags.checkpointSyncUrl,
 		FeeRecipient:               flags.feeRecipient,

@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/NethermindEth/sedge/cli/actions"
+	"github.com/NethermindEth/sedge/configs"
 	sedgeOpts "github.com/NethermindEth/sedge/internal/pkg/options"
 	"github.com/spf13/cobra"
 )
@@ -286,6 +287,83 @@ This command does not generate a validator configuration, as Surge use different
 	cmd.Flags().StringArrayVar(&flags.clExtraFlags, "cl-extra-flag", []string{}, "Additional flag to configure the consensus client service in the generated docker-compose script. Example: 'sedge generate full-node --cl-extra-flag \"<flag1>=value1\" --cl-extra-flag \"<flag2>=\\\"value2\\\"\"'")
 	cmd.Flags().StringSliceVar(&flags.customEnodes, "execution-bootnodes", []string{}, "List of comma separated enodes to use as custom network peers for execution client.")
 	cmd.Flags().StringSliceVar(&flags.customEnrs, "consensus-bootnodes", []string{}, "List of comma separated enrs to use as custom network peers for consensus client.")
+
+	cmd.Flags().SortFlags = false
+	return cmd
+}
+
+func ArbFullNodeSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
+	var flags GenCmdFlags
+	cmd := &cobra.Command{
+		Use:   "arb-full-node [flags]",
+		Short: "Generate a full node config for Arbitrum",
+		Long: `Generate a docker-compose and an environment file with a full node configuration for Arbitrum.
+
+This command sets up an Arbitrum full node consisting of nethermind-arbitrum (L2 execution client) and nitro (rollup node), on top of an Ethereum L1 stack.
+
+By default the L1 stack (execution + consensus) is bundled. To use external L1 endpoints, provide all four of --execution-api-url, --consensus-url, --parent-chain-rpc-url, --parent-chain-beacon-url; the bundled L1 services are then omitted.
+
+Chain selection: provide -n/--network (mainnet -> arbitrum-one, sepolia -> arbitrum-sepolia) and/or --chain (arbitrum-one or arbitrum-sepolia). If only one is given, the other is inferred.
+
+Use --arb-image to override the nitro image and --l2-execution <name>:<image> to override the L2 EL image. --snapshot-url switches nitro from --init.empty=true to --init.url=<snapshot>.`,
+		Args: cobra.NoArgs,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := validateCustomNetwork(&flags.CustomFlags, network); err != nil {
+				return err
+			}
+			resolvedNet, resolvedChain, err := configs.ResolveArbitrumChainAndL1(network, flags.arbChain)
+			if err != nil {
+				return err
+			}
+			network = resolvedNet
+			flags.arbChain = resolvedChain
+			// External-L1 mode validation: all four URLs must be set together or all absent.
+			externalCount := 0
+			for _, u := range []string{flags.executionApiUrl, flags.consensusApiUrl, flags.parentChainRPC, flags.parentChainBeacon} {
+				if u != "" {
+					externalCount++
+				}
+			}
+			if externalCount != 0 && externalCount != 4 {
+				return fmt.Errorf("external-L1 mode requires all of --execution-api-url, --consensus-url, --parent-chain-rpc-url, --parent-chain-beacon-url (got %d/4 set)", externalCount)
+			}
+			return preValidationGenerateCmd(network, logging, &flags)
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			services := []string{arbitrum, arbExecution}
+			// External-L1 mode: skip bundled L1 services. The presence of executionApiUrl gates
+			// ExecutionNodeInitializer.ShouldInitialize and ConsensusNodeInitializer.ShouldInitialize.
+			if flags.executionApiUrl == "" {
+				services = append([]string{execution, consensus}, services...)
+			}
+			return runGenCmd(cmd.OutOrStdout(), &flags, sedgeAction, services)
+		},
+	}
+	// L1 flags (reused when bundled L1 mode is active)
+	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "L1 consensus client (lighthouse|lodestar|teku|prysm|nimbus). Use '<name>:<image>' to override the docker image.")
+	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "L1 execution client (geth|nethermind|besu|erigon). Use '<name>:<image>' to override the docker image.")
+	cmd.Flags().StringVar(&flags.checkpointSyncUrl, "checkpoint-sync-url", "", "L1 checkpoint sync URL (defaults to the per-network value).")
+	cmd.Flags().StringArrayVar(&flags.elExtraFlags, "el-extra-flag", []string{}, "Extra flag to configure the L1 execution client. Repeat for multiple.")
+	cmd.Flags().StringArrayVar(&flags.clExtraFlags, "cl-extra-flag", []string{}, "Extra flag to configure the L1 consensus client. Repeat for multiple.")
+	cmd.Flags().StringSliceVar(&flags.fallbackEL, "fallback-execution-urls", []string{}, "Fallback execution URLs for the L1 consensus client.")
+	cmd.Flags().StringVar(&flags.executionApiUrl, "execution-api-url", "", "External L1 execution-layer RPC URL. Required for external-L1 mode.")
+	cmd.Flags().StringVar(&flags.consensusApiUrl, "consensus-url", "", "External L1 consensus-layer beacon URL. Required for external-L1 mode.")
+	cmd.Flags().StringVar(&flags.feeRecipient, "fee-recipient", "", "Fee recipient address (used by the L1 stack when bundled).")
+	cmd.Flags().StringVar(&flags.jwtPath, "jwt-secret-path", "", "Path to the JWT secret file.")
+	cmd.Flags().BoolVar(&flags.mapAllPorts, "map-all", false, "Map all client ports to the host.")
+	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use :latest tags for L1 clients (L2 images stay pinned).")
+
+	// L2 EL flags (reused)
+	cmd.Flags().StringVar(&flags.l2ExecutionName, "l2-execution", "", "Arbitrum L2 execution client. Use '<name>:<image>' to override the image. Default: nethermind-arbitrum.")
+	cmd.Flags().StringArrayVar(&flags.ell2ExtraFlags, "el-l2-extra-flag", []string{}, "Extra flag to configure the L2 execution client. Repeat for multiple.")
+
+	// Arbitrum-specific flags
+	cmd.Flags().StringVar(&flags.arbChain, "chain", "", "Arbitrum chain (arbitrum-one|arbitrum-sepolia). Inferred from -n/--network if omitted.")
+	cmd.Flags().StringVar(&flags.arbitrumName, "arb-image", "", "Nitro image override (default: pinned nitro version).")
+	cmd.Flags().StringArrayVar(&flags.arbitrumExtraFlags, "arb-extra-flag", []string{}, "Extra flag to configure the nitro service. Repeat for multiple.")
+	cmd.Flags().StringVar(&flags.arbSnapshotURL, "snapshot-url", "", "Nitro --init.url snapshot URL. When omitted, --init.empty=true is used.")
+	cmd.Flags().StringVar(&flags.parentChainRPC, "parent-chain-rpc-url", "", "External L1 RPC URL used by nitro for parent-chain reads. Required for external-L1 mode.")
+	cmd.Flags().StringVar(&flags.parentChainBeacon, "parent-chain-beacon-url", "", "External L1 beacon URL used by nitro for parent-chain blob reads. Required for external-L1 mode.")
 
 	cmd.Flags().SortFlags = false
 	return cmd
