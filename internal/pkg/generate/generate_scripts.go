@@ -43,6 +43,8 @@ const (
 	taikoExecution = "texecution"
 	surge          = "surge"
 	surgeExecution = "sexecution"
+	arbitrum       = "arbitrum"
+	arbExecution   = "arbexecution"
 
 	validatorImport      = "validator-import"
 	mevBoost             = "mev-boost"
