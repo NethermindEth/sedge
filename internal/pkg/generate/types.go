@@ -27,6 +27,7 @@ type EnvData struct {
 	ElL2Image                  string
 	TaikoImageVersion          string
 	SurgeImageVersion          string
+	ArbImageVersion            string
 	ElDataDir                  string
 	CcImage                    string
 	CcDataDir                  string
@@ -56,6 +57,11 @@ type EnvData struct {
 	DistributedValidatorApiUrl string
 	DvDataDir                  string
 	DvImage                    string
+	ArbDataDir                 string
+	ArbChainspec               string
+	ArbSnapshotURL             string
+	ParentChainRPCURL          string
+	ParentChainBeacon          string
 }
 
 // GenData : Struct Data object for script's generation
@@ -67,6 +73,7 @@ type GenData struct {
 	OptimismClient             *clients.Client
 	TaikoClient                *clients.Client
 	SurgeClient                *clients.Client
+	ArbitrumClient             *clients.Client
 	L2ExecutionClient          *clients.Client
 	DistributedValidatorClient *clients.Client
 	Distributed                bool
@@ -109,6 +116,11 @@ type GenData struct {
 	ContainerTag               string
 	LatestVersion              bool
 	JWTSecretL2                string
+	ArbExtraFlags              []string
+	ArbChain                   string
+	ArbSnapshotURL             string // empty -> --init.empty=true
+	ParentChainRPCURL          string // empty -> use bundled L1
+	ParentChainBeacon          string // empty -> use bundled L1
 }
 
 // DockerComposeData : Struct Data object to be applied to docker-compose script
@@ -144,6 +156,7 @@ type DockerComposeData struct {
 	OPExtraFlags            []string
 	TaikoExtraFlags         []string
 	SurgeExtraFlags         []string
+	ArbExtraFlags           []string
 	NetworkPrefix           string
 	ClExtraFlags            []string
 	VlExtraFlags            []string
@@ -170,6 +183,8 @@ type DockerComposeData struct {
 	DVMetricsPort           uint16
 	DVApiPort               uint16
 	ConsensusApiURL         string
+	ArbChainID              uint64
+	ArbInitMode             string // "snapshot" | "empty"
 }
 
 // WithConsensusClient returns true if the consensus client is set
@@ -216,6 +231,16 @@ func (d DockerComposeData) WithTaikoClient() bool {
 func (d DockerComposeData) WithSurgeClient() bool {
 	for _, service := range d.Services {
 		if service == surge {
+			return true
+		}
+	}
+	return false
+}
+
+// WithArbitrumClient returns true if the arbitrum client is set
+func (d DockerComposeData) WithArbitrumClient() bool {
+	for _, service := range d.Services {
+		if service == arbitrum {
 			return true
 		}
 	}

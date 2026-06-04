@@ -1,0 +1,9 @@
+{{/* nitro.tmpl */}}
+{{ define "arbitrum" }}
+# --- Layer 2 - Arbitrum Rollup Node (nitro) - configuration ---
+ARB_IMAGE_VERSION={{.ArbImageVersion}}
+ARB_DATA_DIR={{.ArbDataDir}}
+ARB_SNAPSHOT_URL={{.ArbSnapshotURL}}
+PARENT_CHAIN_RPC_URL={{.ParentChainRPCURL}}
+PARENT_CHAIN_BEACON_URL={{.ParentChainBeacon}}
+{{ end }}

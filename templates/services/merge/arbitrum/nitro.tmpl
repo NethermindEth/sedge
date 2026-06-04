@@ -1,0 +1,39 @@
+{{/* nitro.tmpl */}}
+{{ define "arbitrum" }}
+  arbitrum:
+    tty: true
+    environment:
+      - TERM=xterm-256color
+      - COLORTERM=truecolor
+    stop_grace_period: 5m
+    container_name: sedge-arbitrum{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: unless-stopped
+    image: ${ARB_IMAGE_VERSION}
+    entrypoint: /usr/local/bin/nitro
+    networks:
+      - sedge
+    volumes:
+      - ${ARB_DATA_DIR}:/app/nitro-data
+      - ${EC_L2_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret:ro
+    depends_on:
+      execution-l2:
+        condition: service_healthy
+    command:
+      - {{if eq .ArbInitMode "snapshot"}}--init.url=${ARB_SNAPSHOT_URL}{{else}}--init.empty=true{{end}}
+      - --persistent.global-config=/app/nitro-data
+      - --chain.id={{.ArbChainID}}
+      - --parent-chain.connection.url=${PARENT_CHAIN_RPC_URL}
+      - --parent-chain.blob-client.beacon-url=${PARENT_CHAIN_BEACON_URL}
+      - --node.execution-rpc-client.url=http://execution-l2:{{.ElL2AuthPort}}
+      - --node.execution-rpc-client.jwtsecret=/tmp/jwt/jwtsecret
+      - --node.staker.enable=false
+      - --node.sequencer=false
+      - --execution.forwarding-target=null
+      - --init.validate-genesis-assertion=false{{range $flag := .ArbExtraFlags}}
+      - --{{$flag}}{{end}}{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
+{{ end }}

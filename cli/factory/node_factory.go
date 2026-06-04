@@ -21,6 +21,8 @@ const (
 	tExecution           = "texecution"
 	surge                = "surge"
 	sExecution           = "sexecution"
+	arbitrum             = "arbitrum"
+	arbExecution         = "arbexecution"
 	NetworkGnosis        = "gnosis"
 	NetworkChiado        = "chiado"
 )
@@ -439,6 +441,56 @@ func (t *SurgeNodeInitializer) UpdateResult(result *clients.Clients, client *cli
 	result.L2Execution = t.execClient
 }
 
+// ArbitrumNodeInitializer handles arbitrum client initialization
+type ArbitrumNodeInitializer struct {
+	L2BaseInitializer
+	flags      ClientFlags
+	execClient *clients.Client
+}
+
+func NewArbitrumNodeInitializer() *ArbitrumNodeInitializer {
+	return &ArbitrumNodeInitializer{
+		L2BaseInitializer: L2BaseInitializer{
+			BaseNodeInitializer: BaseNodeInitializer{
+				serviceType: arbitrum,
+				config: clientConfig{
+					clientType: arbitrum,
+					forceName:  "nitro",
+				},
+			},
+			l2ExecutionType: arbExecution,
+		},
+	}
+}
+
+func (a *ArbitrumNodeInitializer) Initialize(allClients clients.OrderedClients, flags ClientFlags) (*clients.Client, error) {
+	a.flags = flags
+	client, execClient, err := a.initializeL2(allClients, flags)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize arbitrum node: %w", err)
+	}
+	a.execClient = execClient
+	// No post-processing needed: AllClients["arbexecution"] is "nethermind-arbitrum"
+	// verbatim, so initializeL2 handles name+image+validation for both clients without
+	// the hyphen-strip that Optimism's post-block applies.
+	return client, nil
+}
+
+func (a *ArbitrumNodeInitializer) ShouldInitialize(services []string, flags ClientFlags) bool {
+	return utils.Contains(services, a.serviceType)
+}
+
+func (a *ArbitrumNodeInitializer) UpdateResult(result *clients.Clients, client *clients.Client) {
+	result.Arbitrum = client
+	if a.execClient != nil {
+		result.L2Execution = a.execClient
+	}
+	if client != nil && a.flags != nil && a.flags.GetExecutionApiUrl() != "" {
+		result.Execution = nil
+		result.Consensus = nil
+	}
+}
+
 // DistributedValidatorNodeInitializer handles distributed validator client initialization
 type DistributedValidatorNodeInitializer struct {
 	BaseNodeInitializer
@@ -479,6 +531,7 @@ func NewNodeFactory() *NodeFactory {
 			NewOptimismNodeInitializer(),
 			NewTaikoNodeInitializer(),
 			NewSurgeNodeInitializer(),
+			NewArbitrumNodeInitializer(),
 			NewDistributedValidatorNodeInitializer(),
 		},
 	}

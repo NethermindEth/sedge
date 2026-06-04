@@ -63,6 +63,12 @@ var ClientImages struct {
 	SExecution struct {
 		SurgeNethermind Image `yaml:"surgenethermind"`
 	}
+	ArbExecution struct {
+		NethermindArbitrum Image `yaml:"nethermind-arbitrum"`
+	}
+	Arbitrum struct {
+		Nitro Image `yaml:"nitro"`
+	}
 }
 
 //go:embed client_images.yaml

@@ -80,3 +80,11 @@ sexecution:
   surgenethermind:
     name: nethermindeth/nethermind
     version: master-9d652e3
+arbexecution:
+  nethermind-arbitrum:
+    name: nethermind/nethermind-arbitrum
+    version: 0.1.0-alpha
+arbitrum:
+  nitro:
+    name: offchainlabs/nitro-node
+    version: v3.10.0-rc.2-746bda2

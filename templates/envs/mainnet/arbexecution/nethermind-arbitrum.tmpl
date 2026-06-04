@@ -1,0 +1,9 @@
+{{/* nethermind-arbitrum.tmpl */}}
+{{ define "arbexecution" }}
+# --- Layer 2 - Arbitrum Execution Node - configuration ---
+EXECUTION_L2_API_URL={{.ExecutionL2ApiURL}}
+EC_L2_IMAGE_VERSION={{.ElL2Image}}
+EC_L2_DATA_DIR={{.ElDataDir}}-arb
+EC_L2_JWT_SECRET_PATH={{.JWTL2SecretPath}}
+ARB_CHAINSPEC={{.ArbChainspec}}
+{{ end }}

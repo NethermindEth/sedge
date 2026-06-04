@@ -43,6 +43,8 @@ const (
 	taikoExecution = "texecution"
 	surge          = "surge"
 	surgeExecution = "sexecution"
+	arbitrum       = "arbitrum"
+	arbExecution   = "arbexecution"
 
 	validatorImport      = "validator-import"
 	mevBoost             = "mev-boost"
@@ -131,9 +133,42 @@ func validateConsensus(gd *GenData, c *clients.ClientInfo) error {
 	return nil
 }
 
+type arbResolved struct {
+	chainID              uint64
+	chainspec            string
+	effectiveSnapshotURL string
+	initMode             string // "snapshot" | "empty"
+}
+
+// resolveArbitrum looks up the configured arbitrum chain and merges its defaults
+// with any user-provided overrides. Returns nil when arbitrum is not in play.
+func resolveArbitrum(gd *GenData) (*arbResolved, error) {
+	if gd.ArbChain == "" {
+		return nil, nil
+	}
+	cfg, err := configs.ArbitrumChain(gd.ArbChain)
+	if err != nil {
+		return nil, err
+	}
+	snap := gd.ArbSnapshotURL
+	if snap == "" {
+		snap = cfg.DefaultSnapshotURL
+	}
+	mode := "empty"
+	if snap != "" {
+		mode = "snapshot"
+	}
+	return &arbResolved{
+		chainID:              cfg.ChainID,
+		chainspec:            cfg.NethermindChainspec,
+		effectiveSnapshotURL: snap,
+		initMode:             mode,
+	}, nil
+}
+
 // mapClients convert genData clients to clients.Clients
 func mapClients(gd *GenData) map[string]*clients.Client {
-	var l2OpClient, l2TaikoClient, l2SurgeClient *clients.Client
+	var l2OpClient, l2TaikoClient, l2SurgeClient, l2ArbClient *clients.Client
 
 	if gd.OptimismClient != nil {
 		l2OpClient = gd.L2ExecutionClient
@@ -143,6 +178,9 @@ func mapClients(gd *GenData) map[string]*clients.Client {
 	}
 	if gd.SurgeClient != nil {
 		l2SurgeClient = gd.L2ExecutionClient
+	}
+	if gd.ArbitrumClient != nil {
+		l2ArbClient = gd.L2ExecutionClient
 	}
 
 	cls := map[string]*clients.Client{
@@ -155,6 +193,8 @@ func mapClients(gd *GenData) map[string]*clients.Client {
 		taikoExecution:       l2TaikoClient,
 		surge:                gd.SurgeClient,
 		surgeExecution:       l2SurgeClient,
+		arbitrum:             gd.ArbitrumClient,
+		arbExecution:         l2ArbClient,
 		distributedValidator: gd.DistributedValidatorClient,
 	}
 
@@ -309,6 +349,17 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		consensusApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(cls[consensus]), gd.Ports["CLApi"])
 	}
 
+	arb, err := resolveArbitrum(gd)
+	if err != nil {
+		return err
+	}
+	var arbChainID uint64
+	arbInitMode := ""
+	if arb != nil && gd.ArbitrumClient != nil {
+		arbChainID = arb.chainID
+		arbInitMode = arb.initMode
+	}
+
 	data := DockerComposeData{
 		Services:            gd.Services,
 		Network:             gd.Network,
@@ -366,6 +417,9 @@ func ComposeFile(gd *GenData, at io.Writer) error {
 		DVDiscoveryPort:         gd.Ports["DVDiscovery"],
 		DVMetricsPort:           gd.Ports["DVMetrics"],
 		DVApiPort:               gd.Ports["DVApi"],
+		ArbExtraFlags:           gd.ArbExtraFlags,
+		ArbChainID:              arbChainID,
+		ArbInitMode:             arbInitMode,
 	}
 
 	// Save to writer
@@ -446,12 +500,12 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		}
 	}
 
-	if cls[optimism] != nil || cls[taiko] != nil || cls[surge] != nil {
+	if cls[optimism] != nil || cls[taiko] != nil || cls[surge] != nil || cls[arbitrum] != nil {
 		gd.L2ExecutionClient.Endpoint = configs.OnPremiseOpExecutionURL
 	}
 
 	executionOPApiUrl := ""
-	if cls[optimism] != nil || cls[taiko] != nil || cls[surge] != nil {
+	if cls[optimism] != nil || cls[taiko] != nil || cls[surge] != nil || cls[arbitrum] != nil {
 		executionOPApiUrl = fmt.Sprintf("%s:%v", endpointOrEmpty(gd.L2ExecutionClient), gd.Ports["ApiPortELL2"])
 	}
 	var mevSupported bool
@@ -517,6 +571,22 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		surgeImage = imageOrEmpty(cls[surge], gd.LatestVersion)
 	}
 
+	arbImage := ""
+	if gd.ArbitrumClient != nil {
+		arbImage = imageOrEmpty(cls[arbitrum], gd.LatestVersion)
+	}
+
+	arbCfg, err := resolveArbitrum(gd)
+	if err != nil {
+		return err
+	}
+	var arbChainspec string
+	arbSnapshotURL := gd.ArbSnapshotURL
+	if arbCfg != nil {
+		arbChainspec = arbCfg.chainspec
+		arbSnapshotURL = arbCfg.effectiveSnapshotURL
+	}
+
 	executionWSApiURL := ""
 	if len(executionApiUrl) > 0 {
 		// If the execution API URL is set, then we need to change https: for ws: at the beginning
@@ -572,6 +642,12 @@ func EnvFile(gd *GenData, at io.Writer) error {
 		OPImageVersion:             opImageVersion,
 		OpSequencerHttp:            gd.Sequencer,
 		RethNetwork:                rethNetwork,
+		ArbImageVersion:            arbImage,
+		ArbDataDir:                 "./" + configs.ArbitrumDir,
+		ArbChainspec:               arbChainspec,
+		ArbSnapshotURL:             arbSnapshotURL,
+		ParentChainRPCURL:          gd.ParentChainRPCURL,
+		ParentChainBeacon:          gd.ParentChainBeacon,
 	}
 
 	// Save to writer
