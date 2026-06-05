@@ -13,7 +13,7 @@ execution:
     version: v3.4.2
   reth:
     name: ghcr.io/paradigmxyz/reth
-    version: v1.10.2
+    version: v2.2.0
 consensus:
   lighthouse:
     name: sigp/lighthouse
