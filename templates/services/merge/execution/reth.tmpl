@@ -1,0 +1,45 @@
+{{/* reth.tmpl */}}
+{{ define "execution" }}
+  execution:
+    stop_grace_period: 30m
+    container_name: sedge-execution-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: unless-stopped
+    image: ${EC_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${EC_DATA_DIR}:/data
+      - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
+      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
+      - "{{.ElApiPort}}:{{.ElApiPort}}"
+      - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
+    expose:
+      - {{.ElApiPort}}
+      - {{.ElAuthPort}}
+    command:
+      - node
+      - --chain={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
+      - --datadir=/data
+      - --port={{.ElDiscoveryPort}}
+      - --discovery.port={{.ElDiscoveryPort}}
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.port={{.ElApiPort}}
+      - --http.api=eth,net,web3
+      - --http.corsdomain=*
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.port={{.ElAuthPort}}
+      - --authrpc.jwtsecret=/tmp/jwt/jwtsecret
+      - --metrics=0.0.0.0:{{.ElMetricsPort}}
+      - --full{{if .ECBootnodes}}
+      - --bootnodes={{.ECBootnodes}}{{end}}{{range $flag := .ElExtraFlags}}
+      - --{{$flag}}{{end}}{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
+{{ end }}

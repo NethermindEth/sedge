@@ -11,6 +11,9 @@ execution:
   erigon:
     name: erigontech/erigon
     version: v3.4.2
+  reth:
+    name: ghcr.io/paradigmxyz/reth
+    version: v1.10.2
 consensus:
   lighthouse:
     name: sigp/lighthouse
