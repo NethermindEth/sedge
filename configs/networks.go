@@ -37,7 +37,9 @@ const (
 	NetworkJocTestnet   = "joc-testnet"
 	NetworkLineaMainnet = "linea-mainnet"
 	NetworkLineaSepolia = "linea-sepolia"
-	NetworkHoodi   = "hoodi"
+	NetworkXdc          = "xdc"
+	NetworkXdcTestnet   = "xdc-testnet"
+	NetworkHoodi        = "hoodi"
 	NetworkCustom       = "custom"
 )
 
@@ -46,7 +48,7 @@ var ErrInvalidNetwork = errors.New("invalid network")
 // added volta and EnergyWeb
 func NetworkCheck(value string) error {
 	switch value {
-	case NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky, NetworkMekong, NetworkCustom, NetworkVolta, NetworkEnergyWeb, NetworkJocMainnet, NetworkJocTestnet, NetworkLineaMainnet, NetworkLineaSepolia:
+	case NetworkMainnet, NetworkSepolia, NetworkGnosis, NetworkChiado, NetworkHolesky, NetworkMekong, NetworkCustom, NetworkVolta, NetworkEnergyWeb, NetworkJocMainnet, NetworkJocTestnet, NetworkLineaMainnet, NetworkLineaSepolia, NetworkXdc, NetworkXdcTestnet:
 		return nil
 	default:
 		return fmt.Errorf("%w: %s", ErrInvalidNetwork, value)
@@ -70,6 +72,8 @@ func NetworkSupported() []string {
 		NetworkJocTestnet,
 		NetworkLineaMainnet,
 		NetworkLineaSepolia,
+		NetworkXdc,
+		NetworkXdcTestnet,
 	}
 }
 

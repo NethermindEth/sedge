@@ -578,7 +578,7 @@ var ErrNotPOANetworkFlags = errors.New("the provided network is not a poa networ
 func validatePOANetwork(network string) error {
 	// validating POA network
 	found := false
-	var networks = []string{"volta", "energyweb", "joc-mainnet", "joc-testnet", "linea-mainnet", "linea-sepolia"}
+	var networks = []string{"volta", "energyweb", "joc-mainnet", "joc-testnet", "linea-mainnet", "linea-sepolia", "xdc", "xdc-testnet"}
 	fmt.Printf("Validating network %s\n", network)
 	for _, n := range networks {
 		if n == network {
