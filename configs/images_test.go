@@ -29,14 +29,14 @@ func TestArbitrumClientImagesPresent(t *testing.T) {
 			client:      "nethermind-arbitrum",
 			got:         ClientImages.ArbExecution.NethermindArbitrum,
 			wantName:    "nethermind/nethermind-arbitrum",
-			wantVersion: "0.1.0-alpha",
+			wantVersion: "0.2.0",
 		},
 		{
 			role:        "arbitrum",
 			client:      "nitro",
 			got:         ClientImages.Arbitrum.Nitro,
 			wantName:    "offchainlabs/nitro-node",
-			wantVersion: "v3.10.0-rc.2-746bda2",
+			wantVersion: "v3.10.1-d7f07be",
 		},
 	}
 	for _, tc := range cases {

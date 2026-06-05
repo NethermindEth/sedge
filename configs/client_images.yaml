@@ -1,63 +1,63 @@
 execution:
   geth:
     name: ethereum/client-go
-    version: v1.17.2
+    version: v1.17.3
   besu:
     name: hyperledger/besu
-    version: 26.4.0
+    version: 26.5.0
   nethermind:
     name: nethermind/nethermind
-    version: 1.36.2
+    version: 1.37.2
   erigon:
     name: erigontech/erigon
-    version: v3.3.10
+    version: v3.4.2
 consensus:
   lighthouse:
     name: sigp/lighthouse
     version: v8.1.3
   lodestar:
     name: chainsafe/lodestar
-    version: v1.42.0
+    version: v1.43.0
   teku:
     name: consensys/teku
     version: 26.4.0
   prysm:
     name: gcr.io/prysmaticlabs/prysm/beacon-chain
-    version: v7.1.3
+    version: v7.1.4
   nimbus:
     name: statusim/nimbus-eth2
-    version: multiarch-v26.3.1
+    version: multiarch-v26.5.0
 validator:
   lighthouse:
     name: sigp/lighthouse
     version: v8.1.3
   lodestar:
     name: chainsafe/lodestar
-    version: v1.42.0
+    version: v1.43.0
   teku:
     name: consensys/teku
     version: 26.4.0
   prysm:
     name: gcr.io/prysmaticlabs/prysm/validator
-    version: v7.1.3
+    version: v7.1.4
   nimbus:
     name: statusim/nimbus-validator-client
-    version: multiarch-v26.3.1
+    version: multiarch-v26.5.0
 distributed:
   charon:
     name: ghcr.io/obolnetwork/charon
-    version: v1.9.3
+    version: v1.10.1
 optimism:
   opnode:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node
-    version: v1.16.12
+    version: v1.18.2
 opexecution:
   opgeth:
     name: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth
-    version: v1.101702.1
+    version: v1.101702.2
   opnethermind:
     name: nethermind/nethermind
-    version: 1.36.2
+    version: 1.37.2
   opreth:
     name: ghcr.io/paradigmxyz/op-reth
     version: v1.10.2
@@ -71,7 +71,7 @@ texecution:
     version: v2.4.0
   taikonethermind:
     name: nethermind/nethermind
-    version: 1.36.2
+    version: 1.37.2
 surge:
   surgeclient:
     name: nethsurge/taiko-client
@@ -83,8 +83,8 @@ sexecution:
 arbexecution:
   nethermind-arbitrum:
     name: nethermind/nethermind-arbitrum
-    version: 0.1.0-alpha
+    version: 0.2.0
 arbitrum:
   nitro:
     name: offchainlabs/nitro-node
-    version: v3.10.0-rc.2-746bda2
+    version: v3.10.1-d7f07be
