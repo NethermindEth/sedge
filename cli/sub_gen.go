@@ -89,7 +89,7 @@ Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the 
 	}
 	// Bind flags
 	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
-	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
+	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon, ethrex. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.validatorName, "validator", "v", "", "Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().BoolVar(&flags.distributed, "distributed", false, "Deploy a node configured to run as part of a Distributed Validator Cluster.")
 	cmd.Flags().StringVarP(&flags.distributedValidatorName, "distributedValidator", "d", "", "Distributed Validator client, e.g. charon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
@@ -155,7 +155,7 @@ This command does not generate a validator configuration, as Optimism and Base u
 	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVar(&flags.optimismName, "op-image", "", "Optimism consensus client image.")
 	cmd.Flags().StringVar(&flags.optimismExecutionName, "op-execution", "", "Optimism Execution client to be used, op-nethermind, op-geth, or op-reth. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name.")
-	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
+	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon, ethrex. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.executionApiUrl, "execution-api-url", "", "", "Set execution api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.")
 	cmd.Flags().StringVarP(&flags.consensusApiUrl, "consensus-url", "", "", "Set consensus api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.")
 	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")
@@ -184,7 +184,7 @@ func ExecutionSubCmd(sedgeAction actions.SedgeActions) *cobra.Command {
 		Short: "Generate a execution node config",
 		Long: "Generate a docker-compose and an environment file with a execution node configuration.\n" +
 			"Valid args: name of execution clients according to network\n\n" +
-			"Should be one of: nethermind, geth, besu, erigon. If you don't provide one, it will chosen randomly.\n" +
+			"Should be one of: nethermind, geth, besu, erigon, ethrex. If you don't provide one, it will chosen randomly.\n" +
 			"Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate execution nethermind:docker.image'. If you want to use the default docker image, just use the client name",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
@@ -420,7 +420,7 @@ Additionally, you can use the syntax '<CLIENT>:<DOCKER_IMAGE>' to override the d
 	cmd.Flags().StringArrayVar(&flags.aztecExtraFlags, "aztec-extra-flag", []string{}, "Additional flag to configure the Aztec node service in the generated docker-compose script. Example: 'sedge generate aztec --aztec-extra-flag \"p2p.maxPeers=200\" --aztec-extra-flag \"txPool.maxSize=10000\"'")
 	cmd.Flags().Uint16Var(&flags.aztecOtelMetricsPort, "otel-metrics-port", 4318, "OTLP HTTP metrics port on the monitoring stack collector (default: 4318). The host is fixed to sedge_aztec_exporter and path to /v1/metrics.")
 	cmd.Flags().StringVarP(&flags.consensusName, "consensus", "c", "", "Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
-	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
+	cmd.Flags().StringVarP(&flags.executionName, "execution", "e", "", "Execution engine client, e.g. geth, nethermind, besu, erigon, ethrex. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name")
 	cmd.Flags().StringVarP(&flags.executionApiUrl, "execution-api-url", "", "", "Set execution api url. If Set, will omit the creation of execution and beacon nodes, and only create azte  nodes.")
 	cmd.Flags().StringVarP(&flags.consensusApiUrl, "consensus-url", "", "", "Set consensus api url. If Set, will omit the creation of execution and beacon nodes, and only create aztec nodes.")
 	cmd.Flags().BoolVar(&flags.latestVersion, "latest", false, "Use the latest version of clients. This sets the \"latest\" tag on the client's docker images. Latest version might not work.")

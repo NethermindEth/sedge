@@ -23,6 +23,7 @@ var ClientImages struct {
 		Besu       Image `yaml:"besu"`
 		Nethermind Image `yaml:"nethermind"`
 		Erigon     Image `yaml:"erigon"`
+		Ethrex     Image `yaml:"ethrex"`
 	}
 	Consensus struct {
 		Lighthouse Image `yaml:"lighthouse"`

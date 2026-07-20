@@ -11,6 +11,9 @@ execution:
   erigon:
     name: erigontech/erigon
     version: v3.2.2
+  ethrex:
+    name: ghcr.io/lambdaclass/ethrex
+    version: 21.0.0
 consensus:
   lighthouse:
     name: sigp/lighthouse

@@ -40,6 +40,10 @@ update-client "Nethermind" "execution" ".execution.nethermind" "$NETHERMIND_LATE
 ERIGON_LATEST=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/ledgerwatch/erigon/releases/latest | jq -r ".tag_name")
 update-client "Erigon" "execution" ".execution.erigon" "$ERIGON_LATEST"
 
+# Ethrex
+ETHREX_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/lambdaclass/ethrex/releases/latest | jq -r '.tag_name | ltrimstr("v")')
+update-client "Ethrex" "execution" ".execution.ethrex" "$ETHREX_LATEST_VERSION"
+
 # Lighthouse
 LIGHTHOUSE_LATEST_VERSION=$(curl -H "Authorization: Bearer $PAT" -sL https://api.github.com/repos/sigp/lighthouse/releases/latest | jq -r ".tag_name")
 update-client "Lighthouse" "consensus" ".consensus.lighthouse" "$LIGHTHOUSE_LATEST_VERSION"

@@ -1,0 +1,46 @@
+{{/* ethrex.tmpl */}}
+{{ define "execution" }}
+  execution:
+    stop_grace_period: 30m
+    container_name: sedge-execution-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
+    restart: unless-stopped
+    image: ${EC_IMAGE_VERSION}
+    networks:
+      - sedge
+    volumes:
+      - ${EC_DATA_DIR}:/var/lib/ethrex
+      - ${EC_JWT_SECRET_PATH}:/tmp/jwt/jwtsecret
+    ports:
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/tcp"
+      - "{{.ElDiscoveryPort}}:{{.ElDiscoveryPort}}/udp"
+      - "{{.ElMetricsPort}}:{{.ElMetricsPort}}/tcp"{{if .MapAllPorts}}
+      - "{{.ElApiPort}}:{{.ElApiPort}}"
+      - "{{.ElAuthPort}}:{{.ElAuthPort}}"{{end}}
+    expose:
+      - {{.ElApiPort}}
+      - {{.ElAuthPort}}
+    command:
+      - --network={{if .SplittedNetwork}}${EL_NETWORK}{{else}}${NETWORK}{{end}}
+      - --datadir=/var/lib/ethrex
+      - --syncmode=${EC_SYNC_MODE}
+      - --log.level=${ETHREX_LOG_LEVEL}{{if .ECBootnodes}}
+      - --bootnodes={{.ECBootnodes}}{{end}}
+      - --http.addr=0.0.0.0
+      - --http.port={{.ElApiPort}}
+      - --http.api=eth,net,web3
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.port={{.ElAuthPort}}
+      - --authrpc.jwtsecret=/tmp/jwt/jwtsecret
+      - --p2p.addr=0.0.0.0
+      - --p2p.port={{.ElDiscoveryPort}}
+      - --discovery.port={{.ElDiscoveryPort}}
+      - --metrics
+      - --metrics.addr=0.0.0.0
+      - --metrics.port={{.ElMetricsPort}}{{range $flag := .ElExtraFlags}}
+      - --{{$flag}}{{end}}{{if .LoggingDriver}}
+    logging:
+      driver: "{{.LoggingDriver}}"{{if eq .LoggingDriver "json-file"}}
+      options:
+        max-size: "10m"
+        max-file: "10"{{end}}{{end}}
+{{ end }}

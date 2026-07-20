@@ -151,7 +151,7 @@ Integrating Charon with Sedge would make it easy for stakers to setup and run a 
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
-|            | Nimbus     | Nimbus     |
+| ethrex     | Nimbus     | Nimbus     |
 
 ### Hoodi
 
@@ -161,7 +161,7 @@ Integrating Charon with Sedge would make it easy for stakers to setup and run a 
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Teku       | Teku       |
 | Besu       | Prysm      | Prysm      |
-|            | Nimbus     | Nimbus     |
+| ethrex     | Nimbus     | Nimbus     |
 
 ### Sepolia
 
@@ -171,7 +171,7 @@ Integrating Charon with Sedge would make it easy for stakers to setup and run a 
 | Nethermind | Lodestar   | Lodestar   |
 | Erigon     | Prysm      | Prysm      |
 | Besu       | Teku       | Teku       |
-|            | Nimbus     | Nimbus     |
+| ethrex     | Nimbus     | Nimbus     |
 
 
 ### Gnosis

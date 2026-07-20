@@ -125,6 +125,9 @@ func checkECBootnodesOnExecution(t *testing.T, data *GenData, compose, env io.Re
 		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "geth" {
 			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--bootnodes="+bootnodes)
 		}
+		if composeData.Services.Execution != nil && data.ExecutionClient.Name == "ethrex" {
+			checkFlagOnCommands(t, composeData.Services.Execution.Command, "--bootnodes="+bootnodes)
+		}
 	}
 	return nil
 }

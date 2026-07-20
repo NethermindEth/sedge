@@ -55,6 +55,13 @@ func TestSetImageOrDefault_Execution(t *testing.T) {
 			},
 			expectedImage: *regexp.MustCompile(`^erigontech/erigon:v\d+\.\d+\.\d+$`),
 		},
+		{
+			client: Client{
+				Name: "ethrex",
+				Type: "execution",
+			},
+			expectedImage: *regexp.MustCompile(`^ghcr.io/lambdaclass/ethrex:\d+\.\d+\.\d+$`),
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.client.Name, func(t *testing.T) {
