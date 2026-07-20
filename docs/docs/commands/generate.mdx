@@ -88,7 +88,7 @@ Usage:
 
 Flags:
   -c, --consensus string                  Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
-  -e, --execution string                  Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
+  -e, --execution string                  Execution engine client, e.g. geth, nethermind, besu, erigon, ethrex. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
   -v, --validator string                  Validator engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
       --distributed boolean               Deploy a node configured to run as part of a Distributed Validator Cluster.
   -d  --distributedValidator string       Distributed Validator client, e.g. charon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
@@ -151,7 +151,7 @@ Flags:
   -c, --consensus string                  Consensus engine client, e.g. teku, lodestar, prysm, lighthouse, Nimbus. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
       --op-image string                   Optimism consensus client image.
       --op-execution string               Optimism Execution client to be used, op-nethermind, op-geth, or op-reth. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name.
-  -e, --execution string                  Execution engine client, e.g. geth, nethermind, besu, erigon. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
+  -e, --execution string                  Execution engine client, e.g. geth, nethermind, besu, erigon, ethrex. Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client. If you want to use the default docker image, just use the client name
       --execution-api-url string          Set execution api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.
       --consensus-url string          Set consensus api url. If Set, will omit the creation of execution and beacon nodes, and only create optimism nodes.
       --latest                            Use the latest version of clients. This sets the "latest" tag on the client's docker images. Latest version might not work.
@@ -236,7 +236,7 @@ $ sedge generate execution -h
 Generate a docker-compose and an environment file with a execution node configuration.
 Valid args: name of execution clients according to network
 
-Should be one of: nethermind, geth, besu, erigon. If you don't provide one, it will chosen randomly.
+Should be one of: nethermind, geth, besu, erigon, ethrex. If you don't provide one, it will chosen randomly.
 Additionally, you can use this syntax '<CLIENT>:<DOCKER_IMAGE>' to override the docker image used for the client, for example 'sedge generate execution nethermind:docker.image'. If you want to use the default docker image, just use the client name
 
 Usage:

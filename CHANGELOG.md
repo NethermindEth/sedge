@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add support for ethrex execution client on mainnet, sepolia and hoodi networks.
+
 ## [v1.11.1] - 2026-02-10
 
 ### Changed
