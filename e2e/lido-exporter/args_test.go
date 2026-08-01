@@ -418,7 +418,7 @@ func TestE2E_ValidFlags_All(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
 			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter",
-				"--rpc-endpoints", "https://ethereum-hoodi.gateway.tatum.io", "https://0xrpc.io/hoodi",
+				"--rpc-endpoints", "https://rpc.hoodi.ethpandaops.io", "https://0xrpc.io/hoodi",
 				"--ws-endpoints", "wss://0xrpc.io/hoodi", // https endpoint should be ignored
 				"--port", "9989",
 				"--scrape-time", "1s",
@@ -467,7 +467,7 @@ func TestE2E_ValidEnv_All(t *testing.T) {
 		// Arrange
 		func(t *testing.T, binaryPath string) (map[string]string, error) {
 			return map[string]string{
-				"LIDO_EXPORTER_RPC_ENDPOINTS":    "'https://ethereum-hoodi.gateway.tatum.io','https://0xrpc.io/hoodi'",
+				"LIDO_EXPORTER_RPC_ENDPOINTS":    "'https://rpc.hoodi.ethpandaops.io','https://0xrpc.io/hoodi'",
 				"LIDO_EXPORTER_WS_ENDPOINTS":     "'wss://0xrpc.io/hoodi'",
 				"LIDO_EXPORTER_PORT":             "9990",
 				"LIDO_EXPORTER_SCRAPE_TIME":      "2s",
@@ -593,7 +593,7 @@ func TestE2E_ValidEnv_All_Mainnet(t *testing.T) {
 		// Arrange
 		func(t *testing.T, binaryPath string) (map[string]string, error) {
 			return map[string]string{
-				"LIDO_EXPORTER_RPC_ENDPOINTS":    "'https://eth.llamarpc.com','https://eth-pokt.nodies.app','https://rpc.mevblocker.io'",
+				"LIDO_EXPORTER_RPC_ENDPOINTS":    "'https://ethereum-rpc.publicnode.com','https://eth-pokt.nodies.app','https://rpc.mevblocker.io'",
 				"LIDO_EXPORTER_WS_ENDPOINTS":     "'wss://ethereum-rpc.publicnode.com'",
 				"LIDO_EXPORTER_PORT":             "9990",
 				"LIDO_EXPORTER_SCRAPE_TIME":      "2s",
@@ -647,7 +647,7 @@ func TestE2E_ValidFlags_All_Mainnet(t *testing.T) {
 		// Act
 		func(t *testing.T, binaryPath string) *exec.Cmd {
 			cmd = base.RunCommandCMD(t, binaryPath, "lido-exporter", "lido-exporter",
-				"--rpc-endpoints", "https://eth.llamarpc.com", "https://eth-pokt.nodies.app", "https://rpc.mevblocker.io",
+				"--rpc-endpoints", "https://ethereum-rpc.publicnode.com", "https://eth-pokt.nodies.app", "https://rpc.mevblocker.io",
 				"--ws-endpoints", "wss://ethereum-rpc.publicnode.com", // https endpoint should be ignored
 				"--port", "9989",
 				"--scrape-time", "1s",
