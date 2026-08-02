@@ -155,7 +155,7 @@ func TestE2E_Keys_Lido_Mainnet(t *testing.T) {
 			for _, key := range keys {
 				assert.Regexp(t, regex, key.WithdrawalCredentials, "withdrawal_credentials should match the pattern")
 				assert.Equal(t, key.NetworkName, "mainnet", "network_name should be mainnet")
-				expectedWithdrawalAddress := "010000000000000000000000" + (wa[2:])
+				expectedWithdrawalAddress := "010000000000000000000000" + wa[2:]
 				assert.Equal(t, expectedWithdrawalAddress, key.WithdrawalCredentials, "WithdrawalAddress value should match expected value")
 			}
 		},
@@ -217,7 +217,7 @@ func TestE2E_Keys_Lido_Hoodi(t *testing.T) {
 			for _, key := range keys {
 				assert.Regexp(t, regex, key.WithdrawalCredentials, "withdrawal_credentials should match the pattern")
 				assert.Equal(t, key.NetworkName, "hoodi", "network_name should be hoodi")
-				expectedWithdrawalCredentials := "010000000000000000000000" + (wa[2:])
+				expectedWithdrawalCredentials := "010000000000000000000000" + wa[2:]
 				expectedWithdrawalCredentials = strings.ToLower(expectedWithdrawalCredentials)
 				assert.Equal(t, expectedWithdrawalCredentials, key.WithdrawalCredentials, "WithdrawalAddress value should match expected value")
 			}

@@ -66,7 +66,7 @@ func TestConnectClientWithRPCs(t *testing.T) {
 		{
 			name:    "ConnectClientWithRPCs, Hoodi",
 			network: "hoodi",
-			RPCs:    []string{"https://0xrpc.io/hoodi", "https://ethereum-hoodi.gateway.tatum.io"},
+			RPCs:    []string{"https://0xrpc.io/hoodi", "https://rpc.hoodi.ethpandaops.io"},
 			wantErr: false,
 		},
 		{
@@ -78,7 +78,7 @@ func TestConnectClientWithRPCs(t *testing.T) {
 		{
 			name:    "ConnectClientWithRPCs, invalid Network RPCs",
 			network: "hoodi",
-			RPCs:    []string{"https://eth.llamarpc.com"}, // Mainnet RPC
+			RPCs:    []string{"https://ethereum-rpc.publicnode.com"}, // Mainnet RPC
 			wantErr: true,
 		},
 		{
@@ -96,7 +96,7 @@ func TestConnectClientWithRPCs(t *testing.T) {
 		{
 			name:    "ConnectClient, Mainnet",
 			network: "mainnet",
-			RPCs:    []string{"https://eth.llamarpc.com"},
+			RPCs:    []string{"https://ethereum-rpc.publicnode.com"},
 			wantErr: false,
 		},
 	}
@@ -158,7 +158,7 @@ func TestConnectClientWSWithRPCs(t *testing.T) {
 		{
 			name:    "ConnectClientWithRPCs, Hoodi",
 			network: "hoodi",
-			RPCs:    []string{"https://ethereum-hoodi.gateway.tatum.io", "wss://0xrpc.io/hoodi"},
+			RPCs:    []string{"https://rpc.hoodi.ethpandaops.io", "wss://0xrpc.io/hoodi"},
 			wantErr: false,
 		},
 		{

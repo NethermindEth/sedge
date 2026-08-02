@@ -238,8 +238,8 @@ func CleanEnvFile(envFilePath string) error {
 		}
 		result := ReENVVAR.FindStringSubmatch(line) // Check line its a valid variable
 		if len(result) >= 3 {
-			envVar := result[1]            // Get var name
-			existingVars[(envVar)] = index // Save latest apparition for the var name
+			envVar := result[1]          // Get var name
+			existingVars[envVar] = index // Save latest apparition for the var name
 		}
 	}
 

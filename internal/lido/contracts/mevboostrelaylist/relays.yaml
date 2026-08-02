@@ -31,10 +31,6 @@ mainnet:
     Operator: "Gattaca"
     IsMandatory: false
     Description: "Titan Relay Global (non-filtering)"
-  - Uri: "https://0x98650451ba02064f7b000f5768cf0cf4d4e492317d82871bdc87ef841a0743f69f0f1eea11168503240ac35d101c9135@mainnet-relay.securerpc.com/"
-    Operator: "Manifold Finance"
-    IsMandatory: true
-    Description: "Manifold SecureRPC Relay"
   - Uri: "https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay-filtered.ultrasound.money"
     Operator: "Ultra Sound"
     IsMandatory: true

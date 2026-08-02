@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Use Nimbus multiarch image tags so Docker Compose can resolve the validator image.
+- Pin gofumpt and abigen versions for reproducible formatting and code-generation checks.
+
+### Fixed
+- Apply gofumpt formatting to the E2E key tests and generated script cleanup.
+- Replace the Hoodi Tatum RPC endpoint with the public ethPandaOps endpoint.
 
 ## [v1.11.1] - 2026-02-10
 
