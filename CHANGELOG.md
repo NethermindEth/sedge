@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Updated execution, consensus, validator, distributed validator, Optimism, Taiko, and Aztec client images.
+
+### Fixed
+- Use Nimbus multiarch image tags so Docker Compose can resolve the validator image.
 - Pin gofumpt and abigen versions for reproducible formatting and code-generation checks.
 
 ### Fixed
