@@ -69,13 +69,13 @@ codecov-test: generate ## unit tests with coverage using the courtney tool
 	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
 
 install-gofumpt: ## install gofumpt
-	go install mvdan.cc/gofumpt@latest
+	go install mvdan.cc/gofumpt@v0.9.2
 
 install-mockgen: ## install mockgen
 	go install github.com/golang/mock/mockgen@v1.6.0 
 
 install-abigen: ## install abigen
-	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
+	go install github.com/ethereum/go-ethereum/cmd/abigen@v1.16.8
 
 install-deps: | install-gofumpt install-mockgen install-abigen ## Install some project dependencies
 
