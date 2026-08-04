@@ -142,7 +142,11 @@ func (c *ConsensusNodeInitializer) Initialize(allClients clients.OrderedClients,
 	// Special handling for Gnosis and Chiado networks
 	if flags.GetNetwork() == NetworkGnosis || flags.GetNetwork() == NetworkChiado {
 		if flags.GetConsensusName() == "nimbus" {
-			c.config.flagName = "nimbus:ghcr.io/gnosischain/gnosis-nimbus-eth2:v26.3"
+			// v26.6.0 minimum: v26.3 predates the nimbus ws-reconnect fix
+			// (status-im/nimbus-eth2#8595, fixed in v26.6.0) — over web3-url=ws://
+			// it never re-dials the EL after an EL restart, wedging any
+			// fuzz/restart scenario on gnosis/chiado.
+			c.config.flagName = "nimbus:ghcr.io/gnosischain/gnosis-nimbus-eth2:v26.6.0"
 		}
 	}
 
