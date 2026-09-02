@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Support `Plataberget` testnet for Ethereum node setup (Nethermind execution + Nimbus consensus only).
+
 ### Changed
 - Bump pinned client images to latest stable releases:
   - Execution: geth `v1.17.3`, besu `26.5.0`, nethermind `1.37.2` (shared with op-execution and t-execution), erigon `v3.4.2`.
-  - Consensus & Validator: lodestar `v1.43.0`, prysm `v7.1.4`, nimbus `multiarch-v26.5.0`.
+  - Consensus & Validator: lodestar `v1.43.0`, prysm `v7.1.4`, nimbus `multiarch-v26.8.0`.
   - DV: charon `v1.10.1`.
   - Optimism: op-node `v1.18.2`, op-geth `v1.101702.2`.
   - Arbitrum: nethermind-arbitrum `0.2.0`, nitro-node `v3.10.1-d7f07be`.

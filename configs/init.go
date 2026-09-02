@@ -90,6 +90,18 @@ var networksConfigs map[string]NetworkConfig = map[string]NetworkConfig{
 		ChainID: 560048,
 		Weight:  2,
 	},
+	NetworkPlataberget: {
+		Name:               NetworkPlataberget,
+		NetworkService:     "merge",
+		GenesisForkVersion: "0x10733183",
+		// mev-boost is launched with -${NETWORK} and rejects unknown networks,
+		// and no relay serves plataberget.
+		SupportsMEVBoost:  false,
+		CheckpointSyncURL: "https://checkpoint-sync.plataberget.ethpandaops.io",
+		RelayURLs:         []string{},
+		ChainID:           7091047534,
+		Weight:            3,
+	},
 	NetworkMekong: {
 		Name:              NetworkMekong,
 		NetworkService:    "merge",

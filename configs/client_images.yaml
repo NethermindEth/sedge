@@ -29,7 +29,7 @@ consensus:
     version: v7.1.4
   nimbus:
     name: statusim/nimbus-eth2
-    version: multiarch-v26.5.0
+    version: multiarch-v26.8.0
 validator:
   lighthouse:
     name: sigp/lighthouse
@@ -45,7 +45,7 @@ validator:
     version: v7.1.4
   nimbus:
     name: statusim/nimbus-validator-client
-    version: multiarch-v26.5.0
+    version: multiarch-v26.8.0
 distributed:
   charon:
     name: ghcr.io/obolnetwork/charon

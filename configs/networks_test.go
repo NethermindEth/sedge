@@ -49,6 +49,11 @@ func TestNetworkCheck(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:    "Valid network, plataberget",
+			network: "plataberget",
+			wantErr: false,
+		},
+		{
 			name:    "Invalid network",
 			network: "invalid",
 			wantErr: true,
