@@ -9,6 +9,9 @@
     depends_on:{{if .Mev}}
       mev-boost:
         condition: service_started{{end}}{{end}}
+    environment:
+      # Mitigate CVE-2026-114938 until the bundled JVM is patched.
+      JAVA_TOOL_OPTIONS: "-XX:+UnlockDiagnosticVMOptions -XX:-UseBASE64Intrinsics"
     networks:
       - sedge
     volumes:

@@ -7,6 +7,9 @@
     depends_on:
       validator-blocker:
         condition: service_completed_successfully
+    environment:
+      # Mitigate CVE-2026-114938 until the bundled JVM is patched.
+      JAVA_TOOL_OPTIONS: "-XX:+UnlockDiagnosticVMOptions -XX:-UseBASE64Intrinsics"
     networks:
       - sedge
     ports:
