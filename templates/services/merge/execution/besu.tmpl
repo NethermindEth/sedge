@@ -5,6 +5,9 @@
     container_name: sedge-execution-client{{if .ContainerTag}}-{{.ContainerTag}}{{end}}
     restart: unless-stopped
     image: ${EC_IMAGE_VERSION}
+    environment:
+      # Mitigate CVE-2026-114938 until the bundled JVM is patched.
+      JAVA_TOOL_OPTIONS: "-XX:+UnlockDiagnosticVMOptions -XX:-UseBASE64Intrinsics"
     networks:
       - sedge
     volumes:
