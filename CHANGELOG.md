@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Removed deprecated `--eth1` and `--eth1.depositContractDeployBlock` flags from the Lodestar template.
 - Updated execution, consensus, validator, distributed validator, Optimism, Taiko, and Aztec client images.
 
 ### Fixed
